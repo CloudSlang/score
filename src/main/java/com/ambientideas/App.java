@@ -20,7 +20,7 @@ public class App
         BasicConfigurator.configure();
         logger.info("Entering application.");
         System.out.println( "Hello World!" );
-        //test2
+
     }
 }
 
