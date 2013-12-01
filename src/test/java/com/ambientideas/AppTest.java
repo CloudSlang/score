@@ -11,7 +11,6 @@ import junit.framework.TestSuite;
 
 /**
  * Unit test for simple App.
- * just for test
  */
 public class AppTest 
     extends TestCase
