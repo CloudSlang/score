@@ -7,6 +7,27 @@
   <version>1.0-SNAPSHOT</version>
   <name>score</name>
   <url>http://maven.apache.org</url>
+  
+  <scm>
+    <connection>scm:git:https://github.com/HPSoftware/score.git</connection>
+    <developerConnection>scm:git:git@github.com:HPSoftware/score.git</developerConnection>
+    <url>https://github.com/HPSoftware/score.git</url>
+    <tag>master</tag> 
+  </scm>
+
+  <distributionManagement>
+    <repository>
+        <id>nexus-repository</id>
+        <name>nexus repository</name>
+        <url>http://mydphdb0166.hpswlabs.adapps.hp.com:8081/nexus/content/repositories/releases/</url>
+    </repository>
+    <snapshotRepository>
+        <id>nexus-snapshot-repository</id>
+        <name>nexus snapshots repository</name>
+        <url>http://mydphdb0166.hpswlabs.adapps.hp.com:8081/nexus/content/repositories/snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
