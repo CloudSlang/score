@@ -6,18 +6,23 @@ import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.oo.enginefacade.execution.SortingStatisticMeasurementsEnum;
 import com.hp.oo.orchestrator.entities.ExecutionSummaryEntity;
 import com.hp.oo.orchestrator.util.OffsetPageRequest;
+import com.hp.score.engine.data.DataBaseDetector;
+import com.hp.score.engine.data.SqlUtils;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -525,42 +530,6 @@ public class ExecutionSummaryRepositoryTest {
         repository.deleteByExecutionIdAndBranchIdNot("NON EXISTENT ID", EMPTY_BRANCH);
     }
 
-    //ONLY FOR LOAD STRESS TESTS!!! NOT TO BE ACTIVATE IN BUILD - MEIR
-    /*@Test
-    public void testFindResultDistLoadStress() {
-        createBatchOfExecutions();
-
-        List<ExecutionSummaryEntity> executions = new ArrayList<>();
-        for(int i=0; i<300000;i++){
-            ExecutionSummaryEntity exec = createExecutionSummaryThatStartsNow(Integer.toString(i+6), ExecutionStatus.COMPLETED);
-            exec.setFlowUuid(UUID.randomUUID().toString());
-            exec.setResultStatusType("RESOLVED");
-            executions.add(exec);
-        }
-        repository.save(executions);
-        System.out.println("start time");
-        Long startTime = System.currentTimeMillis();
-
-        List<Object[]> dist = repository.findResultDistributionByFlowUuid("12345");
-        Long endTime = System.currentTimeMillis();
-        System.out.println("action took:"+ TimeUnit.MILLISECONDS.toSeconds(endTime-startTime) );
-
-        Assert.assertNotNull(dist);
-        Assert.assertEquals("we have two result types here, RESOLVED and ERROR",2,dist.size());
-
-        Set<String> resultTypes = new HashSet<>();
-        resultTypes.add((String)dist.get(0)[0]);
-        resultTypes.add((String)dist.get(1)[0]);
-
-        Assert.assertEquals("we have two result types here, RESOLVED and ERROR",2,resultTypes.size());
-        Assert.assertTrue(resultTypes.contains("RESOLVED"));
-        Assert.assertTrue(resultTypes.contains("ERROR"));
-
-        Assert.assertEquals(2L,dist.get(1)[1]);
-        Assert.assertEquals(2L,dist.get(0)[1]);
-    }*/
-
-
     @Test
     public void findOneFlowStatistics() {
 
@@ -947,8 +916,18 @@ public class ExecutionSummaryRepositoryTest {
     }
 
     @Configuration
-    @ImportResource({"META-INF/spring/executionSummaryTestsContext.xml",
-            "META-INF/spring/executionSummaryEmfContext.xml"})
+    @EnableJpaRepositories("com.hp.oo.orchestrator")
+	@EnableTransactionManagement
+    @ImportResource("META-INF/spring/orchestratorEmfContext.xml")
     static class Configurator {
+	    @Bean
+	    SqlUtils sqlUtils() {
+		    return new SqlUtils();
+	    }
+
+	    @Bean
+	    DataBaseDetector dataBaseDetector() {
+		    return new DataBaseDetector();
+	    }
     }
 }

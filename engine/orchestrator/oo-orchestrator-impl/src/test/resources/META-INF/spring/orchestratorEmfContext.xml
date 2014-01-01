@@ -3,12 +3,8 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:p="http://www.springframework.org/schema/p"
        xmlns:util="http://www.springframework.org/schema/util"
-       xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
-http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
-
-    <tx:annotation-driven/>
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
     <bean id="liquibase" class="liquibase.integration.spring.SpringLiquibase"
        	      p:dataSource-ref="dataSource"
@@ -36,14 +32,9 @@ http://www.springframework.org/schema/tx http://www.springframework.org/schema/t
         <prop key="hibernate.cache.use_query_cache">false</prop>
         <prop key="hibernate.generate_statistics">false</prop>
         <prop key="hibernate.cache.use_second_level_cache">false</prop>
-        <prop key="hibernate.jdbc.fetch_size">100</prop>
-        <prop key="hibernate.jdbc.batch_size">30</prop>
         <prop key="hibernate.order_updates">true</prop>
         <prop key="hibernate.order_inserts">true</prop>
-        <prop key="hibernate.default_batch_fetch_size">20</prop>
-        <prop key="hibernate.hbm2ddl.auto">validate</prop>
         <prop key="hibernate.hbm2ddl.auto">create-drop</prop>
-        <!--<prop key="hibernate.dialect_resolvers">org.hibernate.engine.jdbc.dialect.spi.BasicDialectResolver</prop>-->
     </util:properties>
 
     <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"

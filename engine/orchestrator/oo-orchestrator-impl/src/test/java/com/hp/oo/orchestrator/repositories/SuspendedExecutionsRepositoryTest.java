@@ -6,6 +6,8 @@ import com.hp.oo.orchestrator.entities.BranchContexts;
 import com.hp.oo.orchestrator.entities.FinishedBranch;
 import com.hp.oo.orchestrator.entities.SuspendedExecution;
 import com.hp.oo.orchestrator.services.ExecutionSerializationUtil;
+import com.hp.score.engine.data.DataBaseDetector;
+import com.hp.score.engine.data.SqlUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,9 +16,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
@@ -153,13 +157,23 @@ public class SuspendedExecutionsRepositoryTest {
 
 
     @Configuration
-    @ImportResource({"META-INF/spring/orchestratorTestsContext.xml",
-                "META-INF/spring/orchestratorEmfContext.xml"})
+    @EnableJpaRepositories("com.hp.oo.orchestrator")
+    @EnableTransactionManagement
+    @ImportResource("META-INF/spring/orchestratorEmfContext.xml")
     static class Configurator {
-
         @Bean
         public ExecutionSerializationUtil executionSerializationUtil(){
             return new ExecutionSerializationUtil();
         }
+
+	    @Bean
+	    SqlUtils sqlUtils() {
+		    return new SqlUtils();
+	    }
+
+	    @Bean
+	    DataBaseDetector dataBaseDetector() {
+		    return new DataBaseDetector();
+	    }
     }
 }

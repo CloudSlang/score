@@ -5,6 +5,8 @@ import com.hp.oo.execution.debug.Breakpoint;
 import com.hp.oo.execution.debug.ExecutionInterrupt;
 import com.hp.oo.execution.debug.ResponseOverride;
 import com.hp.oo.execution.services.ExecutionInterruptsService;
+import com.hp.score.engine.data.DataBaseDetector;
+import com.hp.score.engine.data.SqlUtils;
 import junit.framework.Assert;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
@@ -13,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -261,8 +265,9 @@ public class ExecutionInterruptsRegistryServiceTest {
 
 
     @Configuration
-    @ImportResource({"META-INF/spring/orchestratorTestsContext.xml",
-            "META-INF/spring/orchestratorEmfContext.xml"})
+    @EnableJpaRepositories("com.hp.oo.orchestrator")
+    @EnableTransactionManagement
+    @ImportResource("META-INF/spring/orchestratorEmfContext.xml")
     static class Configurator {
 
         @Bean
@@ -279,5 +284,15 @@ public class ExecutionInterruptsRegistryServiceTest {
         public ObjectMapper getObjectMapper() {
             return new ObjectMapper();
         }
+
+	    @Bean
+	    SqlUtils sqlUtils() {
+		    return new SqlUtils();
+	    }
+
+	    @Bean
+	    DataBaseDetector dataBaseDetector() {
+		    return new DataBaseDetector();
+	    }
     }
 }
