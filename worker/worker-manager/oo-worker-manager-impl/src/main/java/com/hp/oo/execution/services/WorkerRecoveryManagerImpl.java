@@ -1,0 +1,63 @@
+package com.hp.oo.execution.services;
+
+import com.hp.oo.engine.node.services.WorkerNodeService;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+/**
+ * Date: 6/11/13
+ *
+ * @author Dima Rassin
+ */
+@Component
+public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager{
+	private final Logger logger = Logger.getLogger(getClass());
+
+	@Autowired
+	private List<WorkerRecoveryListener> listeners;
+
+	@Autowired
+	private WorkerNodeService workerNodeService;
+
+	@Autowired
+	private RetryTemplate retryTemplate;
+
+	private Lock lock = new ReentrantLock();
+	private boolean inRecovery;
+
+	public void doRecovery(){
+		if (!lock.tryLock()) return;
+		try{
+			inRecovery = true;
+			logger.info("Worker recovery started");
+			for (WorkerRecoveryListener listener : listeners) try{
+				listener.doRecovery();
+			} catch (Exception ex) {
+				logger.error("Failed on recovery", ex);
+			}
+			if (logger.isDebugEnabled()) logger.debug("Listeners recovery is done");
+
+			retryTemplate.retry(RetryTemplate.INFINITELY, 30*1000L, new RetryTemplate.RetryCallback() {
+				@Override
+				public void tryOnce() {
+					if (logger.isDebugEnabled()) logger.debug("sending worker UP");
+	                workerNodeService.up(System.getProperty("worker.uuid"));
+					if (logger.isDebugEnabled()) logger.debug("the worker is UP");
+				}
+			});
+			inRecovery = false;
+			logger.info("Worker recovery is done");
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	public boolean isInRecovery(){
+		return inRecovery;
+	}
+}

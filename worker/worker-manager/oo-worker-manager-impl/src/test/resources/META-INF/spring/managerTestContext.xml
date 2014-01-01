@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+
+     <!--New section for Worker Manager-->
+
+    <!--InBuffer capacity-->
+    <bean id="inBufferCapacity" class="java.lang.Integer">
+        <constructor-arg type="int" value="10"/>
+    </bean>
+
+
+
+    <!--Number of execution threads-->
+    <bean id="numberOfExecutionThreads" class="java.lang.Integer">
+        <constructor-arg type="int" value="2"/>
+    </bean>
+
+    <!--InBuffer capacity-->
+    <bean id="maxDeltaBetweenDrains" class="java.lang.Integer">
+        <constructor-arg type="int" value="2000"/>
+    </bean>
+
+    <!--InBuffer capacity-->
+     <bean id="coolDownPollingMillis" class="java.lang.Integer">
+         <constructor-arg type="int" value="500"/>
+     </bean>
+
+    <task:scheduler id="testScheduler" pool-size="10"/>
+
+    <!--<task:scheduled-tasks scheduler="testScheduler">-->
+        <!--<task:scheduled ref="outBuffer" method="drainBufferPeriodically" fixed-delay="1000"/>-->
+    <!--</task:scheduled-tasks>-->
+</beans>

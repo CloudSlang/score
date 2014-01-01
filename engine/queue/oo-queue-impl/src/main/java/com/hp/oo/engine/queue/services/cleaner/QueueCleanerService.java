@@ -1,0 +1,15 @@
+package com.hp.oo.engine.queue.services.cleaner;
+
+import java.util.Set;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Amit Levin
+ * Date: 14/10/13
+ */
+public interface QueueCleanerService {
+
+    Set<Long> getFinishedExecStateIds();
+
+    void cleanFinishedSteps(Set<Long> ids);
+}
