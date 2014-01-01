@@ -8,12 +8,14 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "OO_EXECUTION_BOUND_INPUTS")
+@Table(name = "OO_EXECUTION_BOUND_INPUTS", uniqueConstraints =
+@UniqueConstraint(name="UQ_OO_EXECUTION_BOUND_INPUTS",  columnNames = {"INPUT_NAME", "DOMAIN_TERM_NAME", "VALUE"}))
 public class ExecutionBoundInputEntity extends AbstractIdentifiable {
 
     @Column(name = "INPUT_NAME", nullable = false)

@@ -16,7 +16,7 @@ http://www.springframework.org/schema/tx http://www.springframework.org/schema/t
 
 	<bean id="hiloFactoryBean" class="com.hp.score.engine.data.HiloFactoryBean" depends-on="liquibase"/>
 
-    <bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
           p:jpaProperties-ref="hibernateProperties"
           p:dataSource-ref="dataSource"
           p:persistenceProviderClass="org.hibernate.jpa.HibernatePersistenceProvider"
@@ -42,13 +42,12 @@ http://www.springframework.org/schema/tx http://www.springframework.org/schema/t
         <prop key="hibernate.order_inserts">true</prop>
         <prop key="hibernate.default_batch_fetch_size">20</prop>
         <prop key="hibernate.hbm2ddl.auto">validate</prop>
-        <!--<prop key="hibernate.hbm2ddl.auto">create-drop</prop>-->
-        <prop key="hibernate.dialect_resolvers">com.hp.oo.data.dialect.OODialectResolver</prop>
+        <prop key="hibernate.hbm2ddl.auto">create-drop</prop>
+        <!--<prop key="hibernate.dialect_resolvers">org.hibernate.engine.jdbc.dialect.spi.BasicDialectResolver</prop>-->
     </util:properties>
 
     <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"
-          p:entityManagerFactory-ref="emf"
-            />
+          p:entityManagerFactory-ref="entityManagerFactory"/>
 
     <bean id="transactionTemplate"
           class="org.springframework.transaction.support.TransactionTemplate"

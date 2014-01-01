@@ -18,7 +18,7 @@ public abstract class AbstractIdentifiable implements Identifiable {
 
 	@Id
 	@GeneratedValue(generator = "oo-hilo")
-	@GenericGenerator(name = "oo-hilo", strategy = "com.hp.oo.data.model.SimpleHiloIdentifierGenerator")
+	@GenericGenerator(name = "oo-hilo", strategy = "com.hp.score.engine.data.SimpleHiloIdentifierGenerator")
 	@Column(unique = true, nullable = false, name = "ID")
 	protected Long id;
 
