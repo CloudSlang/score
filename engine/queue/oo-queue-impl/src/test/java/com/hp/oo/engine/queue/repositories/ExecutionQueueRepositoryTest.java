@@ -8,6 +8,7 @@ import com.hp.oo.engine.versioning.services.VersionService;
 import com.hp.oo.partitions.services.PartitionTemplate;
 import com.hp.score.engine.data.IdentityGenerator;
 import junit.framework.Assert;
+import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -99,6 +100,8 @@ public class ExecutionQueueRepositoryTest {
     @Configuration
     @EnableTransactionManagement
     static class Configurator {
+	    @Autowired
+	    private DataSource dataSource;
 
         @Bean
         DataSource dataSource(){
@@ -111,13 +114,21 @@ public class ExecutionQueueRepositoryTest {
             return new TransactionAwareDataSourceProxy(ds);
         }
 
-        @Bean
-        public PlatformTransactionManager txManager() {
+	    @Bean
+	    SpringLiquibase liquibase(){
+		    SpringLiquibase liquibase = new SpringLiquibase();
+		    liquibase.setDataSource(dataSource);
+		    liquibase.setChangeLog("classpath:/META-INF/database/test.changes.xml");
+		    return liquibase;
+	    }
+
+        @Bean(name="transactionManager")
+        PlatformTransactionManager txManager() {
             return new DataSourceTransactionManager(dataSource());
         }
 
         @Bean
-        public IdentityGenerator<Long> identifierGenerator(){
+        IdentityGenerator<Long> identifierGenerator(){
             return new IdentityGenerator<Long>() {
                 long id = 1;
                 @Override
@@ -133,31 +144,32 @@ public class ExecutionQueueRepositoryTest {
         }
 
         @Bean
-        public ExecutionQueueRepository executionQueueRepository(){
+        ExecutionQueueRepository executionQueueRepository(){
             return new ExecutionQueueRepositoryImpl();
         }
 
-
         @Bean
-        public WorkerNodeService workerNodeService(){
+        WorkerNodeService workerNodeService(){
             return Mockito.mock(WorkerNodeService.class);
         }
 
         @Bean(name="OO_EXECUTION_STATES")
-        public PartitionTemplate statePartitionTemplate(){
+        PartitionTemplate statePartitionTemplate(){
             PartitionTemplate partitionTemplate = Mockito.mock(PartitionTemplate.class);
             when(partitionTemplate.activeTable()).thenReturn("OO_EXECUTION_STATES_1");
             return  partitionTemplate;
         }
 
         @Bean(name="OO_EXECUTION_QUEUES")
-        public PartitionTemplate queuePartitionTemplate(){
+        PartitionTemplate queuePartitionTemplate(){
             return Mockito.mock(PartitionTemplate.class);
         }
 
         @Bean
-        public VersionService queueVersionService(){
+        VersionService queueVersionService(){
             return Mockito.mock(VersionService.class);
         }
+
+
     }
 }
