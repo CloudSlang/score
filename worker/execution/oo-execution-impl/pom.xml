@@ -68,14 +68,6 @@
 			<artifactId>spring-integration-core</artifactId>
 		</dependency>
 
-		<!-- engine-facade artifacts -->
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>score-facade</artifactId>
-		</dependency>
-
-		<!-- end of engine-facade artifacts -->
-
 		<!-- engine artifacts -->
 		<dependency>
 			<groupId>${project.groupId}</groupId>
