@@ -5,28 +5,46 @@ import com.hp.oo.engine.node.entities.WorkerNode;
 import com.hp.oo.engine.node.repositories.WorkerNodeRepository;
 import com.hp.oo.engine.versioning.services.VersionService;
 import com.hp.oo.enginefacade.Worker;
+import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
 import junit.framework.Assert;
+import liquibase.integration.spring.SpringLiquibase;
+import org.apache.commons.dbcp.BasicDataSource;
+import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.JpaVendorAdapter;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -41,6 +59,7 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration
 @Transactional @TransactionConfiguration(defaultRollback=true)
 public class WorkerNodeServiceTest {
+	private static final boolean SHOW_SQL = false;
 
 	@Autowired
 	private WorkerNodeService workerNodeService;
@@ -328,7 +347,6 @@ public class WorkerNodeServiceTest {
 		workerNodeService.delete("H3");
 	}
 
-
 	@Test
 	public void checkIfGroupsExist() {
 		workerNodeService.updateWorkerGroups("H1", "group 1", "group 2");
@@ -349,16 +367,84 @@ public class WorkerNodeServiceTest {
 		Assert.assertEquals(groupSize+1, workerNode.getGroups().size());
 	}
 
-    @Configuration
-    @ImportResource({"/META-INF/spring/nodeSystemTestContext.xml"})
-    static class WorkerNodeTestConfiguration   {
+	@Configuration
+	@EnableJpaRepositories("com.hp.oo.engine.node.repositories")
+	@EnableTransactionManagement
+	static class Configurator {
+		@Bean
+		DataSource dataSource() {
+			BasicDataSource ds = new BasicDataSource();
+			ds.setDriverClassName("org.h2.Driver");
+			ds.setUrl("jdbc:h2:mem:test");
+			ds.setUsername("sa");
+			ds.setPassword("sa");
+			ds.setDefaultAutoCommit(false);
+			return new TransactionAwareDataSourceProxy(ds);
+		}
 
-        @Bean
-        public VersionService versionService() {
-            VersionService versionService = mock(VersionService.class);
-            when(versionService.getCurrentVersion(anyString())).thenReturn(0L);
-            return versionService;
-        }
+		@Bean
+		SpringLiquibase liquibase(DataSource dataSource) {
+			SpringLiquibase liquibase = new SpringLiquibase();
+			liquibase.setDataSource(dataSource);
+			liquibase.setChangeLog("classpath:/META-INF/database/test.changes.xml");
+			SimpleHiloIdentifierGenerator.setDataSource(dataSource);
+			return liquibase;
+		}
 
-    }
+
+		@Bean
+		Properties hibernateProperties() {
+			return new Properties(){{
+				setProperty("hibernate.format_sql", "true");
+				setProperty("hibernate.hbm2ddl.auto", "create-drop");
+				setProperty("hibernate.cache.use_query_cache", "false");
+				setProperty("hibernate.generate_statistics", "false");
+				setProperty("hibernate.cache.use_second_level_cache", "false");
+				setProperty("hibernate.order_updates", "true");
+				setProperty("hibernate.order_inserts", "true");
+			}};
+		}
+
+		@Bean
+		JpaVendorAdapter jpaVendorAdapter() {
+			HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
+			adapter.setShowSql(SHOW_SQL);
+			adapter.setGenerateDdl(true);
+			return adapter;
+		}
+
+		@Bean(name="entityManagerFactory")
+		@DependsOn("liquibase")
+		FactoryBean<EntityManagerFactory> emf(JpaVendorAdapter jpaVendorAdapter) {
+			LocalContainerEntityManagerFactoryBean fb = new LocalContainerEntityManagerFactoryBean();
+			fb.setJpaProperties(hibernateProperties());
+			fb.setDataSource(dataSource());
+			fb.setPersistenceProviderClass(HibernatePersistenceProvider.class);
+			fb.setPackagesToScan("com.hp.oo.engine.node");
+			fb.setJpaVendorAdapter(jpaVendorAdapter);
+			return fb;
+		}
+
+		@Bean
+		PlatformTransactionManager transactionManager(EntityManagerFactory emf) {
+			return new JpaTransactionManager(emf);
+		}
+
+		@Bean
+		VersionService versionService() {
+			VersionService versionService = mock(VersionService.class);
+			when(versionService.getCurrentVersion(anyString())).thenReturn(1L);
+			return versionService;
+		}
+
+		@Bean
+		WorkerNodeService workerNodeService(){
+			return new WorkerNodeServiceImpl();
+		}
+
+		@Bean
+		MessageDigestPasswordEncoder encoder(){
+			return new MessageDigestPasswordEncoder("sha-256");
+		}
+	}
 }
