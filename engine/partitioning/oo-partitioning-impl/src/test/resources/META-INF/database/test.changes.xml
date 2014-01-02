@@ -1,43 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+		xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
 
-    <property name="quartz.blob.type" dbms="oracle" value=" blob"/>
-    <property name="quartz.blob.type" dbms="mssql" value="image"/>
-    <property name="quartz.blob.type" dbms="mysql" value="longblob"/>
-    <property name="quartz.blob.type" dbms="postgresql" value="bytea"/>
-    <property name="quartz.blob.type" dbms="h2" value="image"/>
-
-    <property name="blob.type" dbms="oracle" value=" blob"/>
-    <property name="blob.type" dbms="mssql" value="image"/>
-    <property name="blob.type" dbms="mysql" value="longblob"/>
-    <property name="blob.type" dbms="postgresql" value="oid"/>
-    <property name="blob.type" dbms="h2" value="image"/>
-
-    <property name="blob.stream.type" dbms="oracle" value=" blob"/>
-    <property name="blob.stream.type" dbms="mssql" value="image"/>
-    <property name="blob.stream.type" dbms="mysql" value="longblob"/>
-    <property name="blob.stream.type" dbms="postgresql" value="bytea"/>
-    <property name="blob.stream.type" dbms="h2" value="image"/>
-
-    <property name="clob.type" dbms="oracle" value=" clob"/>
-    <property name="clob.type" dbms="mssql" value="text"/>
-    <property name="clob.type" dbms="mysql" value="longtext"/>
-    <property name="clob.type" dbms="postgresql" value="text"/>
-    <property name="clob.type" dbms="h2" value=" clob"/>
-
-    <property name="double.type" dbms="oracle" value="float"/>
-    <property name="double.type" dbms="mssql" value="double"/>
-    <property name="double.type" dbms="mysql" value="double"/>
-    <property name="double.type" dbms="postgresql" value="float8"/>
-    <property name="double.type" dbms="h2" value="float"/>
-
-    <!-- All changes from released versions -->
-    <include file="META-INF/database/all-versions.changes.xml"/>
-
-    <!-- Engine changes for the current development version -->
-    <include file="META-INF/database/engine-current.changes.xml"/>
+	<changeSet id="create OO_HILO table" author="test">
+		<createTable tableName="OO_HILO">
+			<column name="NEXT_HI" type="INT"/>
+		</createTable>
+		<insert tableName="OO_HILO">
+			<column name="NEXT_HI" value="0"/>
+		</insert>
+	</changeSet>
 
 </databaseChangeLog>
