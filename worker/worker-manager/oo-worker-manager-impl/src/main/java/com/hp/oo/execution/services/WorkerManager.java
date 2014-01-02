@@ -135,6 +135,11 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback 
 		return workerUuid;
 	}
 
+
+    public String setWorkerUuid(String workerUuid) {
+        return this.workerUuid = workerUuid;
+    }
+
 	public int getRunningTasksCount() {
 		return mapOfRunningTasks.size();
 	}
