@@ -1,6 +1,5 @@
 package com.hp.oo.execution.reflection;
 
-import com.hp.oo.sdk.content.annotations.Param;
 import org.springframework.stereotype.Component;
 
 /**
@@ -12,11 +11,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReflectionAdapterTestHelper {
 
-    public void myMethod_1(@Param("parameter_1") String param_1, @Param("parameter_2") int param_2){
+    public void myMethod_1(String parameter_1, int parameter_2){
 
     }
 
-    public Integer myMethod_2(@Param("parameter_1") int param_1, @Param("parameter_2") int param_2){
-        return param_1 + param_2;
+    public Integer myMethod_2(int parameter_1, int parameter_2){
+        return parameter_1 + parameter_2;
     }
 }

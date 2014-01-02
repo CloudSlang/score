@@ -2,14 +2,12 @@ package com.hp.oo.execution.reflection;
 
 import com.hp.oo.internal.sdk.execution.ControlActionMetadata;
 import com.hp.oo.internal.sdk.execution.FlowExecutionException;
-import com.hp.oo.sdk.content.annotations.Param;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-
-import java.lang.annotation.Annotation;
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -108,18 +106,9 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 	private Object[] buildParametersArray(Method actionMethod, Map<String, ?> actionData) {
 		List<Object> args = new ArrayList<>();
 
-		int index = 0;
-		for (Annotation[] annotations : actionMethod.getParameterAnnotations()) {
-			index++;
-			for (Annotation annotation : annotations) {
-				if (annotation instanceof Param) {
-					Object param = actionData.get(((Param) annotation).value());
-					args.add(param);
-				}
-			}
-			if (args.size() != index) {
-				throw new FlowExecutionException("All action arguments should be annotated with @Param");
-			}
+		for (String paramName : new DefaultParameterNameDiscoverer().getParameterNames(actionMethod)) {
+			Object param = actionData.get(paramName);
+			args.add(param);
 		}
 		return args.toArray(new Object[args.size()]);
 	}

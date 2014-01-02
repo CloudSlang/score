@@ -11,9 +11,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.hp.oo.enginefacade</groupId>
-			<artifactId>oo-engine-facade</artifactId>
-			<version>102.131</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>score-facade</artifactId>
 		</dependency>
 	</dependencies>
 </project>

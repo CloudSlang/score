@@ -9,10 +9,6 @@
 
 	<artifactId>oo-worker-manager-impl</artifactId>
 
-	<properties>
-		<engine.facade.groupId>com.hp.oo.enginefacade</engine.facade.groupId>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
