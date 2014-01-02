@@ -74,15 +74,6 @@ public class VersionRepositoryTest {
 	@EnableJpaRepositories("com.hp.oo.engine.versioning.repositories")
 	@EnableTransactionManagement
 	static class Configurator {
-		@Autowired
-		private DataSource dataSource;
-
-		@Autowired
-		private JpaVendorAdapter jpaVendorAdapter;
-
-		@Autowired
-		private EntityManagerFactory emf;
-
 		@Bean
 		DataSource dataSource() {
 			BasicDataSource ds = new BasicDataSource();
@@ -95,7 +86,7 @@ public class VersionRepositoryTest {
 		}
 
 		@Bean
-		SpringLiquibase liquibase() {
+		SpringLiquibase liquibase(DataSource dataSource) {
 			SpringLiquibase liquibase = new SpringLiquibase();
 			liquibase.setDataSource(dataSource);
 			liquibase.setChangeLog("classpath:/META-INF/database/test.changes.xml");
@@ -127,7 +118,7 @@ public class VersionRepositoryTest {
 
 		@Bean(name="entityManagerFactory")
 		@DependsOn("liquibase")
-		FactoryBean<EntityManagerFactory> emf() {
+		FactoryBean<EntityManagerFactory> emf(JpaVendorAdapter jpaVendorAdapter) {
 			LocalContainerEntityManagerFactoryBean fb = new LocalContainerEntityManagerFactoryBean();
 			fb.setJpaProperties(hibernateProperties());
 			fb.setDataSource(dataSource());
@@ -138,7 +129,7 @@ public class VersionRepositoryTest {
 		}
 
 		@Bean
-		PlatformTransactionManager transactionManager() throws Exception {
+		PlatformTransactionManager transactionManager(EntityManagerFactory emf) {
 			return new JpaTransactionManager(emf);
 		}
 	}
