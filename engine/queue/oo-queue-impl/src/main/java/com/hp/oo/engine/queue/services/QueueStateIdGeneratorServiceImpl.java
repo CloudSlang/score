@@ -15,11 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 public final class QueueStateIdGeneratorServiceImpl implements QueueStateIdGeneratorService {
 
     @Autowired
-    private IdentityGenerator<Long> identityGenerator;
+    private IdentityGenerator identityGenerator;
 
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
     public Long generateStateId(){
-        return identityGenerator.next();
+        return (Long)identityGenerator.next();
     }
 }

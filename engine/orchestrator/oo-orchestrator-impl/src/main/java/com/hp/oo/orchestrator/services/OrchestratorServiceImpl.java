@@ -60,7 +60,7 @@ public final class OrchestratorServiceImpl implements OrchestratorService {
     private RunningExecutionConfigurationService executionConfigurationService;
 
     @Autowired
-    private IdentityGenerator<Long> idGenerator;
+    private IdentityGenerator idGenerator;
 
     @Override
     @Transactional

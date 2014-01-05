@@ -121,7 +121,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
 
 	@Autowired
-	private IdentityGenerator<Long> idGen;
+	private IdentityGenerator idGen;
 
 	@Autowired
 	@Qualifier("OO_EXECUTION_STATES")
@@ -137,7 +137,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
 	@Override
 	public long generateExecStateId() {
-		return idGen.next();
+		return (Long)idGen.next();
 	}
 
 	@Override
@@ -173,7 +173,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 			@Override
 			public void setValues(PreparedStatement ps, int i) throws SQLException {
 				ExecutionMessage msg = messages.get(i);
-				ps.setLong(1, idGen.next());
+				ps.setLong(1, (Long)idGen.next());
 				ps.setLong(2, msg.getExecStateId());
 				ps.setString(3, msg.getWorkerId());
 				ps.setString(4, msg.getWorkerGroup());
