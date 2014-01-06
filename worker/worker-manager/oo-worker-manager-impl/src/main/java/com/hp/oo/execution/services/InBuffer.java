@@ -6,6 +6,7 @@ import com.hp.oo.engine.queue.services.QueueDispatcherService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
@@ -35,6 +36,7 @@ public class InBuffer implements ApplicationListener, Runnable, WorkerRecoveryLi
 	@Autowired
 	private QueueDispatcherService queueDispatcher;
 
+	@Value("#{systemProperties['oo.worker.uuid']}")
 	private String workerUuid;
 
 	@Autowired

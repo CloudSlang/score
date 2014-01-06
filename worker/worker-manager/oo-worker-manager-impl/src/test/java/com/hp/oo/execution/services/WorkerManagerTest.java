@@ -3,7 +3,6 @@ package com.hp.oo.execution.services;
 import com.hp.oo.engine.node.services.WorkerNodeService;
 import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +12,6 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 import static org.fest.assertions.Assertions.assertThat;
@@ -41,7 +38,11 @@ public class WorkerManagerTest {
     private WorkerRecoveryManager workerRecoveryManager;
 
 	static final String CREDENTIAL_UUID = "uuid";
-	static final String CREDENTIAL_PASS = "pass";
+
+	@Before
+	public void setup(){
+		reset(workerNodeService,workerRecoveryManager);
+	}
 
 	@Test
 	public void testResolveDotnetVersion() {
@@ -51,7 +52,6 @@ public class WorkerManagerTest {
 	}
 
 	@Test
-    @Ignore
 	public void startUp() throws Exception {
 		workerManager.onApplicationEvent(mock(ContextClosedEvent.class));
 		assertThat(workerManager.isUp()).isFalse();
@@ -100,7 +100,6 @@ public class WorkerManagerTest {
     }
 
 	@Test
-    @Ignore
 	public void shutDown() {
 		workerManager.onApplicationEvent(mock(ContextRefreshedEvent.class));
 		assertThat(workerManager.isUp()).isTrue();
@@ -113,6 +112,10 @@ public class WorkerManagerTest {
 
 	@Configuration
 	static class Configurator {
+		static {
+			System.setProperty("oo.worker.uuid", CREDENTIAL_UUID);
+		}
+
 		@Bean WorkerManager workerManager() {
             WorkerManager workerManagerBean = new WorkerManager();
             workerManagerBean.setWorkerUuid(CREDENTIAL_UUID);
@@ -131,13 +134,10 @@ public class WorkerManagerTest {
 			return mock(WorkerRecoveryManager.class);
 		}
 
-		@Bean(name = "numberOfExecutionThreads")
-		Integer numberOfExecutionThreads() {return 2;}
+		@Bean Integer numberOfExecutionThreads() {return 2;}
 
-		@Bean(name = "initStartUpSleep")
-		Long initStartUpSleep() {return 10L;}
+		@Bean Long initStartUpSleep() {return 10L;}
 
-		@Bean(name = "maxStartUpSleep")
-		Long maxStartUpSleep() {return 100L;}
+		@Bean Long maxStartUpSleep() {return 100L;}
 	}
 }

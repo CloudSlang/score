@@ -6,6 +6,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.DependsOn;
@@ -37,6 +38,7 @@ import static ch.lambdaj.Lambda.*;
 public class WorkerManager implements ApplicationListener, EndExecutionCallback {
 	private final Logger logger = Logger.getLogger(this.getClass());
 
+	@Value("#{systemProperties['oo.worker.uuid']}")
 	private String workerUuid;
 
 	@Autowired
@@ -168,34 +170,36 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback 
                 SecurityTemplate securityTemplate = new SecurityTemplate(); //TODO- remove this from score
                 securityTemplate.invokeSecured(new SecurityTemplate.SecurityTemplateCallback<Void>() {
 
-                    @Override
-                    public Void doSecured() {
-                        long sleep = initStartUpSleep;
-                        boolean shouldRetry = true;
-                        while (shouldRetry){
-                            try{
-                                workerNodeService.up(workerUuid);
-                                shouldRetry=false;
-                                logger.info("Worker is up");
-                            } catch (Exception ex){
-                                logger.error("Worker failed on start up, will retry in a " + sleep/1000 + " seconds", ex);
-                                try{Thread.sleep(sleep);}
-                                catch(InterruptedException iex){/*do nothing*/}
-                                sleep = Math.min(maxStartUpSleep, sleep*2); // double the sleep time until max 10 minute
-                            }
-                        }
+	                @Override
+	                public Void doSecured() {
+		                long sleep = initStartUpSleep;
+		                boolean shouldRetry = true;
+		                while (shouldRetry) {
+			                try {
+				                workerNodeService.up(workerUuid);
+				                shouldRetry = false;
+				                logger.info("Worker is up");
+			                } catch (Exception ex) {
+				                logger.error("Worker failed on start up, will retry in a " + sleep / 1000 + " seconds", ex);
+				                try {
+					                Thread.sleep(sleep);
+				                } catch (InterruptedException iex) {/*do nothing*/}
+				                sleep = Math.min(maxStartUpSleep, sleep * 2); // double the sleep time until max 10 minute
+			                }
+		                }
 
-                        endOfInit = true;
-                        //mark that worker is up and its recovery is ended - only now we can start asking for messages from queue
-                        up = true;
+		                endOfInit = true;
+		                //mark that worker is up and its recovery is ended - only now we can start asking for messages from queue
+		                up = true;
 
-                        workerConfigurationService.enabled(true);
-                        workerNodeService.updateEnvironmentParams(workerUuid,
-                                System.getProperty("os.name"),
-                                System.getProperty("java.version"),
-                                resolveDotNetVersion());
-                        return null;
-                    }});
+		                workerConfigurationService.enabled(true);
+		                workerNodeService.updateEnvironmentParams(workerUuid,
+				                System.getProperty("os.name"),
+				                System.getProperty("java.version"),
+				                resolveDotNetVersion());
+		                return null;
+	                }
+                });
 			}
 		}).start();
 	}
@@ -204,15 +208,15 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback 
         SecurityTemplate securityTemplate = new SecurityTemplate();//TODO- remove this from score
         securityTemplate.invokeSecured(new SecurityTemplate.SecurityTemplateCallback<Void>() {
 
-            @Override
-            public Void doSecured() {
-                endOfInit = false;
-                workerConfigurationService.enabled(false);
-                workerNodeService.down(workerUuid);
-                up = false;
-                logger.info("The worker is down");
-                return null;
-            }
+	        @Override
+	        public Void doSecured() {
+		        endOfInit = false;
+		        workerConfigurationService.enabled(false);
+		        workerNodeService.down(workerUuid);
+		        up = false;
+		        logger.info("The worker is down");
+		        return null;
+	        }
         });
 
     }
