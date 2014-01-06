@@ -26,7 +26,6 @@ import static org.mockito.Mockito.*;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-@Ignore
 public class WorkerManagerTest {
 
 	@Autowired
