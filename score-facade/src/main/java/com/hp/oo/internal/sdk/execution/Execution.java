@@ -35,7 +35,7 @@ public class Execution implements Serializable {
 		this.mustGoToQueue = false;
 		this.contexts = new HashMap<>();
 		this.systemContext = new HashMap<>();
-//        this.serializableSessionContext = new HashMap<>();
+		this.serializableSessionContext = new HashMap<>();
 	}
 
 	public Execution(Long executionId, Long runningExecutionPlanId, Long position, Map<String, OOContext> contexts, Map<String, Serializable> systemContext) {
