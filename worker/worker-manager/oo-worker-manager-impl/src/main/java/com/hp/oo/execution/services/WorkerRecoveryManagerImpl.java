@@ -46,7 +46,17 @@ public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager{
 				@Override
 				public void tryOnce() {
 					if (logger.isDebugEnabled()) logger.debug("sending worker UP");
-	                workerNodeService.up(System.getProperty("worker.uuid"));
+
+                    SecurityTemplate securityTemplate = new SecurityTemplate();   //TODO- remove this from score
+                    securityTemplate.invokeSecured(new SecurityTemplate.SecurityTemplateCallback<Void>() {
+
+                        @Override
+                        public Void doSecured() {
+                            workerNodeService.up(System.getProperty("worker.uuid"));
+                            return null;
+                        }
+                    });
+
 					if (logger.isDebugEnabled()) logger.debug("the worker is UP");
 				}
 			});
