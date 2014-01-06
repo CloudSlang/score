@@ -9,7 +9,7 @@ import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
 import junit.framework.Assert;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
-import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.hibernate.ejb.HibernatePersistence;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -419,7 +419,7 @@ public class WorkerNodeServiceTest {
 			LocalContainerEntityManagerFactoryBean fb = new LocalContainerEntityManagerFactoryBean();
 			fb.setJpaProperties(hibernateProperties());
 			fb.setDataSource(dataSource());
-			fb.setPersistenceProviderClass(HibernatePersistenceProvider.class);
+			fb.setPersistenceProviderClass(HibernatePersistence.class);
 			fb.setPackagesToScan("com.hp.oo.engine.node");
 			fb.setJpaVendorAdapter(jpaVendorAdapter);
 			return fb;

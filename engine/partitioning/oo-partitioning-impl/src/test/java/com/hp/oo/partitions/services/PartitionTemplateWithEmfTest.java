@@ -4,7 +4,7 @@ import com.hp.oo.partitions.entities.PartitionGroup;
 import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
-import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.hibernate.ejb.HibernatePersistence;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.FactoryBean;
@@ -145,7 +145,7 @@ public class PartitionTemplateWithEmfTest {
 		FactoryBean<EntityManagerFactory> entityManagerFactory(JpaVendorAdapter jpaVendorAdapter) {
 			LocalContainerEntityManagerFactoryBean fb = new LocalContainerEntityManagerFactoryBean();
 			fb.setDataSource(dataSource());
-			fb.setPersistenceProviderClass(HibernatePersistenceProvider.class);
+			fb.setPersistenceProviderClass(HibernatePersistence.class);
 			fb.setPackagesToScan("com.hp.oo.partitions");
 			fb.setJpaVendorAdapter(jpaVendorAdapter);
 			return fb;

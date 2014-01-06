@@ -15,7 +15,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
           p:jpaProperties-ref="hibernateProperties"
           p:dataSource-ref="dataSource"
-          p:persistenceProviderClass="org.hibernate.jpa.HibernatePersistenceProvider"
+          p:persistenceProviderClass="org.hibernate.ejb.HibernatePersistence"
           p:packagesToScan="com.hp.oo.orchestrator"
           depends-on="hiloFactoryBean">
         <property name="jpaVendorAdapter">

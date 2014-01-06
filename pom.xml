@@ -65,7 +65,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
 		<spring.version>4.0.0.RELEASE</spring.version>
-		<hibernate.version>4.3.0.Final</hibernate.version>
+		<hibernate.version>4.1.4.Final</hibernate.version>
 	</properties>
 
 	<dependencyManagement>
@@ -232,8 +232,8 @@
 			<!-- hibernate artifacts -->
 			<dependency>
 				<groupId>org.hibernate.javax.persistence</groupId>
-				<artifactId>hibernate-jpa-2.1-api</artifactId>
-				<version>1.0.0.Final</version>
+				<artifactId>hibernate-jpa-2.0-api</artifactId>
+				<version>1.0.1.Final</version>
 			</dependency>
 
 			<dependency>
@@ -251,7 +251,7 @@
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-validator</artifactId>
-				<version>${hibernate.version}</version>
+				<version>4.3.0.Final</version>
 				<scope>runtime</scope>
 			</dependency>
 			<!-- end of hibernate artifacts -->

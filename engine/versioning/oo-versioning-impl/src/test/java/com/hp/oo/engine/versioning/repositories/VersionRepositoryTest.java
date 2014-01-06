@@ -5,7 +5,7 @@ import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
 import junit.framework.Assert;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
-import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.hibernate.ejb.HibernatePersistence;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.FactoryBean;
@@ -122,7 +122,7 @@ public class VersionRepositoryTest {
 			LocalContainerEntityManagerFactoryBean fb = new LocalContainerEntityManagerFactoryBean();
 			fb.setJpaProperties(hibernateProperties());
 			fb.setDataSource(dataSource());
-			fb.setPersistenceProviderClass(HibernatePersistenceProvider.class);
+			fb.setPersistenceProviderClass(HibernatePersistence.class);
 			fb.setPackagesToScan("com.hp.oo.engine.versioning");
 			fb.setJpaVendorAdapter(jpaVendorAdapter);
 			return fb;
