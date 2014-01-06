@@ -3,6 +3,7 @@ package com.hp.oo.execution.services;
 import com.hp.oo.engine.node.services.WorkerNodeService;
 import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.doThrow;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
+@Ignore
 public class WorkerManagerTest {
 
 	@Autowired
