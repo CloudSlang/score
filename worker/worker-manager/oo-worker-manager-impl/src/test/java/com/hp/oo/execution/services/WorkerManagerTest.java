@@ -14,9 +14,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.mockito.Mockito.*;
 import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.*;
 
 
 /**
@@ -91,17 +90,24 @@ public class WorkerManagerTest {
         verify(workerNodeService,times(1)).keepAlive(CREDENTIAL_UUID);
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void testKeepAliveFailTriggerRecovery(){
+        validateWorkerIsUp();
         doThrow(new RuntimeException("Network Error")).when(workerNodeService).keepAlive(CREDENTIAL_UUID);
         for(int i=0 ; i<5 ; i++){
             workerManager.workerKeepAlive();
         }
         verify(workerRecoveryManager,times(1)).doRecovery();
+
         reset(workerNodeService);
     }
 
-	@Test
+    private void validateWorkerIsUp() {
+        workerManager.onApplicationEvent(mock(ContextRefreshedEvent.class));
+        while(!workerManager.isUp()){}
+    }
+
+    @Test
 	public void shutDown() {
 		workerManager.onApplicationEvent(mock(ContextRefreshedEvent.class));
 		assertThat(workerManager.isUp()).isTrue();
