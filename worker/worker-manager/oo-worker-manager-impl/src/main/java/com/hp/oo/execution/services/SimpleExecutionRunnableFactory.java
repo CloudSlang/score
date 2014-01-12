@@ -7,6 +7,8 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
+
 /**
  * Created by IntelliJ IDEA.
  * User: Amit Levin
@@ -36,7 +38,8 @@ public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecuti
     @Autowired
     private WorkerConfigurationService workerConfigurationService;
 
-    private String workerUUID;
+    @Resource
+	private String workerUuid;
 
 	@Override
 	public SimpleExecutionRunnable getObject() {
@@ -47,7 +50,7 @@ public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecuti
                 converter,
                 endExecutionCallback,
                 queueStateIdGeneratorService,
-                workerUUID,
+                workerUuid,
                 workerConfigurationService
         );
 	}

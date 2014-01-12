@@ -3,7 +3,6 @@ package com.hp.oo.execution.services;
 import com.hp.oo.engine.node.services.WorkerNodeService;
 import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.Fail.fail;
 import static org.mockito.Mockito.*;
 
 
@@ -34,14 +34,28 @@ public class WorkerManagerTest {
 	@Autowired
 	private WorkerNodeService workerNodeService;
 
-    @Autowired
-    private WorkerRecoveryManager workerRecoveryManager;
+	@Autowired
+	private WorkerRecoveryManager workerRecoveryManager;
 
 	static final String CREDENTIAL_UUID = "uuid";
 
 	@Before
-	public void setup(){
-		reset(workerNodeService,workerRecoveryManager);
+	public void setup() throws Exception {
+		reset(workerNodeService, workerRecoveryManager);
+		startWorker();
+	}
+
+	private void startWorker() throws InterruptedException {
+		final long TIME_OUT = 2000L;
+		workerManager.onApplicationEvent(mock(ContextRefreshedEvent.class));
+		long t = System.currentTimeMillis();
+		while (!workerManager.isUp()) {
+			if (System.currentTimeMillis() - t > TIME_OUT) {
+				throw fail("The worker has failed start on timeout: " + TIME_OUT + " ms");
+			} else {
+				Thread.sleep(100L);
+			}
+		}
 	}
 
 	@Test
@@ -82,31 +96,24 @@ public class WorkerManagerTest {
 		assertThat(workerManager.isUp()).isTrue();
 	}
 
-    @Test
-    public void testKeepAlive(){
-        reset(workerNodeService);
-        workerManager.workerKeepAlive();
-        verify(workerNodeService,times(1)).keepAlive(CREDENTIAL_UUID);
-    }
+	@Test
+	public void testKeepAlive() {
+		workerManager.workerKeepAlive();
+		verify(workerNodeService, times(1)).keepAlive(CREDENTIAL_UUID);
+	}
 
-    @Test(timeout = 10000)
-    public void testKeepAliveFailTriggerRecovery(){
-        validateWorkerIsUp();
-        doThrow(new RuntimeException("Network Error")).when(workerNodeService).keepAlive(CREDENTIAL_UUID);
-        for(int i=0 ; i<5 ; i++){
-            workerManager.workerKeepAlive();
-        }
-        verify(workerRecoveryManager,times(1)).doRecovery();
+	@Test(timeout = 10000)
+	public void testKeepAliveFailTriggerRecovery() {
+		doThrow(new RuntimeException("Network Error")).when(workerNodeService).keepAlive(CREDENTIAL_UUID);
+		for (int i = 0; i < 5; i++) {
+			workerManager.workerKeepAlive();
+		}
+		verify(workerRecoveryManager, times(1)).doRecovery();
 
-        reset(workerNodeService);
-    }
+		reset(workerNodeService);
+	}
 
-    private void validateWorkerIsUp() {
-        workerManager.onApplicationEvent(mock(ContextRefreshedEvent.class));
-        while(!workerManager.isUp()){}
-    }
-
-    @Test
+	@Test
 	public void shutDown() {
 		workerManager.onApplicationEvent(mock(ContextRefreshedEvent.class));
 		assertThat(workerManager.isUp()).isTrue();
@@ -119,32 +126,45 @@ public class WorkerManagerTest {
 
 	@Configuration
 	static class Configurator {
-		static {
-			System.setProperty("oo.worker.uuid", CREDENTIAL_UUID);
+
+		@Bean
+		WorkerManager workerManager() {
+			return new WorkerManager();
 		}
 
-		@Bean WorkerManager workerManager() {
-            WorkerManager workerManagerBean = new WorkerManager();
-            workerManagerBean.setWorkerUuid(CREDENTIAL_UUID);
-            return workerManagerBean;
+		@Bean
+		String workerUuid() {
+			return CREDENTIAL_UUID;
 		}
 
-		@Bean WorkerNodeService workerNodeService() {
+		@Bean
+		WorkerNodeService workerNodeService() {
 			return mock(WorkerNodeService.class);
 		}
 
-		@Bean WorkerConfigurationService workerConfigurationService() {
+		@Bean
+		WorkerConfigurationService workerConfigurationService() {
 			return mock(WorkerConfigurationService.class);
 		}
 
-		@Bean WorkerRecoveryManager workerRecoveryManager() {
+		@Bean
+		WorkerRecoveryManager workerRecoveryManager() {
 			return mock(WorkerRecoveryManager.class);
 		}
 
-		@Bean Integer numberOfExecutionThreads() {return 2;}
+		@Bean
+		Integer numberOfExecutionThreads() {
+			return 2;
+		}
 
-		@Bean Long initStartUpSleep() {return 10L;}
+		@Bean
+		Long initStartUpSleep() {
+			return 10L;
+		}
 
-		@Bean Long maxStartUpSleep() {return 100L;}
+		@Bean
+		Long maxStartUpSleep() {
+			return 100L;
+		}
 	}
 }

@@ -140,7 +140,7 @@ public class OutboundBufferTest {
 	@Test
 	public void longevityTest() throws InterruptedException {
 		int THREADS_NUM = 5;
-		long CHECK_DURATION = 10*1000L;
+		long CHECK_DURATION = 5*1000L;
 		long INFO_FREQUENCY = 2*1000L;
 
 		final AtomicBoolean run = new AtomicBoolean(true);

@@ -6,18 +6,15 @@ import com.hp.oo.engine.queue.services.QueueDispatcherService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.io.IOException;
+import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -36,7 +33,7 @@ public class InBuffer implements ApplicationListener, Runnable, WorkerRecoveryLi
 	@Autowired
 	private QueueDispatcherService queueDispatcher;
 
-	@Value("#{systemProperties['oo.worker.uuid']}")
+	@Resource
 	private String workerUuid;
 
 	@Autowired
