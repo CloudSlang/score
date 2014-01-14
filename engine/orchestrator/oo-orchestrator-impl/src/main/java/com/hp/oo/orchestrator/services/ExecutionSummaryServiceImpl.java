@@ -4,9 +4,11 @@ import com.hp.oo.enginefacade.execution.ExecutionEnums.ExecutionStatus;
 import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.orchestrator.entities.ExecutionSummaryEntity;
+import com.hp.oo.orchestrator.entities.QExecutionSummaryEntity;
+import com.hp.oo.orchestrator.repositories.ExecutionSummaryExpressions;
 import com.hp.oo.orchestrator.repositories.ExecutionSummaryRepository;
 import com.hp.oo.orchestrator.util.OffsetPageRequest;
-import com.hp.score.engine.data.SqlUtils;
+import com.mysema.query.types.expr.BooleanExpression;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -38,13 +39,15 @@ public final class ExecutionSummaryServiceImpl implements ExecutionSummaryServic
     private final Logger logger = Logger.getLogger(getClass());
 
     @Autowired
-    ExecutionSummaryRepository repository;
+    private ExecutionSummaryRepository repository;
 
     @Autowired
     private ExecutionSerializationUtil serUtil;
 
     @Autowired
-    private SqlUtils sqlUtils;
+    private ExecutionSummaryExpressions exp;
+
+    private QExecutionSummaryEntity entity = QExecutionSummaryEntity.executionSummaryEntity;
 
     @Override
     @Transactional(readOnly = true)
@@ -58,41 +61,30 @@ public final class ExecutionSummaryServiceImpl implements ExecutionSummaryServic
                                                        int pageNum,
                                                        int pageSize) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Fetching executions at + " + startedBefore + " and before, and after:"+startedAfter+". Number of executions to return: " + pageSize + ", Page number: " + pageNum);
+            logger.debug("Fetching executions at + " + startedBefore + " and before, and after:" + startedAfter + ". Number of executions to return: " + pageSize + ", Page number: " + pageNum);
         }
 
         // validate mandatory params
         Validate.notNull(startedBefore, "startedBefore can't be null");
         Validate.notNull(startedAfter, "startedAfter can't be null");
-        Validate.isTrue(!startedBefore.before(startedAfter),"startedBefore must be after startedAfter");
+        Validate.isTrue(!startedBefore.before(startedAfter), "startedBefore must be after startedAfter");
         Validate.isTrue(pageNum > 0, "Page number should be positive");
         Validate.isTrue(pageSize >= 0, "Page size can't be negative");
 
-        flowPath = normalize(flowPath);
-        owner = normalize(owner);
+        BooleanExpression expression = exp.branchIsEmpty()
+                .and(exp.startTimeBetween(startedAfter, startedBefore))
+                .and(exp.flowPathLike(flowPath))
+                .and(exp.ownerLike(owner))
+                .and(exp.statusIn(statuses))
+                .and(exp.pauseReasonIn(pauseReasons))
+                .and(exp.resultStatusTypeIn(toUpper(resultStatusTypes)));
 
-        if (statuses == null || statuses.isEmpty()) {
-            statuses = Arrays.asList(ExecutionStatus.values());
-        }
 
-        if (pauseReasons == null || pauseReasons.isEmpty()) {
-            pauseReasons = Arrays.asList(PauseReason.values());
-        }
 
         // the given pageNum is one-based, but PageRequest works zero-based.
-        PageRequest pageRequest = new PageRequest(pageNum - 1, pageSize, Sort.Direction.DESC, "startTime");
-//	    int startPageOffset = (pageNum - 1) * pageSize;
-        String branchId = EMPTY_BRANCH;
+        PageRequest pageRequest = new PageRequest(pageNum - 1, pageSize, Sort.Direction.DESC, entity.startTime.getMetadata().getName());
 
-        boolean noResultStatusTypeFiltering = resultStatusTypes == null || resultStatusTypes.isEmpty();
-        if (noResultStatusTypeFiltering) {
-            resultStatusTypes = Collections.singletonList("");
-        } else {
-            resultStatusTypes = toUpper(resultStatusTypes);
-        }
-
-		return repository.findForFiltering(branchId, flowPath, statuses,
-                noResultStatusTypeFiltering, resultStatusTypes, pauseReasons, owner, startedBefore,startedAfter, pageRequest);
+        return repository.findAll(expression, pageRequest).getContent();
     }
 
     private List<String> toUpper(List<String> resultStatusTypes) {
@@ -144,7 +136,7 @@ public final class ExecutionSummaryServiceImpl implements ExecutionSummaryServic
                 }
 
                 //set the duration
-                if(entity.getDuration() == null && entity.getEndTime() != null){
+                if (entity.getDuration() == null && entity.getEndTime() != null) {
                     entity.setDuration(entity.getEndTime().getTime() - entity.getStartTime().getTime());
                 }
 
@@ -233,7 +225,7 @@ public final class ExecutionSummaryServiceImpl implements ExecutionSummaryServic
             executionSummary.setStatus(executionStatus);
             executionSummary.setEndTime(endTime);
             executionSummary.setDuration(endTime.getTime() - executionSummary.getStartTime().getTime());
-            if(roi!=null){
+            if (roi != null) {
                 executionSummary.setRoi(roi);
             }
         }
@@ -321,17 +313,4 @@ public final class ExecutionSummaryServiceImpl implements ExecutionSummaryServic
         byte[] bytes = serUtil.objToBytes(execution);
         entity.setExecutionObj(bytes);
     }
-
-    // Escaping the expression and adding service related policies (Wild chars & lower casing)
-    private String normalize(String expression) {
-        String result;
-	    if (expression != null && !expression.isEmpty()) {
-		    expression = sqlUtils.escapeLikeExpression(expression.toLowerCase());
-		    result = sqlUtils.normalizeContainingLikeExpression(expression);
-	    } else {
-		    result = "%";
-	    }
-        return result;
-    }
-
 }

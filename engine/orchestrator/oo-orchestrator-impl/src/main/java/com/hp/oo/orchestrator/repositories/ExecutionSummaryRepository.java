@@ -1,25 +1,27 @@
 package com.hp.oo.orchestrator.repositories;
 
 import com.hp.oo.enginefacade.execution.ExecutionEnums.ExecutionStatus;
-import static com.hp.oo.enginefacade.execution.ExecutionSummary.EMPTY_BRANCH;
 import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.oo.orchestrator.entities.ExecutionSummaryEntity;
-import com.hp.score.engine.data.SqlUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Date;
 import java.util.List;
+
+import static com.hp.oo.enginefacade.execution.ExecutionSummary.EMPTY_BRANCH;
 
 /**
  * User: kravtsov
  * Date: 20/12/12
  * Time: 15:34
  */
-public interface ExecutionSummaryRepository extends JpaRepository<ExecutionSummaryEntity, Long>, ExecutionSummaryRepositoryCustom {
+public interface ExecutionSummaryRepository extends JpaRepository<ExecutionSummaryEntity, Long>,
+        ExecutionSummaryRepositoryCustom, QueryDslPredicateExecutor<ExecutionSummaryEntity> {
 
     public List<ExecutionSummaryEntity> findByStatusIn(List<ExecutionStatus> statuses);
 
@@ -36,27 +38,6 @@ public interface ExecutionSummaryRepository extends JpaRepository<ExecutionSumma
     @Query("select es.id from ExecutionSummaryEntity es where es.executionId = :executionId and es.status in :statuses and es.pauseReason not in (:pauseReasons)")
     public List<Long> findIdByExecutionIdAndStatusInAndPauseReasonNotIn(@Param("executionId") String executionId,
                                                                            @Param("statuses") List<ExecutionStatus> statuses, @Param("pauseReasons") List<PauseReason> pauseReason);
-
-    public List<ExecutionSummaryEntity> findByBranchIdAndStartTimeLessThanEqual(String branchId, Date startTime, Pageable pageable);
-
-    @Query("select es from ExecutionSummaryEntity es " +
-            "where es.branchId = :branchId" +
-            " and ((lower(es.flowPath)) like :flowPath " + SqlUtils.ESCAPE_EXPRESSION + ")" +
-            " and es.status in (:statuses)" +
-            " and ((:noResultStatusTypeFiltering = true) or ((upper(es.resultStatusType)) in (:resultStatusTypes)) or (es.resultStatusType is null))" +
-            " and ((es.pauseReason in (:pauseReasons)) or (es.pauseReason is null))" +
-            " and ((lower(es.owner)) like :owner " + SqlUtils.ESCAPE_EXPRESSION + ")" +
-            " and es.startTime >= :startedAfter and es.startTime <=:startedBefore")
-    public List<ExecutionSummaryEntity> findForFiltering(@Param("branchId") String branchId,
-                                                         @Param("flowPath") String flowPath,
-                                                         @Param("statuses") List<ExecutionStatus> statuses,
-                                                         @Param("noResultStatusTypeFiltering") boolean noResultStatusTypeFiltering,
-                                                         @Param("resultStatusTypes") List<String> resultStatusTypes,
-                                                         @Param("pauseReasons") List<PauseReason> pauseReasons,
-                                                         @Param("owner") String owner,
-                                                         @Param("startedBefore") Date startedBefore,
-                                                         @Param("startedAfter") Date startedAfter,
-                                                         Pageable pageRequest);
 
     public List<ExecutionSummaryEntity> findByFlowUuidAndStartTimeGreaterThanEqualAndEndTimeLessThanEqualAndBranchId(String flowUuid, Date startTime, Date endTime, Pageable pageable, String branchId);
 

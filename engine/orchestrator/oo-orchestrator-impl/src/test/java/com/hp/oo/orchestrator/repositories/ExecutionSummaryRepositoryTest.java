@@ -27,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,7 +37,6 @@ import java.util.UUID;
 
 import static com.hp.oo.enginefacade.execution.ExecutionSummary.EMPTY_BRANCH;
 import static junit.framework.Assert.*;
-import static org.fest.assertions.Assertions.assertThat;
 
 /**
  * Created with IntelliJ IDEA.
@@ -47,13 +45,16 @@ import static org.fest.assertions.Assertions.assertThat;
  * Time: 15:49
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
+@ContextConfiguration(classes = ExecutionSummaryRepositoryTest.Configurator.class)
 @Transactional
 @TransactionConfiguration(defaultRollback = true)
 public class ExecutionSummaryRepositoryTest {
 
     @Autowired
-    ExecutionSummaryRepository repository;
+    private ExecutionSummaryRepository repository;
+
+    @Autowired
+    private ExecutionSummaryExpressions exp;
 
     // PAUSE related tests
     @Test
@@ -182,7 +183,11 @@ public class ExecutionSummaryRepositoryTest {
 
         PageRequest pageRequest = new PageRequest(0, 20, Sort.Direction.DESC, "startTime");
 
-        List<ExecutionSummaryEntity> executions = repository.findForFiltering(EMPTY_BRANCH, "%", Arrays.asList(ExecutionStatus.values()), true, Collections.<String>singletonList(""), Arrays.asList(PauseReason.values()), "%", new Date(System.currentTimeMillis() + 1000),new Date(0), pageRequest);
+        final Date startedBefore = new Date(0);
+        final Date startedAfter = new Date(System.currentTimeMillis() + 1000);
+
+        List<ExecutionSummaryEntity> executions = repository.findAll(
+                exp.startTimeBetween(startedBefore, startedAfter), pageRequest).getContent();
         assertNotNull(executions);
         assertEquals("Wrong number of Executions", 6, executions.size());
 
@@ -207,7 +212,11 @@ public class ExecutionSummaryRepositoryTest {
         PageRequest pageRequest = new PageRequest(1, 2, Sort.Direction.DESC, "startTime");
 
         // test partial results - takes from page 2 in the list. Which means execution 3 and 2.
-        List<ExecutionSummaryEntity> executions = repository.findForFiltering(EMPTY_BRANCH, "%", Arrays.asList(ExecutionStatus.values()), true, Collections.<String>singletonList(""), Arrays.asList(PauseReason.values()), "%", new Date(System.currentTimeMillis() + 1000),new Date(0), pageRequest);
+        final Date startedBefore = new Date(0);
+        final Date startedAfter = new Date(System.currentTimeMillis() + 1000);
+
+        List<ExecutionSummaryEntity> executions = repository.findAll(
+                exp.startTimeBetween(startedBefore, startedAfter), pageRequest).getContent();
 
         assertNotNull(executions);
         assertEquals("Wrong number of Executions when testing 'paging' - should return part of the list", 2, executions.size());
@@ -231,7 +240,7 @@ public class ExecutionSummaryRepositoryTest {
         createBatchOfExecutions();
 
         try {
-            Thread.sleep(10);  // just want to create a gap between events creation
+            Thread.sleep(1000);  // just want to create a gap between events creation
         } catch (Exception ex) {
         }
 
@@ -240,7 +249,7 @@ public class ExecutionSummaryRepositoryTest {
         createExecutionSummaryThatStartsNow("6", EMPTY_BRANCH, ExecutionStatus.RUNNING);
 
         try {
-            Thread.sleep(10);  // just want to create a gap between events creation
+            Thread.sleep(1000);  // just want to create a gap between events creation
         } catch (Exception ex) {
         }
 
@@ -248,20 +257,22 @@ public class ExecutionSummaryRepositoryTest {
 
         createExecutionSummaryThatStartsNow("7", EMPTY_BRANCH, ExecutionStatus.PAUSED);
 
-        PageRequest pageRequest = new PageRequest(0, 100, Sort.Direction.DESC, "startTime");
-
         // test partial results - takes from page 2 in the list. Which means execution 3 and 2.
-        List<ExecutionSummaryEntity> executions = repository.findForFiltering(EMPTY_BRANCH, "%", Arrays.asList(ExecutionStatus.values()), true, Collections.<String>singletonList(""), Arrays.asList(PauseReason.values()), "%", new Date(System.currentTimeMillis() + 1000),beforeRunning, pageRequest);
+        final Date startedBefore = new Date(System.currentTimeMillis() + 2000);
+        List<ExecutionSummaryEntity> executions = (List<ExecutionSummaryEntity>) repository.findAll(
+                exp.startTimeBetween(beforeRunning, startedBefore));
 
         assertNotNull(executions);
         assertEquals("Wrong number of Executions when testing 'paging' range - should return all the list", 8, executions.size());
 
-        executions = repository.findForFiltering(EMPTY_BRANCH, "%", Arrays.asList(ExecutionStatus.values()), true, Collections.<String>singletonList(""), Arrays.asList(PauseReason.values()), "%", new Date(System.currentTimeMillis() + 1000),betweenRuns, pageRequest);
+        executions = (List<ExecutionSummaryEntity>) repository.findAll(
+                exp.startTimeBetween(betweenRuns, startedBefore));
 
         assertNotNull(executions);
         assertEquals("Wrong number of Executions when testing 'paging' range - should return part of the list", 2, executions.size());
 
-        executions = repository.findForFiltering(EMPTY_BRANCH, "%", Arrays.asList(ExecutionStatus.values()), true, Collections.<String>singletonList(""), Arrays.asList(PauseReason.values()), "%", new Date(System.currentTimeMillis() + 1000),betweenRuns2, pageRequest);
+        executions = (List<ExecutionSummaryEntity>) repository.findAll(
+                exp.startTimeBetween(betweenRuns2, startedBefore));
 
         assertNotNull(executions);
         assertEquals("Wrong number of Executions when testing 'paging' range - should return part of the list", 1, executions.size());
@@ -273,9 +284,10 @@ public class ExecutionSummaryRepositoryTest {
         createBatchOfExecutions();
 
         PageRequest pageRequest = new PageRequest(0, 20, Sort.Direction.DESC, "startTime");
-        String flowPath = "%library/myotherflows%";
+        String flowPath = "liBrary/mYothErfloWs";
 
-        List<ExecutionSummaryEntity> executions = repository.findForFiltering(EMPTY_BRANCH, flowPath, Arrays.asList(ExecutionStatus.values()), true, Collections.<String>singletonList(""), Arrays.asList(PauseReason.values()), "%", new Date(System.currentTimeMillis() + 1000),new Date(0), pageRequest);
+        List<ExecutionSummaryEntity> executions = repository.findAll(
+                exp.flowPathLike(flowPath), pageRequest).getContent();
 
         assertNotNull(executions);
         assertEquals("Wrong number of Executions when testing filtering by flowPath", 3, executions.size());
@@ -296,7 +308,8 @@ public class ExecutionSummaryRepositoryTest {
 
         PageRequest pageRequest = new PageRequest(0, 20, Sort.Direction.DESC, "startTime");
 
-        List<ExecutionSummaryEntity> executions = repository.findForFiltering(EMPTY_BRANCH, "%", Collections.<ExecutionStatus>singletonList(ExecutionStatus.RUNNING), true, Collections.<String>singletonList(""), Arrays.asList(PauseReason.values()), "%", new Date(System.currentTimeMillis() + 1000),new Date(0), pageRequest);
+        List<ExecutionSummaryEntity> executions = repository.findAll(
+                exp.statusIn(Arrays.asList(ExecutionStatus.RUNNING)), pageRequest).getContent();
 
         assertNotNull(executions);
         assertEquals("Wrong number of Executions when testing filtering by flowPath", 1, executions.size());
@@ -313,9 +326,12 @@ public class ExecutionSummaryRepositoryTest {
         createBatchOfExecutions();
 
         PageRequest pageRequest = new PageRequest(0, 20, Sort.Direction.DESC, "startTime");
-        String flowPath = "%library/myflows%";
+        String flowPath = "library/myflows";
 
-        List<ExecutionSummaryEntity>  executions = repository.findForFiltering(EMPTY_BRANCH, flowPath, Collections.<ExecutionStatus>singletonList(ExecutionStatus.COMPLETED), true, Collections.<String>singletonList(""), Arrays.asList(PauseReason.values()), "%", new Date(System.currentTimeMillis() + 1000),new Date(0), pageRequest);
+        List<ExecutionSummaryEntity>  executions = repository.findAll(
+                exp.flowPathLike(flowPath)
+                        .and(exp.statusIn(Arrays.asList(ExecutionStatus.COMPLETED))),
+                pageRequest).getContent();
 
         assertNotNull(executions);
         assertEquals("Wrong number of Executions when testing filtering by flowPath", 1,executions.size());
@@ -332,7 +348,10 @@ public class ExecutionSummaryRepositoryTest {
 
         PageRequest pageRequest = new PageRequest(0, 20, Sort.Direction.DESC, "startTime");
 
-        List<ExecutionSummaryEntity> executions = repository.findForFiltering(EMPTY_BRANCH, "%", Collections.<ExecutionStatus>singletonList(ExecutionStatus.COMPLETED), false, Collections.<String>singletonList("ERROR"), Arrays.asList(PauseReason.values()), "%", new Date(System.currentTimeMillis() + 1000),new Date(0), pageRequest);
+        List<ExecutionSummaryEntity> executions = repository.findAll(
+                exp.statusIn(Arrays.asList(ExecutionStatus.COMPLETED))
+                        .and(exp.resultStatusTypeIn(Arrays.asList("ERROR")))
+                , pageRequest).getContent();
 
         assertNotNull(executions);
         assertEquals("Wrong number of Executions when testing filtering by status and result status type", 2, executions.size());
@@ -342,10 +361,13 @@ public class ExecutionSummaryRepositoryTest {
         assertEquals("Incorrect first execution in the list", "5", firstExecution.getExecutionId());
         assertEquals("Incorrect first execution in the list", "3", secondExecution.getExecutionId());
 
-        executions = repository.findForFiltering(EMPTY_BRANCH, "%", Collections.<ExecutionStatus>singletonList(ExecutionStatus.PAUSED), true, Collections.<String>singletonList(""), Collections.singletonList(PauseReason.DISPLAY), "%", new Date(System.currentTimeMillis() + 1000),new Date(0), pageRequest);
+        executions = repository.findAll(
+                exp.statusIn(Arrays.asList(ExecutionStatus.PAUSED))
+                .and(exp.pauseReasonIn(Arrays.asList(PauseReason.DISPLAY)))
+                ,pageRequest).getContent();
 
         assertNotNull(executions);
-        assertEquals("Wrong number of Execution when testing by status and result staus type(pause and display)", 1, executions.size() );
+        assertEquals("Wrong number of Execution when testing by status and result status type(pause and display)", 1, executions.size() );
 
         assertEquals("Incorrect execution id in list", "0", executions.get(0).getExecutionId());
 
@@ -358,9 +380,13 @@ public class ExecutionSummaryRepositoryTest {
         createBatchOfExecutions();
 
         PageRequest pageRequest = new PageRequest(0, 20, Sort.Direction.DESC, "startTime");
-        String flowPath = "%library/myflows%";
+        String flowPath = "library/myflows";
 
-        List<ExecutionSummaryEntity> executions = repository.findForFiltering(EMPTY_BRANCH, flowPath, Collections.<ExecutionStatus>singletonList(ExecutionStatus.COMPLETED), false, Collections.<String>singletonList("RESOLVED"), Arrays.asList(PauseReason.values()), "%", new Date(System.currentTimeMillis() +1000),new Date(0), pageRequest);
+        List<ExecutionSummaryEntity> executions = repository.findAll(
+                exp.flowPathLike(flowPath)
+                        .and(exp.statusIn(Arrays.asList(ExecutionStatus.COMPLETED)))
+                        .and(exp.resultStatusTypeIn(Arrays.asList("RESOLVED")))
+                , pageRequest).getContent();
 
         assertNotNull(executions);
         assertEquals("Wrong number of Executions when testing filtering be flow path, status and result status type", 1, executions.size());
@@ -529,6 +555,42 @@ public class ExecutionSummaryRepositoryTest {
         //just to make sure no exception is thrown if we delete a non existent id
         repository.deleteByExecutionIdAndBranchIdNot("NON EXISTENT ID", EMPTY_BRANCH);
     }
+
+    //ONLY FOR LOAD STRESS TESTS!!! NOT TO BE ACTIVATE IN BUILD - MEIR
+    /*@Test
+    public void testFindResultDistLoadStress() {
+        createBatchOfExecutions();
+
+        List<ExecutionSummaryEntity> executions = new ArrayList<>();
+        for(int i=0; i<300000;i++){
+            ExecutionSummaryEntity exec = createExecutionSummaryThatStartsNow(Integer.toString(i+6), ExecutionStatus.COMPLETED);
+            exec.setFlowUuid(UUID.randomUUID().toString());
+            exec.setResultStatusType("RESOLVED");
+            executions.add(exec);
+        }
+        repository.save(executions);
+        System.out.println("start time");
+        Long startTime = System.currentTimeMillis();
+
+        List<Object[]> dist = repository.findResultDistributionByFlowUuid("12345");
+        Long endTime = System.currentTimeMillis();
+        System.out.println("action took:"+ TimeUnit.MILLISECONDS.toSeconds(endTime-startTime) );
+
+        Assert.assertNotNull(dist);
+        Assert.assertEquals("we have two result types here, RESOLVED and ERROR",2,dist.size());
+
+        Set<String> resultTypes = new HashSet<>();
+        resultTypes.add((String)dist.get(0)[0]);
+        resultTypes.add((String)dist.get(1)[0]);
+
+        Assert.assertEquals("we have two result types here, RESOLVED and ERROR",2,resultTypes.size());
+        Assert.assertTrue(resultTypes.contains("RESOLVED"));
+        Assert.assertTrue(resultTypes.contains("ERROR"));
+
+        Assert.assertEquals(2L,dist.get(1)[1]);
+        Assert.assertEquals(2L,dist.get(0)[1]);
+    }*/
+
 
     @Test
     public void findOneFlowStatistics() {
@@ -916,18 +978,12 @@ public class ExecutionSummaryRepositoryTest {
     }
 
     @Configuration
-    @EnableJpaRepositories("com.hp.oo.orchestrator")
+    @EnableJpaRepositories("com.hp.oo.orchestrator.repositories")
 	@EnableTransactionManagement
     @ImportResource("META-INF/spring/orchestratorEmfContext.xml")
     static class Configurator {
-	    @Bean
-	    SqlUtils sqlUtils() {
-		    return new SqlUtils();
-	    }
-
-	    @Bean
-	    DataBaseDetector dataBaseDetector() {
-		    return new DataBaseDetector();
-	    }
+	    @Bean SqlUtils sqlUtils() {return new SqlUtils();}
+	    @Bean DataBaseDetector dataBaseDetector() {return new DataBaseDetector();}
+        @Bean ExecutionSummaryExpressions expressions(){return new ExecutionSummaryExpressions();}
     }
 }

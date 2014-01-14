@@ -6,9 +6,11 @@ import com.hp.oo.enginefacade.execution.ExecutionEnums.ExecutionStatus;
 import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.orchestrator.entities.ExecutionSummaryEntity;
+import com.hp.oo.orchestrator.repositories.ExecutionSummaryExpressions;
 import com.hp.oo.orchestrator.repositories.ExecutionSummaryRepository;
 import com.hp.score.engine.data.DataBaseDetector;
 import com.hp.score.engine.data.SqlUtils;
+import com.mysema.query.types.expr.BooleanExpression;
 import junit.framework.Assert;
 import org.dozer.Mapper;
 import org.junit.Before;
@@ -18,6 +20,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -43,17 +46,17 @@ import static org.mockito.Mockito.*;
  * Time: 11:54
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
+@ContextConfiguration(classes = ExecutionSummaryServiceTest.Configurator.class)
 public class ExecutionSummaryServiceTest {
 
     @Autowired
-    ExecutionSummaryService service;
+    private ExecutionSummaryService service;
 
     @Autowired
-    ExecutionSummaryRepository repository;
+    private ExecutionSummaryRepository repository;
 
     @Autowired
-    Mapper mapper;
+    private Mapper mapper;
 
     @Autowired
     private QueueDispatcherService queueDispatcherService;
@@ -61,12 +64,16 @@ public class ExecutionSummaryServiceTest {
     @Autowired
     private SqlUtils sqlUtils;
 
+    @Autowired
+    private ExecutionSerializationUtil serializationUtil;
+
     @Before
     public void resetMocks() {
         reset(repository);
         reset(queueDispatcherService);
         reset(mapper);
         reset(sqlUtils);
+        reset(serializationUtil);
     }
 
     @Test
@@ -127,23 +134,6 @@ public class ExecutionSummaryServiceTest {
         Assert.assertEquals(1, savedIds.size());
 
     }
-
-    /*@Test
-    public void testCreateExecutionsWithMapperError() {
-        ExecutionSummaryEntity executionSummary = createExecutionSummaryEntityWithoutSave();
-
-        List<ExecutionSummaryEntity> executions = new ArrayList<>();
-        executions.add(executionSummary);
-
-        Mockito.doThrow(new MappingException("")).when(mapper).map(anyObject(), anyObject());
-
-        List<String> failedIds = service.createExecutionsSummaries(executions);
-
-
-        // validation
-        Assert.assertNotNull(failedIds);
-        Assert.assertEquals(1, failedIds.size());
-    }*/
 
     @Test
     public void testCreateExecutionsWithSaveError() {
@@ -326,12 +316,12 @@ public class ExecutionSummaryServiceTest {
         ExecutionSummaryEntity execution2 = createExecutionSummaryEntity(UUID.randomUUID().toString(), startTime, "muku");
 
         // read...
-	    when(sqlUtils.escapeLikeExpression("library\\1")).thenReturn("library\\1");
-	    when(sqlUtils.normalizeContainingLikeExpression("library\\1")).thenReturn("library\\1%");
-	    when(sqlUtils.normalizeContainingLikeExpression("")).thenReturn("%");
-        when(repository.findForFiltering(eq(EMPTY_BRANCH), eq("library\\1%"), eq(Arrays.asList(ExecutionStatus.values())), eq(true), eq(Arrays.asList("")), eq(Arrays.asList(PauseReason.values())), eq("%"), eq(startTime),eq(startTime), any(PageRequest.class))).thenReturn(Arrays.asList(execution1, execution2));
+        when(sqlUtils.escapeLikeExpression("library\\1")).thenReturn("library\\1");
+        when(sqlUtils.normalizeContainingLikeExpression("library\\1")).thenReturn("library\\1%");
+        when(sqlUtils.normalizeContainingLikeExpression("")).thenReturn("%");
+        when(repository.findAll(any(BooleanExpression.class), any(PageRequest.class))).thenReturn(new PageImpl<>(Arrays.asList(execution1, execution2)));
 
-        List<ExecutionSummaryEntity> resultExecutions = service.readExecutions("library\\1", Arrays.asList(ExecutionStatus.values()), Collections.<String>emptyList(), Arrays.asList(PauseReason.values()), "", startTime,startTime, 1, 20);
+        List<ExecutionSummaryEntity> resultExecutions = service.readExecutions("library\\1", Arrays.asList(ExecutionStatus.values()), Collections.<String>emptyList(), Arrays.asList(PauseReason.values()), "", startTime, startTime, 1, 20);
 
         // validate
         assertThat(resultExecutions).hasSize(2); //Wrong number of executions
@@ -339,45 +329,19 @@ public class ExecutionSummaryServiceTest {
         validateExecutionSummary(resultExecutions.get(1), execution2.getExecutionId(), ExecutionStatus.RUNNING);
     }
 
-    @Test
-    public void testOptionalParamConversion() {
-        ExecutionSummaryEntity execution = createExecutionSummaryEntity(UUID.randomUUID().toString(), new Date(0L), "muku");
-        Date startTime = new Date(123L);
-
-        when(repository.findForFiltering(eq(EMPTY_BRANCH), eq("%"), eq(Arrays.asList(ExecutionStatus.values())), eq(true), eq(Collections.singletonList("")), eq(Arrays.asList(PauseReason.values())), eq("%"), eq(startTime),eq(new Date(0)), any(PageRequest.class))).thenReturn(Arrays.asList(execution));
-
-        // not-null default values: empty lists, empty strings
-        List<ExecutionSummaryEntity> resultExecutions = service.readExecutions("", Collections.<ExecutionStatus>emptyList(), Collections.<String>emptyList(), Collections.<PauseReason>emptyList(), "", startTime,new Date(0), 1, 20);
-        assertThat(resultExecutions).hasSize(1);
-        validateExecutionSummary(resultExecutions.get(0), execution.getExecutionId(), execution.getStatus());
-
-        // null default values
-        resultExecutions = service.readExecutions(null, null, null, null, null, startTime,new Date(0), 1, 20);
-        assertThat(resultExecutions).hasSize(1);
-        validateExecutionSummary(resultExecutions.get(0), execution.getExecutionId(), execution.getStatus());
-    }
-
-    @Test
-    public void testStatusFiltering() {
-        ExecutionSummaryEntity execution = createExecutionSummaryEntity(UUID.randomUUID().toString(), new Date(0L), "muku");
-	    when(repository.findForFiltering(eq(EMPTY_BRANCH), eq("%"), eq(Arrays.<ExecutionStatus>asList(ExecutionStatus.COMPLETED, ExecutionStatus.PAUSED)), eq(false), eq(Arrays.<String>asList("RESOLVED", "NO_ACTION_TAKEN", "DIAGNOSED")), eq(Arrays.asList(PauseReason.DISPLAY)), eq("%"), eq(new Date(123L)),eq(new Date(0)), any(PageRequest.class))).thenReturn(Arrays.asList(execution));
-        List<ExecutionSummaryEntity> resultExecutions = service.readExecutions("", Arrays.<ExecutionStatus>asList(ExecutionStatus.COMPLETED, ExecutionStatus.PAUSED), Arrays.<String>asList("RESOLVED", "NO_ACTION_TAKEN", "Diagnosed"), Arrays.asList(PauseReason.DISPLAY), "", new Date(123L),new Date(0), 1, 20);
-        Assert.assertEquals(Collections.singletonList(execution), resultExecutions);
-    }
-
     @Test(expected = IllegalArgumentException.class)
     public void testReadExecutions_invalidDateArg() {
-        service.readExecutions("%", Arrays.asList(ExecutionStatus.values()), Collections.<String>emptyList(), Arrays.asList(PauseReason.values()), "", null,new Date(123L), 1, 20);
+        service.readExecutions("%", Arrays.asList(ExecutionStatus.values()), Collections.<String>emptyList(), Arrays.asList(PauseReason.values()), "", null, new Date(123L), 1, 20);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testReadExecutions_invalidPageNumArg() {
-        service.readExecutions("", Arrays.asList(ExecutionStatus.values()), Collections.<String>emptyList(), Arrays.asList(PauseReason.values()), "", new Date(),new Date(123L), 0, 20);
+        service.readExecutions("", Arrays.asList(ExecutionStatus.values()), Collections.<String>emptyList(), Arrays.asList(PauseReason.values()), "", new Date(), new Date(123L), 0, 20);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testReadExecutions_invalidPageSizeArg() {
-        service.readExecutions("", Arrays.asList(ExecutionStatus.values()), Collections.<String>emptyList(), Arrays.asList(PauseReason.values()), "", new Date(),new Date(123L), 0, -1);
+        service.readExecutions("", Arrays.asList(ExecutionStatus.values()), Collections.<String>emptyList(), Arrays.asList(PauseReason.values()), "", new Date(), new Date(123L), 0, -1);
     }
 
     ////////// ReadExecutions by flow uuid //////////
@@ -467,7 +431,7 @@ public class ExecutionSummaryServiceTest {
         String id2 = UUID.randomUUID().toString();
         String id3 = UUID.randomUUID().toString();
         @SuppressWarnings("UnusedDeclaration") ExecutionSummaryEntity
-        exec1 = createExecutionSummaryEntity(id1, new Date(), "kuku"); // running
+                exec1 = createExecutionSummaryEntity(id1, new Date(), "kuku"); // running
         ExecutionSummaryEntity exec2 = createExecutionSummaryEntity(id2, new Date(), "muku");
         ExecutionSummaryEntity exec3 = createExecutionSummaryEntity(id3, new Date(), "luku");
 
@@ -589,16 +553,20 @@ public class ExecutionSummaryServiceTest {
     ////////// get \ set executionObj //////////
     @Test
     public void testSetAndGetExecutionObj() {
+
         String executionId = "11111";
         ExecutionSummaryEntity entity = createExecutionSummaryEntity(executionId, new Date(), "shalom");
         Execution execution = new Execution(1L, 0L, Collections.singletonList("context_a"));
         execution.setExecutionId(executionId);
 
         // Set
+        byte[] bytes = new byte[0];
+        when(serializationUtil.objToBytes(execution)).thenReturn(bytes);
         service.setExecutionObj(entity, execution);
         assertThat(entity.getExecutionObj()).isNotNull();
 
         // Get
+        when(serializationUtil.objFromBytes(bytes)).thenReturn(execution);
         Execution resultExecutionObj = service.getExecutionObj(entity);
         assertThat(resultExecutionObj).isNotNull();
         assertThat(resultExecutionObj.getExecutionId()).isEqualTo(executionId);
@@ -658,7 +626,12 @@ public class ExecutionSummaryServiceTest {
 
         @Bean
         public ExecutionSerializationUtil executionSerializationUtil() {
-            return new ExecutionSerializationUtil();
+            return mock(ExecutionSerializationUtil.class);
+        }
+
+        @Bean
+        ExecutionSummaryExpressions expressions(){
+            return new ExecutionSummaryExpressions();
         }
 
         @Bean

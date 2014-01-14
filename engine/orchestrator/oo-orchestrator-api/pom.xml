@@ -25,5 +25,30 @@
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
 		</dependency>
+		<dependency>
+             <groupId>com.mysema.querydsl</groupId>
+             <artifactId>querydsl-apt</artifactId>
+             <scope>provided</scope>
+         </dependency>
 	</dependencies>
+
+	<build>
+         <plugins>
+             <plugin>
+                 <groupId>com.mysema.maven</groupId>
+                 <artifactId>apt-maven-plugin</artifactId>
+                 <executions>
+                     <execution>
+                         <goals>
+                             <goal>process</goal>
+                         </goals>
+                         <configuration>
+                             <outputDirectory>target/generated-sources/java</outputDirectory>
+                             <processor>com.mysema.query.apt.jpa.JPAAnnotationProcessor</processor>
+                         </configuration>
+                     </execution>
+                 </executions>
+             </plugin>
+         </plugins>
+     </build>
 </project>

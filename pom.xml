@@ -72,6 +72,7 @@
 
 		<spring.version>4.0.0.RELEASE</spring.version>
 		<hibernate.version>4.1.4.Final</hibernate.version>
+		<querydsl.version>3.2.4</querydsl.version>
 	</properties>
 
 	<dependencyManagement>
@@ -94,6 +95,12 @@
 				<artifactId>commons-lang</artifactId>
 				<version>2.6</version>
 			</dependency>
+
+			<dependency>
+            	<groupId>commons-collections</groupId>
+            	<artifactId>commons-collections</artifactId>
+            	<version>3.2.1</version>
+        	</dependency>
 
 			<dependency>
 				<groupId>commons-io</groupId>
@@ -261,6 +268,33 @@
 				<scope>runtime</scope>
 			</dependency>
 			<!-- end of hibernate artifacts -->
+
+			<!-- querydsl artifacts -->
+			<dependency>
+                <groupId>com.mysema.querydsl</groupId>
+                <artifactId>querydsl-apt</artifactId>
+                <version>${querydsl.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.mysema.querydsl</groupId>
+                <artifactId>querydsl-jpa</artifactId>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.hibernate.javax.persistence</groupId>
+                        <artifactId>hibernate-jpa-2.0-api</artifactId>
+                    </exclusion>
+                </exclusions>
+                <version>${querydsl.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.mysema.maven</groupId>
+                <artifactId>apt-maven-plugin</artifactId>
+                <version>1.0.9</version>
+            </dependency>
+			<!-- end of querydsl artifacts -->
 
 
 			<dependency>

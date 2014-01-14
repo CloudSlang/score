@@ -50,6 +50,16 @@
 			<artifactId>slf4j-log4j12</artifactId>
 		</dependency>
 
+		<dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.mysema.querydsl</groupId>
+            <artifactId>querydsl-jpa</artifactId>
+        </dependency>
+
 		<!-- engine facade artifacts -->
 		<dependency>
 			<groupId>${project.groupId}</groupId>
