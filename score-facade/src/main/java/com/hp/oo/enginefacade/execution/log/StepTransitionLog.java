@@ -3,13 +3,17 @@ package com.hp.oo.enginefacade.execution.log;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import java.io.Serializable;
+
 /**
  * User: zruya
  * Date: 03/01/13
  * Time: 10:41
  */
-public class StepTransitionLog {
-    private String transitionName;
+public class StepTransitionLog implements Serializable{
+	private static final long serialVersionUID = -145923078501934483L;
+
+	private String transitionName;
     private String transitionDescription;
     private String responseName;
     private String responseType;

@@ -3,6 +3,7 @@ package com.hp.oo.enginefacade.execution.log;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -10,9 +11,10 @@ import java.util.Date;
  * Date: 01/01/13
  * Time: 18:06
  */
-public class StepErrorLog {
+public class StepErrorLog implements Serializable{
+	private static final long serialVersionUID = -5568697213780706166L;
 
-    private String message;
+	private String message;
     private Date timeStamp;
     private ErrorType type;
 

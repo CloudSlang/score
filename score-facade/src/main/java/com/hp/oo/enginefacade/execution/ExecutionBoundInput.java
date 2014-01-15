@@ -1,10 +1,12 @@
 package com.hp.oo.enginefacade.execution;
 
+import java.io.Serializable;
 import java.util.Set;
 
-public class ExecutionBoundInput {
+public class ExecutionBoundInput implements Serializable{
+	private static final long serialVersionUID = 8220624776561835231L;
 
-    private String inputName;
+	private String inputName;
 
     private String domainTermName;
 

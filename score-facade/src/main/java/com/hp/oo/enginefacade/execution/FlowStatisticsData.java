@@ -1,5 +1,6 @@
 package com.hp.oo.enginefacade.execution;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -8,8 +9,10 @@ import java.util.Map;
  * Time: 15:34
  */
 @SuppressWarnings("UnusedDeclaration")
-public class FlowStatisticsData {
-    private String flowUuid;
+public class FlowStatisticsData implements Serializable{
+	private static final long serialVersionUID = 6707488115103226046L;
+
+	private String flowUuid;
     private Double flowRoi;
     private Integer numberOfExecutions;
     private Long averageExecutionTime;

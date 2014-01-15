@@ -526,5 +526,7 @@
 		<module>score-facade</module>
 		<module>engine</module>
 		<module>worker</module>
+		<module>score-all</module>
+		<module>score-worker</module>
 	</modules>
 </project>
