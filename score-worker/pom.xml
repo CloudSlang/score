@@ -12,5 +12,18 @@
 	<artifactId>score-worker</artifactId>
 	<packaging>pom</packaging>
 
+    <dependencies>
 
+        <dependency>
+            <groupId>com.hp.score</groupId>
+            <artifactId>oo-execution-impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hp.score</groupId>
+            <artifactId>oo-worker-manager-impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>

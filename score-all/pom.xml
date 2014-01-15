@@ -12,5 +12,50 @@
 	<artifactId>score-all</artifactId>
 	<packaging>pom</packaging>
 
+    <dependencies>
 
+        <dependency>
+            <groupId>com.hp.score</groupId>
+            <artifactId>score-facade</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hp.score</groupId>
+            <artifactId>score-worker</artifactId>
+            <version>${project.version}</version>
+            <type>pom</type>
+        </dependency>
+
+        <!--score engine artifacts  -->
+        <dependency>
+            <groupId>com.hp.score</groupId>
+            <artifactId>oo-node-impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hp.score</groupId>
+            <artifactId>oo-orchestrator-impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hp.score</groupId>
+            <artifactId>oo-partitioning-impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hp.score</groupId>
+            <artifactId>oo-queue-impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hp.score</groupId>
+            <artifactId>oo-versioning-impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>
