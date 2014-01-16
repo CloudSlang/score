@@ -70,8 +70,9 @@ public interface ExecutionSummaryService {
      * @param flowUuid      - mandatory.
      * @param flowPath      - mandatory.
      * @param triggeredBy   - mandatory. The value will be set as the Owner of the execution as well.     @return the created ExecutionSummary.
+     * @param triggeringSource -nullable
      */
-    ExecutionSummaryEntity createExecution(String executionId, String branchId, Date startTime, ExecutionEnums.ExecutionStatus initialStatus, String executionName, String flowUuid, String flowPath, String triggeredBy);
+    ExecutionSummaryEntity createExecution(String executionId, String branchId, Date startTime, ExecutionEnums.ExecutionStatus initialStatus, String executionName, String flowUuid, String flowPath, String triggeredBy, String triggeringSource);
 
     /**
      * Updates existing execution with current status. For instance: SYSTEM_FAILURE \ SYSTEM_CANCEL \ USER_CANCEL.

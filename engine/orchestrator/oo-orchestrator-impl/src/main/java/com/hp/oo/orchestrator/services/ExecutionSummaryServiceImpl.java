@@ -178,7 +178,7 @@ public final class ExecutionSummaryServiceImpl implements ExecutionSummaryServic
 
     @Override
     @Transactional
-    public ExecutionSummaryEntity createExecution(String executionId, String branchId, Date startTime, ExecutionStatus initialStatus, String executionName, String flowUuid, String flowPath, String triggeredBy) {
+    public ExecutionSummaryEntity createExecution(String executionId, String branchId, Date startTime, ExecutionStatus initialStatus, String executionName, String flowUuid, String flowPath, String triggeredBy, String triggeringSource) {
         ExecutionSummaryEntity executionSummary = new ExecutionSummaryEntity();
         executionSummary.setExecutionId(executionId);
 
@@ -195,6 +195,7 @@ public final class ExecutionSummaryServiceImpl implements ExecutionSummaryServic
         executionSummary.setFlowPath(flowPath);
         executionSummary.setOwner(triggeredBy);
         executionSummary.setTriggeredBy(triggeredBy);
+        executionSummary.setTriggeringSource(triggeringSource);
 
         // set RUNNING status
         executionSummary.setStatus(initialStatus);

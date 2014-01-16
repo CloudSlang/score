@@ -64,7 +64,7 @@ public final class OrchestratorServiceImpl implements OrchestratorService {
 
     @Override
     @Transactional
-    public void triggerFlow(String flowUuid, String triggerType, String executionName, String flowPath, String flowInputsContextName, String triggeredBy, Execution execution, Map<String, String> executionConfiguration) {
+    public void triggerFlow(String flowUuid, String triggerType, String executionName, String flowPath, String flowInputsContextName, String triggeredBy, String triggeringSource, Execution execution, Map<String, String> executionConfiguration) {
         ExecutionEventUtils.startFlow(execution.getSystemContext());
         OOContext flowInputsContext = execution.getContexts().get(flowInputsContextName); //get the flow context in generic way
 
@@ -76,7 +76,7 @@ public final class OrchestratorServiceImpl implements OrchestratorService {
         ExecutionEvent startEvent = sendExecutionEvent(flowUuid, triggerType, executionName, execution.getExecutionId(), flowInputsContext, execution.getSystemContext());
 
         // create execution record in ExecutionSummary table
-        executionSummaryService.createExecution(execution.getExecutionId(), null, startEvent.getPublishTime(), ExecutionEnums.ExecutionStatus.RUNNING, executionName, flowUuid, flowPath, triggeredBy);
+        executionSummaryService.createExecution(execution.getExecutionId(), null, startEvent.getPublishTime(), ExecutionEnums.ExecutionStatus.RUNNING, executionName, flowUuid, flowPath, triggeredBy, triggeringSource);
 
         // create execution message
         ExecutionMessage message = createExecutionMessage(execution);

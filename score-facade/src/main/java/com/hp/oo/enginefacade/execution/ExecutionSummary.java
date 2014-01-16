@@ -22,6 +22,7 @@ public class ExecutionSummary implements Serializable {
     private String flowUuid;
     private String flowPath;
     private String executionName;
+    private String triggeringSource;
     @SuppressWarnings("UnusedDeclaration")
     @Deprecated private long branchesCount; //not active since 10.02!! we don't set the value, but must leave it for backward compatible of the POJO in Careml.
     private Double roi;
@@ -114,6 +115,14 @@ public class ExecutionSummary implements Serializable {
         this.triggeredBy = triggeredBy;
     }
 
+    public String getTriggeringSource() {
+        return triggeringSource;
+    }
+
+    public void setTriggeringSource(String triggeringSource) {
+        this.triggeringSource = triggeringSource;
+    }
+
     public String getFlowUuid() {
         return flowUuid;
     }
@@ -181,6 +190,7 @@ public class ExecutionSummary implements Serializable {
         if (status != that.status) return false;
         if (roi != that.roi) return false;
         if (triggeredBy != null ? !triggeredBy.equals(that.triggeredBy) : that.triggeredBy != null) return false;
+        if (triggeringSource != null ? !triggeringSource.equals(that.triggeringSource) : that.triggeringSource != null) return false;
 
         return true;
     }
@@ -198,6 +208,7 @@ public class ExecutionSummary implements Serializable {
         result = 31 * result + (pauseReason != null ? pauseReason.hashCode() : 0);
         result = 31 * result + (owner != null ? owner.hashCode() : 0);
         result = 31 * result + (triggeredBy != null ? triggeredBy.hashCode() : 0);
+        result = 31 * result + (triggeringSource != null ? triggeringSource.hashCode() : 0);
         result = 31 * result + (flowUuid != null ? flowUuid.hashCode() : 0);
         result = 31 * result + (flowPath != null ? flowPath.hashCode() : 0);
         result = 31 * result + (executionName != null ? executionName.hashCode() : 0);

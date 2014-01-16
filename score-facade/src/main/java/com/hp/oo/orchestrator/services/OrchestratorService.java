@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public interface OrchestratorService {
 
-    void triggerFlow(String flowUuid, String triggerType, String executionName, String flowPath, String flowInputsContextName, String triggeredBy, Execution execution, Map<String, String> executionConfiguration);
+    void triggerFlow(String flowUuid, String triggerType, String executionName, String flowPath, String flowInputsContextName, String triggeredBy, String triggeringSource, Execution execution, Map<String, String> executionConfiguration);
 
     Long getOrCreateRunningExecutionPlan(ExecutionPlan executionPlan);
 

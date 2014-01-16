@@ -106,7 +106,7 @@ public class OrchestratorServiceTest {
     public void testStartEventSentAtTrigger(){
         List<String> ctxNames = new ArrayList<>();
         ctxNames.add("flowCtx");
-        orchestratorService.triggerFlow("","","","","flowCtx","",new Execution(1L,0L, ctxNames),new HashMap<String,String>());
+        orchestratorService.triggerFlow("", "", "", "", "flowCtx", "", "", new Execution(1L, 0L, ctxNames), new HashMap<String, String>());
 
         Mockito.verify(executionEventService,Mockito.times(1)).createEvents(Mockito.argThat(new ArgumentMatcher<List<ExecutionEvent>>() {
             @Override

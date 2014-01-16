@@ -74,6 +74,9 @@ public class ExecutionSummaryEntity extends AbstractIdentifiable {
     @Column(name = "TRIGGERED_BY", nullable = false)
     private String triggeredBy;
 
+    @Column(name = "TRIGGER_SOURCE")
+    private String triggeringSource;
+
     @Column(name = "EXECUTION_OBJECT")
     @Lob
     @Basic(fetch = FetchType.LAZY)
@@ -185,6 +188,15 @@ public class ExecutionSummaryEntity extends AbstractIdentifiable {
     @SuppressWarnings("UnusedDeclaration")
     public void setTriggeredBy(String triggeredBy) {
         this.triggeredBy = triggeredBy;
+    }
+
+    public String getTriggeringSource() {
+        return triggeringSource;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public void setTriggeringSource(String triggeringSource) {
+        this.triggeringSource = triggeringSource;
     }
 
     public String getFlowUuid() {

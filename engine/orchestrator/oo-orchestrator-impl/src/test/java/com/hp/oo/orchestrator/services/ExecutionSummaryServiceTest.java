@@ -593,7 +593,7 @@ public class ExecutionSummaryServiceTest {
                 ExecutionStatus.RUNNING, newExecutionEntity.getExecutionName(),
                 newExecutionEntity.getFlowUuid(),
                 newExecutionEntity.getFlowPath(),
-                newExecutionEntity.getTriggeredBy());
+                newExecutionEntity.getTriggeredBy(), "central");
     }
 
     private void validateExecutionSummary(ExecutionSummaryEntity retrieved, String executionId, ExecutionStatus expStatus) {
