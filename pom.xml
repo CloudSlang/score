@@ -288,14 +288,7 @@
                 </exclusions>
                 <version>${querydsl.version}</version>
             </dependency>
-
-            <dependency>
-                <groupId>com.mysema.maven</groupId>
-                <artifactId>apt-maven-plugin</artifactId>
-                <version>1.0.9</version>
-            </dependency>
 			<!-- end of querydsl artifacts -->
-
 
 			<dependency>
 				<groupId>org.codehaus.jackson</groupId>
@@ -507,6 +500,23 @@
 					<configuration>
 						<workDirectory>${project.build.directory}/overlays</workDirectory>
 					</configuration>
+				</plugin>
+
+				<plugin>
+					<groupId>com.mysema.maven</groupId>
+					<artifactId>apt-maven-plugin</artifactId>
+					<version>1.0.9</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>process</goal>
+							</goals>
+							<configuration>
+								<outputDirectory>target/generated-sources/java</outputDirectory>
+								<processor>com.mysema.query.apt.jpa.JPAAnnotationProcessor</processor>
+							</configuration>
+						</execution>
+					</executions>
 				</plugin>
 			</plugins>
 		</pluginManagement>
