@@ -8,6 +8,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.ParameterNameDiscoverer;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -31,6 +33,9 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 	private Map<String, Object> cacheBeans = new ConcurrentHashMap<>();
 	private Map<String, Method> cacheMethods = new ConcurrentHashMap<>();
 	private Lock lock = new ReentrantLock();
+
+	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+	private Map<String, String[]> cacheParamNames = new ConcurrentHashMap<>();
 
 	@Override
 	public Object executeControlAction(ControlActionMetadata actionMetadata, Map<String,?> actionData) {
@@ -104,9 +109,14 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 	}
 
 	private Object[] buildParametersArray(Method actionMethod, Map<String, ?> actionData) {
-		List<Object> args = new ArrayList<>();
+		String[] paramNames = cacheParamNames.get(actionMethod.getName());
+		if (paramNames == null){
+			paramNames = parameterNameDiscoverer.getParameterNames(actionMethod);
+			cacheParamNames.put(actionMethod.getName(), paramNames);
+		}
 
-		for (String paramName : new DefaultParameterNameDiscoverer().getParameterNames(actionMethod)) {
+		List<Object> args = new ArrayList<>(paramNames.length);
+		for (String paramName : paramNames) {
 			Object param = actionData.get(paramName);
 			args.add(param);
 		}
