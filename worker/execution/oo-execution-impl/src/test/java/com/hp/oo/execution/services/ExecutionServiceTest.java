@@ -31,6 +31,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import com.hp.oo.internal.sdk.execution.events.EventBus;
 
 import java.io.Serializable;
 import java.util.ArrayDeque;
@@ -325,6 +326,12 @@ public class ExecutionServiceTest {
 
     @Configuration
     static class ConfigurationForTest {
+
+        @Bean
+        public EventBus getEventBus() {
+            return mock(EventBus.class);
+        }
+
 
         @Bean
         public ExecutionServiceImpl getExecutionService() {

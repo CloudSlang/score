@@ -19,9 +19,7 @@ import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.oo.internal.sdk.execution.ExecutionStep;
 import com.hp.oo.internal.sdk.execution.OOContext;
-import com.hp.oo.internal.sdk.execution.events.ExecutionEvent;
-import com.hp.oo.internal.sdk.execution.events.ExecutionEventFactory;
-import com.hp.oo.internal.sdk.execution.events.ExecutionEventUtils;
+import com.hp.oo.internal.sdk.execution.events.*;
 import com.hp.oo.orchestrator.services.CancelExecutionService;
 import com.hp.oo.orchestrator.services.PauseResumeService;
 import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
@@ -75,6 +73,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     @Autowired
     private WorkerRecoveryManager recoveryManager;
+
+    @Autowired
+    private EventBus eventBus;
 
     @Override
     public Execution execute(Execution execution) {
@@ -471,6 +472,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     private void dumpEvents(Execution execution) {
+       /* List<ExecutionEvent> executionEvents = execution.getAggregatedEvents();
+        for (ExecutionEvent executionEvent:executionEvents){
+            eventBus.dispatch(new EventWrapper(executionEvent.getType().name(), executionEvent));
+        }*/
         executionEventService.createEvents(execution.getAggregatedEvents());
         execution.getAggregatedEvents().clear(); //must clean so we wont send it twice - once from here and once from the QueueListener onTerminated()
         execution.setLastEventDumpTime(System.currentTimeMillis());
