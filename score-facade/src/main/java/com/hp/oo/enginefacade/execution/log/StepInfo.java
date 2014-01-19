@@ -4,7 +4,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import java.io.Serializable;
-import java.lang.Object;import java.lang.Override;import java.lang.String;import java.util.Date;
+import java.util.Date;
 
 /**
  * User: zruya
@@ -19,6 +19,9 @@ public class StepInfo implements Serializable{
     private Date startTime;
     private Date endTime;
     private boolean paused;
+    private String orderNumber;
+    private String parentFlow;
+    private String type;
 
     public String getResponseType() {
         return responseType;
@@ -76,6 +79,30 @@ public class StepInfo implements Serializable{
         this.paused = paused;
     }
 
+    public String getOrderNumber() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(String orderNumber) {
+        this.orderNumber = orderNumber;
+    }
+
+    public String getParentFlow() {
+        return parentFlow;
+    }
+
+    public void setParentFlow(String parentFlow) {
+        this.parentFlow = parentFlow;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -91,6 +118,9 @@ public class StepInfo implements Serializable{
                 .append(this.endTime, that.endTime)
                 .append(this.stepId, that.stepId)
                 .append(this.paused, that.paused)
+                .append(this.orderNumber, that.orderNumber)
+                .append(this.parentFlow, that.parentFlow)
+                .append(this.type, that.type)
                 .isEquals();
     }
 
@@ -104,6 +134,9 @@ public class StepInfo implements Serializable{
                 .append(this.responseType)
                 .append(this.stepName)
                 .append(this.paused)
+                .append(this.orderNumber)
+                .append(this.parentFlow)
+                .append(this.type)
                 .toHashCode();
     }
 }

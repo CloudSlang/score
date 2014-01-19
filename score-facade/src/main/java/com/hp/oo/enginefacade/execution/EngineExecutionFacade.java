@@ -101,6 +101,39 @@ public interface EngineExecutionFacade {
     StepLog readExecutionStepLogByPath(String executionId, String path);
 
     /**
+     * Returns a representation of the steps under the specified path for a given executionId
+     * This method will aggregate the event table into an hierarchical representation of it for a given
+     * execution
+     *
+     * @param executionId the execution id
+     * @param path        a path (in the form of %d.%d.%d) for a given parent step
+     * @return a list of the child steps
+     */
+    //TODO - will be replaced by old readStepsByPath method
+    List<StepInfo> readStepsByPath_(String executionId, String path);
+
+    /**
+     * Returns a representation of all the steps for a given executionId, for use when execution logLevel = ERROR
+     * This method will aggregate the event table into an hierarchical representation of it for a given
+     * execution
+     *
+     * @param executionId the execution id
+     * @return a list of the child steps
+     */
+    //TODO - will be replaced by old readAllSteps method
+    List<StepInfo> readAllSteps_(String executionId);
+
+    /**
+     * Returns an aggregation of all the events for a given step
+     *
+     * @param executionId the execution id
+     * @param path        a path (in the form of %d.%d.%d) for a given step
+     * @return an object of aggregated step data
+     */
+    //TODO - will be replaced by old readExecutionStepLogByPath method
+    StepLog readExecutionStepLogByPath_(String executionId, String path);
+
+    /**
      * @param executionId the execution id to query
      * @return an object with info of a specific execution
      */

@@ -1,5 +1,6 @@
 package com.hp.oo.enginefacade.execution.log;
 
+import com.hp.oo.enginefacade.execution.ExecutionEnums;
 import com.hp.oo.internal.sdk.execution.RecordBoundInput;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -22,6 +23,12 @@ public class StepLog {
     private List<RecordBoundInput> stepInputs;
     private HashMap<String, String> stepResult;
     private HashMap<String, String> extraData;
+
+    private String executionId;
+    private ExecutionEnums.ExecutionStatus status;
+    private String workerId;
+    private String user;
+
 
     public List<StepErrorLog> getErrorList() {
         return errorList;
@@ -95,6 +102,39 @@ public class StepLog {
     public void setStepTransitionLog(StepTransitionLog stepTransitionLog) {
         this.stepTransitionLog = stepTransitionLog;
     }
+
+    public String getExecutionId() {
+        return executionId;
+    }
+
+    public void setExecutionId(String executionId) {
+        this.executionId = executionId;
+    }
+
+    public String getWorkerId() {
+        return workerId;
+    }
+
+    public void setWorkerId(String workerId) {
+        this.workerId = workerId;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public ExecutionEnums.ExecutionStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ExecutionEnums.ExecutionStatus status) {
+        this.status = status;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -111,6 +151,10 @@ public class StepLog {
                 .append(this.extraData, that.extraData)
                 .append(this.stepPrimaryResult, that.stepPrimaryResult)
                 .append(this.errorList, that.errorList)
+                .append(this.user, that.user)
+                .append(this.workerId, that.workerId)
+                .append(this.executionId, that.executionId)
+                .append(this.status, that.status)
                 .isEquals();
     }
 
@@ -125,6 +169,10 @@ public class StepLog {
                 .append(this.stepResult)
                 .append(this.stepPrimaryResult)
                 .append(this.errorList)
+                .append(this.user)
+                .append(this.workerId)
+                .append(this.executionId)
+                .append(this.status)
                 .toHashCode();
     }
 }
