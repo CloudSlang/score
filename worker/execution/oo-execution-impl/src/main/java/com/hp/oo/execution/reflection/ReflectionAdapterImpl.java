@@ -109,10 +109,11 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 	}
 
 	private Object[] buildParametersArray(Method actionMethod, Map<String, ?> actionData) {
-		String[] paramNames = cacheParamNames.get(actionMethod.getName());
+		String actionFullName = actionMethod.getDeclaringClass().getName() + "." + actionMethod.getName();
+		String[] paramNames = cacheParamNames.get(actionFullName);
 		if (paramNames == null){
 			paramNames = parameterNameDiscoverer.getParameterNames(actionMethod);
-			cacheParamNames.put(actionMethod.getName(), paramNames);
+			cacheParamNames.put(actionFullName, paramNames);
 		}
 
 		List<Object> args = new ArrayList<>(paramNames.length);
