@@ -74,8 +74,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
     @Autowired
     private WorkerRecoveryManager recoveryManager;
 
-    @Autowired
-    private EventBus eventBus;
+    //@Autowired
+    //private EventBus eventBus;
 
     @Override
     public Execution execute(Execution execution) {
