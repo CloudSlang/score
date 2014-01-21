@@ -7,4 +7,25 @@
 	<groupId>com.hp.score</groupId>
 	<version>0.1.17-SNAPSHOT</version>
 	<artifactId>score-tests</artifactId>
+
+	<distributionManagement>
+		<repository>
+			<id>nexus-repository</id>
+			<name>nexus repository</name>
+			<url>http://mydphdb0166.hpswlabs.adapps.hp.com:8081/nexus/content/repositories/releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>nexus-snapshot-repository</id>
+			<name>nexus snapshots repository</name>
+			<url>http://mydphdb0166.hpswlabs.adapps.hp.com:8081/nexus/content/repositories/snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>score-all</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 </project>
