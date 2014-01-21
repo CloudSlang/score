@@ -74,8 +74,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
     @Autowired
     private WorkerRecoveryManager recoveryManager;
 
-    //@Autowired
-    //private EventBus eventBus;
+    @Autowired
+    private EventBus eventBus;
 
     @Override
     public Execution execute(Execution execution) {
@@ -472,10 +472,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     private void dumpEvents(Execution execution) {
-       /* List<ExecutionEvent> executionEvents = execution.getAggregatedEvents();
+        /*List<ExecutionEvent> executionEvents = execution.getAggregatedEvents();
         for (ExecutionEvent executionEvent:executionEvents){
             eventBus.dispatch(new EventWrapper(executionEvent.getType().name(), executionEvent));
-        }*/
+        } */
         executionEventService.createEvents(execution.getAggregatedEvents());
         execution.getAggregatedEvents().clear(); //must clean so we wont send it twice - once from here and once from the QueueListener onTerminated()
         execution.setLastEventDumpTime(System.currentTimeMillis());
