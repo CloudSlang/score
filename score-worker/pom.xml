@@ -8,7 +8,6 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>score-worker</artifactId>
-	<packaging>pom</packaging>
 
     <dependencies>
 

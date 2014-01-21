@@ -345,33 +345,33 @@
 				<version>1.3.168</version>
 			</dependency>
 
-			<dependency>
-				<groupId>net.sourceforge.jtds</groupId>
-				<artifactId>jtds</artifactId>
-				<version>1.3.1</version>
-				<scope>test</scope>
-			</dependency>
+			<!--<dependency>-->
+				<!--<groupId>net.sourceforge.jtds</groupId>-->
+				<!--<artifactId>jtds</artifactId>-->
+				<!--<version>1.3.1</version>-->
+				<!--<scope>test</scope>-->
+			<!--</dependency>-->
 
-			<dependency>
-				<groupId>com.oracle</groupId>
-				<artifactId>ojdbc6</artifactId>
-				<version>11.2.0.3.0</version>
-				<scope>test</scope>
-			</dependency>
+			<!--<dependency>-->
+				<!--<groupId>com.oracle</groupId>-->
+				<!--<artifactId>ojdbc6</artifactId>-->
+				<!--<version>11.2.0.3</version>-->
+				<!--<scope>test</scope>-->
+			<!--</dependency>-->
 
-			<dependency>
-				<groupId>mysql</groupId>
-				<artifactId>mysql-connector-java</artifactId>
-				<version>5.1.21</version>
-				<scope>test</scope>
-			</dependency>
+			<!--<dependency>-->
+				<!--<groupId>mysql</groupId>-->
+				<!--<artifactId>mysql-connector-java</artifactId>-->
+				<!--<version>5.1.21</version>-->
+				<!--<scope>test</scope>-->
+			<!--</dependency>-->
 
-			<dependency>
-				<groupId>postgresql</groupId>
-				<artifactId>postgresql</artifactId>
-				<version>9.1-901.jdbc4</version>
-				<scope>test</scope>
-			</dependency>
+			<!--<dependency>-->
+				<!--<groupId>postgresql</groupId>-->
+				<!--<artifactId>postgresql</artifactId>-->
+				<!--<version>9.1-901.jdbc4</version>-->
+				<!--<scope>test</scope>-->
+			<!--</dependency>-->
 			<!-- end of DB Drivers -->
 
 			<dependency>

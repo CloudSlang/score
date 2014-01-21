@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://www.springframework.org/schema/integration"
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		targetNamespace="http://www.hp.com/schema/score"
+		elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<xsd:annotation>
+		<xsd:documentation><![CDATA[
+	Defines the core configuration elements for HP Score modules.
+		]]></xsd:documentation>
+	</xsd:annotation>
+
+	<xsd:element name="engine">
+		<xsd:annotation>
+			<xsd:documentation>
+				Enables a Score engine module.
+			</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+
+	<xsd:element name="worker">
+		<xsd:complexType>
+			<xsd:annotation>
+				<xsd:documentation>
+					Enables a Score worker module.
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:attribute name="uuid" use="required" type="xsd:string"/>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

@@ -18,6 +18,8 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -79,13 +81,9 @@ public class WorkerNodeRepositoryTest {
 	static class Configurator {
 		@Bean
 		DataSource dataSource() {
-			BasicDataSource ds = new BasicDataSource();
-			ds.setDriverClassName("org.h2.Driver");
-			ds.setUrl("jdbc:h2:mem:test");
-			ds.setUsername("sa");
-			ds.setPassword("sa");
-			ds.setDefaultAutoCommit(false);
-			return new TransactionAwareDataSourceProxy(ds);
+			return new EmbeddedDatabaseBuilder()
+					.setType(EmbeddedDatabaseType.H2)
+					.build();
 		}
 
 		@Bean
