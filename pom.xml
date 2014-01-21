@@ -57,7 +57,37 @@
             <url>https://github.com/lamit</url>
             <id>lamit</id>
         </developer>
-	</developers>
+        <developer>
+            <email>shehab.hajyhia@hp.com</email>
+            <name>Shehab Hajyhia</name>
+            <url>https://github.com/shajyhia</url>
+            <id>shajyhia</id>
+        </developer>
+        <developer>
+            <email>lucian-cristian.musca@hp.com</email>
+            <name>Lucian Musca</name>
+            <url>https://github.com/lucian-cm</url>
+            <id>lucian-cm</id>
+        </developer>
+        <developer>
+            <email>marom.guy@gmail.com</email>
+            <name>Guy Marom</name>
+            <url>https://github.com/guymarom</url>
+            <id>guymarom</id>
+        </developer>
+        <developer>
+            <email>ciprian-eugen.duma@hp.com</email>
+            <name>Ciprian Duma</name>
+            <url>https://github.com/cid77</url>
+            <id>cid77</id>
+        </developer>
+        <developer>
+            <email>eliya.sadan@hp.com</email>
+            <name>Eliya Sadan</name>
+            <url>https://github.com/orius123</url>
+            <id>orius123</id>
+        </developer>
+    </developers>
 
 	<licenses>
 		<license>
