@@ -21,6 +21,16 @@ public interface ExecutionSummaryService {
     /**
      * Returns list of Executions that started on the given startDate, or afterwards.
      *
+     * @param flowPath  - a pattern that is matched against the flowPath field of the entities. null or empty string disables this filter.
+     * @param statuses  - the list of execution statuses used for filtering. null or empty list disables this filter.
+     * @param resultStatusTypes - the list of result status types for filtering. null or empty list disables this filter.
+     * @param pauseReasons - the list of pause reasons for filtering. Available only when PAUSED is in the list of statuses. null or empty list disables this filter.
+     * @param owner     - a pattern that is matched against the owner field of the entities. null or empty string disables this filter.
+     * @param runName     - a pattern that is matched against the runName field of the entities. null or empty string disables this filter.
+     * @param runId     - a pattern that is matched against the runId field of the entities. null or empty string disables this filter.
+     * @param flowUUID     - a pattern that is matched against the flowUUID field of the entities. null or empty string disables this filter.
+     * @param startedBefore      - the earlier start time of the executions (we'll return executions that started on this data, or before)
+     * @param startedAfter       - the furthest start time of the executions (we'll return executions that started on this data, or after)
      * @param pageNum   - the page to return, one-based.
      * @param pageSize  - the number of executions to return  @return a list of Executions that started on the given startDate or before.
      */
@@ -29,6 +39,9 @@ public interface ExecutionSummaryService {
                                                 List<String> resultStatusTypes,
                                                 List<PauseReason> pauseReasons,
                                                 String owner,
+                                                String runName,
+                                                String runId,
+                                                String flowUUID,
                                                 Date startedBefore,
                                                 Date startedAfter,
                                                 int pageNum,

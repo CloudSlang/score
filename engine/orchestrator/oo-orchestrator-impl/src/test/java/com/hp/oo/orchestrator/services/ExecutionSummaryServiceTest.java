@@ -1,31 +1,23 @@
 package com.hp.oo.orchestrator.services;
 
-import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
-import com.hp.oo.engine.queue.services.QueueDispatcherService;
 import com.hp.oo.enginefacade.execution.ExecutionEnums.ExecutionStatus;
 import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.orchestrator.entities.ExecutionSummaryEntity;
 import com.hp.oo.orchestrator.repositories.ExecutionSummaryExpressions;
 import com.hp.oo.orchestrator.repositories.ExecutionSummaryRepository;
-import com.hp.score.engine.data.DataBaseDetector;
-import com.hp.score.engine.data.SqlUtils;
 import com.mysema.query.types.expr.BooleanExpression;
+import com.mysema.query.types.template.BooleanTemplate;
 import junit.framework.Assert;
-import org.dozer.Mapper;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.data.domain.Sort;
 
-import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,35 +37,25 @@ import static org.mockito.Mockito.*;
  * Date: 24/02/13
  * Time: 11:54
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = ExecutionSummaryServiceTest.Configurator.class)
 public class ExecutionSummaryServiceTest {
 
-    @Autowired
-    private ExecutionSummaryService service;
+    private static final BooleanExpression DUMMY_PREDICATE = BooleanTemplate.create("dummy");
 
-    @Autowired
+    @InjectMocks
+    private ExecutionSummaryService service = new ExecutionSummaryServiceImpl();
+
+    @Mock
     private ExecutionSummaryRepository repository;
 
-    @Autowired
-    private Mapper mapper;
-
-    @Autowired
-    private QueueDispatcherService queueDispatcherService;
-
-    @Autowired
-    private SqlUtils sqlUtils;
-
-    @Autowired
+    @Mock
     private ExecutionSerializationUtil serializationUtil;
+
+    @Mock
+    private ExecutionSummaryExpressions expressions;
 
     @Before
     public void resetMocks() {
-        reset(repository);
-        reset(queueDispatcherService);
-        reset(mapper);
-        reset(sqlUtils);
-        reset(serializationUtil);
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
@@ -315,13 +297,53 @@ public class ExecutionSummaryServiceTest {
         startTime = new Date();    //now
         ExecutionSummaryEntity execution2 = createExecutionSummaryEntity(UUID.randomUUID().toString(), startTime, "muku");
 
-        // read...
-        when(sqlUtils.escapeLikeExpression("library\\1")).thenReturn("library\\1");
-        when(sqlUtils.normalizeContainingLikeExpression("library\\1")).thenReturn("library\\1%");
-        when(sqlUtils.normalizeContainingLikeExpression("")).thenReturn("%");
-        when(repository.findAll(any(BooleanExpression.class), any(PageRequest.class))).thenReturn(new PageImpl<>(Arrays.asList(execution1, execution2)));
 
-        List<ExecutionSummaryEntity> resultExecutions = service.readExecutions("library\\1", Arrays.asList(ExecutionStatus.values()), Collections.<String>emptyList(), Arrays.asList(PauseReason.values()), "", startTime, startTime, 1, 20);
+        String flowPath = "library\\1\\2.xml";
+        List<ExecutionStatus> statuses = Arrays.asList(ExecutionStatus.values());
+        List<String> resultStatusTypes = Collections.emptyList();
+        List<PauseReason> pauseReasons = Arrays.asList(PauseReason.values());
+        String owner = "user";
+        String runName = "a run name";
+        String runId = "123456";
+        String flowUUID = "MEANINGFUL2349K";
+        Date startedBefore = new Date(20);
+        Date startedAfter = new Date(10);
+        int pageNum = 1;
+        int pageSize = 20;
+
+        PageRequest pageRequest = new PageRequest(pageNum - 1, pageSize, Sort.Direction.DESC, "startTime");
+
+        when(expressions.branchIsEmpty()).thenReturn(DUMMY_PREDICATE);
+        when(repository.findAll(DUMMY_PREDICATE, pageRequest)).thenReturn(new PageImpl<>(Arrays.asList(execution1, execution2)));
+
+        List<ExecutionSummaryEntity> resultExecutions = service.readExecutions(
+                flowPath,
+                statuses,
+                resultStatusTypes,
+                pauseReasons,
+                owner,
+                runName,
+                runId,
+                flowUUID,
+                startedBefore,
+                startedAfter,
+                pageNum,
+                pageSize
+        );
+
+
+        verify(expressions, times(1)).branchIsEmpty();
+        verify(expressions, times(1)).startTimeBetween(startedAfter, startedBefore);
+        verify(expressions, times(1)).flowPathLike(flowPath);
+        verify(expressions, times(1)).ownerLike(owner);
+        verify(expressions, times(1)).runNameLike(runName);
+        verify(expressions, times(1)).runIdLike(runId);
+        verify(expressions, times(1)).flowUuidLike(flowUUID);
+        verify(expressions, times(1)).statusIn(statuses);
+        verify(expressions, times(1)).pauseReasonIn(pauseReasons);
+        verify(expressions, times(1)).resultStatusTypeIn(resultStatusTypes);
+
+        verifyNoMoreInteractions(expressions);
 
         // validate
         assertThat(resultExecutions).hasSize(2); //Wrong number of executions
@@ -331,17 +353,17 @@ public class ExecutionSummaryServiceTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testReadExecutions_invalidDateArg() {
-        service.readExecutions("%", Arrays.asList(ExecutionStatus.values()), Collections.<String>emptyList(), Arrays.asList(PauseReason.values()), "", null, new Date(123L), 1, 20);
+        service.readExecutions(null, null, null, null, null, null, null, null, new Date(0), new Date(123L), 1, 20);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testReadExecutions_invalidPageNumArg() {
-        service.readExecutions("", Arrays.asList(ExecutionStatus.values()), Collections.<String>emptyList(), Arrays.asList(PauseReason.values()), "", new Date(), new Date(123L), 0, 20);
+        service.readExecutions(null, null, null, null, null, null, null, null, null, null, 0, 20);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testReadExecutions_invalidPageSizeArg() {
-        service.readExecutions("", Arrays.asList(ExecutionStatus.values()), Collections.<String>emptyList(), Arrays.asList(PauseReason.values()), "", new Date(), new Date(123L), 0, -1);
+        service.readExecutions(null, null, null, null, null, null, null, null, null, null, 0, -1);
     }
 
     ////////// ReadExecutions by flow uuid //////////
@@ -600,58 +622,5 @@ public class ExecutionSummaryServiceTest {
         Assert.assertNotNull(retrieved);
         Assert.assertEquals("Wrong execution Id", executionId, retrieved.getExecutionId());
         Assert.assertEquals("Wrong status!", expStatus, retrieved.getStatus());
-    }
-
-    @Configuration
-    static class Configurator {
-        @Bean
-        public ExecutionSummaryService executionSummaryService() {
-            return new ExecutionSummaryServiceImpl();
-        }
-
-        @Bean
-        public ExecutionSummaryRepository executionSummaryRepository() {
-            return Mockito.mock(ExecutionSummaryRepository.class);
-        }
-
-        @Bean
-        public QueueDispatcherService getQueueDispatcherService() {
-            return Mockito.mock(QueueDispatcherService.class);
-        }
-
-        @Bean
-        public ExecutionMessageConverter getExecutionMessageConverter() {
-            return Mockito.mock(ExecutionMessageConverter.class);
-        }
-
-        @Bean
-        public ExecutionSerializationUtil executionSerializationUtil() {
-            return mock(ExecutionSerializationUtil.class);
-        }
-
-        @Bean
-        ExecutionSummaryExpressions expressions(){
-            return new ExecutionSummaryExpressions();
-        }
-
-        @Bean
-        public Mapper getMapper() {
-            return mock(Mapper.class);
-        }
-
-        @Bean
-        public SqlUtils sqlUtils() {
-            return mock(SqlUtils.class);
-        }
-
-	    @Bean
-	    public DataBaseDetector dataBaseDetector() {
-		    return mock(DataBaseDetector.class);
-	    }
-
-	    @Bean
-	    public DataSource dataSource() {
-		    return mock(DataSource.class);
-	    }
     }
 }

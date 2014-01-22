@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +57,9 @@ public final class ExecutionSummaryServiceImpl implements ExecutionSummaryServic
                                                        List<String> resultStatusTypes,
                                                        List<PauseReason> pauseReasons,
                                                        String owner,
+                                                       String runName,
+                                                       String runId,
+                                                       String flowUUID,
                                                        Date startedBefore,
                                                        Date startedAfter,
                                                        int pageNum,
@@ -65,36 +69,36 @@ public final class ExecutionSummaryServiceImpl implements ExecutionSummaryServic
         }
 
         // validate mandatory params
-        Validate.notNull(startedBefore, "startedBefore can't be null");
-        Validate.notNull(startedAfter, "startedAfter can't be null");
-        Validate.isTrue(!startedBefore.before(startedAfter), "startedBefore must be after startedAfter");
+        if (startedAfter != null && startedBefore != null) {
+            Validate.isTrue(!startedBefore.before(startedAfter), "startedBefore must be after startedAfter");
+        }
+
         Validate.isTrue(pageNum > 0, "Page number should be positive");
         Validate.isTrue(pageSize >= 0, "Page size can't be negative");
 
-        BooleanExpression expression = exp.branchIsEmpty()
-                .and(exp.startTimeBetween(startedAfter, startedBefore))
-                .and(exp.flowPathLike(flowPath))
-                .and(exp.ownerLike(owner))
-                .and(exp.statusIn(statuses))
-                .and(exp.pauseReasonIn(pauseReasons))
-                .and(exp.resultStatusTypeIn(toUpper(resultStatusTypes)));
+        //hack to support backward compatibility until we will handle statuses in the new way
+        List<String> results = new ArrayList<>(resultStatusTypes);
+        boolean shouldLookForNullResults = results.removeAll(Collections.singleton(null));
 
-
+        BooleanExpression expression = BooleanExpression.allOf(
+                exp.branchIsEmpty(),
+                exp.startTimeBetween(startedAfter, startedBefore),
+                exp.flowPathLike(flowPath),
+                exp.ownerLike(owner),
+                exp.runNameLike(runName),
+                exp.runIdLike(runId),
+                exp.flowUuidLike(flowUUID),
+                exp.statusIn(statuses),
+                exp.pauseReasonIn(pauseReasons),
+                shouldLookForNullResults ? exp.resultStatusTypeIn(results).or(exp.resultStatusTypeIsNull())
+                        : exp.resultStatusTypeIn(results)
+        );
 
         // the given pageNum is one-based, but PageRequest works zero-based.
         PageRequest pageRequest = new PageRequest(pageNum - 1, pageSize, Sort.Direction.DESC, entity.startTime.getMetadata().getName());
 
         return repository.findAll(expression, pageRequest).getContent();
     }
-
-    private List<String> toUpper(List<String> resultStatusTypes) {
-        List<String> result = new ArrayList<>(resultStatusTypes.size());
-        for (String resultStatusType : resultStatusTypes) {
-            result.add(resultStatusType.toUpperCase());
-        }
-        return result;
-    }
-
 
     @Override
     @Transactional(readOnly = true)

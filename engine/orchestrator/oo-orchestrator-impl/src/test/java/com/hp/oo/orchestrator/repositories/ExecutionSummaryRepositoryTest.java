@@ -8,7 +8,9 @@ import com.hp.oo.orchestrator.entities.ExecutionSummaryEntity;
 import com.hp.oo.orchestrator.util.OffsetPageRequest;
 import com.hp.score.engine.data.DataBaseDetector;
 import com.hp.score.engine.data.SqlUtils;
+import com.mysema.query.types.expr.BooleanExpression;
 import junit.framework.Assert;
+import org.fest.assertions.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +38,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static com.hp.oo.enginefacade.execution.ExecutionSummary.EMPTY_BRANCH;
-import static junit.framework.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -49,6 +51,8 @@ import static junit.framework.Assert.*;
 @Transactional
 @TransactionConfiguration(defaultRollback = true)
 public class ExecutionSummaryRepositoryTest {
+
+    private static final PageRequest PAGE_REQUEST = new PageRequest(0, 20, Sort.Direction.DESC, "startTime");
 
     @Autowired
     private ExecutionSummaryRepository repository;
@@ -175,19 +179,393 @@ public class ExecutionSummaryRepositoryTest {
     }
     // End of PAUSED releated tests
 
+    @Test
+    public void findExecutionsByEmptyBranch() {
+        ExecutionSummaryEntity summary1 = createExecutionSummary();
+        summary1.setBranchId(EMPTY_BRANCH);
+        ExecutionSummaryEntity summary2 = createExecutionSummary();
+        summary2.setBranchId("123");
+        repository.save(Arrays.asList(summary1, summary2));
+
+        Assertions.assertThat(repository.findAll(exp.branchIsEmpty()))
+                .hasSize(1)
+                .containsOnly(summary1);
+    }
+
+    @Test
+    public void findExecutionsByFlowPath() {
+        ExecutionSummaryEntity summary1 = createExecutionSummary();
+        summary1.setFlowPath("a\\path");
+        ExecutionSummaryEntity summary2 = createExecutionSummary();
+        summary2.setFlowPath("another\\path");
+        ExecutionSummaryEntity summary3 = createExecutionSummary();
+        summary3.setFlowPath("completely\\different");
+        repository.save(Arrays.asList(summary1, summary2, summary3));
+
+        Assertions.assertThat(repository.findAll(exp.flowPathLike("a\\path")))
+                .as("Full match")
+                .hasSize(1)
+                .containsOnly(summary1);
+
+        Assertions.assertThat(repository.findAll(exp.flowPathLike("a\\pa")))
+                .as("Starts with")
+                .hasSize(1)
+                .containsOnly(summary1);
+
+        Assertions.assertThat(repository.findAll(exp.flowPathLike("her\\path")))
+                .as("Ends with")
+                .hasSize(1)
+                .containsOnly(summary2);
+
+        Assertions.assertThat(repository.findAll(exp.flowPathLike("path")))
+                .as("Contains for some")
+                .hasSize(2)
+                .containsOnly(summary1, summary2);
+
+        Assertions.assertThat(repository.findAll(exp.flowPathLike("p")))
+                .as("Contains for all")
+                .hasSize(3);
+
+        Assertions.assertThat(repository.findAll(exp.flowPathLike(null)))
+                .as("no flow path")
+                .hasSize(3);
+
+        Assertions.assertThat(repository.findAll(exp.flowPathLike("%")))
+                .as("escaping")
+                .hasSize(0);
+    }
+
+    @Test
+    public void findExecutionsByStatuses() {
+        ExecutionSummaryEntity summary1 = createExecutionSummary();
+        summary1.setStatus(ExecutionStatus.COMPLETED);
+        ExecutionSummaryEntity summary2 = createExecutionSummary();
+        summary2.setStatus(ExecutionStatus.RUNNING);
+        ExecutionSummaryEntity summary3 = createExecutionSummary();
+        summary3.setStatus(ExecutionStatus.CANCELED);
+        repository.save(Arrays.asList(summary1, summary2, summary3));
+
+        Assertions.assertThat(repository.findAll(exp.statusIn(Arrays.asList(ExecutionStatus.COMPLETED))))
+                .as("One status")
+                .hasSize(1)
+                .containsOnly(summary1);
+
+        Assertions.assertThat(repository.findAll(exp.statusIn(Arrays.asList(ExecutionStatus.COMPLETED, ExecutionStatus.RUNNING))))
+                .as("Two statuses")
+                .hasSize(2)
+                .containsOnly(summary1, summary2);
+
+        Assertions.assertThat(repository.findAll(exp.statusIn(null)))
+                .as("no statuses")
+                .hasSize(3);
+
+        Assertions.assertThat(repository.findAll(exp.statusIn(Arrays.asList(ExecutionStatus.values()))))
+                .as("all statuses")
+                .hasSize(3);
+    }
+
+    @Test
+    public void findExecutionsByResultStatusTypes() {
+        ExecutionSummaryEntity summary1 = createExecutionSummary();
+        String result1 = "done";
+        summary1.setResultStatusType(result1);
+        ExecutionSummaryEntity summary2 = createExecutionSummary();
+        String result2 = "failed";
+        summary2.setResultStatusType(result2);
+        ExecutionSummaryEntity summary3 = createExecutionSummary();
+        summary3.setResultStatusType(null);
+        repository.save(Arrays.asList(summary1, summary2, summary3));
+
+        Assertions.assertThat(repository.findAll(exp.resultStatusTypeIn(Arrays.asList(result1))))
+                .as("One results")
+                .hasSize(1)
+                .containsOnly(summary1);
+
+        Assertions.assertThat(repository.findAll(exp.resultStatusTypeIn(Arrays.asList(result1, result2))))
+                .as("Two results")
+                .hasSize(2)
+                .containsOnly(summary1, summary2);
+
+        Assertions.assertThat(repository.findAll(exp.resultStatusTypeIn(null)))
+                .as("no results")
+                .hasSize(3);
+
+        Assertions.assertThat(repository.findAll(exp.resultStatusTypeIn(Arrays.asList(result1, result2))))
+                .as("all results")
+                .hasSize(2);
+    }
+
+    @Test
+    public void findExecutionsByPauseReasons() {
+        ExecutionSummaryEntity summary1 = createExecutionSummary();
+        summary1.setPauseReason(PauseReason.USER_PAUSED);
+        ExecutionSummaryEntity summary2 = createExecutionSummary();
+        summary2.setPauseReason(PauseReason.DISPLAY);
+        ExecutionSummaryEntity summary3 = createExecutionSummary();
+        repository.save(Arrays.asList(summary1, summary2, summary3));
+
+        Assertions.assertThat(repository.findAll(exp.pauseReasonIn(Arrays.asList(PauseReason.USER_PAUSED))))
+                .as("One pause reason")
+                .hasSize(1)
+                .containsOnly(summary1);
+
+        Assertions.assertThat(repository.findAll(exp.pauseReasonIn(Arrays.asList(PauseReason.USER_PAUSED, PauseReason.DISPLAY))))
+                .as("Two pause reasons")
+                .hasSize(2)
+                .containsOnly(summary1, summary2);
+
+        Assertions.assertThat(repository.findAll(exp.pauseReasonIn(null)))
+                .as("no pause reasons")
+                .hasSize(3);
+
+        Assertions.assertThat(repository.findAll(exp.pauseReasonIn(Arrays.asList(PauseReason.values()))))
+                .as("all pause reasons")
+                .hasSize(2);
+    }
+
+    @Test
+    public void findExecutionsByOwner() {
+        ExecutionSummaryEntity summary1 = createExecutionSummary();
+        summary1.setOwner("a-owner");
+        ExecutionSummaryEntity summary2 = createExecutionSummary();
+        summary2.setOwner("another-owner");
+        ExecutionSummaryEntity summary3 = createExecutionSummary();
+        summary3.setOwner("completely-different");
+        repository.save(Arrays.asList(summary1, summary2, summary3));
+
+        Assertions.assertThat(repository.findAll(exp.ownerLike("a-owner")))
+                .as("Full match")
+                .hasSize(1)
+                .containsOnly(summary1);
+
+        Assertions.assertThat(repository.findAll(exp.ownerLike("a-own")))
+                .as("Starts with")
+                .hasSize(1)
+                .containsOnly(summary1);
+
+        Assertions.assertThat(repository.findAll(exp.ownerLike("her-owner")))
+                .as("Ends with")
+                .hasSize(1)
+                .containsOnly(summary2);
+
+        Assertions.assertThat(repository.findAll(exp.ownerLike("owner")))
+                .as("Contains for some")
+                .hasSize(2)
+                .containsOnly(summary1, summary2);
+
+        Assertions.assertThat(repository.findAll(exp.ownerLike("o")))
+                .as("Contains for all")
+                .hasSize(3);
+
+        Assertions.assertThat(repository.findAll(exp.ownerLike("%")))
+                .as("escaping")
+                .hasSize(0);
+
+        Assertions.assertThat(repository.findAll(exp.ownerLike(null)))
+                .as("no owner")
+                .hasSize(3);
+    }
+
+    @Test
+    public void findExecutionsByRunName() {
+        ExecutionSummaryEntity summary1 = createExecutionSummary();
+        summary1.setExecutionName("a-execution-name");
+        ExecutionSummaryEntity summary2 = createExecutionSummary();
+        summary2.setExecutionName("another-execution-name");
+        ExecutionSummaryEntity summary3 = createExecutionSummary();
+        summary3.setExecutionName("completely-different");
+        repository.save(Arrays.asList(summary1, summary2, summary3));
+
+        Assertions.assertThat(repository.findAll(exp.runNameLike("a-execution-name")))
+                .as("Full match")
+                .hasSize(1)
+                .containsOnly(summary1);
+
+        Assertions.assertThat(repository.findAll(exp.runNameLike("a-exec")))
+                .as("Starts with")
+                .hasSize(1)
+                .containsOnly(summary1);
+
+        Assertions.assertThat(repository.findAll(exp.runNameLike("her-execution-name")))
+                .as("Ends with")
+                .hasSize(1)
+                .containsOnly(summary2);
+
+        Assertions.assertThat(repository.findAll(exp.runNameLike("execution-")))
+                .as("Contains for some")
+                .hasSize(2)
+                .containsOnly(summary1, summary2);
+
+        Assertions.assertThat(repository.findAll(exp.runNameLike("e")))
+                .as("Contains for all")
+                .hasSize(3);
+
+        Assertions.assertThat(repository.findAll(exp.runNameLike("%")))
+                .as("escaping")
+                .hasSize(0);
+
+        Assertions.assertThat(repository.findAll(exp.runNameLike(null)))
+                .as("no run name")
+                .hasSize(3);
+    }
+
+    @Test
+    public void findExecutionsByRunId() {
+        ExecutionSummaryEntity summary1 = createExecutionSummary();
+        summary1.setExecutionId("a-execution-id");
+        ExecutionSummaryEntity summary2 = createExecutionSummary();
+        summary2.setExecutionId("another-execution-id");
+        ExecutionSummaryEntity summary3 = createExecutionSummary();
+        summary3.setExecutionId("completely-different");
+        repository.save(Arrays.asList(summary1, summary2, summary3));
+
+        Assertions.assertThat(repository.findAll(exp.runIdLike("a-execution-id")))
+                .as("Full match")
+                .hasSize(1)
+                .containsOnly(summary1);
+
+        Assertions.assertThat(repository.findAll(exp.runIdLike("a-exec")))
+                .as("Starts with")
+                .hasSize(1)
+                .containsOnly(summary1);
+
+        Assertions.assertThat(repository.findAll(exp.runIdLike("her-execution-id")))
+                .as("Ends with")
+                .hasSize(1)
+                .containsOnly(summary2);
+
+        Assertions.assertThat(repository.findAll(exp.runIdLike("execution-")))
+                .as("Contains for some")
+                .hasSize(2)
+                .containsOnly(summary1, summary2);
+
+        Assertions.assertThat(repository.findAll(exp.runIdLike("e")))
+                .as("Contains for all")
+                .hasSize(3);
+
+        Assertions.assertThat(repository.findAll(exp.runIdLike("%")))
+                .as("escaping")
+                .hasSize(0);
+
+        Assertions.assertThat(repository.findAll(exp.runIdLike(null)))
+                .as("no run id")
+                .hasSize(3);
+    }
+
+    @Test
+    public void findExecutionsByFlowUuid() {
+        ExecutionSummaryEntity summary1 = createExecutionSummary();
+        summary1.setFlowPath("a\\path");
+        ExecutionSummaryEntity summary2 = createExecutionSummary();
+        summary2.setFlowPath("another\\path");
+        ExecutionSummaryEntity summary3 = createExecutionSummary();
+        summary3.setFlowPath("completely\\different");
+        repository.save(Arrays.asList(summary1, summary2, summary3));
+
+        Assertions.assertThat(repository.findAll(exp.flowPathLike("a\\path")))
+                .as("Full match")
+                .hasSize(1)
+                .containsOnly(summary1);
+
+        Assertions.assertThat(repository.findAll(exp.flowPathLike("a\\pa")))
+                .as("Starts with")
+                .hasSize(1)
+                .containsOnly(summary1);
+
+        Assertions.assertThat(repository.findAll(exp.flowPathLike("her\\path")))
+                .as("Ends with")
+                .hasSize(1)
+                .containsOnly(summary2);
+
+        Assertions.assertThat(repository.findAll(exp.flowPathLike("path")))
+                .as("Contains for some")
+                .hasSize(2)
+                .containsOnly(summary1, summary2);
+
+        Assertions.assertThat(repository.findAll(exp.flowPathLike("p")))
+                .as("Contains for all")
+                .hasSize(3);
+
+        Assertions.assertThat(repository.findAll(exp.flowPathLike("%")))
+                .as("escaping")
+                .hasSize(0);
+    }
+
+    @Test
+    public void findExecutionsByAllFilterParams() {
+        createBatchOfExecutions();
+
+        Long startTime = 23230L;
+        String flowPath = "flow\\path\\like";
+        String owner = "the owner";
+        String executionName = "an execution with a name";
+        String executionId = "some id";
+        String flowUuid = UUID.randomUUID().toString();
+        ExecutionStatus status = ExecutionStatus.PENDING_PAUSE;
+        PauseReason pauseReason = PauseReason.SELECT_TRANSITION;
+        String resultStatusType = "don't really know";
+        ExecutionSummaryEntity summary = createExecutionSummary(
+                EMPTY_BRANCH,
+                flowPath,
+                status,
+                resultStatusType,
+                pauseReason,
+                owner,
+                executionName,
+                executionId,
+                flowUuid,
+                new Date(startTime)
+        );
+        repository.save(summary);
+
+        Assertions.assertThat(repository.findAll(
+                BooleanExpression.allOf(
+                        exp.branchIsEmpty(),
+                        exp.startTimeBetween(new Date(startTime - 1), new Date(startTime + 1)),
+                        exp.flowPathLike(flowPath),
+                        exp.ownerLike(owner),
+                        exp.runNameLike(executionName),
+                        exp.runIdLike(executionId),
+                        exp.flowUuidLike(flowUuid),
+                        exp.statusIn(Arrays.asList(status)),
+                        exp.pauseReasonIn(Arrays.asList(pauseReason)),
+                        exp.resultStatusTypeIn(Arrays.asList(resultStatusType))
+                )))
+                .as("all filters")
+                .hasSize(1)
+                .containsOnly(summary);
+    }
+
+    @Test
+    public void findExecutionsByEmptyFilterParams() {
+        createBatchOfExecutions();
+        Assertions.assertThat(repository.findAll(
+                BooleanExpression.allOf(
+                        exp.branchIsEmpty(),
+                        exp.startTimeBetween(null, null),
+                        exp.flowPathLike(null),
+                        exp.ownerLike(null),
+                        exp.runNameLike(null),
+                        exp.runIdLike(null),
+                        exp.flowUuidLike(null),
+                        exp.statusIn(null),
+                        exp.pauseReasonIn(null),
+                        exp.resultStatusTypeIn(null)
+                )))
+                .as("all nulls")
+                .hasSize(6);
+    }
 
     // Tests for fetching Executions by Start Date
     @Test
     public void findExecutionsByStartDate() {
         createBatchOfExecutions();
 
-        PageRequest pageRequest = new PageRequest(0, 20, Sort.Direction.DESC, "startTime");
-
         final Date startedBefore = new Date(0);
         final Date startedAfter = new Date(System.currentTimeMillis() + 1000);
 
         List<ExecutionSummaryEntity> executions = repository.findAll(
-                exp.startTimeBetween(startedBefore, startedAfter), pageRequest).getContent();
+                exp.startTimeBetween(startedBefore, startedAfter), PAGE_REQUEST).getContent();
         assertNotNull(executions);
         assertEquals("Wrong number of Executions", 6, executions.size());
 
@@ -283,11 +661,10 @@ public class ExecutionSummaryRepositoryTest {
 
         createBatchOfExecutions();
 
-        PageRequest pageRequest = new PageRequest(0, 20, Sort.Direction.DESC, "startTime");
         String flowPath = "liBrary/mYothErfloWs";
 
         List<ExecutionSummaryEntity> executions = repository.findAll(
-                exp.flowPathLike(flowPath), pageRequest).getContent();
+                exp.flowPathLike(flowPath), PAGE_REQUEST).getContent();
 
         assertNotNull(executions);
         assertEquals("Wrong number of Executions when testing filtering by flowPath", 3, executions.size());
@@ -306,10 +683,8 @@ public class ExecutionSummaryRepositoryTest {
 
         createBatchOfExecutions();
 
-        PageRequest pageRequest = new PageRequest(0, 20, Sort.Direction.DESC, "startTime");
-
         List<ExecutionSummaryEntity> executions = repository.findAll(
-                exp.statusIn(Arrays.asList(ExecutionStatus.RUNNING)), pageRequest).getContent();
+                exp.statusIn(Arrays.asList(ExecutionStatus.RUNNING)), PAGE_REQUEST).getContent();
 
         assertNotNull(executions);
         assertEquals("Wrong number of Executions when testing filtering by flowPath", 1, executions.size());
@@ -325,13 +700,12 @@ public class ExecutionSummaryRepositoryTest {
 
         createBatchOfExecutions();
 
-        PageRequest pageRequest = new PageRequest(0, 20, Sort.Direction.DESC, "startTime");
         String flowPath = "library/myflows";
 
         List<ExecutionSummaryEntity>  executions = repository.findAll(
                 exp.flowPathLike(flowPath)
                         .and(exp.statusIn(Arrays.asList(ExecutionStatus.COMPLETED))),
-                pageRequest).getContent();
+                PAGE_REQUEST).getContent();
 
         assertNotNull(executions);
         assertEquals("Wrong number of Executions when testing filtering by flowPath", 1,executions.size());
@@ -340,18 +714,15 @@ public class ExecutionSummaryRepositoryTest {
 
     }
 
-
     @Test
     public void findExecutionByStatusAndResultStatusType() {
 
         createBatchOfExecutions();
 
-        PageRequest pageRequest = new PageRequest(0, 20, Sort.Direction.DESC, "startTime");
-
         List<ExecutionSummaryEntity> executions = repository.findAll(
                 exp.statusIn(Arrays.asList(ExecutionStatus.COMPLETED))
                         .and(exp.resultStatusTypeIn(Arrays.asList("ERROR")))
-                , pageRequest).getContent();
+                , PAGE_REQUEST).getContent();
 
         assertNotNull(executions);
         assertEquals("Wrong number of Executions when testing filtering by status and result status type", 2, executions.size());
@@ -364,7 +735,7 @@ public class ExecutionSummaryRepositoryTest {
         executions = repository.findAll(
                 exp.statusIn(Arrays.asList(ExecutionStatus.PAUSED))
                 .and(exp.pauseReasonIn(Arrays.asList(PauseReason.DISPLAY)))
-                ,pageRequest).getContent();
+                ,PAGE_REQUEST).getContent();
 
         assertNotNull(executions);
         assertEquals("Wrong number of Execution when testing by status and result status type(pause and display)", 1, executions.size() );
@@ -379,14 +750,13 @@ public class ExecutionSummaryRepositoryTest {
 
         createBatchOfExecutions();
 
-        PageRequest pageRequest = new PageRequest(0, 20, Sort.Direction.DESC, "startTime");
         String flowPath = "library/myflows";
 
         List<ExecutionSummaryEntity> executions = repository.findAll(
                 exp.flowPathLike(flowPath)
                         .and(exp.statusIn(Arrays.asList(ExecutionStatus.COMPLETED)))
                         .and(exp.resultStatusTypeIn(Arrays.asList("RESOLVED")))
-                , pageRequest).getContent();
+                , PAGE_REQUEST).getContent();
 
         assertNotNull(executions);
         assertEquals("Wrong number of Executions when testing filtering be flow path, status and result status type", 1, executions.size());
@@ -657,9 +1027,9 @@ public class ExecutionSummaryRepositoryTest {
         List<Object[]> result = repository.getFlowResultDistribution("12345", fromDate, toDate);
 
         assertEquals(3, result.size());
-        assertEquals("12345", (String)result.get(0)[0]);
-        assertEquals("12345", (String)result.get(1)[0]);
-        assertEquals("12345", (String)result.get(2)[0]);
+        assertEquals("12345", result.get(0)[0]);
+        assertEquals("12345", result.get(1)[0]);
+        assertEquals("12345", result.get(2)[0]);
 
         Map<String, Long> map = new HashMap<>();
 
@@ -705,13 +1075,13 @@ public class ExecutionSummaryRepositoryTest {
         List<Object []> result = repository.getFlowsStatistics(fromDate, toDate, -1, SortingStatisticMeasurementsEnum.numOfExecutions, false);
 
         assertEquals(2, result.size());
-        assertEquals("12345", (String)result.get(0)[0]);
-        assertEquals("98765", (String) result.get(1)[0]);
+        assertEquals("12345", result.get(0)[0]);
+        assertEquals("98765", result.get(1)[0]);
 
         result = repository.getFlowsStatistics(fromDate, toDate, 1, SortingStatisticMeasurementsEnum.numOfExecutions, true);
 
         assertEquals(1, result.size());
-        assertEquals("98765", (String)result.get(0)[0]);
+        assertEquals("98765", result.get(0)[0]);
     }
 
     @Test
@@ -732,8 +1102,8 @@ public class ExecutionSummaryRepositoryTest {
         List<Object []> result = repository.getFlowsStatistics(fromDate, toDate, 10, SortingStatisticMeasurementsEnum.avgExecutionTime, true);
 
         assertEquals(2, result.size());
-        assertEquals("98765", (String)result.get(0)[0]);
-        assertEquals("12345", (String) result.get(1)[0]);
+        assertEquals("98765", result.get(0)[0]);
+        assertEquals("12345", result.get(1)[0]);
         assertEquals(3500.0, result.get(0)[3]); //avg exec time
     }
 
@@ -959,15 +1329,49 @@ public class ExecutionSummaryRepositoryTest {
 
         executionSummary.setExecutionId(executionId);
         executionSummary.setBranchId(branchId);
-        //        executionSummary.setExecutionObj(new byte[1]);
         executionSummary.setStatus(status);
         executionSummary.setFlowPath("stam flow");
         executionSummary.setFlowUuid(flowUuid);
         executionSummary.setTriggeredBy("admin");
         executionSummary.setOwner("admin");
-        executionSummary.setStartTime(new Date(System.currentTimeMillis()));
+        executionSummary.setStartTime(new Date());
         executionSummary.setEndTime(new Date(System.currentTimeMillis() + 1));
         return repository.save(executionSummary);
+    }
+
+    private ExecutionSummaryEntity createExecutionSummary(){
+        return createExecutionSummary(null, null, null, null, null, null, null, null, null, null);
+    }
+
+    private ExecutionSummaryEntity createExecutionSummary(
+            String branchId,
+            String flowPath,
+            ExecutionStatus status,
+            String resultStatusType,
+            PauseReason pauseReason,
+            String owner,
+            String runName,
+            String runId,
+            String flowUUID,
+            Date startTime){
+        ExecutionSummaryEntity executionSummary = new ExecutionSummaryEntity();
+
+
+        //Required fields
+        executionSummary.setExecutionId(runId != null ? runId : "some-execution-id");
+        executionSummary.setBranchId(branchId != null ? branchId : "some-branch-id");
+        executionSummary.setStatus(status != null ? status : ExecutionStatus.RUNNING);
+        executionSummary.setFlowPath(flowPath != null ? flowPath : "some-flow-path");
+        executionSummary.setFlowUuid(flowUUID != null ? flowUUID : "some-flow-uuid");
+        executionSummary.setOwner(owner != null ? owner : "some-owner");
+        executionSummary.setStartTime(startTime != null ? startTime : new Date());
+        executionSummary.setTriggeredBy("Rumpelstiltskin");
+
+        //Optional fields
+        executionSummary.setResultStatusType(resultStatusType);
+        executionSummary.setPauseReason(pauseReason);
+        executionSummary.setExecutionName(runName);
+        return executionSummary;
     }
 
     private ExecutionSummaryEntity createPendingPauseExecution(String executionId, String branchId) {
