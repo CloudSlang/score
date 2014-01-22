@@ -25,7 +25,7 @@ import java.util.Map;
  * Date: 21/01/14
  * Time: 17:39
  */
-public class ScoreManagerImpl implements ScoreManager {
+public class ScoreImpl implements Score {
 
     @Autowired
     private RunningExecutionPlanService runningExecutionPlanService;
@@ -91,7 +91,7 @@ public class ScoreManagerImpl implements ScoreManager {
         }
     }
 
-    private Long createNewRunningExecutionPlan(ExecutionPlan executionPlan) {   //TODO
+    private Long createNewRunningExecutionPlan(ExecutionPlan executionPlan) {   //TODO - move this to RunningExecutionPlan Service
         //Create new and save in DB
         RunningExecutionPlan runningExecutionPlan = new RunningExecutionPlan();
         runningExecutionPlan.setFlowUUID(executionPlan.getFlowUuid());
