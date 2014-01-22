@@ -219,7 +219,7 @@ public class SplitJoinServiceTest {
 
 		List<EndBranchDataContainer> finishedChildContexts = value.getFinishedChildBranchesData();
 
-		Map<String, OOContext> ooContexts = suspendedExecution.getFinishedBranches().get(0).getBranchContexts().getContexts();
+		Map<String, Serializable> ooContexts = suspendedExecution.getFinishedBranches().get(0).getBranchContexts().getContexts();
 		Map<String, Serializable> systemContext = suspendedExecution.getFinishedBranches().get(0).getBranchContexts().getSystemContext();
 		assertThat("parent execution must contain children maps", finishedChildContexts, is(Arrays.asList(
 				new EndBranchDataContainer(ooContexts, systemContext, null))));
@@ -241,7 +241,7 @@ public class SplitJoinServiceTest {
 	}
 
 	private FinishedBranch createFinishedBranch(String splitId, String branchId, OOContext context, Map<String, Serializable> systemContext) {
-		HashMap<String, OOContext> contexts = new HashMap<>();
+		HashMap<String, Serializable> contexts = new HashMap<>();
 		contexts.put("haha", context);
 		return new FinishedBranch(null, branchId, splitId, null, new BranchContexts(false, contexts, systemContext));
 	}

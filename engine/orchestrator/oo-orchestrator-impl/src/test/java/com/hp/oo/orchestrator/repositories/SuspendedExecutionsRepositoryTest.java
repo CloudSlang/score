@@ -75,7 +75,7 @@ public class SuspendedExecutionsRepositoryTest {
 
         SuspendedExecution saved = repository.save(suspendedExecution);
 
-        Map<String, OOContext> context = new HashMap<>();
+        Map<String, Serializable> context = new HashMap<>();
         FinishedBranch finishedBranch = new FinishedBranch("111", "333", "888", null, new BranchContexts(false, context, new HashMap<String, Serializable>()));
 
         finishedBranch.connectToSuspendedExecution(saved);
@@ -120,7 +120,7 @@ public class SuspendedExecutionsRepositoryTest {
 
         SuspendedExecution saved = repository.save(suspendedExecution);
 
-        Map<String, OOContext> context = new HashMap<>();
+        Map<String, Serializable> context = new HashMap<>();
         FinishedBranch finishedBranch = new FinishedBranch("111", "333", "888", null, new BranchContexts(false, context, new HashMap<String, Serializable>()));
 
         finishedBranch.connectToSuspendedExecution(saved);
@@ -143,7 +143,7 @@ public class SuspendedExecutionsRepositoryTest {
 
         SuspendedExecution saved = repository.save(suspendedExecution);
 
-        Map<String, OOContext> context = new HashMap<>();
+        Map<String, Serializable> context = new HashMap<>();
         FinishedBranch finishedBranch = new FinishedBranch("111", "333", "888", null, new BranchContexts(false, context, new HashMap<String, Serializable>()));
 
         finishedBranch.connectToSuspendedExecution(saved);

@@ -66,7 +66,7 @@ public final class OrchestratorServiceImpl implements OrchestratorService {
     @Transactional
     public void triggerFlow(String flowUuid, String triggerType, String executionName, String flowPath, String flowInputsContextName, String triggeredBy, String triggeringSource, Execution execution, Map<String, String> executionConfiguration) {
         ExecutionEventUtils.startFlow(execution.getSystemContext());
-        OOContext flowInputsContext = execution.getContexts().get(flowInputsContextName); //get the flow context in generic way
+        OOContext flowInputsContext = (OOContext)execution.getContexts().get(flowInputsContextName); //get the flow context in generic way
 
         //TODO configure running execution configuration
         long versionNumber = executionConfigurationService.createRunningExecutionConfiguration(executionConfiguration);

@@ -24,7 +24,7 @@ public class Execution implements Serializable {
 	private List<ExecutionEvent> aggregatedEvents;
 	private long lastEventDumpTime;
 
-	protected Map<String, OOContext> contexts;
+	protected Map<String, Serializable> contexts;
 	protected Map<String, Serializable> systemContext;
 	//This context is an internal action context for sharing serializable data between actions on the same execution
 	protected Map<String, Serializable> serializableSessionContext;
@@ -38,7 +38,7 @@ public class Execution implements Serializable {
 		this.serializableSessionContext = new HashMap<>();
 	}
 
-	public Execution(Long executionId, Long runningExecutionPlanId, Long position, Map<String, OOContext> contexts, Map<String, Serializable> systemContext) {
+	public Execution(Long executionId, Long runningExecutionPlanId, Long position, Map<String, Serializable> contexts, Map<String, Serializable> systemContext) {
 		this();
 		this.contexts.putAll(contexts);
 		this.systemContext.putAll(systemContext);
@@ -98,7 +98,7 @@ public class Execution implements Serializable {
 		return this;
 	}
 
-	public Map<String, OOContext> getContexts() {
+	public Map<String, Serializable> getContexts() {
 		return contexts;
 	}
 
@@ -106,7 +106,7 @@ public class Execution implements Serializable {
 		return systemContext;
 	}
 
-	public void setContexts(Map<String, OOContext> contexts) {
+	public void setContexts(Map<String, Serializable> contexts) {
 		this.contexts = contexts;
 	}
 

@@ -1,6 +1,5 @@
 package com.hp.oo.orchestrator.entities;
 
-import com.hp.oo.internal.sdk.execution.OOContext;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -12,10 +11,10 @@ import java.util.Map;
 
 public class BranchContexts implements Serializable {
     private boolean isBranchCancelled;
-    private final Map<String, OOContext> contexts;
+    private final Map<String, Serializable> contexts;
     private final Map<String, Serializable> systemContext;
 
-    public BranchContexts(boolean isBranchCancelled, Map<String, OOContext> contexts, Map<String, Serializable> systemContext) {
+    public BranchContexts(boolean isBranchCancelled, Map<String, Serializable> contexts, Map<String, Serializable> systemContext) {
         Validate.notNull(contexts);
         Validate.notNull(systemContext);
 
@@ -32,7 +31,7 @@ public class BranchContexts implements Serializable {
         isBranchCancelled = branchCancelled;
     }
 
-    public Map<String, OOContext> getContexts() {
+    public Map<String, Serializable> getContexts() {
         return Collections.unmodifiableMap(contexts);
     }
 

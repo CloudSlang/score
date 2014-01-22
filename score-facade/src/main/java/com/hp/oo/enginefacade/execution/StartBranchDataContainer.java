@@ -1,6 +1,5 @@
 package com.hp.oo.enginefacade.execution;
 
-import com.hp.oo.internal.sdk.execution.OOContext;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -16,10 +15,10 @@ import java.util.Map;
 public class StartBranchDataContainer {
     private final Long startPosition;
     private final Long executionPlanId;
-    private final Map<String, OOContext> contexts;
+    private final Map<String, Serializable> contexts;
     private final Map<String, Serializable> systemContext;
 
-    public StartBranchDataContainer(Long startPosition, Long executionPlanId, Map<String, OOContext> contexts, Map<String, Serializable> systemContext) {
+    public StartBranchDataContainer(Long startPosition, Long executionPlanId, Map<String, Serializable> contexts, Map<String, Serializable> systemContext) {
         Validate.notNull(startPosition);
         Validate.notNull(executionPlanId);
         Validate.notNull(contexts);
@@ -31,7 +30,7 @@ public class StartBranchDataContainer {
         this.contexts = new HashMap<>();
 
         for (String name : contexts.keySet()) {
-            this.contexts.put(name, new OOContext(contexts.get(name)));
+            this.contexts.put(name, contexts.get(name));
         }
     }
 
@@ -43,7 +42,7 @@ public class StartBranchDataContainer {
         return executionPlanId;
     }
 
-    public Map<String, OOContext> getContexts() {
+    public Map<String, Serializable> getContexts() {
         return Collections.unmodifiableMap(contexts);
     }
 

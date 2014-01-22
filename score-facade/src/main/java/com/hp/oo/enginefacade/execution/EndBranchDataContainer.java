@@ -14,11 +14,11 @@ import java.util.Map;
  * A POJO which serves as an holder for the contexts and exception (if exists) of a finished branch
  */
 public class EndBranchDataContainer implements Serializable {
-    private final Map<String, OOContext> contexts;
+    private final Map<String, Serializable> contexts;
     private final Map<String, Serializable> systemContext;
     private final String exception;
 
-    public EndBranchDataContainer(Map<String, OOContext> contexts, Map<String, Serializable> systemContext, String exception) {
+    public EndBranchDataContainer(Map<String, Serializable> contexts, Map<String, Serializable> systemContext, String exception) {
         Validate.notNull(contexts);
         Validate.notNull(systemContext);
 
@@ -27,7 +27,7 @@ public class EndBranchDataContainer implements Serializable {
         this.exception = exception;
     }
 
-    public Map<String, OOContext> getContexts() {
+    public Map<String, Serializable> getContexts() {
         return Collections.unmodifiableMap(contexts);
     }
 
