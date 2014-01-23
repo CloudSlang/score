@@ -59,18 +59,18 @@ public class ScoreImpl implements Score {
     }
 
     @Override
-    public Boolean pauseExecution(Long executionId) {
-        return null;  //TODO - impl this
+    public void pauseExecution(Long executionId) {
+        //TODO - impl this
 }
 
     @Override
-    public Boolean resumeExecution(Long executionId) {
-        return null;  //TODO - impl this
+    public void resumeExecution(Long executionId) {
+         //TODO - impl this
     }
 
     @Override
-    public Boolean cancelExecution(Long executionId) {
-        return null;  //TODO - impl this
+    public void cancelExecution(Long executionId) {
+         //TODO - impl this
     }
 
     private Long getOrCreateRunningExecutionPlan(ExecutionPlan executionPlan) {//TODO - move this to RunningExecutionPlan Service
