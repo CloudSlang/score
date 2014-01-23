@@ -120,7 +120,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             addExecutionEvent(execution);
 
             // dump execution events
-            dumpExecutionEvents(execution, false);
+            dumpExecutionEvents(execution, true);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("End of step: " + execution.getPosition() + " in execution id: " + execution.getExecutionId());
@@ -472,11 +472,11 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     private void dumpEvents(Execution execution) {
-        /*List<ExecutionEvent> executionEvents = execution.getAggregatedEvents();
+        List<ExecutionEvent> executionEvents = execution.getAggregatedEvents();
         for (ExecutionEvent executionEvent:executionEvents){
             eventBus.dispatch(new EventWrapper(executionEvent.getType().name(), executionEvent));
-        } */
-        executionEventService.createEvents(execution.getAggregatedEvents());
+        }
+        //executionEventService.createEvents(execution.getAggregatedEvents());
         execution.getAggregatedEvents().clear(); //must clean so we wont send it twice - once from here and once from the QueueListener onTerminated()
         execution.setLastEventDumpTime(System.currentTimeMillis());
     }
