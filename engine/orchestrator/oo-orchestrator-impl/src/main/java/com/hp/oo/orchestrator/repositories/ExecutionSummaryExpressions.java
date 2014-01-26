@@ -5,7 +5,9 @@ import com.hp.oo.enginefacade.execution.ExecutionEnums;
 import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.oo.orchestrator.entities.QExecutionSummaryEntity;
 import com.hp.score.engine.data.SqlUtils;
+import com.mysema.query.types.Ops;
 import com.mysema.query.types.expr.BooleanExpression;
+import com.mysema.query.types.path.StringPath;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import java.util.List;
 
 import static ch.lambdaj.Lambda.convert;
 import static com.hp.oo.enginefacade.execution.ExecutionSummary.EMPTY_BRANCH;
+import static com.mysema.query.support.Expressions.*;
 
 /**
  * User: sadane
@@ -48,10 +51,10 @@ public class ExecutionSummaryExpressions {
 
     public BooleanExpression resultStatusTypeIn(List<String> resultStatusTypes) {
         if (CollectionUtils.isEmpty(resultStatusTypes)) return null;
-        return entity.resultStatusType.lower().in(convert(resultStatusTypes, new Converter<String, String>() {
+        return entity.resultStatusType.upper().in(convert(resultStatusTypes, new Converter<String, String>() {
             @Override
             public String convert(String from) {
-                return from.toLowerCase();
+                return from.toUpperCase();
             }
         }));
     }
@@ -62,27 +65,27 @@ public class ExecutionSummaryExpressions {
 
     public BooleanExpression flowPathLike(final String flowPath) {
         if (StringUtils.isEmpty(flowPath)) return null;
-        return entity.flowPath.lower().like(buildLikeExpression(flowPath), ESCAPE_CHAR);
+        return buildLikeExpression(entity.flowPath, flowPath);
     }
 
     public BooleanExpression ownerLike(final String owner) {
         if (StringUtils.isEmpty(owner)) return null;
-        return entity.owner.lower().like(buildLikeExpression(owner), ESCAPE_CHAR);
+        return buildLikeExpression(entity.owner, owner);
     }
 
     public BooleanExpression runIdLike(final String runId) {
         if (StringUtils.isEmpty(runId)) return null;
-        return entity.executionId.lower().like(buildLikeExpression(runId), ESCAPE_CHAR);
+        return buildLikeExpression(entity.executionId, runId);
     }
 
     public BooleanExpression flowUuidLike(final String flowUuid) {
         if (StringUtils.isEmpty(flowUuid)) return null;
-        return entity.flowUuid.lower().like(buildLikeExpression(flowUuid), ESCAPE_CHAR);
+        return buildLikeExpression(entity.flowUuid, flowUuid);
     }
 
     public BooleanExpression runNameLike(final String executionName) {
         if (StringUtils.isEmpty(executionName)) return null;
-        return entity.executionName.lower().like(buildLikeExpression(executionName), ESCAPE_CHAR);
+        return buildLikeExpression(entity.executionName, executionName);
     }
 
     public BooleanExpression startTimeBetween(final Date from, final Date to) {
@@ -90,8 +93,13 @@ public class ExecutionSummaryExpressions {
         return entity.startTime.between(from, to);
     }
 
-    private String buildLikeExpression(String str) {
-        String normalized = sqlUtils.escapeLikeExpression(str.toLowerCase());
-        return sqlUtils.normalizeContainingLikeExpression(normalized);
+    private BooleanExpression buildLikeExpression(StringPath field, String value) {
+        String normalized = sqlUtils.escapeLikeExpression(value);
+        normalized = sqlUtils.normalizeContainingLikeExpression(normalized);
+        return booleanOperation(
+                Ops.LIKE_ESCAPE,
+                field.toUpperCase(),
+                stringOperation(Ops.UPPER, constant(normalized)),
+                constant(ESCAPE_CHAR));
     }
 }
