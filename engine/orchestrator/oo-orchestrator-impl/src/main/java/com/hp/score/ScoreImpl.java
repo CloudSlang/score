@@ -1,6 +1,5 @@
 package com.hp.score;
 
-import com.hp.oo.broker.entities.RunningExecutionPlan;
 import com.hp.oo.broker.services.RunningExecutionPlanService;
 import com.hp.oo.engine.node.entities.WorkerNode;
 import com.hp.oo.engine.queue.entities.ExecStatus;
@@ -12,12 +11,10 @@ import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionPlan;
 import com.hp.score.engine.data.IdentityGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

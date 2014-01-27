@@ -1,10 +1,13 @@
-package com.hp.oo.engine.node.repositories;
+package com.hp.score.schema;
 
-import com.hp.oo.engine.node.entities.WorkerNode;
-import com.hp.oo.engine.versioning.services.VersionService;
-import com.hp.oo.enginefacade.Worker;
+import com.hp.oo.engine.execution.events.services.ExecutionEventService;
+import com.hp.oo.engine.node.services.WorkerNodeService;
+import com.hp.oo.engine.queue.entities.ExecutionMessage;
+import com.hp.oo.engine.queue.services.QueueDispatcherService;
+import com.hp.oo.internal.sdk.execution.ExecutionPlan;
+import com.hp.oo.internal.sdk.execution.ExecutionStep;
+import com.hp.score.Score;
 import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
-import junit.framework.Assert;
 import liquibase.integration.spring.SpringLiquibase;
 import org.hibernate.ejb.HibernatePersistence;
 import org.junit.Test;
@@ -14,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -23,59 +26,62 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
-import java.util.Arrays;
+
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
-import static org.mockito.Matchers.anyString;
+import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
- * Created by IntelliJ IDEA.
- * User: froelica
- * Date: 9/8/13
- * Time: 10:25 AM
+ * Date: 1/21/14
+ *
+ * @author Dima Rassin
  */
-
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-@Transactional
-@TransactionConfiguration(defaultRollback = true)
-public class WorkerNodeRepositoryTest {
-	private static final boolean SHOW_SQL = false;
+public class EngineTest {
 
 	@Autowired
-	private WorkerNodeRepository workerNodeRepository;
+	private Score score;
+
+	@Autowired
+	private WorkerNodeService workerNodeService;
+
+	@Autowired
+	private QueueDispatcherService dispatcherService;
 
 	@Test
-	public void findGroupsTest() {
-		WorkerNode worker = new WorkerNode();
-		worker.setUuid("some faked uuid");
-		worker.setHostName("worker host name");
-		worker.setInstallPath("faked installation path");
-		worker.setPassword("faked password");
-		worker.setStatus(Worker.Status.RUNNING);
-		worker.setActive(true);
-		worker.setGroups(Arrays.asList("group1", "group2", "group3"));
-		workerNodeRepository.saveAndFlush(worker);
+	public void baseEngineTest(){
+		// register worker
+		workerNodeService.create("uuid", "password", "host", "dir");
+		workerNodeService.activate("uuid");
+		workerNodeService.up("uuid");
 
-		List<String> expected = Arrays.asList("group1", "group2");
-		List<String> result = workerNodeRepository.findGroups(expected);
-		Assert.assertEquals(expected, result);
+		score.trigger(createExecutionPlan());
+
+		List<ExecutionMessage> messages = dispatcherService.poll("uuid", 10, new Date(0));
+
+		assertThat(messages).hasSize(1);
+	}
+
+	private ExecutionPlan createExecutionPlan(){
+		return new ExecutionPlan()
+				.setFlowUuid("flowUUID")
+				.addStep(new ExecutionStep(1L))
+				.setBeginStep(1L);
 	}
 
 	@Configuration
-	@EnableJpaRepositories("com.hp.oo.engine.node.repositories")
 	@EnableTransactionManagement
-	static class Configurator {
+	@ImportResource("META-INF/spring/schema/schemaEngineTestContext.xml")
+	static class Context{
 		@Bean
 		DataSource dataSource() {
 			return new EmbeddedDatabaseBuilder()
@@ -92,12 +98,11 @@ public class WorkerNodeRepositoryTest {
 			return liquibase;
 		}
 
-
 		@Bean
-		Properties hibernateProperties() {
+		Properties jpaProperties() {
 			return new Properties(){{
 				setProperty("hibernate.format_sql", "true");
-				setProperty("hibernate.hbm2ddl.auto", "create-drop");
+				setProperty("hibernate.hbm2ddl.auto", "create");
 				setProperty("hibernate.cache.use_query_cache", "false");
 				setProperty("hibernate.generate_statistics", "false");
 				setProperty("hibernate.cache.use_second_level_cache", "false");
@@ -106,22 +111,23 @@ public class WorkerNodeRepositoryTest {
 			}};
 		}
 
+
 		@Bean
 		JpaVendorAdapter jpaVendorAdapter() {
 			HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
-			adapter.setShowSql(SHOW_SQL);
+			adapter.setShowSql(false);
 			adapter.setGenerateDdl(true);
 			return adapter;
 		}
 
 		@Bean(name="entityManagerFactory")
 		@DependsOn("liquibase")
-		FactoryBean<EntityManagerFactory> emf(JpaVendorAdapter jpaVendorAdapter) {
+		FactoryBean<EntityManagerFactory> emf(JpaVendorAdapter jpaVendorAdapter, Properties jpaProperties) {
 			LocalContainerEntityManagerFactoryBean fb = new LocalContainerEntityManagerFactoryBean();
-			fb.setJpaProperties(hibernateProperties());
 			fb.setDataSource(dataSource());
+			fb.setJpaProperties(jpaProperties);
 			fb.setPersistenceProviderClass(HibernatePersistence.class);
-			fb.setPackagesToScan("com.hp.oo.engine.node");
+			fb.setPackagesToScan("com.hp.oo");
 			fb.setJpaVendorAdapter(jpaVendorAdapter);
 			return fb;
 		}
@@ -132,10 +138,8 @@ public class WorkerNodeRepositoryTest {
 		}
 
 		@Bean
-		public VersionService versionService() {
-			VersionService versionService = mock(VersionService.class);
-			when(versionService.getCurrentVersion(anyString())).thenReturn(1L);
-			return versionService;
+		ExecutionEventService executionEventService() {
+			return mock(ExecutionEventService.class);
 		}
 	}
 }

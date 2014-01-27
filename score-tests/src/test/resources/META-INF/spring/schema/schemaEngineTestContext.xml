@@ -6,5 +6,5 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.hp.com/schema/score http://www.hp.com/schema/score/score.xsd">
 
-	<score:engine/>
+	<score:engine id="score" messageDigestAlgorithm="sha-256"/>
 </beans>

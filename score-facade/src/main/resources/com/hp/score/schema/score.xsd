@@ -16,15 +16,19 @@
 				Enables a Score engine module.
 			</xsd:documentation>
 		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute type="xsd:string" name="id"/>
+			<xsd:attribute type="xsd:string" name="messageDigestAlgorithm"/>
+		</xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="worker">
+		<xsd:annotation>
+			<xsd:documentation>
+				Enables a Score worker module.
+			</xsd:documentation>
+		</xsd:annotation>
 		<xsd:complexType>
-			<xsd:annotation>
-				<xsd:documentation>
-					Enables a Score worker module.
-				</xsd:documentation>
-			</xsd:annotation>
 			<xsd:attribute name="uuid" use="required" type="xsd:string"/>
 		</xsd:complexType>
 	</xsd:element>
