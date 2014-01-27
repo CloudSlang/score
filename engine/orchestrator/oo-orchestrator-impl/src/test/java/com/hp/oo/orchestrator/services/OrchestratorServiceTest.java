@@ -116,48 +116,4 @@ public class OrchestratorServiceTest {
         }));
     }
 
-    @Test
-    public void testCreateRunningExecutionPlan(){
-        ExecutionPlan executionPlan = new ExecutionPlan();
-        RunningExecutionPlan runningExecutionPlan = new RunningExecutionPlan();
-        runningExecutionPlan.setId(1L);
-
-        when(runningExecutionPlanService.createRunningExecutionPlan(any(RunningExecutionPlan.class))).
-                thenReturn(runningExecutionPlan);
-        Long id = orchestratorService.getOrCreateRunningExecutionPlan(executionPlan);
-        Assert.assertEquals((Long)1L,id);
-    }
-
-    @Test
-    public void testGetRunningExecutionPlan(){
-        ExecutionPlan executionPlan = new ExecutionPlan();
-        RunningExecutionPlan runningExecutionPlan = new RunningExecutionPlan();
-        runningExecutionPlan.setId(2L);
-        runningExecutionPlan.setExecutionPlan(executionPlan);
-
-        when(runningExecutionPlanService.readByFlowId(anyString())).thenReturn(Arrays.asList(runningExecutionPlan));
-        Long id = orchestratorService.getOrCreateRunningExecutionPlan(executionPlan);
-        Assert.assertEquals((Long)2L,id);
-    }
-
-    @Test
-    public void testCreateRunningExecutionPlan2(){
-        ExecutionPlan executionPlan = new ExecutionPlan();
-        RunningExecutionPlan oldRunningExecutionPlan = new RunningExecutionPlan();
-        oldRunningExecutionPlan.setId(3L);
-
-        ExecutionPlan diffExecutionPlan = new ExecutionPlan();
-        diffExecutionPlan.setFlowUuid("diff uuid");
-        oldRunningExecutionPlan.setExecutionPlan(diffExecutionPlan);
-
-        RunningExecutionPlan runningExecutionPlan = new RunningExecutionPlan();
-        runningExecutionPlan.setId(5L);
-
-        when(runningExecutionPlanService.readByFlowId(anyString())).thenReturn(Arrays.asList(oldRunningExecutionPlan));
-        when(runningExecutionPlanService.createRunningExecutionPlan(any(RunningExecutionPlan.class))).
-                thenReturn(runningExecutionPlan);
-
-        Long id = orchestratorService.getOrCreateRunningExecutionPlan(executionPlan);
-        Assert.assertEquals((Long) 5L, id);
-    }
 }

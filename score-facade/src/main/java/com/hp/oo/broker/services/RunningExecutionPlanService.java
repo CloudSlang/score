@@ -1,6 +1,7 @@
 package com.hp.oo.broker.services;
 
 import com.hp.oo.broker.entities.RunningExecutionPlan;
+import com.hp.oo.internal.sdk.execution.ExecutionPlan;
 
 import java.util.List;
 
@@ -16,4 +17,5 @@ public interface RunningExecutionPlanService {
 	Long saveExecutionPlan(RunningExecutionPlan runningExecutionPlan);
 	byte[] getZippedExecutionPlan(Long id);
 	List<RunningExecutionPlan> readByFlowId(String flowId);
+    Long getOrCreateRunningExecutionPlan(ExecutionPlan executionPlan);
 }

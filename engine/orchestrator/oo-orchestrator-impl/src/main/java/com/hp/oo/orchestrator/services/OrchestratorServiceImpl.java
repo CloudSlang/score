@@ -136,21 +136,7 @@ public final class OrchestratorServiceImpl implements OrchestratorService {
     @Override
     @Transactional
     public Long getOrCreateRunningExecutionPlan(ExecutionPlan executionPlan) {
-        List<RunningExecutionPlan> existingRunningPlans = runningExecutionPlanService.readByFlowId(executionPlan.getFlowUuid());
-
-        //If no running execution plan existsByUuid for this UUID - create new
-        if (CollectionUtils.isEmpty(existingRunningPlans)) {
-            return createNewRunningExecutionPlan(executionPlan);
-        }
-        //If existsByUuid - check if the plans are equal
-        else {
-            for (RunningExecutionPlan existingRunningPlan : existingRunningPlans) {
-                if (existingRunningPlan.getExecutionPlan().equals(executionPlan)) {
-                    return existingRunningPlan.getId();
-                }
-            }
-            return createNewRunningExecutionPlan(executionPlan);
-        }
+        return runningExecutionPlanService.getOrCreateRunningExecutionPlan(executionPlan);
     }
 
     @Override
@@ -165,16 +151,6 @@ public final class OrchestratorServiceImpl implements OrchestratorService {
         execution.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_LOG_LEVEL, computedLogLevel.name());
 
         return execution;
-    }
-
-    private Long createNewRunningExecutionPlan(ExecutionPlan executionPlan) {
-        //Create new and save in DB
-        RunningExecutionPlan runningExecutionPlan = new RunningExecutionPlan();
-        runningExecutionPlan.setFlowUUID(executionPlan.getFlowUuid());
-        runningExecutionPlan.setExecutionPlan(executionPlan);
-        runningExecutionPlan = runningExecutionPlanService.createRunningExecutionPlan(runningExecutionPlan);
-
-        return runningExecutionPlan.getId();
     }
 
     private void enqueue(ExecutionMessage... messages) {

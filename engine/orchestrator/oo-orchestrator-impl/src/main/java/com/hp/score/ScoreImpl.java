@@ -48,7 +48,7 @@ public class ScoreImpl implements Score {
 
     @Override
     public Long trigger(ExecutionPlan executionPlan, Map<String, Serializable> context, Map<String, Serializable> systemContext, Long startStep) {
-        Long runningExecutionPlanId = getOrCreateRunningExecutionPlan(executionPlan);
+        Long runningExecutionPlanId = runningExecutionPlanService.getOrCreateRunningExecutionPlan(executionPlan);
         Long executionId = (Long)idGenerator.next();
         Execution execution = new Execution(executionId, runningExecutionPlanId, startStep,context, systemContext);
 
@@ -71,34 +71,6 @@ public class ScoreImpl implements Score {
     @Override
     public void cancelExecution(Long executionId) {
          //TODO - impl this
-    }
-
-    private Long getOrCreateRunningExecutionPlan(ExecutionPlan executionPlan) {//TODO - move this to RunningExecutionPlan Service
-        List<RunningExecutionPlan> existingRunningPlans = runningExecutionPlanService.readByFlowId(executionPlan.getFlowUuid());
-
-        //If no running execution plan existsByUuid for this UUID - create new
-        if (CollectionUtils.isEmpty(existingRunningPlans)) {
-            return createNewRunningExecutionPlan(executionPlan);
-        }
-        //If existsByUuid - check if the plans are equal
-        else {
-            for (RunningExecutionPlan existingRunningPlan : existingRunningPlans) {
-                if (existingRunningPlan.getExecutionPlan().equals(executionPlan)) {
-                    return existingRunningPlan.getId();
-                }
-            }
-            return createNewRunningExecutionPlan(executionPlan);
-        }
-    }
-
-    private Long createNewRunningExecutionPlan(ExecutionPlan executionPlan) {   //TODO - move this to RunningExecutionPlan Service
-        //Create new and save in DB
-        RunningExecutionPlan runningExecutionPlan = new RunningExecutionPlan();
-        runningExecutionPlan.setFlowUUID(executionPlan.getFlowUuid());
-        runningExecutionPlan.setExecutionPlan(executionPlan);
-        runningExecutionPlan = runningExecutionPlanService.createRunningExecutionPlan(runningExecutionPlan);
-
-        return runningExecutionPlan.getId();
     }
 
     private void enqueue(ExecutionMessage... messages) {
