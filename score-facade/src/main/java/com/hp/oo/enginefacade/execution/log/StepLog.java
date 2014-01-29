@@ -28,6 +28,7 @@ public class StepLog {
     private ExecutionEnums.ExecutionStatus status;
     private String workerId;
     private String user;
+    private ExecutionEnums.EventCategory eventCategory;
 
 
     public List<StepErrorLog> getErrorList() {
@@ -133,6 +134,14 @@ public class StepLog {
 
     public void setStatus(ExecutionEnums.ExecutionStatus status) {
         this.status = status;
+    }
+
+    public ExecutionEnums.EventCategory getEventCategory() {
+        return eventCategory;
+    }
+
+    public void setEventCategory(ExecutionEnums.EventCategory eventCategory) {
+        this.eventCategory = eventCategory;
     }
 
     @Override

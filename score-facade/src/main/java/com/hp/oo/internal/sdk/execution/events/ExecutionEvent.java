@@ -21,6 +21,8 @@ public class ExecutionEvent implements Serializable{
 
 	private ExecutionEnums.Event type;
 
+	private ExecutionEnums.EventCategory eventCategory;
+
 	private Date publishTime;
 
 	@SuppressWarnings("unused")
@@ -46,6 +48,15 @@ public class ExecutionEvent implements Serializable{
 	ExecutionEvent(String executionId, ExecutionEnums.Event type, String sequenceOrder, String path) {
 		this.executionId = executionId;
 		this.type = type;
+		this.publishTime = new Date();
+        this.sequenceOrder =  sequenceOrder;
+        this.path = path;
+	}
+
+    ExecutionEvent(String executionId, ExecutionEnums.Event type, ExecutionEnums.EventCategory eventCategory, String sequenceOrder, String path) {
+		this.executionId = executionId;
+		this.type = type;
+		this.eventCategory = eventCategory;
 		this.publishTime = new Date();
         this.sequenceOrder =  sequenceOrder;
         this.path = path;
@@ -172,6 +183,14 @@ public class ExecutionEvent implements Serializable{
     public ExecutionEvent setDebuggerMode(boolean debuggerMode) {
         isDebuggerMode = debuggerMode;
         return this;
+    }
+
+    public ExecutionEnums.EventCategory getEventCategory() {
+        return eventCategory;
+    }
+
+    public void setEventCategory(ExecutionEnums.EventCategory eventCategory) {
+        this.eventCategory = eventCategory;
     }
 
     @Override

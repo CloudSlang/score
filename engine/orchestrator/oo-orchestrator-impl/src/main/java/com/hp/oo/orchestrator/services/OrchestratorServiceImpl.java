@@ -22,11 +22,11 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -71,6 +71,8 @@ public final class OrchestratorServiceImpl implements OrchestratorService {
         //TODO configure running execution configuration
         long versionNumber = executionConfigurationService.createRunningExecutionConfiguration(executionConfiguration);
         execution.getSystemContext().put(ExecutionConstants.EXECUTION_CONFIGURATION_VERSION, versionNumber);
+        //TODO after moving all execution events creating and dispatching into score this should also moved into score
+        execution.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String,List>());
 
         // send execution event and add the execution to the queue
         ExecutionEvent startEvent = sendExecutionEvent(flowUuid, triggerType, executionName, execution.getExecutionId(), flowInputsContext, execution.getSystemContext());

@@ -5,7 +5,9 @@ import org.apache.commons.lang.ArrayUtils;
 
 import java.io.Serializable;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,7 +19,7 @@ public  class ExecutionEventUtils {
     public static ExecutionEventSequenceOrder startFlow(Map<String, Serializable> systemContext) {
         ExecutionEventSequenceOrder executionEventSequenceOrder = new ExecutionEventSequenceOrder();
         systemContext.put(ExecutionConstants.EXECUTION_EVENT_SEQUENCE_ORDER, executionEventSequenceOrder);
-
+        systemContext.put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED,new HashMap<String,List>());
          return increaseDepth(systemContext);
     }
 

@@ -20,7 +20,8 @@ public class StepInfo implements Serializable{
     private Date endTime;
     private boolean paused;
     private String orderNumber;
-    private String parentFlow;
+    private String flowName;
+    private String flowId;
     private String type;
 
     public String getResponseType() {
@@ -87,12 +88,12 @@ public class StepInfo implements Serializable{
         this.orderNumber = orderNumber;
     }
 
-    public String getParentFlow() {
-        return parentFlow;
+    public String getFlowName() {
+        return flowName;
     }
 
-    public void setParentFlow(String parentFlow) {
-        this.parentFlow = parentFlow;
+    public void setFlowName(String flowName) {
+        this.flowName = flowName;
     }
 
     public String getType() {
@@ -101,6 +102,15 @@ public class StepInfo implements Serializable{
 
     public void setType(String type) {
         this.type = type;
+    }
+
+
+    public String getFlowId() {
+        return flowId;
+    }
+
+    public void setFlowId(String flowId) {
+        this.flowId = flowId;
     }
 
     @Override
@@ -119,7 +129,8 @@ public class StepInfo implements Serializable{
                 .append(this.stepId, that.stepId)
                 .append(this.paused, that.paused)
                 .append(this.orderNumber, that.orderNumber)
-                .append(this.parentFlow, that.parentFlow)
+                .append(this.flowName, that.flowName)
+                .append(this.flowId, that.flowId)
                 .append(this.type, that.type)
                 .isEquals();
     }
@@ -135,7 +146,8 @@ public class StepInfo implements Serializable{
                 .append(this.stepName)
                 .append(this.paused)
                 .append(this.orderNumber)
-                .append(this.parentFlow)
+                .append(this.flowName)
+                .append(this.flowId)
                 .append(this.type)
                 .toHashCode();
     }

@@ -91,4 +91,11 @@ public interface ExecutionEventService {
     List<ExecutionEvent> readEventsByExecutionIdByEventType(String executionId, ExecutionEnums.Event... eventType);
 
     List<ExecutionEvent> readEventsByExecutionIdAndIndexGreaterByEventType(String executionId, Long index , ExecutionEnums.Event... eventType) ;
+
+    /**
+     *
+     * @param executionEvents
+     * @return
+     */
+    StepLog aggregateEventsToStepLog(List<ExecutionEvent> executionEvents);
 }

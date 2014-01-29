@@ -49,6 +49,7 @@ public class ExecutionConstants {
 
     // for  Execution Event
     public static final String EXECUTION_EVENTS_QUEUE = "EXECUTION_EVENTS_QUEUE";
+    public static final String EXECUTION_EVENTS_STEP_MAPPED = "EXECUTION_EVENTS_STEP_MAPPED";
     public static final String EXECUTION_EVENT_SEQUENCE_ORDER = "EXECUTION_EVENT_SEQUENCE_ORDER";
 
     // For Execution event
@@ -60,6 +61,7 @@ public class ExecutionConstants {
 
     //For Workers Groups
     public static final String OPERATION_GROUP = "OPERATION_GROUP"; //the group that the action need to run on
+    public static final String OPERATION_WORKER = "worker_uuid"; //the group that the action need to run on
     public static final String ACTUALLY_OPERATION_GROUP = "ACTUALLY_OPERATION_GROUP"; //the actually entry in the queue that the worker should run. like the name of the worker itself that was chosen from the group
     public static final String DEFAULT_GROUP = "RAS_Operator_Path";
     public static final String ALIAS_GROUP_MAPPING = "OO_ALIAS_GROUP_MAPPING"; //reserve word for clients
@@ -133,4 +135,5 @@ public class ExecutionConstants {
     public static final String NEW_BRANCH_MECHANISM = "NEW_BRANCH_MECHANISM";
 
     public static final String RUNNING_EXECUTION_PLAN_ID = "RUNNING_EXECUTION_PLAN_ID";
+    public static final String PARENT_STEP_UUID = "PARENT_STEP_UUID";
 }

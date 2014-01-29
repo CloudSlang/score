@@ -90,6 +90,7 @@ public class ExecutionServiceTest {
         exe.setExecutionId("111");
         exe.getSystemContext().put(ExecutionConstants.BRANCH_ID, "branch_id");
         exe.getSystemContext().put(ExecutionConstants.FLOW_UUID, "flow_uuid");
+        exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED,new HashMap<String,List>());
 
         //since the resumeService mock will return null - there no such execution in pause state, expect to get false
         boolean result = executionService.handlePausedFlow(exe);
@@ -148,7 +149,7 @@ public class ExecutionServiceTest {
         exe.setExecutionId(executionId);
         exe.getSystemContext().put(ExecutionConstants.BRANCH_ID, branch_id);
         exe.getSystemContext().put(ExecutionConstants.FLOW_UUID, "flow_uuid");
-
+        exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED,new HashMap<String,List>());
         //for events
         exe.getSystemContext().put(ExecutionConstants.EXECUTION_ID_CONTEXT, executionId);
         ExecutionEventSequenceOrder order = new ExecutionEventSequenceOrder();
@@ -190,7 +191,7 @@ public class ExecutionServiceTest {
         exe.getSystemContext().put(ExecutionConstants.SPLIT_ID, "split_id");
         exe.getSystemContext().put(ExecutionConstants.BRANCH_ID, "branch_id");
         exe.getSystemContext().put(ExecutionConstants.ACQUIRED_LOCKS, (Serializable) locks);
-
+        exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED,new HashMap<String,List>());
         executionService.handleBranchFailure(exe, new Exception("Test exception..."));
 
         Mockito.verify(workerDbSupportService, VerificationModeFactory.times(1)).createBranchContext(any(BranchContextHolder.class));
@@ -209,7 +210,7 @@ public class ExecutionServiceTest {
         Execution exe = new Execution(0L, 0L, new ArrayList<String>());
         exe.setExecutionId("111");
         exe.getSystemContext().put(ExecutionConstants.ACQUIRED_LOCKS, (Serializable) locks);
-
+        exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED,new HashMap<String,List>());
         executionService.clearBranchLocks(exe);
 
         //3 times runtimeService
@@ -310,6 +311,7 @@ public class ExecutionServiceTest {
         exe.getSystemContext().put(ExecutionConstants.ACTUALLY_OPERATION_GROUP, "Real_Group");
         exe.getSystemContext().put(ExecutionConstants.MUST_GO_TO_QUEUE, true);
         exe.getSystemContext().put(ExecutionConstants.SHOULD_BE_PERSISTED_FOR_RECOVERY, true);
+        exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED,new HashMap<String,List>());
         //for events
         exe.getSystemContext().put(ExecutionConstants.EXECUTION_ID_CONTEXT, "stam");
         ExecutionEventSequenceOrder order = new ExecutionEventSequenceOrder();

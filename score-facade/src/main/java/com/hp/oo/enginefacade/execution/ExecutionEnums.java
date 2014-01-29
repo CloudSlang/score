@@ -43,7 +43,8 @@ public interface ExecutionEnums {
         AGGREGATION_FINISHED,
         FLOW_INPUTS,
         STEP_INPUTS,
-        ROI
+        ROI,
+        STEP_LOG
 	}
 	
 	enum LogLevel {
@@ -51,6 +52,13 @@ public interface ExecutionEnums {
 		INFO,
 		ERROR
 	}
+
+    enum EventCategory {
+        STEP_START,
+        STEP_PAUSED,
+        STEP_RESUMED,
+        STEP_END,
+    }
 
     enum LogLevelCategory {
         STEP_START ("STEP_START",  "execution.logEvent.startStep.title.label",  "execution.logEvent.startStep.description.label"),

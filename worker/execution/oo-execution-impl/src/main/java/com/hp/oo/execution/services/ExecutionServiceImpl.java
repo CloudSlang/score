@@ -4,6 +4,7 @@ import com.hp.oo.broker.entities.BranchContextHolder;
 import com.hp.oo.broker.entities.RunningExecutionPlan;
 import com.hp.oo.broker.services.RuntimeValueService;
 import com.hp.oo.engine.execution.events.services.ExecutionEventService;
+import com.hp.oo.enginefacade.execution.ExecutionEnums;
 import com.hp.oo.enginefacade.execution.ExecutionEnums.ExecutionStatus;
 import com.hp.oo.enginefacade.execution.ExecutionEnums.LogLevel;
 import com.hp.oo.enginefacade.execution.ExecutionEnums.LogLevelCategory;
@@ -19,7 +20,11 @@ import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.oo.internal.sdk.execution.ExecutionStep;
 import com.hp.oo.internal.sdk.execution.OOContext;
-import com.hp.oo.internal.sdk.execution.events.*;
+import com.hp.oo.internal.sdk.execution.events.EventBus;
+import com.hp.oo.internal.sdk.execution.events.EventWrapper;
+import com.hp.oo.internal.sdk.execution.events.ExecutionEvent;
+import com.hp.oo.internal.sdk.execution.events.ExecutionEventFactory;
+import com.hp.oo.internal.sdk.execution.events.ExecutionEventUtils;
 import com.hp.oo.orchestrator.services.CancelExecutionService;
 import com.hp.oo.orchestrator.services.PauseResumeService;
 import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
@@ -98,6 +103,13 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 return null;
             }
 
+            if(execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_QUEUE) != null){
+                addExecutionEvent(execution);
+                dumpEvents(execution);
+                storeAggregatedEvents(execution);
+            }
+
+
             //Run the execution step
             executeStep(execution, currStep);
 
@@ -120,7 +132,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             addExecutionEvent(execution);
 
             // dump execution events
-            dumpExecutionEvents(execution, false);
+            dumpExecutionEvents(execution, true);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("End of step: " + execution.getPosition() + " in execution id: " + execution.getExecutionId());
@@ -326,15 +338,16 @@ public final class ExecutionServiceImpl implements ExecutionService {
         String branchId = (String) systemContext.get(ExecutionConstants.BRANCH_ID);
         String flowUuid = (String) systemContext.get(ExecutionConstants.FLOW_UUID);
 
+        @SuppressWarnings({"unchecked"})
+        ArrayDeque<ExecutionEvent> eventsQueue = (ArrayDeque<ExecutionEvent>) systemContext.get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
+        if (eventsQueue == null) {
+            eventsQueue = new ArrayDeque<>();
+            execution.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_QUEUE, eventsQueue);
+        }
+
         //If USER_PAUSED send such event
         if (reason.equals(PauseReason.USER_PAUSED)) {
             ExecutionEvent pauseEvent = ExecutionEventFactory.createPausedEvent(executionId, flowUuid, ExecutionEventUtils.increaseEvent(systemContext), systemContext);
-            @SuppressWarnings({"unchecked"})
-            ArrayDeque<ExecutionEvent> eventsQueue = (ArrayDeque<ExecutionEvent>) systemContext.get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
-            if (eventsQueue == null) {
-                eventsQueue = new ArrayDeque<>();
-                execution.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_QUEUE, eventsQueue);
-            }
             eventsQueue.add(pauseEvent);
 
             if (branchId != null) {
@@ -342,6 +355,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 pauseService.pauseExecution(executionId, branchId, reason); // this creates a DB record for this branch, as Pending-paused
             }
         }
+
+        ExecutionEvent stepLogEvent = ExecutionEventFactory.createStepLogEvent(executionId,ExecutionEventUtils.increaseEvent(systemContext), ExecutionEnums.EventCategory.STEP_PAUSED, systemContext);
+        eventsQueue.add(stepLogEvent);
 
         //just dump events that were written in afl or just now
         addExecutionEvent(execution);
@@ -472,11 +488,19 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     private void dumpEvents(Execution execution) {
-        /*List<ExecutionEvent> executionEvents = execution.getAggregatedEvents();
+        List<ExecutionEvent> executionEvents = execution.getAggregatedEvents();
         for (ExecutionEvent executionEvent:executionEvents){
             eventBus.dispatch(new EventWrapper(executionEvent.getType().name(), executionEvent));
-        } */
-        executionEventService.createEvents(execution.getAggregatedEvents());
+        }
+
+        List<ExecutionEvent> filteredExecutionEvents = new ArrayList<>();
+        for (ExecutionEvent executionEvent : executionEvents){
+            if(executionEvent.getType().equals(ExecutionEnums.Event.STEP_LOG)){
+                continue;
+            }
+            filteredExecutionEvents.add(executionEvent);
+        }
+        executionEventService.createEvents(filteredExecutionEvents);
         execution.getAggregatedEvents().clear(); //must clean so we wont send it twice - once from here and once from the QueueListener onTerminated()
         execution.setLastEventDumpTime(System.currentTimeMillis());
     }
