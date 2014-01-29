@@ -7,7 +7,6 @@ import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.hamcrest.Matchers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
@@ -21,7 +20,6 @@ import static ch.lambdaj.Lambda.filter;
  *
  * @author Dima Rassin
  */
-@Service("orchestratorDispatcherService")
 public final class OrchestratorDispatcherServiceImpl implements OrchestratorDispatcherService {
 	private final Logger logger = Logger.getLogger(getClass());
 

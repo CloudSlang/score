@@ -2,12 +2,10 @@ package com.hp.score.engine.data;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
-@Component
 public class HiloFactoryBean implements FactoryBean<IdentityGenerator> {
 
 	@Autowired

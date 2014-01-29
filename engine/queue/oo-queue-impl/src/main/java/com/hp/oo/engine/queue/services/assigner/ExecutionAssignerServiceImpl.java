@@ -11,7 +11,6 @@ import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -23,12 +22,9 @@ import java.util.*;
  * User: Amit Levin
  * Date: 19/11/12
  */
-@Service("executionAssignerService")
 final public class ExecutionAssignerServiceImpl implements ExecutionAssignerService {
 
 	private Logger logger = Logger.getLogger(getClass());
-
-	public static int ASSIGNER_POLL_MAX_SIZE = 20000;
 
 	@Autowired
 	private ExecutionQueueService executionQueueService;

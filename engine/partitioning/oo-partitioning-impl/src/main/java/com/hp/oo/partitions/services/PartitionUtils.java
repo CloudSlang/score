@@ -1,13 +1,10 @@
 package com.hp.oo.partitions.services;
 
-import org.springframework.stereotype.Component;
-
 /**
  * Date: 4/27/12
  *
  * @author Dima Rassin
  */
-@Component
 public class PartitionUtils {
 	public String tableName(String groupName, int partition){
 		return groupName + "_" + partition;

@@ -69,23 +69,23 @@ public class PartitionServiceTest {
 
 	@Configuration
 	static class Configurator{
-		@Bean public PartitionService createPartitionManager(){
+		@Bean PartitionService createPartitionManager(){
 			return new PartitionServiceImpl();
 		}
 
-		@Bean(name = TABLE_NAME) public PartitionTemplate template(){
+		@Bean(name = TABLE_NAME) PartitionTemplate template(){
 			return new PartitionTemplateImpl();
 		}
 
-		@Bean public PartitionGroupRepository repository(){
+		@Bean PartitionGroupRepository repository(){
 			return mock(PartitionGroupRepository.class);
 		}
 
-		@Bean public JdbcTemplate jdbcTemplate(){
+		@Bean JdbcTemplate jdbcTemplate(){
 			return mock(JdbcTemplate.class);
 		}
 
-		@Bean public TransactionTemplate createTransactionTemplate(){
+		@Bean TransactionTemplate createTransactionTemplate(){
 			TransactionTemplate template = mock(TransactionTemplate.class);
 			//noinspection unchecked
 			when(template.<PartitionGroup>execute(any(TransactionCallback.class)))
@@ -93,7 +93,7 @@ public class PartitionServiceTest {
 			return template;
 		}
 
-        @Bean public PartitionUtils partitionUtils() {
+        @Bean PartitionUtils partitionUtils() {
             return new PartitionUtils();
         }
 	}

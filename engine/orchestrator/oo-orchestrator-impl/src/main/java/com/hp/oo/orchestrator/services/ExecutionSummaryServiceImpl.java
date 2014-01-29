@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -34,7 +33,6 @@ import static com.hp.oo.enginefacade.execution.ExecutionSummary.EMPTY_BRANCH;
  * Date: 20/02/13
  * Time: 15:34
  */
-@Service
 public final class ExecutionSummaryServiceImpl implements ExecutionSummaryService {
 
     private final Logger logger = Logger.getLogger(getClass());

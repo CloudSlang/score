@@ -5,7 +5,6 @@ import com.hp.oo.internal.sdk.execution.ExecutionPlan;
 import com.hp.oo.orchestrator.repositories.RunningExecutionPlanRepository;
 import com.hp.oo.broker.services.RunningExecutionPlanService;import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -21,7 +20,6 @@ import java.util.List;
  * Date: 11/24/11
  * Time: 10:54 AM
  */
-@Service("runningEP")
 public final class RunningExecutionPlanServiceImpl implements RunningExecutionPlanService {
 
     @Autowired
@@ -37,8 +35,7 @@ public final class RunningExecutionPlanServiceImpl implements RunningExecutionPl
 	@Override
     @Transactional(readOnly = true)
     public RunningExecutionPlan readExecutionPlanById(Long id) {
-        RunningExecutionPlan runningExecutionPlan= runningExecutionPlanRepository.findOne(id);
-        return runningExecutionPlan;
+        return runningExecutionPlanRepository.findOne(id);
     }
 
     @Override
@@ -51,8 +48,7 @@ public final class RunningExecutionPlanServiceImpl implements RunningExecutionPl
     @Override
     @Transactional
     public byte[] getZippedExecutionPlan(Long id) {
-        byte[] bytes = runningExecutionPlanRepository.getZippedExecutionPlan(id);
-        return bytes;
+        return runningExecutionPlanRepository.getZippedExecutionPlan(id);
     }
 
 	@Override

@@ -14,7 +14,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
-import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
@@ -37,7 +36,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * Time: 15:04
  */
 
-@Repository
 public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
     private Logger logger = Logger.getLogger(getClass());

@@ -6,7 +6,6 @@ import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @author Dima Rassin
  */
-@Service
 public final class PartitionServiceImpl implements PartitionService {
 	private final Logger logger = Logger.getLogger(getClass());
 

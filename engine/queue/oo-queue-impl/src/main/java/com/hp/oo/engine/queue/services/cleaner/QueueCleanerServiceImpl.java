@@ -2,7 +2,6 @@ package com.hp.oo.engine.queue.services.cleaner;
 
 import com.hp.oo.engine.queue.repositories.ExecutionQueueRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
@@ -12,7 +11,6 @@ import java.util.Set;
  * User: Amit Levin
  * Date: 14/10/13
  */
-@Service
 final public class QueueCleanerServiceImpl  implements QueueCleanerService{
 
     final private int BULK_SIZE = 500;

@@ -8,17 +8,18 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
 
 /**
  * User: Amit Levin
  * Date: 10/09/12
  * Time: 11:01
  */
-@Service("queueDispatcherService")
 public final class QueueDispatcherServiceImpl implements QueueDispatcherService {
 	private final Logger logger = Logger.getLogger(getClass());
 

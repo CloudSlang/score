@@ -18,7 +18,6 @@ import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -31,7 +30,6 @@ import static ch.lambdaj.Lambda.extract;
 import static ch.lambdaj.Lambda.on;
 
 
-@Service("splitJoinService")
 public final class SplitJoinServiceImpl implements SplitJoinService {
     private final Logger logger = Logger.getLogger(getClass());
 

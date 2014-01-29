@@ -2,7 +2,6 @@ package com.hp.oo.engine.queue.services;
 
 import com.hp.score.engine.data.IdentityGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
  * Date: 09/10/13
  * Time: 08:54
  */
-@Service
 public final class QueueStateIdGeneratorServiceImpl implements QueueStateIdGeneratorService {
 
     @Autowired
