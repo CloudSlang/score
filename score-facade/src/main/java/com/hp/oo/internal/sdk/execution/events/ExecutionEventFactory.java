@@ -238,7 +238,7 @@ public abstract class ExecutionEventFactory {
         return executionEvent;
     }
 
-    public static ExecutionEvent createOperationalEvent(String executionId, String stepId, String stepName, ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemContext) {
+    public static ExecutionEvent createOperationalEvent(String executionId, String stepId, String stepName,String stepType, String flowName,  ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = eventOrder.getFlowPath().toString();
 
@@ -246,6 +246,8 @@ public abstract class ExecutionEventFactory {
                 .setData4(json(
                         "step_id", stepId,
                         "step_name", stepName,
+                        "step_type", stepType,
+                        "flow_name",flowName,
                         ExecutionConstants.EFFECTIVE_RUNNING_USER, (String)systemContext.get(ExecutionConstants.EFFECTIVE_RUNNING_USER),
                         ExecutionConstants.FLOW_UUID, (String)systemContext.get(ExecutionConstants.FLOW_UUID),
                         ExecutionConstants.PARENT_STEP_UUID, (String)systemContext.get("PARENT_MSS_STEP_UUID")

@@ -22,7 +22,7 @@ public class StepInfo implements Serializable{
     private String orderNumber;
     private String flowName;
     private String flowId;
-    private String type;
+    private String type = "OTHER";
 
     public String getResponseType() {
         return responseType;
