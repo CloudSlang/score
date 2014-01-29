@@ -9,6 +9,7 @@ import com.hp.oo.internal.sdk.execution.ExecutionStep;
 import com.hp.score.Score;
 import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
 import liquibase.integration.spring.SpringLiquibase;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.hibernate.ejb.HibernatePersistence;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,6 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -28,6 +30,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
@@ -90,6 +93,11 @@ public class EngineTest {
 		}
 
 		@Bean
+		JdbcTemplate jdbcTemplate(DataSource dataSource){
+			return new JdbcTemplate(dataSource);
+		}
+
+		@Bean
 		SpringLiquibase liquibase(DataSource dataSource) {
 			SpringLiquibase liquibase = new SpringLiquibase();
 			liquibase.setDataSource(dataSource);
@@ -135,6 +143,16 @@ public class EngineTest {
 		@Bean
 		PlatformTransactionManager transactionManager(EntityManagerFactory emf) {
 			return new JpaTransactionManager(emf);
+		}
+
+		@Bean
+		TransactionTemplate transactionTemplate(PlatformTransactionManager transactionManager){
+			return new TransactionTemplate(transactionManager);
+		}
+
+		@Bean // required by executionInterruptsService
+		ObjectMapper objectMapper(){
+			return new ObjectMapper();
 		}
 
 		@Bean

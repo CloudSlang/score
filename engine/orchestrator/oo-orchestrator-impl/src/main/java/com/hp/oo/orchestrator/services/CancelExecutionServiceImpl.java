@@ -10,7 +10,6 @@ import com.hp.oo.orchestrator.entities.ExecutionSummaryEntity;
 import com.hp.oo.orchestrator.repositories.ExecutionSummaryRepository;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -26,7 +25,6 @@ import static com.hp.oo.enginefacade.execution.ExecutionSummary.EMPTY_BRANCH;
  * Date: 3/29/13
  * Time: 10:47 AM
  */
-@Service("cancelExecutionService")
 public final class CancelExecutionServiceImpl implements CancelExecutionService {
 
     private final Logger logger = Logger.getLogger(getClass());

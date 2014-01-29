@@ -13,7 +13,6 @@ import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -31,7 +30,6 @@ import static com.hp.oo.execution.debug.ExecutionInterrupt.InterruptType;
  * Time: 5:02 PM
  */
 
-@Service("executionInterruptsService")
 public final class ExecutionInterruptsServiceImpl implements ExecutionInterruptsService {
 
     private final Logger logger = Logger.getLogger(getClass());
@@ -106,14 +104,6 @@ public final class ExecutionInterruptsServiceImpl implements ExecutionInterrupts
         return saved.getId();
     }
 
-    /**
-     *
-     * @param executionId
-     * @param interruptType
-     * @param key
-     * @param value
-     * @return
-     */
     @Override
     @Transactional
     public ExecutionInterrupt readExecutionDebugInterrupts(String executionId, InterruptType interruptType, String key, String value) {
@@ -121,14 +111,6 @@ public final class ExecutionInterruptsServiceImpl implements ExecutionInterrupts
         return readExecutionDebugInterrupts(executionId,interruptType,key,value,false);
     }
 
-    /**
-     * invoke when you desire to retrieve ExecutionInterrupt and an un-register it immediately
-     * @param executionId
-     * @param interruptType  :BREAKPOINT,OVERRIDE_RESPONSES
-     * @param key : used to match value
-     * @param value :key value
-     * @return
-     */
     @Override
     @Transactional
     public ExecutionInterrupt readExecutionDebugInterrupts(String executionId, InterruptType interruptType, String key, String value, boolean unRegister) {

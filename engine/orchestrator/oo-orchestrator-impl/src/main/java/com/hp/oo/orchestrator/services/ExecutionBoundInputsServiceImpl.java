@@ -5,7 +5,6 @@ import com.hp.oo.orchestrator.repositories.ExecutionBoundInputsRepository;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -13,7 +12,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Service
 public final class ExecutionBoundInputsServiceImpl implements ExecutionBoundInputsService {
 
     private final Logger logger = Logger.getLogger(getClass());

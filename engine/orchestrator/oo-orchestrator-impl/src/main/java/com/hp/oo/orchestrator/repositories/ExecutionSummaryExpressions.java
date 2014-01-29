@@ -11,7 +11,6 @@ import com.mysema.query.types.path.StringPath;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
@@ -25,7 +24,6 @@ import static com.mysema.query.support.Expressions.*;
  * Date: 22/12/13
  * Time: 12:01
  */
-@Component
 public class ExecutionSummaryExpressions {
 
     @Autowired

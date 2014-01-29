@@ -1,13 +1,10 @@
 package com.hp.oo.engine.queue.repositories.callbacks;
 
-import org.springframework.stereotype.Component;
-
 /**
  * Date: 4/20/13
  *
  * @author Dima Rassin
  */
-@Component("executionStatesCallback")
 public class ExecutionStatesCallback  extends AbstractCallback{
 
 

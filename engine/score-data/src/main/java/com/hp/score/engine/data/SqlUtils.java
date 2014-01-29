@@ -1,7 +1,6 @@
 package com.hp.score.engine.data;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -14,7 +13,6 @@ import java.util.List;
  * User: Eyal Roth
  * Date: 03/12/13
  */
-@Component
 public class SqlUtils {
 
     // Not using '\' since it has special meaning in MySql

@@ -16,7 +16,6 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -30,7 +29,6 @@ import java.util.List;
  * User: Amit Levin
  * Date: 11/11/12
  */
-@Service("ooUserDetailsService")
 public final class WorkerNodeServiceImpl implements WorkerNodeService, UserDetailsService {
 	static public String RUN_WORKER_PERMISSION = "ROLE_RUN_WORKER";
 

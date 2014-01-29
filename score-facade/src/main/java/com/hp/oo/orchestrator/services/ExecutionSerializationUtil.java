@@ -2,7 +2,6 @@ package com.hp.oo.orchestrator.services;
 
 import com.hp.oo.internal.sdk.execution.Execution;
 import org.apache.commons.io.IOUtils;
-import org.springframework.stereotype.Component;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -18,7 +17,6 @@ import java.io.ObjectOutputStream;
  * Date: 24/12/12
  * Time: 11:14
  */
-@Component
 public class ExecutionSerializationUtil {
 
     public Execution objFromBytes(byte[] bytes) {
@@ -41,7 +39,7 @@ public class ExecutionSerializationUtil {
     	}
 
     	public byte[] objToBytes(Execution obj){
-    		ObjectOutputStream oos = null;
+    		ObjectOutputStream oos;
     		try {
     			ByteArrayOutputStream bout = new ByteArrayOutputStream();
     			BufferedOutputStream bos = new BufferedOutputStream(bout);

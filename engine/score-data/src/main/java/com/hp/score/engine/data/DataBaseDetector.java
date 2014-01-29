@@ -2,7 +2,6 @@ package com.hp.score.engine.data;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -15,7 +14,6 @@ import java.sql.SQLException;
  * Time: 3:10 PM
  */
 
-@Component
 public class DataBaseDetector {
 
 	private final Logger logger = Logger.getLogger(getClass());

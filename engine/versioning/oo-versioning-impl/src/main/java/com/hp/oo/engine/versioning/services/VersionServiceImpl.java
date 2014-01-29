@@ -5,7 +5,6 @@ import com.hp.oo.engine.versioning.repositories.VersionRepository;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
@@ -15,8 +14,7 @@ import java.util.Date;
  * Date: 28/10/13
  * Time: 19:13
  */
-@Service
-public final class VersionServiceImpl implements VersionService {
+public final class  VersionServiceImpl implements VersionService {
 
     private final Logger logger = Logger.getLogger(this.getClass());
 

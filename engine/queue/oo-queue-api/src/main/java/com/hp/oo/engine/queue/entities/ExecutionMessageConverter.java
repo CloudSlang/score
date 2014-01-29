@@ -1,7 +1,6 @@
 package com.hp.oo.engine.queue.entities;
 
 import org.apache.commons.io.IOUtils;
-import org.springframework.stereotype.Component;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -19,7 +18,6 @@ import java.util.zip.GZIPOutputStream;
  * Date: 20/11/12
  * Time: 14:35
  */
-@Component
 public class ExecutionMessageConverter {
 
 	public <T> T extractExecution(Payload payload) throws IOException {

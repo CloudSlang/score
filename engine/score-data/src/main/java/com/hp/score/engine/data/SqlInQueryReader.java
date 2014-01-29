@@ -1,7 +1,6 @@
 package com.hp.score.engine.data;
 
 import org.apache.commons.lang.Validate;
-import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
@@ -18,7 +17,6 @@ import java.util.Set;
  * This class is used for executing queries that contain In clauses.
  * It is needed because databases have a limitation of 1000 (Depending on the database) items per in clause.
  */
-@Component
 public class SqlInQueryReader {
 
     private final int DATABASE_IN_CLAUSE_LIMIT = 1000;

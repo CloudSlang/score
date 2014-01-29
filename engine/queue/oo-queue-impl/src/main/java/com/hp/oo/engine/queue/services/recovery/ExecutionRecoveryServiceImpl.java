@@ -10,7 +10,6 @@ import com.hp.oo.engine.versioning.services.VersionService;
 import com.hp.oo.enginefacade.Worker;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +23,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * User: Amit Levin
  * Date: 20/11/12
  */
-@Service
 final public class ExecutionRecoveryServiceImpl implements ExecutionRecoveryService, LoginListener {
 	private final Logger logger = Logger.getLogger(getClass());
 

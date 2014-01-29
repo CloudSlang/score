@@ -1,9 +1,14 @@
 package com.hp.oo.orchestrator.services;
 
 import org.apache.commons.io.IOUtils;
-import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
@@ -11,7 +16,6 @@ import java.util.Map;
 /**
  *
  */
-@Component
 public class ExecConfigSerializationUtil {
 
     public Map<String,String> objFromBytes(byte[] bytes) {

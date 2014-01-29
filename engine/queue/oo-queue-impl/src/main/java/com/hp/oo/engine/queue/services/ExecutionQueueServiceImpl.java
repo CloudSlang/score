@@ -10,7 +10,6 @@ import com.hp.oo.engine.queue.services.statistics.WorkerQueueStatistics;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -25,7 +24,6 @@ import java.util.Map;
  * Date: 20/09/12
  * Time: 18:09
  */
-@Service("executionQueueService")
 final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 
 	private final Logger logger = Logger.getLogger(this.getClass());

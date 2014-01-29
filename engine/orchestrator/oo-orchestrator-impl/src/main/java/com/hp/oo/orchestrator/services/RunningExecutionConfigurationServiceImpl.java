@@ -3,9 +3,7 @@ package com.hp.oo.orchestrator.services;
 import com.hp.oo.orchestrator.entities.RunningExecutionConfiguration;
 import com.hp.oo.orchestrator.entities.RunningExecutionConfigurationImpl;
 import com.hp.oo.orchestrator.repositories.RunningExecutionConfigurationRepository;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -15,10 +13,7 @@ import java.util.*;
  * Date: 1/17/13
  * Time: 12:54 PM
  */
-@Service("runningExecutionConfigurationService")
 public final class RunningExecutionConfigurationServiceImpl implements RunningExecutionConfigurationService {
-
-    private final Logger log = Logger.getLogger(getClass());
 
     @Autowired
     private RunningExecutionConfigurationRepository runningExecConfigRepository;

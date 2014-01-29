@@ -20,7 +20,6 @@ import com.hp.oo.internal.sdk.execution.events.ExecutionEventUtils;
 import com.hp.score.engine.data.IdentityGenerator;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
@@ -35,8 +34,6 @@ import java.util.Map;
  *
  * @author Dima Rassin
  */
-@SuppressWarnings("UnusedDeclaration")
-@Service("orchestratorService")
 public final class OrchestratorServiceImpl implements OrchestratorService {
     private final Logger logger = Logger.getLogger(getClass());
     private final ExecutionEnums.LogLevel DEFAULT_LOG_LEVEL = ExecutionEnums.LogLevel.INFO;
