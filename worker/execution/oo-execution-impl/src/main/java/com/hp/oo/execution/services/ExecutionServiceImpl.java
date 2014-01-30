@@ -38,6 +38,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -105,8 +106,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
             if(execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_QUEUE) != null){
                 addExecutionEvent(execution);
-                dumpEvents(execution);
-                storeAggregatedEvents(execution);
+                dumpBusEvents(execution);
             }
 
 
@@ -131,8 +131,11 @@ public final class ExecutionServiceImpl implements ExecutionService {
             // add execution events
             addExecutionEvent(execution);
 
+            //dum bus event
+            dumpBusEvents(execution);
+
             // dump execution events
-            dumpExecutionEvents(execution, true);
+            dumpExecutionEvents(execution, false);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("End of step: " + execution.getPosition() + " in execution id: " + execution.getExecutionId());
@@ -356,7 +359,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             }
         }
 
-        ExecutionEvent stepLogEvent = ExecutionEventFactory.createStepLogEvent(executionId,ExecutionEventUtils.increaseEvent(systemContext), ExecutionEnums.EventCategory.STEP_PAUSED, systemContext);
+        ExecutionEvent stepLogEvent = ExecutionEventFactory.createStepLogEvent(executionId,ExecutionEventUtils.increaseEvent(systemContext), ExecutionEnums.StepLogCategory.STEP_PAUSED, systemContext);
         eventsQueue.add(stepLogEvent);
 
         //just dump events that were written in afl or just now
@@ -489,20 +492,20 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     private void dumpEvents(Execution execution) {
         List<ExecutionEvent> executionEvents = execution.getAggregatedEvents();
-        for (ExecutionEvent executionEvent:executionEvents){
-            eventBus.dispatch(new EventWrapper(executionEvent.getType().name(), executionEvent));
-        }
-
-        List<ExecutionEvent> filteredExecutionEvents = new ArrayList<>();
-        for (ExecutionEvent executionEvent : executionEvents){
-            if(executionEvent.getType().equals(ExecutionEnums.Event.STEP_LOG)){
-                continue;
-            }
-            filteredExecutionEvents.add(executionEvent);
-        }
-        executionEventService.createEvents(filteredExecutionEvents);
+        executionEventService.createEvents(executionEvents);
         execution.getAggregatedEvents().clear(); //must clean so we wont send it twice - once from here and once from the QueueListener onTerminated()
         execution.setLastEventDumpTime(System.currentTimeMillis());
+    }
+
+    private void dumpBusEvents(Execution execution) {
+        Iterator<ExecutionEvent> executionEvents = execution.getAggregatedEvents().iterator();
+        while(executionEvents.hasNext()){
+            ExecutionEvent executionEvent  =  executionEvents.next();
+            if(executionEvent.getType().equals(ExecutionEnums.Event.STEP_LOG)){
+                eventBus.dispatch(new EventWrapper(executionEvent.getType().name(), executionEvent));
+                executionEvents.remove();
+            }
+        }
     }
 
     private void storeCurrentLogLevel(Execution execution) {
@@ -566,6 +569,11 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 ExecutionEvent logEvent = createLogEvent(execution, currStep, ex, "Error occurred during operation execution", LogLevelCategory.STEP_OPER_ERROR, execution.getSystemContext());
                 @SuppressWarnings("unchecked") Deque<ExecutionEvent> eventsQueue = (Deque<ExecutionEvent>) execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
                 eventsQueue.add(logEvent);
+
+                ExecutionEvent stepLogEvent = ExecutionEventFactory.createStepLogEvent(execution.getExecutionId(),ExecutionEventUtils.increaseEvent(execution.getSystemContext()),
+                        ExecutionEnums.StepLogCategory.STEP_ERROR, execution.getSystemContext());
+                eventsQueue.add(stepLogEvent);
+
             } catch (RuntimeException eventEx) {
                 logger.error("Failed to create event: ", eventEx);
             }
@@ -592,6 +600,11 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 ExecutionEvent logEvent = createLogEvent(execution, currStep, ex, "Error occurred during operation execution", LogLevelCategory.STEP_OPER_ERROR, execution.getSystemContext());
                 @SuppressWarnings("unchecked") Deque<ExecutionEvent> eventsQueue = (Deque<ExecutionEvent>) execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
                 eventsQueue.add(logEvent);
+
+                ExecutionEvent stepLogEvent = ExecutionEventFactory.createStepLogEvent(execution.getExecutionId(),ExecutionEventUtils.increaseEvent(execution.getSystemContext()),
+                        ExecutionEnums.StepLogCategory.STEP_ERROR, execution.getSystemContext());
+                eventsQueue.add(stepLogEvent);
+
             } catch (RuntimeException eventEx) {
                 logger.error("Failed to create event: ", eventEx);
             }
@@ -635,6 +648,11 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 ExecutionEvent logEvent = createLogEvent(execution, currStep, navEx, "Error occurred during navigation execution ", LogLevelCategory.STEP_NAV_ERROR, execution.getSystemContext());
                 @SuppressWarnings("unchecked") Deque<ExecutionEvent> eventsQueue = (Deque) execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
                 eventsQueue.add(logEvent);
+
+                ExecutionEvent stepLogEvent = ExecutionEventFactory.createStepLogEvent(execution.getExecutionId(),ExecutionEventUtils.increaseEvent(execution.getSystemContext()),
+                        ExecutionEnums.StepLogCategory.STEP_ERROR, execution.getSystemContext());
+                eventsQueue.add(stepLogEvent);
+
             } catch (RuntimeException eventEx) {
                 logger.error("Failed to create event: ", eventEx);
             }

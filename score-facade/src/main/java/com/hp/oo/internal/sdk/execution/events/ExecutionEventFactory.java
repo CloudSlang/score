@@ -260,18 +260,18 @@ public abstract class ExecutionEventFactory {
 
     }
 
-    public static ExecutionEvent createStepLogEvent(String executionId,ExecutionEventSequenceOrder eventOrder,ExecutionEnums.EventCategory eventCategory, Map<String, Serializable> systemContext) {
+    public static ExecutionEvent createStepLogEvent(String executionId,ExecutionEventSequenceOrder eventOrder,ExecutionEnums.StepLogCategory stepLogCategory, Map<String, Serializable> systemContext) {
         //TODO do we need sequence order
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = eventOrder.getFlowPath().toString();
 
         List<ExecutionEvent> events = ((Map<String,List>)systemContext.get(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED)).get(flowPath);
 
-        if(eventCategory.equals(ExecutionEnums.EventCategory.STEP_END)){
+        if(stepLogCategory.equals(ExecutionEnums.StepLogCategory.STEP_END)){
             ((Map<String,List>)systemContext.get(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED)).remove(flowPath);
         }
 
-        return new ExecutionEvent(executionId, ExecutionEnums.Event.STEP_LOG,eventCategory, executionEventSequenceOrder, flowPath)
+        return new ExecutionEvent(executionId, ExecutionEnums.Event.STEP_LOG, stepLogCategory, executionEventSequenceOrder, flowPath)
                 .setData4(json(events));
 
     }

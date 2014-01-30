@@ -21,7 +21,7 @@ public class ExecutionEvent implements Serializable{
 
 	private ExecutionEnums.Event type;
 
-	private ExecutionEnums.EventCategory eventCategory;
+	private ExecutionEnums.StepLogCategory stepLogCategory;
 
 	private Date publishTime;
 
@@ -53,10 +53,10 @@ public class ExecutionEvent implements Serializable{
         this.path = path;
 	}
 
-    ExecutionEvent(String executionId, ExecutionEnums.Event type, ExecutionEnums.EventCategory eventCategory, String sequenceOrder, String path) {
+    ExecutionEvent(String executionId, ExecutionEnums.Event type, ExecutionEnums.StepLogCategory stepLogCategory, String sequenceOrder, String path) {
 		this.executionId = executionId;
 		this.type = type;
-		this.eventCategory = eventCategory;
+		this.stepLogCategory = stepLogCategory;
 		this.publishTime = new Date();
         this.sequenceOrder =  sequenceOrder;
         this.path = path;
@@ -185,12 +185,12 @@ public class ExecutionEvent implements Serializable{
         return this;
     }
 
-    public ExecutionEnums.EventCategory getEventCategory() {
-        return eventCategory;
+    public ExecutionEnums.StepLogCategory getStepLogCategory() {
+        return stepLogCategory;
     }
 
-    public void setEventCategory(ExecutionEnums.EventCategory eventCategory) {
-        this.eventCategory = eventCategory;
+    public void setStepLogCategory(ExecutionEnums.StepLogCategory stepLogCategory) {
+        this.stepLogCategory = stepLogCategory;
     }
 
     @Override

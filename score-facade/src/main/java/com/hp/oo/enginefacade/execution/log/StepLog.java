@@ -25,10 +25,10 @@ public class StepLog {
     private HashMap<String, String> extraData;
 
     private String executionId;
-    private ExecutionEnums.ExecutionStatus status;
+    private ExecutionEnums.StepStatus status;
     private String workerId;
     private String user;
-    private ExecutionEnums.EventCategory eventCategory;
+    private ExecutionEnums.StepLogCategory stepLogCategory;
 
 
     public List<StepErrorLog> getErrorList() {
@@ -128,20 +128,20 @@ public class StepLog {
         this.user = user;
     }
 
-    public ExecutionEnums.ExecutionStatus getStatus() {
+    public ExecutionEnums.StepStatus getStatus() {
         return status;
     }
 
-    public void setStatus(ExecutionEnums.ExecutionStatus status) {
+    public void setStatus(ExecutionEnums.StepStatus status) {
         this.status = status;
     }
 
-    public ExecutionEnums.EventCategory getEventCategory() {
-        return eventCategory;
+    public ExecutionEnums.StepLogCategory getStepLogCategory() {
+        return stepLogCategory;
     }
 
-    public void setEventCategory(ExecutionEnums.EventCategory eventCategory) {
-        this.eventCategory = eventCategory;
+    public void setStepLogCategory(ExecutionEnums.StepLogCategory stepLogCategory) {
+        this.stepLogCategory = stepLogCategory;
     }
 
     @Override
