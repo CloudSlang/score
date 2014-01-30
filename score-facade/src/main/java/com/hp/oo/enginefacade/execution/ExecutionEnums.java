@@ -53,11 +53,20 @@ public interface ExecutionEnums {
 		ERROR
 	}
 
-    enum EventCategory {
+    enum StepLogCategory {
         STEP_START,
         STEP_PAUSED,
+        STEP_ERROR,
         STEP_RESUMED,
         STEP_END,
+    }
+
+    enum StepStatus{
+        RUNNING,
+        COMPLETED,
+        ERROR,
+        PAUSED,
+        CANCELED
     }
 
     enum LogLevelCategory {
