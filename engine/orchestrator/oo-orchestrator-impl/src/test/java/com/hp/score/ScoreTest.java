@@ -1,11 +1,6 @@
 package com.hp.score;
 
-import com.hp.oo.broker.entities.RunningExecutionPlan;
-import com.hp.oo.broker.services.RunningExecutionPlanService;
-import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
-import com.hp.oo.engine.queue.services.QueueDispatcherService;
 import com.hp.oo.internal.sdk.execution.ExecutionPlan;
-import com.hp.score.engine.data.IdentityGenerator;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -29,25 +24,12 @@ public class ScoreTest {
     private Score score = new ScoreImpl();
 
     @Mock
-    private RunningExecutionPlanService runningExecutionPlanService;
+    private ScoreTriggering scoreTriggering;
 
-
-    @Mock
-    private IdentityGenerator idGenerator;
-
-
-    @Mock
-    private QueueDispatcherService queueDispatcher;
-
-    @Mock
-    private ExecutionMessageConverter executionMessageConverter;
 
     @Before
     public void resetMocks() {
         MockitoAnnotations.initMocks(this);
-        RunningExecutionPlan runningExecutionPlan = mock(RunningExecutionPlan.class);
-        when(runningExecutionPlan.getId()).thenReturn(2L);
-        when(runningExecutionPlanService.createRunningExecutionPlan((any(RunningExecutionPlan.class)))).thenReturn(runningExecutionPlan);
     }
 
     @Test
@@ -56,7 +38,7 @@ public class ScoreTest {
         ep.setBeginStep(1L);
         score.trigger(ep);
 
-        verify(queueDispatcher,times(1)).dispatch(anyList());
+        verify(scoreTriggering,times(1)).trigger(any(ExecutionPlan.class), anyMap(), anyMap(), anyLong());
     }
 
     @Test
@@ -65,7 +47,7 @@ public class ScoreTest {
         ep.setBeginStep(1L);
         score.trigger(ep,new HashMap<String, Serializable>(),new HashMap<String, Serializable>(),1L);
 
-        verify(queueDispatcher,times(1)).dispatch(anyList());
+        verify(scoreTriggering,times(1)).trigger(any(ExecutionPlan.class), anyMap(), anyMap(), anyLong());
     }
 
 

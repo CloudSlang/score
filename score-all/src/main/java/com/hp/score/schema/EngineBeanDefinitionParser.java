@@ -29,6 +29,7 @@ import com.hp.oo.partitions.services.PartitionServiceImpl;
 import com.hp.oo.partitions.services.PartitionTemplateImpl;
 import com.hp.oo.partitions.services.PartitionUtils;
 import com.hp.score.ScoreImpl;
+import com.hp.score.ScoreTriggeringImpl;
 import com.hp.score.engine.data.DataBaseDetector;
 import com.hp.score.engine.data.HiloFactoryBean;
 import com.hp.score.engine.data.SqlInQueryReader;
@@ -73,6 +74,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(ExecutionRecoveryServiceImpl.class, null);
 		put(QueueCleanerServiceImpl.class, null);
 		put(QueueStateIdGeneratorServiceImpl.class, null);
+        put(ScoreTriggeringImpl.class,null);
 
 		put(PartitionUtils.class, null);
 		put(ExecutionMessageConverter.class, null);
