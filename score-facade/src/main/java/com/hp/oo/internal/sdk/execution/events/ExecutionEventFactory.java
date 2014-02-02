@@ -267,7 +267,7 @@ public abstract class ExecutionEventFactory {
 
         List<ExecutionEvent> events = ((Map<String,List>)systemContext.get(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED)).get(flowPath);
 
-        if(stepLogCategory.equals(ExecutionEnums.StepLogCategory.STEP_END)){
+        if(stepLogCategory.equals(ExecutionEnums.StepLogCategory.STEP_END) || stepLogCategory.equals(ExecutionEnums.StepLogCategory.STEP_ERROR)){
             ((Map<String,List>)systemContext.get(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED)).remove(flowPath);
         }
 
