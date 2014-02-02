@@ -105,9 +105,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             }
 
             if(execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_QUEUE) != null){
-                addExecutionEvent(execution);
-                dumpEvents(execution);
-                storeAggregatedEvents(execution);
+                dumpBusEvents(execution);
             }
 
 
@@ -129,14 +127,14 @@ public final class ExecutionServiceImpl implements ExecutionService {
                     return null;
                 }
             }
+            //dum bus event
+            dumpBusEvents(execution);
+
             // add execution events
             addExecutionEvent(execution);
 
-            //dum bus event
-//            dumpBusEvents(execution);
-
             // dump execution events
-            dumpExecutionEvents(execution, true);
+            dumpExecutionEvents(execution, false);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("End of step: " + execution.getPosition() + " in execution id: " + execution.getExecutionId());
