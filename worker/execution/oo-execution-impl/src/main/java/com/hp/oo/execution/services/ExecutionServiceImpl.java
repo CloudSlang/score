@@ -106,7 +106,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
             if(execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_QUEUE) != null){
                 addExecutionEvent(execution);
-                dumpBusEvents(execution);
+                dumpEvents(execution);
+                storeAggregatedEvents(execution);
             }
 
 
@@ -132,10 +133,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
             addExecutionEvent(execution);
 
             //dum bus event
-            dumpBusEvents(execution);
+//            dumpBusEvents(execution);
 
             // dump execution events
-            dumpExecutionEvents(execution, false);
+            dumpExecutionEvents(execution, true);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("End of step: " + execution.getPosition() + " in execution id: " + execution.getExecutionId());
@@ -492,13 +493,33 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     private void dumpEvents(Execution execution) {
         List<ExecutionEvent> executionEvents = execution.getAggregatedEvents();
-        executionEventService.createEvents(executionEvents);
+        for (ExecutionEvent executionEvent:executionEvents){
+            eventBus.dispatch(new EventWrapper(executionEvent.getType().name(), executionEvent));
+        }
+
+        List<ExecutionEvent> filteredExecutionEvents = new ArrayList<>();
+        for (ExecutionEvent executionEvent : executionEvents){
+            if(executionEvent.getType().equals(ExecutionEnums.Event.STEP_LOG)){
+                continue;
+            }
+            filteredExecutionEvents.add(executionEvent);
+        }
+        executionEventService.createEvents(filteredExecutionEvents);
         execution.getAggregatedEvents().clear(); //must clean so we wont send it twice - once from here and once from the QueueListener onTerminated()
         execution.setLastEventDumpTime(System.currentTimeMillis());
     }
 
+//    private void dumpEvents(Execution execution) {
+//        List<ExecutionEvent> executionEvents = execution.getAggregatedEvents();
+//        executionEventService.createEvents(executionEvents);
+//        execution.getAggregatedEvents().clear(); //must clean so we wont send it twice - once from here and once from the QueueListener onTerminated()
+//        execution.setLastEventDumpTime(System.currentTimeMillis());
+//    }
+
     private void dumpBusEvents(Execution execution) {
-        Iterator<ExecutionEvent> executionEvents = execution.getAggregatedEvents().iterator();
+        @SuppressWarnings("unchecked") ArrayDeque<ExecutionEvent> eventsQueue = (ArrayDeque) execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
+        Iterator<ExecutionEvent> executionEvents  = eventsQueue.iterator();
+
         while(executionEvents.hasNext()){
             ExecutionEvent executionEvent  =  executionEvents.next();
             if(executionEvent.getType().equals(ExecutionEnums.Event.STEP_LOG)){
