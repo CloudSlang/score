@@ -5,6 +5,7 @@ import com.hp.oo.internal.sdk.execution.RecordBoundInput;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 
@@ -13,7 +14,11 @@ import java.util.List;
  * Date: 25/12/12
  * Time: 17:30
  */
-public class StepLog {
+public class StepLog implements Serializable {
+
+
+    private static final long serialVersionUID = -3195339762640416295L;
+
     private StepInfo stepInfo;
     private StepTransitionLog stepTransitionLog;
     private String description;
