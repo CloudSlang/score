@@ -10,7 +10,6 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.Date;
@@ -23,7 +22,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Date: 20/11/12
  * Time: 08:46
  */
-@Component
 public class InBuffer implements ApplicationListener, Runnable, WorkerRecoveryListener {
 
     private final long MEMORY_THRESHOLD = 50000000; // 50 Mega byte

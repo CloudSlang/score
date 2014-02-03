@@ -34,7 +34,6 @@ import com.hp.score.engine.data.DataBaseDetector;
 import com.hp.score.engine.data.HiloFactoryBean;
 import com.hp.score.engine.data.SqlInQueryReader;
 import com.hp.score.engine.data.SqlUtils;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
@@ -53,7 +52,6 @@ import java.util.Map;
  */
 @SuppressWarnings("unused")
 public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
-	private final Logger logger = Logger.getLogger(getClass());
 
 	private Map<Class<?>,String> beans = new HashMap<Class<?>,String>(){{
 		put(OrchestratorServiceImpl.class, "orchestratorService");

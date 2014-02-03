@@ -31,7 +31,6 @@ import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.ArrayDeque;
@@ -49,7 +48,6 @@ import java.util.UUID;
  *
  * @author Dima Rassin
  */
-@Component("agent")
 public final class ExecutionServiceImpl implements ExecutionService {
     private final Logger logger = Logger.getLogger(getClass());
 
@@ -610,7 +608,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
             execution.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_QUEUE, eventsQueue);
 
             //now we run the exe step
-            return (List<StartBranchDataContainer>) reflectionAdapter.executeControlAction(currStep.getAction(), stepData);
+	        //noinspection unchecked
+	        return (List<StartBranchDataContainer>) reflectionAdapter.executeControlAction(currStep.getAction(), stepData);
         } catch (RuntimeException ex) {
             logger.error("Error occurred during operation execution.  Execution id: " + execution.getExecutionId(), ex);
             execution.getSystemContext().put(ExecutionConstants.EXECUTION_STEP_ERROR_KEY, ex.getMessage());

@@ -5,6 +5,8 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -18,7 +20,7 @@ import java.util.Map;
  * Time: 09:32
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("/META-INF/spring/reflectionAdapterTestContext.xml")
+@ContextConfiguration
 public class ReflectionAdapterTest {
      private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(getClass().getName());
 
@@ -56,4 +58,17 @@ public class ReflectionAdapterTest {
 
         Assert.assertEquals(8, (int)result);
     }
+
+	@Configuration
+	static class Context{
+		@Bean
+		ReflectionAdapter reflectionAdapter(){
+			return new ReflectionAdapterImpl();
+		}
+
+		@Bean
+		ReflectionAdapterTestHelper reflectionAdapterTestHelper(){
+			return new ReflectionAdapterTestHelper();
+		}
+	}
 }

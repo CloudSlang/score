@@ -6,12 +6,10 @@ package com.hp.oo.execution.services;
  */
 
 import com.hp.oo.internal.sdk.execution.events.ExecutionEvent;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
 public class ExecutionEventLogFilterServiceTest {
 
 	private List<ExecutionEvent> successFilterList = new ArrayList<>();

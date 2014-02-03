@@ -2,14 +2,12 @@ package com.hp.oo.execution.services;
 
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
-import org.springframework.stereotype.Component;
 
 /**
  * Date: 6/10/13
  *
  * @author Dima Rassin
  */
-@Component
 public class RetryTemplate {
 	private final Logger logger = Logger.getLogger(getClass());
 

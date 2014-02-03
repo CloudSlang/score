@@ -10,7 +10,6 @@
 	<artifactId>score-worker</artifactId>
 
     <dependencies>
-
         <dependency>
             <groupId>com.hp.score</groupId>
             <artifactId>oo-execution-impl</artifactId>

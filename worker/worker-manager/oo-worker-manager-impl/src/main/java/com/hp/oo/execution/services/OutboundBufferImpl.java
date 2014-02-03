@@ -6,7 +6,6 @@ import com.hp.oo.orchestrator.services.OrchestratorDispatcherService;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,7 +21,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import static ch.lambdaj.Lambda.*;
 
-@Component("outBuffer")
 public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListener {
 	private final Logger logger = Logger.getLogger(this.getClass());
 

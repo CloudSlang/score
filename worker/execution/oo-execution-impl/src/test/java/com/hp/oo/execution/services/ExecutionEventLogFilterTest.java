@@ -69,20 +69,18 @@ public class ExecutionEventLogFilterTest {
 
 	
 	private List<ExecutionEvent> createSuccessFilterEvents(String executionId) {
-		List<ExecutionEvent> events = Arrays.asList(
+		return Arrays.asList(
 				ExecutionEventFactory.createStartEvent(executionId, "my flow", "manually", null, null, ExecutionEventUtils.increaseEvent(systemContext), systemContext),
 				ExecutionEventFactory.createLogEvent(executionId,"step2", "test log message 2", LogLevel.INFO, LogLevelCategory.STEP_TRANSITION ,  null, ExecutionEventUtils.increaseEvent(systemContext), systemContext),
 				ExecutionEventFactory.createLogEvent(executionId,"step2", "test log message 3", LogLevel.ERROR,LogLevelCategory.STEP_TRANSITION,  null, ExecutionEventUtils.increaseEvent(systemContext), systemContext),
 				ExecutionEventFactory.createCompletedFinishEvent(executionId, "my flow", "content", ExecutionEventUtils.increaseEvent(systemContext), systemContext)
 		);
-		return events;
 	}
 
 	private List<ExecutionEvent> createDiscardFilterEvents(String executionId) {
-		List<ExecutionEvent> events = Arrays.asList(
+		return Arrays.asList(
 				ExecutionEventFactory.createLogEvent(executionId,"step2", "test log message 1", LogLevel.DEBUG, LogLevelCategory.STEP_TRANSITION, null, ExecutionEventUtils.increaseEvent(systemContext), systemContext)
 		);
-		return events;
 	}
 
 }
