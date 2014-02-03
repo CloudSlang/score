@@ -66,7 +66,7 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
     }
 
     private void createRunningExecutionConfiguration(Map<String, Serializable> systemContext) {
-        Map<String,String> executionConfiguration = (Map<String,String>)systemContext.get("executionConfiguration");
+        @SuppressWarnings("unchecked") Map<String,String> executionConfiguration = (Map<String,String>)systemContext.get("executionConfiguration");
         if(executionConfiguration != null){
             long versionNumber = executionConfigurationService.createRunningExecutionConfiguration(executionConfiguration);
             systemContext.put(ExecutionConstants.EXECUTION_CONFIGURATION_VERSION, versionNumber);

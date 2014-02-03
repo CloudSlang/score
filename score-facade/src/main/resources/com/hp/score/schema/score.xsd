@@ -29,7 +29,19 @@
 			</xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
-			<xsd:attribute name="uuid" use="required" type="xsd:string"/>
+			<xsd:sequence>
+				<xsd:element name="configuration" minOccurs="0" maxOccurs="1">
+					<xsd:complexType>
+						<xsd:attribute type="xsd:int" name="inBufferCapacity"/>
+						<xsd:attribute type="xsd:int" name="coolDownPollingMillis"/>
+						<xsd:attribute type="xsd:int" name="numberOfExecutionThreads"/>
+						<xsd:attribute type="xsd:int" name="maxDeltaBetweenDrains"/>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:sequence>
+			<xsd:attribute type="xsd:string" name="id"/>
+			<xsd:attribute  type="xsd:string" name="uuid" use="required"/>
+			<xsd:attribute type="xsd:string" name="depends-on"/>
 		</xsd:complexType>
 	</xsd:element>
 </xsd:schema>

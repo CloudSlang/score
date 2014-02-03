@@ -3,14 +3,13 @@
 	<parent>
 		<artifactId>score-parent</artifactId>
 		<groupId>com.hp.score</groupId>
-		<version>0.1.39-SNAPSHOT</version>
+		<version>0.1.40-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>score-worker</artifactId>
 
     <dependencies>
-
         <dependency>
             <groupId>com.hp.score</groupId>
             <artifactId>oo-execution-impl</artifactId>

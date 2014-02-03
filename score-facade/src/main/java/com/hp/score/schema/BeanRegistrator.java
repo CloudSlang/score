@@ -3,6 +3,7 @@ package com.hp.score.schema;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.util.StringUtils;
 
 /**
  * Date: 1/28/14
@@ -48,6 +49,15 @@ public class BeanRegistrator{
 	@SuppressWarnings("unused")
 	public BeanRegistrator addPropertyValue(String name, String beanName) {
 		builder.addPropertyReference(name, beanName);
+		return this;
+	}
+
+	public BeanRegistrator addDependsOn(String ... beanNames) {
+		if (beanNames != null){
+			for (String beanName : beanNames){
+				if (StringUtils.hasText(beanName)) builder.addDependsOn(beanName.trim());
+			}
+		}
 		return this;
 	}
 

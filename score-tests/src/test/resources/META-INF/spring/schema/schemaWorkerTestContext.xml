@@ -5,5 +5,10 @@
 		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.hp.com/schema/score http://www.hp.com/schema/score/score.xsd">
 
-	<score:worker uuid="aaa"/>
+	<score:worker uuid="aaa">
+		<score:configuration
+				inBufferCapacity="1"
+				coolDownPollingMillis="2"
+		/>
+	</score:worker>
 </beans>

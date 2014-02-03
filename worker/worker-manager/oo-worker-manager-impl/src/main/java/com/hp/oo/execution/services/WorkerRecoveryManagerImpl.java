@@ -3,7 +3,6 @@ package com.hp.oo.execution.services;
 import com.hp.oo.engine.node.services.WorkerNodeService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -14,7 +13,6 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * @author Dima Rassin
  */
-@Component
 public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager{
 	private final Logger logger = Logger.getLogger(getClass());
 

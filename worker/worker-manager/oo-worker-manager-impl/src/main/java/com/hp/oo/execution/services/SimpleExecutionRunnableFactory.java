@@ -5,8 +5,6 @@ import com.hp.oo.engine.queue.services.QueueStateIdGeneratorService;
 import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import javax.annotation.Resource;
 
 /**
@@ -14,7 +12,6 @@ import javax.annotation.Resource;
  * User: Amit Levin
  * Date: 19/12/12
  */
-@Component
 public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecutionRunnable> {
 
 	@Autowired

@@ -9,7 +9,6 @@ import com.hp.oo.execution.services.OutboundBuffer;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.FlowExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -20,7 +19,6 @@ import java.util.UUID;
  * Date: 21/11/12
  * Time: 15:19
  */
-@Component("runningExecutionGateway")
 public class ExecutionGatewayImpl implements ExecutionGateway, SubFlowExecutionGateway {
 
     @Autowired
