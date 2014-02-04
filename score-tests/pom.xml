@@ -4,7 +4,7 @@
 
 	<groupId>com.hp.score</groupId>
 	<artifactId>score-tests</artifactId>
-	<version>0.1.40</version>
+	<version>0.1.41-SNAPSHOT</version>
 
 	<distributionManagement>
 		<repository>
