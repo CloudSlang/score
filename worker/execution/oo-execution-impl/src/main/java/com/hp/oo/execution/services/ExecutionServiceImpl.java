@@ -359,6 +359,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
         ExecutionEvent stepLogEvent = ExecutionEventFactory.createStepLogEvent(executionId,ExecutionEventUtils.increaseEvent(systemContext), ExecutionEnums.StepLogCategory.STEP_PAUSED, systemContext);
         eventsQueue.add(stepLogEvent);
 
+        //dump bus events here because out side is too late
+        dumpBusEvents(execution);
+
         //just dump events that were written in afl or just now
         addExecutionEvent(execution);
         dumpEvents(execution);
@@ -383,6 +386,12 @@ public final class ExecutionServiceImpl implements ExecutionService {
         if (reason == null) {
             return false; //indicate that the flow was not paused
         }
+
+        Deque<ExecutionEvent> eventsQueue = (Deque) systemContext.get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
+        ExecutionEvent pausedStepEvent = ExecutionEventFactory.createStepLogEvent(executionId, ExecutionEventUtils.increaseEvent(systemContext),ExecutionEnums.StepLogCategory.STEP_PAUSED,systemContext);
+        eventsQueue.add(pausedStepEvent);
+
+        dumpBusEvents(execution);
 
         //just dump events that were written in afl
         addExecutionEvent(execution);

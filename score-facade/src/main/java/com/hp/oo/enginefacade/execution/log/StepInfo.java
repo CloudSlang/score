@@ -24,6 +24,10 @@ public class StepInfo implements Serializable{
     private String flowId;
     private String type = "OTHER";
 
+
+    private String transitionMessage;
+
+
     public String getResponseType() {
         return responseType;
     }
@@ -111,6 +115,14 @@ public class StepInfo implements Serializable{
 
     public void setFlowId(String flowId) {
         this.flowId = flowId;
+    }
+
+    public String getTransitionMessage() {
+        return transitionMessage;
+    }
+
+    public void setTransitionMessage(String transitionMessage) {
+        this.transitionMessage = transitionMessage;
     }
 
     @Override
