@@ -42,6 +42,12 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 			new ConfValue().NAME("maxDeltaBetweenDrains").DEFAULT(100)
 	);
 
+	private List<ConfValue> schedulerValues = Arrays.asList(
+			new ConfValue().NAME("outBufferInterval").DEFAULT(100L),
+			new ConfValue().NAME("keepAliveInterval").DEFAULT(10000L),
+			new ConfValue().NAME("statisticsInterval").DEFAULT(1000L)
+	);
+
 	@Override
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		registerWorkerUuid(element.getAttribute("uuid"), element.getAttribute("depends-on"), parserContext);
@@ -52,11 +58,13 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 		registerSpringIntegration(parserContext);
 
+//		registerScheduler(DomUtils.getChildElementByTagName(element, "scheduler"), parserContext);
+
 		return createRootBeanDefinition();
 	}
 
 	private AbstractBeanDefinition createRootBeanDefinition(){
-		//
+		// todo should be returned some reasonable bean. Currently jus an Object is returned
 		return BeanDefinitionBuilder.genericBeanDefinition(Object.class).getBeanDefinition();
 	}
 
@@ -79,31 +87,23 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		}
 	}
 
-	private void registerConfiguration(Element configurationElement, ParserContext parserContext) {
-		Map<String,Object> configuration = parseConfiguration(configurationElement);
-
-		BeanRegistrator beanRegistrator = new BeanRegistrator(parserContext);
-		for (Map.Entry<String, Object> configurationEntry : configuration.entrySet()) {
-			beanRegistrator
-					.NAME(configurationEntry.getKey())
-					.CLASS(configurationEntry.getValue().getClass())
-					.addConstructorArgValue(configurationEntry.getValue())
-					.register();
-		}
-	}
-	
-	private Map<String,Object> parseConfiguration(Element configurationElement){
-		Map<String,Object> configuration = new HashMap<>();
-		for (ConfValue value : configurationValues) {
-			String attrValue = configurationElement != null? configurationElement.getAttribute(value.NAME()): null;
-			configuration.put(value.NAME(), value.fromString(attrValue));
-		}
-		return configuration;
-	}
-
 	private void registerSpringIntegration(ParserContext parserContext) {
 		new XmlBeanDefinitionReader(parserContext.getRegistry())
 				.loadBeanDefinitions("META-INF/spring/score/context/scoreIntegrationContext.xml");
+	}
+
+	private void registerConfiguration(Element configurationElement, ParserContext parserContext) {
+		for (ConfValue configurationValue : configurationValues) {
+			configurationValue.register(configurationElement, parserContext);
+		}
+	}
+
+	private void registerScheduler(Element schedulerElement, ParserContext parserContext){
+		for (ConfValue value : schedulerValues) {
+			value.register(schedulerElement, parserContext);
+		}
+		new XmlBeanDefinitionReader(parserContext.getRegistry())
+				.loadBeanDefinitions("META-INF/spring/score/context/scoreWorkerSchedulerContext.xml");
 	}
 
 	@Override
@@ -111,41 +111,4 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		return true;
 	}
 
-	private class ConfValue {
-		private String name;
-		private Class<?> clazz;
-		private Object defaultValue;
-
-		public String NAME(){
-			return this.name;
-		}
-
-		public ConfValue NAME(String name) {
-			this.name = name;
-			return this;
-		}
-
-		public ConfValue CLASS(Class<?> clazz) {
-			this.clazz = clazz;
-			return this;
-		}
-
-		public ConfValue DEFAULT(Object defaultValue) {
-			this.defaultValue = defaultValue;
-			if (defaultValue != null) this.clazz = defaultValue.getClass();
-			return this;
-		}
-
-		public Object fromString(String value) {
-			if (StringUtils.hasText(value)){
-				try {
-					return clazz.getConstructor(String.class).newInstance(value);
-				} catch (Exception ex) {
-					throw new RuntimeException("Failed to parse worker configuration attribute [" + name + "] value: " + value, ex);
-				}
-			} else {
-				return defaultValue;
-			}
-		}
-	}
 }

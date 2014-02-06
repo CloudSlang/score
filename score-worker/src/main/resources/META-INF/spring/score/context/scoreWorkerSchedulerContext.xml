@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:task="http://www.springframework.org/schema/task"
+		xsi:schemaLocation=
+				"http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+				http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+
+	<task:scheduler id="scoreWorkerScheduler" pool-size="3"/>
+	<task:scheduled-tasks scheduler="scoreWorkerScheduler">
+		<task:scheduled ref="outBuffer" method="drain" fixed-delay="#{outBufferInterval}"/>
+		<task:scheduled ref="workerManager" method="workerKeepAlive" fixed-rate="#{keepAliveInterval}"/>
+		<task:scheduled ref="workerManager" method="logStatistics" fixed-rate="#{statisticsInterval}"/>
+	</task:scheduled-tasks>
+</beans>

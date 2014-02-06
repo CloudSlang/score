@@ -29,7 +29,7 @@
 			</xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
-			<xsd:sequence>
+			<xsd:all>
 				<xsd:element name="configuration" minOccurs="0" maxOccurs="1">
 					<xsd:complexType>
 						<xsd:attribute type="xsd:int" name="inBufferCapacity"/>
@@ -38,7 +38,19 @@
 						<xsd:attribute type="xsd:int" name="maxDeltaBetweenDrains"/>
 					</xsd:complexType>
 				</xsd:element>
-			</xsd:sequence>
+				<xsd:element name="scheduler" minOccurs="0" maxOccurs="1">
+					<xsd:annotation>
+						<xsd:documentation>
+							Score worker scheduler configuration.
+						</xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:attribute type="xsd:int" name="outBufferInterval"/>
+						<xsd:attribute type="xsd:int" name="keepAliveInterval"/>
+						<xsd:attribute type="xsd:int" name="statisticsInterval"/>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:all>
 			<xsd:attribute type="xsd:string" name="id"/>
 			<xsd:attribute  type="xsd:string" name="uuid" use="required"/>
 			<xsd:attribute type="xsd:string" name="depends-on"/>

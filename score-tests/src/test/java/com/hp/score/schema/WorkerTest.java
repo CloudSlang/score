@@ -37,8 +37,8 @@ public class WorkerTest {
 	private WorkerManager workerManager;
 
 	@Test
-	public void baseEngineTest(){
-
+	public void baseEngineTest() throws InterruptedException {
+//		Thread.currentThread().join();
 	}
 
 	@Configuration
