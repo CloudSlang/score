@@ -241,4 +241,14 @@ public interface EngineExecutionFacade {
      */
     List<FlowStatisticsData> readFlowsStatistics(Integer top, List<StatisticMeasurementsEnum> measurements, SortingStatisticMeasurementsEnum sortBy, Boolean isDescending, Date fromDate, Date toDate);
 
+    /**
+     * Calculates the currently running step for a given execution id.
+     * If a sub-flow is executed within the execution id, then the executing step within the sub-flow will be returned.
+     * If a step inside a parallel or multi-instance step is currently running, then the step representing the entry
+     * point of the parallel/multi-instance step will be returned.
+     *
+     * @param executionId the execution id.
+     * @return the StepInfo object for the currently running step.
+     */
+    StepInfo readCurrentlyExecutingStep(String executionId);
 }
