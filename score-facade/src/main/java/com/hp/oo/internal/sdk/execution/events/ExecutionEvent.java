@@ -37,6 +37,8 @@ public class ExecutionEvent implements Serializable{
 	private Long data3;
 
 	private String data4;
+    // currently used for passing ExecutionEvent List instead of using the Data 4 and JsonMappper which has bad performance when resolving it
+    private Object data5;
 
     private long index;
 
@@ -148,6 +150,16 @@ public class ExecutionEvent implements Serializable{
 		this.data4 = data4;
 		return this;
 	}
+
+
+    public Object getData5() {
+        return data5;
+    }
+
+    public ExecutionEvent setData5(Object data5) {
+        this.data5 = data5;
+        return this;
+    }
 
     public String getSequenceOrder() {
    		return sequenceOrder;
