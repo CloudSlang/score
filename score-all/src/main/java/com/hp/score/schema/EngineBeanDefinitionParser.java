@@ -25,6 +25,7 @@ import com.hp.oo.orchestrator.services.OrchestratorServiceImpl;
 import com.hp.oo.orchestrator.services.RunningExecutionConfigurationServiceImpl;
 import com.hp.oo.orchestrator.services.RunningExecutionPlanServiceImpl;
 import com.hp.oo.orchestrator.services.SplitJoinServiceImpl;
+import com.hp.oo.partitions.services.PartitionCallback;
 import com.hp.oo.partitions.services.PartitionServiceImpl;
 import com.hp.oo.partitions.services.PartitionTemplateImpl;
 import com.hp.oo.partitions.services.PartitionUtils;
@@ -130,17 +131,20 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	}
 
 	private void registerPartitionTemplates(ParserContext parserContext) {
-		registerPartitionTemplate("OO_EXECUTION_EVENTS", 4, 1000000, -1, parserContext);
-		registerPartitionTemplate("OO_EXECUTION_STATES", 2, 50000, -1, parserContext);
+		//registerPartitionTemplate("OO_EXECUTION_EVENTS", 4, 1000000, -1, parserContext,ExecutionEventsCallback);
+		registerPartitionTemplate("OO_EXECUTION_STATES", 2, 50000, -1, parserContext,ExecutionStatesCallback.class);
 	}
 
-	private void registerPartitionTemplate(String name, int groupSize, long sizeThreshold, long timeThreshold, ParserContext parserContext){
+	private void registerPartitionTemplate(String name, int groupSize, long sizeThreshold, long timeThreshold,
+                                           ParserContext parserContext,
+                                           Class<? extends PartitionCallback> callbackClass){
 		new BeanRegistrator(parserContext)
 				.NAME(name)
 				.CLASS(PartitionTemplateImpl.class)
 				.addPropertyValue("groupSize", groupSize)
 				.addPropertyValue("sizeThreshold", sizeThreshold)
 				.addPropertyValue("timeThreshold", timeThreshold)
+                .addPropertyValue("callbackClass",callbackClass)
 				.register();
 	}
 

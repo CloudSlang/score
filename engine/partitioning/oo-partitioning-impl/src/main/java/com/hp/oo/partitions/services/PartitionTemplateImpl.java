@@ -140,7 +140,7 @@ public class PartitionTemplateImpl implements PartitionTemplate, BeanNameAware {
 	}
 
 	public void setCallbackClass(Class<? extends PartitionCallback> callbackClass){
-		if (logger.isDebugEnabled()) logger.debug("Registering callback class " + callbackClass.getSimpleName() + " for partition group [" + groupName +"]");
+		logger.info("Registering callback class " + callbackClass.getSimpleName() + " for partition group [" + groupName +"]");
 		Map<String,? extends PartitionCallback> callbacksMap = applicationContext.getBeansOfType(callbackClass);
 
 		if (!callbacksMap.isEmpty()){
