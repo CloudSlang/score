@@ -3,6 +3,7 @@ package com.hp.oo.enginefacade.execution;
 import com.hp.oo.enginefacade.execution.log.ExecutionLog;
 import com.hp.oo.enginefacade.execution.log.StepInfo;
 import com.hp.oo.enginefacade.execution.log.StepLog;
+import com.hp.oo.enginefacade.execution.log.StepLogSearchCriteria;
 import com.hp.oo.internal.sdk.execution.events.ExecutionEvent;
 
 import java.util.Collection;
@@ -137,6 +138,50 @@ public interface EngineExecutionFacade {
     StepLog readExecutionStepLogByPath_(String executionId, String path);
 
     /**
+     * Returns a paginated list of StepLogs.
+     *
+     * @param executionId execution ID whose steps to retrieve
+     * @param descendingOrder controls whether steps should be retrieved from the end (in descending path order)
+     * @param pageNum page number to return (starting with 1)
+     * @param pageSize size of each page (1 to 500)
+     * @return a paginated list of StepLogs - will be empty if the page is empty or if no such execution
+     */
+    List<StepLog> readStepLogs(String executionId, boolean descendingOrder, long pageNum, long pageSize);
+
+    /**
+     * Searches StepLogs and returns a paginated list of search results.
+     *
+     * @param executionId execution ID whose steps to search
+     * @param criteria search criteria for filtering the result set
+     * @param descendingOrder controls whether steps should be searched from the end (in descending path order)
+     * @param pageNum page number of search results (starting with 1)
+     * @param pageSize size of each page (1 to 500)
+     * @return a paginated list of StepLogs matching the criteria - will be empty if no matches, or if there are matches
+     *          but the requested page is empty, or if no such execution
+     */
+    List<StepLog> findStepLogs(
+            String executionId, StepLogSearchCriteria criteria, boolean descendingOrder, long pageNum, long pageSize);
+
+    /**
+     * Returns the total number of step logs for the given execution.
+     *
+     * @param executionId execution ID whose steps to count
+     * @return the total step log count - will be 0 if no step has been logged yet, or if no such execution
+     */
+    long countStepLogs(String executionId);
+
+    /**
+     * Returns the number of step logs for the given execution, whose paths come before the given path. For example, the
+     * path 0.2.0 comes before 0.10.0.
+     *
+     * @param executionId execution ID whose steps to count
+     * @param upToPath step path marking the upper bound for the count (exclusive) - note that this path does not have
+     *                 to actually exist in the execution, it is simply an upper bound
+     * @return the step log count - will be 0 if no matching step has been logged yet, or if no such execution
+     */
+    long countStepLogs(String executionId, String upToPath);
+
+    /**
      * @param executionId the execution id to query
      * @return an object with info of a specific execution
      */
@@ -183,7 +228,6 @@ public interface EngineExecutionFacade {
      * @param value          the bounded value of this input
      */
     void createBoundInput(String executionId, String inputName, String domainTermName, String value);
-
 
     /**
      * Create a list of bound inputs
