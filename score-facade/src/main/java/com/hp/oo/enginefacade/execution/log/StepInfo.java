@@ -23,6 +23,7 @@ public class StepInfo implements Serializable{
     private String flowName;
     private String flowId;
     private String type = "OTHER";
+    private long updatedTime;
 
 
     private String transitionMessage;
@@ -123,6 +124,14 @@ public class StepInfo implements Serializable{
 
     public void setTransitionMessage(String transitionMessage) {
         this.transitionMessage = transitionMessage;
+    }
+
+    public long getUpdatedTime() {
+        return updatedTime;
+    }
+
+    public void setUpdatedTime(long updatedTime) {
+        this.updatedTime = updatedTime;
     }
 
     @Override
