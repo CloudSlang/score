@@ -10,9 +10,6 @@ import java.util.List;
  */
 public class StepLogSearchCriteria {
 
-    private Long stepNumber;
-    private Long stepNumberLowerBound;
-    private Long stepNumberUpperBound;
     private String path;
     private String pathLowerBound;
     private String pathUpperBound;
@@ -34,30 +31,6 @@ public class StepLogSearchCriteria {
     private String flowContains;
     private String userContains;
     private String workerContains;
-
-    public Long getStepNumber() {
-        return stepNumber;
-    }
-
-    public void setStepNumber(Long stepNumber) {
-        this.stepNumber = stepNumber;
-    }
-
-    public Long getStepNumberLowerBound() {
-        return stepNumberLowerBound;
-    }
-
-    public void setStepNumberLowerBound(Long stepNumberLowerBound) {
-        this.stepNumberLowerBound = stepNumberLowerBound;
-    }
-
-    public Long getStepNumberUpperBound() {
-        return stepNumberUpperBound;
-    }
-
-    public void setStepNumberUpperBound(Long stepNumberUpperBound) {
-        this.stepNumberUpperBound = stepNumberUpperBound;
-    }
 
     public String getPath() {
         return path;
@@ -263,11 +236,6 @@ public class StepLogSearchCriteria {
             return false;
         if (startTimeUpperBound != null ? !startTimeUpperBound.equals(that.startTimeUpperBound) : that.startTimeUpperBound != null)
             return false;
-        if (stepNumber != null ? !stepNumber.equals(that.stepNumber) : that.stepNumber != null) return false;
-        if (stepNumberLowerBound != null ? !stepNumberLowerBound.equals(that.stepNumberLowerBound) : that.stepNumberLowerBound != null)
-            return false;
-        if (stepNumberUpperBound != null ? !stepNumberUpperBound.equals(that.stepNumberUpperBound) : that.stepNumberUpperBound != null)
-            return false;
         if (transitionContains != null ? !transitionContains.equals(that.transitionContains) : that.transitionContains != null)
             return false;
         if (userContains != null ? !userContains.equals(that.userContains) : that.userContains != null) return false;
@@ -279,10 +247,7 @@ public class StepLogSearchCriteria {
 
     @Override
     public int hashCode() {
-        int result = stepNumber != null ? stepNumber.hashCode() : 0;
-        result = 31 * result + (stepNumberLowerBound != null ? stepNumberLowerBound.hashCode() : 0);
-        result = 31 * result + (stepNumberUpperBound != null ? stepNumberUpperBound.hashCode() : 0);
-        result = 31 * result + (path != null ? path.hashCode() : 0);
+        int result = path != null ? path.hashCode() : 0;
         result = 31 * result + (pathLowerBound != null ? pathLowerBound.hashCode() : 0);
         result = 31 * result + (pathUpperBound != null ? pathUpperBound.hashCode() : 0);
         result = 31 * result + (nameContains != null ? nameContains.hashCode() : 0);

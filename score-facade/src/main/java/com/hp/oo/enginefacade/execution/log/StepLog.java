@@ -27,6 +27,7 @@ public class StepLog implements Serializable {
     private List<StepErrorLog> errorList;
     private List<RecordBoundInput> stepInputs;
     private HashMap<String, String> stepResult;
+    private HashMap<String, String> rawResult;
     private HashMap<String, String> extraData;
 
     private String executionId;
@@ -82,6 +83,14 @@ public class StepLog implements Serializable {
 
     public void setStepResult(HashMap<String, String> stepResult) {
         this.stepResult = stepResult;
+    }
+
+    public HashMap<String, String> getRawResult() {
+        return rawResult;
+    }
+
+    public void setRawResult(HashMap<String, String> rawResult) {
+        this.rawResult = rawResult;
     }
 
     public String getStepPrimaryResult() {
