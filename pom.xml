@@ -3,14 +3,14 @@
 
 	<groupId>com.hp.score</groupId>
 	<artifactId>score-parent</artifactId>
-	<version>0.1.47-SNAPSHOT</version>
+	<version>0.1.47.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<scm>
 		<connection>scm:git:https://github.com/HPSoftware/score.git</connection>
 		<developerConnection>scm:git:git@github.com:HPSoftware/score.git</developerConnection>
 		<url>https://github.com/HPSoftware/score.git</url>
-		<tag>master</tag>
+		<tag>epr1010</tag>
 	</scm>
 
 	<distributionManagement>
