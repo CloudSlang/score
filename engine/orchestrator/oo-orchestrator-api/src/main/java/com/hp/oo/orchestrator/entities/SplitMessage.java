@@ -17,6 +17,8 @@ import java.util.Objects;
 public class SplitMessage implements Message {
 	private static final long serialVersionUID = -720851148155732731L;
 
+    private int basicSplitWeight = Integer.getInteger("basic.split.weight",3);
+
 	private final String splitId;
     private final Execution parent;
     private final List<Execution> children;
@@ -46,7 +48,7 @@ public class SplitMessage implements Message {
 
 	@Override
 	public int getWeight() {
-		return 300;
+		return children.size() * basicSplitWeight;
 	}
 
 	@Override
