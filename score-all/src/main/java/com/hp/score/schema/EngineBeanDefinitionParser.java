@@ -85,7 +85,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(DataBaseDetector.class, null);
 		put(ExecutionQueueRepositoryImpl.class, null);
 		put(HiloFactoryBean.class, "scoreHiloFactoryBean");
-		put(WorkersMBean.class, null);
+		put(WorkersMBean.class, "com.hp.oo.engine.node.services.WorkersMBean");
 		put(ExecutionInterruptsSerializationUtil.class, null);
 		put(ExecutionStatesCallback.class, "executionStatesCallback");
 	}};
