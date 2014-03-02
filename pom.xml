@@ -87,6 +87,12 @@
             <url>https://github.com/orius123</url>
             <id>orius123</id>
         </developer>
+        <developer>
+            <email>einat.neuman@hp.com</email>
+            <name>Einat Neuman</name>
+            <url>https://github.com/einatneu</url>
+            <id>einatneu</id>
+        </developer>
     </developers>
 
 	<licenses>
