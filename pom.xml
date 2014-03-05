@@ -45,18 +45,6 @@
 			<url>https://github.com/meirwah</url>
 			<id>meirwah</id>
 		</developer>
-		<developer>
-			<email>dima.rassin@hp.com</email>
-			<name>Dima Rassin</name>
-			<url>https://github.com/dimarassin</url>
-			<id>dimarassin</id>
-		</developer>
-        <developer>
-            <email>amit.levin@hp.com</email>
-            <name>Amit Levin</name>
-            <url>https://github.com/lamit</url>
-            <id>lamit</id>
-        </developer>
         <developer>
             <email>shehab.hajyhia@hp.com</email>
             <name>Shehab Hajyhia</name>
