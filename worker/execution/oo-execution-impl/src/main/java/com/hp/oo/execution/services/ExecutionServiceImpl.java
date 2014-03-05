@@ -500,9 +500,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     private void dumpEvents(Execution execution) {
         List<ExecutionEvent> executionEvents = execution.getAggregatedEvents();
-        //for (ExecutionEvent executionEvent:executionEvents){
-            //eventBus.dispatch(new EventWrapper(executionEvent.getType().name(), executionEvent));
-        //}
+        for (ExecutionEvent executionEvent:executionEvents){
+            eventBus.dispatch(new EventWrapper(executionEvent.getType().name(), executionEvent));
+        }
 
         List<ExecutionEvent> filteredExecutionEvents = new ArrayList<>();
         for (ExecutionEvent executionEvent : executionEvents){

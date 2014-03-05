@@ -10,8 +10,4 @@ public interface EventHandler {
 
     void handleEvent(EventWrapper eventWrapper);
 
-    boolean equals(Object o);
-
-    int hashCode();
-
 }
