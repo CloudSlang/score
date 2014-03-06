@@ -81,6 +81,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
     @Autowired
     private EventBus eventBus;
 
+    private boolean eventsOff = Boolean.getBoolean("events.mechanism.off");
+
     @Override
     public Execution execute(Execution execution) {
         try {
@@ -509,7 +511,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
             }
             filteredExecutionEvents.add(executionEvent);
         }
-        executionEventService.createEvents(filteredExecutionEvents);
+        if(!eventsOff){
+            executionEventService.createEvents(filteredExecutionEvents);
+        }
         execution.getAggregatedEvents().clear(); //must clean so we wont send it twice - once from here and once from the QueueListener onTerminated()
         execution.setLastEventDumpTime(System.currentTimeMillis());
     }
