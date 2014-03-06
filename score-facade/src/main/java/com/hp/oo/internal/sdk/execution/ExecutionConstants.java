@@ -130,6 +130,10 @@ public class ExecutionConstants {
     public static final String FINISHED_CHILD_BRANCHES_DATA = "FINISHED_CHILD_BRANCHES_DATA";
     public static final String NEW_SPLIT_ID = "NEW_SPLIT_ID";
 
+    // For ROI
+    public static final double DEFAULT_TRANSITION_VALUE = 0.0;
+    public static final String EXECUTION_TOTAL_ROI = "execution_total_roi";
+
     // TODO temporary while we have 2 different mechanisms for parallel executions
     // TODO it is used to differentiate between the 2
     public static final String NEW_BRANCH_MECHANISM = "NEW_BRANCH_MECHANISM";
