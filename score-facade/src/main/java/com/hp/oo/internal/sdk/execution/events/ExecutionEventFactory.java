@@ -272,7 +272,7 @@ public abstract class ExecutionEventFactory {
         }
 
         return new ExecutionEvent(executionId, ExecutionEnums.Event.STEP_LOG, stepLogCategory, executionEventSequenceOrder, flowPath)
-                .setData5(events);
+                .setData5(new ArrayList<>(events));
 
     }
 
