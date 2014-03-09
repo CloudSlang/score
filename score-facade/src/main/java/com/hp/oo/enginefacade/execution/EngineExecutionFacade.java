@@ -155,11 +155,11 @@ public interface EngineExecutionFacade {
      * @param criteria search criteria for filtering the result set
      * @param descendingOrder controls whether steps should be searched from the end (in descending path order)
      * @param pageNum page number of search results (starting with 1)
-     * @param pageSize size of each page (1 to 500)
+     * @param pageSize size of each page (1 to 10000)
      * @return a paginated list of StepLogs matching the criteria - will be empty if no matches, or if there are matches
      *          but the requested page is empty, or if no such execution
      */
-    List<StepLog> findStepLogs(
+    List<StepLog> readStepLogs(
             String executionId, StepLogSearchCriteria criteria, boolean descendingOrder, long pageNum, long pageSize);
 
     /**

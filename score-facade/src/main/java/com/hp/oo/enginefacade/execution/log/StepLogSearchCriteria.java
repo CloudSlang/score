@@ -1,7 +1,10 @@
 package com.hp.oo.enginefacade.execution.log;
 
+import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: eisentha
@@ -10,27 +13,105 @@ import java.util.List;
  */
 public class StepLogSearchCriteria {
 
+    // Main info
     private String path;
     private String pathLowerBound;
     private String pathUpperBound;
     private String nameContains;
     private List<String> allowedTypes;
+
+    // Time
     private Date startTime;
     private Date startTimeLowerBound;
     private Date startTimeUpperBound;
     private Long durationSec;
     private Long durationSecLowerBound;
     private Long durationSecUpperBound;
+
+    // Bindings
     private String inputsContain;
-    private String resultsContain;
-    private List<String> allowedResponses;
+    private String rawResultsContain;
+
+    // Response/transition
+    private List<String> allowedResponseTypes;
     private String transitionContains;
     private Double roi;
     private Double roiLowerBound;
     private Double roiUpperBound;
-    private String flowContains;
+
+    // Misc.
+    private String currentFlowContains;
     private String userContains;
-    private String workerContains;
+    private String workerIdContains;
+
+    public StepLogSearchCriteria() {
+        // Empty constructor
+    }
+
+    public StepLogSearchCriteria(
+            String path, String pathLowerBound, String pathUpperBound,
+            String nameContains,
+            List<String> allowedTypes,
+            Date startTime, Date startTimeLowerBound, Date startTimeUpperBound,
+            Long durationSec, Long durationSecLowerBound, Long durationSecUpperBound,
+            String inputsContain,
+            String rawResultsContain,
+            List<String> allowedResponseTypes,
+            String transitionContains,
+            Double roi, Double roiLowerBound, Double roiUpperBound,
+            String currentFlowContains,
+            String userContains,
+            String workerIdContains) {
+        this.path = path;
+        this.pathLowerBound = pathLowerBound;
+        this.pathUpperBound = pathUpperBound;
+        this.nameContains = nameContains;
+        this.allowedTypes = allowedTypes;
+        this.startTime = startTime;
+        this.startTimeLowerBound = startTimeLowerBound;
+        this.startTimeUpperBound = startTimeUpperBound;
+        this.durationSec = durationSec;
+        this.durationSecLowerBound = durationSecLowerBound;
+        this.durationSecUpperBound = durationSecUpperBound;
+        this.inputsContain = inputsContain;
+        this.rawResultsContain = rawResultsContain;
+        this.allowedResponseTypes = allowedResponseTypes;
+        this.transitionContains = transitionContains;
+        this.roi = roi;
+        this.roiLowerBound = roiLowerBound;
+        this.roiUpperBound = roiUpperBound;
+        this.currentFlowContains = currentFlowContains;
+        this.userContains = userContains;
+        this.workerIdContains = workerIdContains;
+    }
+
+    /**
+     * Returns true if no criterion is set.
+     * @return True if all of the criteria are unset (i.e. null), false otherwise.
+     */
+    public boolean isEmpty() {
+
+        for (Method method : getClass().getMethods()) {
+
+            // Skip if it's a superclass method, or a method that doesn't start with "get"
+            if (!method.getDeclaringClass().equals(getClass()) || !method.getName().startsWith("get")) {
+                continue;
+            }
+
+            Object value;
+            try {
+                value = method.invoke(this);
+            } catch (Exception ex) {
+                continue;
+            }
+
+            if (!emptyValue(value)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     public String getPath() {
         return path;
@@ -128,20 +209,20 @@ public class StepLogSearchCriteria {
         this.inputsContain = inputsContain;
     }
 
-    public String getResultsContain() {
-        return resultsContain;
+    public String getRawResultsContain() {
+        return rawResultsContain;
     }
 
-    public void setResultsContain(String resultsContain) {
-        this.resultsContain = resultsContain;
+    public void setRawResultsContain(String rawResultsContain) {
+        this.rawResultsContain = rawResultsContain;
     }
 
-    public List<String> getAllowedResponses() {
-        return allowedResponses;
+    public List<String> getAllowedResponseTypes() {
+        return allowedResponseTypes;
     }
 
-    public void setAllowedResponses(List<String> allowedResponses) {
-        this.allowedResponses = allowedResponses;
+    public void setAllowedResponseTypes(List<String> allowedResponseTypes) {
+        this.allowedResponseTypes = allowedResponseTypes;
     }
 
     public String getTransitionContains() {
@@ -176,12 +257,12 @@ public class StepLogSearchCriteria {
         this.roiUpperBound = roiUpperBound;
     }
 
-    public String getFlowContains() {
-        return flowContains;
+    public String getCurrentFlowContains() {
+        return currentFlowContains;
     }
 
-    public void setFlowContains(String flowContains) {
-        this.flowContains = flowContains;
+    public void setCurrentFlowContains(String currentFlowContains) {
+        this.currentFlowContains = currentFlowContains;
     }
 
     public String getUserContains() {
@@ -192,12 +273,30 @@ public class StepLogSearchCriteria {
         this.userContains = userContains;
     }
 
-    public String getWorkerContains() {
-        return workerContains;
+    public String getWorkerIdContains() {
+        return workerIdContains;
     }
 
-    public void setWorkerContains(String workerContains) {
-        this.workerContains = workerContains;
+    public void setWorkerIdContains(String workerIdContains) {
+        this.workerIdContains = workerIdContains;
+    }
+
+    private boolean emptyValue(Object value) {
+
+        if (value == null){
+            return true;
+        }
+
+        if (Collection.class.isAssignableFrom(value.getClass())) {
+            return ((Collection) value).isEmpty();
+        }
+
+        //noinspection SimplifiableIfStatement
+        if (Map.class.isAssignableFrom(value.getClass())) {
+            return ((Map) value).isEmpty();
+        }
+
+        return false;
     }
 
     @Override
@@ -207,7 +306,7 @@ public class StepLogSearchCriteria {
 
         StepLogSearchCriteria that = (StepLogSearchCriteria) o;
 
-        if (allowedResponses != null ? !allowedResponses.equals(that.allowedResponses) : that.allowedResponses != null)
+        if (allowedResponseTypes != null ? !allowedResponseTypes.equals(that.allowedResponseTypes) : that.allowedResponseTypes != null)
             return false;
         if (allowedTypes != null ? !allowedTypes.equals(that.allowedTypes) : that.allowedTypes != null) return false;
         if (durationSec != null ? !durationSec.equals(that.durationSec) : that.durationSec != null) return false;
@@ -215,7 +314,7 @@ public class StepLogSearchCriteria {
             return false;
         if (durationSecUpperBound != null ? !durationSecUpperBound.equals(that.durationSecUpperBound) : that.durationSecUpperBound != null)
             return false;
-        if (flowContains != null ? !flowContains.equals(that.flowContains) : that.flowContains != null) return false;
+        if (currentFlowContains != null ? !currentFlowContains.equals(that.currentFlowContains) : that.currentFlowContains != null) return false;
         if (inputsContain != null ? !inputsContain.equals(that.inputsContain) : that.inputsContain != null)
             return false;
         if (nameContains != null ? !nameContains.equals(that.nameContains) : that.nameContains != null) return false;
@@ -224,7 +323,7 @@ public class StepLogSearchCriteria {
             return false;
         if (pathUpperBound != null ? !pathUpperBound.equals(that.pathUpperBound) : that.pathUpperBound != null)
             return false;
-        if (resultsContain != null ? !resultsContain.equals(that.resultsContain) : that.resultsContain != null)
+        if (rawResultsContain != null ? !rawResultsContain.equals(that.rawResultsContain) : that.rawResultsContain != null)
             return false;
         if (roi != null ? !roi.equals(that.roi) : that.roi != null) return false;
         if (roiLowerBound != null ? !roiLowerBound.equals(that.roiLowerBound) : that.roiLowerBound != null)
@@ -239,7 +338,7 @@ public class StepLogSearchCriteria {
         if (transitionContains != null ? !transitionContains.equals(that.transitionContains) : that.transitionContains != null)
             return false;
         if (userContains != null ? !userContains.equals(that.userContains) : that.userContains != null) return false;
-        if (workerContains != null ? !workerContains.equals(that.workerContains) : that.workerContains != null)
+        if (workerIdContains != null ? !workerIdContains.equals(that.workerIdContains) : that.workerIdContains != null)
             return false;
 
         return true;
@@ -259,15 +358,15 @@ public class StepLogSearchCriteria {
         result = 31 * result + (durationSecLowerBound != null ? durationSecLowerBound.hashCode() : 0);
         result = 31 * result + (durationSecUpperBound != null ? durationSecUpperBound.hashCode() : 0);
         result = 31 * result + (inputsContain != null ? inputsContain.hashCode() : 0);
-        result = 31 * result + (resultsContain != null ? resultsContain.hashCode() : 0);
-        result = 31 * result + (allowedResponses != null ? allowedResponses.hashCode() : 0);
+        result = 31 * result + (rawResultsContain != null ? rawResultsContain.hashCode() : 0);
+        result = 31 * result + (allowedResponseTypes != null ? allowedResponseTypes.hashCode() : 0);
         result = 31 * result + (transitionContains != null ? transitionContains.hashCode() : 0);
         result = 31 * result + (roi != null ? roi.hashCode() : 0);
         result = 31 * result + (roiLowerBound != null ? roiLowerBound.hashCode() : 0);
         result = 31 * result + (roiUpperBound != null ? roiUpperBound.hashCode() : 0);
-        result = 31 * result + (flowContains != null ? flowContains.hashCode() : 0);
+        result = 31 * result + (currentFlowContains != null ? currentFlowContains.hashCode() : 0);
         result = 31 * result + (userContains != null ? userContains.hashCode() : 0);
-        result = 31 * result + (workerContains != null ? workerContains.hashCode() : 0);
+        result = 31 * result + (workerIdContains != null ? workerIdContains.hashCode() : 0);
         return result;
     }
 }
