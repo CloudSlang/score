@@ -1,8 +1,7 @@
 package com.hp.oo.orchestrator.services;
 
-//import com.hp.oo.engine.queue.entities.ExecStatus;
+import com.hp.oo.enginefacade.execution.ComplexExecutionStatus;
 import com.hp.oo.enginefacade.execution.ExecutionEnums;
-import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.orchestrator.entities.ExecutionSummaryEntity;
 
@@ -23,8 +22,6 @@ public interface ExecutionSummaryService {
      *
      * @param flowPath  - a pattern that is matched against the flowPath field of the entities. null or empty string disables this filter.
      * @param statuses  - the list of execution statuses used for filtering. null or empty list disables this filter.
-     * @param resultStatusTypes - the list of result status types for filtering. null or empty list disables this filter.
-     * @param pauseReasons - the list of pause reasons for filtering. Available only when PAUSED is in the list of statuses. null or empty list disables this filter.
      * @param owner     - a pattern that is matched against the owner field of the entities. null or empty string disables this filter.
      * @param runName     - a pattern that is matched against the runName field of the entities. null or empty string disables this filter.
      * @param runId     - a pattern that is matched against the runId field of the entities. null or empty string disables this filter.
@@ -35,9 +32,7 @@ public interface ExecutionSummaryService {
      * @param pageSize  - the number of executions to return  @return a list of Executions that started on the given startDate or before.
      */
     List<ExecutionSummaryEntity> readExecutions(String flowPath,
-                                                List<ExecutionEnums.ExecutionStatus> statuses,
-                                                List<String> resultStatusTypes,
-                                                List<PauseReason> pauseReasons,
+                                                List<ComplexExecutionStatus> statuses,
                                                 String owner,
                                                 String runName,
                                                 String runId,
@@ -146,15 +141,6 @@ public interface ExecutionSummaryService {
      */
     public List<ExecutionSummaryEntity> readExecutionsByFlow(String flowUuid, Date startTime, Date endTime, int offsetIndex, int pageSize);
 
-
-    /**
-     * The service of returning an Execution object to the queue.
-     * Relevant for Resume and Cancel after paused.
-     *
-     * @param execution   - the Execution to return to the queue.
-     * @param queueStatus - the status that the execution will get in the queue
-     */
-//    public void putExecutionToQueue(Execution execution, ExecStatus queueStatus);
 
     public Execution getExecutionObj(ExecutionSummaryEntity entity);
 

@@ -1,5 +1,6 @@
 package com.hp.oo.orchestrator.services;
 
+import com.hp.oo.enginefacade.execution.ComplexExecutionStatus;
 import com.hp.oo.enginefacade.execution.ExecutionEnums.ExecutionStatus;
 import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.oo.internal.sdk.execution.Execution;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -299,9 +301,13 @@ public class ExecutionSummaryServiceTest {
 
 
         String flowPath = "library\\1\\2.xml";
-        List<ExecutionStatus> statuses = Arrays.asList(ExecutionStatus.values());
-        List<String> resultStatusTypes = Collections.emptyList();
-        List<PauseReason> pauseReasons = Arrays.asList(PauseReason.values());
+        List<ComplexExecutionStatus> statuses = new LinkedList<>();
+        for(ExecutionStatus status : ExecutionStatus.values()) {
+            for(PauseReason pauseReason : PauseReason.values()) {
+                ComplexExecutionStatus complexExecutionStatus = new ComplexExecutionStatus(status, null, pauseReason);
+                statuses.add(complexExecutionStatus);
+            }
+        }
         String owner = "user";
         String runName = "a run name";
         String runId = "123456";
@@ -319,8 +325,6 @@ public class ExecutionSummaryServiceTest {
         List<ExecutionSummaryEntity> resultExecutions = service.readExecutions(
                 flowPath,
                 statuses,
-                resultStatusTypes,
-                pauseReasons,
                 owner,
                 runName,
                 runId,
@@ -339,9 +343,7 @@ public class ExecutionSummaryServiceTest {
         verify(expressions, times(1)).runNameLike(runName);
         verify(expressions, times(1)).runIdLike(runId);
         verify(expressions, times(1)).flowUuidLike(flowUUID);
-        verify(expressions, times(1)).statusIn(statuses);
-        verify(expressions, times(1)).pauseReasonIn(pauseReasons);
-        verify(expressions, times(1)).resultStatusTypeIn(resultStatusTypes);
+        verify(expressions, times(1)).complexStatusIn(statuses);
 
         verifyNoMoreInteractions(expressions);
 
@@ -352,18 +354,23 @@ public class ExecutionSummaryServiceTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
+    public void testReadExecutions_invlidStatusArg() {
+        service.readExecutions(null, Arrays.asList(new ComplexExecutionStatus(null, "a", null)), null, null, null, null, null,null, 1, 20);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
     public void testReadExecutions_invalidDateArg() {
-        service.readExecutions(null, null, null, null, null, null, null, null, new Date(0), new Date(123L), 1, 20);
+        service.readExecutions(null, null, null, null, null, null, new Date(0), new Date(123L), 1, 20);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testReadExecutions_invalidPageNumArg() {
-        service.readExecutions(null, null, null, null, null, null, null, null, null, null, 0, 20);
+        service.readExecutions(null, null,null, null, null, null, null, null, 0, 20);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testReadExecutions_invalidPageSizeArg() {
-        service.readExecutions(null, null, null, null, null, null, null, null, null, null, 0, -1);
+        service.readExecutions(null, null, null, null, null, null, null, null, 0, -1);
     }
 
     ////////// ReadExecutions by flow uuid //////////
