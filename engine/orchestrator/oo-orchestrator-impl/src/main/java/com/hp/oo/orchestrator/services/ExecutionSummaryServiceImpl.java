@@ -1,7 +1,7 @@
 package com.hp.oo.orchestrator.services;
 
+import com.hp.oo.enginefacade.execution.ComplexExecutionStatus;
 import com.hp.oo.enginefacade.execution.ExecutionEnums.ExecutionStatus;
-import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.orchestrator.entities.ExecutionSummaryEntity;
 import com.hp.oo.orchestrator.entities.QExecutionSummaryEntity;
@@ -9,6 +9,7 @@ import com.hp.oo.orchestrator.repositories.ExecutionSummaryExpressions;
 import com.hp.oo.orchestrator.repositories.ExecutionSummaryRepository;
 import com.hp.oo.orchestrator.util.OffsetPageRequest;
 import com.mysema.query.types.expr.BooleanExpression;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -51,9 +51,7 @@ public final class ExecutionSummaryServiceImpl implements ExecutionSummaryServic
     @Override
     @Transactional(readOnly = true)
     public List<ExecutionSummaryEntity> readExecutions(String flowPath,
-                                                       List<ExecutionStatus> statuses,
-                                                       List<String> resultStatusTypes,
-                                                       List<PauseReason> pauseReasons,
+                                                       List<ComplexExecutionStatus> statuses,
                                                        String owner,
                                                        String runName,
                                                        String runId,
@@ -74,9 +72,11 @@ public final class ExecutionSummaryServiceImpl implements ExecutionSummaryServic
         Validate.isTrue(pageNum > 0, "Page number should be positive");
         Validate.isTrue(pageSize >= 0, "Page size can't be negative");
 
-        //hack to support backward compatibility until we will handle statuses in the new way
-        List<String> results = new ArrayList<>(resultStatusTypes);
-        boolean shouldLookForNullResults = results.removeAll(Collections.singleton(null));
+        if(CollectionUtils.isNotEmpty(statuses)) {
+            for(ComplexExecutionStatus complexExecutionStatus : statuses) {
+                Validate.isTrue(complexExecutionStatus.getExecutionStatus() != null, "Complex status can't have null status");
+            }
+        }
 
         BooleanExpression expression = BooleanExpression.allOf(
                 exp.branchIsEmpty(),
@@ -86,10 +86,7 @@ public final class ExecutionSummaryServiceImpl implements ExecutionSummaryServic
                 exp.runNameLike(runName),
                 exp.runIdLike(runId),
                 exp.flowUuidLike(flowUUID),
-                exp.statusIn(statuses),
-                exp.pauseReasonIn(pauseReasons),
-                shouldLookForNullResults ? exp.resultStatusTypeIn(results).or(exp.resultStatusTypeIsNull())
-                        : exp.resultStatusTypeIn(results)
+                exp.complexStatusIn(statuses)
         );
 
         // the given pageNum is one-based, but PageRequest works zero-based.

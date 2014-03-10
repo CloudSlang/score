@@ -24,8 +24,6 @@ public interface EngineExecutionFacade {
      *
      * @param flowPath  - a pattern that is matched against the flowPath field of the entities. null or empty string disables this filter.
      * @param statuses  - the list of execution statuses used for filtering. null or empty list disables this filter.
-     * @param resultStatusTypes - the list of result status types for filtering. null or empty list disables this filter.
-     * @param pauseReasons - the list of pause reasons for filtering. Available only when PAUSED is in the list of statuses. null or empty list disables this filter.
      * @param owner     - a pattern that is matched against the owner field of the entities. null or empty string disables this filter.
      * @param runName     - a pattern that is matched against the runName field of the entities. null or empty string disables this filter.
      * @param runId     - a pattern that is matched against the runId field of the entities. null or empty string disables this filter.
@@ -36,9 +34,7 @@ public interface EngineExecutionFacade {
      * @param pageSize  - the number of executions to return  @return a list of Executions that started on the given startDate or before.
      */
     List<ExecutionSummary> readExecutions(String flowPath,
-                                          List<ExecutionEnums.ExecutionStatus> statuses,
-                                          List<String> resultStatusTypes,
-                                          List<PauseReason> pauseReasons,
+                                          List<ComplexExecutionStatus> statuses,
                                           String owner,
                                           String runName,
                                           String runId,
