@@ -37,6 +37,7 @@ public class WorkerTest {
 	private WorkerManager workerManager;
 
 	@Test
+    //This test starts an engine process, uncomment the line if you want the process to run, please note it is endless...
 	public void baseEngineTest() throws InterruptedException {
 //		Thread.currentThread().join();
 	}

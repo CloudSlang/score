@@ -39,7 +39,8 @@ public class WorkersMBean {
 		return objectWriter.writeValueAsString(workerNodeService.readAllWorkers());
 	}
 
-	@ManagedOperation(description = "Activates specified worker")
+    /*I remove this due to security issue this present*/
+/*	@ManagedOperation(description = "Activates specified worker")
 	@ManagedOperationParameters(
 			@ManagedOperationParameter(name = "worker UUID", description = "Worker UUID to be activated")
 	)
@@ -53,5 +54,5 @@ public class WorkersMBean {
 	)
 	public void deactivateWorker(String workerUuid){
 		workerNodeService.deactivate(workerUuid);
-	}
+	}*/
 }

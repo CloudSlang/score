@@ -1,6 +1,7 @@
 package com.hp.oo.orchestrator.repositories;
 
 import ch.lambdaj.function.convert.Converter;
+import com.hp.oo.enginefacade.execution.ComplexExecutionStatus;
 import com.hp.oo.enginefacade.execution.ExecutionEnums;
 import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.oo.orchestrator.entities.QExecutionSummaryEntity;
@@ -17,7 +18,11 @@ import java.util.List;
 
 import static ch.lambdaj.Lambda.convert;
 import static com.hp.oo.enginefacade.execution.ExecutionSummary.EMPTY_BRANCH;
-import static com.mysema.query.support.Expressions.*;
+import static com.mysema.query.support.Expressions.allOf;
+import static com.mysema.query.support.Expressions.anyOf;
+import static com.mysema.query.support.Expressions.booleanOperation;
+import static com.mysema.query.support.Expressions.constant;
+import static com.mysema.query.support.Expressions.stringOperation;
 
 /**
  * User: sadane
@@ -37,28 +42,45 @@ public class ExecutionSummaryExpressions {
         return entity.branchId.eq(EMPTY_BRANCH);
     }
 
-    public BooleanExpression statusIn(List<ExecutionEnums.ExecutionStatus> statuses) {
+    public BooleanExpression complexStatusIn(List<ComplexExecutionStatus> statuses) {
         if (CollectionUtils.isEmpty(statuses)) return null;
-        return entity.status.in(statuses);
-    }
-
-    public BooleanExpression pauseReasonIn(List<PauseReason> pauseReasons) {
-        if (CollectionUtils.isEmpty(pauseReasons)) return null;
-        return entity.pauseReason.in(pauseReasons);
-    }
-
-    public BooleanExpression resultStatusTypeIn(List<String> resultStatusTypes) {
-        if (CollectionUtils.isEmpty(resultStatusTypes)) return null;
-        return entity.resultStatusType.upper().in(convert(resultStatusTypes, new Converter<String, String>() {
+        List<BooleanExpression> expressions = convert(statuses, new Converter<ComplexExecutionStatus, BooleanExpression>() {
             @Override
-            public String convert(String from) {
-                return from.toUpperCase();
+            public BooleanExpression convert(ComplexExecutionStatus from) {
+                return complexStatusEq(from);
             }
-        }));
+        });
+        return anyOf(expressions.toArray(new BooleanExpression[expressions.size()]));
     }
 
-    public BooleanExpression resultStatusTypeIsNull() {
-        return entity.resultStatusType.isNull();
+    public BooleanExpression complexStatusEq(ComplexExecutionStatus status) {
+        return allOf(statusEq(status.getExecutionStatus()),
+                resultStatusTypeEq(status.getResultStatus()),
+                pauseReasonEq(status.getPauseReason()));
+    }
+
+    public BooleanExpression statusEq(ExecutionEnums.ExecutionStatus status) {
+        if(status == null) {
+            return null;
+        } else {
+            return entity.status.eq(status);
+        }
+    }
+
+    public BooleanExpression resultStatusTypeEq(String result) {
+        if(result == null) {
+            return null;
+        } else {
+            return entity.resultStatusType.eq(result);
+        }
+    }
+
+    public BooleanExpression pauseReasonEq(PauseReason pauseReason) {
+        if(pauseReason == null) {
+            return null;
+        } else {
+            return entity.pauseReason.eq(pauseReason);
+        }
     }
 
     public BooleanExpression flowPathLike(final String flowPath) {

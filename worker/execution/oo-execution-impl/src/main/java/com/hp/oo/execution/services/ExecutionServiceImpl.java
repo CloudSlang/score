@@ -511,7 +511,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             }
             filteredExecutionEvents.add(executionEvent);
         }
-        if(!eventsOff){
+        if(!eventsOff || isDebuggerMode(execution.getSystemContext())){ //consider flag events and debugger before sending events
             executionEventService.createEvents(filteredExecutionEvents);
         }
         execution.getAggregatedEvents().clear(); //must clean so we wont send it twice - once from here and once from the QueueListener onTerminated()

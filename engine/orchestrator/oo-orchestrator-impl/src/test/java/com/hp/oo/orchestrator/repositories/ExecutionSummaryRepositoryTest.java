@@ -1,5 +1,7 @@
 package com.hp.oo.orchestrator.repositories;
 
+import ch.lambdaj.function.convert.Converter;
+import com.hp.oo.enginefacade.execution.ComplexExecutionStatus;
 import com.hp.oo.enginefacade.execution.ExecutionEnums;
 import com.hp.oo.enginefacade.execution.ExecutionEnums.ExecutionStatus;
 import com.hp.oo.enginefacade.execution.PauseReason;
@@ -37,6 +39,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import static ch.lambdaj.Lambda.convert;
 import static com.hp.oo.enginefacade.execution.ExecutionSummary.EMPTY_BRANCH;
 import static org.junit.Assert.*;
 
@@ -245,21 +248,31 @@ public class ExecutionSummaryRepositoryTest {
         summary3.setStatus(ExecutionStatus.CANCELED);
         repository.save(Arrays.asList(summary1, summary2, summary3));
 
-        Assertions.assertThat(repository.findAll(exp.statusIn(Arrays.asList(ExecutionStatus.COMPLETED))))
+        List<ComplexExecutionStatus> onlyCompleted = Arrays.asList(new ComplexExecutionStatus(ExecutionStatus.COMPLETED, null, null));
+        Assertions.assertThat(repository.findAll(exp.complexStatusIn(onlyCompleted)))
                 .as("One status")
                 .hasSize(1)
                 .containsOnly(summary1);
 
-        Assertions.assertThat(repository.findAll(exp.statusIn(Arrays.asList(ExecutionStatus.COMPLETED, ExecutionStatus.RUNNING))))
+        List<ComplexExecutionStatus> completedAndRunning = Arrays.asList(new ComplexExecutionStatus(ExecutionStatus.COMPLETED, null, null),
+                new ComplexExecutionStatus(ExecutionStatus.RUNNING, null, null));
+        Assertions.assertThat(repository.findAll(exp.complexStatusIn(completedAndRunning)))
                 .as("Two statuses")
                 .hasSize(2)
                 .containsOnly(summary1, summary2);
 
-        Assertions.assertThat(repository.findAll(exp.statusIn(null)))
+        Assertions.assertThat(repository.findAll(exp.complexStatusIn(null)))
                 .as("no statuses")
                 .hasSize(3);
 
-        Assertions.assertThat(repository.findAll(exp.statusIn(Arrays.asList(ExecutionStatus.values()))))
+        List<ComplexExecutionStatus> allStatuses = convert(ExecutionStatus.values(), new Converter<ExecutionStatus, ComplexExecutionStatus>() {
+            @Override
+            public ComplexExecutionStatus convert(ExecutionStatus from) {
+                return new ComplexExecutionStatus(from, null, null);
+            }
+        });
+
+        Assertions.assertThat(repository.findAll(exp.complexStatusIn(allStatuses)))
                 .as("all statuses")
                 .hasSize(3);
     }
@@ -276,23 +289,22 @@ public class ExecutionSummaryRepositoryTest {
         summary3.setResultStatusType(null);
         repository.save(Arrays.asList(summary1, summary2, summary3));
 
-        Assertions.assertThat(repository.findAll(exp.resultStatusTypeIn(Arrays.asList(result1))))
+        List<ComplexExecutionStatus> onlyDone = Arrays.asList(new ComplexExecutionStatus(null, result1, null));
+        Assertions.assertThat(repository.findAll(exp.complexStatusIn(onlyDone)))
                 .as("One results")
                 .hasSize(1)
                 .containsOnly(summary1);
 
-        Assertions.assertThat(repository.findAll(exp.resultStatusTypeIn(Arrays.asList(result1, result2))))
+        List<ComplexExecutionStatus> doneAndFailed = Arrays.asList(new ComplexExecutionStatus(null, result1, null),
+                new ComplexExecutionStatus(null, result2, null));
+        Assertions.assertThat(repository.findAll(exp.complexStatusIn(doneAndFailed)))
                 .as("Two results")
                 .hasSize(2)
                 .containsOnly(summary1, summary2);
 
-        Assertions.assertThat(repository.findAll(exp.resultStatusTypeIn(null)))
+        Assertions.assertThat(repository.findAll(exp.complexStatusIn(null)))
                 .as("no results")
                 .hasSize(3);
-
-        Assertions.assertThat(repository.findAll(exp.resultStatusTypeIn(Arrays.asList(result1, result2))))
-                .as("all results")
-                .hasSize(2);
     }
 
     @Test
@@ -304,21 +316,31 @@ public class ExecutionSummaryRepositoryTest {
         ExecutionSummaryEntity summary3 = createExecutionSummary();
         repository.save(Arrays.asList(summary1, summary2, summary3));
 
-        Assertions.assertThat(repository.findAll(exp.pauseReasonIn(Arrays.asList(PauseReason.USER_PAUSED))))
+        List<ComplexExecutionStatus> onlyUser = Arrays.asList(new ComplexExecutionStatus(null, null, PauseReason.USER_PAUSED));
+                Assertions.assertThat(repository.findAll(exp.complexStatusIn(onlyUser)))
                 .as("One pause reason")
                 .hasSize(1)
                 .containsOnly(summary1);
 
-        Assertions.assertThat(repository.findAll(exp.pauseReasonIn(Arrays.asList(PauseReason.USER_PAUSED, PauseReason.DISPLAY))))
+        List<ComplexExecutionStatus> userAndDisplay = Arrays.asList(new ComplexExecutionStatus(null, null, PauseReason.USER_PAUSED),
+                new ComplexExecutionStatus(null, null, PauseReason.DISPLAY));
+        Assertions.assertThat(repository.findAll(exp.complexStatusIn(userAndDisplay)))
                 .as("Two pause reasons")
                 .hasSize(2)
                 .containsOnly(summary1, summary2);
 
-        Assertions.assertThat(repository.findAll(exp.pauseReasonIn(null)))
+        Assertions.assertThat(repository.findAll(exp.complexStatusIn(null)))
                 .as("no pause reasons")
                 .hasSize(3);
 
-        Assertions.assertThat(repository.findAll(exp.pauseReasonIn(Arrays.asList(PauseReason.values()))))
+        List<ComplexExecutionStatus> allPauseReasons = convert(PauseReason.values(), new Converter<PauseReason, ComplexExecutionStatus>() {
+            @Override
+            public ComplexExecutionStatus convert(PauseReason from) {
+                return new ComplexExecutionStatus(null, null, from);
+            }
+        });
+
+        Assertions.assertThat(repository.findAll(exp.complexStatusIn(allPauseReasons)))
                 .as("all pause reasons")
                 .hasSize(2);
     }
@@ -527,9 +549,7 @@ public class ExecutionSummaryRepositoryTest {
                         exp.runNameLike(executionName),
                         exp.runIdLike(executionId),
                         exp.flowUuidLike(flowUuid),
-                        exp.statusIn(Arrays.asList(status)),
-                        exp.pauseReasonIn(Arrays.asList(pauseReason)),
-                        exp.resultStatusTypeIn(Arrays.asList(resultStatusType))
+                        exp.complexStatusIn(Arrays.asList(new ComplexExecutionStatus(status, resultStatusType, pauseReason)))
                 )))
                 .as("all filters")
                 .hasSize(1)
@@ -548,9 +568,7 @@ public class ExecutionSummaryRepositoryTest {
                         exp.runNameLike(null),
                         exp.runIdLike(null),
                         exp.flowUuidLike(null),
-                        exp.statusIn(null),
-                        exp.pauseReasonIn(null),
-                        exp.resultStatusTypeIn(null)
+                        exp.complexStatusIn(Arrays.asList(new ComplexExecutionStatus(null, null, null)))
                 )))
                 .as("all nulls")
                 .hasSize(6);
@@ -684,7 +702,7 @@ public class ExecutionSummaryRepositoryTest {
         createBatchOfExecutions();
 
         List<ExecutionSummaryEntity> executions = repository.findAll(
-                exp.statusIn(Arrays.asList(ExecutionStatus.RUNNING)), PAGE_REQUEST).getContent();
+                exp.complexStatusIn(Arrays.asList(new ComplexExecutionStatus(ExecutionStatus.RUNNING, null, null))), PAGE_REQUEST).getContent();
 
         assertNotNull(executions);
         assertEquals("Wrong number of Executions when testing filtering by flowPath", 1, executions.size());
@@ -704,8 +722,7 @@ public class ExecutionSummaryRepositoryTest {
 
         List<ExecutionSummaryEntity>  executions = repository.findAll(
                 exp.flowPathLike(flowPath)
-                        .and(exp.statusIn(Arrays.asList(ExecutionStatus.COMPLETED))),
-                PAGE_REQUEST).getContent();
+                        .and(exp.complexStatusIn(Arrays.asList(new ComplexExecutionStatus(ExecutionStatus.COMPLETED, null, null)))),PAGE_REQUEST).getContent();
 
         assertNotNull(executions);
         assertEquals("Wrong number of Executions when testing filtering by flowPath", 1,executions.size());
@@ -720,9 +737,7 @@ public class ExecutionSummaryRepositoryTest {
         createBatchOfExecutions();
 
         List<ExecutionSummaryEntity> executions = repository.findAll(
-                exp.statusIn(Arrays.asList(ExecutionStatus.COMPLETED))
-                        .and(exp.resultStatusTypeIn(Arrays.asList("ERROR")))
-                , PAGE_REQUEST).getContent();
+                exp.complexStatusIn(Arrays.asList(new ComplexExecutionStatus(ExecutionStatus.COMPLETED, "ERROR", null))), PAGE_REQUEST).getContent();
 
         assertNotNull(executions);
         assertEquals("Wrong number of Executions when testing filtering by status and result status type", 2, executions.size());
@@ -733,9 +748,7 @@ public class ExecutionSummaryRepositoryTest {
         assertEquals("Incorrect first execution in the list", "3", secondExecution.getExecutionId());
 
         executions = repository.findAll(
-                exp.statusIn(Arrays.asList(ExecutionStatus.PAUSED))
-                .and(exp.pauseReasonIn(Arrays.asList(PauseReason.DISPLAY)))
-                ,PAGE_REQUEST).getContent();
+                exp.complexStatusIn(Arrays.asList(new ComplexExecutionStatus(ExecutionStatus.PAUSED, null, PauseReason.DISPLAY))) ,PAGE_REQUEST).getContent();
 
         assertNotNull(executions);
         assertEquals("Wrong number of Execution when testing by status and result status type(pause and display)", 1, executions.size() );
@@ -752,11 +765,8 @@ public class ExecutionSummaryRepositoryTest {
 
         String flowPath = "library/myflows";
 
-        List<ExecutionSummaryEntity> executions = repository.findAll(
-                exp.flowPathLike(flowPath)
-                        .and(exp.statusIn(Arrays.asList(ExecutionStatus.COMPLETED)))
-                        .and(exp.resultStatusTypeIn(Arrays.asList("RESOLVED")))
-                , PAGE_REQUEST).getContent();
+        List<ExecutionSummaryEntity> executions = repository.findAll(exp.flowPathLike(flowPath)
+                .and(exp.complexStatusIn(Arrays.asList(new ComplexExecutionStatus(ExecutionStatus.COMPLETED, "RESOLVED", null)))), PAGE_REQUEST).getContent();
 
         assertNotNull(executions);
         assertEquals("Wrong number of Executions when testing filtering be flow path, status and result status type", 1, executions.size());
