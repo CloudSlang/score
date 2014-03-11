@@ -11,6 +11,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
@@ -63,6 +64,14 @@ public class InBuffer implements ApplicationListener, Runnable, WorkerRecoveryLi
 	private AtomicBoolean recoveryFlag = new AtomicBoolean(false);
 
     private Date currentCreateDate = new Date(0);
+
+    @PostConstruct
+    private void init(){
+        capacity = Integer.getInteger("worker.inbuffer.capacity",capacity);
+        coolDownPollingMillis = Integer.getInteger("worker.inbuffer.coolDownPollingMillis",capacity);
+        logger.info("InBuffer capacity is set to :" + capacity + ", coolDownPollingMillis is set to :"+ coolDownPollingMillis);
+    }
+
 
     private void fillBufferPeriodically() {
         long pollCounter = 0;
