@@ -16,7 +16,6 @@ import java.util.List;
  */
 public class StepLog implements Serializable {
 
-
     private static final long serialVersionUID = -3195339762640416295L;
 
     private StepInfo stepInfo;
@@ -35,7 +34,6 @@ public class StepLog implements Serializable {
     private String workerId;
     private String user;
     private ExecutionEnums.StepLogCategory stepLogCategory;
-
 
     public List<StepErrorLog> getErrorList() {
         return errorList;
@@ -109,7 +107,6 @@ public class StepLog implements Serializable {
         this.operationGroup = operationGroup;
     }
 
-
     public StepTransitionLog getStepTransitionLog() {
         return stepTransitionLog;
     }
@@ -161,7 +158,7 @@ public class StepLog implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof StepInfo)) return false;
+        if (!(o instanceof StepLog)) return false;
 
         StepLog that = (StepLog) o;
 
