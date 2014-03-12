@@ -87,7 +87,7 @@ public class StepLogSearchCriteria {
 
     /**
      * Returns true if no criterion is set.
-     * @return True if all of the criteria are unset (i.e. null), false otherwise.
+     * @return True if all of the criteria are unset (null or empty List/Map), false otherwise.
      */
     public boolean isEmpty() {
 

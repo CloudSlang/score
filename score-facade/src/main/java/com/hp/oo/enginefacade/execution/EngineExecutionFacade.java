@@ -139,7 +139,7 @@ public interface EngineExecutionFacade {
      * @param executionId execution ID whose steps to retrieve
      * @param descendingOrder controls whether steps should be retrieved from the end (in descending path order)
      * @param pageNum page number to return (starting with 1)
-     * @param pageSize size of each page (1 to 500)
+     * @param pageSize size of each page (1 to 10000)
      * @return a paginated list of StepLogs - will be empty if the page is empty or if no such execution
      */
     List<StepLog> readStepLogs(String executionId, boolean descendingOrder, long pageNum, long pageSize);
@@ -150,7 +150,7 @@ public interface EngineExecutionFacade {
      * @param executionId execution ID whose steps to search
      * @param criteria search criteria for filtering the result set
      * @param descendingOrder controls whether steps should be searched from the end (in descending path order)
-     * @param pageNum page number of search results (starting with 1)
+     * @param pageNum result page number to return (starting with 1)
      * @param pageSize size of each page (1 to 10000)
      * @return a paginated list of StepLogs matching the criteria - will be empty if no matches, or if there are matches
      *          but the requested page is empty, or if no such execution
@@ -168,7 +168,7 @@ public interface EngineExecutionFacade {
 
     /**
      * Returns the number of step logs for the given execution, whose paths come before the given path. For example, the
-     * path 0.2.0 comes before 0.10.0.
+     * path 0.9.9999.9999 comes before 0.10 which comes before 0.10.0.
      *
      * @param executionId execution ID whose steps to count
      * @param upToPath step path marking the upper bound for the count (exclusive) - note that this path does not have
