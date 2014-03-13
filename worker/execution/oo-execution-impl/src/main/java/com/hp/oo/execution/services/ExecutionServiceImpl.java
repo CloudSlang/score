@@ -105,7 +105,16 @@ public final class ExecutionServiceImpl implements ExecutionService {
             }
 
             if(execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_QUEUE) != null){
-                dumpBusEvents(execution);
+                //TODO temproray solution until Elia finish moving PauseResumeServiceImpl  to score
+                @SuppressWarnings("unchecked") ArrayDeque<ExecutionEvent> eventsQueue = (ArrayDeque) execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
+                Iterator<ExecutionEvent> executionEvents  = eventsQueue.iterator();
+                while(executionEvents.hasNext()){
+                    ExecutionEvent executionEvent  =  executionEvents.next();
+                    if(executionEvent.getType().equals(ExecutionEnums.Event.STEP_LOG)
+                            && executionEvent.getStepLogCategory().equals(ExecutionEnums.StepLogCategory.STEP_RESUMED)){
+                        eventBus.dispatch(new EventWrapper(executionEvent.getType().name(), executionEvent));
+                    }
+                }
             }
 
 
@@ -600,10 +609,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 @SuppressWarnings("unchecked") Deque<ExecutionEvent> eventsQueue = (Deque<ExecutionEvent>) execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
                 eventsQueue.add(logEvent);
 
-                ExecutionEvent stepLogEvent = ExecutionEventFactory.createStepLogEvent(execution.getExecutionId(),ExecutionEventUtils.increaseEvent(execution.getSystemContext()),
-                        ExecutionEnums.StepLogCategory.STEP_ERROR, execution.getSystemContext());
-                eventsQueue.add(stepLogEvent);
-
             } catch (RuntimeException eventEx) {
                 logger.error("Failed to create event: ", eventEx);
             }
@@ -631,10 +636,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 ExecutionEvent logEvent = createLogEvent(execution, currStep, ex, "Error occurred during operation execution", LogLevelCategory.STEP_OPER_ERROR, execution.getSystemContext());
                 @SuppressWarnings("unchecked") Deque<ExecutionEvent> eventsQueue = (Deque<ExecutionEvent>) execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
                 eventsQueue.add(logEvent);
-
-                ExecutionEvent stepLogEvent = ExecutionEventFactory.createStepLogEvent(execution.getExecutionId(),ExecutionEventUtils.increaseEvent(execution.getSystemContext()),
-                        ExecutionEnums.StepLogCategory.STEP_ERROR, execution.getSystemContext());
-                eventsQueue.add(stepLogEvent);
 
             } catch (RuntimeException eventEx) {
                 logger.error("Failed to create event: ", eventEx);
