@@ -140,4 +140,7 @@ public class ExecutionConstants {
 
     public static final String RUNNING_EXECUTION_PLAN_ID = "RUNNING_EXECUTION_PLAN_ID";
     public static final String PARENT_STEP_UUID = "PARENT_STEP_UUID";
+
+    //for non-required inputs behavior (can be: PROMPT or SUPPRESS_PROMPT)
+    public static final String NON_REQUIRED_INPUTS_BEHAVIOR = "NON_REQUIRED_INPUTS_BEHAVIOR";
 }
