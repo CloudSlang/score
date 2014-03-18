@@ -96,6 +96,8 @@ public class ExecutionConstants {
     //For the studio debugger events
     public static final String DEBUGGER_MODE = "DEBUGGER_MODE";
 
+    public static final String USE_DEFAULT_GROUP = "USE_DEFAULT_GROUP";
+
     //for Gated-Transition, user and role
     public static final String EFFECTIVE_RUNNING_USER = "EFFECTIVE_RUNNING_USER";
     public static final String EFFECTIVE_RUNNING_USER_ROLES = "EFFECTIVE_RUNNING_USER_ROLES";

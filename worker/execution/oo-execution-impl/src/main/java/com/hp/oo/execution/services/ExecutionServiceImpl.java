@@ -692,6 +692,15 @@ public final class ExecutionServiceImpl implements ExecutionService {
         }
     }
 
+    private boolean useDefaultGroup(Execution execution) {
+        Boolean useDefaultGroup = (Boolean) execution.getSystemContext().get(ExecutionConstants.USE_DEFAULT_GROUP);
+        if (useDefaultGroup == null) {
+            return false;
+        }
+
+        return useDefaultGroup;
+    }
+
     protected void postExecutionSettings(Execution execution) {
         // Decide on Group
         String group = (String) execution.getSystemContext().get(ExecutionConstants.ACTUALLY_OPERATION_GROUP);
@@ -702,11 +711,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
         }
 
         if (isDebuggerMode(execution.getSystemContext())) {
-            @SuppressWarnings("unchecked") Set<String> groups = (Set<String>) execution.getSystemContext().get("ALL_ACTIVE_RUNNING_GROUPS");
-
-            if (!StringUtils.isEmpty(group) && !groups.contains(group)) {
+            if (!StringUtils.isEmpty(group) && useDefaultGroup(execution)) {
                 execution.setGroupName(null);
-
             }
         }
 
