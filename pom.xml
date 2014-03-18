@@ -26,62 +26,131 @@
 		</snapshotRepository>
 	</distributionManagement>
 
-	<developers>
-		<developer>
-			<email>harar.zafrir@hp.com</email>
-			<name>Harar Zafrir</name>
-			<url>https://github.com/hararzafrir</url>
-			<id>hararzafrir</id>
-		</developer>
-		<developer>
-			<email>mor.lajb@hp.com</email>
-			<name>Mor Lajb</name>
-			<url>https://github.com/morlajb</url>
-			<id>morlajb</id>
-		</developer>
-		<developer>
-			<email>meir.wahnon@hp.com</email>
-			<name>Meir Wahnon</name>
-			<url>https://github.com/meirwah</url>
-			<id>meirwah</id>
-		</developer>
+    <developers>
         <developer>
+            <id>hararzafrir</id>
+            <email>harar.zafrir@hp.com</email>
+            <name>Harar Zafrir</name>
+            <url>https://github.com/hararzafrir</url>
+            <organization>HP Software</organization>
+            <timezone>+2</timezone>
+        </developer>
+        <developer>
+            <id>morlajb</id>
+            <email>mor.lajb@hp.com</email>
+            <name>Mor Lajb</name>
+            <url>https://github.com/morlajb</url>
+            <organization>HP Software</organization>
+            <timezone>+2</timezone>
+        </developer>
+        <developer>
+            <id>meirwah</id>
+            <email>meir.wahnon@hp.com</email>
+            <name>Meir Wahnon</name>
+            <url>https://github.com/meirwah</url>
+            <organization>HP Software</organization>
+            <timezone>+2</timezone>
+        </developer>
+        <developer>
+            <id>shajyhia</id>
             <email>shehab.hajyhia@hp.com</email>
             <name>Shehab Hajyhia</name>
             <url>https://github.com/shajyhia</url>
-            <id>shajyhia</id>
+            <organization>HP Software</organization>
+            <timezone>+2</timezone>
         </developer>
         <developer>
+            <id>lucian-cm</id>
             <email>lucian-cristian.musca@hp.com</email>
             <name>Lucian Musca</name>
             <url>https://github.com/lucian-cm</url>
-            <id>lucian-cm</id>
+            <organization>HP Software</organization>
+            <timezone>+2</timezone>
         </developer>
         <developer>
+            <id>guymarom</id>
             <email>marom.guy@gmail.com</email>
             <name>Guy Marom</name>
             <url>https://github.com/guymarom</url>
-            <id>guymarom</id>
+            <organization>HP Software</organization>
+            <timezone>+2</timezone>
         </developer>
         <developer>
+            <id>cid77</id>
             <email>ciprian-eugen.duma@hp.com</email>
             <name>Ciprian Duma</name>
             <url>https://github.com/cid77</url>
-            <id>cid77</id>
+            <organization>HP Software</organization>
+            <timezone>+2</timezone>
         </developer>
         <developer>
+            <id>zsolt-donca-hp</id>
+            <email>zsolt.donca@hp.com</email>
+            <name>Zsolt Donca</name>
+            <url>https://github.com/zsolt-donca-hp</url>
+            <organization>HP Software</organization>
+            <timezone>+2</timezone>
+        </developer>
+        <developer>
+            <id>orius123</id>
             <email>eliya.sadan@hp.com</email>
             <name>Eliya Sadan</name>
             <url>https://github.com/orius123</url>
-            <id>orius123</id>
+            <organization>HP Software</organization>
+            <timezone>+2</timezone>
         </developer>
         <developer>
+            <id>hprotem</id>
+            <email>rotem.eisenthal@hp.com</email>
+            <name>Rotem Eisenthal</name>
+            <url>https://github.com/hprotem</url>
+            <organization>HP Software</organization>
+            <timezone>+2</timezone>
+        </developer>
+        <developer>
+            <id>mzruya</id>
+            <email>matan@hp.com</email>
+            <name>Matan Zruya</name>
+            <url>https://github.com/mzruya</url>
+            <organization>HP Software</organization>
+            <timezone>+2</timezone>
+        </developer>
+        <developer>
+            <id>liat-bensal</id>
+            <email>liat.marom-bensal@hp.com</email>
+            <name>Liat Marom Bensal</name>
+            <url>https://github.com/liat-bensal</url>
+            <organization>HP Software</organization>
+            <timezone>+2</timezone>
+        </developer>
+        <developer>
+            <id>einatneu</id>
             <email>einat.neuman@hp.com</email>
             <name>Einat Neuman</name>
             <url>https://github.com/einatneu</url>
-            <id>einatneu</id>
+            <organization>HP Software</organization>
+            <timezone>+2</timezone>
+        </developer>
+        <developer>
+            <id>maayannoy</id>
+            <email>maayan.noy@hp.com</email>
+            <name>Maayan Noy</name>
+            <url>https://github.com/maayannoy</url>
+            <organization>HP Software</organization>
+            <timezone>+2</timezone>
         </developer>
     </developers>
+
+    <!--contributors>
+        <contributor>
+            <id>johndoe</id>
+            <email>john.doe@foo.bar.com</email>
+            <name>John Doe</name>
+            <url>https://github.com/johndoe</url>
+            <organization>Foo-Bar inc.</organization>
+            <timezone>UTC</timezone>
+        </contributor>
+    </contributors-->
 
 	<licenses>
 		<license>
