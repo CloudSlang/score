@@ -98,4 +98,13 @@ public interface ExecutionEventService {
      * @return
      */
     StepLog aggregateEventsToStepLog(List<ExecutionEvent> executionEvents);
+
+    /**
+     * Reads <param>numOfEvents</param> events for the given <param>executionId</param>. Only events with the step path
+     * bigger than or equal to <param>stepPath</param> will be read.
+     * @param executionId the execution id for which to read events
+     * @param stepPath the step path from which to start reading (inclusive)
+     * @param numOfEvents the number of events to read
+     */
+    List<ExecutionEvent> readEventsByExecutionIdAndStepPath(String executionId, String stepPath, int numOfEvents);
 }
