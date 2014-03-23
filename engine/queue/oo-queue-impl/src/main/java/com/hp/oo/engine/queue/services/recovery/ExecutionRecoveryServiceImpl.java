@@ -136,6 +136,7 @@ final public class ExecutionRecoveryServiceImpl implements ExecutionRecoveryServ
 							ExecStatus.ASSIGNED,
 							ExecStatus.SENT,
 							ExecStatus.IN_PROGRESS);
+                    logMessageRecovery(messages);
 					doMessageRecovery(messages);
 
 					if (messages == null || messages.size() < DEFAULT_POLL_SIZE){
@@ -145,7 +146,7 @@ final public class ExecutionRecoveryServiceImpl implements ExecutionRecoveryServ
 				}
 			});
 		}
-	    if (logger.isDebugEnabled()) logger.debug("Worker [" + workerName + "] recovery id done in " + (System.currentTimeMillis()-time) + " ms");
+	    logger.info("Worker [" + workerName + "] recovery id done in " + (System.currentTimeMillis()-time) + " ms");
 	}
 
 	@Override
