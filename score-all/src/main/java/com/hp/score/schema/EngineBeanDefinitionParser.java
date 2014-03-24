@@ -15,7 +15,6 @@ import com.hp.oo.engine.versioning.services.VersionServiceImpl;
 import com.hp.oo.orchestrator.repositories.ExecutionSummaryExpressions;
 import com.hp.oo.orchestrator.services.CancelExecutionServiceImpl;
 import com.hp.oo.orchestrator.services.ExecConfigSerializationUtil;
-import com.hp.oo.orchestrator.services.ExecutionBoundInputsServiceImpl;
 import com.hp.oo.orchestrator.services.ExecutionInterruptsSerializationUtil;
 import com.hp.oo.orchestrator.services.ExecutionInterruptsServiceImpl;
 import com.hp.oo.orchestrator.services.ExecutionSerializationUtil;
@@ -67,7 +66,6 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(WorkerNodeServiceImpl.class, "ooUserDetailsService");
 		put(VersionServiceImpl.class, null);
 		put(CancelExecutionServiceImpl.class, "cancelExecutionService");
-		put(ExecutionBoundInputsServiceImpl.class, null);
 		put(ExecutionInterruptsServiceImpl.class, "executionInterruptsService");
 		put(SplitJoinServiceImpl.class, "splitJoinService");
 		put(ExecutionRecoveryServiceImpl.class, null);
