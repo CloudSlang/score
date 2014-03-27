@@ -139,6 +139,14 @@
             <organization>HP Software</organization>
             <timezone>+2</timezone>
         </developer>
+        <developer>
+            <id>adriana-chis</id>
+            <email>adriana.chis@hp.com</email>
+            <name>Adriana Chis</name>
+            <url>https://github.com/adriana-chis</url>
+            <organization>HP Software</organization>
+            <timezone>+2</timezone>
+        </developer>
     </developers>
 
     <!--contributors>
