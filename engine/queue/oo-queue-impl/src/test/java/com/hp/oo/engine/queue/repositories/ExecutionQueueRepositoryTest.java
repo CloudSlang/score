@@ -10,10 +10,12 @@ import com.hp.score.engine.data.IdentityGenerator;
 import junit.framework.Assert;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -27,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
@@ -44,6 +47,16 @@ public class ExecutionQueueRepositoryTest {
 
     @Autowired
     private ExecutionQueueRepository executionQueueRepository;
+
+    @Autowired
+    @Qualifier("OO_EXECUTION_STATES")
+    private PartitionTemplate partitionTemplate;
+
+    @Before
+    public void init(){
+        Mockito.reset(partitionTemplate);
+        when(partitionTemplate.activeTable()).thenReturn("OO_EXECUTION_STATES_1");
+    }
 
     @Test
     public void testInsert(){
@@ -88,6 +101,86 @@ public class ExecutionQueueRepositoryTest {
         List<ExecutionMessage> result = executionQueueRepository.pollMessagesWithoutAck(100,0);
         Assert.assertNotNull(result);
         Assert.assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testPollForRecovery(){
+        List<ExecutionMessage> msg = new ArrayList<>();
+        ExecutionMessage execMsg = generateMessage("group1","msg1");
+        execMsg.setWorkerId("worker1");
+        execMsg.setStatus(ExecStatus.IN_PROGRESS);
+        execMsg.incMsgSeqId();
+        msg.add(execMsg);
+        executionQueueRepository.insertExecutionStates(msg);
+        executionQueueRepository.insertExecutionQueue(msg,1L);
+        List<ExecutionMessage> result = executionQueueRepository.poll("worker1",10,ExecStatus.IN_PROGRESS);
+
+        Assert.assertNotNull(result);
+        Assert.assertFalse(result.isEmpty());
+    }
+
+    @Test
+    public void testPollForRecoveryDuplicateMsg(){
+
+        //insert to states table 1
+        List<ExecutionMessage> msg = new ArrayList<>();
+        ExecutionMessage execMsg = generateMessage("group1","msg1");
+        execMsg.setWorkerId("worker1");
+        execMsg.setStatus(ExecStatus.IN_PROGRESS);
+        msg.add(execMsg);
+        executionQueueRepository.insertExecutionStates(msg);
+        executionQueueRepository.insertExecutionQueue(msg,1L);
+
+        //insert to states table 2
+        when(partitionTemplate.activeTable()).thenReturn("OO_EXECUTION_STATES_2");
+        executionQueueRepository.insertExecutionStates(msg);
+        executionQueueRepository.insertExecutionQueue(msg,1L);
+
+        List<ExecutionMessage> result = executionQueueRepository.poll("worker1",10,ExecStatus.IN_PROGRESS);
+
+
+        Assert.assertNotNull(result);
+        Assert.assertFalse(result.isEmpty());
+        Assert.assertEquals("should find only 1 msg result!, since it is the same msg, no duplication",1,result.size());
+    }
+
+    @Test
+    public void testPollForRecoveryInPrvTable(){
+
+        //insert to states table 2
+        when(partitionTemplate.activeTable()).thenReturn("OO_EXECUTION_STATES_2");
+        List<ExecutionMessage> msg = new ArrayList<>();
+        ExecutionMessage execMsg = generateMessage("group1","msg1");
+        execMsg.setWorkerId("worker1");
+        execMsg.setStatus(ExecStatus.IN_PROGRESS);
+        msg.add(execMsg);
+        executionQueueRepository.insertExecutionStates(msg);
+        executionQueueRepository.insertExecutionQueue(msg,1L);
+
+        //move pointer to states table 1
+        when(partitionTemplate.activeTable()).thenReturn("OO_EXECUTION_STATES_1");
+
+        List<ExecutionMessage> result = executionQueueRepository.poll("worker1",10,ExecStatus.IN_PROGRESS);
+
+
+        Assert.assertNotNull(result);
+        Assert.assertFalse(result.isEmpty());
+        Assert.assertEquals("should find msg even that it is in previous states table!",1,result.size());
+    }
+
+    @Test
+    public void testPoll(){
+        List<ExecutionMessage> msg = new ArrayList<>();
+        ExecutionMessage execMsg = generateMessage("group1","msg1");
+        execMsg.setWorkerId("worker1");
+        execMsg.setStatus(ExecStatus.IN_PROGRESS);
+        msg.add(execMsg);
+        executionQueueRepository.insertExecutionQueue(msg,1L);
+        executionQueueRepository.insertExecutionStates(msg);
+        List<ExecutionMessage> result = executionQueueRepository.poll(new Date(0), "worker1", 10, ExecStatus.IN_PROGRESS);
+
+        Assert.assertNotNull(result);
+        Assert.assertFalse(result.isEmpty());
     }
 
     private ExecutionMessage generateMessage(String groupName,String msgId) {

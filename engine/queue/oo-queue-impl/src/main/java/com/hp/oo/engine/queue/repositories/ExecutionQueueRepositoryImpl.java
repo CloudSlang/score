@@ -90,6 +90,43 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					"              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
 					" ORDER BY q.CREATE_TIME  ";
 
+    final private String QUERY_WORKER_RECOVERY_SQL =
+            "SELECT         EXEC_STATE_ID,      " +
+                    "       ASSIGNED_WORKER,      " +
+                    "       EXEC_GROUP,       " +
+                    "       STATUS,       " +
+                    "       PAYLOAD,       " +
+                    "       MSG_SEQ_ID,      " +
+                    "       MSG_ID," +
+                    "       q.CREATE_TIME " +
+                    " FROM  OO_EXECUTION_QUEUES_1 q,  " +
+                    "       OO_EXECUTION_STATES_1 s1   " +
+                    " WHERE  " +
+                    "      (q.ASSIGNED_WORKER =  ?)  AND " +
+                    "      (q.STATUS IN (:status)) AND " +
+                    " q.EXEC_STATE_ID = s1.ID AND" +
+                    " (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
+                    "              FROM OO_EXECUTION_QUEUES_1 qq " +
+                    "              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
+            "UNION " +
+            "SELECT         EXEC_STATE_ID,      " +
+                    "       ASSIGNED_WORKER,      " +
+                    "       EXEC_GROUP,       " +
+                    "       STATUS,       " +
+                    "       PAYLOAD,       " +
+                    "       MSG_SEQ_ID,      " +
+                    "       MSG_ID," +
+                    "       q.CREATE_TIME " +
+                    " FROM  OO_EXECUTION_QUEUES_1 q,  " +
+                    "       OO_EXECUTION_STATES_2 s2   " +
+                    " WHERE  " +
+                    "      (q.ASSIGNED_WORKER =  ?)  AND " +
+                    "      (q.STATUS IN (:status)) AND " +
+                    " q.EXEC_STATE_ID = s2.ID AND" +
+                    " (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
+                    "              FROM OO_EXECUTION_QUEUES_1 qq " +
+                    "              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)); ";
+
 	final private String QUERY_MESSAGES_BY_STATUSES =
 			"SELECT EXEC_STATE_ID, " +
 					"  ASSIGNED_WORKER, " +
@@ -191,7 +228,27 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
 	@Override
 	public List<ExecutionMessage> poll(String workerId, int maxSize, ExecStatus... statuses) {
-		return poll(new Date(0), workerId, maxSize, statuses);
+
+        // preapare the sql statment
+        String sqlStat = QUERY_WORKER_RECOVERY_SQL
+                .replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
+
+        // prepare the argument
+        java.lang.Object[] values;
+        values = new Object[statuses.length*2 + 2];
+        values[0] = workerId;
+        int i = 1;
+
+        for (ExecStatus status : statuses) {
+            values[i++] = status.getNumber();
+        }
+
+        values[i] = workerId;
+        i++;
+        for (ExecStatus status : statuses) {
+            values[i++] = status.getNumber();
+        }
+        return doSelect(sqlStat, maxSize, new ExecutionMessageRowMapper(), values);
 	}
 
 
@@ -314,6 +371,10 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 	private String getExecStateTableName() {
 		return statePartitionTemplate.activeTable();
 	}
+
+    private String getExecPrvStateTableName() {
+        return statePartitionTemplate.previousTable();
+    }
 
 
 	private class ExecutionMessageRowMapper implements RowMapper<ExecutionMessage> {
