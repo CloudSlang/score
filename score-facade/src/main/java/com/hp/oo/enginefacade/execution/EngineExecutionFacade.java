@@ -253,4 +253,10 @@ public interface EngineExecutionFacade {
      * @return the StepInfo object for the currently running step.
      */
     StepInfo readCurrentlyExecutingStep(String executionId);
+
+    /**
+     *
+     * @param executionId
+     */
+    void upgradeExecutionEvents(String executionId);
 }

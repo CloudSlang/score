@@ -45,7 +45,7 @@ public abstract class ExecutionEventFactory {
 
     public static ExecutionEvent createCompletedFinishEvent(String executionId, String flowUUID, String context, ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
-        String flowPath = eventOrder.getFlowPath().toString();
+        String flowPath = "0";//eventOrder.getFlowPath().toString();
 
         ExecutionEvent executionEvent = new ExecutionEvent(executionId, ExecutionEnums.Event.FINISH, executionEventSequenceOrder, flowPath)
                 .setData1(ExecutionStatus.COMPLETED.name())
@@ -55,13 +55,13 @@ public abstract class ExecutionEventFactory {
                         "context", context
                 ))
                 .setDebuggerMode(isDebuggerMode(systemContext));
-        addEventToSysContext(executionEvent,systemContext);
+//        addEventToSysContext(executionEvent,systemContext);
         return executionEvent;
     }
 
     public static ExecutionEvent createFailureFinishEvent(String executionId, String flowUUID, String exceptionStr, String context, ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
-        String flowPath = eventOrder.getFlowPath().toString();
+        String flowPath ="0"; //eventOrder.getFlowPath().toString();
 
         ExecutionEvent executionEvent = new ExecutionEvent(executionId, ExecutionEnums.Event.FINISH, executionEventSequenceOrder, flowPath)
                 .setData1(ExecutionStatus.SYSTEM_FAILURE.name())
@@ -79,7 +79,7 @@ public abstract class ExecutionEventFactory {
     @SuppressWarnings("UnusedDeclaration")
     public static ExecutionEvent createCancelledFinishEvent(String executionId, String flowUUID, String context, ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
-        String flowPath = eventOrder.getFlowPath().toString();
+        String flowPath = "0";// eventOrder.getFlowPath().toString();
 
         ExecutionEvent executionEvent = new ExecutionEvent(executionId, ExecutionEnums.Event.FINISH, executionEventSequenceOrder, flowPath)
                 .setData1(ExecutionStatus.CANCELED.name())
@@ -212,7 +212,7 @@ public abstract class ExecutionEventFactory {
 
     public static ExecutionEvent createResultEvent(String executionId, String resultType, String resultName, ExecutionEventSequenceOrder eventOrder, Map systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
-        String flowPath = eventOrder.getFlowPath().toString();
+        String flowPath = "0";//eventOrder.getFlowPath().toString();
 
         ExecutionEvent executionEvent = new ExecutionEvent(executionId, ExecutionEnums.Event.RESULT, executionEventSequenceOrder, flowPath)
                 .setData1(resultType)
@@ -222,7 +222,7 @@ public abstract class ExecutionEventFactory {
                         "result_name", resultName
                 ))
                 .setDebuggerMode(isDebuggerMode(systemContext));
-        addEventToSysContext(executionEvent,systemContext);
+//        addEventToSysContext(executionEvent,systemContext);
         return executionEvent;
     }
 
