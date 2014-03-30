@@ -372,11 +372,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 		return statePartitionTemplate.activeTable();
 	}
 
-    private String getExecPrvStateTableName() {
-        return statePartitionTemplate.previousTable();
-    }
-
-
 	private class ExecutionMessageRowMapper implements RowMapper<ExecutionMessage> {
 		@Override
 		public ExecutionMessage mapRow(ResultSet rs, int rowNum) throws SQLException {
