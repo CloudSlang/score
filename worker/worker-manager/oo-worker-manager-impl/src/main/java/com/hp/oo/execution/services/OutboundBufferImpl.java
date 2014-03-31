@@ -7,6 +7,7 @@ import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -23,6 +24,8 @@ import static ch.lambdaj.Lambda.*;
 
 public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListener {
 	private final Logger logger = Logger.getLogger(this.getClass());
+
+    private static long GB = 900000000;//there is JVM overhead, so i will take 10% buffer...
 
 	@Autowired
 	private RetryTemplate retryTemplate;
@@ -45,6 +48,12 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 	private int maxBulkWeight = Integer.getInteger("out.buffer.max.bulk.weight", 1500);
 	private int retryAmount = Integer.getInteger("out.buffer.retry.number", 5);
 	private long retryDelay = Long.getLong("out.buffer.retry.delay", 5000);
+
+    @PostConstruct
+    public void init(){
+        maxBufferWeight = Integer.getInteger("out.buffer.max.buffer.weight", defaultBufferCapacity());
+        logger.info("maxBufferWeight = " + maxBufferWeight);
+    }
 
 	@Override
 	public void put(final Message... messages) {
@@ -172,7 +181,12 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 		return currentWeight;
 	}
 
-	@Override
+    @Override
+    public int getCapacity() {
+        return maxBufferWeight;
+    }
+
+    @Override
 	public String getStatus() {
 		return "Buffer status: [W:" + currentWeight + '/' + maxBufferWeight + ",S:" + buffer.size() + "]";
 	}
@@ -211,4 +225,14 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 			return messages; // do nothing
 		}
 	}
+
+
+    private int defaultBufferCapacity() {
+        Long maxMemory = Runtime.getRuntime().maxMemory();
+        if(maxMemory  < 0.5*GB) return 10000;
+        if(maxMemory  < 1*GB) return 15000;
+        if(maxMemory  < 2*GB) return 30000;
+        return 60000;
+    }
+
 }

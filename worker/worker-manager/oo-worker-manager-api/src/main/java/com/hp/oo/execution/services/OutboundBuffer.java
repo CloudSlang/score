@@ -34,5 +34,10 @@ public interface OutboundBuffer {
 	 */
 	int getWeight();
 
+    /**
+     * @return : the capacity of the buffer
+     */
+    int getCapacity();
+
 	String getStatus();
 }

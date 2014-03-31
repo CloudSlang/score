@@ -27,6 +27,11 @@ public class WorkerManagerMBean {
 		return outBuffer.getSize();
 	}
 
+    @ManagedAttribute(description = "Out-Buffer Capacity")
+    public int getOutBufferCapacity(){
+        return outBuffer.getCapacity();
+    }
+
 	@ManagedAttribute(description = "Worker UUID")
 	public String getWorkerUuid(){
 		return workerManager.getWorkerUuid();
