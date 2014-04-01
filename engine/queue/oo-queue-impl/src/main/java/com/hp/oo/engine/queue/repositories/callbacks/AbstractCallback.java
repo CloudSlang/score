@@ -9,6 +9,8 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Date: 4/20/13
  *
@@ -38,6 +40,7 @@ abstract class AbstractCallback implements PartitionCallback {
 				}});
 			t = System.currentTimeMillis()-t;
 			if (logger.isDebugEnabled()) logger.debug(getClass().getSimpleName() + ": " + numOfRows  + " rows where processed in " + t + " ms");
+            else if(t > TimeUnit.MINUTES.toMillis(1)) logger.warn("Rolling between table "+previousTable+" to table "+activeTable+", took :"+ t + " ms");
 		} catch (DataAccessException ex){
 			logger.error(getClass().getSimpleName() + " failed to execute: " + sql, ex);
 		}
