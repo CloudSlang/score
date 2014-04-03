@@ -147,6 +147,14 @@
             <organization>HP Software</organization>
             <timezone>+2</timezone>
         </developer>
+        <developer>
+            <id>varelasavela</id>
+            <email>evgeny.varela@hp.com</email>
+            <name>Evgeny Varela-Savela</name>
+            <url>https://github.com/varelasavela</url>
+            <organization>HP Software</organization>
+            <timezone>+2</timezone>
+        </developer>
     </developers>
 
     <!--contributors>
