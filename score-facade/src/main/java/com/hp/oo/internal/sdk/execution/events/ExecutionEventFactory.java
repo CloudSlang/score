@@ -350,6 +350,25 @@ public abstract class ExecutionEventFactory {
         return executionEvent;
     }
 
+    public static ExecutionEvent createOutputsEvent(String executionId, String stepId, OOContext context, ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemContext) {
+        HashMap<String, String> contextMap;
+
+        if (context != null) {
+            contextMap = (HashMap<String, String>) context.retrieveSecureMap();
+        } else {
+            contextMap = new HashMap<>();
+        }
+        String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
+        String flowPath = eventOrder.getFlowPath().toString();
+
+        ExecutionEvent executionEvent = new ExecutionEvent(executionId, ExecutionEnums.Event.FLOW_OUTPUTS, executionEventSequenceOrder, flowPath)
+                .setData1(stepId)
+                .setData4(json(contextMap))
+                .setDebuggerMode(isDebuggerMode(systemContext));
+        addEventToSysContext(executionEvent,systemContext);
+        return executionEvent;
+    }
+
     public static ExecutionEvent createBreakpointEvent(String executionId, String branchId,
                                                        String stepUuid, ExecutionEventSequenceOrder eventOrder,
                                                        LogLevelCategory logLevelCategory, Map<String, Serializable> context,

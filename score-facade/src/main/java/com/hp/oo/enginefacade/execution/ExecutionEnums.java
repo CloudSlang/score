@@ -42,6 +42,7 @@ public interface ExecutionEnums {
         CANCEL,
         AGGREGATION_FINISHED,
         FLOW_INPUTS,
+        FLOW_OUTPUTS,
         STEP_INPUTS,
         ROI,
         STEP_LOG
