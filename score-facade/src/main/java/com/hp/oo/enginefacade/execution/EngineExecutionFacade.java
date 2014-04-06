@@ -140,9 +140,10 @@ public interface EngineExecutionFacade {
      * @param descendingOrder controls whether steps should be retrieved from the end (in descending path order)
      * @param pageNum page number to return (starting with 1)
      * @param pageSize size of each page (1 to 10000)
+	 * @param locales list of string representation of locales sort by priority. for example: en_US, en 
      * @return a paginated list of StepLogs - will be empty if the page is empty or if no such execution
      */
-    List<StepLog> readStepLogs(String executionId, boolean descendingOrder, long pageNum, long pageSize);
+    List<StepLog> readStepLogs(String executionId, boolean descendingOrder, long pageNum, long pageSize, List<String> locales);
 
     /**
      * Searches StepLogs and returns a paginated list of search results.
@@ -152,11 +153,12 @@ public interface EngineExecutionFacade {
      * @param descendingOrder controls whether steps should be searched from the end (in descending path order)
      * @param pageNum result page number to return (starting with 1)
      * @param pageSize size of each page (1 to 10000)
+	 * @param locales list of string representation of locales sort by priority. for example: en_US, en 
      * @return a paginated list of StepLogs matching the criteria - will be empty if no matches, or if there are matches
      *          but the requested page is empty, or if no such execution
      */
     List<StepLog> readStepLogs(
-            String executionId, StepLogSearchCriteria criteria, boolean descendingOrder, long pageNum, long pageSize);
+            String executionId, StepLogSearchCriteria criteria, boolean descendingOrder, long pageNum, long pageSize, List<String> locales);
 
     /**
      * Returns the total number of step logs for the given execution.
