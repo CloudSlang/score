@@ -2,7 +2,6 @@ package com.hp.oo.enginefacade.execution.log;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -21,9 +20,9 @@ public class StepLogSearchCriteria {
     private List<String> allowedTypes;
 
     // Time
-    private Date startTime;
-    private Date startTimeLowerBound;
-    private Date startTimeUpperBound;
+    private Long startTime;
+    private Long startTimeLowerBound;
+    private Long startTimeUpperBound;
     private Long durationSec;
     private Long durationSecLowerBound;
     private Long durationSecUpperBound;
@@ -52,7 +51,7 @@ public class StepLogSearchCriteria {
             String path, String pathLowerBound, String pathUpperBound,
             String nameContains,
             List<String> allowedTypes,
-            Date startTime, Date startTimeLowerBound, Date startTimeUpperBound,
+            Long startTime, Long startTimeLowerBound, Long startTimeUpperBound,
             Long durationSec, Long durationSecLowerBound, Long durationSecUpperBound,
             String inputsContain,
             String rawResultsContain,
@@ -153,27 +152,27 @@ public class StepLogSearchCriteria {
         this.allowedTypes = allowedTypes;
     }
 
-    public Date getStartTime() {
+    public Long getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Date startTime) {
+    public void setStartTime(Long startTime) {
         this.startTime = startTime;
     }
 
-    public Date getStartTimeLowerBound() {
+    public Long getStartTimeLowerBound() {
         return startTimeLowerBound;
     }
 
-    public void setStartTimeLowerBound(Date startTimeLowerBound) {
+    public void setStartTimeLowerBound(Long startTimeLowerBound) {
         this.startTimeLowerBound = startTimeLowerBound;
     }
 
-    public Date getStartTimeUpperBound() {
+    public Long getStartTimeUpperBound() {
         return startTimeUpperBound;
     }
 
-    public void setStartTimeUpperBound(Date startTimeUpperBound) {
+    public void setStartTimeUpperBound(Long startTimeUpperBound) {
         this.startTimeUpperBound = startTimeUpperBound;
     }
 

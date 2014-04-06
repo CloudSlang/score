@@ -265,10 +265,11 @@ public abstract class ExecutionEventFactory {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = eventOrder.getFlowPath().toString();
 
-        List<ExecutionEvent> events = ((Map<String,List>)systemContext.get(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED)).get(flowPath);
+        Map stringListMap = (Map) systemContext.get(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED);
+        List<ExecutionEvent> events = (List<ExecutionEvent>)stringListMap.get(flowPath);
 
         if(stepLogCategory.equals(ExecutionEnums.StepLogCategory.STEP_END)){
-            ((Map<String,List>)systemContext.get(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED)).remove(flowPath);
+            stringListMap.remove(flowPath);
         }
 
         return new ExecutionEvent(executionId, ExecutionEnums.Event.STEP_LOG, stepLogCategory, executionEventSequenceOrder, flowPath)
