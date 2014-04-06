@@ -1,13 +1,13 @@
 package com.hp.oo.internal.sdk.execution.events;
 
+import java.io.Serializable;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Amit Levin
  * Date: 09/01/14
- * Time: 11:59
- * To change this template use File | Settings | File Templates.
  */
-public class EventWrapper {
+public class EventWrapper implements Serializable{
 
     private String eventType;
     private Object data;
