@@ -1,7 +1,6 @@
 package com.hp.oo.engine.execution.events.services;
 
 import com.hp.oo.enginefacade.execution.ExecutionEnums;
-import com.hp.oo.enginefacade.execution.log.ExecutionLog;
 import com.hp.oo.enginefacade.execution.log.StepInfo;
 import com.hp.oo.enginefacade.execution.log.StepLog;
 import com.hp.oo.internal.sdk.execution.events.ExecutionEvent;
@@ -26,13 +25,6 @@ public interface ExecutionEventService {
      * @return
      */
     List<ExecutionEvent> readEventsByExecutionId(String executionId); // used by FlowExecutionController in flow-execution-impl
-
-    /**
-     * Returns data concerning a specific executionId in the system
-     * @param executionId the execution id
-     * @return LogLevel of the execution
-     */
-    ExecutionEnums.LogLevel readExecutionLogLevel(String executionId);
 
     /**
      * Returns a representation of the steps under the specified path for a given executionId
@@ -71,14 +63,6 @@ public interface ExecutionEventService {
      * @return an object of aggregated data
      */
     StepLog readExecutionStepLogByPath(String executionId, String path);
-
-    /**
-     * Returns an ExecutionLog object concerning a specific executionId
-     * This log object contains data which is the result of aggregating relevant events
-     * @param executionId the execution id to query
-     * @return an object with info of a specific execution
-     */
-    ExecutionLog readExecutionLog(String executionId);
 
     /**
      * Returns the event containing the data for a specific pause
