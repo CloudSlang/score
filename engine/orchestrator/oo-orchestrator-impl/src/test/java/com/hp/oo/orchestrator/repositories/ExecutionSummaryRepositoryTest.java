@@ -1208,6 +1208,34 @@ public class ExecutionSummaryRepositoryTest {
         assertTrue(result.isEmpty());
     }
 
+    @Test
+    public void findExecutionIdsByDate() {
+        Pageable page = new PageRequest(0,100);
+        Date before = new Date(System.currentTimeMillis());
+
+        createBatchOfExecutionsForFlowStatistics("12345");
+
+        List<String> result = repository.findExecutionIdByEndTimeLessThan(before,page);
+
+        assertTrue(result.isEmpty());
+
+        result = repository.findExecutionIdByEndTimeLessThan(new Date(0),page);
+
+        assertTrue(result.isEmpty());
+
+        result = repository.findExecutionIdByEndTimeLessThan(new Date(),page);
+
+        assertFalse(result.isEmpty());
+        assertEquals(6,result.size());
+        Set<String> resultInSet = new HashSet<>(result);
+        assertEquals(6,resultInSet.size());
+
+        result = repository.findExecutionIdByEndTimeLessThan(new Date(),new PageRequest(0,1));
+
+        assertFalse(result.isEmpty());
+        assertEquals(1,result.size());
+    }
+
     // create executions in order 1,2,3,4,5 - where 5 is the latest, and 1 is the earlier.
     private void createBatchOfExecutions() {
 

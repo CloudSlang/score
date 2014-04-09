@@ -150,6 +150,12 @@ public final class ExecutionSummaryServiceImpl implements ExecutionSummaryServic
 
     @Override
     @Transactional(readOnly = true)
+    public List<String> getExecutionsThatEndedBefore(Date endedBefore,int maxResultSize) {
+        return repository.findExecutionIdByEndTimeLessThan(endedBefore, new PageRequest(0,maxResultSize));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<ExecutionSummaryEntity> readExecutionsByIdsAndStatus(List<String> executionIds, List<ExecutionStatus> statuses) {
         Validate.notEmpty(executionIds, "Given executionIds list shouldn't be null nor empty");
         Validate.notEmpty(statuses, "Given statuses list shouldn't be null nor empty");
