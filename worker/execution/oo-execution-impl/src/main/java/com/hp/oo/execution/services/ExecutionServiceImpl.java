@@ -488,8 +488,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         // make sure we are actually sending something
         shouldDump &= execution.getAggregatedEvents().size() > 0;
 
-        // in case we run with DEBUGGER MODE then dum events immediately
-        if (shouldDump || isDebuggerMode(execution.getSystemContext())) {
+        if (shouldDump) {
             dumpEvents(execution);
         }
 
