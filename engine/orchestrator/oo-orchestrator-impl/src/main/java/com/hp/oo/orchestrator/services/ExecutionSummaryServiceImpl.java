@@ -35,6 +35,8 @@ import static com.hp.oo.enginefacade.execution.ExecutionSummary.EMPTY_BRANCH;
  */
 public final class ExecutionSummaryServiceImpl implements ExecutionSummaryService {
 
+    public static final String END_TIME_COLUMN_NAME = "endTime";
+
     private final Logger logger = Logger.getLogger(getClass());
 
     @Autowired
@@ -151,7 +153,8 @@ public final class ExecutionSummaryServiceImpl implements ExecutionSummaryServic
     @Override
     @Transactional(readOnly = true)
     public List<String> getExecutionsThatEndedBefore(Date endedBefore,int maxResultSize) {
-        return repository.findExecutionIdByEndTimeLessThan(endedBefore, new PageRequest(0,maxResultSize));
+        PageRequest page = new PageRequest(0,maxResultSize,Sort.Direction.DESC, END_TIME_COLUMN_NAME);
+        return repository.findExecutionIdByEndTimeLessThan(endedBefore,page);
     }
 
     @Override

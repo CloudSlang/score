@@ -1236,6 +1236,19 @@ public class ExecutionSummaryRepositoryTest {
         assertEquals(1,result.size());
     }
 
+    @Test
+    public void findExecutionIdsByDateCheckOrder() {
+        Pageable page = new PageRequest(0,1, Sort.Direction.DESC,"endTime");
+
+        createBatchOfExecutions();
+
+        List<String> result = repository.findExecutionIdByEndTimeLessThan(new Date(new Date().getTime()+10000),page);
+
+        assertFalse(result.isEmpty());
+        assertEquals(1,result.size());
+        assertEquals("5",result.get(0));
+
+    }
     // create executions in order 1,2,3,4,5 - where 5 is the latest, and 1 is the earlier.
     private void createBatchOfExecutions() {
 
