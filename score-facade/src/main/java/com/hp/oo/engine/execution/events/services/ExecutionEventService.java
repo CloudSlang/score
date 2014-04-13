@@ -99,4 +99,6 @@ public interface ExecutionEventService {
      * @return
      */
     List<ExecutionEvent> readEventsByExecutionIdAndStepPath(String executionId, String stepPath);
+
+    void deleteEventsByExecutionId(String executionId);
 }
