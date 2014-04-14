@@ -456,6 +456,38 @@ public abstract class ExecutionEventFactory {
 
     }
 
+    public static ExecutionEvent createDebuggerErrorEvent(String executionId, String stepUuid, String logMessage, LogLevel logLevel,
+                                                          LogLevelCategory logLevelCategory, OOContext context, ExecutionEventSequenceOrder eventOrder,
+                                                          Map<String, Serializable> systemContext) {
+
+        HashMap<String, String> contextMap = new HashMap<>();
+
+        if (context != null) {
+            contextMap = (HashMap<String, String>) context.retrieveSecureMap();
+        }
+
+        String eventDataAsString;
+        try {
+            eventDataAsString = mapper.writeValueAsString(context);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create json", e);
+        }
+
+        String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
+        String flowPath = eventOrder.getFlowPath().toString();
+
+        contextMap.put("logLevelCategory", logLevelCategory.name());
+
+        ExecutionEvent executionEvent = new ExecutionEvent(executionId, ExecutionEnums.Event.DEBUGGER, executionEventSequenceOrder, flowPath)
+                .setData1(stepUuid)
+                .setData2(logMessage)
+                .setData3((long) logLevel.ordinal())
+                .setData4(eventDataAsString)
+                .setDebuggerMode(isDebuggerMode(systemContext));
+        addEventToSysContext(executionEvent,systemContext);
+        return executionEvent;
+    }
+
     public static ExecutionEvent createDebuggerEvent(String executionId, String stepUuid, ExecutionEventSequenceOrder eventOrder,
                                                      String path, LogLevelCategory logLevelCategory, Map<String, Serializable> context) {
         context.put("logLevelCategory", logLevelCategory.name());

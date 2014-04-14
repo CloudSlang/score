@@ -605,9 +605,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
             execution.getSystemContext().put(ExecutionConstants.EXECUTION_STEP_ERROR_KEY, ex.getMessage());
 
             try {
-                ExecutionEvent logEvent = createLogEvent(execution, currStep, ex, "Error occurred during operation execution", LogLevelCategory.STEP_OPER_ERROR, execution.getSystemContext());
+                ExecutionEvent executionEvent = createErrorEvent(execution, currStep, ex, "Error occurred during operation execution", LogLevelCategory.STEP_OPER_ERROR, execution.getSystemContext());
                 @SuppressWarnings("unchecked") Deque<ExecutionEvent> eventsQueue = (Deque<ExecutionEvent>) execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
-                eventsQueue.add(logEvent);
+                eventsQueue.add(executionEvent);
 
             } catch (RuntimeException eventEx) {
                 logger.error("Failed to create event: ", eventEx);
@@ -633,9 +633,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
             execution.getSystemContext().put(ExecutionConstants.EXECUTION_STEP_ERROR_KEY, ex.getMessage());
 
             try {
-                ExecutionEvent logEvent = createLogEvent(execution, currStep, ex, "Error occurred during operation execution", LogLevelCategory.STEP_OPER_ERROR, execution.getSystemContext());
+                ExecutionEvent executionEvent = createErrorEvent(execution, currStep, ex, "Error occurred during operation execution", LogLevelCategory.STEP_OPER_ERROR, execution.getSystemContext());
                 @SuppressWarnings("unchecked") Deque<ExecutionEvent> eventsQueue = (Deque<ExecutionEvent>) execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
-                eventsQueue.add(logEvent);
+                eventsQueue.add(executionEvent);
 
             } catch (RuntimeException eventEx) {
                 logger.error("Failed to create event: ", eventEx);
@@ -645,15 +645,20 @@ public final class ExecutionServiceImpl implements ExecutionService {
         }
     }
 
-    private ExecutionEvent createLogEvent(Execution execution, ExecutionStep currStep, RuntimeException ex, String logMessage, LogLevelCategory logLevelCategory, Map<String, Serializable> systemContext) {
+    private ExecutionEvent createErrorEvent(Execution execution, ExecutionStep currStep, RuntimeException ex, String logMessage, LogLevelCategory logLevelCategory, Map<String, Serializable> systemContext) {
         Map<String, String> map = new HashMap<>();
         map.put("error_message", ex.getMessage());
         OOContext stepInputForEvent = new OOContext();
         stepInputForEvent.put("error_message", map.get("error_message"), false);
 
         String stepId = currStep.getExecStepId().toString();
-        return ExecutionEventFactory.createLogEvent(execution.getExecutionId(), stepId, logMessage, LogLevel.ERROR,
+        if (isDebuggerMode(execution.getSystemContext())) {
+            return ExecutionEventFactory.createDebuggerErrorEvent(execution.getExecutionId(), stepId, logMessage, LogLevel.ERROR,
+                    logLevelCategory, stepInputForEvent, ExecutionEventUtils.increaseEvent(systemContext), systemContext);
+        } else {
+            return ExecutionEventFactory.createLogEvent(execution.getExecutionId(), stepId, logMessage, LogLevel.ERROR,
                 logLevelCategory, stepInputForEvent, ExecutionEventUtils.increaseEvent(systemContext), systemContext);
+        }
     }
 
     protected void navigate(Execution execution, ExecutionStep currStep) {
@@ -677,9 +682,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
             execution.setPosition(null); //this ends the flow!!!
 
             try {
-                ExecutionEvent logEvent = createLogEvent(execution, currStep, navEx, "Error occurred during navigation execution ", LogLevelCategory.STEP_NAV_ERROR, execution.getSystemContext());
+                ExecutionEvent executionEvent = createErrorEvent(execution, currStep, navEx, "Error occurred during navigation execution ", LogLevelCategory.STEP_NAV_ERROR, execution.getSystemContext());
                 @SuppressWarnings("unchecked") Deque<ExecutionEvent> eventsQueue = (Deque) execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
-                eventsQueue.add(logEvent);
+                eventsQueue.add(executionEvent);
 
                 ExecutionEvent stepLogEvent = ExecutionEventFactory.createStepLogEvent(execution.getExecutionId(),ExecutionEventUtils.increaseEvent(execution.getSystemContext()),
                         ExecutionEnums.StepLogCategory.STEP_ERROR, execution.getSystemContext());
