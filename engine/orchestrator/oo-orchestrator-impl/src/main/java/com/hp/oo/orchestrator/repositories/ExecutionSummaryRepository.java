@@ -77,8 +77,10 @@ public interface ExecutionSummaryRepository extends JpaRepository<ExecutionSumma
     @Query("select es.executionId ,es.branchId  from ExecutionSummaryEntity es where es.status in :statuses")
     public List<Object[]> findExecutionIdAndBranchIdByStatuses(@Param("statuses") List<ExecutionStatus> statuses);
 
-    @Query("select es.executionId from ExecutionSummaryEntity es where es.endTime < :endedBefore")
-    public List<String> findExecutionIdByEndTimeLessThan(@Param("endedBefore") Date endedBefore,Pageable pageable);
+    @Query("select es.executionId from ExecutionSummaryEntity es where es.endTime < :endedBefore and es.endTime >= :endedAfter")
+    public List<String> findExecutionIdByEndTimeBetween(@Param("endedAfter") Date endedAfter,
+                                                        @Param("endedBefore") Date endedBefore,
+                                                        Pageable pageable);
 
 
 }

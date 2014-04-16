@@ -155,10 +155,11 @@ public interface ExecutionSummaryService {
     public List<String> createExecutionsSummaries(Collection<ExecutionSummaryEntity> executionSummaries);
 
     /**
-     * Get executions ids of executions ended before given date
+     * Get executions ids of executions ended between given date
      * @param endedBefore : the last date the executions ended.
+     * @param endedAfter : the first date the executions ended.
      * @param maxResultSize : max amount of results to return.
      * @return : executionIds
      */
-    public List<String> getExecutionsThatEndedBefore(Date endedBefore,int maxResultSize);
+    public List<String> getExecutionsThatEndedBetweenDates(Date endedBefore,Date endedAfter,int maxResultSize);
 }

@@ -152,9 +152,9 @@ public final class ExecutionSummaryServiceImpl implements ExecutionSummaryServic
 
     @Override
     @Transactional(readOnly = true)
-    public List<String> getExecutionsThatEndedBefore(Date endedBefore,int maxResultSize) {
+    public List<String> getExecutionsThatEndedBetweenDates(Date endedBefore,Date endedAfter,int maxResultSize) {
         PageRequest page = new PageRequest(0,maxResultSize,Sort.Direction.DESC, END_TIME_COLUMN_NAME);
-        return repository.findExecutionIdByEndTimeLessThan(endedBefore,page);
+        return repository.findExecutionIdByEndTimeBetween(endedAfter, endedBefore, page);
     }
 
     @Override
