@@ -466,9 +466,11 @@ public abstract class ExecutionEventFactory {
             contextMap = (HashMap<String, String>) context.retrieveSecureMap();
         }
 
+        contextMap.put("error_message", context.get("error_message"));
+
         String eventDataAsString;
         try {
-            eventDataAsString = mapper.writeValueAsString(context);
+            eventDataAsString = mapper.writeValueAsString(contextMap);
         } catch (IOException e) {
             throw new RuntimeException("Failed to create json", e);
         }
@@ -476,11 +478,9 @@ public abstract class ExecutionEventFactory {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = eventOrder.getFlowPath().toString();
 
-        contextMap.put("logLevelCategory", logLevelCategory.name());
-
         ExecutionEvent executionEvent = new ExecutionEvent(executionId, ExecutionEnums.Event.DEBUGGER, executionEventSequenceOrder, flowPath)
                 .setData1(stepUuid)
-                .setData2(logMessage)
+                .setData2(logLevelCategory.name())
                 .setData3((long) logLevel.ordinal())
                 .setData4(eventDataAsString)
                 .setDebuggerMode(isDebuggerMode(systemContext));
