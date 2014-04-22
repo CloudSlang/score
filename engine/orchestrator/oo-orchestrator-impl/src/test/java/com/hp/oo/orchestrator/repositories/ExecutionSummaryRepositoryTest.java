@@ -1238,7 +1238,7 @@ public class ExecutionSummaryRepositoryTest {
 
     @Test
     public void findExecutionIdsByDateCheckOrder() {
-        Pageable page = new PageRequest(0,1, Sort.Direction.DESC,"endTime");
+        Pageable page = new PageRequest(0,1, Sort.Direction.ASC,"endTime");
 
         createBatchOfExecutions();
 
@@ -1246,15 +1246,37 @@ public class ExecutionSummaryRepositoryTest {
 
         assertFalse(result.isEmpty());
         assertEquals(1,result.size());
-        assertEquals("5",result.get(0));
+        assertEquals("0",result.get(result.size()-1));
 
-        page = new PageRequest(0,5, Sort.Direction.DESC,"endTime");
+        page = new PageRequest(0,6, Sort.Direction.ASC,"endTime");
 
         result = repository.findExecutionIdByEndTimeBetween(new Date(0),new Date(new Date().getTime() + 1000000), page);
 
         assertFalse(result.isEmpty());
-        assertEquals(5,result.size());
-        assertEquals("first entry should be the newest run","5",result.get(0));
+        assertEquals(6,result.size());
+        assertEquals("first entry should be the newest run","5",result.get(result.size()-1));
+
+    }
+
+    @Test
+    public void findExecutionIdsByDateCheckOrder2() {
+        Pageable page = new PageRequest(0,2, Sort.Direction.ASC,"endTime");
+
+        createBatchOfExecutions();
+
+        List<String> result = repository.findExecutionIdByEndTimeBetween(new Date(0),new Date(new Date().getTime() + 10000), page);
+
+        assertFalse(result.isEmpty());
+        assertEquals(2,result.size());
+        assertEquals("1",result.get(result.size()-1));
+
+        page = new PageRequest(1,2, Sort.Direction.ASC,"endTime");
+
+        result = repository.findExecutionIdByEndTimeBetween(new Date(0),new Date(new Date().getTime() + 1000000), page);
+
+        assertFalse(result.isEmpty());
+        assertEquals(2,result.size());
+        assertEquals("last entry should be the newest run","3",result.get(result.size()-1));
 
     }
 
