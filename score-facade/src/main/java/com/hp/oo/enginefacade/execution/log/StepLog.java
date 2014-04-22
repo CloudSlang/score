@@ -33,7 +33,6 @@ public class StepLog implements Serializable {
     private ExecutionEnums.StepStatus status;
     private String workerId;
     private String user;
-    private ExecutionEnums.StepLogCategory stepLogCategory;
 
     public List<StepErrorLog> getErrorList() {
         return errorList;
@@ -145,14 +144,6 @@ public class StepLog implements Serializable {
 
     public void setStatus(ExecutionEnums.StepStatus status) {
         this.status = status;
-    }
-
-    public ExecutionEnums.StepLogCategory getStepLogCategory() {
-        return stepLogCategory;
-    }
-
-    public void setStepLogCategory(ExecutionEnums.StepLogCategory stepLogCategory) {
-        this.stepLogCategory = stepLogCategory;
     }
 
     @Override
