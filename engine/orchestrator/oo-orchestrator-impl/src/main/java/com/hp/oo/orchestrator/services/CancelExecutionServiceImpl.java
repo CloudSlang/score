@@ -136,14 +136,14 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
     @Override
     @Transactional(readOnly = true)
     public List<String> readCanceledExecutionsIds() {
-        List<ExecutionSummaryEntity> executions = repository.findByStatusIn(getCancelStatuses());
+        List<Object[]> executions = repository.findExecutionIdAndBranchIdByStatuses(getCancelStatuses());
         if (executions == null || executions.isEmpty()) {
             return Collections.emptyList();
         }
 
         List<String> ids = new ArrayList<>(executions.size());
-        for (ExecutionSummaryEntity exec : executions) {
-            ids.add(exec.getExecutionId());
+        for (Object[] exec : executions) {
+            ids.add((String)exec[0]);
         }
         return ids;
     }

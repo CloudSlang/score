@@ -193,7 +193,12 @@ public class CancelExecutionServiceTest {
         ExecutionSummaryEntity pendingCancel = createExecutionSummary("pendingCancelId", ExecutionStatus.PENDING_CANCEL);
         createExecutionSummary("completedId", ExecutionStatus.COMPLETED);
 
-        when(repository.findByStatusIn(getCancelStatuses())).thenReturn(Arrays.asList(cancel, pendingCancel));
+        Object[] cancelResult= new Object[2];
+        cancelResult[0] = "cancelId";
+        Object[] pendingCancelResult= new Object[2];
+        pendingCancelResult[0] = "pendingCancelId";
+
+        when(repository.findExecutionIdAndBranchIdByStatuses(getCancelStatuses())).thenReturn(Arrays.asList(cancelResult, pendingCancelResult));
         List<String> result = service.readCanceledExecutionsIds();
         assertThat(result).hasSize(2);
     }
@@ -201,14 +206,14 @@ public class CancelExecutionServiceTest {
     @Test
     public void testReadCancelledExecutions_emptyList() {
         //noinspection unchecked
-        when(repository.findByStatusIn(getCancelStatuses())).thenReturn(Collections.EMPTY_LIST);
+        when(repository.findExecutionIdAndBranchIdByStatuses(getCancelStatuses())).thenReturn(Collections.EMPTY_LIST);
         List<String> result = service.readCanceledExecutionsIds();
         assertThat(result).isEmpty();
     }
 
     @Test
     public void testReadCancelledExecutions_null() {
-        when(repository.findByStatusIn(getCancelStatuses())).thenReturn(null);
+        when(repository.findExecutionIdAndBranchIdByStatuses(getCancelStatuses())).thenReturn(null);
         List<String> result = service.readCanceledExecutionsIds();
         assertThat(result).isEmpty();
     }
