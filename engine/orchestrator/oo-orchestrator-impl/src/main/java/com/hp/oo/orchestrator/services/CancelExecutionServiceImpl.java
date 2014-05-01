@@ -10,6 +10,7 @@ import com.hp.oo.orchestrator.entities.ExecutionSummaryEntity;
 import com.hp.oo.orchestrator.repositories.ExecutionSummaryRepository;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -135,6 +136,7 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable("worker_data")
     public List<String> readCanceledExecutionsIds() {
         List<Object[]> executions = repository.findExecutionIdAndBranchIdByStatuses(getCancelStatuses());
         if (executions == null || executions.isEmpty()) {
