@@ -73,7 +73,7 @@ public class WorkerManagerTest {
 
 		workerManager.onApplicationEvent(mock(ContextRefreshedEvent.class));
 		Thread.sleep(1000L); // must sleep some time since the start up is being processed in a new thread
-		verify(workerNodeService).up(CREDENTIAL_UUID);
+		verify(workerNodeService,atLeastOnce()).up(CREDENTIAL_UUID);
 		assertThat(workerManager.isUp()).isTrue();
 	}
 
