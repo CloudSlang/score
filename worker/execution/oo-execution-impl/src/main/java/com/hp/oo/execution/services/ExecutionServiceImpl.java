@@ -81,7 +81,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     @Autowired
     private EventBus eventBus;
 
-    private boolean eventsOff = Boolean.getBoolean("events.mechanism.off");
+    private boolean eventsPersistencyOn = Boolean.getBoolean("events.persistency");
 
     @Override
     public Execution execute(Execution execution) {
@@ -520,7 +520,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             }
             filteredExecutionEvents.add(executionEvent);
         }
-        if(!eventsOff || isDebuggerMode(execution.getSystemContext())){ //consider flag events and debugger before sending events
+        if(eventsPersistencyOn || isDebuggerMode(execution.getSystemContext())){ //consider flag events and debugger before sending events
             executionEventService.createEvents(filteredExecutionEvents);
         }
         execution.getAggregatedEvents().clear(); //must clean so we wont send it twice - once from here and once from the QueueListener onTerminated()

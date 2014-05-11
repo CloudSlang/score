@@ -1,6 +1,5 @@
 package com.hp.oo.orchestrator.services;
 
-import com.hp.oo.broker.entities.RunningExecutionPlan;
 import com.hp.oo.broker.services.RunningExecutionPlanService;
 import com.hp.oo.engine.execution.events.services.ExecutionEventService;
 import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
@@ -8,7 +7,6 @@ import com.hp.oo.engine.queue.services.QueueDispatcherService;
 import com.hp.oo.enginefacade.execution.ExecutionEnums;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
-import com.hp.oo.internal.sdk.execution.ExecutionPlan;
 import com.hp.oo.internal.sdk.execution.events.ExecutionEvent;
 import com.hp.score.engine.data.IdentityGenerator;
 import junit.framework.Assert;
@@ -27,14 +25,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * User: zruya
@@ -103,10 +95,13 @@ public class OrchestratorServiceTest {
     }
 
     @Test
-    public void testStartEventSentAtTrigger(){
+    public void testStartEventSentAtTriggerForDebugger(){
         List<String> ctxNames = new ArrayList<>();
         ctxNames.add("flowCtx");
-        orchestratorService.triggerFlow("", "", "", "", "flowCtx", "", "", new Execution(1L, 0L, ctxNames), new HashMap<String, String>());
+        Execution execution = new Execution(1L, 0L, ctxNames);
+        //make the test work until we remove the events mechanism
+        execution.getSystemContext().put(ExecutionConstants.DEBUGGER_MODE, true);
+        orchestratorService.triggerFlow("", "", "", "", "flowCtx", "", "", execution, new HashMap<String, String>());
 
         Mockito.verify(executionEventService,Mockito.times(1)).createEvents(Mockito.argThat(new ArgumentMatcher<List<ExecutionEvent>>() {
             @Override
@@ -115,5 +110,4 @@ public class OrchestratorServiceTest {
             }
         }));
     }
-
 }
