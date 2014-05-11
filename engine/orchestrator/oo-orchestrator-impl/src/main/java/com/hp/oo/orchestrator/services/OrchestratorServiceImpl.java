@@ -38,6 +38,8 @@ public final class OrchestratorServiceImpl implements OrchestratorService {
     private final Logger logger = Logger.getLogger(getClass());
     private final ExecutionEnums.LogLevel DEFAULT_LOG_LEVEL = ExecutionEnums.LogLevel.INFO;
 
+    private boolean eventsPersistencyOn = Boolean.getBoolean("events.persistency");
+
     @Autowired
     private RunningExecutionPlanService runningExecutionPlanService;
 
@@ -87,6 +89,10 @@ public final class OrchestratorServiceImpl implements OrchestratorService {
         enqueue(message);
     }
 
+    private boolean isDebuggerMode(Map<String, Serializable> systemContext) {
+        return systemContext.containsKey(ExecutionConstants.DEBUGGER_MODE) && (Boolean) systemContext.get(ExecutionConstants.DEBUGGER_MODE);
+    }
+
     // returns the created START event
     private ExecutionEvent sendExecutionEvent(String uuid, String triggerType, String executionName, String executionId, OOContext context, Map<String, Serializable> systemContext) {
         logger.debug("Create start execution event for " + uuid);
@@ -106,7 +112,9 @@ public final class OrchestratorServiceImpl implements OrchestratorService {
             }
         }
         if (logger.isDebugEnabled()) logger.debug("send start execution event for " + uuid);
-        executionEventService.createEvents(events);
+        if (eventsPersistencyOn || isDebuggerMode(systemContext)) {
+            executionEventService.createEvents(events);
+        }
 
         return startEvent;
     }

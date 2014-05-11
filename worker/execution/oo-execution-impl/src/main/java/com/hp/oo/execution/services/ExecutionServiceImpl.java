@@ -81,7 +81,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     @Autowired
     private EventBus eventBus;
 
-    private boolean eventsOff = Boolean.getBoolean("events.mechanism.off");
+    private boolean eventsPersistencyOn = Boolean.getBoolean("events.persistency");
 
     @Override
     public Execution execute(Execution execution) {
@@ -393,13 +393,18 @@ public final class ExecutionServiceImpl implements ExecutionService {
         String branchId = (String) systemContext.get(ExecutionConstants.BRANCH_ID);
 
         //get the type of paused flow
-        PauseReason reason = pauseService.writeExecutionObject(executionId, branchId, execution);
+
+        PauseReason reason = null;
+        ExecutionSummary execSummary = pauseService.readPausedExecution(execution.getExecutionId(), branchId);
+        if (execSummary != null && execSummary.getStatus().equals(ExecutionStatus.PENDING_PAUSE)) {
+            reason = execSummary.getPauseReason();
+        }
 
         if (reason == null) {
             return false; //indicate that the flow was not paused
         }
 
-        Deque<ExecutionEvent> eventsQueue = (Deque) systemContext.get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
+        @SuppressWarnings("unchecked") Deque<ExecutionEvent> eventsQueue = (Deque) systemContext.get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
         ExecutionEvent pausedStepEvent = ExecutionEventFactory.createStepLogEvent(executionId, ExecutionEventUtils.increaseEvent(systemContext),ExecutionEnums.StepLogCategory.STEP_PAUSED,systemContext);
         eventsQueue.add(pausedStepEvent);
 
@@ -409,9 +414,13 @@ public final class ExecutionServiceImpl implements ExecutionService {
         addExecutionEvent(execution);
         dumpEvents(execution);
 
+        //Write execution to the db! Pay attention - do not do anything to the execution or its context after this line!!!
+        pauseService.writeExecutionObject(executionId, branchId, execution);
+
         if (logger.isDebugEnabled()) {
             logger.debug("Execution with execution_id: " + execution.getExecutionId() + " is paused!");
         }
+
         return true;
     }
 
@@ -520,7 +529,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             }
             filteredExecutionEvents.add(executionEvent);
         }
-        if(!eventsOff || isDebuggerMode(execution.getSystemContext())){ //consider flag events and debugger before sending events
+        if(eventsPersistencyOn || isDebuggerMode(execution.getSystemContext())){ //consider flag events and debugger before sending events
             executionEventService.createEvents(filteredExecutionEvents);
         }
         execution.getAggregatedEvents().clear(); //must clean so we wont send it twice - once from here and once from the QueueListener onTerminated()
