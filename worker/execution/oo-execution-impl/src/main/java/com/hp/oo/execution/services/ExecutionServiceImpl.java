@@ -94,6 +94,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
             // handle flow cancellation
             if (handleCancelledFlow(execution, isDebuggerMode(execution.getSystemContext()))) {
+                dumpExecutionEvents(execution, true);
                 return execution;
             }
 
