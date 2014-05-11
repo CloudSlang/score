@@ -136,7 +136,6 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable("worker_data")
     public List<String> readCanceledExecutionsIds() {
         List<Object[]> executions = repository.findExecutionIdAndBranchIdByStatuses(getCancelStatuses());
         if (executions == null || executions.isEmpty()) {
