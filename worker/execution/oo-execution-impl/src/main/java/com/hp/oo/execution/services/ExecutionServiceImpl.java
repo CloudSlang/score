@@ -393,13 +393,18 @@ public final class ExecutionServiceImpl implements ExecutionService {
         String branchId = (String) systemContext.get(ExecutionConstants.BRANCH_ID);
 
         //get the type of paused flow
-        PauseReason reason = pauseService.writeExecutionObject(executionId, branchId, execution);
+
+        PauseReason reason = null;
+        ExecutionSummary execSummary = pauseService.readPausedExecution(execution.getExecutionId(), branchId);
+        if (execSummary != null && execSummary.getStatus().equals(ExecutionStatus.PENDING_PAUSE)) {
+            reason = execSummary.getPauseReason();
+        }
 
         if (reason == null) {
             return false; //indicate that the flow was not paused
         }
 
-        Deque<ExecutionEvent> eventsQueue = (Deque) systemContext.get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
+        @SuppressWarnings("unchecked") Deque<ExecutionEvent> eventsQueue = (Deque) systemContext.get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
         ExecutionEvent pausedStepEvent = ExecutionEventFactory.createStepLogEvent(executionId, ExecutionEventUtils.increaseEvent(systemContext),ExecutionEnums.StepLogCategory.STEP_PAUSED,systemContext);
         eventsQueue.add(pausedStepEvent);
 
@@ -409,9 +414,13 @@ public final class ExecutionServiceImpl implements ExecutionService {
         addExecutionEvent(execution);
         dumpEvents(execution);
 
+        //Write execution to the db! Pay attention - do not do anything to the execution or its context after this line!!!
+        pauseService.writeExecutionObject(executionId, branchId, execution);
+
         if (logger.isDebugEnabled()) {
             logger.debug("Execution with execution_id: " + execution.getExecutionId() + " is paused!");
         }
+
         return true;
     }
 
