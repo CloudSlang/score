@@ -459,7 +459,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     private void addExecutionEvent(Execution execution) {
-        if(!eventsPersistencyOn && !isDebuggerMode(execution.getSystemContext())) return;
         // move all the events form the SystemContext into the event channel
         @SuppressWarnings("unchecked") ArrayDeque<ExecutionEvent> eventsQueue = (ArrayDeque) execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
         for (ExecutionEvent executionEvent : eventsQueue) {
