@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.hp.score</groupId>
 		<artifactId>engine</artifactId>
-		<version>0.10.10.3-SNAPSHOT</version>
+		<version>0.10.10.3</version>
 	</parent>
 
 	<artifactId>queue</artifactId>
