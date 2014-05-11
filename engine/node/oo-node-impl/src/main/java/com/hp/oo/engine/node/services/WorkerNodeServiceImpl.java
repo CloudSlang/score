@@ -297,6 +297,7 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService, UserDetai
 
 	@Override
 	@Transactional
+    @Secured("topologyManage")
 	public void addGroupToWorker(String workerUuid, String group) {
 		WorkerNode worker = readByUUID(workerUuid);
 		List<String> groups = new ArrayList<>(worker.getGroups());
