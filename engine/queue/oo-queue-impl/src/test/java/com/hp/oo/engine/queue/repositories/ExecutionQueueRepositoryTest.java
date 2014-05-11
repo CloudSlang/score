@@ -145,6 +145,32 @@ public class ExecutionQueueRepositoryTest {
     }
 
     @Test
+    public void testPollForRecoveryDuplicateMsg2(){
+
+        //insert to states table 1
+        List<ExecutionMessage> msg = new ArrayList<>();
+        ExecutionMessage execMsg = generateMessage("group1","msg1");
+        execMsg.setWorkerId("worker1");
+        execMsg.setStatus(ExecStatus.IN_PROGRESS);
+        msg.add(execMsg);
+        executionQueueRepository.insertExecutionStates(msg);
+        executionQueueRepository.insertExecutionQueue(msg,1L);
+
+        //insert to states table 2
+        when(partitionTemplate.activeTable()).thenReturn("OO_EXECUTION_STATES_2");
+        execMsg.incMsgSeqId();
+        executionQueueRepository.insertExecutionStates(msg);
+        executionQueueRepository.insertExecutionQueue(msg,1L);
+
+        List<ExecutionMessage> result = executionQueueRepository.poll("worker1",10,ExecStatus.IN_PROGRESS);
+
+
+        Assert.assertNotNull(result);
+        Assert.assertFalse(result.isEmpty());
+        Assert.assertEquals("should find only 1 msg result!, since the second msg has higher msg seq id",1,result.size());
+    }
+
+    @Test
     public void testPollForRecoveryInPrvTable(){
 
         //insert to states table 2
