@@ -99,4 +99,12 @@ public interface ExecutionEventService {
      * @return
      */
     List<ExecutionEvent> readEventsByExecutionIdAndStepPath(String executionId, String stepPath);
+
+
+    /**
+     * read the number of execution events of provided execution id
+     * @param executionId
+     * @return
+     */
+    long readExecutionEventsCountByExecutionId(String executionId);
 }
