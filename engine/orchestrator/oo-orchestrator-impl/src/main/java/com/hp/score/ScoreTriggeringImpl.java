@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -50,7 +51,7 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
 
     @Override
     public Long trigger(ExecutionPlan executionPlan, Map<String, Serializable> context, Map<String, Serializable> systemContext, Long startStep) {
-        Long runningExecutionPlanId = runningExecutionPlanService.getOrCreateRunningExecutionPlan(executionPlan);
+        Long runningExecutionPlanId = saveRunningExecutionPlan(executionPlan,systemContext);
         Long executionId = (Long)idGenerator.next();
         Execution execution = new Execution(executionId, runningExecutionPlanId, startStep,context, systemContext);
 
@@ -63,6 +64,22 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
         ExecutionMessage message = createExecutionMessage(execution);
         enqueue(message);
         return executionId;
+    }
+
+    private Long saveRunningExecutionPlan(ExecutionPlan executionPlan,Map<String, Serializable> systemContext) {
+        Map<String, Long> runningPlansIds = new HashMap<>();
+        Map<String, Long> beginStepsIds = new HashMap<>();
+
+        for(ExecutionPlan dependencyExecutionPlan: executionPlan.getDependencies().values()){
+            String subFlowUuid = dependencyExecutionPlan.getFlowUuid();
+            Long subFlowRunningId = runningExecutionPlanService.getOrCreateRunningExecutionPlan(dependencyExecutionPlan);
+            runningPlansIds.put(subFlowUuid,subFlowRunningId);
+            beginStepsIds.put(subFlowUuid,executionPlan.getBeginStep());
+        }
+        systemContext.put(ExecutionConstants.RUNNING_PLANS_MAP, (Serializable) runningPlansIds);
+        systemContext.put(ExecutionConstants.BEGIN_STEPS_MAP, (Serializable) beginStepsIds);
+
+        return runningExecutionPlanService.getOrCreateRunningExecutionPlan(executionPlan);
     }
 
     private void createRunningExecutionConfiguration(Map<String, Serializable> systemContext) {

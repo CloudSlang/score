@@ -4,7 +4,6 @@ import com.hp.oo.broker.entities.RunningExecutionPlan;
 import com.hp.oo.broker.services.RunningExecutionPlanService;
 import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.engine.queue.services.QueueDispatcherService;
-import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.internal.sdk.execution.ExecutionPlan;
 import com.hp.oo.orchestrator.services.ExecutionSummaryService;
 import com.hp.score.engine.data.IdentityGenerator;
@@ -16,12 +15,11 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 /**
  * User: wahnonm
@@ -67,6 +65,27 @@ public class ScoreTriggeringTest {
         scoreTrigger.trigger(ep,new HashMap<String, Serializable>(),new HashMap<String, Serializable>(),1L);
 
         verify(queueDispatcher,times(1)).dispatch(anyList());
+    }
+
+    @Test
+    public void testSaveOfRunningEP() throws Exception {
+        ExecutionPlan ep = new ExecutionPlan();
+        ep.setBeginStep(1L);
+        scoreTrigger.trigger(ep,new HashMap<String, Serializable>(),new HashMap<String, Serializable>(),1L);
+
+        verify(runningExecutionPlanService,times(1)).getOrCreateRunningExecutionPlan(any(ExecutionPlan.class));
+    }
+
+    @Test
+    public void testSaveOfRunningEPComplex() throws Exception {
+        ExecutionPlan ep = new ExecutionPlan();
+        Map<String,ExecutionPlan> dep = new HashMap<>();
+        dep.put("subflowEP",new ExecutionPlan());
+        ep.setDependencies(dep);
+        ep.setBeginStep(1L);
+        scoreTrigger.trigger(ep,new HashMap<String, Serializable>(),new HashMap<String, Serializable>(),1L);
+
+        verify(runningExecutionPlanService,times(2)).getOrCreateRunningExecutionPlan(any(ExecutionPlan.class));
     }
 
 }

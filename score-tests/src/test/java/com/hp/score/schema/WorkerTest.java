@@ -62,9 +62,9 @@ public class WorkerTest {
 		}
 
 		@Bean
-		WorkerNodeService workerNodeService(){
-			return mock(WorkerNodeService.class);
-		}
+         WorkerNodeService workerNodeService(){
+            return mock(WorkerNodeService.class);
+        }
 
 		@Bean
 		WorkerConfigurationService workerConfigurationService(){

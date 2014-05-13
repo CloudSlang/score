@@ -2,6 +2,7 @@ package com.hp.oo.broker.entities;
 
 import com.hp.oo.internal.sdk.execution.ExecutionPlan;
 import com.hp.score.engine.data.AbstractIdentifiable;
+import org.apache.commons.lang.SerializationUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -53,7 +54,9 @@ public class RunningExecutionPlan extends AbstractIdentifiable {
     }
 
     public void setExecutionPlan(ExecutionPlan executionPlan) {
-        this.executionPlan = executionPlan;
+
+        this.executionPlan = (ExecutionPlan)SerializationUtils.clone(executionPlan);
+        this.executionPlan.setDependencies(null); //not needed for the RunningExecutionPlan
         executionPlanZipped = ExecutionPlanCompressUtil.getBytesFromExecutionPlan(executionPlan);
     }
 

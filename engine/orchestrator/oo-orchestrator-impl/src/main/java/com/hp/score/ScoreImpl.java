@@ -19,7 +19,12 @@ public class ScoreImpl implements Score {
 
     @Override
     public Long trigger(ExecutionPlan executionPlan) {
-        return trigger(executionPlan,new HashMap<String,Serializable>(),new HashMap<String,Serializable>(),executionPlan.getBeginStep());
+        return trigger(executionPlan,new HashMap<String,Serializable>());
+    }
+
+    @Override
+    public Long trigger(ExecutionPlan executionPlan, Map<String, Serializable> input) {
+        return trigger(executionPlan,input,new HashMap<String,Serializable>(),executionPlan.getBeginStep());
     }
 
     @Override
@@ -33,7 +38,7 @@ public class ScoreImpl implements Score {
 }
 
     @Override
-    public void resumeExecution(Long executionId) {
+    public void resumeExecution(Long executionId,Map<String,Serializable> context, Map<String,Serializable> systemContext) {
          //TODO - impl this
     }
 
