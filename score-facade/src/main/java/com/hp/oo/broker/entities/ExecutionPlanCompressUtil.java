@@ -29,7 +29,23 @@ public class ExecutionPlanCompressUtil {
      * @return ExecutionPlan
      */
     public static ExecutionPlan getExecutionPlanFromBytes(byte[] bytes) {
-        ObjectInputStream ois = null;
+
+        try (ByteArrayInputStream is = new ByteArrayInputStream(bytes);
+             BufferedInputStream bis = new BufferedInputStream(is);
+             GZIPInputStream gis = new GZIPInputStream(bis);
+             BufferedInputStream bis_2 = new BufferedInputStream(gis);
+             ObjectInputStream ois =  new ObjectInputStream(bis_2);
+             ){
+
+            return (ExecutionPlan) ois.readObject();
+
+        }
+        catch(IOException | ClassNotFoundException ex) {
+            logger.error("Failed to read execution plan from byte[]. Error: ", ex);
+            throw new RuntimeException("Failed to read execution plan from byte[]. Error: ", ex);
+        }
+
+       /* ObjectInputStream ois = null;
         try {
             //2 Buffers are added to increase performance
             ByteArrayInputStream is = new ByteArrayInputStream(bytes);
@@ -49,7 +65,7 @@ public class ExecutionPlanCompressUtil {
             } catch (IOException e) {
                  logger.error("Failed to close stream... ", e);
             }
-        }
+        }*/
 
     }
 

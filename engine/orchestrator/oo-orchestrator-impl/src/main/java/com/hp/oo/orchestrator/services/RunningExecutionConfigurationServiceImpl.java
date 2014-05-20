@@ -50,7 +50,11 @@ public final class RunningExecutionConfigurationServiceImpl implements RunningEx
 
         List<RunningExecutionConfigurationImpl> latestRunningExecutionConfigurations =  runningExecConfigRepository.findLatestTime();
         RunningExecutionConfiguration latest = latestRunningExecutionConfigurations.isEmpty()?null:latestRunningExecutionConfigurations.get(latestRunningExecutionConfigurations.size()-1);
-        return execConfigSerializationUtil.objFromBytes(latest.getExecutionConfiguration());
+        Map<String,String> resultMap = new HashMap<>();
+        if (latest != null){
+            resultMap =  execConfigSerializationUtil.objFromBytes(latest.getExecutionConfiguration());
+        }
+        return resultMap;
     }
 
 
