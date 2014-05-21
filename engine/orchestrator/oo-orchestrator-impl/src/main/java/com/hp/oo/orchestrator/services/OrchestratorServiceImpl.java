@@ -56,20 +56,15 @@ public final class OrchestratorServiceImpl implements OrchestratorService {
     private ExecutionMessageConverter executionMessageConverter;
 
     @Autowired
-    private RunningExecutionConfigurationService executionConfigurationService;
-
-    @Autowired
     private IdentityGenerator idGenerator;
 
     @Override
     @Transactional
     public void triggerFlow(String flowUuid, String triggerType, String executionName, String flowPath, String flowInputsContextName, String triggeredBy, String triggeringSource, Execution execution, Map<String, String> executionConfiguration) {
         ExecutionEventUtils.startFlow(execution.getSystemContext());
+        //TODO orit: change the OOContext class name
         OOContext flowInputsContext = (OOContext)execution.getContexts().get(flowInputsContextName); //get the flow context in generic way
 
-        //TODO configure running execution configuration
-        long versionNumber = executionConfigurationService.createRunningExecutionConfiguration(executionConfiguration);
-        execution.getSystemContext().put(ExecutionConstants.EXECUTION_CONFIGURATION_VERSION, versionNumber);
         //TODO after moving all execution events creating and dispatching into score this should also moved into score
         execution.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String,List>());
 

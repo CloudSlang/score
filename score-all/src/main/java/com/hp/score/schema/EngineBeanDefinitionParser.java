@@ -21,7 +21,6 @@ import com.hp.oo.orchestrator.services.ExecutionSerializationUtil;
 import com.hp.oo.orchestrator.services.ExecutionSummaryServiceImpl;
 import com.hp.oo.orchestrator.services.OrchestratorDispatcherServiceImpl;
 import com.hp.oo.orchestrator.services.OrchestratorServiceImpl;
-import com.hp.oo.orchestrator.services.RunningExecutionConfigurationServiceImpl;
 import com.hp.oo.orchestrator.services.RunningExecutionPlanServiceImpl;
 import com.hp.oo.orchestrator.services.SplitJoinServiceImpl;
 import com.hp.oo.partitions.services.PartitionCallback;
@@ -59,7 +58,6 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(ExecutionSummaryServiceImpl.class, null);
 		put(QueueDispatcherServiceImpl.class, "queueDispatcherService");
 		put(ExecutionQueueServiceImpl.class, "executionQueueService");
-		put(RunningExecutionConfigurationServiceImpl.class, "runningExecutionConfigurationService");
 		put(ExecutionAssignerServiceImpl.class, "executionAssignerService");
 		put(PartitionServiceImpl.class, null);
 		put(RunningExecutionPlanServiceImpl.class, "runningEP");

@@ -12,7 +12,6 @@ import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.oo.internal.sdk.execution.ExecutionPlan;
 import com.hp.oo.orchestrator.services.ExecutionSummaryService;
-import com.hp.oo.orchestrator.services.RunningExecutionConfigurationService;
 import com.hp.score.engine.data.IdentityGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -46,16 +45,11 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
     @Autowired
     private ExecutionSummaryService executionSummaryService;
 
-    @Autowired
-    private RunningExecutionConfigurationService executionConfigurationService;
-
     @Override
     public Long trigger(ExecutionPlan executionPlan, Map<String, Serializable> context, Map<String, Serializable> systemContext, Long startStep) {
         Long runningExecutionPlanId = saveRunningExecutionPlan(executionPlan,systemContext);
         Long executionId = (Long)idGenerator.next();
         Execution execution = new Execution(executionId, runningExecutionPlanId, startStep,context, systemContext);
-
-        createRunningExecutionConfiguration(systemContext);
 
         // create execution record in ExecutionSummary table
         executionSummaryService.createExecution(execution.getExecutionId(), null, new Date(), ExecutionEnums.ExecutionStatus.RUNNING, "", executionPlan.getFlowUuid(), "", "", "");
@@ -80,14 +74,6 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
         systemContext.put(ExecutionConstants.BEGIN_STEPS_MAP, (Serializable) beginStepsIds);
 
         return runningExecutionPlanService.getOrCreateRunningExecutionPlan(executionPlan);
-    }
-
-    private void createRunningExecutionConfiguration(Map<String, Serializable> systemContext) {
-        @SuppressWarnings("unchecked") Map<String,String> executionConfiguration = (Map<String,String>)systemContext.get("executionConfiguration");
-        if(executionConfiguration != null){
-            long versionNumber = executionConfigurationService.createRunningExecutionConfiguration(executionConfiguration);
-            systemContext.put(ExecutionConstants.EXECUTION_CONFIGURATION_VERSION, versionNumber);
-        }
     }
 
     private void enqueue(ExecutionMessage... messages) {
