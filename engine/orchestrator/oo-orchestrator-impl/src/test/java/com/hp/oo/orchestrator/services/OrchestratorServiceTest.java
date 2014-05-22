@@ -52,9 +52,6 @@ public class OrchestratorServiceTest {
     private ExecutionMessageConverter executionMessageConverter;
 
     @Mock
-    private RunningExecutionConfigurationService executionConfigurationService;
-
-    @Mock
     private IdentityGenerator<Long> idGenerator;
 
     @Configuration

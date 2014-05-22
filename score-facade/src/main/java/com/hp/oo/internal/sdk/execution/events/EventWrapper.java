@@ -12,19 +12,19 @@ import java.io.Serializable;
 public class EventWrapper implements Serializable {
 
     private String eventType;
-    private Object data;
+    private Object event;
 
-    public EventWrapper(String eventType, Object data) {
+    public EventWrapper(String eventType, Object event) {
         this.eventType = eventType;
-        this.data = data;
+        this.event = event;
     }
 
     public String getEventType() {
         return eventType;
     }
 
-    public Object getData() {
-        return data;
+    public Object getEvent() {
+        return event;
     }
 
 }
