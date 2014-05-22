@@ -77,10 +77,6 @@ public class QueueListenerImpl implements QueueListener {
         }
     }
 
-    private void deleteRunStateIfNotBranch(ExecutionMessage executionMessage) {
-
-    }
-
     @Override
     public void onFailed(List<ExecutionMessage> messages) {
         for (ExecutionMessage executionMessage : messages) {
