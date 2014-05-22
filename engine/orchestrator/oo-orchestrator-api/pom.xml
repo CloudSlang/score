@@ -32,12 +32,4 @@
          </dependency>
 	</dependencies>
 
-	<build>
-         <plugins>
-             <plugin>
-                 <groupId>com.mysema.maven</groupId>
-                 <artifactId>apt-maven-plugin</artifactId>
-             </plugin>
-         </plugins>
-     </build>
 </project>

@@ -5,8 +5,8 @@ import com.hp.oo.broker.services.RunningExecutionPlanService;
 import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.engine.queue.services.QueueDispatcherService;
 import com.hp.oo.internal.sdk.execution.ExecutionPlan;
-import com.hp.oo.orchestrator.services.ExecutionSummaryService;
 import com.hp.score.engine.data.IdentityGenerator;
+import com.hp.score.services.RunStateService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -19,7 +19,10 @@ import java.util.Map;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * User: wahnonm
@@ -28,17 +31,14 @@ import static org.mockito.Mockito.*;
  */
 public class ScoreTriggeringTest {
 
-
     @InjectMocks
     private ScoreTriggering scoreTrigger = new ScoreTriggeringImpl();
 
     @Mock
     private RunningExecutionPlanService runningExecutionPlanService;
 
-
     @Mock
     private IdentityGenerator idGenerator;
-
 
     @Mock
     private QueueDispatcherService queueDispatcher;
@@ -47,8 +47,7 @@ public class ScoreTriggeringTest {
     private ExecutionMessageConverter executionMessageConverter;
 
     @Mock
-    private ExecutionSummaryService executionSummaryService;
-
+    private RunStateService runStateService;
 
     @Before
     public void resetMocks() {
@@ -62,30 +61,30 @@ public class ScoreTriggeringTest {
     public void testTrigger2() throws Exception {
         ExecutionPlan ep = new ExecutionPlan();
         ep.setBeginStep(1L);
-        scoreTrigger.trigger(ep,new HashMap<String, Serializable>(),new HashMap<String, Serializable>(),1L);
+        scoreTrigger.trigger(ep, new HashMap<String, Serializable>(), new HashMap<String, Serializable>(), 1L);
 
-        verify(queueDispatcher,times(1)).dispatch(anyList());
+        verify(queueDispatcher, times(1)).dispatch(anyList());
     }
 
     @Test
     public void testSaveOfRunningEP() throws Exception {
         ExecutionPlan ep = new ExecutionPlan();
         ep.setBeginStep(1L);
-        scoreTrigger.trigger(ep,new HashMap<String, Serializable>(),new HashMap<String, Serializable>(),1L);
+        scoreTrigger.trigger(ep, new HashMap<String, Serializable>(), new HashMap<String, Serializable>(), 1L);
 
-        verify(runningExecutionPlanService,times(1)).getOrCreateRunningExecutionPlan(any(ExecutionPlan.class));
+        verify(runningExecutionPlanService, times(1)).getOrCreateRunningExecutionPlan(any(ExecutionPlan.class));
     }
 
     @Test
     public void testSaveOfRunningEPComplex() throws Exception {
         ExecutionPlan ep = new ExecutionPlan();
-        Map<String,ExecutionPlan> dep = new HashMap<>();
-        dep.put("subflowEP",new ExecutionPlan());
+        Map<String, ExecutionPlan> dep = new HashMap<>();
+        dep.put("subflowEP", new ExecutionPlan());
         ep.setDependencies(dep);
         ep.setBeginStep(1L);
-        scoreTrigger.trigger(ep,new HashMap<String, Serializable>(),new HashMap<String, Serializable>(),1L);
+        scoreTrigger.trigger(ep, new HashMap<String, Serializable>(), new HashMap<String, Serializable>(), 1L);
 
-        verify(runningExecutionPlanService,times(2)).getOrCreateRunningExecutionPlan(any(ExecutionPlan.class));
+        verify(runningExecutionPlanService, times(2)).getOrCreateRunningExecutionPlan(any(ExecutionPlan.class));
     }
 
 }

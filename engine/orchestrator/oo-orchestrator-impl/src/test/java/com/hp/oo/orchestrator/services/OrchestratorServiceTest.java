@@ -7,13 +7,12 @@ import com.hp.oo.engine.queue.services.QueueDispatcherService;
 import com.hp.oo.enginefacade.execution.ExecutionEnums;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
-import com.hp.oo.internal.sdk.execution.events.ExecutionEvent;
 import com.hp.score.engine.data.IdentityGenerator;
+import com.hp.score.services.RunStateService;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -25,8 +24,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * User: zruya
@@ -46,7 +43,7 @@ public class OrchestratorServiceTest {
     private ExecutionEventService executionEventService;
 
     @Mock
-    private ExecutionSummaryService executionSummaryService;
+    private RunStateService runStateService;
 
     @Mock
     private QueueDispatcherService queueDispatcher;
@@ -94,20 +91,4 @@ public class OrchestratorServiceTest {
         Assert.assertEquals("When specifying a log level, it should be included in the execution", ExecutionEnums.LogLevel.ERROR.name(),  resultLogLevel);
     }
 
-    @Test
-    public void testStartEventSentAtTriggerForDebugger(){
-        List<String> ctxNames = new ArrayList<>();
-        ctxNames.add("flowCtx");
-        Execution execution = new Execution(1L, 0L, ctxNames);
-        //make the test work until we remove the events mechanism
-        execution.getSystemContext().put(ExecutionConstants.DEBUGGER_MODE, true);
-        orchestratorService.triggerFlow("", "", "", "", "flowCtx", "", "", execution, new HashMap<String, String>());
-
-        Mockito.verify(executionEventService,Mockito.times(1)).createEvents(Mockito.argThat(new ArgumentMatcher<List<ExecutionEvent>>() {
-            @Override
-            public boolean matches(Object o) {
-                return ((List<ExecutionEvent>)o).get(0).getType().equals(ExecutionEnums.Event.START);   //make sure that the event is of type start event
-            }
-        }));
-    }
 }
