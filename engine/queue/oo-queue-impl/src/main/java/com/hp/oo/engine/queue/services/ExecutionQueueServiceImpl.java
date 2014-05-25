@@ -114,7 +114,7 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<ExecutionMessage> poll(String workerId, int maxSize, ExecStatus... statuses) {
-		return poll(new Date(0), workerId, maxSize, statuses);
+		return executionQueueRepository.poll(workerId, maxSize, statuses);
 	}
 
 	@Override

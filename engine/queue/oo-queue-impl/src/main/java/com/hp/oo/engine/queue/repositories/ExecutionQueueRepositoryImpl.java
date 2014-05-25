@@ -20,6 +20,7 @@ import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -108,7 +109,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     " (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
                     "              FROM OO_EXECUTION_QUEUES_1 qq " +
                     "              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
-            "UNION " +
+            "UNION ALL" +
             "SELECT         EXEC_STATE_ID,      " +
                     "       ASSIGNED_WORKER,      " +
                     "       EXEC_GROUP,       " +
@@ -125,7 +126,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     " q.EXEC_STATE_ID = s2.ID AND" +
                     " (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
                     "              FROM OO_EXECUTION_QUEUES_1 qq " +
-                    "              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)); ";
+                    "              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) ";
 
 	final private String QUERY_MESSAGES_BY_STATUSES =
 			"SELECT EXEC_STATE_ID, " +
@@ -248,7 +249,13 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         for (ExecStatus status : statuses) {
             values[i++] = status.getNumber();
         }
-        return doSelect(sqlStat, maxSize, new ExecutionMessageRowMapper(), values);
+
+        List<ExecutionMessage> result =  doSelect(sqlStat, maxSize, new ExecutionMessageRowMapper(), values);
+        Map<Long,ExecutionMessage> resultAsMap = new HashMap<>();
+        for(ExecutionMessage executionMessage:result){ //remove duplications
+            resultAsMap.put(executionMessage.getExecStateId(),executionMessage);
+        }
+        return new ArrayList<>(resultAsMap.values());
 	}
 
 
