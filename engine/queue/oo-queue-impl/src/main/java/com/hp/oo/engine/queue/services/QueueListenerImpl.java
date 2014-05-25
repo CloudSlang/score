@@ -4,6 +4,7 @@ import com.hp.oo.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.score.services.RunStateService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,20 +69,31 @@ public class QueueListenerImpl implements QueueListener {
     Parses the payload of the execution message and returns true if the execution is marked as a branch
      */
     private boolean isBranchExecution(ExecutionMessage executionMessage) {
+        Execution execution = extractExecution(executionMessage);
+        return execution != null && execution.isBranch();
+    }
+
+    private Execution extractExecution(ExecutionMessage executionMessage) {
         try {
-            Execution execution = executionMessageConverter.extractExecution(executionMessage.getPayload());
-            return execution.isBranch();
+            return executionMessageConverter.extractExecution(executionMessage.getPayload());
         } catch (IOException e) {
             logger.error("Unable to parse payload from execution message");
-            return false;
+            return null;
         }
     }
 
     @Override
     public void onFailed(List<ExecutionMessage> messages) {
         for (ExecutionMessage executionMessage : messages) {
-            runStateService.deleteRunState(executionMessage.getMsgId(), ExecutionSummary.EMPTY_BRANCH);
+            if (!failedBecauseNoWorker(executionMessage)) {
+                runStateService.deleteRunState(executionMessage.getMsgId(), ExecutionSummary.EMPTY_BRANCH);
+            }
         }
+    }
+
+    private boolean failedBecauseNoWorker(ExecutionMessage executionMessage) {
+        Execution execution = extractExecution(executionMessage);
+        return execution != null && execution.getSystemContext().containsKey(ExecutionConstants.NO_WORKERS_IN_GROUP);
     }
 
 }
