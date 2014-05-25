@@ -7,18 +7,17 @@ import com.hp.oo.engine.queue.repositories.ExecutionQueueRepositoryImpl;
 import com.hp.oo.engine.queue.repositories.callbacks.ExecutionStatesCallback;
 import com.hp.oo.engine.queue.services.ExecutionQueueServiceImpl;
 import com.hp.oo.engine.queue.services.QueueDispatcherServiceImpl;
+import com.hp.oo.engine.queue.services.QueueListenerImpl;
 import com.hp.oo.engine.queue.services.QueueStateIdGeneratorServiceImpl;
 import com.hp.oo.engine.queue.services.assigner.ExecutionAssignerServiceImpl;
 import com.hp.oo.engine.queue.services.cleaner.QueueCleanerServiceImpl;
 import com.hp.oo.engine.queue.services.recovery.ExecutionRecoveryServiceImpl;
 import com.hp.oo.engine.versioning.services.VersionServiceImpl;
-import com.hp.oo.orchestrator.repositories.ExecutionSummaryExpressions;
 import com.hp.oo.orchestrator.services.CancelExecutionServiceImpl;
 import com.hp.oo.orchestrator.services.ExecConfigSerializationUtil;
 import com.hp.oo.orchestrator.services.ExecutionInterruptsSerializationUtil;
 import com.hp.oo.orchestrator.services.ExecutionInterruptsServiceImpl;
 import com.hp.oo.orchestrator.services.ExecutionSerializationUtil;
-import com.hp.oo.orchestrator.services.ExecutionSummaryServiceImpl;
 import com.hp.oo.orchestrator.services.OrchestratorDispatcherServiceImpl;
 import com.hp.oo.orchestrator.services.OrchestratorServiceImpl;
 import com.hp.oo.orchestrator.services.RunningExecutionPlanServiceImpl;
@@ -33,6 +32,7 @@ import com.hp.score.engine.data.DataBaseDetector;
 import com.hp.score.engine.data.HiloFactoryBean;
 import com.hp.score.engine.data.SqlInQueryReader;
 import com.hp.score.engine.data.SqlUtils;
+import com.hp.score.services.RunStateServiceImpl;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
@@ -54,8 +54,8 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	private Map<Class<?>,String> beans = new HashMap<Class<?>,String>(){{
 		put(OrchestratorServiceImpl.class, "orchestratorService");
-		put(OrchestratorDispatcherServiceImpl.class, "orchestratorDispatcherService");
-		put(ExecutionSummaryServiceImpl.class, null);
+        put(OrchestratorDispatcherServiceImpl.class, "orchestratorDispatcherService");
+        put(RunStateServiceImpl.class, null);
 		put(QueueDispatcherServiceImpl.class, "queueDispatcherService");
 		put(ExecutionQueueServiceImpl.class, "executionQueueService");
 		put(ExecutionAssignerServiceImpl.class, "executionAssignerService");
@@ -65,6 +65,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(VersionServiceImpl.class, null);
 		put(CancelExecutionServiceImpl.class, "cancelExecutionService");
 		put(ExecutionInterruptsServiceImpl.class, "executionInterruptsService");
+        put(QueueListenerImpl.class, "scoreQueueListenenerImpl");
 		put(SplitJoinServiceImpl.class, "splitJoinService");
 		put(ExecutionRecoveryServiceImpl.class, null);
 		put(QueueCleanerServiceImpl.class, null);
@@ -75,7 +76,6 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(ExecutionMessageConverter.class, null);
 		put(ExecutionSerializationUtil.class, null);
 		put(ExecConfigSerializationUtil.class, null);
-		put(ExecutionSummaryExpressions.class, null);
 		put(SqlUtils.class, null);
 		put(SqlInQueryReader.class, null);
 		put(DataBaseDetector.class, null);

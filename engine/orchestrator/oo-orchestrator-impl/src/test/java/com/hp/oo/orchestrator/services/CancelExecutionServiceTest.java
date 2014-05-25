@@ -3,14 +3,10 @@ package com.hp.oo.orchestrator.services;
 import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.engine.queue.services.QueueDispatcherService;
 import com.hp.oo.enginefacade.execution.ExecutionEnums.ExecutionStatus;
-import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
-import com.hp.oo.orchestrator.entities.ExecutionSummaryEntity;
-import com.hp.oo.orchestrator.repositories.ExecutionSummaryRepository;
-
-import static com.hp.oo.enginefacade.execution.ExecutionSummary.EMPTY_BRANCH;
-
+import com.hp.score.entities.RunState;
+import com.hp.score.services.RunStateService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,29 +20,30 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static com.hp.oo.enginefacade.execution.ExecutionSummary.EMPTY_BRANCH;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.mock;
 
 @SuppressWarnings({"SpringContextConfigurationInspection"})
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
+@ContextConfiguration(classes = CancelExecutionServiceTest.Configurator.class)
 public class CancelExecutionServiceTest {
 
     @Autowired
     private CancelExecutionService service;
 
     @Autowired
-    private ExecutionSummaryRepository repository;
+    private RunStateService runStateService;
 
     @Autowired
     private ExecutionSerializationUtil executionSerializationUtil;
 
     @Before
     public void resetMocks() {
-        reset(repository);
+        reset(runStateService);
     }
 
     /////////////// requestCancelExecution ///////////////
@@ -60,24 +57,23 @@ public class CancelExecutionServiceTest {
     public void testValidRequestCancel() {
 
         // Running
-        checkValidRequestCancel(ExecutionStatus.RUNNING, null, ExecutionStatus.PENDING_CANCEL);
+        checkValidRequestCancel(ExecutionStatus.RUNNING, ExecutionStatus.PENDING_CANCEL);
 
         // Paused
         Execution pausedExecutionObj = new Execution(1L, 1L, Collections.singletonList("context_a"));
         when(executionSerializationUtil.objFromBytes(any(byte[].class))).thenReturn(pausedExecutionObj);
-        checkValidRequestCancel(ExecutionStatus.PAUSED, PauseReason.INPUT_REQUIRED, ExecutionStatus.PENDING_CANCEL);
+        checkValidRequestCancel(ExecutionStatus.PAUSED, ExecutionStatus.PENDING_CANCEL);
         assertThat(pausedExecutionObj.getPosition()).isNull();
         assertThat(pausedExecutionObj.getSystemContext().get(ExecutionConstants.FLOW_TERMINATION_TYPE)).isEqualTo(ExecutionStatus.CANCELED);
 
         // Cancel
-        checkValidRequestCancel(ExecutionStatus.CANCELED, null, ExecutionStatus.CANCELED);
+        checkValidRequestCancel(ExecutionStatus.CANCELED, ExecutionStatus.CANCELED);
     }
 
-    private void checkValidRequestCancel(ExecutionStatus origStatus, PauseReason pauseReason, ExecutionStatus expStatusAfterCancellation) {
+    private void checkValidRequestCancel(ExecutionStatus origStatus, ExecutionStatus expStatusAfterCancellation) {
         String executionId = "111";
-        ExecutionSummaryEntity ex1 = createExecutionSummary(executionId, origStatus);
-        ex1.setPauseReason(pauseReason);
-        when(repository.findByExecutionIdAndBranchId(executionId, EMPTY_BRANCH)).thenReturn(ex1);
+        RunState ex1 = createRun(executionId, origStatus);
+        when(runStateService.readByRunIdAndBranchId(executionId, EMPTY_BRANCH)).thenReturn(ex1);
         boolean result = service.requestCancelExecution(executionId);
 
         // Validation - Status should be updated by the service
@@ -87,32 +83,30 @@ public class CancelExecutionServiceTest {
 
     @Test
     public void testValidRequestCancel_pausedBranches() {
-        mockPausedParentAndBranchAndRequestCancel(PauseReason.BRANCH_PAUSED, PauseReason.DISPLAY);
+        mockPausedParentAndBranchAndRequestCancel();
     }
 
     @Test
     public void testValidRequestCancel_userPausedWithBranches() {
-        mockPausedParentAndBranchAndRequestCancel(PauseReason.USER_PAUSED, PauseReason.USER_PAUSED);
+        mockPausedParentAndBranchAndRequestCancel();
     }
 
     @Test
     public void testValidRequestCancel_pausedBranchesNoWorkersInGroup() {
-        mockPausedParentAndBranchAndRequestCancel(PauseReason.NO_WORKERS_IN_GROUP, PauseReason.NO_WORKERS_IN_GROUP);
+        mockPausedParentAndBranchAndRequestCancel();
     }
 
-    private void mockPausedParentAndBranchAndRequestCancel(PauseReason parentPausedReason, PauseReason branchPausedReason) {
+    private void mockPausedParentAndBranchAndRequestCancel() {
         String executionId = "111";
-        ExecutionSummaryEntity parent = createExecutionSummary(executionId, ExecutionStatus.PAUSED);
-        parent.setPauseReason(parentPausedReason);
-        when(repository.findByExecutionIdAndBranchId(executionId, EMPTY_BRANCH)).thenReturn(parent);
+        RunState parent = createRun(executionId, ExecutionStatus.PAUSED);
+        when(runStateService.readByRunIdAndBranchId(executionId, EMPTY_BRANCH)).thenReturn(parent);
         // mock branch
-        ExecutionSummaryEntity branch1 = createExecutionSummary(executionId, ExecutionStatus.PAUSED);
+        RunState branch1 = createRun(executionId, ExecutionStatus.PAUSED);
         branch1.setBranchId("b1");
-        branch1.setPauseReason(branchPausedReason);
 
         Execution pausedExecutionObj = new Execution(1L, 1L, Collections.singletonList("context_a"));
         when(executionSerializationUtil.objFromBytes(any(byte[].class))).thenReturn(pausedExecutionObj);
-        when(repository.findByExecutionId(executionId)).thenReturn(Arrays.asList(parent, branch1));
+        when(runStateService.readByRunId(executionId)).thenReturn(Arrays.asList(parent, branch1));
 
         boolean result = service.requestCancelExecution(executionId);
 
@@ -138,11 +132,10 @@ public class CancelExecutionServiceTest {
 
     private void checkInvalidRequestCancel(ExecutionStatus executionStatus) {
         String executionId = "111";
-        ExecutionSummaryEntity ex1 = createExecutionSummary(executionId, executionStatus);
+        RunState ex1 = createRun(executionId, executionStatus);
 
-        when(repository.findByExecutionIdAndBranchId(executionId, EMPTY_BRANCH)).thenReturn(ex1);
+        when(runStateService.readByRunIdAndBranchId(executionId, EMPTY_BRANCH)).thenReturn(ex1);
         boolean result = service.requestCancelExecution(executionId);
-
 
         // Validation - Status should be updated by the service
         assertThat(result).isFalse();
@@ -152,7 +145,7 @@ public class CancelExecutionServiceTest {
     @Test
     public void testNotExistExecution() {
         String executionId = "stam";
-        when(repository.findByExecutionIdAndBranchId(executionId, EMPTY_BRANCH)).thenReturn(null);
+        when(runStateService.readByRunIdAndBranchId(executionId, EMPTY_BRANCH)).thenReturn(null);
         boolean result = service.requestCancelExecution(executionId);
 
         assertThat(result).isFalse();
@@ -174,12 +167,12 @@ public class CancelExecutionServiceTest {
 
     private void checkIsCancelledExecution(ExecutionStatus executionStatus, boolean expResult) {
         String executionId = "123";
-        ExecutionSummaryEntity entity = null;
+        RunState entity = null;
         if (expResult) {
-            entity = createExecutionSummary("123", executionStatus);
+            entity = createRun("123", executionStatus);
         }
 
-        when(repository.findByExecutionIdAndBranchIdAndStatusIn(executionId, EMPTY_BRANCH, getCancelStatuses())).thenReturn(entity);
+        when(runStateService.readCancelledRun(executionId)).thenReturn(entity);
 
         boolean result = service.isCanceledExecution(executionId);
         assertThat(result).isEqualTo(expResult);
@@ -189,16 +182,7 @@ public class CancelExecutionServiceTest {
 
     @Test
     public void testReadCancelledExecutions() {
-        ExecutionSummaryEntity cancel = createExecutionSummary("cancelId", ExecutionStatus.CANCELED);
-        ExecutionSummaryEntity pendingCancel = createExecutionSummary("pendingCancelId", ExecutionStatus.PENDING_CANCEL);
-        createExecutionSummary("completedId", ExecutionStatus.COMPLETED);
-
-        Object[] cancelResult= new Object[2];
-        cancelResult[0] = "cancelId";
-        Object[] pendingCancelResult= new Object[2];
-        pendingCancelResult[0] = "pendingCancelId";
-
-        when(repository.findExecutionIdAndBranchIdByStatuses(getCancelStatuses())).thenReturn(Arrays.asList(cancelResult, pendingCancelResult));
+        when(runStateService.readRunIdAndBranchIdByStatuses(getCancelStatuses())).thenReturn(Arrays.asList("cancelId", "pendingCancelId"));
         List<String> result = service.readCanceledExecutionsIds();
         assertThat(result).hasSize(2);
     }
@@ -206,32 +190,31 @@ public class CancelExecutionServiceTest {
     @Test
     public void testReadCancelledExecutions_emptyList() {
         //noinspection unchecked
-        when(repository.findExecutionIdAndBranchIdByStatuses(getCancelStatuses())).thenReturn(Collections.EMPTY_LIST);
+        when(runStateService.readRunIdAndBranchIdByStatuses(getCancelStatuses())).thenReturn(Collections.EMPTY_LIST);
         List<String> result = service.readCanceledExecutionsIds();
         assertThat(result).isEmpty();
     }
 
     @Test
     public void testReadCancelledExecutions_null() {
-        when(repository.findExecutionIdAndBranchIdByStatuses(getCancelStatuses())).thenReturn(null);
+        when(runStateService.readRunIdAndBranchIdByStatuses(getCancelStatuses())).thenReturn(null);
         List<String> result = service.readCanceledExecutionsIds();
         assertThat(result).isEmpty();
     }
 
     /////////////// Helpers ///////////////
 
-    private ExecutionSummaryEntity createExecutionSummary(String executionId, ExecutionStatus status) {
-        ExecutionSummaryEntity entity = new ExecutionSummaryEntity();
-        entity.setExecutionId(executionId);
-        entity.setStatus(status);
+    private RunState createRun(String runId, ExecutionStatus status) {
+        RunState runState = new RunState();
+        runState.setRunId(runId);
+        runState.setStatus(status);
 
-        return entity;
+        return runState;
     }
 
     private List<ExecutionStatus> getCancelStatuses() {
         return Arrays.asList(ExecutionStatus.CANCELED, ExecutionStatus.PENDING_CANCEL);
     }
-
 
     @Configuration
     static class Configurator {
@@ -252,8 +235,8 @@ public class CancelExecutionServiceTest {
         }
 
         @Bean
-        ExecutionSummaryRepository getExecutionSummaryRepository() {
-            return mock(ExecutionSummaryRepository.class);
+        RunStateService runService() {
+            return mock(RunStateService.class);
         }
 
         @Bean

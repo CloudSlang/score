@@ -34,7 +34,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -48,116 +47,116 @@ import static org.mockito.Mockito.mock;
  * @author Dima Rassin
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
+@ContextConfiguration(classes = EngineTest.Context.class)
 public class EngineTest {
 
-	@Autowired
-	private Score score;
+    @Autowired
+    private Score score;
 
-	@Autowired
-	private WorkerNodeService workerNodeService;
+    @Autowired
+    private WorkerNodeService workerNodeService;
 
-	@Autowired
-	private QueueDispatcherService dispatcherService;
+    @Autowired
+    private QueueDispatcherService dispatcherService;
 
-	@Test
-	public void baseEngineTest(){
-		// register worker
-		workerNodeService.create("uuid", "password", "host", "dir");
-		workerNodeService.activate("uuid");
-		workerNodeService.up("uuid");
+    @Test
+    public void baseEngineTest() {
+        // register worker
+        workerNodeService.create("uuid", "password", "host", "dir");
+        workerNodeService.activate("uuid");
+        workerNodeService.up("uuid");
 
-		score.trigger(createExecutionPlan());
+        score.trigger(createExecutionPlan());
 
-		List<ExecutionMessage> messages = dispatcherService.poll("uuid", 10, new Date(0));
+        List<ExecutionMessage> messages = dispatcherService.poll("uuid", 10, new Date(0));
 
-		assertThat(messages).hasSize(1);
-	}
+        assertThat(messages).hasSize(1);
+    }
 
-	private ExecutionPlan createExecutionPlan(){
-		return new ExecutionPlan()
-				.setFlowUuid("flowUUID")
-				.addStep(new ExecutionStep(1L))
-				.setBeginStep(1L);
-	}
+    private ExecutionPlan createExecutionPlan() {
+        return new ExecutionPlan()
+                .setFlowUuid("flowUUID")
+                .addStep(new ExecutionStep(1L))
+                .setBeginStep(1L);
+    }
 
-	@Configuration
-	@EnableTransactionManagement
-	@ImportResource("META-INF/spring/schema/schemaEngineTestContext.xml")
-	static class Context{
-		@Bean
-		DataSource dataSource() {
-			return new EmbeddedDatabaseBuilder()
-					.setType(EmbeddedDatabaseType.H2)
-					.build();
-		}
+    @Configuration
+    @EnableTransactionManagement
+    @ImportResource("META-INF/spring/schema/schemaEngineTestContext.xml")
+    static class Context {
+        @Bean
+        DataSource dataSource() {
+            return new EmbeddedDatabaseBuilder()
+                    .setType(EmbeddedDatabaseType.H2)
+                    .build();
+        }
 
-		@Bean
-		JdbcTemplate jdbcTemplate(DataSource dataSource){
-			return new JdbcTemplate(dataSource);
-		}
+        @Bean
+        JdbcTemplate jdbcTemplate(DataSource dataSource) {
+            return new JdbcTemplate(dataSource);
+        }
 
-		@Bean
-		SpringLiquibase liquibase(DataSource dataSource) {
-			SpringLiquibase liquibase = new SpringLiquibase();
-			liquibase.setDataSource(dataSource);
-			liquibase.setChangeLog("classpath:/META-INF/database/test.changes.xml");
-			SimpleHiloIdentifierGenerator.setDataSource(dataSource);
-			return liquibase;
-		}
+        @Bean
+        SpringLiquibase liquibase(DataSource dataSource) {
+            SpringLiquibase liquibase = new SpringLiquibase();
+            liquibase.setDataSource(dataSource);
+            liquibase.setChangeLog("classpath:/META-INF/database/test.changes.xml");
+            SimpleHiloIdentifierGenerator.setDataSource(dataSource);
+            return liquibase;
+        }
 
-		@Bean
-		Properties jpaProperties() {
-			return new Properties(){{
-				setProperty("hibernate.format_sql", "true");
-				setProperty("hibernate.hbm2ddl.auto", "create");
-				setProperty("hibernate.cache.use_query_cache", "false");
-				setProperty("hibernate.generate_statistics", "false");
-				setProperty("hibernate.cache.use_second_level_cache", "false");
-				setProperty("hibernate.order_updates", "true");
-				setProperty("hibernate.order_inserts", "true");
-			}};
-		}
+        @Bean
+        Properties jpaProperties() {
+            return new Properties() {{
+                setProperty("hibernate.format_sql", "true");
+                setProperty("hibernate.hbm2ddl.auto", "create");
+                setProperty("hibernate.cache.use_query_cache", "false");
+                setProperty("hibernate.generate_statistics", "false");
+                setProperty("hibernate.cache.use_second_level_cache", "false");
+                setProperty("hibernate.order_updates", "true");
+                setProperty("hibernate.order_inserts", "true");
+            }};
+        }
 
+        @Bean
+        JpaVendorAdapter jpaVendorAdapter() {
+            HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
+            adapter.setShowSql(false);
+            adapter.setGenerateDdl(true);
+            return adapter;
+        }
 
-		@Bean
-		JpaVendorAdapter jpaVendorAdapter() {
-			HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
-			adapter.setShowSql(false);
-			adapter.setGenerateDdl(true);
-			return adapter;
-		}
+        @Bean(name = "entityManagerFactory")
+        @DependsOn("liquibase")
+        FactoryBean<EntityManagerFactory> emf(JpaVendorAdapter jpaVendorAdapter, Properties jpaProperties) {
+            LocalContainerEntityManagerFactoryBean fb = new LocalContainerEntityManagerFactoryBean();
+            fb.setDataSource(dataSource());
+            fb.setJpaProperties(jpaProperties);
+            fb.setPersistenceProviderClass(HibernatePersistence.class);
+            fb.setPackagesToScan("com.hp.oo", "com.hp.score");
+            fb.setJpaVendorAdapter(jpaVendorAdapter);
+            return fb;
+        }
 
-		@Bean(name="entityManagerFactory")
-		@DependsOn("liquibase")
-		FactoryBean<EntityManagerFactory> emf(JpaVendorAdapter jpaVendorAdapter, Properties jpaProperties) {
-			LocalContainerEntityManagerFactoryBean fb = new LocalContainerEntityManagerFactoryBean();
-			fb.setDataSource(dataSource());
-			fb.setJpaProperties(jpaProperties);
-			fb.setPersistenceProviderClass(HibernatePersistence.class);
-			fb.setPackagesToScan("com.hp.oo");
-			fb.setJpaVendorAdapter(jpaVendorAdapter);
-			return fb;
-		}
+        @Bean
+        PlatformTransactionManager transactionManager(EntityManagerFactory emf) {
+            return new JpaTransactionManager(emf);
+        }
 
-		@Bean
-		PlatformTransactionManager transactionManager(EntityManagerFactory emf) {
-			return new JpaTransactionManager(emf);
-		}
+        @Bean
+        TransactionTemplate transactionTemplate(PlatformTransactionManager transactionManager) {
+            return new TransactionTemplate(transactionManager);
+        }
 
-		@Bean
-		TransactionTemplate transactionTemplate(PlatformTransactionManager transactionManager){
-			return new TransactionTemplate(transactionManager);
-		}
+        @Bean
+            // required by executionInterruptsService
+        ObjectMapper objectMapper() {
+            return new ObjectMapper();
+        }
 
-		@Bean // required by executionInterruptsService
-		ObjectMapper objectMapper(){
-			return new ObjectMapper();
-		}
-
-		@Bean
-		ExecutionEventService executionEventService() {
-			return mock(ExecutionEventService.class);
-		}
-	}
+        @Bean
+        ExecutionEventService executionEventService() {
+            return mock(ExecutionEventService.class);
+        }
+    }
 }

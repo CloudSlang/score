@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--suppress SpringPlaceholdersInspection -->
+<!--suppress SpringModelInspection -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+	<tx:annotation-driven/>
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"    >
+        <property name="url" value="jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1;MVCC=TRUE;LOCK_TIMEOUT=5000"/>
+        <property name="driverClassName" value="org.h2.Driver"/>
+        <property name="username" value="sa"/>
+        <property name="password" value="sa"/>
+    </bean>
+
+	<bean id="liquibase" class="liquibase.integration.spring.SpringLiquibase"
+	      p:dataSource-ref="dataSource"
+	      p:changeLog="classpath:/META-INF/database/test-changes.xml"/>
+
+
+	<bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+	      p:jpaProperties-ref="hibernateProperties"
+	      p:dataSource-ref="dataSource"
+	      p:persistenceProviderClass="org.hibernate.ejb.HibernatePersistence"
+	      p:packagesToScan="com.hp.score"
+	      depends-on="liquibase">
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"
+			      p:showSql="false"
+			      p:generateDdl="true"
+					/>
+		</property>
+	</bean>
+
+	<util:properties id="hibernateProperties">
+		<prop key="hibernate.format_sql">true</prop>
+
+		<prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory
+		</prop>
+		<prop key="hibernate.cache.use_query_cache">true</prop>
+		<prop key="hibernate.generate_statistics">true</prop>
+		<prop key="hibernate.cache.use_second_level_cache">true</prop>
+
+		<prop key="hibernate.jdbc.fetch_size">100</prop>
+		<prop key="hibernate.jdbc.batch_size">30</prop>
+		<prop key="hibernate.order_updates">true</prop>
+		<prop key="hibernate.order_inserts">true</prop>
+		<prop key="hibernate.default_batch_fetch_size">20</prop>
+		<prop key="hibernate.hbm2ddl.auto">validate</prop>
+		<prop key="hibernate.dialect_resolvers">com.hp.oo.data.dialect.OODialectResolver</prop>
+	</util:properties>
+
+	<jpa:repositories base-package="com.hp.score" />
+
+</beans>

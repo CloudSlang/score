@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>com.hp.score</groupId>
 		<artifactId>orchestrator</artifactId>
-		<version>0.1.96-SNAPSHOT</version>
+		<version>0.1.98-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
@@ -138,5 +138,10 @@
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+        <dependency>
+            <groupId>org.easytesting</groupId>
+            <artifactId>fest-assert</artifactId>
+        </dependency>
 	</dependencies>
 </project>

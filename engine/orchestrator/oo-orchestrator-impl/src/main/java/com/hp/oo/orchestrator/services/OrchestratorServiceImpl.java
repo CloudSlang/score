@@ -2,7 +2,6 @@ package com.hp.oo.orchestrator.services;
 
 import com.hp.oo.broker.entities.RunningExecutionPlan;
 import com.hp.oo.broker.services.RunningExecutionPlanService;
-import com.hp.oo.engine.execution.events.services.ExecutionEventService;
 import com.hp.oo.engine.node.entities.WorkerNode;
 import com.hp.oo.engine.queue.entities.ExecStatus;
 import com.hp.oo.engine.queue.entities.ExecutionMessage;
@@ -13,19 +12,13 @@ import com.hp.oo.enginefacade.execution.ExecutionEnums;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.oo.internal.sdk.execution.ExecutionPlan;
-import com.hp.oo.internal.sdk.execution.OOContext;
-import com.hp.oo.internal.sdk.execution.events.ExecutionEvent;
-import com.hp.oo.internal.sdk.execution.events.ExecutionEventFactory;
-import com.hp.oo.internal.sdk.execution.events.ExecutionEventUtils;
 import com.hp.score.engine.data.IdentityGenerator;
+import com.hp.score.services.RunStateService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,16 +31,8 @@ public final class OrchestratorServiceImpl implements OrchestratorService {
     private final Logger logger = Logger.getLogger(getClass());
     private final ExecutionEnums.LogLevel DEFAULT_LOG_LEVEL = ExecutionEnums.LogLevel.INFO;
 
-    private boolean eventsPersistencyOn = Boolean.getBoolean("events.persistency");
-
     @Autowired
     private RunningExecutionPlanService runningExecutionPlanService;
-
-    @Autowired
-    private ExecutionEventService executionEventService;
-
-    @Autowired
-    private ExecutionSummaryService executionSummaryService;
 
     @Autowired
     private QueueDispatcherService queueDispatcher;
@@ -58,21 +43,14 @@ public final class OrchestratorServiceImpl implements OrchestratorService {
     @Autowired
     private IdentityGenerator idGenerator;
 
+    @Autowired
+    private RunStateService runStateService;
+
     @Override
     @Transactional
     public void triggerFlow(String flowUuid, String triggerType, String executionName, String flowPath, String flowInputsContextName, String triggeredBy, String triggeringSource, Execution execution, Map<String, String> executionConfiguration) {
-        ExecutionEventUtils.startFlow(execution.getSystemContext());
-        //TODO orit: change the OOContext class name
-        OOContext flowInputsContext = (OOContext)execution.getContexts().get(flowInputsContextName); //get the flow context in generic way
-
-        //TODO after moving all execution events creating and dispatching into score this should also moved into score
-        execution.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String,List>());
-
-        // send execution event and add the execution to the queue
-        ExecutionEvent startEvent = sendExecutionEvent(flowUuid, triggerType, executionName, execution.getExecutionId(), flowInputsContext, execution.getSystemContext());
-
         // create execution record in ExecutionSummary table
-        executionSummaryService.createExecution(execution.getExecutionId(), null, startEvent.getPublishTime(), ExecutionEnums.ExecutionStatus.RUNNING, executionName, flowUuid, flowPath, triggeredBy, triggeringSource);
+        runStateService.createParentRun(execution.getExecutionId());
 
         // create execution message
         ExecutionMessage message = createExecutionMessage(execution);
@@ -82,36 +60,6 @@ public final class OrchestratorServiceImpl implements OrchestratorService {
             logger.debug("Orchestrator is triggering flow: " + flowUuid + ". ExecutionId: " + execution.getExecutionId());
         }
         enqueue(message);
-    }
-
-    private boolean isDebuggerMode(Map<String, Serializable> systemContext) {
-        return systemContext.containsKey(ExecutionConstants.DEBUGGER_MODE) && (Boolean) systemContext.get(ExecutionConstants.DEBUGGER_MODE);
-    }
-
-    // returns the created START event
-    private ExecutionEvent sendExecutionEvent(String uuid, String triggerType, String executionName, String executionId, OOContext context, Map<String, Serializable> systemContext) {
-        logger.debug("Create start execution event for " + uuid);
-
-        String logLevelStr = (String) systemContext.get(ExecutionConstants.EXECUTION_EVENTS_LOG_LEVEL);
-
-        // send "Start execution" events
-        List<ExecutionEvent> events = new ArrayList<>();
-        ExecutionEvent startEvent = ExecutionEventFactory.createStartEvent(executionId, uuid, triggerType, executionName, logLevelStr, ExecutionEventUtils.increaseEvent(systemContext), systemContext);
-        events.add(startEvent);
-        for (Map.Entry<String, String> contextEntry : context.entrySet()) {
-            if (context.getEncryptedSet().contains(contextEntry.getKey())) {
-                // add this input as encrypted
-                events.add(ExecutionEventFactory.createFlowInputEvent(executionId, contextEntry.getKey(), OOContext.ENCRYPTED_VALUE, ExecutionEventUtils.increaseEvent(systemContext),systemContext));
-            } else {
-                events.add(ExecutionEventFactory.createFlowInputEvent(executionId, contextEntry.getKey(), contextEntry.getValue(), ExecutionEventUtils.increaseEvent(systemContext),systemContext));
-            }
-        }
-        if (logger.isDebugEnabled()) logger.debug("send start execution event for " + uuid);
-        if (eventsPersistencyOn || isDebuggerMode(systemContext)) {
-            executionEventService.createEvents(events);
-        }
-
-        return startEvent;
     }
 
     private ExecutionMessage createExecutionMessage(Execution execution) {
