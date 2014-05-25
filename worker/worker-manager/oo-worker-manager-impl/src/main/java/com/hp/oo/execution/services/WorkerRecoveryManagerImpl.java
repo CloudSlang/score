@@ -32,7 +32,7 @@ public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager{
 		if (!lock.tryLock()) return;
 		try{
 			inRecovery = true;
-			logger.info("Worker recovery started");
+			logger.warn("Worker recovery started");
 			for (WorkerRecoveryListener listener : listeners) try{
 				listener.doRecovery();
 			} catch (Exception ex) {
@@ -59,7 +59,7 @@ public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager{
 				}
 			});
 			inRecovery = false;
-			logger.info("Worker recovery is done");
+			logger.warn("Worker recovery is done");
 		} finally {
 			lock.unlock();
 		}

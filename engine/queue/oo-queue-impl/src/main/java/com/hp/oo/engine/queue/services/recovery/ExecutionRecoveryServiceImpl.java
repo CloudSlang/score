@@ -60,7 +60,9 @@ final public class ExecutionRecoveryServiceImpl implements ExecutionRecoveryServ
 		long time = System.currentTimeMillis();
 		// Recovery all the non-responding workers.
 		List<String> workerNames = workerNodeService.readNonRespondingWorkers();
-		if (logger.isDebugEnabled()) logger.debug(workerNames.size() + " workers will be recovered");
+        if (workerNames.size()>0) logger.warn(workerNames.size() + " workers will be recovered");
+		else if (logger.isDebugEnabled()) logger.debug(workerNames.size() + " workers will be recovered");
+
 		for(String workerName: workerNames){
 			try {
 				doWorkerRecovery(workerName);
@@ -146,7 +148,7 @@ final public class ExecutionRecoveryServiceImpl implements ExecutionRecoveryServ
 				}
 			});
 		}
-	    logger.info("Worker [" + workerName + "] recovery id done in " + (System.currentTimeMillis()-time) + " ms");
+	    logger.warn("Worker [" + workerName + "] recovery id done in " + (System.currentTimeMillis()-time) + " ms");
 	}
 
 	@Override
