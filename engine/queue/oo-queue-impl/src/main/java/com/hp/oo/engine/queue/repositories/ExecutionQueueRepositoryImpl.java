@@ -101,29 +101,11 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       MSG_ID," +
                     "       q.CREATE_TIME " +
                     " FROM  OO_EXECUTION_QUEUES_1 q,  " +
-                    "       OO_EXECUTION_STATES_1 s1   " +
+                    "       :OO_EXECUTION_STATES s1   " +
                     " WHERE  " +
                     "      (q.ASSIGNED_WORKER =  ?)  AND " +
                     "      (q.STATUS IN (:status)) AND " +
                     " q.EXEC_STATE_ID = s1.ID AND" +
-                    " (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
-                    "              FROM OO_EXECUTION_QUEUES_1 qq " +
-                    "              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
-            "UNION ALL" +
-            "SELECT         EXEC_STATE_ID,      " +
-                    "       ASSIGNED_WORKER,      " +
-                    "       EXEC_GROUP,       " +
-                    "       STATUS,       " +
-                    "       PAYLOAD,       " +
-                    "       MSG_SEQ_ID,      " +
-                    "       MSG_ID," +
-                    "       q.CREATE_TIME " +
-                    " FROM  OO_EXECUTION_QUEUES_1 q,  " +
-                    "       OO_EXECUTION_STATES_2 s2   " +
-                    " WHERE  " +
-                    "      (q.ASSIGNED_WORKER =  ?)  AND " +
-                    "      (q.STATUS IN (:status)) AND " +
-                    " q.EXEC_STATE_ID = s2.ID AND" +
                     " (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
                     "              FROM OO_EXECUTION_QUEUES_1 qq " +
                     "              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) ";
@@ -231,12 +213,17 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 	public List<ExecutionMessage> poll(String workerId, int maxSize, ExecStatus... statuses) {
 
         // preapare the sql statment
-        String sqlStat = QUERY_WORKER_RECOVERY_SQL
+        String sqlStatPrvTable = QUERY_WORKER_RECOVERY_SQL
+                .replaceAll(":OO_EXECUTION_STATES", getPrvExecStateTableName())
+                .replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
+
+        String sqlStatActiveTable = QUERY_WORKER_RECOVERY_SQL
+                .replaceAll(":OO_EXECUTION_STATES", getExecStateTableName())
                 .replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
 
         // prepare the argument
         java.lang.Object[] values;
-        values = new Object[statuses.length*2 + 2];
+        values = new Object[statuses.length + 1];
         values[0] = workerId;
         int i = 1;
 
@@ -244,15 +231,15 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
             values[i++] = status.getNumber();
         }
 
-        values[i] = workerId;
-        i++;
-        for (ExecStatus status : statuses) {
-            values[i++] = status.getNumber();
-        }
+        List<ExecutionMessage> resultPrvTable =  doSelect(sqlStatPrvTable, maxSize, new ExecutionMessageRowMapper(), values);
 
-        List<ExecutionMessage> result =  doSelect(sqlStat, maxSize, new ExecutionMessageRowMapper(), values);
+        List<ExecutionMessage> resultActiveTable =  doSelect(sqlStatActiveTable, maxSize, new ExecutionMessageRowMapper(), values);
+
         Map<Long,ExecutionMessage> resultAsMap = new HashMap<>();
-        for(ExecutionMessage executionMessage:result){ //remove duplications
+        for(ExecutionMessage executionMessage:resultPrvTable){ //remove duplications
+            resultAsMap.put(executionMessage.getExecStateId(),executionMessage);
+        }
+        for(ExecutionMessage executionMessage:resultActiveTable){ //remove duplications
             resultAsMap.put(executionMessage.getExecStateId(),executionMessage);
         }
         return new ArrayList<>(resultAsMap.values());
@@ -378,6 +365,10 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 	private String getExecStateTableName() {
 		return statePartitionTemplate.activeTable();
 	}
+
+    private String getPrvExecStateTableName() {
+        return statePartitionTemplate.previousTable();
+    }
 
 	private class ExecutionMessageRowMapper implements RowMapper<ExecutionMessage> {
 		@Override

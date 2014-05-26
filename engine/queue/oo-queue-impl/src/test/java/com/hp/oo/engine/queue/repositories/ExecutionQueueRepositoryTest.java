@@ -56,6 +56,7 @@ public class ExecutionQueueRepositoryTest {
     public void init(){
         Mockito.reset(partitionTemplate);
         when(partitionTemplate.activeTable()).thenReturn("OO_EXECUTION_STATES_1");
+        when(partitionTemplate.previousTable()).thenReturn("OO_EXECUTION_STATES_2");
     }
 
     @Test
