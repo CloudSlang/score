@@ -1,12 +1,12 @@
 package com.hp.oo.engine.queue.services;
 
-import com.hp.oo.engine.versioning.services.VersionService;
 import com.hp.oo.engine.queue.entities.ExecStatus;
 import com.hp.oo.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.engine.queue.entities.Payload;
 import com.hp.oo.engine.queue.repositories.ExecutionQueueRepository;
 import com.hp.oo.engine.queue.services.assigner.ExecutionAssignerService;
 import com.hp.oo.engine.queue.services.statistics.WorkerQueueStatistics;
+import com.hp.oo.engine.versioning.services.VersionService;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,7 +140,7 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 	@Override
 	@Transactional(readOnly = true)
 	public Map<Long, Payload> readPayloadByExecutionIds(Long... ids) {
-		if (ArrayUtils.isEmpty(ids)) throw new IllegalArgumentException("lIST OD IDs is null or empty");
+		if (ArrayUtils.isEmpty(ids)) throw new IllegalArgumentException("List of IDs is null or empty");
 		return executionQueueRepository.findPayloadByExecutionIds(ids);
 	}
 
