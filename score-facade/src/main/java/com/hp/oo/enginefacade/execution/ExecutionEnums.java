@@ -17,11 +17,6 @@ public interface ExecutionEnums {
         PENDING_CANCEL
 	}
 
-	enum Trigger {
-		MANUAL,
-		SCHEDULED
-	}
-
 	enum Event {
 		START,
 		FINISH,
