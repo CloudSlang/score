@@ -194,7 +194,13 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 	@Override
 	public void doRecovery() {
 		if (logger.isDebugEnabled()) logger.debug("OutboundBuffer in recovery, clearing buffer");
-		buffer.clear();
+        lock.lock();
+        try {
+            buffer.clear();
+            currentWeight = 0 ;
+        } finally {
+            lock.unlock();
+        }
 	}
 
 	private class CompoundMessage implements Message{
