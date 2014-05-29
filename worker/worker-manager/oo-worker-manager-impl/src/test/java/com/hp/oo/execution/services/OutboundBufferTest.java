@@ -216,6 +216,24 @@ public class OutboundBufferTest {
 		System.out.println("Drain statistics: " + statistics.report());
 	}
 
+
+    /**
+     * Makes sure the recovery clears worker state
+     */
+    @Test
+    public void testRecovery() {
+        List<DummyMsg1> messages = Arrays.asList(new DummyMsg1(), new DummyMsg1());
+
+        for (DummyMsg1 message : messages) {
+            buffer.put(message);
+        }
+        Assert.assertEquals(2,buffer.getSize());
+        Assert.assertEquals(2,buffer.getWeight());
+        ((WorkerRecoveryListener)buffer).doRecovery();
+        Assert.assertEquals(0,buffer.getSize());
+        Assert.assertEquals(0,buffer.getWeight());
+    }
+
 	static class DrainStatistics{
 		private int counter;
 		private int size;
