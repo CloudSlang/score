@@ -25,6 +25,8 @@ import java.util.Arrays;
         uniqueConstraints = {@UniqueConstraint(name = "SCORE_RUN_STATE_UC", columnNames = {"RUN_ID", "BRANCH_ID"})})
 public class RunState extends AbstractIdentifiable {
 
+    public static final String EMPTY_BRANCH = "EMPTY";
+
     @Column(name = "RUN_ID", nullable = false)
     private String runId;
 

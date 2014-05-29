@@ -22,7 +22,7 @@ public interface RunStateService {
      */
     public List<RunState> readByRunId(String runId);
 
-    public List<String> readRunIdAndBranchIdByStatuses(List<ExecutionEnums.ExecutionStatus> statuses);
+    public List<String> readRunIdByStatuses(List<ExecutionEnums.ExecutionStatus> statuses);
 
     /**
      * Reads a cancelled parent run with the specified run id
@@ -32,12 +32,12 @@ public interface RunStateService {
     /**
      * Creates a new parent run with the specified run id. The run is created as a parent run.
      */
-    public void createParentRun(String runId);
+    public RunState createParentRun(String runId);
 
     /**
      * Creates a new run state object
      */
-    public void createRunState(String runId, String branchId);
+    public RunState createRunState(String runId, String branchId);
 
     /**
      * Returns the run object for the specified run id and branch id

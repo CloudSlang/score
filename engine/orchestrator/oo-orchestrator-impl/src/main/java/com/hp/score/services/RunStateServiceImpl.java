@@ -1,11 +1,12 @@
 package com.hp.score.services;
 
 import com.hp.oo.enginefacade.execution.ExecutionEnums;
-import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.orchestrator.services.ExecutionSerializationUtil;
 import com.hp.score.entities.RunState;
 import com.hp.score.repositories.RunStateRepository;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,69 +24,84 @@ public class RunStateServiceImpl implements RunStateService {
     private RunStateRepository runStateRepository;
 
     @Autowired
-    private ExecutionSerializationUtil serUtil;
+    private ExecutionSerializationUtil executionSerializationUtil;
 
     @Override
     @Transactional(readOnly = true)
     public RunState readByRunIdAndBranchId(String runId, String branchId) {
+        validateRunId(runId);
+        validateBranchId(branchId);
         return runStateRepository.findByRunIdAndBranchId(runId, branchId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<RunState> readByRunId(String runId) {
+        validateRunId(runId);
         return runStateRepository.findByRunId(runId);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<String> readRunIdAndBranchIdByStatuses(List<ExecutionEnums.ExecutionStatus> statuses) {
+    public List<String> readRunIdByStatuses(List<ExecutionEnums.ExecutionStatus> statuses) {
         return runStateRepository.findRunIdByStatuses(statuses);
     }
 
     @Override
     @Transactional(readOnly = true)
     public RunState readCancelledRun(String runId) {
-        return runStateRepository.findByRunIdAndBranchIdAndStatusIn(runId, ExecutionSummary.EMPTY_BRANCH, getCancelStatuses());
+        validateRunId(runId);
+        return runStateRepository.findByRunIdAndBranchIdAndStatusIn(runId, RunState.EMPTY_BRANCH, getCancelStatuses());
     }
 
     @Override
     @Transactional
-    public void createParentRun(String runId) {
+    public RunState createParentRun(String runId) {
+        validateRunId(runId);
         RunState runState = new RunState();
         runState.setRunId(runId);
-        runState.setBranchId(ExecutionSummary.EMPTY_BRANCH);
+        runState.setBranchId(RunState.EMPTY_BRANCH);
         runState.setStatus(ExecutionEnums.ExecutionStatus.RUNNING);
-        runStateRepository.save(runState);
+        return runStateRepository.save(runState);
     }
 
     @Override
     @Transactional
-    public void createRunState(String runId, String branchId) {
+    public RunState createRunState(String runId, String branchId) {
+        validateRunId(runId);
+        validateBranchId(branchId);
         RunState runState = new RunState();
         runState.setRunId(runId);
         runState.setBranchId(branchId);
         runState.setStatus(ExecutionEnums.ExecutionStatus.PENDING_PAUSE);
-        runStateRepository.save(runState);
+        return runStateRepository.save(runState);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Execution readRunObject(String runId, String branchId) {
+        validateRunId(runId);
+        validateBranchId(branchId);
         RunState runState = findByRunIdAndBranchId(runId, branchId);
-        return serUtil.objFromBytes(runState.getRunObject());
+        return executionSerializationUtil.objFromBytes(runState.getRunObject());
     }
 
     @Override
     @Transactional
     public void updateRunObject(String runId, String branchId, Execution execution) {
+        validateRunId(runId);
+        validateBranchId(branchId);
+        Validate.notNull(execution, "execution cannot be null");
         RunState runState = findByRunIdAndBranchId(runId, branchId);
-        runState.setRunObject(serUtil.objToBytes(execution));
+        runState.setRunObject(executionSerializationUtil.objToBytes(execution));
     }
 
     @Override
     @Transactional
     public void updateRunStateStatus(String runId, String branchId, ExecutionEnums.ExecutionStatus status) {
+        validateRunId(runId);
+        validateBranchId(branchId);
+        Validate.notNull(status, "status cannot be null");
         RunState runState = findByRunIdAndBranchId(runId, branchId);
         runState.setStatus(status);
     }
@@ -104,9 +120,19 @@ public class RunStateServiceImpl implements RunStateService {
 
     @Override
     public void deleteRunState(String runId, String branchId) {
+        validateRunId(runId);
+        validateBranchId(branchId);
         RunState runState = runStateRepository.findByRunIdAndBranchId(runId, branchId);
         if (runState != null) {
             runStateRepository.delete(runState);
         }
+    }
+
+    private void validateBranchId(String branchId) {
+        Validate.notEmpty(StringUtils.trim(branchId), "branchId cannot be null or empty");
+    }
+
+    private void validateRunId(String runId) {
+        Validate.notEmpty(StringUtils.trim(runId), "runId cannot be null or empty");
     }
 }
