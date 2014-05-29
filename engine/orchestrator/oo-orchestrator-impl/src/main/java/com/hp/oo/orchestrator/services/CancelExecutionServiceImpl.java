@@ -134,7 +134,7 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
     @Override
     @Transactional(readOnly = true)
     public List<String> readCanceledExecutionsIds() {
-        List<String> result = runStateService.readRunIdAndBranchIdByStatuses(getCancelStatuses());
+        List<String> result = runStateService.readRunIdByStatuses(getCancelStatuses());
         if (result == null) {
             result = Arrays.asList();
         }
