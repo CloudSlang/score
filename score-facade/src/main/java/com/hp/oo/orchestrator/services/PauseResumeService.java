@@ -4,6 +4,7 @@ import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.oo.internal.sdk.execution.Execution;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,7 +28,7 @@ public interface PauseResumeService {
      *
      * @param executionId of the execution
      */
-    void resumeExecution(String executionId, String branchId, Map<String, String> map);
+    void resumeExecution(String executionId, String branchId, Map<String, Serializable> map);
 
     /**
      * Persists Execution object to the DB
