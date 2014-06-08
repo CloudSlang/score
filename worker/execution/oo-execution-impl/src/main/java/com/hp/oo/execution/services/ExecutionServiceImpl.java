@@ -550,7 +550,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
         while(executionEvents.hasNext()){
             ExecutionEvent executionEvent  =  executionEvents.next();
             if(executionEvent.getType().equals(ExecutionEnums.Event.STEP_LOG)){
-//                System.out.println(executionEvent.getExecutionId() + ", " + executionEvent.getPath() +"," + executionEvent.getType() +":" + executionEvent.getStepLogCategory() + "-- " + executionEvent);
                 eventBus.dispatch(new EventWrapper(executionEvent.getType().name(), executionEvent));
                 executionEvents.remove();
             }
@@ -600,7 +599,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     protected void executeStep(Execution execution, ExecutionStep currStep) {
         try {
-            System.out.println(execution.getExecutionId() + " - " + ExecutionEventUtils.increaseEvent(execution.getSystemContext()).getFlowPath().toString()  + " :" + currStep.getAction().getClassName() + "." + currStep.getAction().getMethodName());
 
             Map<String, Object> stepData = new HashMap<>(currStep.getActionData());
             //We add all the contexts to the step data - so inside of each control action we will have access to all contexts
