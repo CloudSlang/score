@@ -462,7 +462,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         // move all the events form the SystemContext into the event channel
         @SuppressWarnings("unchecked") ArrayDeque<ExecutionEvent> eventsQueue = (ArrayDeque) execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
         for (ExecutionEvent executionEvent : eventsQueue) {
-            eventGateway.addEvent(executionEvent);
+            execution.getAggregatedEvents().add(executionEvent);
         }
 
         eventsQueue.clear();
