@@ -182,7 +182,7 @@ public class CancelExecutionServiceTest {
 
     @Test
     public void testReadCancelledExecutions() {
-        when(runStateService.readRunIdAndBranchIdByStatuses(getCancelStatuses())).thenReturn(Arrays.asList("cancelId", "pendingCancelId"));
+        when(runStateService.readRunIdByStatuses(getCancelStatuses())).thenReturn(Arrays.asList("cancelId", "pendingCancelId"));
         List<String> result = service.readCanceledExecutionsIds();
         assertThat(result).hasSize(2);
     }
@@ -190,14 +190,14 @@ public class CancelExecutionServiceTest {
     @Test
     public void testReadCancelledExecutions_emptyList() {
         //noinspection unchecked
-        when(runStateService.readRunIdAndBranchIdByStatuses(getCancelStatuses())).thenReturn(Collections.EMPTY_LIST);
+        when(runStateService.readRunIdByStatuses(getCancelStatuses())).thenReturn(Collections.EMPTY_LIST);
         List<String> result = service.readCanceledExecutionsIds();
         assertThat(result).isEmpty();
     }
 
     @Test
     public void testReadCancelledExecutions_null() {
-        when(runStateService.readRunIdAndBranchIdByStatuses(getCancelStatuses())).thenReturn(null);
+        when(runStateService.readRunIdByStatuses(getCancelStatuses())).thenReturn(null);
         List<String> result = service.readCanceledExecutionsIds();
         assertThat(result).isEmpty();
     }

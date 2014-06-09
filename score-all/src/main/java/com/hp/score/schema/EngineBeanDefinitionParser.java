@@ -26,6 +26,7 @@ import com.hp.oo.partitions.services.PartitionCallback;
 import com.hp.oo.partitions.services.PartitionServiceImpl;
 import com.hp.oo.partitions.services.PartitionTemplateImpl;
 import com.hp.oo.partitions.services.PartitionUtils;
+import com.hp.score.ScorePauseResumeImpl;
 import com.hp.score.ScoreImpl;
 import com.hp.score.ScoreTriggeringImpl;
 import com.hp.score.engine.data.DataBaseDetector;
@@ -53,6 +54,7 @@ import java.util.Map;
 public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	private Map<Class<?>,String> beans = new HashMap<Class<?>,String>(){{
+		put(ScorePauseResumeImpl.class, "scoreExecution");
 		put(OrchestratorServiceImpl.class, "orchestratorService");
         put(OrchestratorDispatcherServiceImpl.class, "orchestratorDispatcherService");
         put(RunStateServiceImpl.class, null);

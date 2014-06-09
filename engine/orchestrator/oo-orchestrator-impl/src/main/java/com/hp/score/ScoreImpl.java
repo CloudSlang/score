@@ -17,33 +17,37 @@ public class ScoreImpl implements Score {
     @Autowired
     private ScoreTriggering scoreTriggering;
 
+    @Autowired
+    private ScorePauseResume scorePauseResume;
+
     @Override
     public Long trigger(ExecutionPlan executionPlan) {
-        return trigger(executionPlan,new HashMap<String,Serializable>());
+        return trigger(executionPlan, new HashMap<String, Serializable>());
     }
 
     @Override
     public Long trigger(ExecutionPlan executionPlan, Map<String, Serializable> input) {
-        return trigger(executionPlan,input,new HashMap<String,Serializable>(),executionPlan.getBeginStep());
+        return trigger(executionPlan, input, new HashMap<String, Serializable>(), executionPlan.getBeginStep());
     }
 
     @Override
     public Long trigger(ExecutionPlan executionPlan, Map<String, Serializable> context, Map<String, Serializable> systemContext, Long startStep) {
-        return scoreTriggering.trigger(executionPlan,context,systemContext,startStep);
+        return scoreTriggering.trigger(executionPlan, context, systemContext, startStep);
     }
 
     @Override
-    public void pauseExecution(Long executionId) {
-        //TODO - impl this
-}
+    public boolean pauseExecution(Long executionId) {
+        return scorePauseResume.pauseExecution(executionId);
+    }
 
     @Override
-    public void resumeExecution(Long executionId,Map<String,Serializable> context, Map<String,Serializable> systemContext) {
-         //TODO - impl this
+    public void resumeExecution(Long executionId, Map<String, Serializable> context, Map<String, Serializable> systemContext) {
+        scorePauseResume.resumeExecution(executionId, context, systemContext);
     }
 
     @Override
     public void cancelExecution(Long executionId) {
          //TODO - impl this
     }
+
 }

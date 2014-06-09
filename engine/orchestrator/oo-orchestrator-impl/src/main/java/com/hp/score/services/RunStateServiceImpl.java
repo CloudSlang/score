@@ -17,7 +17,6 @@ import java.util.List;
  * User: maromg
  * Date: 12/05/2014
  */
-//todo create tests for this class. Do we want to validate all arguments in each method?
 public class RunStateServiceImpl implements RunStateService {
 
     @Autowired
@@ -91,7 +90,6 @@ public class RunStateServiceImpl implements RunStateService {
     public void updateRunObject(String runId, String branchId, Execution execution) {
         validateRunId(runId);
         validateBranchId(branchId);
-        Validate.notNull(execution, "execution cannot be null");
         RunState runState = findByRunIdAndBranchId(runId, branchId);
         runState.setRunObject(executionSerializationUtil.objToBytes(execution));
     }

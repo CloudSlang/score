@@ -291,13 +291,6 @@ public class RunStateServiceTest {
     }
 
     @Test
-    public void testUpdateRunObject_NullExecution() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("execution cannot be null");
-        runStateService.updateRunObject("Asdasd", "sdfsdf", null);
-    }
-
-    @Test
     public void testUpdateRunObject() {
         String runId = UUID.randomUUID().toString();
         String branchId = UUID.randomUUID().toString();

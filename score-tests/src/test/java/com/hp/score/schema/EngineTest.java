@@ -6,6 +6,7 @@ import com.hp.oo.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.engine.queue.services.QueueDispatcherService;
 import com.hp.oo.internal.sdk.execution.ExecutionPlan;
 import com.hp.oo.internal.sdk.execution.ExecutionStep;
+import com.hp.oo.orchestrator.services.PauseResumeService;
 import com.hp.score.Score;
 import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
 import liquibase.integration.spring.SpringLiquibase;
@@ -157,6 +158,11 @@ public class EngineTest {
         @Bean
         ExecutionEventService executionEventService() {
             return mock(ExecutionEventService.class);
+        }
+
+        @Bean
+        PauseResumeService pauseResumeService() {
+            return mock(PauseResumeService.class);
         }
     }
 }

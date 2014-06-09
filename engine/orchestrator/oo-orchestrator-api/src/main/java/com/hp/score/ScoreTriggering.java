@@ -10,6 +10,6 @@ import java.util.Map;
  * Date: 27/01/14
  * Time: 11:20
  */
-public interface ScoreTriggering {
+interface ScoreTriggering {
     Long trigger(ExecutionPlan executionPlan, Map<String, Serializable> context, Map<String, Serializable> systemContext, Long startStep);
 }
