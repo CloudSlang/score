@@ -5,8 +5,8 @@ import com.hp.oo.engine.queue.services.QueueDispatcherService;
 import com.hp.oo.enginefacade.execution.ExecutionEnums.ExecutionStatus;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
-import com.hp.score.entities.RunState;
-import com.hp.score.services.RunStateService;
+import com.hp.score.entities.ExecutionState;
+import com.hp.score.services.ExecutionStateService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,14 +36,14 @@ public class CancelExecutionServiceTest {
     private CancelExecutionService service;
 
     @Autowired
-    private RunStateService runStateService;
+    private ExecutionStateService executionStateService;
 
     @Autowired
     private ExecutionSerializationUtil executionSerializationUtil;
 
     @Before
     public void resetMocks() {
-        reset(runStateService);
+        reset(executionStateService);
     }
 
     /////////////// requestCancelExecution ///////////////
@@ -72,8 +72,8 @@ public class CancelExecutionServiceTest {
 
     private void checkValidRequestCancel(ExecutionStatus origStatus, ExecutionStatus expStatusAfterCancellation) {
         String executionId = "111";
-        RunState ex1 = createRun(executionId, origStatus);
-        when(runStateService.readByRunIdAndBranchId(executionId, EMPTY_BRANCH)).thenReturn(ex1);
+        ExecutionState ex1 = createRun(executionId, origStatus);
+        when(executionStateService.readByExecutionIdAndBranchId(executionId, EMPTY_BRANCH)).thenReturn(ex1);
         boolean result = service.requestCancelExecution(executionId);
 
         // Validation - Status should be updated by the service
@@ -98,15 +98,15 @@ public class CancelExecutionServiceTest {
 
     private void mockPausedParentAndBranchAndRequestCancel() {
         String executionId = "111";
-        RunState parent = createRun(executionId, ExecutionStatus.PAUSED);
-        when(runStateService.readByRunIdAndBranchId(executionId, EMPTY_BRANCH)).thenReturn(parent);
+        ExecutionState parent = createRun(executionId, ExecutionStatus.PAUSED);
+        when(executionStateService.readByExecutionIdAndBranchId(executionId, EMPTY_BRANCH)).thenReturn(parent);
         // mock branch
-        RunState branch1 = createRun(executionId, ExecutionStatus.PAUSED);
+        ExecutionState branch1 = createRun(executionId, ExecutionStatus.PAUSED);
         branch1.setBranchId("b1");
 
         Execution pausedExecutionObj = new Execution(1L, 1L, Collections.singletonList("context_a"));
         when(executionSerializationUtil.objFromBytes(any(byte[].class))).thenReturn(pausedExecutionObj);
-        when(runStateService.readByRunId(executionId)).thenReturn(Arrays.asList(parent, branch1));
+        when(executionStateService.readByExecutionId(executionId)).thenReturn(Arrays.asList(parent, branch1));
 
         boolean result = service.requestCancelExecution(executionId);
 
@@ -132,9 +132,9 @@ public class CancelExecutionServiceTest {
 
     private void checkInvalidRequestCancel(ExecutionStatus executionStatus) {
         String executionId = "111";
-        RunState ex1 = createRun(executionId, executionStatus);
+        ExecutionState ex1 = createRun(executionId, executionStatus);
 
-        when(runStateService.readByRunIdAndBranchId(executionId, EMPTY_BRANCH)).thenReturn(ex1);
+        when(executionStateService.readByExecutionIdAndBranchId(executionId, EMPTY_BRANCH)).thenReturn(ex1);
         boolean result = service.requestCancelExecution(executionId);
 
         // Validation - Status should be updated by the service
@@ -145,7 +145,7 @@ public class CancelExecutionServiceTest {
     @Test
     public void testNotExistExecution() {
         String executionId = "stam";
-        when(runStateService.readByRunIdAndBranchId(executionId, EMPTY_BRANCH)).thenReturn(null);
+        when(executionStateService.readByExecutionIdAndBranchId(executionId, EMPTY_BRANCH)).thenReturn(null);
         boolean result = service.requestCancelExecution(executionId);
 
         assertThat(result).isFalse();
@@ -167,12 +167,12 @@ public class CancelExecutionServiceTest {
 
     private void checkIsCancelledExecution(ExecutionStatus executionStatus, boolean expResult) {
         String executionId = "123";
-        RunState entity = null;
+        ExecutionState entity = null;
         if (expResult) {
             entity = createRun("123", executionStatus);
         }
 
-        when(runStateService.readCancelledRun(executionId)).thenReturn(entity);
+        when(executionStateService.readCancelledExecution(executionId)).thenReturn(entity);
 
         boolean result = service.isCanceledExecution(executionId);
         assertThat(result).isEqualTo(expResult);
@@ -182,7 +182,7 @@ public class CancelExecutionServiceTest {
 
     @Test
     public void testReadCancelledExecutions() {
-        when(runStateService.readRunIdByStatuses(getCancelStatuses())).thenReturn(Arrays.asList("cancelId", "pendingCancelId"));
+        when(executionStateService.readExecutionIdByStatuses(getCancelStatuses())).thenReturn(Arrays.asList("cancelId", "pendingCancelId"));
         List<String> result = service.readCanceledExecutionsIds();
         assertThat(result).hasSize(2);
     }
@@ -190,26 +190,26 @@ public class CancelExecutionServiceTest {
     @Test
     public void testReadCancelledExecutions_emptyList() {
         //noinspection unchecked
-        when(runStateService.readRunIdByStatuses(getCancelStatuses())).thenReturn(Collections.EMPTY_LIST);
+        when(executionStateService.readExecutionIdByStatuses(getCancelStatuses())).thenReturn(Collections.EMPTY_LIST);
         List<String> result = service.readCanceledExecutionsIds();
         assertThat(result).isEmpty();
     }
 
     @Test
     public void testReadCancelledExecutions_null() {
-        when(runStateService.readRunIdByStatuses(getCancelStatuses())).thenReturn(null);
+        when(executionStateService.readExecutionIdByStatuses(getCancelStatuses())).thenReturn(null);
         List<String> result = service.readCanceledExecutionsIds();
         assertThat(result).isEmpty();
     }
 
     /////////////// Helpers ///////////////
 
-    private RunState createRun(String runId, ExecutionStatus status) {
-        RunState runState = new RunState();
-        runState.setRunId(runId);
-        runState.setStatus(status);
+    private ExecutionState createRun(String executionId, ExecutionStatus status) {
+        ExecutionState executionState = new ExecutionState();
+        executionState.setExecutionId(executionId);
+        executionState.setStatus(status);
 
-        return runState;
+        return executionState;
     }
 
     private List<ExecutionStatus> getCancelStatuses() {
@@ -235,8 +235,8 @@ public class CancelExecutionServiceTest {
         }
 
         @Bean
-        RunStateService runService() {
-            return mock(RunStateService.class);
+        ExecutionStateService runService() {
+            return mock(ExecutionStateService.class);
         }
 
         @Bean

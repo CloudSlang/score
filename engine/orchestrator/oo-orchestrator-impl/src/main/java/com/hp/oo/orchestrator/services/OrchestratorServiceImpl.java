@@ -13,7 +13,7 @@ import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.oo.internal.sdk.execution.ExecutionPlan;
 import com.hp.score.engine.data.IdentityGenerator;
-import com.hp.score.services.RunStateService;
+import com.hp.score.services.ExecutionStateService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,13 +44,13 @@ public final class OrchestratorServiceImpl implements OrchestratorService {
     private IdentityGenerator idGenerator;
 
     @Autowired
-    private RunStateService runStateService;
+    private ExecutionStateService executionStateService;
 
     @Override
     @Transactional
     public void triggerFlow(String flowUuid, String triggerType, String executionName, String flowPath, String flowInputsContextName, String triggeredBy, String triggeringSource, Execution execution, Map<String, String> executionConfiguration) {
         // create execution record in ExecutionSummary table
-        runStateService.createParentRun(execution.getExecutionId());
+        executionStateService.createParentExecution(execution.getExecutionId());
 
         // create execution message
         ExecutionMessage message = createExecutionMessage(execution);

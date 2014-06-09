@@ -6,8 +6,8 @@ import com.hp.oo.engine.queue.services.QueueDispatcherService;
 import com.hp.oo.enginefacade.execution.ExecutionEnums.ExecutionStatus;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
-import com.hp.score.entities.RunState;
-import com.hp.score.services.RunStateService;
+import com.hp.score.entities.ExecutionState;
+import com.hp.score.services.ExecutionStateService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +37,7 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
     private QueueDispatcherService queueDispatcherService;
 
     @Autowired
-    private RunStateService runStateService;
+    private ExecutionStateService executionStateService;
 
     @Override
     @Transactional
@@ -49,15 +49,15 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
             throw new IllegalArgumentException("Null is not allowed as input of execution id in cancelExecution()");
         }
 
-        RunState runStateToCancel = runStateService.readByRunIdAndBranchId(executionId, EMPTY_BRANCH);
+        ExecutionState executionStateToCancel = executionStateService.readByExecutionIdAndBranchId(executionId, EMPTY_BRANCH);
         // we must have such execution in the table - the record is created on execution triggering
-        if (runStateToCancel == null) {
+        if (executionStateToCancel == null) {
             String errMsg = "Failed to cancel execution. Execution id: " + executionId + ".";
             logger.error(errMsg);
             return false;
         }
 
-        ExecutionStatus status = runStateToCancel.getStatus();
+        ExecutionStatus status = executionStateToCancel.getStatus();
 
         if (status.equals(ExecutionStatus.CANCELED) || status.equals(ExecutionStatus.PENDING_CANCEL)) {
             return true;
@@ -67,13 +67,13 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
         // If it's running - set to pending-cancel, and the ExecutionServiceImpl will handle it and extract it from the queue.
         // If it's paused - sometimes needs to handle its branches (if such exists).
         if (status.equals(ExecutionStatus.RUNNING)) {
-            runStateToCancel.setStatus(ExecutionStatus.PENDING_CANCEL);
+            executionStateToCancel.setStatus(ExecutionStatus.PENDING_CANCEL);
         } else if (status.equals(ExecutionStatus.PAUSED)) {
 
-            cancelPausedRun(runStateToCancel);
+            cancelPausedRun(executionStateToCancel);
 
         } else {
-            String errMsg = "Failed to cancel execution. Execution id: " + executionId + ". Execution is in status: " + runStateToCancel.getStatus().name();
+            String errMsg = "Failed to cancel execution. Execution id: " + executionId + ". Execution is in status: " + executionStateToCancel.getStatus().name();
             logger.error(errMsg);
             return false;
         }
@@ -84,37 +84,37 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
     // Cancel paused run according to its branches state
     //      If the run has branches, (it can be branch-paused / user-paused / no-workers-in-group) - then it's a 'virtual' pause, and we should cancel the paused branches. Then, the run itself will be canceled as well.
     //      If it doesn't - just cancel it straight away - extract the Run Object, set its context accordingly and put into the queue.
-    private void cancelPausedRun(RunState runStateToCancel) {
-        final List<RunState> branches = runStateService.readByRunId(runStateToCancel.getRunId());
+    private void cancelPausedRun(ExecutionState executionStateToCancel) {
+        final List<ExecutionState> branches = executionStateService.readByExecutionId(executionStateToCancel.getExecutionId());
 
         // If the parent is paused because one of the branches is paused, OR, it was paused by the user / no-workers-in-group, but has branches that were not finished (and thus, were paused) -
         // The parent itself will return to the queue after all the branches are ended (due to this cancellation), and then it'll be canceled as well.
         if (branches.size() > 1) { // more than 1 means that it has paused branches (branches is at least 1 - the parent)
-            for (RunState branch : branches) {
+            for (ExecutionState branch : branches) {
                 if (!EMPTY_BRANCH.equals(branch.getBranchId())) { // exclude the base execution
                     returnCanceledRunToQueue(branch);
                 }
             }
-            runStateToCancel.setStatus(ExecutionStatus.PENDING_CANCEL); // when the parent will return to queue - should have the correct status
+            executionStateToCancel.setStatus(ExecutionStatus.PENDING_CANCEL); // when the parent will return to queue - should have the correct status
         } else {
-            returnCanceledRunToQueue(runStateToCancel);
+            returnCanceledRunToQueue(executionStateToCancel);
         }
     }
 
-    private void returnCanceledRunToQueue(RunState runStateToCancel) {
+    private void returnCanceledRunToQueue(ExecutionState executionStateToCancel) {
         // set the context and return the run to the queue. It will be handled on "finishFlow" (QueueEventListener).
-        Execution executionObj = executionSerializationUtil.objFromBytes(runStateToCancel.getRunObject());
+        Execution executionObj = executionSerializationUtil.objFromBytes(executionStateToCancel.getExecutionObject());
         if (executionObj == null) {
-            logger.error("Run Object is null. Execution Id = " + runStateToCancel.getRunId() + "; Branch Id = " + runStateToCancel.getBranchId());
+            logger.error("Run Object is null. Execution Id = " + executionStateToCancel.getExecutionId() + "; Branch Id = " + executionStateToCancel.getBranchId());
             return;
         }
         executionObj.getSystemContext().put(ExecutionConstants.FLOW_TERMINATION_TYPE, ExecutionStatus.CANCELED);
         executionObj.setPosition(null);
 
         // just in case - we shouldn't need it, because the Execution is back to the queue as "Terminated"
-        runStateToCancel.setStatus(ExecutionStatus.PENDING_CANCEL);
+        executionStateToCancel.setStatus(ExecutionStatus.PENDING_CANCEL);
         // clean the DB field
-        runStateToCancel.setRunObject(null);
+        executionStateToCancel.setExecutionObject(null);
 
         // return execution to queue, as "Terminated"
         queueDispatcherService.dispatch(
@@ -128,13 +128,13 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
     @Override
     @Transactional(readOnly = true)
     public boolean isCanceledExecution(String executionId) {
-        return runStateService.readCancelledRun(executionId) != null;
+        return executionStateService.readCancelledExecution(executionId) != null;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<String> readCanceledExecutionsIds() {
-        List<String> result = runStateService.readRunIdByStatuses(getCancelStatuses());
+        List<String> result = executionStateService.readExecutionIdByStatuses(getCancelStatuses());
         if (result == null) {
             result = Arrays.asList();
         }

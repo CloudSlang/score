@@ -11,7 +11,7 @@ import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.oo.internal.sdk.execution.ExecutionPlan;
 import com.hp.score.engine.data.IdentityGenerator;
-import com.hp.score.services.RunStateService;
+import com.hp.score.services.ExecutionStateService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
@@ -39,7 +39,7 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
     private ExecutionMessageConverter executionMessageConverter;
 
     @Autowired
-    private RunStateService runStateService;
+    private ExecutionStateService executionStateService;
 
     @Override
     public Long trigger(ExecutionPlan executionPlan, Map<String, Serializable> context, Map<String, Serializable> systemContext, Long startStep) {
@@ -48,7 +48,7 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
         Execution execution = new Execution(executionId, runningExecutionPlanId, startStep, context, systemContext);
 
         // create execution record in ExecutionSummary table
-        runStateService.createParentRun(execution.getExecutionId());
+        executionStateService.createParentExecution(execution.getExecutionId());
 
         // create execution message
         ExecutionMessage message = createExecutionMessage(execution);

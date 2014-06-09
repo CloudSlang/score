@@ -3,8 +3,8 @@ package com.hp.score;
 import com.hp.oo.enginefacade.execution.ExecutionEnums;
 import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.oo.orchestrator.services.PauseResumeService;
-import com.hp.score.entities.RunState;
-import com.hp.score.services.RunStateService;
+import com.hp.score.entities.ExecutionState;
+import com.hp.score.services.ExecutionStateService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
@@ -17,15 +17,15 @@ import java.util.Map;
 public class ScorePauseResumeImpl implements ScorePauseResume {
 
     @Autowired
-    private RunStateService runStateService;
+    private ExecutionStateService executionStateService;
 
     @Autowired
     private PauseResumeService pauseResumeService;
 
     @Override
     public boolean pauseExecution(Long executionId) {
-        RunState runState = runStateService.readByRunIdAndBranchId(executionId.toString(), RunState.EMPTY_BRANCH);
-        if (canBePaused(runState)) {
+        ExecutionState executionState = executionStateService.readByExecutionIdAndBranchId(executionId.toString(), ExecutionState.EMPTY_BRANCH);
+        if (canBePaused(executionState)) {
             pauseResumeService.pauseExecution(executionId.toString(), null, PauseReason.USER_PAUSED);
             return true;
         } else {
@@ -33,8 +33,8 @@ public class ScorePauseResumeImpl implements ScorePauseResume {
         }
     }
 
-    private boolean canBePaused(RunState runState) {
-        return runState != null && runState.getStatus().equals(ExecutionEnums.ExecutionStatus.RUNNING);
+    private boolean canBePaused(ExecutionState executionState) {
+        return executionState != null && executionState.getStatus().equals(ExecutionEnums.ExecutionStatus.RUNNING);
     }
 
     @Override

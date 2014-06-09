@@ -1,7 +1,7 @@
 package com.hp.score.repositories;
 
 import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
-import com.hp.score.entities.RunState;
+import com.hp.score.entities.ExecutionState;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.hibernate.ejb.HibernatePersistence;
@@ -37,34 +37,35 @@ import static org.fest.assertions.Assertions.assertThat;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-public class RunStateRepositoryTest {
+public class ExecutionStateRepositoryTest {
 
     @Autowired
-    private RunStateRepository runStateRepository;
+    private ExecutionStateRepository executionStateRepository;
 
     @Test
-    public void testFindRunIdByStatuses() {
-        RunState canceledRunState = createRunState(ExecutionStatus.CANCELED);
-        RunState completedRunState = createRunState(ExecutionStatus.COMPLETED);
-        createRunState(ExecutionStatus.PENDING_CANCEL);
+    public void testFindExecutionIdByStatuses() {
+        ExecutionState canceledExecutionState = createExecutionState(ExecutionStatus.CANCELED);
+        ExecutionState completedExecutionState = createExecutionState(ExecutionStatus.COMPLETED);
+        createExecutionState(ExecutionStatus.PENDING_CANCEL);
 
-        List<String> runStates = runStateRepository.findRunIdByStatuses(Arrays.asList(ExecutionStatus.CANCELED, ExecutionStatus.COMPLETED));
+        List<String> executionStates = executionStateRepository.findExecutionIdByStatuses(Arrays.asList(ExecutionStatus.CANCELED, ExecutionStatus.COMPLETED));
 
-        assertThat(runStates).containsExactly(canceledRunState.getRunId(), completedRunState.getRunId());
+        assertThat(executionStates).containsExactly(canceledExecutionState.getExecutionId(), completedExecutionState.getExecutionId());
     }
 
-    private RunState createRunState(ExecutionStatus status) {
-        RunState runState = new RunState();
-        runState.setStatus(status);
-        runState.setRunId(UUID.randomUUID().toString());
-        runState.setBranchId(UUID.randomUUID().toString());
-        runStateRepository.saveAndFlush(runState);
-        return runState;
+    private ExecutionState createExecutionState(ExecutionStatus status) {
+        ExecutionState executionState = new ExecutionState();
+        executionState.setStatus(status);
+        executionState.setExecutionId(UUID.randomUUID()
+                                    .toString());
+        executionState.setBranchId(UUID.randomUUID().toString());
+        executionStateRepository.saveAndFlush(executionState);
+        return executionState;
     }
 
     @Configuration
     @EnableJpaRepositories("com.hp.score")
-    static class RunStateRepositoryTestContext {
+    static class ExecutionStateRepositoryTestContext {
 
         @Bean
         DataSource dataSource(){

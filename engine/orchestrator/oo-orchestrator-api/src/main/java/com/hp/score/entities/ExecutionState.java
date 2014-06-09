@@ -21,14 +21,14 @@ import java.util.Arrays;
  * Date: 12/05/2014
  */
 @Entity
-@Table(name = "SCORE_RUN_STATE",
-        uniqueConstraints = {@UniqueConstraint(name = "SCORE_RUN_STATE_UC", columnNames = {"RUN_ID", "BRANCH_ID"})})
-public class RunState extends AbstractIdentifiable {
+@Table(name = "SCORE_EXECUTION_STATE",
+        uniqueConstraints = {@UniqueConstraint(name = "SCORE_EXECUTION_STATE_UC", columnNames = {"EXECUTION_ID", "BRANCH_ID"})})
+public class ExecutionState extends AbstractIdentifiable {
 
     public static final String EMPTY_BRANCH = "EMPTY";
 
-    @Column(name = "RUN_ID", nullable = false)
-    private String runId;
+    @Column(name = "EXECUTION_ID", nullable = false)
+    private String executionId;
 
     @Column(name = "BRANCH_ID", nullable = false)
     private String branchId = ExecutionSummary.EMPTY_BRANCH;
@@ -37,17 +37,17 @@ public class RunState extends AbstractIdentifiable {
     @Column(name = "STATUS", nullable = false)
     private ExecutionEnums.ExecutionStatus status;
 
-    @Column(name = "RUN_OBJECT")
+    @Column(name = "EXECUTION_OBJECT")
     @Lob
     @Basic(fetch = FetchType.LAZY)
-    private byte[] runObject;
+    private byte[] executionObject;
 
-    public String getRunId() {
-        return runId;
+    public String getExecutionId() {
+        return executionId;
     }
 
-    public void setRunId(String runId) {
-        this.runId = runId;
+    public void setExecutionId(String executionId) {
+        this.executionId = executionId;
     }
 
     public String getBranchId() {
@@ -66,41 +66,41 @@ public class RunState extends AbstractIdentifiable {
         this.status = status;
     }
 
-    public byte[] getRunObject() {
-        return runObject;
+    public byte[] getExecutionObject() {
+        return executionObject;
     }
 
-    public void setRunObject(byte[] executionObj) {
-        this.runObject = executionObj;
+    public void setExecutionObject(byte[] executionObj) {
+        this.executionObject = executionObj;
     }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (!(obj instanceof RunState)) return false;
+        if (!(obj instanceof ExecutionState)) return false;
 
-        RunState that = (RunState) obj;
+        ExecutionState that = (ExecutionState) obj;
         EqualsBuilder equalsBuilder = new EqualsBuilder();
         equalsBuilder.append(branchId, that.branchId);
-        equalsBuilder.append(runId, that.runId);
-        equalsBuilder.append(runObject, that.runObject);
+        equalsBuilder.append(executionId, that.executionId);
+        equalsBuilder.append(executionObject, that.executionObject);
         equalsBuilder.append(status, that.status);
         return equalsBuilder.isEquals();
     }
 
     @Override
     public int hashCode() {
-        int result = runId != null ? runId.hashCode() : 0;
+        int result = executionId != null ? executionId.hashCode() : 0;
         result = 31 * result + (branchId != null ? branchId.hashCode() : 0);
         result = 31 * result + (status != null ? status.hashCode() : 0);
-        result = 31 * result + (runObject != null ? Arrays.hashCode(runObject) : 0);
+        result = 31 * result + (executionObject != null ? Arrays.hashCode(executionObject) : 0);
         return result;
     }
 
     @Override
     public String toString() {
-        return "RunState{" +
-                "runId='" + runId + '\'' +
+        return "ExecutionState {" +
+                "executionId='" + executionId + '\'' +
                 ", branchId='" + branchId + '\'' +
                 '}';
     }

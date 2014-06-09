@@ -2,11 +2,12 @@ package com.hp.score;
 
 import com.hp.oo.broker.entities.RunningExecutionPlan;
 import com.hp.oo.broker.services.RunningExecutionPlanService;
+import com.hp.oo.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.engine.queue.services.QueueDispatcherService;
 import com.hp.oo.internal.sdk.execution.ExecutionPlan;
 import com.hp.score.engine.data.IdentityGenerator;
-import com.hp.score.services.RunStateService;
+import com.hp.score.services.ExecutionStateService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -18,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -47,7 +48,7 @@ public class ScoreTriggeringTest {
     private ExecutionMessageConverter executionMessageConverter;
 
     @Mock
-    private RunStateService runStateService;
+    private ExecutionStateService executionStateService;
 
     @Before
     public void resetMocks() {
@@ -63,7 +64,7 @@ public class ScoreTriggeringTest {
         ep.setBeginStep(1L);
         scoreTrigger.trigger(ep, new HashMap<String, Serializable>(), new HashMap<String, Serializable>(), 1L);
 
-        verify(queueDispatcher, times(1)).dispatch(anyList());
+        verify(queueDispatcher, times(1)).dispatch(anyListOf(ExecutionMessage.class));
     }
 
     @Test

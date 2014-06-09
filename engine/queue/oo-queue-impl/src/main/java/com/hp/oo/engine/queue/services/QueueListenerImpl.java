@@ -5,7 +5,7 @@ import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
-import com.hp.score.services.RunStateService;
+import com.hp.score.services.ExecutionStateService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -23,7 +23,7 @@ public class QueueListenerImpl implements QueueListener {
     private static Logger logger = Logger.getLogger(QueueListenerImpl.class);
 
     @Autowired
-    private RunStateService runStateService;
+    private ExecutionStateService executionStateService;
 
     @Autowired
     private ExecutionMessageConverter executionMessageConverter;
@@ -60,7 +60,7 @@ public class QueueListenerImpl implements QueueListener {
             //Only delete parent runs and not branches because the Terminated event of branches should not cause the
             //deletion of the entire run
             if (!isBranchExecution(executionMessage)) {
-                runStateService.deleteRunState(executionMessage.getMsgId(), ExecutionSummary.EMPTY_BRANCH);
+                executionStateService.deleteExecutionState(executionMessage.getMsgId(), ExecutionSummary.EMPTY_BRANCH);
             }
         }
     }
@@ -86,7 +86,7 @@ public class QueueListenerImpl implements QueueListener {
     public void onFailed(List<ExecutionMessage> messages) {
         for (ExecutionMessage executionMessage : messages) {
             if (!failedBecauseNoWorker(executionMessage)) {
-                runStateService.deleteRunState(executionMessage.getMsgId(), ExecutionSummary.EMPTY_BRANCH);
+                executionStateService.deleteExecutionState(executionMessage.getMsgId(), ExecutionSummary.EMPTY_BRANCH);
             }
         }
     }

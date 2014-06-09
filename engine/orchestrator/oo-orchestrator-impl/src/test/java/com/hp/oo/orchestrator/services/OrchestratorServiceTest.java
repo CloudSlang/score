@@ -8,7 +8,7 @@ import com.hp.oo.enginefacade.execution.ExecutionEnums;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.score.engine.data.IdentityGenerator;
-import com.hp.score.services.RunStateService;
+import com.hp.score.services.ExecutionStateService;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +43,7 @@ public class OrchestratorServiceTest {
     private ExecutionEventService executionEventService;
 
     @Mock
-    private RunStateService runStateService;
+    private ExecutionStateService executionStateService;
 
     @Mock
     private QueueDispatcherService queueDispatcher;

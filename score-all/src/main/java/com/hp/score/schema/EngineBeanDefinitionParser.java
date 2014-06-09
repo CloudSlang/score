@@ -33,7 +33,7 @@ import com.hp.score.engine.data.DataBaseDetector;
 import com.hp.score.engine.data.HiloFactoryBean;
 import com.hp.score.engine.data.SqlInQueryReader;
 import com.hp.score.engine.data.SqlUtils;
-import com.hp.score.services.RunStateServiceImpl;
+import com.hp.score.services.ExecutionStateServiceImpl;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
@@ -54,10 +54,10 @@ import java.util.Map;
 public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	private Map<Class<?>,String> beans = new HashMap<Class<?>,String>(){{
-		put(ScorePauseResumeImpl.class, "scoreExecution");
+		put(ScorePauseResumeImpl.class, null);
 		put(OrchestratorServiceImpl.class, "orchestratorService");
         put(OrchestratorDispatcherServiceImpl.class, "orchestratorDispatcherService");
-        put(RunStateServiceImpl.class, null);
+        put(ExecutionStateServiceImpl.class, null);
 		put(QueueDispatcherServiceImpl.class, "queueDispatcherService");
 		put(ExecutionQueueServiceImpl.class, "executionQueueService");
 		put(ExecutionAssignerServiceImpl.class, "executionAssignerService");

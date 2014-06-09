@@ -16,6 +16,6 @@
 		<repository:include-filter type="regex" expression="com.hp.oo.partitions.repositories.PartitionGroupRepository"/>
 		<repository:include-filter type="regex" expression="com.hp.oo.orchestrator.repositories.RunningExecutionPlanRepository"/>
 		<repository:include-filter type="regex" expression="com.hp.oo.orchestrator.repositories.FinishedBranchRepository"/>
-		<repository:include-filter type="regex" expression="com.hp.score.repositories.RunStateRepository"/>
+		<repository:include-filter type="regex" expression="com.hp.score.repositories.ExecutionStateRepository"/>
 	</jpa:repositories>
 </beans>

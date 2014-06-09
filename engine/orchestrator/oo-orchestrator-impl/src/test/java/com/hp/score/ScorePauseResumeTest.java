@@ -2,8 +2,8 @@ package com.hp.score;
 
 import com.hp.oo.enginefacade.execution.ExecutionEnums;
 import com.hp.oo.orchestrator.services.PauseResumeService;
-import com.hp.score.entities.RunState;
-import com.hp.score.services.RunStateService;
+import com.hp.score.entities.ExecutionState;
+import com.hp.score.services.ExecutionStateService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 public class ScorePauseResumeTest {
 
     @Autowired
-    private RunStateService runStateService;
+    private ExecutionStateService executionStateService;
 
     @Autowired
     private ScorePauseResume scorePauseResume;
@@ -36,27 +36,27 @@ public class ScorePauseResumeTest {
     public void testPauseExecution_NoSuchExecution() {
         Long executionId = new Random().nextLong();
 
-        when(runStateService.readByRunIdAndBranchId(executionId.toString(), RunState.EMPTY_BRANCH)).thenReturn(null);
+        when(executionStateService.readByExecutionIdAndBranchId(executionId.toString(), ExecutionState.EMPTY_BRANCH)).thenReturn(null);
         assertThat(scorePauseResume.pauseExecution(executionId)).isFalse();
     }
 
     @Test
     public void testPauseExecution_ExecutionCannotBePaused() {
         Long executionId = new Random().nextLong();
-        RunState runState = new RunState();
-        runState.setStatus(ExecutionEnums.ExecutionStatus.CANCELED);
+        ExecutionState executionState = new ExecutionState();
+        executionState.setStatus(ExecutionEnums.ExecutionStatus.CANCELED);
 
-        when(runStateService.readByRunIdAndBranchId(executionId.toString(), RunState.EMPTY_BRANCH)).thenReturn(runState);
+        when(executionStateService.readByExecutionIdAndBranchId(executionId.toString(), ExecutionState.EMPTY_BRANCH)).thenReturn(executionState);
         assertThat(scorePauseResume.pauseExecution(executionId)).isFalse();
     }
 
     @Test
     public void testPauseExecution_ExecutionCanBePaused() {
         Long executionId = new Random().nextLong();
-        RunState runState = new RunState();
-        runState.setStatus(ExecutionEnums.ExecutionStatus.RUNNING);
+        ExecutionState executionState = new ExecutionState();
+        executionState.setStatus(ExecutionEnums.ExecutionStatus.RUNNING);
 
-        when(runStateService.readByRunIdAndBranchId(executionId.toString(), RunState.EMPTY_BRANCH)).thenReturn(runState);
+        when(executionStateService.readByExecutionIdAndBranchId(executionId.toString(), ExecutionState.EMPTY_BRANCH)).thenReturn(executionState);
         assertThat(scorePauseResume.pauseExecution(executionId)).isTrue();
     }
 
@@ -69,8 +69,8 @@ public class ScorePauseResumeTest {
         }
 
         @Bean
-        public RunStateService runStateService() {
-            return mock(RunStateService.class);
+        public ExecutionStateService executionStateService() {
+            return mock(ExecutionStateService.class);
         }
 
         @Bean
