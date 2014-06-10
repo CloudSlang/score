@@ -356,9 +356,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 pauseService.pauseExecution(executionId, branchId, reason); // this creates a DB record for this branch, as Pending-paused
             }
         }
-
-        ExecutionEvent stepLogEvent = ExecutionEventFactory.createStepLogEvent(executionId,ExecutionEventUtils.increaseEvent(systemContext), ExecutionEnums.StepLogCategory.STEP_PAUSED, systemContext);
-        eventsQueue.add(stepLogEvent);
+        ExecutionEventFactory.createStepLogEvent(executionId,ExecutionEventUtils.increaseEvent(systemContext), ExecutionEnums.StepLogCategory.STEP_PAUSED, systemContext);
 
         //dump bus events here because out side is too late
         dumpBusEvents(execution);
@@ -392,10 +390,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         if (reason == null) {
             return false; //indicate that the flow was not paused
         }
-
-        @SuppressWarnings("unchecked") Deque<ExecutionEvent> eventsQueue = (Deque) systemContext.get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
-        ExecutionEvent pausedStepEvent = ExecutionEventFactory.createStepLogEvent(executionId, ExecutionEventUtils.increaseEvent(systemContext),ExecutionEnums.StepLogCategory.STEP_PAUSED,systemContext);
-        eventsQueue.add(pausedStepEvent);
+        ExecutionEventFactory.createStepLogEvent(executionId, ExecutionEventUtils.increaseEvent(systemContext),ExecutionEnums.StepLogCategory.STEP_PAUSED,systemContext);
 
         dumpBusEvents(execution);
 
@@ -514,8 +509,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
         List<ExecutionEvent> filteredExecutionEvents = new ArrayList<>(); //TODO : remove this filtering...
         for (ExecutionEvent executionEvent : executionEvents){
             if(executionEvent.getType().equals(ExecutionEnums.Event.STEP_LOG)){
-                //logger.error("no step log events should get here");
-                continue;
+                logger.error("no step log events should get here! :"+executionEvent.getStepLogCategory().name());
+                //continue;
             }
             filteredExecutionEvents.add(executionEvent);
         }
@@ -680,11 +675,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
             try {
                 createErrorEvent(execution, currStep, navEx, "Error occurred during navigation execution ", LogLevelCategory.STEP_NAV_ERROR, execution.getSystemContext());
-                @SuppressWarnings("unchecked") Deque<ExecutionEvent> eventsQueue = (Deque) execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
 
-                ExecutionEvent stepLogEvent = ExecutionEventFactory.createStepLogEvent(execution.getExecutionId(),ExecutionEventUtils.increaseEvent(execution.getSystemContext()),
+                ExecutionEventFactory.createStepLogEvent(execution.getExecutionId(),ExecutionEventUtils.increaseEvent(execution.getSystemContext()),
                         ExecutionEnums.StepLogCategory.STEP_ERROR, execution.getSystemContext());
-                eventsQueue.add(stepLogEvent);
 
             } catch (RuntimeException eventEx) {
                 logger.error("Failed to create event: ", eventEx);
