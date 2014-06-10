@@ -26,7 +26,6 @@ public class ScoreTest {
     @Mock
     private ScoreTriggering scoreTriggering;
 
-
     @Before
     public void resetMocks() {
         MockitoAnnotations.initMocks(this);
@@ -38,17 +37,16 @@ public class ScoreTest {
         ep.setBeginStep(1L);
         score.trigger(ep);
 
-        verify(scoreTriggering,times(1)).trigger(any(ExecutionPlan.class), anyMap(), anyMap(), anyLong());
+        verify(scoreTriggering, times(1)).trigger(any(ExecutionPlan.class), anyMapOf(String.class, Serializable.class), anyMapOf(String.class, Serializable.class), anyLong());
     }
 
     @Test
     public void testTrigger2() throws Exception {
         ExecutionPlan ep = new ExecutionPlan();
         ep.setBeginStep(1L);
-        score.trigger(ep,new HashMap<String, Serializable>(),new HashMap<String, Serializable>(),1L);
+        score.trigger(ep, new HashMap<String, Serializable>(), new HashMap<String, Serializable>(), 1L);
 
-        verify(scoreTriggering,times(1)).trigger(any(ExecutionPlan.class), anyMap(), anyMap(), anyLong());
+        verify(scoreTriggering, times(1)).trigger(any(ExecutionPlan.class), anyMapOf(String.class, Serializable.class), anyMapOf(String.class, Serializable.class), anyLong());
     }
-
 
 }

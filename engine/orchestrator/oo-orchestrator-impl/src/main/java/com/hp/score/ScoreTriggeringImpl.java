@@ -11,6 +11,7 @@ import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.oo.internal.sdk.execution.ExecutionPlan;
 import com.hp.score.engine.data.IdentityGenerator;
+import com.hp.score.lang.ScoreSystemContext;
 import com.hp.score.services.ExecutionStateService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -42,10 +43,11 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
     private ExecutionStateService executionStateService;
 
     @Override
-    public Long trigger(ExecutionPlan executionPlan, Map<String, Serializable> context, Map<String, Serializable> systemContext, Long startStep) {
-        Long runningExecutionPlanId = saveRunningExecutionPlan(executionPlan, systemContext);
+    public Long trigger(ExecutionPlan executionPlan, Map<String, Serializable> context, Map<String, Serializable> runtimeValues, Long startStep) {
+        ScoreSystemContext scoreSystemContext = new ScoreSystemContext(runtimeValues);
+        Long runningExecutionPlanId = saveRunningExecutionPlan(executionPlan, scoreSystemContext);
         Long executionId = (Long) idGenerator.next();
-        Execution execution = new Execution(executionId, runningExecutionPlanId, startStep, context, systemContext);
+        Execution execution = new Execution(executionId, runningExecutionPlanId, startStep, context, scoreSystemContext);
 
         // create execution record in ExecutionSummary table
         executionStateService.createParentExecution(execution.getExecutionId());
@@ -56,7 +58,7 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
         return executionId;
     }
 
-    private Long saveRunningExecutionPlan(ExecutionPlan executionPlan, Map<String, Serializable> systemContext) {
+    private Long saveRunningExecutionPlan(ExecutionPlan executionPlan, ScoreSystemContext systemContext) {
         Map<String, Long> runningPlansIds = new HashMap<>();
         Map<String, Long> beginStepsIds = new HashMap<>();
 

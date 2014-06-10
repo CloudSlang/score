@@ -16,11 +16,11 @@ public interface Score {
 
     public Long trigger(ExecutionPlan executionPlan, Map<String, Serializable> context);
 
-    public Long trigger(ExecutionPlan executionPlan, Map<String, Serializable> context, Map<String, Serializable> systemContext, Long startStep);
+    public Long trigger(ExecutionPlan executionPlan, Map<String, Serializable> context, Map<String, Serializable> runtimeValues, Long startStep);
 
     public boolean pauseExecution(Long executionId);
 
-    public void resumeExecution(Long executionId, Map<String, Serializable> context, Map<String, Serializable> systemContext);
+    public void resumeExecution(Long executionId, Map<String, Serializable> context, Map<String, Serializable> runtimeValues);
 
     public void cancelExecution(Long executionId);
 

@@ -60,8 +60,13 @@
             <artifactId>querydsl-jpa</artifactId>
         </dependency>
 
-		<!-- engine facade artifacts -->
-		<dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>score-lang</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- engine facade artifacts -->
+        <dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>score-facade</artifactId>
 		</dependency>
@@ -114,12 +119,6 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-validator</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.easytesting</groupId>
-			<artifactId>fest-assert</artifactId>
 			<scope>test</scope>
 		</dependency>
 

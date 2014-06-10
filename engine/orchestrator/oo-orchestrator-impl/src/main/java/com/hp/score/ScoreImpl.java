@@ -31,8 +31,8 @@ public class ScoreImpl implements Score {
     }
 
     @Override
-    public Long trigger(ExecutionPlan executionPlan, Map<String, Serializable> context, Map<String, Serializable> systemContext, Long startStep) {
-        return scoreTriggering.trigger(executionPlan, context, systemContext, startStep);
+    public Long trigger(ExecutionPlan executionPlan, Map<String, Serializable> context, Map<String, Serializable> runtimeValues, Long startStep) {
+        return scoreTriggering.trigger(executionPlan, context, runtimeValues, startStep);
     }
 
     @Override
@@ -41,13 +41,13 @@ public class ScoreImpl implements Score {
     }
 
     @Override
-    public void resumeExecution(Long executionId, Map<String, Serializable> context, Map<String, Serializable> systemContext) {
-        scorePauseResume.resumeExecution(executionId, context, systemContext);
+    public void resumeExecution(Long executionId, Map<String, Serializable> context, Map<String, Serializable> runtimeValues) {
+        scorePauseResume.resumeExecution(executionId, context, runtimeValues);
     }
 
     @Override
     public void cancelExecution(Long executionId) {
-         //TODO - impl this
+        //TODO - impl this
     }
 
 }
