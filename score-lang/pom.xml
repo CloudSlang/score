@@ -9,11 +9,5 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>score-lang</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>score-lang-api</module>
-        <module>score-lang-impl</module>
-    </modules>
-
 
 </project>
