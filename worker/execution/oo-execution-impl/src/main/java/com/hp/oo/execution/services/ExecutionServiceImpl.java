@@ -105,19 +105,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 return null;
             }
 
-            if(execution.getSystemContext().get(ExecutionConstants.SCORE_EVENTS_QUEUE) != null){
-                //TODO temproray solution until Elia finish moving PauseResumeServiceImpl  to score
-                @SuppressWarnings("unchecked") ArrayDeque<EventWrapper> eventsQueue = (ArrayDeque) execution.getSystemContext().get(ExecutionConstants.SCORE_EVENTS_QUEUE);
-                Iterator<EventWrapper> executionEvents  = eventsQueue.iterator();
-                while(executionEvents.hasNext()){
-                    ExecutionEvent executionEvent  =  (ExecutionEvent)executionEvents.next().getEvent();
-                    if(executionEvent.getType().equals(ExecutionEnums.Event.STEP_LOG)
-                            && executionEvent.getStepLogCategory().equals(ExecutionEnums.StepLogCategory.STEP_RESUMED)){
-                        eventBus.dispatch(new EventWrapper(executionEvent.getType().name(), executionEvent));
-                    }
-                }
-            }
-
+            //dum bus event
+            dumpBusEvents(execution);
 
             //Run the execution step
             executeStep(execution, currStep);
@@ -522,9 +511,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
             eventBus.dispatch(new EventWrapper(executionEvent.getType().name(), executionEvent));
         }
 
-        List<ExecutionEvent> filteredExecutionEvents = new ArrayList<>();
+        List<ExecutionEvent> filteredExecutionEvents = new ArrayList<>(); //TODO : remove this filtering...
         for (ExecutionEvent executionEvent : executionEvents){
             if(executionEvent.getType().equals(ExecutionEnums.Event.STEP_LOG)){
+                //logger.error("no step log events should get here");
                 continue;
             }
             filteredExecutionEvents.add(executionEvent);
@@ -545,15 +535,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     private void dumpBusEvents(Execution execution) {
         @SuppressWarnings("unchecked") ArrayDeque<EventWrapper> eventsQueue = (ArrayDeque) execution.getSystemContext().get(ExecutionConstants.SCORE_EVENTS_QUEUE);
-        /*Iterator<ExecutionEvent> executionEvents  = eventsQueue.iterator();
-
-        while(executionEvents.hasNext()){
-            ExecutionEvent executionEvent  =  executionEvents.next();
-            if(executionEvent.getType().equals(ExecutionEnums.Event.STEP_LOG)){
-                eventBus.dispatch(new EventWrapper(executionEvent.getType().name(), executionEvent));
-                executionEvents.remove();
-            }
-        }*/
         if(eventsQueue == null) return;
         for(EventWrapper eventWrapper:eventsQueue){
             eventBus.dispatch(eventWrapper);
