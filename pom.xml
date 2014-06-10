@@ -613,5 +613,6 @@
 		<module>score-all</module>
 		<module>score-worker</module>
 		<module>score-tests</module>
-	</modules>
+        <module>score-lang</module>
+    </modules>
 </project>
