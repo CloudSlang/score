@@ -51,6 +51,7 @@ public class ExecutionConstants {
     public static final String EXECUTION_EVENTS_QUEUE = "EXECUTION_EVENTS_QUEUE";
     public static final String EXECUTION_EVENTS_STEP_MAPPED = "EXECUTION_EVENTS_STEP_MAPPED";
     public static final String EXECUTION_EVENT_SEQUENCE_ORDER = "EXECUTION_EVENT_SEQUENCE_ORDER";
+    public static final String SCORE_EVENTS_QUEUE = "SCORE_EVENTS_QUEUE";
 
     // For Execution event
     public static final String EXECUTION_EVENTS_LOG_LEVEL = "EXECUTION_EVENTS_LOG_LEVEL";

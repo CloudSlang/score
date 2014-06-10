@@ -12,11 +12,13 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 /**
  * Date: 3/6/12
@@ -272,8 +274,10 @@ public abstract class ExecutionEventFactory {
             stringListMap.remove(flowPath);
         }
 
-        return new ExecutionEvent(executionId, ExecutionEnums.Event.STEP_LOG, stepLogCategory, executionEventSequenceOrder, flowPath)
+        ExecutionEvent executionEvent = new ExecutionEvent(executionId, ExecutionEnums.Event.STEP_LOG, stepLogCategory, executionEventSequenceOrder, flowPath)
                 .setData5(new ArrayList<>(events));
+        saveEvent(executionEvent,systemContext);
+        return executionEvent;
 
     }
 
@@ -566,5 +570,13 @@ public abstract class ExecutionEventFactory {
         exEvents.add(executionEvent);
     }
 
+    private static void saveEvent(ExecutionEvent executionEvent, Map<String, Serializable> systemContext){
+        Queue<EventWrapper> eventsQueue = (Queue<EventWrapper>)systemContext.get(ExecutionConstants.SCORE_EVENTS_QUEUE);
+        if(eventsQueue == null){
+            eventsQueue = new ArrayDeque<>();
+            systemContext.put(ExecutionConstants.SCORE_EVENTS_QUEUE,(ArrayDeque)eventsQueue);
+        }
+        eventsQueue.add(new EventWrapper(executionEvent.getType().name(),executionEvent));
+    }
 
 }
