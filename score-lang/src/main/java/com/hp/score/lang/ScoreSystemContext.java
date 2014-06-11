@@ -20,13 +20,4 @@ public class ScoreSystemContext extends HashMap<String, Serializable> {
         super(m);
     }
 
-    public void addEvent(String type, Serializable data) {
-    }
-
-    public void pauseExecution() {
-    }
-
-    public void setError(String error) {
-    }
-
 }
