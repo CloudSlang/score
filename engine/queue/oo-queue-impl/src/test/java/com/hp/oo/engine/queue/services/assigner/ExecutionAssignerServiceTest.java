@@ -9,6 +9,7 @@ import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.engine.queue.entities.Payload;
 import com.hp.oo.engine.queue.services.ExecutionQueueService;
 import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.score.lang.ScoreSystemContext;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,10 +22,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 import static org.mockito.Matchers.any;
@@ -92,7 +91,7 @@ public class ExecutionAssignerServiceTest {
         Mockito.reset(workerNodeService);
         Mockito.when(workerNodeService.readGroupWorkersMapActiveAndRunning()).thenReturn(groupWorkersMap);
         Execution execution = Mockito.mock(Execution.class);
-        Mockito.when(execution.getSystemContext()).thenReturn(new HashMap<String,Serializable>()) ;
+        Mockito.when(execution.getSystemContext()).thenReturn(new ScoreSystemContext());
         Mockito.when(executionMessageConverter.extractExecution(any(Payload.class))).thenReturn(execution);
 
         final List<ExecutionMessage> messagesInQ = executionAssignerService.assignWorkers(assignMessages);

@@ -13,6 +13,7 @@ import com.hp.oo.orchestrator.entities.SplitMessage;
 import com.hp.oo.orchestrator.entities.SuspendedExecution;
 import com.hp.oo.orchestrator.repositories.FinishedBranchRepository;
 import com.hp.oo.orchestrator.repositories.SuspendedExecutionsRepository;
+import com.hp.score.lang.ScoreSystemContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -124,6 +125,7 @@ public class SplitJoinServiceTest {
 		Execution execution = Mockito.mock(Execution.class);
 		Mockito.when(execution.getSplitId()).thenReturn(splitId);
 		Mockito.when(execution.getPosition()).thenReturn(null);
+        Mockito.when(execution.getSystemContext()).thenReturn(new ScoreSystemContext());
 
 		Mockito.when(suspendedExecutionsRepository.findBySplitIdIn(Arrays.asList(splitId))).thenReturn(Arrays.asList(createSuspendedExecution(splitId, 2)));
 
@@ -140,8 +142,10 @@ public class SplitJoinServiceTest {
 		Execution branch2 = Mockito.mock(Execution.class);
 		Mockito.when(branch1.getSplitId()).thenReturn(splitId1);
 		Mockito.when(branch2.getSplitId()).thenReturn(splitId2);
-		Mockito.when(branch1.getPosition()).thenReturn(null);
-		Mockito.when(branch2.getPosition()).thenReturn(null);
+        Mockito.when(branch1.getSystemContext()).thenReturn(new ScoreSystemContext());
+        Mockito.when(branch2.getSystemContext()).thenReturn(new ScoreSystemContext());
+        Mockito.when(branch1.getPosition()).thenReturn(null);
+        Mockito.when(branch2.getPosition()).thenReturn(null);
 
 		// find only a a partial amount of the required suspended execution entities
 		Mockito.when(suspendedExecutionsRepository.findBySplitIdIn(Arrays.asList(splitId1, splitId2))).thenReturn(Arrays.asList(createSuspendedExecution(splitId1, 1)));

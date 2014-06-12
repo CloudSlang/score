@@ -2,6 +2,7 @@ package com.hp.oo.internal.sdk.execution;
 
 import com.hp.oo.enginefacade.execution.EndBranchDataContainer;
 import com.hp.oo.internal.sdk.execution.events.ExecutionEvent;
+import com.hp.score.lang.ScoreSystemContext;
 import org.apache.commons.lang.Validate;
 
 import java.io.Serializable;
@@ -25,16 +26,15 @@ public class Execution implements Serializable {
 	private long lastEventDumpTime;
 
 	protected Map<String, Serializable> contexts;
-	protected Map<String, Serializable> systemContext;
-	//This context is an internal action context for sharing serializable data between actions on the same execution
-	protected Map<String, Serializable> serializableSessionContext;
+    protected ScoreSystemContext systemContext = new ScoreSystemContext();
+    //This context is an internal action context for sharing serializable data between actions on the same execution
+    protected Map<String, Serializable> serializableSessionContext;
 
 	public Execution() {
 		this.aggregatedEvents = new ArrayList<>();
 		this.lastEventDumpTime = 0;
 		this.mustGoToQueue = false;
 		this.contexts = new HashMap<>();
-		this.systemContext = new HashMap<>();
 		this.serializableSessionContext = new HashMap<>();
 	}
 
@@ -102,9 +102,9 @@ public class Execution implements Serializable {
 		return contexts;
 	}
 
-	public Map<String, Serializable> getSystemContext() {
-		return systemContext;
-	}
+    public ScoreSystemContext getSystemContext() {
+        return systemContext;
+    }
 
 	public void setContexts(Map<String, Serializable> contexts) {
 		this.contexts = contexts;

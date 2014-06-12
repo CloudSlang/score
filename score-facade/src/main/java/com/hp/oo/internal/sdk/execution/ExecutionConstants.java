@@ -18,9 +18,6 @@ public class ExecutionConstants {
     //Execution context
     public static final String EXECUTION_ID_CONTEXT = "executionIdContext";
 
-    //Execution paused
-    public static final String EXECUTION_PAUSED = "EXECUTION_PAUSED";
-
     //For Exceptions
     public static final String NO_WORKERS_IN_GROUP = "NO_WORKERS_IN_GROUP";
     public static final String EXECUTION_STEP_ERROR_KEY = "EXECUTION_STEP_ERROR_KEY";
@@ -42,7 +39,6 @@ public class ExecutionConstants {
     public static final String BRANCH_ID = "BRANCH_ID";
     public static final String BRANCH_NAME = "BRANCH_NAME";
     public static final String SPLIT_ID = "SPLIT_ID";
-
 
     public static final String FLOW_RESPONSE_TYPE = "INTERNAL_FLOW_RESPONSE_TYPE";
     public static final String FLOW_RESPONSE_NAME = "INTERNAL_FLOW_RESPONSE_NAME";
@@ -73,15 +69,13 @@ public class ExecutionConstants {
     //For sticky worker
     public static final String STICKY_MAPPING = "STICKY_MAPPING";
 
-      //For whether the current step needs to go out to the outbuffer after execution, will be reset after use !
+    //For whether the current step needs to go out to the outbuffer after execution, will be reset after use !
     // 1. going to queue means this step will be persisted to the db and therefor recoverable in case of broker failure
     // 2. will use the stay in the queue mechanism, meaning the next step will go directly to the in-buffer
     public static final String MUST_GO_TO_QUEUE = "MUST_GO_TO_QUEUE";
 
     // For whether the next step needs to go out to the queue after execution and also go-to the in-buffer.
-     public static final String USE_STAY_IN_THE_WORKER = "USE_STAY_IN_THE_WORKER";
-
-
+    public static final String USE_STAY_IN_THE_WORKER = "USE_STAY_IN_THE_WORKER";
 
     //for telling the persistMessage for recovery whether to save this message or not
     public static final String SHOULD_BE_PERSISTED_FOR_RECOVERY = "SHOULD_BE_PERSISTED_FOR_RECOVERY";

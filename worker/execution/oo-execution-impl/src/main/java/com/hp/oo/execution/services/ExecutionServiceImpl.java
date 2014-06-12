@@ -37,7 +37,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -118,7 +117,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             postExecutionSettings(execution);
 
             //If execution was  paused in afl - to avoid delay of configuration
-            if (execution.getSystemContext().containsKey(ExecutionConstants.EXECUTION_PAUSED)) {
+            if (execution.getSystemContext().isPaused()) {
                 if (!isDebuggerMode(execution.getSystemContext()) && handlePausedFlowAfterStep(execution)) {
                     return null;
                 }
@@ -356,7 +355,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 pauseService.pauseExecution(executionId, branchId, reason); // this creates a DB record for this branch, as Pending-paused
             }
         }
-        ExecutionEventFactory.createStepLogEvent(executionId,ExecutionEventUtils.increaseEvent(systemContext), ExecutionEnums.StepLogCategory.STEP_PAUSED, systemContext);
+        ExecutionEventFactory.createStepLogEvent(executionId, ExecutionEventUtils.increaseEvent(systemContext), ExecutionEnums.StepLogCategory.STEP_PAUSED, systemContext);
 
         //dump bus events here because out side is too late
         dumpBusEvents(execution);
@@ -390,7 +389,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         if (reason == null) {
             return false; //indicate that the flow was not paused
         }
-        ExecutionEventFactory.createStepLogEvent(executionId, ExecutionEventUtils.increaseEvent(systemContext),ExecutionEnums.StepLogCategory.STEP_PAUSED,systemContext);
+        ExecutionEventFactory.createStepLogEvent(executionId, ExecutionEventUtils.increaseEvent(systemContext), ExecutionEnums.StepLogCategory.STEP_PAUSED, systemContext);
 
         dumpBusEvents(execution);
 
@@ -676,7 +675,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             try {
                 createErrorEvent(execution, currStep, navEx, "Error occurred during navigation execution ", LogLevelCategory.STEP_NAV_ERROR, execution.getSystemContext());
 
-                ExecutionEventFactory.createStepLogEvent(execution.getExecutionId(),ExecutionEventUtils.increaseEvent(execution.getSystemContext()),
+                ExecutionEventFactory.createStepLogEvent(execution.getExecutionId(), ExecutionEventUtils.increaseEvent(execution.getSystemContext()),
                         ExecutionEnums.StepLogCategory.STEP_ERROR, execution.getSystemContext());
 
             } catch (RuntimeException eventEx) {
