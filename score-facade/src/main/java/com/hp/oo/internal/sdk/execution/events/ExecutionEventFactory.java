@@ -42,6 +42,7 @@ public abstract class ExecutionEventFactory {
                 ))
                 .setDebuggerMode(isDebuggerMode(systemContext));
         addEventToSysContext(executionEvent,systemContext);
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
     }
 
@@ -58,6 +59,7 @@ public abstract class ExecutionEventFactory {
                 ))
                 .setDebuggerMode(isDebuggerMode(systemContext));
 //        addEventToSysContext(executionEvent,systemContext);
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
     }
 
@@ -75,6 +77,7 @@ public abstract class ExecutionEventFactory {
                 ))
                 .setDebuggerMode(isDebuggerMode(systemContext));
         addEventToSysContext(executionEvent,systemContext);
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
     }
 
@@ -92,6 +95,7 @@ public abstract class ExecutionEventFactory {
                 ))
                 .setDebuggerMode(isDebuggerMode(systemContext));
         addEventToSysContext(executionEvent,systemContext);
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
     }
 
@@ -103,6 +107,7 @@ public abstract class ExecutionEventFactory {
                 .setData1(flowUuid)
                 .setDebuggerMode(isDebuggerMode(systemContext));
         addEventToSysContext(executionEvent,systemContext);
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
     }
 
@@ -117,6 +122,7 @@ public abstract class ExecutionEventFactory {
                 ))
                 .setDebuggerMode(isDebuggerMode(systemContext));
         addEventToSysContext(executionEvent,systemContext);
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
     }
 
@@ -134,6 +140,7 @@ public abstract class ExecutionEventFactory {
                         "branch_id", branchId))
                 .setDebuggerMode(isDebuggerMode(systemContext));
         addEventToSysContext(executionEvent,systemContext);
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
     }
 
@@ -146,6 +153,7 @@ public abstract class ExecutionEventFactory {
                 .setData1(flowUuid)
                 .setDebuggerMode(isDebuggerMode(systemContext));
         addEventToSysContext(executionEvent,systemContext);
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
     }
 
@@ -171,6 +179,7 @@ public abstract class ExecutionEventFactory {
                 )).setDebuggerMode(isDebuggerMode(systemContext));
 
         addEventToSysContext(executionEvent,systemContext);
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
     }
 
@@ -191,6 +200,7 @@ public abstract class ExecutionEventFactory {
                 ))
                 .setDebuggerMode(isDebuggerMode(systemContext));
         addEventToSysContext(executionEvent,systemContext);
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
     }
 
@@ -209,6 +219,7 @@ public abstract class ExecutionEventFactory {
                 ))
                 .setDebuggerMode(isDebuggerMode(systemContext));
         addEventToSysContext(executionEvent,systemContext);
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
     }
 
@@ -225,6 +236,7 @@ public abstract class ExecutionEventFactory {
                 ))
                 .setDebuggerMode(isDebuggerMode(systemContext));
 //        addEventToSysContext(executionEvent,systemContext);
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
     }
 
@@ -237,6 +249,7 @@ public abstract class ExecutionEventFactory {
                 .setData2(paramValue)
                 .setDebuggerMode(isDebuggerMode(systemContext));
         addEventToSysContext(executionEvent,systemContext);
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
     }
 
@@ -257,7 +270,7 @@ public abstract class ExecutionEventFactory {
                 .setDebuggerMode(isDebuggerMode(systemContext));
 
         addEventToSysContext(executionEvent, systemContext);
-
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
 
     }
@@ -296,6 +309,7 @@ public abstract class ExecutionEventFactory {
                         "key_to_locale_to_value_map", json(l10nMapAfterReferences)
                 )).setDebuggerMode(isDebuggerMode(systemContext));
         addEventToSysContext(executionEvent,systemContext);
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
     }
 
@@ -305,6 +319,7 @@ public abstract class ExecutionEventFactory {
 
         ExecutionEvent executionEvent = new ExecutionEvent(executionId, ExecutionEnums.Event.AGGREGATION_FINISHED, executionEventSequenceOrder, flowPath);
         addEventToSysContext(executionEvent,systemCtx);
+        saveEvent(executionEvent,systemCtx);
         return executionEvent;
     }
 
@@ -329,6 +344,7 @@ public abstract class ExecutionEventFactory {
                 .setData4(eventData)
                 .setDebuggerMode(isDebuggerMode(systemContext));
         addEventToSysContext(executionEvent,systemContext);
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
     }
 
@@ -352,6 +368,7 @@ public abstract class ExecutionEventFactory {
                 .setData4(json(contextMap))
                 .setDebuggerMode(isDebuggerMode(systemContext));
         addEventToSysContext(executionEvent,systemContext);
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
     }
 
@@ -371,13 +388,15 @@ public abstract class ExecutionEventFactory {
                 .setData4(json(contextMap))
                 .setDebuggerMode(isDebuggerMode(systemContext));
         addEventToSysContext(executionEvent,systemContext);
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
     }
 
     public static ExecutionEvent createBreakpointEvent(String executionId, String branchId,
                                                        String stepUuid, ExecutionEventSequenceOrder eventOrder,
                                                        LogLevelCategory logLevelCategory, Map<String, Serializable> context,
-                                                       String interruptUuid, String interruptType) {
+                                                       String interruptUuid, String interruptType,
+                                                       Map<String, Serializable> systemContext) {
         context.put("logLevelCategory", logLevelCategory.name());
         context.put("branch_id", branchId);
         context.put("debugInterruptUuid", interruptUuid);
@@ -398,6 +417,7 @@ public abstract class ExecutionEventFactory {
                 .setData4(eventDataAsString)
                 .setDebuggerMode(isDebuggerMode(context));
         addEventToSysContext(executionEvent,context);
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
 
     }
@@ -433,6 +453,7 @@ public abstract class ExecutionEventFactory {
                 .setData4(eventDataAsString)
                 .setDebuggerMode(isDebuggerMode(systemContext));
         addEventToSysContext(executionEvent,systemContext);
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
 
     }
@@ -447,17 +468,18 @@ public abstract class ExecutionEventFactory {
                 .setData2(roi)
                 .setDebuggerMode(isDebuggerMode(systemCtx));
         addEventToSysContext(executionEvent,systemCtx);
+        saveEvent(executionEvent,systemCtx);
         return executionEvent;
     }
 
 
     @SuppressWarnings("UnusedDeclaration")
     public static ExecutionEvent createDebuggerEvent(String executionId, String stepUuid, ExecutionEventSequenceOrder eventOrder,
-                                                     LogLevelCategory logLevelCategory, Map<String, Serializable> context) {
+                                                     LogLevelCategory logLevelCategory, Map<String, Serializable> context,
+                                                     Map<String, Serializable> systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = eventOrder.getFlowPath().toString();
-        return createDebuggerEvent(executionId, stepUuid, eventOrder, flowPath, logLevelCategory, context);
-
+        return  createDebuggerEvent(executionId, stepUuid, eventOrder, flowPath, logLevelCategory, context, systemContext);
     }
 
     public static ExecutionEvent createDebuggerErrorEvent(String executionId, String stepUuid, String logMessage, LogLevel logLevel,
@@ -489,11 +511,13 @@ public abstract class ExecutionEventFactory {
                 .setData4(eventDataAsString)
                 .setDebuggerMode(isDebuggerMode(systemContext));
         addEventToSysContext(executionEvent,systemContext);
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
     }
 
     public static ExecutionEvent createDebuggerEvent(String executionId, String stepUuid, ExecutionEventSequenceOrder eventOrder,
-                                                     String path, LogLevelCategory logLevelCategory, Map<String, Serializable> context) {
+                                                     String path, LogLevelCategory logLevelCategory,
+                                                     Map<String, Serializable> context,Map<String, Serializable> systemContext) {
         context.put("logLevelCategory", logLevelCategory.name());
         String eventDataAsString;
         try {
@@ -504,13 +528,14 @@ public abstract class ExecutionEventFactory {
 
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = path != null ? path : eventOrder.getFlowPath().toString();
-
-        return new ExecutionEvent(executionId, ExecutionEnums.Event.DEBUGGER, executionEventSequenceOrder, flowPath)
+        ExecutionEvent event  = new ExecutionEvent(executionId, ExecutionEnums.Event.DEBUGGER, executionEventSequenceOrder, flowPath)
                 .setData1(stepUuid)
                 .setData2(logLevelCategory.name())
                 .setData3((long) LogLevel.DEBUG.ordinal())
                 .setData4(eventDataAsString)
                 .setDebuggerMode(isDebuggerMode(context));
+        saveEvent(event,systemContext);
+        return event;
     }
 
     private static String json(Map map) {

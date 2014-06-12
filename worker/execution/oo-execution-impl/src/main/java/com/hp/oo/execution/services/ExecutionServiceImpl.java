@@ -501,31 +501,13 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     private void dumpEvents(Execution execution) {
         List<ExecutionEvent> executionEvents = execution.getAggregatedEvents();
-        for (ExecutionEvent executionEvent:executionEvents){
-            eventBus.dispatch(new EventWrapper(executionEvent.getType().name(), executionEvent));
-        }
 
-        List<ExecutionEvent> filteredExecutionEvents = new ArrayList<>(); //TODO : remove this filtering...
-        for (ExecutionEvent executionEvent : executionEvents){
-            if(executionEvent.getType().equals(ExecutionEnums.Event.STEP_LOG)){
-                logger.error("no step log events should get here! :"+executionEvent.getStepLogCategory().name());
-                //continue;
-            }
-            filteredExecutionEvents.add(executionEvent);
-        }
         if(eventsPersistencyOn || isDebuggerMode(execution.getSystemContext())){ //consider flag events and debugger before sending events
-            executionEventService.createEvents(filteredExecutionEvents);
+            executionEventService.createEvents(executionEvents);
         }
         execution.getAggregatedEvents().clear(); //must clean so we wont send it twice - once from here and once from the QueueListener onTerminated()
         execution.setLastEventDumpTime(System.currentTimeMillis());
     }
-
-//    private void dumpEvents(Execution execution) {
-//        List<ExecutionEvent> executionEvents = execution.getAggregatedEvents();
-//        executionEventService.createEvents(executionEvents);
-//        execution.getAggregatedEvents().clear(); //must clean so we wont send it twice - once from here and once from the QueueListener onTerminated()
-//        execution.setLastEventDumpTime(System.currentTimeMillis());
-//    }
 
     private void dumpBusEvents(Execution execution) {
         @SuppressWarnings("unchecked") ArrayDeque<EventWrapper> eventsQueue = (ArrayDeque) execution.getSystemContext().get(ExecutionConstants.SCORE_EVENTS_QUEUE);
