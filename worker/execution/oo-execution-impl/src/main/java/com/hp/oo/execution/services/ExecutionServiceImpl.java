@@ -466,7 +466,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
         // timeout trigger
         //noinspection ConstantConditions
-        if (isDebuggerMode(execution.getSystemContext())) {
+        if ( isDebuggerMode(execution.getSystemContext())) {
             shouldDump |= currTime - execution.getLastEventDumpTime() >= ExecutionConstants.EVENT_AGGREGATION_DEBUGGER_TIME_THRESHOLD;
         } else {
             shouldDump |= (execution.getLastEventDumpTime() != 0) &&
