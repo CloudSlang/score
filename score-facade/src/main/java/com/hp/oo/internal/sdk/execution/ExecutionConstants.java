@@ -85,6 +85,7 @@ public class ExecutionConstants {
 
     // timeout for event dump
     public static final long EVENT_AGGREGATION_TIME_THRESHOLD = 2 * 60 * 1000;
+    public static final long EVENT_AGGREGATION_DEBUGGER_TIME_THRESHOLD = 750;
 
     public static final String FLOW_TERMINATION_TYPE = "FLOW_TERMINATION_TYPE";
 

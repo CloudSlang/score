@@ -466,8 +466,12 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
         // timeout trigger
         //noinspection ConstantConditions
-        shouldDump |= (execution.getLastEventDumpTime() != 0) &&
-                (currTime - execution.getLastEventDumpTime() >= ExecutionConstants.EVENT_AGGREGATION_TIME_THRESHOLD);
+        if (isDebuggerMode(execution.getSystemContext())) {
+            shouldDump |= currTime - execution.getLastEventDumpTime() >= ExecutionConstants.EVENT_AGGREGATION_DEBUGGER_TIME_THRESHOLD;
+        } else {
+            shouldDump |= (execution.getLastEventDumpTime() != 0) &&
+                    (currTime - execution.getLastEventDumpTime() >= ExecutionConstants.EVENT_AGGREGATION_TIME_THRESHOLD);
+        }
 
         // amount trigger
         shouldDump |= execution.getAggregatedEvents().size() >= ExecutionConstants.EVENT_AGGREGATION_AMOUNT_THRESHOLD;
