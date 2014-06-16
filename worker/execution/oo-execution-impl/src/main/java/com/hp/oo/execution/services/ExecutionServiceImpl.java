@@ -60,9 +60,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
     private WorkerDbSupportService workerDbSupportService;
 
     @Autowired
-    private EventGateway eventGateway;
-
-    @Autowired
     private WorkerConfigurationService configurationService;
 
     @Autowired
@@ -608,8 +605,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
             try {
                 createErrorEvent(execution, currStep, ex, "Error occurred during operation execution", LogLevelCategory.STEP_OPER_ERROR, execution.getSystemContext());
-                @SuppressWarnings("unchecked") Deque<ExecutionEvent> eventsQueue = (Deque<ExecutionEvent>) execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
-
             } catch (RuntimeException eventEx) {
                 logger.error("Failed to create event: ", eventEx);
             }
@@ -618,6 +613,16 @@ public final class ExecutionServiceImpl implements ExecutionService {
         }
     }
 
+
+    private void createNavErrorEvent(Execution execution, ExecutionStep currStep, RuntimeException ex, String logMessage,
+                                     LogLevelCategory logLevelCategory, Map<String, Serializable> systemContext) {
+        Map<String, Serializable> eventData = new HashMap<>(systemContext);
+        eventData.put("error_message",ex.getMessage()); //TODO - change to const
+        eventData.put("logMessage",logMessage);  //TODO - change to const
+        eventData.put("logLevelCategory",logLevelCategory.getCategoryName()); //TODO - change to const
+        EventWrapper eventWrapper = new EventWrapper(ExecutionConstants.SCORE_ERROR_EVENT,eventData);
+        eventBus.dispatch(eventWrapper);
+    }
 
     private ExecutionEvent createErrorEvent(Execution execution, ExecutionStep currStep, RuntimeException ex, String logMessage, LogLevelCategory logLevelCategory, Map<String, Serializable> systemContext) {
         Map<String, String> map = new HashMap<>();
@@ -638,6 +643,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
         return null;
     }
+
     protected void navigate(Execution execution, ExecutionStep currStep) {
         Long position;
         try {
@@ -659,11 +665,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             execution.setPosition(null); //this ends the flow!!!
 
             try {
-                createErrorEvent(execution, currStep, navEx, "Error occurred during navigation execution ", LogLevelCategory.STEP_NAV_ERROR, execution.getSystemContext());
-
-                ExecutionEventFactory.createStepLogEvent(execution.getExecutionId(), ExecutionEventUtils.increaseEvent(execution.getSystemContext()),
-                        ExecutionEnums.StepLogCategory.STEP_ERROR, execution.getSystemContext());
-
+                createNavErrorEvent(execution, currStep, navEx, "Error occurred during navigation execution ", LogLevelCategory.STEP_NAV_ERROR, execution.getSystemContext());
             } catch (RuntimeException eventEx) {
                 logger.error("Failed to create event: ", eventEx);
             }
