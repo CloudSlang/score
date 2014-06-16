@@ -614,7 +614,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
 
-    private void createNavErrorEvent(Execution execution, ExecutionStep currStep, RuntimeException ex, String logMessage,
+    private void createNavErrorEvent(RuntimeException ex, String logMessage,
                                      LogLevelCategory logLevelCategory, Map<String, Serializable> systemContext) {
         Map<String, Serializable> eventData = new HashMap<>(systemContext);
         eventData.put("error_message",ex.getMessage()); //TODO - change to const
@@ -665,7 +665,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             execution.setPosition(null); //this ends the flow!!!
 
             try {
-                createNavErrorEvent(execution, currStep, navEx, "Error occurred during navigation execution ", LogLevelCategory.STEP_NAV_ERROR, execution.getSystemContext());
+                createNavErrorEvent(navEx, "Error occurred during navigation execution ", LogLevelCategory.STEP_NAV_ERROR, execution.getSystemContext());
             } catch (RuntimeException eventEx) {
                 logger.error("Failed to create event: ", eventEx);
             }
