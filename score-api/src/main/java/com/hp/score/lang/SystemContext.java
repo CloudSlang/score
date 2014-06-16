@@ -11,14 +11,14 @@ import java.util.Set;
  * Date: 10/06/2014
  */
 @Deprecated
-public class ScoreSystemContext extends ScoreRuntimeServices implements Map<String, Serializable> {
+public class SystemContext extends ExecutionRuntimeServices implements Map<String, Serializable> {
 
     private static final long serialVersionUID = -2882205533540314198L;
 
-    public ScoreSystemContext() {
+    public SystemContext() {
     }
 
-    public ScoreSystemContext(Map<? extends String, ? extends Serializable> map) {
+    public SystemContext(Map<? extends String, ? extends Serializable> map) {
         this.myMap = new HashMap<>(map);
     }
 

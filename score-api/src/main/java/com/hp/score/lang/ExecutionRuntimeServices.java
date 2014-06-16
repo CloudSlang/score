@@ -8,7 +8,7 @@ import java.util.Map;
  * User: maromg
  * Date: 11/06/2014
  */
-public class ScoreRuntimeServices implements Serializable {
+public class ExecutionRuntimeServices implements Serializable {
 
     private static final long serialVersionUID = 2557429503280678353L;
 

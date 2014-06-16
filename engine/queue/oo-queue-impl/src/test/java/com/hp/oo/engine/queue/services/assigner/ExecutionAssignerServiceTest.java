@@ -9,7 +9,7 @@ import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.engine.queue.entities.Payload;
 import com.hp.oo.engine.queue.services.ExecutionQueueService;
 import com.hp.oo.internal.sdk.execution.Execution;
-import com.hp.score.lang.ScoreSystemContext;
+import com.hp.score.lang.SystemContext;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,62 +36,62 @@ import static org.mockito.Matchers.any;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 public class ExecutionAssignerServiceTest {
-	@Autowired
-	private ExecutionAssignerService executionAssignerService;
+    @Autowired
+    private ExecutionAssignerService executionAssignerService;
 
-	@Autowired
-	private WorkerNodeService workerNodeService;
+    @Autowired
+    private WorkerNodeService workerNodeService;
 
-	@Autowired
-	ExecutionQueueService executionQueueService;
+    @Autowired
+    ExecutionQueueService executionQueueService;
 
     @Autowired
     private ExecutionMessageConverter executionMessageConverter;
 
-	@Test
-	public void assign() throws Exception {
+    @Test
+    public void assign() throws Exception {
 
-		Multimap<String,String> groupWorkersMap = ArrayListMultimap.create();
-		groupWorkersMap.put("DefaultGroup","worker1");
-		groupWorkersMap.put("DefaultGroup","worker2");
+        Multimap<String, String> groupWorkersMap = ArrayListMultimap.create();
+        groupWorkersMap.put("DefaultGroup", "worker1");
+        groupWorkersMap.put("DefaultGroup", "worker2");
 
-		List<ExecutionMessage> assignMessages = new ArrayList<>();
-		ExecutionMessage msg1 = new ExecutionMessage(1,ExecutionMessage.EMPTY_WORKER,"DefaultGroup","msg1",ExecStatus.PENDING,null,0,new Date(0));
-		ExecutionMessage msg2 = new ExecutionMessage(2,ExecutionMessage.EMPTY_WORKER,"DefaultGroup","msg2",ExecStatus.PENDING,null,0,new Date(0));
-		assignMessages.add(msg1);
-		assignMessages.add(msg2);
+        List<ExecutionMessage> assignMessages = new ArrayList<>();
+        ExecutionMessage msg1 = new ExecutionMessage(1, ExecutionMessage.EMPTY_WORKER, "DefaultGroup", "msg1", ExecStatus.PENDING, null, 0, new Date(0));
+        ExecutionMessage msg2 = new ExecutionMessage(2, ExecutionMessage.EMPTY_WORKER, "DefaultGroup", "msg2", ExecStatus.PENDING, null, 0, new Date(0));
+        assignMessages.add(msg1);
+        assignMessages.add(msg2);
 
-		Mockito.reset(executionQueueService);
-		Mockito.reset(workerNodeService);
-		Mockito.when(workerNodeService.readGroupWorkersMapActiveAndRunning()).thenReturn(groupWorkersMap);
+        Mockito.reset(executionQueueService);
+        Mockito.reset(workerNodeService);
+        Mockito.when(workerNodeService.readGroupWorkersMapActiveAndRunning()).thenReturn(groupWorkersMap);
 
-		final List<ExecutionMessage> messagesInQ = executionAssignerService.assignWorkers(assignMessages);
+        final List<ExecutionMessage> messagesInQ = executionAssignerService.assignWorkers(assignMessages);
 
-		Assert.assertEquals(2, messagesInQ.size());
-		for(ExecutionMessage msg:messagesInQ){
-			Assert.assertEquals(ExecStatus.ASSIGNED.getNumber(),msg.getStatus().getNumber());
-			Assert.assertEquals(1,msg.getMsgSeqId());
-			Assert.assertTrue(msg.getWorkerId().equals("worker1") || msg.getWorkerId().equals("worker2"));
-		}
+        Assert.assertEquals(2, messagesInQ.size());
+        for (ExecutionMessage msg : messagesInQ) {
+            Assert.assertEquals(ExecStatus.ASSIGNED.getNumber(), msg.getStatus().getNumber());
+            Assert.assertEquals(1, msg.getMsgSeqId());
+            Assert.assertTrue(msg.getWorkerId().equals("worker1") || msg.getWorkerId().equals("worker2"));
+        }
 
-	}
+    }
 
     @Test
     public void assignWhenHaveNoWorkers() throws Exception {
 
-        Multimap<String,String> groupWorkersMap = ArrayListMultimap.create();
-        groupWorkersMap.put("DefaultGroup","worker1");
-        groupWorkersMap.put("DefaultGroup","worker2");
+        Multimap<String, String> groupWorkersMap = ArrayListMultimap.create();
+        groupWorkersMap.put("DefaultGroup", "worker1");
+        groupWorkersMap.put("DefaultGroup", "worker2");
 
         List<ExecutionMessage> assignMessages = new ArrayList<>();
-        ExecutionMessage msg1 = new ExecutionMessage(1,ExecutionMessage.EMPTY_WORKER,"GroupX","msg1",ExecStatus.PENDING,null,0,new Date(0));
+        ExecutionMessage msg1 = new ExecutionMessage(1, ExecutionMessage.EMPTY_WORKER, "GroupX", "msg1", ExecStatus.PENDING, null, 0, new Date(0));
         assignMessages.add(msg1);
 
         Mockito.reset(executionQueueService);
         Mockito.reset(workerNodeService);
         Mockito.when(workerNodeService.readGroupWorkersMapActiveAndRunning()).thenReturn(groupWorkersMap);
         Execution execution = Mockito.mock(Execution.class);
-        Mockito.when(execution.getSystemContext()).thenReturn(new ScoreSystemContext());
+        Mockito.when(execution.getSystemContext()).thenReturn(new SystemContext());
         Mockito.when(executionMessageConverter.extractExecution(any(Payload.class))).thenReturn(execution);
 
         final List<ExecutionMessage> messagesInQ = executionAssignerService.assignWorkers(assignMessages);
@@ -99,44 +99,44 @@ public class ExecutionAssignerServiceTest {
         Assert.assertEquals(2, messagesInQ.size());
 
         ExecutionMessage finishMsg = messagesInQ.get(0);
-        Assert.assertEquals(ExecStatus.FINISHED.getNumber(),finishMsg.getStatus().getNumber());
-        Assert.assertEquals(1,finishMsg.getMsgSeqId());
+        Assert.assertEquals(ExecStatus.FINISHED.getNumber(), finishMsg.getStatus().getNumber());
+        Assert.assertEquals(1, finishMsg.getMsgSeqId());
         Assert.assertEquals("EMPTY", finishMsg.getWorkerId());
 
         ExecutionMessage FailedMsg = messagesInQ.get(1);
-        Assert.assertEquals(ExecStatus.FAILED.getNumber(),FailedMsg.getStatus().getNumber());
-        Assert.assertEquals(2,FailedMsg.getMsgSeqId());
+        Assert.assertEquals(ExecStatus.FAILED.getNumber(), FailedMsg.getStatus().getNumber());
+        Assert.assertEquals(2, FailedMsg.getMsgSeqId());
         Assert.assertEquals("EMPTY", FailedMsg.getWorkerId());
     }
 
-	@Configuration
-    static class Configurator{
-
-		@Bean
-		public ExecutionAssignerService executionAssignerService(){
-			return new ExecutionAssignerServiceImpl();
-		}
-
-		@Bean
-		public WorkerNodeService workerNodeService(){
-			return Mockito.mock(WorkerNodeService.class);
-		}
-
-		@Bean
-		public ExecutionQueueService executionQueueService() {
-			return Mockito.mock(ExecutionQueueService.class);
-		}
+    @Configuration
+    static class Configurator {
 
         @Bean
-        public ExecutionMessageConverter executionMessageConverter(){
+        public ExecutionAssignerService executionAssignerService() {
+            return new ExecutionAssignerServiceImpl();
+        }
+
+        @Bean
+        public WorkerNodeService workerNodeService() {
+            return Mockito.mock(WorkerNodeService.class);
+        }
+
+        @Bean
+        public ExecutionQueueService executionQueueService() {
+            return Mockito.mock(ExecutionQueueService.class);
+        }
+
+        @Bean
+        public ExecutionMessageConverter executionMessageConverter() {
             return Mockito.mock(ExecutionMessageConverter.class);
         }
 
-		@Bean
-		public TransactionTemplate transactionTemplate(){
-			TransactionTemplate bean =  new TransactionTemplate();
-			bean.setTransactionManager(Mockito.mock(PlatformTransactionManager.class));
-			return bean;
-		}
+        @Bean
+        public TransactionTemplate transactionTemplate() {
+            TransactionTemplate bean = new TransactionTemplate();
+            bean.setTransactionManager(Mockito.mock(PlatformTransactionManager.class));
+            return bean;
+        }
     }
 }
