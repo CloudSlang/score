@@ -1,6 +1,7 @@
 package com.hp.score;
 
-import com.hp.oo.internal.sdk.execution.ExecutionPlan;
+import com.hp.score.api.ExecutionPlan;
+import com.hp.score.api.Score;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;

@@ -1,6 +1,6 @@
 package com.hp.oo.broker.entities;
 
-import com.hp.oo.internal.sdk.execution.ExecutionPlan;
+import com.hp.score.api.ExecutionPlan;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedInputStream;
@@ -25,6 +25,7 @@ public class ExecutionPlanCompressUtil {
     /**
      * Gets byte[] that contains serialized object ExecutionPlan + zipped
      * and creates ExecutionPlan from it
+     *
      * @param bytes - compressed serialized object of ExecutionPlan
      * @return ExecutionPlan
      */
@@ -34,13 +35,12 @@ public class ExecutionPlanCompressUtil {
              BufferedInputStream bis = new BufferedInputStream(is);
              GZIPInputStream gis = new GZIPInputStream(bis);
              BufferedInputStream bis_2 = new BufferedInputStream(gis);
-             ObjectInputStream ois =  new ObjectInputStream(bis_2);
-             ){
+             ObjectInputStream ois = new ObjectInputStream(bis_2);
+        ) {
 
             return (ExecutionPlan) ois.readObject();
 
-        }
-        catch(IOException | ClassNotFoundException ex) {
+        } catch (IOException | ClassNotFoundException ex) {
             logger.error("Failed to read execution plan from byte[]. Error: ", ex);
             throw new RuntimeException("Failed to read execution plan from byte[]. Error: ", ex);
         }
@@ -69,7 +69,7 @@ public class ExecutionPlanCompressUtil {
 
     }
 
-    public static byte[] getBytesFromExecutionPlan(ExecutionPlan executionPlan){
+    public static byte[] getBytesFromExecutionPlan(ExecutionPlan executionPlan) {
         ObjectOutputStream oos = null;
         try {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -84,8 +84,7 @@ public class ExecutionPlanCompressUtil {
             @SuppressWarnings({"UnnecessaryLocalVariable"})
             byte[] bytes = bout.toByteArray();
             return bytes;
-        }
-        catch(IOException ex) {
+        } catch (IOException ex) {
             logger.error("Failed to serialize execution plan. Error: ", ex);
             throw new RuntimeException("Failed to serialize execution plan. Error: ", ex);
         }

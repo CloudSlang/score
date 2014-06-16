@@ -1,4 +1,4 @@
-package com.hp.oo.internal.sdk.execution;
+package com.hp.score.api;
 
 import java.io.Serializable;
 
@@ -42,18 +42,22 @@ public class ControlActionMetadata implements Serializable {
     @Override
     public String toString() {
         return "ControlActionMetadata: " +
-                "className= " + className +  " ,  methodName = " + methodName;
+                "className= " + className + " ,  methodName = " + methodName;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         ControlActionMetadata that = (ControlActionMetadata) o;
 
-        if (className != null ? !className.equals(that.className) : that.className != null) return false;
-        if (methodName != null ? !methodName.equals(that.methodName) : that.methodName != null) return false;
+        if (className != null ? !className.equals(that.className) : that.className != null)
+            return false;
+        if (methodName != null ? !methodName.equals(that.methodName) : that.methodName != null)
+            return false;
 
         return true;
     }

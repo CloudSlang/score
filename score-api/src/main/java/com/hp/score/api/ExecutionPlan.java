@@ -1,4 +1,4 @@
-package com.hp.oo.internal.sdk.execution;
+package com.hp.score.api;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -31,7 +31,7 @@ public class ExecutionPlan implements Serializable {
     //Holds the list of it's direct subflows UUIDs
     protected Set<String> subflowsUUIDs = new HashSet<>();
 
-    protected Map<String,ExecutionPlan> dependencies = new HashMap<>();
+    protected Map<String, ExecutionPlan> dependencies = new HashMap<>();
 
     public Set<String> getSubflowsUUIDs() {
         return subflowsUUIDs;
@@ -125,11 +125,11 @@ public class ExecutionPlan implements Serializable {
     public boolean equals(Object o) {
         EqualsBuilder equalsBuilder = new EqualsBuilder();
 
-        if(!(o instanceof ExecutionPlan)){
+        if (!(o instanceof ExecutionPlan)) {
             return false;
         }
 
-        ExecutionPlan other = (ExecutionPlan)o;
+        ExecutionPlan other = (ExecutionPlan) o;
 
         equalsBuilder.append(this.getFlowUuid(), other.getFlowUuid());
         equalsBuilder.append(this.getBeginStep(), other.getBeginStep());
@@ -137,7 +137,7 @@ public class ExecutionPlan implements Serializable {
         equalsBuilder.append(this.getLanguage(), other.getLanguage());
         equalsBuilder.append(this.getSubflowsUUIDs(), other.getSubflowsUUIDs());
         equalsBuilder.append(this.getSteps(), other.getSteps());
-        equalsBuilder.append(this.getDependencies(),other.getDependencies());
+        equalsBuilder.append(this.getDependencies(), other.getDependencies());
 
         return equalsBuilder.isEquals();
     }

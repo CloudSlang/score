@@ -1,9 +1,10 @@
 package com.hp.oo.orchestrator.services;
 
 import com.hp.oo.broker.entities.RunningExecutionPlan;
-import com.hp.oo.internal.sdk.execution.ExecutionPlan;
+import com.hp.score.api.ExecutionPlan;
 import com.hp.oo.orchestrator.repositories.RunningExecutionPlanRepository;
-import com.hp.oo.broker.services.RunningExecutionPlanService;import org.apache.commons.lang.StringUtils;
+import com.hp.oo.broker.services.RunningExecutionPlanService;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -25,14 +26,15 @@ public final class RunningExecutionPlanServiceImpl implements RunningExecutionPl
     @Autowired
     private RunningExecutionPlanRepository runningExecutionPlanRepository;
 
-	@Override
-	@Transactional
-	public RunningExecutionPlan createRunningExecutionPlan(RunningExecutionPlan runningExecutionPlan) {
-		if (runningExecutionPlan == null) throw new IllegalArgumentException("Running execution plan is null");
-		return runningExecutionPlanRepository.save(runningExecutionPlan);
-	}
+    @Override
+    @Transactional
+    public RunningExecutionPlan createRunningExecutionPlan(RunningExecutionPlan runningExecutionPlan) {
+        if (runningExecutionPlan == null)
+            throw new IllegalArgumentException("Running execution plan is null");
+        return runningExecutionPlanRepository.save(runningExecutionPlan);
+    }
 
-	@Override
+    @Override
     @Transactional(readOnly = true)
     public RunningExecutionPlan readExecutionPlanById(Long id) {
         return runningExecutionPlanRepository.findOne(id);
@@ -40,7 +42,7 @@ public final class RunningExecutionPlanServiceImpl implements RunningExecutionPl
 
     @Override
     @Transactional
-    public Long saveExecutionPlan(RunningExecutionPlan runningExecutionPlan){
+    public Long saveExecutionPlan(RunningExecutionPlan runningExecutionPlan) {
         runningExecutionPlanRepository.save(runningExecutionPlan);
         return runningExecutionPlan.getId();
     }
@@ -51,12 +53,13 @@ public final class RunningExecutionPlanServiceImpl implements RunningExecutionPl
         return runningExecutionPlanRepository.getZippedExecutionPlan(id);
     }
 
-	@Override
-	@Transactional
-	public List<RunningExecutionPlan> readByFlowId(String flowUuid) {
-		if (StringUtils.isEmpty(flowUuid)) throw new IllegalArgumentException("Flow UUID is null or empty");
-		return runningExecutionPlanRepository.findByUuidCached(flowUuid);
-	}
+    @Override
+    @Transactional
+    public List<RunningExecutionPlan> readByFlowId(String flowUuid) {
+        if (StringUtils.isEmpty(flowUuid))
+            throw new IllegalArgumentException("Flow UUID is null or empty");
+        return runningExecutionPlanRepository.findByUuidCached(flowUuid);
+    }
 
     @Override
     @Transactional

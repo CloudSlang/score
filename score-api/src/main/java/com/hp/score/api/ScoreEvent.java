@@ -1,4 +1,4 @@
-package com.hp.score;
+package com.hp.score.api;
 
 import java.io.Serializable;
 

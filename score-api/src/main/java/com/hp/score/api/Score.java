@@ -1,6 +1,4 @@
-package com.hp.score;
-
-import com.hp.oo.internal.sdk.execution.ExecutionPlan;
+package com.hp.score.api;
 
 import java.io.Serializable;
 import java.util.Map;

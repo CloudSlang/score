@@ -1,6 +1,6 @@
 package com.hp.oo.broker.entities;
 
-import com.hp.oo.internal.sdk.execution.ExecutionPlan;
+import com.hp.score.api.ExecutionPlan;
 import com.hp.score.engine.data.AbstractIdentifiable;
 import org.apache.commons.lang.SerializationUtils;
 import org.hibernate.annotations.Cache;
@@ -37,7 +37,6 @@ public class RunningExecutionPlan extends AbstractIdentifiable {
     @Column(name = "UUID", nullable = false)
     private String flowUUID;
 
-
     public byte[] getExecutionPlanZipped() {
         return executionPlanZipped;
     }
@@ -47,7 +46,7 @@ public class RunningExecutionPlan extends AbstractIdentifiable {
     }
 
     public ExecutionPlan getExecutionPlan() {
-        if(executionPlan == null){
+        if (executionPlan == null) {
             executionPlan = ExecutionPlanCompressUtil.getExecutionPlanFromBytes(executionPlanZipped);
         }
         return executionPlan;
@@ -55,7 +54,7 @@ public class RunningExecutionPlan extends AbstractIdentifiable {
 
     public void setExecutionPlan(ExecutionPlan executionPlan) {
 
-        this.executionPlan = (ExecutionPlan)SerializationUtils.clone(executionPlan);
+        this.executionPlan = (ExecutionPlan) SerializationUtils.clone(executionPlan);
         this.executionPlan.setDependencies(null); //not needed for the RunningExecutionPlan
         executionPlanZipped = ExecutionPlanCompressUtil.getBytesFromExecutionPlan(executionPlan);
     }
@@ -70,12 +69,15 @@ public class RunningExecutionPlan extends AbstractIdentifiable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         RunningExecutionPlan that = (RunningExecutionPlan) o;
 
-        if (id != null ? !id.equals(that.id) : that.id != null) return false;
+        if (id != null ? !id.equals(that.id) : that.id != null)
+            return false;
 
         return true;
     }
@@ -86,7 +88,7 @@ public class RunningExecutionPlan extends AbstractIdentifiable {
     }
 
     //done for manual creation of the object
-    public void setId(Long id){
+    public void setId(Long id) {
         this.id = id;
     }
 }

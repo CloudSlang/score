@@ -1,7 +1,7 @@
 package com.hp.oo.broker.services;
 
 import com.hp.oo.broker.entities.RunningExecutionPlan;
-import com.hp.oo.internal.sdk.execution.ExecutionPlan;
+import com.hp.score.api.ExecutionPlan;
 
 import java.util.List;
 
@@ -12,10 +12,15 @@ import java.util.List;
  * Time: 10:54 AM
  */
 public interface RunningExecutionPlanService {
-	RunningExecutionPlan createRunningExecutionPlan(RunningExecutionPlan runningExecutionPlan);
-	RunningExecutionPlan readExecutionPlanById(Long id);
-	Long saveExecutionPlan(RunningExecutionPlan runningExecutionPlan);
-	byte[] getZippedExecutionPlan(Long id);
-	List<RunningExecutionPlan> readByFlowId(String flowId);
+    RunningExecutionPlan createRunningExecutionPlan(RunningExecutionPlan runningExecutionPlan);
+
+    RunningExecutionPlan readExecutionPlanById(Long id);
+
+    Long saveExecutionPlan(RunningExecutionPlan runningExecutionPlan);
+
+    byte[] getZippedExecutionPlan(Long id);
+
+    List<RunningExecutionPlan> readByFlowId(String flowId);
+
     Long getOrCreateRunningExecutionPlan(ExecutionPlan executionPlan);
 }

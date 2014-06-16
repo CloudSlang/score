@@ -2,7 +2,7 @@ package com.hp.oo.orchestrator.services;
 
 import com.hp.oo.enginefacade.execution.ExecutionEnums;
 import com.hp.oo.internal.sdk.execution.Execution;
-import com.hp.oo.internal.sdk.execution.ExecutionPlan;
+import com.hp.score.api.ExecutionPlan;
 
 import java.util.List;
 import java.util.Map;

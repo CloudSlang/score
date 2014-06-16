@@ -9,7 +9,7 @@ import com.hp.oo.engine.queue.entities.Payload;
 import com.hp.oo.engine.queue.services.QueueDispatcherService;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
-import com.hp.oo.internal.sdk.execution.ExecutionPlan;
+import com.hp.score.api.ExecutionPlan;
 import com.hp.score.engine.data.IdentityGenerator;
 import com.hp.score.lang.ScoreSystemContext;
 import com.hp.score.services.ExecutionStateService;

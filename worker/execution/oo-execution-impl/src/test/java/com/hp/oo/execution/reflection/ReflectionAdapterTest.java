@@ -1,6 +1,6 @@
 package com.hp.oo.execution.reflection;
 
-import com.hp.oo.internal.sdk.execution.ControlActionMetadata;
+import com.hp.score.api.ControlActionMetadata;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,31 +22,29 @@ import java.util.Map;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 public class ReflectionAdapterTest {
-     private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(getClass().getName());
+    private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(getClass().getName());
 
-   @Autowired
-   ReflectionAdapter adapter;
+    @Autowired
+    ReflectionAdapter adapter;
 
     @Test
-    public void executeControlActionTest(){
+    public void executeControlActionTest() {
         ControlActionMetadata metadata = new ControlActionMetadata("com.hp.oo.execution.reflection.ReflectionAdapterTestHelper", "myMethod_1");
 
         Map<String, Object> map = new HashMap<>();
 
         map.put("parameter_1", "TEST");
         map.put("parameter_2", 3);
-        try{
+        try {
             adapter.executeControlAction(metadata, map);
-        }
-        catch (Exception ex){
+        } catch (Exception ex) {
             logger.error("Failed to run method in reflectionAdapter..." + ex.getMessage());
             Assert.fail();
         }
     }
 
-
     @Test
-    public void executeControlActionTest_2()  {
+    public void executeControlActionTest_2() {
         ControlActionMetadata metadata = new ControlActionMetadata("com.hp.oo.execution.reflection.ReflectionAdapterTestHelper", "myMethod_2");
 
         Map<String, Object> map = new HashMap<>();
@@ -54,21 +52,21 @@ public class ReflectionAdapterTest {
         map.put("parameter_1", 5);
         map.put("parameter_2", 3);
 
-        Integer result =  (Integer) adapter.executeControlAction(metadata, map);
+        Integer result = (Integer) adapter.executeControlAction(metadata, map);
 
-        Assert.assertEquals(8, (int)result);
+        Assert.assertEquals(8, (int) result);
     }
 
-	@Configuration
-	static class Context{
-		@Bean
-		ReflectionAdapter reflectionAdapter(){
-			return new ReflectionAdapterImpl();
-		}
+    @Configuration
+    static class Context {
+        @Bean
+        ReflectionAdapter reflectionAdapter() {
+            return new ReflectionAdapterImpl();
+        }
 
-		@Bean
-		ReflectionAdapterTestHelper reflectionAdapterTestHelper(){
-			return new ReflectionAdapterTestHelper();
-		}
-	}
+        @Bean
+        ReflectionAdapterTestHelper reflectionAdapterTestHelper() {
+            return new ReflectionAdapterTestHelper();
+        }
+    }
 }

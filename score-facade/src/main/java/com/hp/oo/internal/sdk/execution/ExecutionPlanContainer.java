@@ -1,5 +1,6 @@
 package com.hp.oo.internal.sdk.execution;
 
+import com.hp.score.api.ExecutionPlan;
 
 import java.io.Serializable;
 import java.util.List;
@@ -18,7 +19,8 @@ public class ExecutionPlanContainer implements Serializable {
 
     private List<FlowInput> flowInputs;
 
-    public ExecutionPlanContainer() {}
+    public ExecutionPlanContainer() {
+    }
 
     public ExecutionPlan getExecutionPlan() {
         return executionPlan;

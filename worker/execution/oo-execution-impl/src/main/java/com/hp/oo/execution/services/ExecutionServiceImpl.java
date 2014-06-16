@@ -18,7 +18,7 @@ import com.hp.oo.execution.reflection.ReflectionAdapter;
 import com.hp.oo.execution.services.dbsupport.WorkerDbSupportService;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
-import com.hp.oo.internal.sdk.execution.ExecutionStep;
+import com.hp.score.api.ExecutionStep;
 import com.hp.oo.internal.sdk.execution.OOContext;
 import com.hp.oo.internal.sdk.execution.events.EventBus;
 import com.hp.oo.internal.sdk.execution.events.EventWrapper;

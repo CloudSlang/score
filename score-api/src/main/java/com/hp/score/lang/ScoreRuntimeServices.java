@@ -16,9 +16,6 @@ public class ScoreRuntimeServices implements Serializable {
 
     protected Map<String, Serializable> myMap = new HashMap<>();
 
-    public ScoreRuntimeServices() {
-    }
-
     public void pause() {
         myMap.put(EXECUTION_PAUSED, Boolean.TRUE);
     }
@@ -26,7 +23,5 @@ public class ScoreRuntimeServices implements Serializable {
     public boolean isPaused() {
         return myMap.containsKey(EXECUTION_PAUSED) && myMap.get(EXECUTION_PAUSED).equals(Boolean.TRUE);
     }
-
-    //todo implement Serializable methods
 
 }

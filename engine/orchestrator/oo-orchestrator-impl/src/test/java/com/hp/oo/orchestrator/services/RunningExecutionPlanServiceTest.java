@@ -2,7 +2,7 @@ package com.hp.oo.orchestrator.services;
 
 import com.hp.oo.broker.entities.RunningExecutionPlan;
 import com.hp.oo.broker.services.RunningExecutionPlanService;
-import com.hp.oo.internal.sdk.execution.ExecutionPlan;
+import com.hp.score.api.ExecutionPlan;
 import com.hp.oo.orchestrator.repositories.RunningExecutionPlanRepository;
 import junit.framework.Assert;
 import org.junit.Before;
@@ -37,7 +37,8 @@ public class RunningExecutionPlanServiceTest {
     private RunningExecutionPlanRepository runningExecutionPlanRepository;
 
     @Configuration
-    static class EmptyConfig {}
+    static class EmptyConfig {
+    }
 
     @Before
     public void setUp() {
@@ -45,9 +46,9 @@ public class RunningExecutionPlanServiceTest {
     }
 
     @Test
-    public void testCreateRunningExecutionPlan(){
+    public void testCreateRunningExecutionPlan() {
         ExecutionPlan executionPlan = new ExecutionPlan();
-        executionPlan.setFlowUuid("uuid") ;
+        executionPlan.setFlowUuid("uuid");
         RunningExecutionPlan oldRunningExecutionPlan = new RunningExecutionPlan();
         oldRunningExecutionPlan.setId(3L);
 
@@ -60,7 +61,7 @@ public class RunningExecutionPlanServiceTest {
 
         when(runningExecutionPlanRepository.findByUuidCached(anyString())).thenReturn(Arrays.asList(oldRunningExecutionPlan));
         when(runningExecutionPlanRepository.save(any(RunningExecutionPlan.class))).
-                thenReturn(runningExecutionPlan);
+                                                                                          thenReturn(runningExecutionPlan);
 
         Long id = runningExecutionPlanService.getOrCreateRunningExecutionPlan(executionPlan);
         Assert.assertEquals((Long) 5L, id);

@@ -1,6 +1,6 @@
 package com.hp.oo.execution.reflection;
 
-import com.hp.oo.internal.sdk.execution.ControlActionMetadata;
+import com.hp.score.api.ControlActionMetadata;
 
 import java.util.Map;
 
@@ -11,5 +11,5 @@ import java.util.Map;
  * Time: 11:49
  */
 public interface ReflectionAdapter {
-    public Object executeControlAction(ControlActionMetadata actionMetadata, Map<String, ?> actionData)  ;
+    public Object executeControlAction(ControlActionMetadata actionMetadata, Map<String, ?> actionData);
 }
