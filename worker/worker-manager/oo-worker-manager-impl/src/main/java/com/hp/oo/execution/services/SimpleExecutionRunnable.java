@@ -111,58 +111,9 @@ public class SimpleExecutionRunnable implements Runnable {
 
             //Check which logic to trigger - regular execution or split
             if (executionService.isSplitStep(execution)) {
-                //If execution is paused or cancelled it will return false
-                List<Execution> newExecutions = executionService.executeSplit(execution);
-
-                //set current step to finished
-                executionMessage.setStatus(ExecStatus.FINISHED);
-                executionMessage.incMsgSeqId();
-                executionMessage.setPayload(null);
-                String splitId = getSplitId(newExecutions);
-                SplitMessage splitMessage = new SplitMessage(splitId, execution, newExecutions);
-                outBuffer.put(executionMessage, splitMessage);
+                executeSplitStep(execution);
             } else {
-                //Actually execute the step and get the execution object of the next step
-                Execution nextStepExecution;
-                // this do while loop was added to force the worker execute the next execution micro step in case we running under debugger mode
-                // which force executionService.execute to exist so the transaction commit th events insertion into DB
-                do {
-                    nextStepExecution = executionService.execute(execution);
-                }
-                while (nextStepExecution != null && !nextStepExecution.isMustGoToQueue() && !isExecutionTerminating(nextStepExecution) && !executionService.isSplitStep(nextStepExecution));
-
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Execution done");
-                    if (nextStepExecution != null) {
-                        logger.debug("Next position: " + nextStepExecution.getPosition());
-                    }
-                }
-
-                if (recoveryFlag.get()) {
-                    logger.warn("Worker is in recovery. Execution result will be dropped");
-                    return null;
-                }
-
-                //set current step to finished
-                executionMessage.setStatus(ExecStatus.FINISHED);
-                executionMessage.incMsgSeqId();
-                executionMessage.setPayload(null);
-
-                //execution was paused - send the FINISHED message - but don't send the PENDING for next step
-                if (nextStepExecution == null) {
-                    outBuffer.put(executionMessage);
-                } else {
-                    ExecutionMessage[] executionMessagesToSend = createMessagesToSend(executionMessage, nextStepExecution);
-
-                    // for finished status , we don't need the payload.
-                    // but for terminated we need the payload
-                    outBuffer.put(executionMessagesToSend);
-
-                    // check if a new step was created for stay in the worker
-                    if (executionMessagesToSend.length == 2 && executionMessagesToSend[1].getStatus() == ExecStatus.IN_PROGRESS) {
-                        return (ExecutionMessage) executionMessagesToSend[1].clone();
-                    }
-                }
+                return executeRegularStep(execution);
             }
         } catch (Exception ex) {
             logger.error("Error during execution!!!", ex);
@@ -179,6 +130,65 @@ public class SimpleExecutionRunnable implements Runnable {
             Thread.currentThread().setName(origThreadName);
         }
         return null;
+    }
+
+    private ExecutionMessage executeRegularStep(Execution execution) throws IOException {
+        ExecutionMessage returnValue = null;
+        //Actually execute the step and get the execution object of the next step
+        Execution nextStepExecution;
+        // this do while loop was added to force the worker execute the next execution micro step in case we running under debugger mode
+        // which force executionService.execute to exist so the transaction commit th events insertion into DB
+        do {
+            nextStepExecution = executionService.execute(execution);
+        }
+        while (nextStepExecution != null && !nextStepExecution.isMustGoToQueue() && !isExecutionTerminating(nextStepExecution) && !executionService.isSplitStep(nextStepExecution));
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Execution done");
+            if (nextStepExecution != null) {
+                logger.debug("Next position: " + nextStepExecution.getPosition());
+            }
+        }
+
+        if (recoveryFlag.get()) {
+            logger.warn("Worker is in recovery. Execution result will be dropped");
+            returnValue = null;
+        }
+
+        //set current step to finished
+        executionMessage.setStatus(ExecStatus.FINISHED);
+        executionMessage.incMsgSeqId();
+        executionMessage.setPayload(null);
+
+        //execution was paused - send the FINISHED message - but don't send the PENDING for next step
+        if (nextStepExecution == null) {
+            outBuffer.put(executionMessage);
+        } else {
+            ExecutionMessage[] executionMessagesToSend = createMessagesToSend(executionMessage, nextStepExecution);
+
+            // for finished status , we don't need the payload.
+            // but for terminated we need the payload
+            outBuffer.put(executionMessagesToSend);
+
+            // check if a new step was created for stay in the worker
+            if (executionMessagesToSend.length == 2 && executionMessagesToSend[1].getStatus() == ExecStatus.IN_PROGRESS) {
+                returnValue = (ExecutionMessage) executionMessagesToSend[1].clone();
+            }
+        }
+        return returnValue;
+    }
+
+    private void executeSplitStep(Execution execution) {
+        //If execution is paused or cancelled it will return false
+        List<Execution> newExecutions = executionService.executeSplit(execution);
+
+        //set current step to finished
+        executionMessage.setStatus(ExecStatus.FINISHED);
+        executionMessage.incMsgSeqId();
+        executionMessage.setPayload(null);
+        String splitId = getSplitId(newExecutions);
+        SplitMessage splitMessage = new SplitMessage(splitId, execution, newExecutions);
+        outBuffer.put(executionMessage, splitMessage);
     }
 
     private boolean isExecutionTerminating(Execution execution) {
