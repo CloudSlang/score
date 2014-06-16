@@ -576,15 +576,18 @@ public final class ExecutionServiceImpl implements ExecutionService {
             //now we run the exe step
             reflectionAdapter.executeControlAction(currStep.getAction(), stepData);
         } catch (RuntimeException ex) {
-            logger.error("Error occurred during operation execution.  Execution id: " + execution.getExecutionId(), ex);
-            execution.getSystemContext().put(ExecutionConstants.EXECUTION_STEP_ERROR_KEY, ex.getMessage());
+            handleStepExecutionException(execution, currStep, ex);
+        }
+    }
 
-            try {
-                createErrorEvent(execution, currStep, ex, "Error occurred during operation execution", LogLevelCategory.STEP_OPER_ERROR, execution.getSystemContext());
+    private void handleStepExecutionException(Execution execution, ExecutionStep currStep, RuntimeException ex) {
+        logger.error("Error occurred during operation execution.  Execution id: " + execution.getExecutionId(), ex);
+        execution.getSystemContext().put(ExecutionConstants.EXECUTION_STEP_ERROR_KEY, ex.getMessage());
 
-            } catch (RuntimeException eventEx) {
-                logger.error("Failed to create event: ", eventEx);
-            }
+        try {
+            createErrorEvent(execution, currStep, ex, "Error occurred during operation execution", LogLevelCategory.STEP_OPER_ERROR, execution.getSystemContext());
+        } catch (RuntimeException eventEx) {
+            logger.error("Failed to create event: ", eventEx);
         }
     }
 
@@ -596,15 +599,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             //noinspection unchecked
             return (List<StartBranchDataContainer>) reflectionAdapter.executeControlAction(currStep.getAction(), stepData);
         } catch (RuntimeException ex) {
-            logger.error("Error occurred during operation execution.  Execution id: " + execution.getExecutionId(), ex);
-            execution.getSystemContext().put(ExecutionConstants.EXECUTION_STEP_ERROR_KEY, ex.getMessage());
-
-            try {
-                createErrorEvent(execution, currStep, ex, "Error occurred during operation execution", LogLevelCategory.STEP_OPER_ERROR, execution.getSystemContext());
-            } catch (RuntimeException eventEx) {
-                logger.error("Failed to create event: ", eventEx);
-            }
-
+            handleStepExecutionException(execution, currStep, ex);
             throw ex;
         }
     }
