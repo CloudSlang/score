@@ -438,7 +438,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
         return null; // not paused
     }
 
-
     private void storeAggregatedEvents(Execution execution) {
         if (execution.getAggregatedEvents() == null) {
             execution.setAggregatedEvents(new ArrayList<ExecutionEvent>());
@@ -572,13 +571,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     protected void executeStep(Execution execution, ExecutionStep currStep) {
         try {
 
-            Map<String, Object> stepData = new HashMap<>(currStep.getActionData());
-            //We add all the contexts to the step data - so inside of each control action we will have access to all contexts
-            addContextData(stepData, execution);
-
-            // put in Queue the ExecutionEvent
-            ArrayDeque<ExecutionEvent> eventsQueue = new ArrayDeque<>();
-            execution.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_QUEUE, eventsQueue);
+            Map<String, Object> stepData = prepareStepData(execution, currStep);
 
             //now we run the exe step
             reflectionAdapter.executeControlAction(currStep.getAction(), stepData);
@@ -597,17 +590,11 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     protected List<StartBranchDataContainer> executeSplitStep(Execution execution, ExecutionStep currStep) {
         try {
-            Map<String, Object> stepData = new HashMap<>(currStep.getActionData());
-            //We add all the contexts to the step data - so inside of each control action we will have access to all contexts
-            addContextData(stepData, execution);
-
-            // put in Queue the ExecutionEvent
-            ArrayDeque<ExecutionEvent> eventsQueue = new ArrayDeque<>();
-            execution.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_QUEUE, eventsQueue);
+            Map<String, Object> stepData = prepareStepData(execution, currStep);
 
             //now we run the exe step
-	        //noinspection unchecked
-	        return (List<StartBranchDataContainer>) reflectionAdapter.executeControlAction(currStep.getAction(), stepData);
+            //noinspection unchecked
+            return (List<StartBranchDataContainer>) reflectionAdapter.executeControlAction(currStep.getAction(), stepData);
         } catch (RuntimeException ex) {
             logger.error("Error occurred during operation execution.  Execution id: " + execution.getExecutionId(), ex);
             execution.getSystemContext().put(ExecutionConstants.EXECUTION_STEP_ERROR_KEY, ex.getMessage());
@@ -622,6 +609,16 @@ public final class ExecutionServiceImpl implements ExecutionService {
         }
     }
 
+    private Map<String, Object> prepareStepData(Execution execution, ExecutionStep currStep) {
+        Map<String, Object> stepData = new HashMap<>(currStep.getActionData());
+        //We add all the contexts to the step data - so inside of each control action we will have access to all contexts
+        addContextData(stepData, execution);
+
+        // put in Queue the ExecutionEvent
+        ArrayDeque<ExecutionEvent> eventsQueue = new ArrayDeque<>();
+        execution.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_QUEUE, eventsQueue);
+        return stepData;
+    }
 
     private void createNavErrorEvent(RuntimeException ex, String logMessage,
                                      LogLevelCategory logLevelCategory, SystemContext systemContext
@@ -646,7 +643,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 logLevelCategory, stepInputForEvent, ExecutionEventUtils.increaseEvent(systemContext), systemContext);
         eventsQueue.add(errorExecutionEvent);
         if (isDebuggerMode(execution.getSystemContext())) {
-            ExecutionEvent errorDebug =  ExecutionEventFactory.createDebuggerErrorEvent(execution.getExecutionId(), stepId, logMessage, LogLevel.ERROR,
+            ExecutionEvent errorDebug = ExecutionEventFactory.createDebuggerErrorEvent(execution.getExecutionId(), stepId, logMessage, LogLevel.ERROR,
                     logLevelCategory, stepInputForEvent, ExecutionEventUtils.increaseEvent(systemContext), systemContext);
             eventsQueue.add(errorDebug);
         }
