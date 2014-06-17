@@ -12,6 +12,7 @@ import com.hp.oo.execution.gateways.EventGateway;
 import com.hp.oo.internal.sdk.execution.events.ExecutionEvent;
 import com.hp.oo.internal.sdk.execution.events.ExecutionEventFactory;
 import com.hp.oo.internal.sdk.execution.events.ExecutionEventUtils;
+import com.hp.score.lang.SystemContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,11 +40,11 @@ public class ExecutionEventLogFilterTest {
 	@Autowired
 	private ExecutionEventLogFilterServiceTest executionEventLogFilterServiceTest;
 
-    private Map<String, Serializable> systemContext;
+    private SystemContext systemContext;
 
     @Before
     public void setUp() {
-        systemContext = new HashMap<>();
+        systemContext = new SystemContext();
         ExecutionEventUtils.startFlow(systemContext);
     }
 

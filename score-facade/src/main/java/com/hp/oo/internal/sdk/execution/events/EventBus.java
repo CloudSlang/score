@@ -1,5 +1,7 @@
 package com.hp.oo.internal.sdk.execution.events;
 
+import com.hp.score.api.ScoreEvent;
+
 import java.util.Set;
 
 /**
@@ -13,5 +15,5 @@ public interface EventBus {
 
     void unRegister(EventHandler eventHandler);
 
-    void dispatch(EventWrapper... eventWrappers);
+    void dispatch(ScoreEvent... eventWrappers);
 }

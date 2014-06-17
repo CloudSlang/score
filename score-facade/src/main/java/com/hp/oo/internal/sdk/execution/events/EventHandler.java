@@ -1,5 +1,7 @@
 package com.hp.oo.internal.sdk.execution.events;
 
+import com.hp.score.api.ScoreEvent;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Amit Levin
@@ -8,6 +10,6 @@ package com.hp.oo.internal.sdk.execution.events;
  */
 public interface EventHandler {
 
-    void handleEvent(EventWrapper eventWrapper);
+    void handleEvent(ScoreEvent eventWrapper);
 
 }

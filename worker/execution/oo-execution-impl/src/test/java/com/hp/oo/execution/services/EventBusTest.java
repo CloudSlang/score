@@ -2,7 +2,7 @@ package com.hp.oo.execution.services;
 
 import com.hp.oo.internal.sdk.execution.events.EventBus;
 import com.hp.oo.internal.sdk.execution.events.EventHandler;
-import com.hp.oo.internal.sdk.execution.events.EventWrapper;
+import com.hp.score.api.ScoreEvent;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,12 +32,12 @@ public class EventBusTest {
         eventBus.register(eventHandler,handlerTypes);
 
 
-        EventWrapper event = new EventWrapper("type1","event");
+        ScoreEvent event = new ScoreEvent("type1","event");
         eventBus.dispatch(event);
 
         verify(eventHandler,times(1)).handleEvent(event);
 
-        event = new EventWrapper("typeX","event");
+        event = new ScoreEvent("typeX","event");
         eventBus.dispatch(event);
 
         verify(eventHandler,times(0)).handleEvent(event);

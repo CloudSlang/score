@@ -2,7 +2,7 @@ package com.hp.oo.execution.services;
 
 import com.hp.oo.internal.sdk.execution.events.EventBus;
 import com.hp.oo.internal.sdk.execution.events.EventHandler;
-import com.hp.oo.internal.sdk.execution.events.EventWrapper;
+import com.hp.score.api.ScoreEvent;
 
 import java.util.Map;
 import java.util.Set;
@@ -26,10 +26,10 @@ public class EventBusImpl implements EventBus {
         handlers.remove(eventHandler);
     }
 
-    public void dispatch(EventWrapper... eventWrappers){
+    public void dispatch(ScoreEvent... eventWrappers){
         for (EventHandler eventHandler : handlers.keySet()){
             Set<String> eventTypes = handlers.get(eventHandler);
-            for (EventWrapper eventWrapper:eventWrappers){
+            for (ScoreEvent eventWrapper:eventWrappers){
                 if (eventTypes.contains(eventWrapper.getEventType()))
                     eventHandler.handleEvent(eventWrapper);
             }

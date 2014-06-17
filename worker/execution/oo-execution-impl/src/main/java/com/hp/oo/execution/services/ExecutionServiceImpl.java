@@ -21,13 +21,14 @@ import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.score.api.ExecutionStep;
 import com.hp.oo.internal.sdk.execution.OOContext;
 import com.hp.oo.internal.sdk.execution.events.EventBus;
-import com.hp.oo.internal.sdk.execution.events.EventWrapper;
 import com.hp.oo.internal.sdk.execution.events.ExecutionEvent;
 import com.hp.oo.internal.sdk.execution.events.ExecutionEventFactory;
 import com.hp.oo.internal.sdk.execution.events.ExecutionEventUtils;
 import com.hp.oo.orchestrator.services.CancelExecutionService;
 import com.hp.oo.orchestrator.services.PauseResumeService;
 import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
+import com.hp.score.api.ScoreEvent;
+import com.hp.score.lang.SystemContext;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -330,7 +331,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     private void pauseFlow(PauseReason reason, Execution execution) {
 
-        Map<String, Serializable> systemContext = execution.getSystemContext();
+        SystemContext systemContext = execution.getSystemContext();
         String executionId = execution.getExecutionId();
         String branchId = (String) systemContext.get(ExecutionConstants.BRANCH_ID);
         String flowUuid = (String) systemContext.get(ExecutionConstants.FLOW_UUID);
@@ -371,7 +372,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     private boolean handlePausedFlowForDebuggerMode(Execution execution) {
 
-        Map<String, Serializable> systemContext = execution.getSystemContext();
+        SystemContext systemContext = execution.getSystemContext();
         String executionId = execution.getExecutionId();
         String branchId = (String) systemContext.get(ExecutionConstants.BRANCH_ID);
 
@@ -511,9 +512,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     private void dumpBusEvents(Execution execution) {
-        @SuppressWarnings("unchecked") ArrayDeque<EventWrapper> eventsQueue = (ArrayDeque) execution.getSystemContext().get(ExecutionConstants.SCORE_EVENTS_QUEUE);
+        @SuppressWarnings("unchecked") ArrayDeque<ScoreEvent> eventsQueue = execution.getSystemContext().getEvents();
         if(eventsQueue == null) return;
-        for(EventWrapper eventWrapper:eventsQueue){
+        for(ScoreEvent eventWrapper:eventsQueue){
             eventBus.dispatch(eventWrapper);
         }
         eventsQueue.clear();
@@ -616,15 +617,15 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     private void createNavErrorEvent(RuntimeException ex, String logMessage,
                                      LogLevelCategory logLevelCategory, Map<String, Serializable> systemContext) {
-        Map<String, Serializable> eventData = new HashMap<>(systemContext);
+        HashMap<String, Serializable> eventData = new HashMap<>(systemContext);
         eventData.put("error_message",ex.getMessage()); //TODO - change to const
         eventData.put("logMessage",logMessage);  //TODO - change to const
         eventData.put("logLevelCategory",logLevelCategory.getCategoryName()); //TODO - change to const
-        EventWrapper eventWrapper = new EventWrapper(ExecutionConstants.SCORE_ERROR_EVENT,eventData);
+        ScoreEvent eventWrapper = new ScoreEvent(ExecutionConstants.SCORE_ERROR_EVENT,eventData);
         eventBus.dispatch(eventWrapper);
     }
 
-    private ExecutionEvent createErrorEvent(Execution execution, ExecutionStep currStep, RuntimeException ex, String logMessage, LogLevelCategory logLevelCategory, Map<String, Serializable> systemContext) {
+    private ExecutionEvent createErrorEvent(Execution execution, ExecutionStep currStep, RuntimeException ex, String logMessage, LogLevelCategory logLevelCategory, SystemContext systemContext) {
         Map<String, String> map = new HashMap<>();
         map.put("error_message", ex.getMessage());
         OOContext stepInputForEvent = new OOContext();

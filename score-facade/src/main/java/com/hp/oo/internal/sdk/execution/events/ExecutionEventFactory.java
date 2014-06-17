@@ -6,6 +6,10 @@ import com.hp.oo.enginefacade.execution.ExecutionEnums.LogLevel;
 import com.hp.oo.enginefacade.execution.ExecutionEnums.LogLevelCategory;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.oo.internal.sdk.execution.OOContext;
+import com.hp.score.api.ScoreEvent;
+import com.hp.score.lang.ExecutionRuntimeServices;
+import com.hp.score.lang.ExecutionRuntimeServices;
+import com.hp.score.lang.SystemContext;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -29,7 +33,7 @@ public abstract class ExecutionEventFactory {
     private static ObjectMapper mapper = new ObjectMapper();
     public static final int SEQUENCE_SIZE = 5;
 
-    public static ExecutionEvent createStartEvent(String executionId, String flowUuid, final String triggerType, final String executionName, final String executionLogLevel, ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemContext) {
+    public static ExecutionEvent createStartEvent(String executionId, String flowUuid, final String triggerType, final String executionName, final String executionLogLevel, ExecutionEventSequenceOrder eventOrder, SystemContext systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = eventOrder.getFlowPath().toString();
         ExecutionEvent executionEvent = new ExecutionEvent(executionId, ExecutionEnums.Event.START, executionEventSequenceOrder, flowPath)
@@ -46,7 +50,7 @@ public abstract class ExecutionEventFactory {
         return executionEvent;
     }
 
-    public static ExecutionEvent createCompletedFinishEvent(String executionId, String flowUUID, String context, ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemContext) {
+    public static ExecutionEvent createCompletedFinishEvent(String executionId, String flowUUID, String context, ExecutionEventSequenceOrder eventOrder, SystemContext systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = "0";//eventOrder.getFlowPath().toString();
 
@@ -63,7 +67,7 @@ public abstract class ExecutionEventFactory {
         return executionEvent;
     }
 
-    public static ExecutionEvent createFailureFinishEvent(String executionId, String flowUUID, String exceptionStr, String context, ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemContext) {
+    public static ExecutionEvent createFailureFinishEvent(String executionId, String flowUUID, String exceptionStr, String context, ExecutionEventSequenceOrder eventOrder, SystemContext systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath ="0"; //eventOrder.getFlowPath().toString();
 
@@ -82,7 +86,7 @@ public abstract class ExecutionEventFactory {
     }
 
     @SuppressWarnings("UnusedDeclaration")
-    public static ExecutionEvent createCancelledFinishEvent(String executionId, String flowUUID, String context, ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemContext) {
+    public static ExecutionEvent createCancelledFinishEvent(String executionId, String flowUUID, String context, ExecutionEventSequenceOrder eventOrder, SystemContext systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = "0";// eventOrder.getFlowPath().toString();
 
@@ -99,7 +103,7 @@ public abstract class ExecutionEventFactory {
         return executionEvent;
     }
 
-    public static ExecutionEvent createPausedEvent(String executionId, String flowUuid, ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemContext) {
+    public static ExecutionEvent createPausedEvent(String executionId, String flowUuid, ExecutionEventSequenceOrder eventOrder, SystemContext systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = eventOrder.getFlowPath().toString();
 
@@ -111,7 +115,7 @@ public abstract class ExecutionEventFactory {
         return executionEvent;
     }
 
-    public static ExecutionEvent createResumeEvent(String executionId, String flowUuid, String branchId, ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemContext) {
+    public static ExecutionEvent createResumeEvent(String executionId, String flowUuid, String branchId, ExecutionEventSequenceOrder eventOrder, SystemContext systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = eventOrder.getFlowPath().toString();
 
@@ -126,7 +130,7 @@ public abstract class ExecutionEventFactory {
         return executionEvent;
     }
 
-    public static ExecutionEvent createNoWorkersEvent(String executionId, Long pausedExecutionId, String flowUuid, String branchId, String group, ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemContext) {
+    public static ExecutionEvent createNoWorkersEvent(String executionId, Long pausedExecutionId, String flowUuid, String branchId, String group, ExecutionEventSequenceOrder eventOrder, SystemContext systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = eventOrder.getFlowPath().toString();
 
@@ -145,7 +149,7 @@ public abstract class ExecutionEventFactory {
     }
 
     // todo (Shehab): it is probably redundant, and need to use the FINISH event (with execution_status CANCEL).
-    public static ExecutionEvent createCancelEvent(String executionId, String flowUuid, ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemContext) {
+    public static ExecutionEvent createCancelEvent(String executionId, String flowUuid, ExecutionEventSequenceOrder eventOrder, SystemContext systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = eventOrder.getFlowPath().toString();
 
@@ -158,7 +162,7 @@ public abstract class ExecutionEventFactory {
     }
 
     public static ExecutionEvent createDisplayEvent(String executionId, Long pausedExecutionId, String flowUuid, String stepUuid, String stepName, String branchId,
-                                                    String displayTitle, String messageKey, HashMap<String, String> displayTextMapLocale, String displayWindowHeight, String displayWindowWidth, ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemContext) {
+                                                    String displayTitle, String messageKey, HashMap<String, String> displayTextMapLocale, String displayWindowHeight, String displayWindowWidth, ExecutionEventSequenceOrder eventOrder, SystemContext systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = eventOrder.getFlowPath().toString();
 
@@ -184,7 +188,7 @@ public abstract class ExecutionEventFactory {
     }
 
     public static ExecutionEvent createGatedTransitionEvent(String executionId, Long pausedExecutionId, String flowUuid, String stepUuid, String stepName, String branchId,
-                                                            String roleName, String userName, ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemContext) {
+                                                            String roleName, String userName, ExecutionEventSequenceOrder eventOrder, SystemContext systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = eventOrder.getFlowPath().toString();
 
@@ -205,7 +209,7 @@ public abstract class ExecutionEventFactory {
     }
 
     public static ExecutionEvent createHandOffEvent(String executionId, Long pausedExecutionId, String flowUuid, String stepUuid, String stepName, String branchId,
-                                                    ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemContext) {
+                                                    ExecutionEventSequenceOrder eventOrder, SystemContext systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = eventOrder.getFlowPath().toString();
 
@@ -223,7 +227,7 @@ public abstract class ExecutionEventFactory {
         return executionEvent;
     }
 
-    public static ExecutionEvent createResultEvent(String executionId, String resultType, String resultName, ExecutionEventSequenceOrder eventOrder, Map systemContext) {
+    public static ExecutionEvent createResultEvent(String executionId, String resultType, String resultName, ExecutionEventSequenceOrder eventOrder, SystemContext systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = "0";//eventOrder.getFlowPath().toString();
 
@@ -240,7 +244,7 @@ public abstract class ExecutionEventFactory {
         return executionEvent;
     }
 
-    public static ExecutionEvent createFlowInputEvent(String executionId, String paramName, String paramValue, ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemContext) {
+    public static ExecutionEvent createFlowInputEvent(String executionId, String paramName, String paramValue, ExecutionEventSequenceOrder eventOrder, SystemContext systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = eventOrder.getFlowPath().toString();
 
@@ -253,7 +257,7 @@ public abstract class ExecutionEventFactory {
         return executionEvent;
     }
 
-    public static ExecutionEvent createOperationalEvent(String executionId, String stepId, String stepName,String stepType, String flowName,  ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemContext) {
+    public static ExecutionEvent createOperationalEvent(String executionId, String stepId, String stepName,String stepType, String flowName,  ExecutionEventSequenceOrder eventOrder, SystemContext systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = eventOrder.getFlowPath().toString();
 
@@ -275,7 +279,7 @@ public abstract class ExecutionEventFactory {
 
     }
 
-    public static ExecutionEvent createStepLogEvent(String executionId,ExecutionEventSequenceOrder eventOrder,ExecutionEnums.StepLogCategory stepLogCategory, Map<String, Serializable> systemContext) {
+    public static ExecutionEvent createStepLogEvent(String executionId,ExecutionEventSequenceOrder eventOrder,ExecutionEnums.StepLogCategory stepLogCategory, SystemContext systemContext) {
         //TODO do we need sequence order
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = eventOrder.getFlowPath().toString();
@@ -294,7 +298,7 @@ public abstract class ExecutionEventFactory {
 
     }
 
-    public static ExecutionEvent createPauseFlowForInputsEvent(String executionId, Long pausedExecutionId, String flowUuid, String stepId, String branchId, String stepName, List<Object> promptInputs, Map<String, Map<String, String>> l10nMapAfterReferences, ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemContext) {
+    public static ExecutionEvent createPauseFlowForInputsEvent(String executionId, Long pausedExecutionId, String flowUuid, String stepId, String branchId, String stepName, List<Object> promptInputs, Map<String, Map<String, String>> l10nMapAfterReferences, ExecutionEventSequenceOrder eventOrder, SystemContext systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = eventOrder.getFlowPath().toString();
 
@@ -313,17 +317,17 @@ public abstract class ExecutionEventFactory {
         return executionEvent;
     }
 
-    public static ExecutionEvent createAggregationFinishedEvent(String executionId, ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemCtx) {
+    public static ExecutionEvent createAggregationFinishedEvent(String executionId, ExecutionEventSequenceOrder eventOrder, SystemContext systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = eventOrder.getFlowPath().toString();
 
         ExecutionEvent executionEvent = new ExecutionEvent(executionId, ExecutionEnums.Event.AGGREGATION_FINISHED, executionEventSequenceOrder, flowPath);
-        addEventToSysContext(executionEvent,systemCtx);
-        saveEvent(executionEvent,systemCtx);
+        addEventToSysContext(executionEvent,systemContext);
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
     }
 
-    public static ExecutionEvent createInputsEvent(String executionId, String flowId, String stepId, ExecutionEnums.Event type, ExecutionEventSequenceOrder eventOrder, String branchId, String stepName, List<Object> inputs, Map<String, Serializable> systemContext) {
+    public static ExecutionEvent createInputsEvent(String executionId, String flowId, String stepId, ExecutionEnums.Event type, ExecutionEventSequenceOrder eventOrder, String branchId, String stepName, List<Object> inputs, SystemContext systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = eventOrder.getFlowPath().toString();
 
@@ -348,7 +352,7 @@ public abstract class ExecutionEventFactory {
         return executionEvent;
     }
 
-    public static ExecutionEvent createLogEvent(String executionId, String stepId, String logMessage, LogLevel logLevel, LogLevelCategory logLevelCategory, OOContext context, ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemContext) {
+    public static ExecutionEvent createLogEvent(String executionId, String stepId, String logMessage, LogLevel logLevel, LogLevelCategory logLevelCategory, OOContext context, ExecutionEventSequenceOrder eventOrder, SystemContext systemContext) {
         HashMap<String, String> contextMap;
 
         if (context != null) {
@@ -372,7 +376,7 @@ public abstract class ExecutionEventFactory {
         return executionEvent;
     }
 
-    public static ExecutionEvent createOutputsEvent(String executionId, String stepId, OOContext context, ExecutionEventSequenceOrder eventOrder, Map<String, Serializable> systemContext) {
+    public static ExecutionEvent createOutputsEvent(String executionId, String stepId, OOContext context, ExecutionEventSequenceOrder eventOrder, SystemContext systemContext) {
         HashMap<String, String> contextMap;
 
         if (context != null) {
@@ -394,9 +398,9 @@ public abstract class ExecutionEventFactory {
 
     public static ExecutionEvent createBreakpointEvent(String executionId, String branchId,
                                                        String stepUuid, ExecutionEventSequenceOrder eventOrder,
-                                                       LogLevelCategory logLevelCategory, Map<String, Serializable> context,
+                                                       LogLevelCategory logLevelCategory, SystemContext context,
                                                        String interruptUuid, String interruptType,
-                                                       Map<String, Serializable> systemContext) {
+                                                       SystemContext systemContext) {
         context.put("logLevelCategory", logLevelCategory.name());
         context.put("branch_id", branchId);
         context.put("debugInterruptUuid", interruptUuid);
@@ -415,14 +419,14 @@ public abstract class ExecutionEventFactory {
                 .setData2(logLevelCategory.name())
                 .setData3((long) LogLevel.DEBUG.ordinal())
                 .setData4(eventDataAsString)
-                .setDebuggerMode(isDebuggerMode(context));
+                .setDebuggerMode(isDebuggerMode(systemContext));
         addEventToSysContext(executionEvent,context);
         saveEvent(executionEvent,systemContext);
         return executionEvent;
 
     }
 
-    private static boolean isDebuggerMode(Map<String, Serializable> systemContext) {
+    private static boolean isDebuggerMode(SystemContext systemContext) {
 
         Boolean isDebuggerMode = (Boolean) systemContext.get(ExecutionConstants.DEBUGGER_MODE);
         if (isDebuggerMode == null) {
@@ -434,7 +438,7 @@ public abstract class ExecutionEventFactory {
 
     public static ExecutionEvent createManualPausedEvent(String executionId, String branchId,
                                                          String stepUuid, ExecutionEventSequenceOrder eventOrder,
-                                                         Map<String, Serializable> eventData, Map<String, Serializable> systemContext) {
+                                                         Map<String, Serializable> eventData, SystemContext systemContext) {
 
         systemContext.put("branch_id", branchId);
         String eventDataAsString;
@@ -460,15 +464,15 @@ public abstract class ExecutionEventFactory {
 
 
     public static ExecutionEvent createRoiEvent(String executionId, String stepUuid,
-                                                ExecutionEventSequenceOrder eventOrder, String roi, Map<String, Serializable> systemCtx) {
+                                                ExecutionEventSequenceOrder eventOrder, String roi, SystemContext systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = eventOrder.getFlowPath().toString();
         ExecutionEvent executionEvent = new ExecutionEvent(executionId, ExecutionEnums.Event.ROI, executionEventSequenceOrder, flowPath)
                 .setData1(stepUuid)
                 .setData2(roi)
-                .setDebuggerMode(isDebuggerMode(systemCtx));
-        addEventToSysContext(executionEvent,systemCtx);
-        saveEvent(executionEvent,systemCtx);
+                .setDebuggerMode(isDebuggerMode(systemContext));
+        addEventToSysContext(executionEvent,systemContext);
+        saveEvent(executionEvent,systemContext);
         return executionEvent;
     }
 
@@ -476,7 +480,7 @@ public abstract class ExecutionEventFactory {
     @SuppressWarnings("UnusedDeclaration")
     public static ExecutionEvent createDebuggerEvent(String executionId, String stepUuid, ExecutionEventSequenceOrder eventOrder,
                                                      LogLevelCategory logLevelCategory, Map<String, Serializable> context,
-                                                     Map<String, Serializable> systemContext) {
+                                                     SystemContext systemContext) {
         String executionEventSequenceOrder = formatExecutionEventSequenceOrder(eventOrder.getEventPath().toString());
         String flowPath = eventOrder.getFlowPath().toString();
         return  createDebuggerEvent(executionId, stepUuid, eventOrder, flowPath, logLevelCategory, context, systemContext);
@@ -484,7 +488,7 @@ public abstract class ExecutionEventFactory {
 
     public static ExecutionEvent createDebuggerErrorEvent(String executionId, String stepUuid, String logMessage, LogLevel logLevel,
                                                           LogLevelCategory logLevelCategory, OOContext context, ExecutionEventSequenceOrder eventOrder,
-                                                          Map<String, Serializable> systemContext) {
+                                                          SystemContext systemContext) {
 
         HashMap<String, String> contextMap = new HashMap<>();
 
@@ -517,7 +521,7 @@ public abstract class ExecutionEventFactory {
 
     public static ExecutionEvent createDebuggerEvent(String executionId, String stepUuid, ExecutionEventSequenceOrder eventOrder,
                                                      String path, LogLevelCategory logLevelCategory,
-                                                     Map<String, Serializable> context,Map<String, Serializable> systemContext) {
+                                                     Map<String, Serializable> context,SystemContext systemContext) {
         context.put("logLevelCategory", logLevelCategory.name());
         String eventDataAsString;
         try {
@@ -533,7 +537,7 @@ public abstract class ExecutionEventFactory {
                 .setData2(logLevelCategory.name())
                 .setData3((long) LogLevel.DEBUG.ordinal())
                 .setData4(eventDataAsString)
-                .setDebuggerMode(isDebuggerMode(context));
+                .setDebuggerMode(isDebuggerMode(systemContext));
         saveEvent(event,systemContext);
         return event;
     }
@@ -585,7 +589,7 @@ public abstract class ExecutionEventFactory {
         return formatSequence.toString();
     }
 
-    private static void addEventToSysContext(ExecutionEvent executionEvent, Map<String, Serializable> systemContext) {
+    private static void addEventToSysContext(ExecutionEvent executionEvent, SystemContext systemContext) {
         Map<String,List<ExecutionEvent>> stepExecutionEvents = (Map<String,List<ExecutionEvent>>)systemContext.get(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED);
         List<ExecutionEvent> exEvents = stepExecutionEvents.get(executionEvent.getPath());
         if(exEvents == null){
@@ -595,13 +599,8 @@ public abstract class ExecutionEventFactory {
         exEvents.add(executionEvent);
     }
 
-    private static void saveEvent(ExecutionEvent executionEvent, Map<String, Serializable> systemContext){
-        Queue<EventWrapper> eventsQueue = (Queue<EventWrapper>)systemContext.get(ExecutionConstants.SCORE_EVENTS_QUEUE);
-        if(eventsQueue == null){
-            eventsQueue = new ArrayDeque<>();
-            systemContext.put(ExecutionConstants.SCORE_EVENTS_QUEUE,(ArrayDeque)eventsQueue);
-        }
-        eventsQueue.add(new EventWrapper(executionEvent.getType().name(),executionEvent));
+    private static void saveEvent(ExecutionEvent executionEvent, ExecutionRuntimeServices executionRuntimeServices){
+        executionRuntimeServices.addEvent(executionEvent.getType().name(), executionEvent);
     }
 
 }

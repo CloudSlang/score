@@ -6,24 +6,21 @@ import java.io.Serializable;
  * User: maromg
  * Date: 10/06/2014
  */
-public class ScoreEvent {
+public class ScoreEvent implements Serializable {
 
-    private String type;
+    private String eventType;
     private Serializable data;
 
-    public String getType() {
-        return type;
+    public ScoreEvent(String eventType, Serializable data) {
+        this.eventType = eventType;
+        this.data = data;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public String getEventType() {
+        return eventType;
     }
 
     public Serializable getData() {
         return data;
-    }
-
-    public void setData(Serializable data) {
-        this.data = data;
     }
 }
