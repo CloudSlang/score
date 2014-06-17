@@ -1,7 +1,6 @@
 package com.hp.score.lang;
 
-import com.hp.score.api.ScoreEvent;
-import com.hp.score.vos.StartBranchDataContainer;
+import com.hp.score.api.StartBranchDataContainer;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
