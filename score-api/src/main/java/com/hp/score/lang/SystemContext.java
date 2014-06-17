@@ -85,4 +85,8 @@ public class SystemContext extends ExecutionRuntimeServices implements Map<Strin
     public void resume() {
         myMap.remove(EXECUTION_PAUSED);
     }
+
+    public void addBranch(Long startPosition, Long executionPlanId, Map<String, Serializable> context, SystemContext systemContext) {
+        super.addBranch(startPosition, executionPlanId, context, systemContext);
+    }
 }
