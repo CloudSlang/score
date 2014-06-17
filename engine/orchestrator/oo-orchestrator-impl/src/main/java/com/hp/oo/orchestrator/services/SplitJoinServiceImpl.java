@@ -4,7 +4,7 @@ import ch.lambdaj.function.convert.Converter;
 import com.hp.oo.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.engine.queue.services.QueueDispatcherService;
-import com.hp.oo.enginefacade.execution.EndBranchDataContainer;
+import com.hp.score.api.EndBranchDataContainer;
 import com.hp.oo.enginefacade.execution.ExecutionEnums;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
@@ -28,7 +28,6 @@ import java.util.Map;
 import static ch.lambdaj.Lambda.convert;
 import static ch.lambdaj.Lambda.extract;
 import static ch.lambdaj.Lambda.on;
-
 
 public final class SplitJoinServiceImpl implements SplitJoinService {
     private final Logger logger = Logger.getLogger(getClass());
@@ -72,7 +71,8 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     public void split(List<SplitMessage> splitMessages) {
         Validate.notNull(splitMessages, "split messages cannot be null");
 
-        if (splitMessages.isEmpty()) return;
+        if (splitMessages.isEmpty())
+            return;
 
         // these lists will be populated with values and inserted in bulk to the db
         List<ExecutionMessage> stepFinishMessages = new ArrayList<>();
@@ -107,14 +107,15 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     public void endBranch(List<Execution> executions) {
         Validate.notNull(executions, "executions cannot be null");
 
-        if (executions.isEmpty()) return;
+        if (executions.isEmpty())
+            return;
 
         for (Execution execution : executions) {
             // this will be deleted when the old branch mechanism is completely removed (after NB is re-implemented)
             Validate.isTrue(
                     (execution.getPosition() == null) ||
-                    (execution.getPosition() != -1L && execution.getPosition() != -2L),
-                    "branch finished with position = "+execution.getPosition()+" -> new branch mechanism is ending a branch from old mechanism");
+                            (execution.getPosition() != -1L && execution.getPosition() != -2L),
+                    "branch finished with position = " + execution.getPosition() + " -> new branch mechanism is ending a branch from old mechanism");
             if (logger.isDebugEnabled())
                 logger.debug("finishing branch " + execution.getBranchId() + " for execution " + execution.getExecutionId());
         }
@@ -146,27 +147,26 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         // add each finished branch to it's parent
         for (FinishedBranch finishedBranch : finishedBranches) {
             SuspendedExecution suspendedExecution = suspendedMap.get(finishedBranch.getSplitId());
-            if(suspendedExecution != null){
+            if (suspendedExecution != null) {
                 finishedBranch.connectToSuspendedExecution(suspendedExecution);
 
                 //this is an optimization for subflow (also works for MI with one branch :) )
-                if(suspendedExecution.getNumberOfBranches() == 1){
+                if (suspendedExecution.getNumberOfBranches() == 1) {
                     suspendedExecutionsWithOneBranch.add(suspendedExecution);
-                }
-                else {
+                } else {
                     finishedBranchRepository.save(finishedBranch);
                 }
             }
         }
 
-        if(!suspendedExecutionsWithOneBranch.isEmpty()){
+        if (!suspendedExecutionsWithOneBranch.isEmpty()) {
             joinAndSendToQueue(suspendedExecutionsWithOneBranch);
         }
     }
 
-    private String findExecutionId(List<Execution> executions, String splitId){
+    private String findExecutionId(List<Execution> executions, String splitId) {
         for (Execution execution : executions) {
-            if(execution.getSplitId().equals(splitId)){
+            if (execution.getSplitId().equals(splitId)) {
                 return execution.getExecutionId();
             }
         }
@@ -184,14 +184,15 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         return joinAndSendToQueue(suspendedExecutions);
     }
 
-    private int joinAndSendToQueue(List<SuspendedExecution> suspendedExecutions){
+    private int joinAndSendToQueue(List<SuspendedExecution> suspendedExecutions) {
         List<ExecutionMessage> messages = new ArrayList<>();
 
         if (logger.isDebugEnabled())
             logger.debug("Joining finished branches, found " + suspendedExecutions.size() + " suspended executions with all branches finished");
 
         // nothing to do here
-        if (suspendedExecutions.isEmpty()) return 0;
+        if (suspendedExecutions.isEmpty())
+            return 0;
 
         for (SuspendedExecution se : suspendedExecutions) {
             Execution exec = joinSplit(se);
@@ -207,7 +208,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         return suspendedExecutions.size();
     }
 
-    private Execution joinSplit(SuspendedExecution suspendedExecution){
+    private Execution joinSplit(SuspendedExecution suspendedExecution) {
 
         List<FinishedBranch> finishedBranches = suspendedExecution.getFinishedBranches();
         Execution exec = suspendedExecution.getExecutionObj();
@@ -215,13 +216,14 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         Validate.isTrue(suspendedExecution.getNumberOfBranches().equals(finishedBranches.size()),
                 "Expected suspended execution " + exec.getExecutionId() + " to have " + suspendedExecution.getNumberOfBranches() + "finished branches, but found " + finishedBranches.size());
 
-        if (logger.isDebugEnabled()) logger.debug("Joining execution " + exec.getExecutionId());
+        if (logger.isDebugEnabled())
+            logger.debug("Joining execution " + exec.getExecutionId());
 
         boolean wasExecutionCancelled = false;
         ArrayList<EndBranchDataContainer> finishedContexts = new ArrayList<>();
         for (FinishedBranch fb : finishedBranches) {
             finishedContexts.add(new EndBranchDataContainer(fb.getBranchContexts().getContexts(), fb.getBranchContexts().getSystemContext(), fb.getBranchException()));
-            if(fb.getBranchContexts().isBranchCancelled()){
+            if (fb.getBranchContexts().isBranchCancelled()) {
                 wasExecutionCancelled = true;
             }
         }
@@ -230,7 +232,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         exec.putFinishedChildBranchesData(finishedContexts);
 
         //mark cancelled on parent
-        if(wasExecutionCancelled){
+        if (wasExecutionCancelled) {
             exec.getSystemContext().put(ExecutionConstants.FLOW_TERMINATION_TYPE, ExecutionEnums.ExecutionStatus.CANCELED);
         }
 

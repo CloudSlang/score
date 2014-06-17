@@ -1,7 +1,7 @@
 package com.hp.oo.internal.sdk.execution;
 
-import com.hp.oo.enginefacade.execution.EndBranchDataContainer;
 import com.hp.oo.internal.sdk.execution.events.ExecutionEvent;
+import com.hp.score.api.EndBranchDataContainer;
 import com.hp.score.lang.SystemContext;
 import org.apache.commons.lang.Validate;
 

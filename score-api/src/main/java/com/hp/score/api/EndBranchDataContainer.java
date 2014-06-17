@@ -1,12 +1,11 @@
-package com.hp.oo.enginefacade.execution;
+package com.hp.score.api;
 
-import com.hp.oo.internal.sdk.execution.OOContext;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import java.io.Serializable;
-import java.lang.Object;import java.lang.Override;import java.lang.String;import java.util.Collections;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,8 +40,12 @@ public class EndBranchDataContainer implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof EndBranchDataContainer)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof EndBranchDataContainer)) {
+            return false;
+        }
 
         EndBranchDataContainer that = (EndBranchDataContainer) o;
 

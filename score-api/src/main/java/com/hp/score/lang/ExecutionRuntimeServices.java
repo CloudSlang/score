@@ -1,5 +1,6 @@
 package com.hp.score.lang;
 
+import com.hp.score.api.ScoreEvent;
 import com.hp.score.api.StartBranchDataContainer;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -92,7 +93,7 @@ public class ExecutionRuntimeServices implements Serializable {
         }
         @SuppressWarnings("unchecked")
         List<StartBranchDataContainer> branchesData = (List<StartBranchDataContainer>) myMap.get(BRANCH_DATA);
-        branchesData.add(new StartBranchDataContainer(startPosition, executionPlanId, context, executionRuntimeServices));
+        branchesData.add(new StartBranchDataContainer(startPosition, executionPlanId, context, new SystemContext(executionRuntimeServices.myMap)));
     }
 
     public List<StartBranchDataContainer> getBranchesData() {

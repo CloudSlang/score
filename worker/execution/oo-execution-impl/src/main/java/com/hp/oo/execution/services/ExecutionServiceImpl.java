@@ -10,7 +10,7 @@ import com.hp.oo.enginefacade.execution.ExecutionEnums.LogLevel;
 import com.hp.oo.enginefacade.execution.ExecutionEnums.LogLevelCategory;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.enginefacade.execution.PauseReason;
-import com.hp.oo.enginefacade.execution.StartBranchDataContainer;
+import com.hp.score.api.StartBranchDataContainer;
 import com.hp.oo.execution.ExecutionEventAggregatorHolder;
 import com.hp.oo.execution.ExecutionLogLevelHolder;
 import com.hp.oo.execution.reflection.ReflectionAdapter;
@@ -174,8 +174,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
             ExecutionStep currStep = loadExecutionStep(execution);
 
+            executeStep(execution, currStep);
+
             //Run the split step
-            List<StartBranchDataContainer> newBranches = executeSplitStep(execution, currStep);
+            List<StartBranchDataContainer> newBranches = execution.getSystemContext().getBranchesData();
 
             List<Execution> newExecutions = createChildExecutions(execution.getExecutionId(), newBranches);
 
@@ -570,10 +572,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     protected void executeStep(Execution execution, ExecutionStep currStep) {
         try {
-
             Map<String, Object> stepData = prepareStepData(execution, currStep);
-
-            //now we run the exe step
             reflectionAdapter.executeControlAction(currStep.getAction(), stepData);
         } catch (RuntimeException ex) {
             handleStepExecutionException(execution, currStep, ex);
@@ -588,19 +587,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
             createErrorEvent(execution, currStep, ex, "Error occurred during operation execution", LogLevelCategory.STEP_OPER_ERROR, execution.getSystemContext());
         } catch (RuntimeException eventEx) {
             logger.error("Failed to create event: ", eventEx);
-        }
-    }
-
-    protected List<StartBranchDataContainer> executeSplitStep(Execution execution, ExecutionStep currStep) {
-        try {
-            Map<String, Object> stepData = prepareStepData(execution, currStep);
-
-            //now we run the exe step
-            //noinspection unchecked
-            return (List<StartBranchDataContainer>) reflectionAdapter.executeControlAction(currStep.getAction(), stepData);
-        } catch (RuntimeException ex) {
-            handleStepExecutionException(execution, currStep, ex);
-            throw ex;
         }
     }
 
@@ -620,7 +606,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     ) {
         SystemContext eventData = new SystemContext(systemContext);
         eventData.put("error_message",ex.getMessage()); //TODO - change to const
-        eventData.put("logMessage",logMessage);  //TODO - change to const
+        eventData.put("logMessage", logMessage);  //TODO - change to const
         eventData.put("logLevelCategory",logLevelCategory.getCategoryName()); //TODO - change to const
         ScoreEvent eventWrapper = new ScoreEvent(ExecutionConstants.SCORE_ERROR_EVENT,eventData);
         eventBus.dispatch(eventWrapper);

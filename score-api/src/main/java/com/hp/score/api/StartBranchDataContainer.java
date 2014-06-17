@@ -1,6 +1,6 @@
 package com.hp.score.api;
 
-import com.hp.score.lang.ExecutionRuntimeServices;
+import com.hp.score.lang.SystemContext;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -17,17 +17,17 @@ public class StartBranchDataContainer {
     private final Long startPosition;
     private final Long executionPlanId;
     private final Map<String, Serializable> contexts;
-    private final ExecutionRuntimeServices executionRuntimeServices;
+    private final SystemContext systemContext;
 
-    public StartBranchDataContainer(Long startPosition, Long executionPlanId, Map<String, Serializable> contexts, ExecutionRuntimeServices executionRuntimeServices) {
+    public StartBranchDataContainer(Long startPosition, Long executionPlanId, Map<String, Serializable> contexts, SystemContext systemContext) {
         Validate.notNull(startPosition);
         Validate.notNull(executionPlanId);
         Validate.notNull(contexts);
-        Validate.notNull(executionRuntimeServices);
+        Validate.notNull(systemContext);
 
         this.startPosition = startPosition;
         this.executionPlanId = executionPlanId;
-        this.executionRuntimeServices = new ExecutionRuntimeServices(executionRuntimeServices);
+        this.systemContext = new SystemContext(systemContext);
         this.contexts = new HashMap<>();
 
         for (String name : contexts.keySet()) {
@@ -47,8 +47,8 @@ public class StartBranchDataContainer {
         return Collections.unmodifiableMap(contexts);
     }
 
-    public ExecutionRuntimeServices getExecutionRuntimeServices() {
-        return executionRuntimeServices;
+    public SystemContext getSystemContext() {
+        return systemContext;
     }
 
     @Override
@@ -62,7 +62,7 @@ public class StartBranchDataContainer {
                 .append(this.startPosition, that.startPosition)
                 .append(this.executionPlanId, that.executionPlanId)
                 .append(this.contexts, that.contexts)
-                .append(this.executionRuntimeServices, that.executionRuntimeServices)
+                .append(this.systemContext, that.systemContext)
                 .isEquals();
     }
 
@@ -72,7 +72,7 @@ public class StartBranchDataContainer {
                 .append(this.startPosition)
                 .append(this.executionPlanId)
                 .append(this.contexts)
-                .append(this.executionRuntimeServices)
+                .append(this.systemContext)
                 .toHashCode();
     }
 }
