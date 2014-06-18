@@ -50,6 +50,15 @@ import java.util.UUID;
  */
 public final class ExecutionServiceImpl implements ExecutionService {
     private final Logger logger = Logger.getLogger(getClass());
+    private static final String SYSTEM_CONTEXT = "systemContext";
+    private static final String EXECUTION = "execution";
+
+    // max amount of aggregated events
+    private static final int EVENT_AGGREGATION_AMOUNT_THRESHOLD = 50;
+
+    // timeout for event dump
+    private static final long EVENT_AGGREGATION_TIME_THRESHOLD = 2 * 60 * 1000;
+    private static final long EVENT_AGGREGATION_DEBUGGER_TIME_THRESHOLD  = 750;
 
     @Autowired
     private PauseResumeService pauseService;
@@ -465,14 +474,14 @@ public final class ExecutionServiceImpl implements ExecutionService {
         // timeout trigger
         //noinspection ConstantConditions
         if ( isDebuggerMode(execution.getSystemContext())) {
-            shouldDump |= currTime - execution.getLastEventDumpTime() >= ExecutionConstants.EVENT_AGGREGATION_DEBUGGER_TIME_THRESHOLD;
+            shouldDump |= currTime - execution.getLastEventDumpTime() >= EVENT_AGGREGATION_DEBUGGER_TIME_THRESHOLD;
         } else {
             shouldDump |= (execution.getLastEventDumpTime() != 0) &&
-                    (currTime - execution.getLastEventDumpTime() >= ExecutionConstants.EVENT_AGGREGATION_TIME_THRESHOLD);
+                    (currTime - execution.getLastEventDumpTime() >= EVENT_AGGREGATION_TIME_THRESHOLD);
         }
 
         // amount trigger
-        shouldDump |= execution.getAggregatedEvents().size() >= ExecutionConstants.EVENT_AGGREGATION_AMOUNT_THRESHOLD;
+        shouldDump |= execution.getAggregatedEvents().size() >= EVENT_AGGREGATION_AMOUNT_THRESHOLD;
 
         // ending execution trigger (null for flow ending, -1L for mi/parralel, -2L for subflow)
         shouldDump |= isExecutionTerminating(execution);
@@ -710,9 +719,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     private void addContextData(Map<String, Object> data, Execution execution) {
         data.putAll(execution.getContexts());
-        data.put(ExecutionConstants.SYSTEM_CONTEXT, execution.getSystemContext());
+        data.put(SYSTEM_CONTEXT, execution.getSystemContext());
         data.put(ExecutionConstants.SERIALIZABLE_SESSION_CONTEXT, execution.getSerializableSessionContext());
-        data.put(ExecutionConstants.EXECUTION, execution);
+        data.put(EXECUTION, execution);
         data.put(ExecutionConstants.RUNNING_EXECUTION_PLAN_ID, execution.getRunningExecutionPlanId());
     }
 }

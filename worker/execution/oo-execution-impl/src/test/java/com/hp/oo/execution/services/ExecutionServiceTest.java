@@ -308,7 +308,6 @@ public class ExecutionServiceTest {
 
         exe.getSystemContext().put(ExecutionConstants.ACTUALLY_OPERATION_GROUP, "Real_Group");
         exe.getSystemContext().put(ExecutionConstants.MUST_GO_TO_QUEUE, true);
-        exe.getSystemContext().put(ExecutionConstants.SHOULD_BE_PERSISTED_FOR_RECOVERY, true);
         exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String, List>());
         //for events
         exe.getSystemContext().put(ExecutionConstants.EXECUTION_ID_CONTEXT, "stam");

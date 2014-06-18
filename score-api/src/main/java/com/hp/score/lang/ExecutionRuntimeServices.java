@@ -20,6 +20,8 @@ public class ExecutionRuntimeServices implements Serializable {
 
     protected static final String SCORE_EVENTS_QUEUE = "SCORE_EVENTS_QUEUE";
 
+    protected static final String NO_WORKERS_IN_GROUP = "NO_WORKERS_IN_GROUP";
+
     protected Map<String, Serializable> myMap = new HashMap<>();
 
     public void pause() {
@@ -42,6 +44,14 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public ArrayDeque<ScoreEvent> getEvents() {
         return getFromMap(SCORE_EVENTS_QUEUE);
+    }
+
+    public void setNoWorkerInGroup(String groupName){
+           myMap.put(NO_WORKERS_IN_GROUP, groupName);
+    }
+
+    public String getNoWorkerInGroupName(){
+        return getFromMap(NO_WORKERS_IN_GROUP);
     }
 
     protected <T> T getFromMap(String key) {

@@ -8,8 +8,8 @@ package com.hp.oo.internal.sdk.execution;
  */
 public class ExecutionConstants {
 
-    public static final String SYSTEM_CONTEXT = "systemContext";
-    public static final String SERIALIZABLE_SESSION_CONTEXT = "serializableSessionContext";
+//    public static final String SYSTEM_CONTEXT = "systemContext";
+    public static final String SERIALIZABLE_SESSION_CONTEXT = "serializableSessionContext";    //sits in PluginParams
 
     public static final String EXTERNAL_URL = "EXTERNAL_URL";
     public static final String FLOW_UUID = "FLOW_UUID";
@@ -19,14 +19,12 @@ public class ExecutionConstants {
     public static final String EXECUTION_ID_CONTEXT = "executionIdContext";
 
     //For Exceptions
-    public static final String NO_WORKERS_IN_GROUP = "NO_WORKERS_IN_GROUP";
     public static final String EXECUTION_STEP_ERROR_KEY = "EXECUTION_STEP_ERROR_KEY";
     public static final String PLATFORM_RESPONSE_EXCEPTION_TYPE = "EXCEPTION";
     public static final String PLATFORM_RESPONSE_EXCEPTION_NAME = "EXCEPTION";
     public static final String EXCEPTION_STEP_ID = "exceptionStepId";
 
     public static final String LIST_OF_CONTEXTS_NAMES = "listOfContextNames";
-    public static final String EXECUTION = "execution";
 
     //For subflows
     public static final String FLOWS_PERMISSIONS = "FLOWS_PERMISSIONS";
@@ -80,13 +78,6 @@ public class ExecutionConstants {
 
     //for telling the persistMessage for recovery whether to save this message or not
     public static final String SHOULD_BE_PERSISTED_FOR_RECOVERY = "SHOULD_BE_PERSISTED_FOR_RECOVERY";
-
-    // max amount of aggregated events
-    public static final int EVENT_AGGREGATION_AMOUNT_THRESHOLD = 50;
-
-    // timeout for event dump
-    public static final long EVENT_AGGREGATION_TIME_THRESHOLD = 2 * 60 * 1000;
-    public static final long EVENT_AGGREGATION_DEBUGGER_TIME_THRESHOLD  = 750;
 
     public static final String FLOW_TERMINATION_TYPE = "FLOW_TERMINATION_TYPE";
 

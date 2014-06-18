@@ -6,6 +6,7 @@ import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.score.services.ExecutionStateService;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -93,7 +94,7 @@ public class QueueListenerImpl implements QueueListener {
 
     private boolean failedBecauseNoWorker(ExecutionMessage executionMessage) {
         Execution execution = extractExecution(executionMessage);
-        return execution != null && execution.getSystemContext().containsKey(ExecutionConstants.NO_WORKERS_IN_GROUP);
+        return execution != null && !StringUtils.isEmpty(execution.getSystemContext().getNoWorkerInGroupName());
     }
 
 }

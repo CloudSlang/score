@@ -40,7 +40,7 @@ final public class ExecutionAssignerServiceImpl implements ExecutionAssignerServ
 		try {
 			String group = message.getWorkerGroup();
 			Execution execution = converter.extractExecution(message.getPayload());
-			execution.getSystemContext().put(ExecutionConstants.NO_WORKERS_IN_GROUP, group);
+			execution.getSystemContext().setNoWorkerInGroup(group);
 
 			Payload payload = converter.createPayload(execution);
 			message.setPayload(payload);
