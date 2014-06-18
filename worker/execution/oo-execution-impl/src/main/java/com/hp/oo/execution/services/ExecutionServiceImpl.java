@@ -10,7 +10,6 @@ import com.hp.oo.enginefacade.execution.ExecutionEnums.LogLevel;
 import com.hp.oo.enginefacade.execution.ExecutionEnums.LogLevelCategory;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.enginefacade.execution.PauseReason;
-import com.hp.score.api.StartBranchDataContainer;
 import com.hp.oo.execution.ExecutionEventAggregatorHolder;
 import com.hp.oo.execution.ExecutionLogLevelHolder;
 import com.hp.oo.execution.reflection.ReflectionAdapter;
@@ -27,6 +26,7 @@ import com.hp.oo.orchestrator.services.PauseResumeService;
 import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
 import com.hp.score.api.ExecutionStep;
 import com.hp.score.api.ScoreEvent;
+import com.hp.score.api.StartBranchDataContainer;
 import com.hp.score.lang.SystemContext;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -57,7 +57,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     // timeout for event dump
     private static final long EVENT_AGGREGATION_TIME_THRESHOLD = 2 * 60 * 1000;
-    private static final long EVENT_AGGREGATION_DEBUGGER_TIME_THRESHOLD  = 750;
+    private static final long EVENT_AGGREGATION_DEBUGGER_TIME_THRESHOLD = 750;
 
     @Autowired
     private PauseResumeService pauseService;
@@ -473,7 +473,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
         // timeout trigger
         //noinspection ConstantConditions
-        if ( isDebuggerMode(execution.getSystemContext())) {
+        if (isDebuggerMode(execution.getSystemContext())) {
             shouldDump |= currTime - execution.getLastEventDumpTime() >= EVENT_AGGREGATION_DEBUGGER_TIME_THRESHOLD;
         } else {
             shouldDump |= (execution.getLastEventDumpTime() != 0) &&
@@ -522,8 +522,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     private void dumpBusEvents(Execution execution) {
         @SuppressWarnings("unchecked") ArrayDeque<ScoreEvent> eventsQueue = execution.getSystemContext().getEvents();
-        if(eventsQueue == null) return;
-        for(ScoreEvent eventWrapper:eventsQueue){
+        if (eventsQueue == null) {
+            return;
+        }
+        for (ScoreEvent eventWrapper : eventsQueue) {
             eventBus.dispatch(eventWrapper);
         }
         eventsQueue.clear();
@@ -607,8 +609,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
         SystemContext eventData = new SystemContext(systemContext);
         eventData.put("error_message",ex.getMessage()); //TODO - change to const
         eventData.put("logMessage", logMessage);  //TODO - change to const
-        eventData.put("logLevelCategory",logLevelCategory.getCategoryName()); //TODO - change to const
-        ScoreEvent eventWrapper = new ScoreEvent(ExecutionConstants.SCORE_ERROR_EVENT,eventData);
+        eventData.put("logLevelCategory", logLevelCategory.getCategoryName()); //TODO - change to const
+        ScoreEvent eventWrapper = new ScoreEvent(ExecutionConstants.SCORE_ERROR_EVENT, eventData);
         eventBus.dispatch(eventWrapper);
     }
 
