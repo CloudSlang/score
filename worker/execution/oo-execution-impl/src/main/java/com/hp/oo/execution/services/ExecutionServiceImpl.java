@@ -13,12 +13,10 @@ import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.oo.enginefacade.execution.StartBranchDataContainer;
 import com.hp.oo.execution.ExecutionEventAggregatorHolder;
 import com.hp.oo.execution.ExecutionLogLevelHolder;
-import com.hp.oo.execution.gateways.EventGateway;
 import com.hp.oo.execution.reflection.ReflectionAdapter;
 import com.hp.oo.execution.services.dbsupport.WorkerDbSupportService;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
-import com.hp.score.api.ExecutionStep;
 import com.hp.oo.internal.sdk.execution.OOContext;
 import com.hp.oo.internal.sdk.execution.events.EventBus;
 import com.hp.oo.internal.sdk.execution.events.ExecutionEvent;
@@ -27,6 +25,7 @@ import com.hp.oo.internal.sdk.execution.events.ExecutionEventUtils;
 import com.hp.oo.orchestrator.services.CancelExecutionService;
 import com.hp.oo.orchestrator.services.PauseResumeService;
 import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
+import com.hp.score.api.ExecutionStep;
 import com.hp.score.api.ScoreEvent;
 import com.hp.score.lang.SystemContext;
 import org.apache.commons.lang.StringUtils;
@@ -625,8 +624,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
 
     private void createNavErrorEvent(RuntimeException ex, String logMessage,
-                                     LogLevelCategory logLevelCategory, Map<String, Serializable> systemContext) {
-        HashMap<String, Serializable> eventData = new HashMap<>(systemContext);
+                                     LogLevelCategory logLevelCategory, SystemContext systemContext
+    ) {
+        SystemContext eventData = new SystemContext(systemContext);
         eventData.put("error_message",ex.getMessage()); //TODO - change to const
         eventData.put("logMessage",logMessage);  //TODO - change to const
         eventData.put("logLevelCategory",logLevelCategory.getCategoryName()); //TODO - change to const
