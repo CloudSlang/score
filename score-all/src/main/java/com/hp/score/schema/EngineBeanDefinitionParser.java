@@ -68,7 +68,6 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(PartitionUtils.class, null);
 		put(ExecutionMessageConverter.class, null);
 		put(ExecutionSerializationUtil.class, null);
-		put(ExecConfigSerializationUtil.class, null);
 		put(SqlUtils.class, null);
 		put(SqlInQueryReader.class, null);
 		put(DataBaseDetector.class, null);
