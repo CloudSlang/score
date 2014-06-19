@@ -4,7 +4,7 @@ import ch.lambdaj.function.convert.Converter;
 import com.hp.oo.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.engine.queue.services.QueueDispatcherService;
-import com.hp.score.api.EndBranchDataContainer;
+import com.hp.oo.enginefacade.execution.EndBranchDataContainer;
 import com.hp.oo.enginefacade.execution.ExecutionEnums;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
