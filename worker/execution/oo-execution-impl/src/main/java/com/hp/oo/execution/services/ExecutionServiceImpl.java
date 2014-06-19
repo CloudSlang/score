@@ -512,7 +512,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     private void dumpEvents(Execution execution) {
         List<ExecutionEvent> executionEvents = execution.getAggregatedEvents();
 
-        if(eventsPersistencyOn){ //consider flag events and debugger before sending events
+        if(eventsPersistencyOn) { //consider flag events and debugger before sending events
             executionEventService.createEvents(executionEvents);
         }
         execution.getAggregatedEvents().clear(); //must clean so we wont send it twice - once from here and once from the QueueListener onTerminated()
