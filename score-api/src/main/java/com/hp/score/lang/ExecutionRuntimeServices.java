@@ -30,17 +30,6 @@ public class ExecutionRuntimeServices implements Serializable {
 
     protected Map<String, Serializable> myMap = new HashMap<>();
 
-    public ExecutionRuntimeServices() {
-    }
-
-    public ExecutionRuntimeServices(Map<String, Serializable> parameters) {
-        this.myMap = new HashMap<>(parameters);
-    }
-
-    public ExecutionRuntimeServices(ExecutionRuntimeServices origin) {
-        this.myMap = new HashMap<>(origin.myMap);
-    }
-
     public void pause() {
         myMap.put(EXECUTION_PAUSED, Boolean.TRUE);
     }
@@ -63,11 +52,11 @@ public class ExecutionRuntimeServices implements Serializable {
         return getFromMap(SCORE_EVENTS_QUEUE);
     }
 
-    public void setNoWorkerInGroup(String groupName){
-           myMap.put(NO_WORKERS_IN_GROUP, groupName);
+    public void setNoWorkerInGroup(String groupName) {
+        myMap.put(NO_WORKERS_IN_GROUP, groupName);
     }
 
-    public String getNoWorkerInGroupName(){
+    public String getNoWorkerInGroupName() {
         return getFromMap(NO_WORKERS_IN_GROUP);
     }
 
@@ -91,15 +80,12 @@ public class ExecutionRuntimeServices implements Serializable {
         if (!myMap.containsKey(BRANCH_DATA)) {
             myMap.put(BRANCH_DATA, new ArrayList<StartBranchDataContainer>());
         }
-        @SuppressWarnings("unchecked")
-        List<StartBranchDataContainer> branchesData = (List<StartBranchDataContainer>) myMap.get(BRANCH_DATA);
+        List<StartBranchDataContainer> branchesData = getFromMap(BRANCH_DATA);
         branchesData.add(new StartBranchDataContainer(startPosition, executionPlanId, context, new SystemContext(executionRuntimeServices.myMap)));
     }
 
     public List<StartBranchDataContainer> getBranchesData() {
-        @SuppressWarnings("unchecked")
-        List<StartBranchDataContainer> branchesData = (List<StartBranchDataContainer>) myMap.get(BRANCH_DATA);
-        return branchesData;
+        return getFromMap(BRANCH_DATA);
     }
 
     @Override
