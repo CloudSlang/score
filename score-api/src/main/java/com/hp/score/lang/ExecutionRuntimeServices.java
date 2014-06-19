@@ -84,8 +84,23 @@ public class ExecutionRuntimeServices implements Serializable {
         branchesData.add(new StartBranchDataContainer(startPosition, executionPlanId, context, new SystemContext(executionRuntimeServices.myMap)));
     }
 
-    public List<StartBranchDataContainer> getBranchesData() {
-        return getFromMap(BRANCH_DATA);
+    /**
+     * Removes the branches data and returns it
+     */
+    public List<StartBranchDataContainer> removeBranchesData() {
+        return removeFromMap(BRANCH_DATA);
+    }
+
+    private <T> T removeFromMap(String key) {
+        if (myMap.containsKey(key)) {
+            Serializable value = myMap.remove(key);
+            if (value != null) {
+                @SuppressWarnings("unchecked")
+                T retVal = (T) value;
+                return retVal;
+            }
+        }
+        return null;
     }
 
     @Override

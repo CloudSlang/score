@@ -177,7 +177,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             executeStep(execution, currStep);
 
             //Run the split step
-            List<StartBranchDataContainer> newBranches = execution.getSystemContext().getBranchesData();
+            List<StartBranchDataContainer> newBranches = execution.getSystemContext().removeBranchesData();
 
             List<Execution> newExecutions = createChildExecutions(execution.getExecutionId(), newBranches);
 
