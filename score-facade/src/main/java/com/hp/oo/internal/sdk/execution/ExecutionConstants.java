@@ -8,7 +8,7 @@ package com.hp.oo.internal.sdk.execution;
  */
 public class ExecutionConstants {
 
-//    public static final String SYSTEM_CONTEXT = "systemContext";
+    public static final String SYSTEM_CONTEXT = "systemContext";
     public static final String SERIALIZABLE_SESSION_CONTEXT = "serializableSessionContext";    //sits in PluginParams
 
     public static final String EXTERNAL_URL = "EXTERNAL_URL";

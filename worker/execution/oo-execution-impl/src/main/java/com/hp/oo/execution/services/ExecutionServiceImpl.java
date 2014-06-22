@@ -606,7 +606,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
     private void createNavErrorEvent(RuntimeException ex, String logMessage,
                                      LogLevelCategory logLevelCategory, SystemContext systemContext
     ) {
-        SystemContext eventData = new SystemContext(systemContext);
+        HashMap<String, Serializable> eventData = new HashMap<>();
+        eventData.put(ExecutionConstants.SYSTEM_CONTEXT,new HashMap<>(systemContext));
         eventData.put("error_message",ex.getMessage()); //TODO - change to const
         eventData.put("logMessage", logMessage);  //TODO - change to const
         eventData.put("logLevelCategory", logLevelCategory.getCategoryName()); //TODO - change to const
@@ -622,9 +623,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
         @SuppressWarnings("unchecked") Deque<ExecutionEvent> eventsQueue = (Deque) execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
 
         String stepId = currStep.getExecStepId().toString();
-        ExecutionEvent errorExecutionEvent = ExecutionEventFactory.createLogEvent(execution.getExecutionId(), stepId, logMessage, LogLevel.ERROR,
-                logLevelCategory, stepInputForEvent, ExecutionEventUtils.increaseEvent(systemContext), systemContext);
-        eventsQueue.add(errorExecutionEvent);
         if (isDebuggerMode(execution.getSystemContext())) {
             ExecutionEvent errorDebug = ExecutionEventFactory.createDebuggerErrorEvent(execution.getExecutionId(), stepId, logMessage, LogLevel.ERROR,
                     logLevelCategory, stepInputForEvent, ExecutionEventUtils.increaseEvent(systemContext), systemContext);
