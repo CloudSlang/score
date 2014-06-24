@@ -6,7 +6,6 @@ import com.hp.oo.broker.services.RuntimeValueService;
 import com.hp.oo.engine.execution.events.services.ExecutionEventService;
 import com.hp.oo.enginefacade.execution.ExecutionEnums;
 import com.hp.oo.enginefacade.execution.ExecutionEnums.ExecutionStatus;
-import com.hp.oo.enginefacade.execution.ExecutionEnums.LogLevel;
 import com.hp.oo.enginefacade.execution.ExecutionEnums.LogLevelCategory;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.enginefacade.execution.PauseReason;
@@ -33,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -575,19 +573,13 @@ public final class ExecutionServiceImpl implements ExecutionService {
             Map<String, Object> stepData = prepareStepData(execution, currStep);
             reflectionAdapter.executeControlAction(currStep.getAction(), stepData);
         } catch (RuntimeException ex) {
-            handleStepExecutionException(execution, currStep, ex);
+            handleStepExecutionException(execution, ex);
         }
     }
 
-    private void handleStepExecutionException(Execution execution, ExecutionStep currStep, RuntimeException ex) {
+    private void handleStepExecutionException(Execution execution,RuntimeException ex) {
         logger.error("Error occurred during operation execution.  Execution id: " + execution.getExecutionId(), ex);
         execution.getSystemContext().put(ExecutionConstants.EXECUTION_STEP_ERROR_KEY, ex.getMessage());
-
-        try {
-            createErrorEvent(execution, currStep, ex, "Error occurred during operation execution", LogLevelCategory.STEP_OPER_ERROR, execution.getSystemContext());
-        } catch (RuntimeException eventEx) {
-            logger.error("Failed to create event: ", eventEx);
-        }
     }
 
     private Map<String, Object> prepareStepData(Execution execution, ExecutionStep currStep) {
@@ -611,23 +603,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
         eventData.put("logLevelCategory", logLevelCategory.getCategoryName()); //TODO - change to const
         ScoreEvent eventWrapper = new ScoreEvent(ExecutionConstants.SCORE_ERROR_EVENT, eventData);
         eventBus.dispatch(eventWrapper);
-    }
-
-    private ExecutionEvent createErrorEvent(Execution execution, ExecutionStep currStep, RuntimeException ex, String logMessage, LogLevelCategory logLevelCategory, SystemContext systemContext) {
-        Map<String, String> map = new HashMap<>();
-        map.put("error_message", ex.getMessage());
-        OOContext stepInputForEvent = new OOContext();
-        stepInputForEvent.put("error_message", map.get("error_message"), false);
-        @SuppressWarnings("unchecked") Deque<ExecutionEvent> eventsQueue = (Deque) execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
-
-        String stepId = currStep.getExecStepId().toString();
-        if (isDebuggerMode(execution.getSystemContext())) {
-            ExecutionEvent errorDebug = ExecutionEventFactory.createDebuggerErrorEvent(execution.getExecutionId(), stepId, logMessage, LogLevel.ERROR,
-                    logLevelCategory, stepInputForEvent, ExecutionEventUtils.increaseEvent(systemContext), systemContext);
-            eventsQueue.add(errorDebug);
-        }
-
-        return null;
     }
 
     protected void navigate(Execution execution, ExecutionStep currStep) {
