@@ -10,8 +10,6 @@ import com.hp.oo.enginefacade.execution.ExecutionEnums.LogLevel;
 import com.hp.oo.enginefacade.execution.ExecutionEnums.LogLevelCategory;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.enginefacade.execution.PauseReason;
-import com.hp.oo.execution.ExecutionEventAggregatorHolder;
-import com.hp.oo.execution.ExecutionLogLevelHolder;
 import com.hp.oo.execution.reflection.ReflectionAdapter;
 import com.hp.oo.execution.services.dbsupport.WorkerDbSupportService;
 import com.hp.oo.internal.sdk.execution.Execution;
@@ -92,10 +90,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
     public Execution execute(Execution execution) {
         try {
             // sets thread local context with log level
-            storeCurrentLogLevel(execution);
+//            storeCurrentLogLevel(execution);
 
             // sets thread local context with a reference to the execution objects aggregated events list
-            storeAggregatedEvents(execution);
+//            storeAggregatedEvents(execution);
 
             // handle flow cancellation
             if (handleCancelledFlow(execution, isDebuggerMode(execution.getSystemContext()))) {
@@ -167,10 +165,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
     public List<Execution> executeSplit(Execution execution) {
         try {
             // sets thread local context with log level
-            storeCurrentLogLevel(execution);
+//            storeCurrentLogLevel(execution);
 
             // sets thread local context with a reference to the execution objects aggregated events list
-            storeAggregatedEvents(execution);
+//            storeAggregatedEvents(execution);
 
             ExecutionStep currStep = loadExecutionStep(execution);
 
@@ -440,13 +438,13 @@ public final class ExecutionServiceImpl implements ExecutionService {
         return null; // not paused
     }
 
-    private void storeAggregatedEvents(Execution execution) {
-        if (execution.getAggregatedEvents() == null) {
-            execution.setAggregatedEvents(new ArrayList<ExecutionEvent>());
-        }
-
-        ExecutionEventAggregatorHolder.setAggregatedExecutionEvents(execution.getAggregatedEvents());
-    }
+//    private void storeAggregatedEvents(Execution execution) {
+//        if (execution.getAggregatedEvents() == null) {
+//            execution.setAggregatedEvents(new ArrayList<ExecutionEvent>());
+//        }
+//
+//        ExecutionEventAggregatorHolder.setAggregatedExecutionEvents(execution.getAggregatedEvents());
+//    }
 
     private void addExecutionEvent(Execution execution) {
         // move all the events form the SystemContext into the event channel
@@ -458,7 +456,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         eventsQueue.clear();
         execution.getSystemContext().remove(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
         // clean up thread local context to avoid memory leaks
-        ExecutionLogLevelHolder.removeExecutionLogLevel();
+//        ExecutionLogLevelHolder.removeExecutionLogLevel();
     }
 
     private void dumpExecutionEvents(Execution execution, boolean forceDump) {
@@ -497,7 +495,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         }
 
         // clean up thread local context to avoid memory leaks
-        ExecutionEventAggregatorHolder.removeAggregatedExecutionEvents();
+//        ExecutionEventAggregatorHolder.removeAggregatedExecutionEvents();
     }
 
     private boolean isDebuggerMode(Map<String, Serializable> systemContext) {
@@ -531,18 +529,18 @@ public final class ExecutionServiceImpl implements ExecutionService {
         eventsQueue.clear();
     }
 
-    private void storeCurrentLogLevel(Execution execution) {
-        String logLevelStr = (String) execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_LOG_LEVEL);
-        if (StringUtils.isNotEmpty(logLevelStr)) {
-            LogLevel logLevel;
-            try {
-                logLevel = LogLevel.valueOf(logLevelStr);
-            } catch (NullPointerException ex) {
-                logLevel = LogLevel.INFO;
-            }
-            ExecutionLogLevelHolder.setExecutionLogLevel(logLevel);
-        }
-    }
+//    private void storeCurrentLogLevel(Execution execution) {
+//        String logLevelStr = (String) execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_LOG_LEVEL);
+//        if (StringUtils.isNotEmpty(logLevelStr)) {
+//            LogLevel logLevel;
+//            try {
+//                logLevel = LogLevel.valueOf(logLevelStr);
+//            } catch (NullPointerException ex) {
+//                logLevel = LogLevel.INFO;
+//            }
+//            ExecutionLogLevelHolder.setExecutionLogLevel(logLevel);
+//        }
+//    }
 
     protected ExecutionStep loadExecutionStep(Execution execution) {
         RunningExecutionPlan runningExecutionPlan;

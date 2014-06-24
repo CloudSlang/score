@@ -25,6 +25,6 @@
 	<integration:filter input-channel="event_Channel" output-channel="event_ChannelAfterFilter"
 			 ref="filter_bean" method="logFilterAccept" discard-channel="rejectedMessages"/>
 
-	<bean id="filter_bean" class="com.hp.oo.execution.services.ExecutionEventLogFilter"/>
+	<!--<bean id="filter_bean" class="com.hp.oo.execution.services.ExecutionEventLogFilter"/>-->
 
 </beans>

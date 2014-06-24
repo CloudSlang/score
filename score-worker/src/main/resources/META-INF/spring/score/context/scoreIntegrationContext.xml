@@ -19,15 +19,15 @@
 	<!-- filter -->
 	<integration:channel id="eventChannelAfterFilter"/>
 
-	<integration:filter input-channel="eventChannelAfterEnricher" output-channel="eventChannelAfterFilter"
-			ref="filterBean" method="logFilterAccept"/>
+	<!--<integration:filter input-channel="eventChannelAfterEnricher" output-channel="eventChannelAfterFilter"-->
+			<!--ref="filterBean" method="logFilterAccept"/>-->
 
-	<bean id="filterBean" class="com.hp.oo.execution.services.ExecutionEventLogFilter"/>
+	<!--<bean id="filterBean" class="com.hp.oo.execution.services.ExecutionEventLogFilter"/>-->
 
-	<bean id="executionEventAggregatorHolder" class="com.hp.oo.execution.ExecutionEventAggregatorHolder"/>
+	<!--<bean id="executionEventAggregatorHolder" class="com.hp.oo.execution.ExecutionEventAggregatorHolder"/>-->
 
 	<!-- aggregate events after filter -->
-	<integration:service-activator input-channel="eventChannelAfterFilter" ref="executionEventAggregatorHolder"
-			method="aggregateExecutionEvent"/>
+	<!--<integration:service-activator input-channel="eventChannelAfterFilter" ref="executionEventAggregatorHolder"-->
+			<!--method="aggregateExecutionEvent"/>-->
 
 </beans>
