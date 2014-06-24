@@ -82,7 +82,11 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         validateExecutionId(executionId);
         validateBranchId(branchId);
         ExecutionState executionState = findByExecutionIdAndBranchId(executionId, branchId);
-        return executionSerializationUtil.objFromBytes(executionState.getExecutionObject());
+        if (executionState.getExecutionObject() != null) {
+            return executionSerializationUtil.objFromBytes(executionState.getExecutionObject());
+        } else {
+            return null;
+        }
     }
 
     @Override

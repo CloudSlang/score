@@ -218,35 +218,35 @@ public class ExecutionStateServiceTest {
     }
 
     @Test
-    public void testreadExecutionObject_NullExecutionId() {
+    public void testReadExecutionObject_NullExecutionId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("executionId cannot be null or empty");
         executionStateService.readExecutionObject(null, "Asdfsdf");
     }
 
     @Test
-    public void testreadExecutionObject_EmptyExecutionId() {
+    public void testReadExecutionObject_EmptyExecutionId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("executionId cannot be null or empty");
         executionStateService.readExecutionObject("         ", "Asdfsdf");
     }
 
     @Test
-    public void testreadExecutionObject_NullBranchId() {
+    public void testReadExecutionObject_NullBranchId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("branchId cannot be null or empty");
         executionStateService.readExecutionObject("Asdasd", null);
     }
 
     @Test
-    public void testreadExecutionObject_EmptyBranchId() {
+    public void testReadExecutionObject_EmptyBranchId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("branchId cannot be null or empty");
         executionStateService.readExecutionObject("Asdasd", "          ");
     }
 
     @Test
-    public void testreadExecutionObject() {
+    public void testReadExecutionObject() {
         String executionId = UUID.randomUUID().toString();
         String branchId = UUID.randomUUID().toString();
 
@@ -263,35 +263,49 @@ public class ExecutionStateServiceTest {
     }
 
     @Test
-    public void testupdateExecutionObject_NullExecutionId() {
+    public void testReadNullExecutionObject() {
+        String executionId = UUID.randomUUID().toString();
+        String branchId = UUID.randomUUID().toString();
+
+        ExecutionState executionState = new ExecutionState();
+        executionState.setExecutionObject(null);
+
+        when(executionStateRepository.findByExecutionIdAndBranchId(executionId, branchId)).thenReturn(executionState);
+
+        Execution actualExecution = executionStateService.readExecutionObject(executionId, branchId);
+        assertThat(actualExecution).isNull();
+    }
+
+    @Test
+    public void testUpdateExecutionObject_NullExecutionId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("executionId cannot be null or empty");
         executionStateService.updateExecutionObject(null, "Asdfsdf", null);
     }
 
     @Test
-    public void testupdateExecutionObject_EmptyExecutionId() {
+    public void testUpdateExecutionObject_EmptyExecutionId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("executionId cannot be null or empty");
         executionStateService.updateExecutionObject("         ", "Asdfsdf", null);
     }
 
     @Test
-    public void testupdateExecutionObject_NullBranchId() {
+    public void testUpdateExecutionObject_NullBranchId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("branchId cannot be null or empty");
         executionStateService.updateExecutionObject("Asdasd", null, null);
     }
 
     @Test
-    public void testupdateExecutionObject_EmptyBranchId() {
+    public void testUpdateExecutionObject_EmptyBranchId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("branchId cannot be null or empty");
         executionStateService.updateExecutionObject("Asdasd", "          ", null);
     }
 
     @Test
-    public void testupdateExecutionObject() {
+    public void testUpdateExecutionObject() {
         String executionId = UUID.randomUUID().toString();
         String branchId = UUID.randomUUID().toString();
         Execution execution = new Execution();
