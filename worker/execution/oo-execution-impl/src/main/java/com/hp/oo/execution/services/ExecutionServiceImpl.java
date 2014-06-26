@@ -340,7 +340,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
         SystemContext systemContext = execution.getSystemContext();
         String executionId = execution.getExecutionId();
         String branchId = (String) systemContext.get(ExecutionConstants.BRANCH_ID);
-        String flowUuid = (String) systemContext.get(ExecutionConstants.FLOW_UUID);
 
         @SuppressWarnings({"unchecked"})
         ArrayDeque<ExecutionEvent> eventsQueue = (ArrayDeque<ExecutionEvent>) systemContext.get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
@@ -351,15 +350,12 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
         //If USER_PAUSED send such event
         if (reason.equals(PauseReason.USER_PAUSED)) {
-            ExecutionEvent pauseEvent = ExecutionEventFactory.createPausedEvent(executionId, flowUuid, ExecutionEventUtils.increaseEvent(systemContext), systemContext);
-            eventsQueue.add(pauseEvent);
-
             if (branchId != null) {
                 // we pause the branch because the Parent was user-paused (see findPauseReason)
                 pauseService.pauseExecution(executionId, branchId, reason); // this creates a DB record for this branch, as Pending-paused
             }
         }
-        ExecutionEventFactory.createStepLogEvent(executionId, ExecutionEventUtils.increaseEvent(systemContext), ExecutionEnums.StepLogCategory.STEP_PAUSED, systemContext);
+        addPauseEvent(systemContext);
 
         //dump bus events here because out side is too late
         dumpBusEvents(execution);
@@ -374,6 +370,14 @@ public final class ExecutionServiceImpl implements ExecutionService {
         if (logger.isDebugEnabled()) {
             logger.debug("Execution with execution_id: " + execution.getExecutionId() + " is paused!");
         }
+    }
+
+    private void addPauseEvent(SystemContext systemContext) {
+        //TODO : add pause reason??
+        HashMap<String, Serializable> eventData = new HashMap<>();
+        eventData.put(ExecutionConstants.SYSTEM_CONTEXT,new HashMap<>(systemContext));
+        ScoreEvent eventWrapper = new ScoreEvent(ExecutionConstants.SCORE_PAUSED_EVENT, eventData);
+        eventBus.dispatch(eventWrapper);
     }
 
     private boolean handlePausedFlowForDebuggerMode(Execution execution) {
@@ -594,8 +598,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     private void createNavErrorEvent(RuntimeException ex, String logMessage,
-                                     LogLevelCategory logLevelCategory, SystemContext systemContext
-    ) {
+                                     LogLevelCategory logLevelCategory, SystemContext systemContext) {
         HashMap<String, Serializable> eventData = new HashMap<>();
         eventData.put(ExecutionConstants.SYSTEM_CONTEXT,new HashMap<>(systemContext));
         eventData.put("error_message",ex.getMessage()); //TODO - change to const
