@@ -4,7 +4,6 @@ import com.hp.oo.broker.entities.BranchContextHolder;
 import com.hp.oo.broker.entities.RunningExecutionPlan;
 import com.hp.oo.broker.services.RuntimeValueService;
 import com.hp.oo.engine.execution.events.services.ExecutionEventService;
-import com.hp.oo.enginefacade.execution.ExecutionEnums;
 import com.hp.oo.enginefacade.execution.ExecutionEnums.ExecutionStatus;
 import com.hp.oo.enginefacade.execution.ExecutionEnums.LogLevelCategory;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
@@ -16,8 +15,6 @@ import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.oo.internal.sdk.execution.OOContext;
 import com.hp.oo.internal.sdk.execution.events.EventBus;
 import com.hp.oo.internal.sdk.execution.events.ExecutionEvent;
-import com.hp.oo.internal.sdk.execution.events.ExecutionEventFactory;
-import com.hp.oo.internal.sdk.execution.events.ExecutionEventUtils;
 import com.hp.oo.orchestrator.services.CancelExecutionService;
 import com.hp.oo.orchestrator.services.PauseResumeService;
 import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
@@ -341,13 +338,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
         String executionId = execution.getExecutionId();
         String branchId = (String) systemContext.get(ExecutionConstants.BRANCH_ID);
 
-        @SuppressWarnings({"unchecked"})
-        ArrayDeque<ExecutionEvent> eventsQueue = (ArrayDeque<ExecutionEvent>) systemContext.get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
-        if (eventsQueue == null) {
-            eventsQueue = new ArrayDeque<>();
-            execution.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_QUEUE, eventsQueue);
-        }
-
         //If USER_PAUSED send such event
         if (reason.equals(PauseReason.USER_PAUSED)) {
             if (branchId != null) {
@@ -397,13 +387,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
         if (reason == null) {
             return false; //indicate that the flow was not paused
         }
-        ExecutionEventFactory.createStepLogEvent(executionId, ExecutionEventUtils.increaseEvent(systemContext), ExecutionEnums.StepLogCategory.STEP_PAUSED, systemContext);
-
+        addPauseEvent(systemContext);
         dumpBusEvents(execution);
-
-        //just dump events that were written in afl
-        addExecutionEvent(execution);
-        dumpEvents(execution);
 
         //Write execution to the db! Pay attention - do not do anything to the execution or its context after this line!!!
         pauseService.writeExecutionObject(executionId, branchId, execution);
@@ -456,7 +441,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         }
 
         eventsQueue.clear();
-        execution.getSystemContext().remove(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
+        //execution.getSystemContext().remove(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
         // clean up thread local context to avoid memory leaks
 //        ExecutionLogLevelHolder.removeExecutionLogLevel();
     }
@@ -592,8 +577,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
         addContextData(stepData, execution);
 
         // put in Queue the ExecutionEvent
-        ArrayDeque<ExecutionEvent> eventsQueue = new ArrayDeque<>();
-        execution.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_QUEUE, eventsQueue);
+        //ArrayDeque<ExecutionEvent> eventsQueue = new ArrayDeque<>();
+        //execution.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_QUEUE, eventsQueue);
         return stepData;
     }
 
@@ -601,7 +586,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
                                      LogLevelCategory logLevelCategory, SystemContext systemContext) {
         HashMap<String, Serializable> eventData = new HashMap<>();
         eventData.put(ExecutionConstants.SYSTEM_CONTEXT,new HashMap<>(systemContext));
-        eventData.put("error_message",ex.getMessage()); //TODO - change to const
+        eventData.put(ExecutionConstants.SCORE_ERROR_MSG,ex.getMessage());
         eventData.put("logMessage", logMessage);  //TODO - change to const
         eventData.put("logLevelCategory", logLevelCategory.getCategoryName()); //TODO - change to const
         ScoreEvent eventWrapper = new ScoreEvent(ExecutionConstants.SCORE_ERROR_EVENT, eventData);

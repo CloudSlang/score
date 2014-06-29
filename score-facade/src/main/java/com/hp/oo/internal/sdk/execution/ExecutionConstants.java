@@ -57,6 +57,8 @@ public class ExecutionConstants {
 
     public static final String SCORE_PAUSED_EVENT = "SCORE_PAUSED_EVENT";
 
+    public static final String SCORE_ERROR_MSG = "error_message";
+
     //For Workers Groups
     public static final String OPERATION_GROUP = "OPERATION_GROUP"; //the group that the action need to run on
     public static final String OPERATION_WORKER = "worker_uuid"; //the group that the action need to run on
