@@ -115,12 +115,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
             // currently handles groups and jms optimizations
             postExecutionSettings(execution);
 
-            //If execution was  paused in afl - to avoid delay of configuration
+            //If execution was  paused in language - to avoid delay of configuration
             if (execution.getSystemContext().isPaused()) {
-                if (!isDebuggerMode(execution.getSystemContext()) && handlePausedFlowAfterStep(execution)) {
-                    return null;
-                }
-                if (isDebuggerMode(execution.getSystemContext()) && handlePausedFlowForDebuggerMode(execution)) {
+                if (handlePausedFlowAfterStep(execution)) {
                     return null;
                 }
             }
