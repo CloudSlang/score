@@ -71,6 +71,7 @@ public interface ExecutionEnums {
         STEP_OPER_GROUP ("STEP_OPER_GROUP",  "execution.logEvent.stepOperationGroup.title.label",  "execution.logEvent.stepOperationGroup.description.label"),
         STEP_OPER_ERROR ("STEP_OPER_ERROR",  "execution.logEvent.stepOperationError.title.label",  "execution.logEvent.stepOperationError.description.label"),
         STEP_NAV_ERROR ("STEP_NAV_ERROR",  "execution.logEvent.stepNavigationError.title.label",  "execution.logEvent.stepNavigationError.description.label"),
+        STEP_SPLIT_ERROR ("STEP_SPLIT_ERROR",  "execution.logEvent.stepSplitError.title.label",  "execution.logEvent.stepSplitError.description.label"),
         OPER_OUTPUTS ("OPER_OUTPUTS",  "execution.logEvent.operationOutputs.title.label",  "execution.logEvent.operationOutputs.description.label"),
         OPER_RAW_OUTPUTS ("OPER_RAW_OUTPUTS",  "execution.logEvent.operationRawOutputs.title.label",  "execution.logEvent.operationRawOutputs.description.label"),
         OPER_PRIMARY_OUTPUT ("OPER_PRIMARY_OUTPUT",  "execution.logEvent.operationPrimaryOutput.title.label",  "execution.logEvent.operationPrimaryOutput.description.label"),

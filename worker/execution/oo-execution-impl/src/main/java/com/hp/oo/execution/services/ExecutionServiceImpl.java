@@ -166,6 +166,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
             executeStep(execution, currStep);
 
+            failFlowIfSplitStepFailed(execution);
+
             //Run the split step
             List<StartBranchDataContainer> newBranches = execution.getSystemContext().removeBranchesData();
 
@@ -188,6 +190,22 @@ public final class ExecutionServiceImpl implements ExecutionService {
         } catch (Exception ex) {
             logger.error("Exception during the split step!", ex);
             throw ex;
+        }
+    }
+
+
+    private void failFlowIfSplitStepFailed(Execution execution) {
+        if (execution.getSystemContext().containsKey(ExecutionConstants.EXECUTION_STEP_ERROR_KEY)) {
+            String exception = (String) execution.getSystemContext().get(ExecutionConstants.EXECUTION_STEP_ERROR_KEY);
+            execution.getSystemContext().put(ExecutionConstants.FLOW_TERMINATION_TYPE, ExecutionStatus.SYSTEM_FAILURE);
+            execution.setPosition(null); //this ends the flow!!!
+            try {
+                createErrorEvent(exception, "Error occurred during split step ", LogLevelCategory.STEP_SPLIT_ERROR, execution.getSystemContext());
+            } catch (RuntimeException eventEx) {
+                logger.error("Failed to create event: ", eventEx);
+            }
+            throw new RuntimeException(exception);
+
         }
     }
 
@@ -579,15 +597,16 @@ public final class ExecutionServiceImpl implements ExecutionService {
         return stepData;
     }
 
-    private void createNavErrorEvent(RuntimeException ex, String logMessage,
+    private void createErrorEvent(String ex, String logMessage,
                                      LogLevelCategory logLevelCategory, SystemContext systemContext) {
         HashMap<String, Serializable> eventData = new HashMap<>();
         eventData.put(ExecutionConstants.SYSTEM_CONTEXT,new HashMap<>(systemContext));
-        eventData.put(ExecutionConstants.SCORE_ERROR_MSG,ex.getMessage());
+        eventData.put(ExecutionConstants.SCORE_ERROR_MSG,ex);
         eventData.put("logMessage", logMessage);  //TODO - change to const
         eventData.put("logLevelCategory", logLevelCategory.getCategoryName()); //TODO - change to const
         ScoreEvent eventWrapper = new ScoreEvent(ExecutionConstants.SCORE_ERROR_EVENT, eventData);
         eventBus.dispatch(eventWrapper);
+
     }
 
     protected void navigate(Execution execution, ExecutionStep currStep) {
@@ -611,7 +630,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             execution.setPosition(null); //this ends the flow!!!
 
             try {
-                createNavErrorEvent(navEx, "Error occurred during navigation execution ", LogLevelCategory.STEP_NAV_ERROR, execution.getSystemContext());
+                createErrorEvent(navEx.getMessage(), "Error occurred during navigation execution ", LogLevelCategory.STEP_NAV_ERROR, execution.getSystemContext());
             } catch (RuntimeException eventEx) {
                 logger.error("Failed to create event: ", eventEx);
             }
