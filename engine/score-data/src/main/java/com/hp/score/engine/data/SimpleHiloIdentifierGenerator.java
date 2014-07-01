@@ -22,7 +22,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * Date: 4/25/13
  * Time: 11:03 AM
  */
-public class SimpleHiloIdentifierGenerator implements IdentifierGenerator, IdentityGenerator<Long> {
+public class SimpleHiloIdentifierGenerator implements IdentifierGenerator, IdentityGenerator {
 
 	private final Logger logger = Logger.getLogger(getClass());
 
