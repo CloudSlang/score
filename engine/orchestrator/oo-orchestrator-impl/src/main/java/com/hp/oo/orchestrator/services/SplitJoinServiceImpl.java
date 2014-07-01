@@ -50,7 +50,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     private final Converter<Execution, ExecutionMessage> executionToStartExecutionMessage = new Converter<Execution, ExecutionMessage>() {
         @Override
         public ExecutionMessage convert(Execution execution) {
-            return new ExecutionMessage(execution.getExecutionId(),
+            return new ExecutionMessage(execution.getExecutionId().toString(),
                     converter.createPayload(execution));
         }
     };
@@ -62,7 +62,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         @Override
         public FinishedBranch convert(Execution execution) {
             boolean isBranchCancelled = ExecutionEnums.ExecutionStatus.CANCELED.equals(execution.getSystemContext().get(ExecutionConstants.FLOW_TERMINATION_TYPE));
-            return new FinishedBranch(execution.getExecutionId(), execution.getBranchId(), execution.getSplitId(), execution.getError(), new BranchContexts(isBranchCancelled, execution.getContexts(), execution.getSystemContext()));
+            return new FinishedBranch(execution.getExecutionId().toString(), execution.getBranchId(), execution.getSplitId(), execution.getError(), new BranchContexts(isBranchCancelled, execution.getContexts(), execution.getSystemContext()));
         }
     };
 
@@ -85,7 +85,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             branchTriggerMessages.addAll(childExecutionMessages);
 
             // 2. suspend the parent
-            suspendedParents.add(new SuspendedExecution(splitMessage.getParent().getExecutionId(),
+            suspendedParents.add(new SuspendedExecution(splitMessage.getParent().getExecutionId().toString(),
                     splitMessage.getSplitId(),
                     splitMessage.getChildren().size(),
                     splitMessage.getParent()));
@@ -134,7 +134,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         // each finished branch must have it's parent in the suspended table, it is an illegal state otherwise
         for (String splitId : splitIds) {
             if (!suspendedMap.containsKey(splitId)) {
-                String executionId = findExecutionId(executions, splitId);
+                Long executionId = findExecutionId(executions, splitId);
                 logger.error("Couldn't find suspended execution for split " + splitId + " execution id: " + executionId);
             }
         }
@@ -164,7 +164,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         }
     }
 
-    private String findExecutionId(List<Execution> executions, String splitId) {
+    private Long findExecutionId(List<Execution> executions, String splitId) {
         for (Execution execution : executions) {
             if (execution.getSplitId().equals(splitId)) {
                 return execution.getExecutionId();

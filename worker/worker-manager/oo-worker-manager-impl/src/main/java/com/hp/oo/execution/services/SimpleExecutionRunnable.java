@@ -10,6 +10,7 @@ import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.oo.orchestrator.entities.SplitMessage;
 import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -126,7 +127,11 @@ public class SimpleExecutionRunnable implements Runnable {
             if (logger.isDebugEnabled()) {
                 logger.debug("Worker has finished to work on execution: " + executionId);
             }
-            endExecutionCallback.endExecution(executionId);
+            Long executionIdL = null;
+            if (!StringUtils.isEmpty(executionId)) {
+                executionIdL = Long.valueOf(executionId);
+            }
+            endExecutionCallback.endExecution(executionIdL);
             Thread.currentThread().setName(origThreadName);
         }
         return null;

@@ -28,7 +28,7 @@ public class ExecutionState extends AbstractIdentifiable {
     public static final String EMPTY_BRANCH = "EMPTY";
 
     @Column(name = "EXECUTION_ID", nullable = false)
-    private String executionId;
+    private Long executionId;
 
     @Column(name = "BRANCH_ID", nullable = false)
     private String branchId = ExecutionSummary.EMPTY_BRANCH;
@@ -42,11 +42,11 @@ public class ExecutionState extends AbstractIdentifiable {
     @Basic(fetch = FetchType.LAZY)
     private byte[] executionObject;
 
-    public String getExecutionId() {
+    public Long getExecutionId() {
         return executionId;
     }
 
-    public void setExecutionId(String executionId) {
+    public void setExecutionId(Long executionId) {
         this.executionId = executionId;
     }
 

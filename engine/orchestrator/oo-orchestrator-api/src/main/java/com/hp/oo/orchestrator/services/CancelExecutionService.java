@@ -15,18 +15,18 @@ public interface CancelExecutionService {
      * @param executionId - the execution to cancel
      *
      */
-    boolean requestCancelExecution(String executionId);
+    boolean requestCancelExecution(Long executionId);
 
     /**
      * Returns list of executions that are were cancelled (the status is either CANCELED or PENDING_CANCEL)
      * We need it for the cache of cancelled executions in the worker.
      */
-    List<String> readCanceledExecutionsIds();
+    List<Long> readCanceledExecutionsIds();
 
     /**
      * Returns true if the given execution was cancelled.
      * @param executionId - the execution to check.
      * @return true if the given execution's status is CANCELED or PENDING_CANCEL
      */
-    boolean isCanceledExecution(String executionId);
+    boolean isCanceledExecution(Long executionId);
 }

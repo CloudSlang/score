@@ -41,7 +41,7 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
 
     @Override
     @Transactional
-    public boolean requestCancelExecution(String executionId) {
+    public boolean requestCancelExecution(Long executionId) {
         if (logger.isDebugEnabled()) {
             logger.debug("Cancelling Execution Id: " + executionId);
         }
@@ -118,7 +118,7 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
 
         // return execution to queue, as "Terminated"
         queueDispatcherService.dispatch(
-                executionObj.getExecutionId(),
+                String.valueOf(executionObj.getExecutionId()),
                 executionObj.getGroupName(),
                 ExecStatus.TERMINATED,
                 executionMessageConverter.createPayload(executionObj)
@@ -127,14 +127,14 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
 
     @Override
     @Transactional(readOnly = true)
-    public boolean isCanceledExecution(String executionId) {
+    public boolean isCanceledExecution(Long executionId) {
         return executionStateService.readCancelledExecution(executionId) != null;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<String> readCanceledExecutionsIds() {
-        List<String> result = executionStateService.readExecutionIdByStatuses(getCancelStatuses());
+    public List<Long> readCanceledExecutionsIds() {
+        List<Long> result = executionStateService.readExecutionIdByStatuses(getCancelStatuses());
         if (result == null) {
             result = Arrays.asList();
         }

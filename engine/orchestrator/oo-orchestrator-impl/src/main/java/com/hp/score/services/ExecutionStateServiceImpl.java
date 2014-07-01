@@ -27,7 +27,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
 
     @Override
     @Transactional(readOnly = true)
-    public ExecutionState readByExecutionIdAndBranchId(String executionId, String branchId) {
+    public ExecutionState readByExecutionIdAndBranchId(Long executionId, String branchId) {
         validateExecutionId(executionId);
         validateBranchId(branchId);
         return executionStateRepository.findByExecutionIdAndBranchId(executionId, branchId);
@@ -35,27 +35,27 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ExecutionState> readByExecutionId(String executionId) {
+    public List<ExecutionState> readByExecutionId(Long executionId) {
         validateExecutionId(executionId);
         return executionStateRepository.findByExecutionId(executionId);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<String> readExecutionIdByStatuses(List<ExecutionEnums.ExecutionStatus> statuses) {
+    public List<Long> readExecutionIdByStatuses(List<ExecutionEnums.ExecutionStatus> statuses) {
         return executionStateRepository.findExecutionIdByStatuses(statuses);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ExecutionState readCancelledExecution(String executionId) {
+    public ExecutionState readCancelledExecution(Long executionId) {
         validateExecutionId(executionId);
         return executionStateRepository.findByExecutionIdAndBranchIdAndStatusIn(executionId, ExecutionState.EMPTY_BRANCH, getCancelStatuses());
     }
 
     @Override
     @Transactional
-    public ExecutionState createParentExecution(String executionId) {
+    public ExecutionState createParentExecution(Long executionId) {
         validateExecutionId(executionId);
         ExecutionState executionState = new ExecutionState();
         executionState.setExecutionId(executionId);
@@ -66,7 +66,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
 
     @Override
     @Transactional
-    public ExecutionState createExecutionState(String executionId, String branchId) {
+    public ExecutionState createExecutionState(Long executionId, String branchId) {
         validateExecutionId(executionId);
         validateBranchId(branchId);
         ExecutionState executionState = new ExecutionState();
@@ -78,7 +78,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
 
     @Override
     @Transactional(readOnly = true)
-    public Execution readExecutionObject(String executionId, String branchId) {
+    public Execution readExecutionObject(Long executionId, String branchId) {
         validateExecutionId(executionId);
         validateBranchId(branchId);
         ExecutionState executionState = findByExecutionIdAndBranchId(executionId, branchId);
@@ -91,7 +91,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
 
     @Override
     @Transactional
-    public void updateExecutionObject(String executionId, String branchId, Execution execution) {
+    public void updateExecutionObject(Long executionId, String branchId, Execution execution) {
         validateExecutionId(executionId);
         validateBranchId(branchId);
         ExecutionState executionState = findByExecutionIdAndBranchId(executionId, branchId);
@@ -100,7 +100,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
 
     @Override
     @Transactional
-    public void updateExecutionStateStatus(String executionId, String branchId, ExecutionEnums.ExecutionStatus status) {
+    public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionEnums.ExecutionStatus status) {
         validateExecutionId(executionId);
         validateBranchId(branchId);
         Validate.notNull(status, "status cannot be null");
@@ -108,7 +108,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         executionState.setStatus(status);
     }
 
-    private ExecutionState findByExecutionIdAndBranchId(String executionId, String branchId) {
+    private ExecutionState findByExecutionIdAndBranchId(Long executionId, String branchId) {
         ExecutionState executionState = executionStateRepository.findByExecutionIdAndBranchId(executionId, branchId);
         if (executionState == null) {
             throw new RuntimeException("Could not find execution state. executionId:  " + executionId + ", branchId: " + branchId);
@@ -121,7 +121,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
     }
 
     @Override
-    public void deleteExecutionState(String executionId, String branchId) {
+    public void deleteExecutionState(Long executionId, String branchId) {
         validateExecutionId(executionId);
         validateBranchId(branchId);
         ExecutionState executionState = executionStateRepository.findByExecutionIdAndBranchId(executionId, branchId);
@@ -134,7 +134,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         Validate.notEmpty(StringUtils.trim(branchId), "branchId cannot be null or empty");
     }
 
-    private void validateExecutionId(String executionId) {
-        Validate.notEmpty(StringUtils.trim(executionId), "executionId cannot be null or empty");
+    private void validateExecutionId(Long executionId) {
+        Validate.notNull(executionId, "executionId cannot be null or empty");
     }
 }

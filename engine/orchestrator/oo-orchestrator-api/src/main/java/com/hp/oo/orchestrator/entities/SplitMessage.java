@@ -53,7 +53,7 @@ public class SplitMessage implements Message {
 
 	@Override
 	public String getId() {
-		return parent.getExecutionId()+parent.getBranchId();
+		return parent.getExecutionId().toString() + parent.getBranchId();
 	}
 
 	@Override

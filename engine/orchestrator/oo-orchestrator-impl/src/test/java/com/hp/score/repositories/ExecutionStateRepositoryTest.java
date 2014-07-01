@@ -48,7 +48,7 @@ public class ExecutionStateRepositoryTest {
         ExecutionState completedExecutionState = createExecutionState(ExecutionStatus.COMPLETED);
         createExecutionState(ExecutionStatus.PENDING_CANCEL);
 
-        List<String> executionStates = executionStateRepository.findExecutionIdByStatuses(Arrays.asList(ExecutionStatus.CANCELED, ExecutionStatus.COMPLETED));
+        List<Long> executionStates = executionStateRepository.findExecutionIdByStatuses(Arrays.asList(ExecutionStatus.CANCELED, ExecutionStatus.COMPLETED));
 
         assertThat(executionStates).containsExactly(canceledExecutionState.getExecutionId(), completedExecutionState.getExecutionId());
     }
@@ -56,8 +56,7 @@ public class ExecutionStateRepositoryTest {
     private ExecutionState createExecutionState(ExecutionStatus status) {
         ExecutionState executionState = new ExecutionState();
         executionState.setStatus(status);
-        executionState.setExecutionId(UUID.randomUUID()
-                                    .toString());
+        executionState.setExecutionId(123L);
         executionState.setBranchId(UUID.randomUUID().toString());
         executionStateRepository.saveAndFlush(executionState);
         return executionState;

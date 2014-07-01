@@ -7,5 +7,5 @@ package com.hp.oo.execution.services;
  * Time: 14:14
  */
 public interface EndExecutionCallback {
-    void endExecution(String executionId);
+    void endExecution(Long executionId);
 }

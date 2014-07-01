@@ -12,11 +12,11 @@ import java.util.List;
 public interface WorkerConfigurationService {
 
     //todo: orit - refactor method to return boolean
-    List<String> getCancelledExecutions();
+    List<Long> getCancelledExecutions();
 
     List<String> getWorkerGroups();
 
-    boolean isExecutionPaused(String executionId, String branchId);
+    boolean isExecutionPaused(Long executionId, String branchId);
 
     void enabled(boolean enabled);
 }

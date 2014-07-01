@@ -24,9 +24,9 @@ public class ScorePauseResumeImpl implements ScorePauseResume {
 
     @Override
     public boolean pauseExecution(Long executionId) {
-        ExecutionState executionState = executionStateService.readByExecutionIdAndBranchId(executionId.toString(), ExecutionState.EMPTY_BRANCH);
+        ExecutionState executionState = executionStateService.readByExecutionIdAndBranchId(executionId, ExecutionState.EMPTY_BRANCH);
         if (canBePaused(executionState)) {
-            pauseResumeService.pauseExecution(executionId.toString(), null, PauseReason.USER_PAUSED);
+            pauseResumeService.pauseExecution(executionId, null, PauseReason.USER_PAUSED);
             return true;
         } else {
             return false;

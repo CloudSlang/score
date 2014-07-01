@@ -53,7 +53,7 @@ public class ExecutionGatewayImpl implements ExecutionGateway, SubFlowExecutionG
            return new ExecutionMessage(ExecutionMessage.EMPTY_EXEC_STATE_ID,
                    ExecutionMessage.EMPTY_WORKER,
                    workerGroupForMessage,
-                   execution.getExecutionId(), //msgId
+                   String.valueOf(execution.getExecutionId()), //msgId
                    ExecStatus.PENDING,  //it is middle of the flow
                    payload,
                    0).setWorkerKey(UUID.randomUUID().toString());

@@ -188,7 +188,7 @@ public class SplitJoinServiceTest {
         List<ExecutionMessage> argument = queueDispatcherDispatchCaptor.getValue();
         assertThat("exactly one execution should be dispatched", argument.size(), is(1));
         assertThat("parent sent back to the queue should be in status pending", argument.get(0).getStatus(), is(ExecStatus.PENDING));
-        assertThat("ExecutionMessage has a different msg id then the execution object's execution id", argument.get(0).getMsgId(), is(suspendedExecution.getExecutionObj().getExecutionId()));
+        assertThat("ExecutionMessage has a different msg id then the execution object's execution id", argument.get(0).getMsgId(), is(suspendedExecution.getExecutionObj().getExecutionId().toString()));
     }
 
     @Test
@@ -232,7 +232,7 @@ public class SplitJoinServiceTest {
     // private helpers
     private Execution createExecution(Long id) {
         Execution res = new Execution(null, null, null);
-        res.setExecutionId(id.toString());
+        res.setExecutionId(id);
         return res;
     }
 

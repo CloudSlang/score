@@ -3,6 +3,7 @@ package com.hp.oo.execution.services;
 import com.hp.oo.engine.queue.entities.ExecStatus;
 import com.hp.oo.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.engine.queue.services.QueueDispatcherService;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -144,7 +145,11 @@ public class InBuffer implements ApplicationListener, Runnable, WorkerRecoveryLi
         SimpleExecutionRunnable simpleExecutionRunnable = simpleExecutionRunnableFactory.getObject();
         simpleExecutionRunnable.setExecutionMessage(msg);
         simpleExecutionRunnable.setRecoveryFlag(recoveryFlag);
-        workerManager.addExecution(msg.getMsgId(), simpleExecutionRunnable);
+        Long executionId = null;
+        if (!StringUtils.isEmpty(msg.getMsgId())) {
+            executionId = Long.valueOf(msg.getMsgId());
+        }
+        workerManager.addExecution(executionId, simpleExecutionRunnable);
     }
 
 	@Override

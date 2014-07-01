@@ -60,8 +60,8 @@ public class ExecutionServiceTest {
     private static final Long RUNNING_EXE_PLAN_ID = 333L;
     private static final Long EXECUTION_STEP_1_ID = 1L;
     private static final Long EXECUTION_STEP_2_ID = 2L;
-    private static final String EXECUTION_ID_1 = "1111";
-    private static final String EXECUTION_ID_2 = "2222";
+    private static final Long EXECUTION_ID_1 = 1111L;
+    private static final Long EXECUTION_ID_2 = 2222L;
 
     @Autowired
     private ExecutionServiceImpl executionService;
@@ -86,7 +86,7 @@ public class ExecutionServiceTest {
     @Test
     public void handlePausedFlow_NotPausedExecutionTest() {
         Execution exe = new Execution(0L, 0L, new ArrayList<String>());
-        exe.setExecutionId("111");
+        exe.setExecutionId(111L);
         exe.getSystemContext().put(ExecutionConstants.BRANCH_ID, "branch_id");
         exe.getSystemContext().put(ExecutionConstants.FLOW_UUID, "flow_uuid");
         exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String, List>());
@@ -99,7 +99,7 @@ public class ExecutionServiceTest {
 
     @Test
     public void handlePausedFlow_UserPausedTest() {
-        final String executionId = "111";
+        final Long executionId = 111L;
         final String branch_id = null;
 
         Execution exe = getExecutionObjToPause(executionId, branch_id);
@@ -119,7 +119,7 @@ public class ExecutionServiceTest {
     @Test
     // branch is running, and parent is paused by the user -> branch should be paused
     public void handlePausedFlow_UserPausedParentTest() {
-        final String executionId = "111";
+        final Long executionId = 111L;
         final String branch_id = "branch_id";
 
         Execution exe = getExecutionObjToPause(executionId, branch_id);
@@ -143,7 +143,7 @@ public class ExecutionServiceTest {
         Assert.assertTrue(result);
     }
 
-    private Execution getExecutionObjToPause(String executionId, String branch_id) {
+    private Execution getExecutionObjToPause(Long executionId, String branch_id) {
         Execution exe = new Execution(0L, 0L, new ArrayList<String>());
         exe.setExecutionId(executionId);
         exe.getSystemContext().put(ExecutionConstants.BRANCH_ID, branch_id);
@@ -161,7 +161,7 @@ public class ExecutionServiceTest {
     @Test
     public void isExecutionTerminatingTest() {
         Execution exe = new Execution(0L, 0L, new ArrayList<String>());
-        exe.setExecutionId("111");
+        exe.setExecutionId(111L);
         exe.setPosition(null);
 
         boolean result = executionService.isExecutionTerminating(exe);
@@ -186,7 +186,7 @@ public class ExecutionServiceTest {
         locks.add("lock_1");
 
         Execution exe = new Execution(0L, 0L, new ArrayList<String>());
-        exe.setExecutionId("111");
+        exe.setExecutionId(111L);
         exe.getSystemContext().put(ExecutionConstants.SPLIT_ID, "split_id");
         exe.getSystemContext().put(ExecutionConstants.BRANCH_ID, "branch_id");
         exe.getSystemContext().put(ExecutionConstants.ACQUIRED_LOCKS, (Serializable) locks);
@@ -207,7 +207,7 @@ public class ExecutionServiceTest {
         locks.add("lock_3");
 
         Execution exe = new Execution(0L, 0L, new ArrayList<String>());
-        exe.setExecutionId("111");
+        exe.setExecutionId(111l);
         exe.getSystemContext().put(ExecutionConstants.ACQUIRED_LOCKS, (Serializable) locks);
         exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String, List>());
         executionService.clearBranchLocks(exe);
@@ -304,7 +304,7 @@ public class ExecutionServiceTest {
     @Test
     public void postExecutionSettingsTest() {
         Execution exe = new Execution(0L, 0L, new ArrayList<String>());
-        exe.setExecutionId("1111111");
+        exe.setExecutionId(1111111L);
 
         exe.getSystemContext().put(ExecutionConstants.ACTUALLY_OPERATION_GROUP, "Real_Group");
         exe.getSystemContext().put(ExecutionConstants.MUST_GO_TO_QUEUE, true);
@@ -340,7 +340,7 @@ public class ExecutionServiceTest {
         public WorkerConfigurationService getWorkerConfigurationService() {
             WorkerConfigurationService serviceMock = mock(WorkerConfigurationService.class);
 
-            List<String> listOfCancelled = Arrays.asList(EXECUTION_ID_1, EXECUTION_ID_2);
+            List<Long> listOfCancelled = Arrays.asList(EXECUTION_ID_1, EXECUTION_ID_2);
             when(serviceMock.getCancelledExecutions()).thenReturn(listOfCancelled);
 
             return serviceMock;

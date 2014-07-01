@@ -62,12 +62,12 @@ public class ExecutionStateServiceTest {
     public void testReadByExecutionId_EmptyValue() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.readByExecutionId("     ");
+        executionStateService.readByExecutionId(null);
     }
 
     @Test
     public void testReadByExecutionId() {
-        String executionId = UUID.randomUUID().toString();
+        Long executionId = 123L;
         ExecutionState expectedExecutionState = new ExecutionState();
         when(executionStateRepository.findByExecutionId(executionId)).thenReturn(Arrays.asList(expectedExecutionState));
         List<ExecutionState> actualExecutionStates = executionStateService.readByExecutionId(executionId);
@@ -85,26 +85,26 @@ public class ExecutionStateServiceTest {
     public void testReadByExecutionIdAndBranchId_ExecutionIdEmpty() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.readByExecutionIdAndBranchId("     ", "asd");
+        executionStateService.readByExecutionIdAndBranchId(null, "asd");
     }
 
     @Test
     public void testReadByExecutionIdAndBranchId_BranchIdNull() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.readByExecutionIdAndBranchId("asd", null);
+        executionStateService.readByExecutionIdAndBranchId(123L, null);
     }
 
     @Test
     public void testReadByExecutionIdAndBranchId_BranchIdEmpty() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.readByExecutionIdAndBranchId("asd", "      ");
+        executionStateService.readByExecutionIdAndBranchId(123L, "      ");
     }
 
     @Test
     public void testReadByExecutionIdAndBranchId() {
-        String executionId = UUID.randomUUID().toString();
+        Long executionId = 123L;
         String branchId = UUID.randomUUID().toString();
         ExecutionState expectedExecutionState = new ExecutionState();
         when(executionStateRepository.findByExecutionIdAndBranchId(executionId, branchId)).thenReturn(expectedExecutionState);
@@ -114,24 +114,24 @@ public class ExecutionStateServiceTest {
 
     @Test
     public void readExecutionIdAndBranchIdByStatuses_NullList() {
-        when(executionStateRepository.findExecutionIdByStatuses(null)).thenReturn(new ArrayList<String>());
-        List<String> actualExecutionIds = executionStateService.readExecutionIdByStatuses(null);
+        when(executionStateRepository.findExecutionIdByStatuses(null)).thenReturn(new ArrayList<Long>());
+        List<Long> actualExecutionIds = executionStateService.readExecutionIdByStatuses(null);
         assertThat(actualExecutionIds).hasSize(0);
     }
 
     @Test
     public void readExecutionIdAndBranchIdByStatuses_EmptyList() {
-        when(executionStateRepository.findExecutionIdByStatuses(anyListOf(ExecutionEnums.ExecutionStatus.class))).thenReturn(new ArrayList<String>());
-        List<String> actualExecutionIds = executionStateService.readExecutionIdByStatuses(new ArrayList<ExecutionEnums.ExecutionStatus>());
+        when(executionStateRepository.findExecutionIdByStatuses(anyListOf(ExecutionEnums.ExecutionStatus.class))).thenReturn(new ArrayList<Long>());
+        List<Long> actualExecutionIds = executionStateService.readExecutionIdByStatuses(new ArrayList<ExecutionEnums.ExecutionStatus>());
         assertThat(actualExecutionIds).hasSize(0);
     }
 
     @Test
     public void readExecutionIdAndBranchIdByStatuses() {
         List<ExecutionEnums.ExecutionStatus> statuses = Arrays.asList(ExecutionEnums.ExecutionStatus.COMPLETED, ExecutionEnums.ExecutionStatus.CANCELED);
-        List<String> expectedExecutionIds = Arrays.asList("a", "b");
+        List<Long> expectedExecutionIds = Arrays.asList(1L, 2L);
         when(executionStateRepository.findExecutionIdByStatuses(statuses)).thenReturn(expectedExecutionIds);
-        List<String> actualExecutionIds = executionStateService.readExecutionIdByStatuses(statuses);
+        List<Long> actualExecutionIds = executionStateService.readExecutionIdByStatuses(statuses);
         assertThat(actualExecutionIds).containsExactly(expectedExecutionIds.toArray());
     }
 
@@ -146,12 +146,12 @@ public class ExecutionStateServiceTest {
     public void testreadCancelledExecution_EmptyValue() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.readCancelledExecution("      ");
+        executionStateService.readCancelledExecution(null);
     }
 
     @Test
     public void testreadCancelledExecution() {
-        String executionId = UUID.randomUUID().toString();
+        Long executionId = 123L;
         List<ExecutionEnums.ExecutionStatus> statuses = Arrays.asList(ExecutionEnums.ExecutionStatus.CANCELED, ExecutionEnums.ExecutionStatus.PENDING_CANCEL);
         ExecutionState expectedExecutionState = new ExecutionState();
         when(executionStateRepository.findByExecutionIdAndBranchIdAndStatusIn(executionId, ExecutionState.EMPTY_BRANCH, statuses)).thenReturn(expectedExecutionState);
@@ -170,12 +170,12 @@ public class ExecutionStateServiceTest {
     public void testcreateParentExecution_EmptyExecutionId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.createParentExecution("           ");
+        executionStateService.createParentExecution(null);
     }
 
     @Test
     public void testcreateParentExecution() {
-        String executionId = UUID.randomUUID().toString();
+        Long executionId = 123L;
         ExecutionState executionState = executionStateService.createParentExecution(executionId);
         assertThat(executionState.getExecutionId()).isEqualTo(executionId);
     }
@@ -191,26 +191,26 @@ public class ExecutionStateServiceTest {
     public void testCreateExecutionState_EmptyExecutionId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.createExecutionState("         ", "Asdfsdf");
+        executionStateService.createExecutionState(null, "Asdfsdf");
     }
 
     @Test
     public void testCreateExecutionState_NullBranchId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.createExecutionState("Asdasd", null);
+        executionStateService.createExecutionState(123L, null);
     }
 
     @Test
     public void testCreateExecutionState_EmptyBranchId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.createExecutionState("Asdasd", "          ");
+        executionStateService.createExecutionState(123L, "          ");
     }
 
     @Test
     public void testCreateExecutionState() {
-        String executionId = UUID.randomUUID().toString();
+        Long executionId = 123L;
         String branchId = UUID.randomUUID().toString();
         ExecutionState executionState = executionStateService.createExecutionState(executionId, branchId);
         assertThat(executionState.getExecutionId()).isEqualTo(executionId);
@@ -228,26 +228,26 @@ public class ExecutionStateServiceTest {
     public void testReadExecutionObject_EmptyExecutionId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.readExecutionObject("         ", "Asdfsdf");
+        executionStateService.readExecutionObject(null, "Asdfsdf");
     }
 
     @Test
     public void testReadExecutionObject_NullBranchId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.readExecutionObject("Asdasd", null);
+        executionStateService.readExecutionObject(123L, null);
     }
 
     @Test
     public void testReadExecutionObject_EmptyBranchId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.readExecutionObject("Asdasd", "          ");
+        executionStateService.readExecutionObject(123L, "          ");
     }
 
     @Test
     public void testReadExecutionObject() {
-        String executionId = UUID.randomUUID().toString();
+        Long executionId = 123L;
         String branchId = UUID.randomUUID().toString();
 
         Execution expectedExecution = new Execution();
@@ -264,7 +264,7 @@ public class ExecutionStateServiceTest {
 
     @Test
     public void testReadNullExecutionObject() {
-        String executionId = UUID.randomUUID().toString();
+        Long executionId = 123L;
         String branchId = UUID.randomUUID().toString();
 
         ExecutionState executionState = new ExecutionState();
@@ -287,26 +287,26 @@ public class ExecutionStateServiceTest {
     public void testUpdateExecutionObject_EmptyExecutionId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.updateExecutionObject("         ", "Asdfsdf", null);
+        executionStateService.updateExecutionObject(null, "Asdfsdf", null);
     }
 
     @Test
     public void testUpdateExecutionObject_NullBranchId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.updateExecutionObject("Asdasd", null, null);
+        executionStateService.updateExecutionObject(123L, null, null);
     }
 
     @Test
     public void testUpdateExecutionObject_EmptyBranchId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.updateExecutionObject("Asdasd", "          ", null);
+        executionStateService.updateExecutionObject(123L, "          ", null);
     }
 
     @Test
     public void testUpdateExecutionObject() {
-        String executionId = UUID.randomUUID().toString();
+        Long executionId = 123L;
         String branchId = UUID.randomUUID().toString();
         Execution execution = new Execution();
 
@@ -331,33 +331,33 @@ public class ExecutionStateServiceTest {
     public void testUpdateExecutionStateStatus_EmptyExecutionId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.updateExecutionStateStatus("         ", "Asdfsdf", null);
+        executionStateService.updateExecutionStateStatus(null, "Asdfsdf", null);
     }
 
     @Test
     public void testUpdateExecutionStateStatus_NullBranchId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.updateExecutionStateStatus("Asdasd", null, null);
+        executionStateService.updateExecutionStateStatus(123L, null, null);
     }
 
     @Test
     public void testUpdateExecutionStateStatus_EmptyBranchId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.updateExecutionStateStatus("Asdasd", "          ", null);
+        executionStateService.updateExecutionStateStatus(123L, "          ", null);
     }
 
     @Test
     public void testUpdateExecutionStateStatus_NullStatus() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("status cannot be null");
-        executionStateService.updateExecutionStateStatus("Asdasd", "asdasd", null);
+        executionStateService.updateExecutionStateStatus(123L, "asdasd", null);
     }
 
     @Test
     public void testUpdateExecutionStateStatus() {
-        String executionId = UUID.randomUUID().toString();
+        Long executionId = 123L;
         String branchId = UUID.randomUUID().toString();
         ExecutionEnums.ExecutionStatus status = ExecutionEnums.ExecutionStatus.PAUSED;
 
@@ -380,28 +380,28 @@ public class ExecutionStateServiceTest {
     public void testDeleteExecutionState_EmptyExecutionId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.deleteExecutionState("         ", "Asdfsdf");
+        executionStateService.deleteExecutionState(null, "Asdfsdf");
     }
 
     @Test
     public void testDeleteExecutionState_NullBranchId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.deleteExecutionState("Asdasd", null);
+        executionStateService.deleteExecutionState(123L, null);
     }
 
     @Test
     public void testDeleteExecutionState_EmptyBranchId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.deleteExecutionState("Asdasd", "          ");
+        executionStateService.deleteExecutionState(123L, "          ");
     }
 
     @Test
     @DirtiesContext
     public void testDeleteExecutionState() {
         Mockito.reset(executionStateRepository);
-        String executionId = UUID.randomUUID().toString();
+        Long executionId = 123L;
         String branchId = UUID.randomUUID().toString();
 
         ExecutionState executionState = new ExecutionState();

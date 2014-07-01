@@ -14,12 +14,12 @@ import java.util.List;
  */
 public interface ExecutionStateRepository extends JpaRepository<ExecutionState, String> {
 
-    public ExecutionState findByExecutionIdAndBranchId(String executionId, String branchId);
+    public ExecutionState findByExecutionIdAndBranchId(Long executionId, String branchId);
 
-    public List<ExecutionState> findByExecutionId(String executionId);
+    public List<ExecutionState> findByExecutionId(Long executionId);
 
-    public ExecutionState findByExecutionIdAndBranchIdAndStatusIn(String executionId, String branchId, List<ExecutionEnums.ExecutionStatus> statuses);
+    public ExecutionState findByExecutionIdAndBranchIdAndStatusIn(Long executionId, String branchId, List<ExecutionEnums.ExecutionStatus> statuses);
 
     @Query("select executionState.executionId from ExecutionState executionState where executionState.status in :statuses")
-    public List<String> findExecutionIdByStatuses(@Param("statuses") List<ExecutionEnums.ExecutionStatus> statuses);
+    public List<Long> findExecutionIdByStatuses(@Param("statuses") List<ExecutionEnums.ExecutionStatus> statuses);
 }

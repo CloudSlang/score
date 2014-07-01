@@ -36,7 +36,7 @@ public class ScorePauseResumeTest {
     public void testPauseExecution_NoSuchExecution() {
         Long executionId = new Random().nextLong();
 
-        when(executionStateService.readByExecutionIdAndBranchId(executionId.toString(), ExecutionState.EMPTY_BRANCH)).thenReturn(null);
+        when(executionStateService.readByExecutionIdAndBranchId(executionId, ExecutionState.EMPTY_BRANCH)).thenReturn(null);
         assertThat(scorePauseResume.pauseExecution(executionId)).isFalse();
     }
 
@@ -46,7 +46,7 @@ public class ScorePauseResumeTest {
         ExecutionState executionState = new ExecutionState();
         executionState.setStatus(ExecutionEnums.ExecutionStatus.CANCELED);
 
-        when(executionStateService.readByExecutionIdAndBranchId(executionId.toString(), ExecutionState.EMPTY_BRANCH)).thenReturn(executionState);
+        when(executionStateService.readByExecutionIdAndBranchId(executionId, ExecutionState.EMPTY_BRANCH)).thenReturn(executionState);
         assertThat(scorePauseResume.pauseExecution(executionId)).isFalse();
     }
 
@@ -56,7 +56,7 @@ public class ScorePauseResumeTest {
         ExecutionState executionState = new ExecutionState();
         executionState.setStatus(ExecutionEnums.ExecutionStatus.RUNNING);
 
-        when(executionStateService.readByExecutionIdAndBranchId(executionId.toString(), ExecutionState.EMPTY_BRANCH)).thenReturn(executionState);
+        when(executionStateService.readByExecutionIdAndBranchId(executionId, ExecutionState.EMPTY_BRANCH)).thenReturn(executionState);
         assertThat(scorePauseResume.pauseExecution(executionId)).isTrue();
     }
 

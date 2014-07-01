@@ -75,14 +75,12 @@ public class Execution implements Serializable {
         this.groupName = groupName;
     }
 
-    //TODO change the return type to Long
-    public String getExecutionId() {
-        return String.valueOf(executionId);
+    public Long getExecutionId() {
+        return executionId;
     }
 
-    //TODO change the param type to Long
-    public void setExecutionId(String executionId) {
-        this.executionId = Long.parseLong(executionId);
+    public void setExecutionId(Long executionId) {
+        this.executionId = executionId;
     }
 
     public Long getRunningExecutionPlanId() {

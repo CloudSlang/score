@@ -209,13 +209,13 @@ public final class ExecutionServiceImpl implements ExecutionService {
         }
     }
 
-    private List<Execution> createChildExecutions(String executionId, List<StartBranchDataContainer> newBranches) {
+    private List<Execution> createChildExecutions(Long executionId, List<StartBranchDataContainer> newBranches) {
         List<Execution> newExecutions = new ArrayList<>();
         String splitId = UUID.randomUUID().toString();
 
         for (int i = 0; i < newBranches.size(); i++) {
             StartBranchDataContainer from = newBranches.get(i);
-            Execution to = new Execution(Long.parseLong(executionId),
+            Execution to = new Execution(executionId,
                     from.getExecutionPlanId(),
                     from.getStartPosition(),
                     from.getContexts(),
@@ -287,7 +287,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     protected boolean handleCancelledFlow(Execution execution, boolean isDebugMode) {
 
-        String executionId = execution.getExecutionId();
+        Long executionId = execution.getExecutionId();
         boolean executionIsCancelled;
 
         // Different methods to see if the run is cancelled, and cancel it:
@@ -296,7 +296,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         if (isDebugMode) {
             executionIsCancelled = cancelExecutionService.isCanceledExecution(executionId); // in this case we already cancel the execution if needed
         } else {
-            List<String> cancelledExecutions = configurationService.getCancelledExecutions(); // in this case - just check if need to cancel. It will set as cancelled later on QueueEventListener
+            List<Long> cancelledExecutions = configurationService.getCancelledExecutions(); // in this case - just check if need to cancel. It will set as cancelled later on QueueEventListener
             executionIsCancelled = cancelledExecutions.contains(executionId);
         }
 
@@ -350,7 +350,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     private void pauseFlow(PauseReason reason, Execution execution) {
 
         SystemContext systemContext = execution.getSystemContext();
-        String executionId = execution.getExecutionId();
+        Long executionId = execution.getExecutionId();
         String branchId = (String) systemContext.get(ExecutionConstants.BRANCH_ID);
 
         //If USER_PAUSED send such event
@@ -388,7 +388,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     private boolean handlePausedFlowForDebuggerMode(Execution execution) {
 
         SystemContext systemContext = execution.getSystemContext();
-        String executionId = execution.getExecutionId();
+        Long executionId = execution.getExecutionId();
         String branchId = (String) systemContext.get(ExecutionConstants.BRANCH_ID);
 
         //get the type of paused flow
@@ -415,7 +415,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         return true;
     }
 
-    private PauseReason findPauseReason(String executionId, String branchId) {
+    private PauseReason findPauseReason(Long executionId, String branchId) {
 
         // 1. Check the configuration according to branch (can be null or not null...)
         if (configurationService.isExecutionPaused(executionId, branchId)) {

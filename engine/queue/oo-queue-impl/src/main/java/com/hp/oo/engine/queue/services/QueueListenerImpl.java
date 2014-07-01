@@ -61,7 +61,7 @@ public class QueueListenerImpl implements QueueListener {
             //Only delete parent runs and not branches because the Terminated event of branches should not cause the
             //deletion of the entire run
             if (!isBranchExecution(executionMessage)) {
-                executionStateService.deleteExecutionState(executionMessage.getMsgId(), ExecutionSummary.EMPTY_BRANCH);
+                executionStateService.deleteExecutionState(Long.valueOf(executionMessage.getMsgId()), ExecutionSummary.EMPTY_BRANCH);
             }
         }
     }
@@ -87,7 +87,7 @@ public class QueueListenerImpl implements QueueListener {
     public void onFailed(List<ExecutionMessage> messages) {
         for (ExecutionMessage executionMessage : messages) {
             if (!failedBecauseNoWorker(executionMessage)) {
-                executionStateService.deleteExecutionState(executionMessage.getMsgId(), ExecutionSummary.EMPTY_BRANCH);
+                executionStateService.deleteExecutionState(Long.valueOf(executionMessage.getMsgId()), ExecutionSummary.EMPTY_BRANCH);
             }
         }
     }
