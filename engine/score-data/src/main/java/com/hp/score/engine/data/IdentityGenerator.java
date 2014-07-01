@@ -9,9 +9,9 @@ import java.util.List;
  * Date: 4/29/13
  * Time: 10:05 AM
  */
-public interface IdentityGenerator<T extends Serializable> {
+public interface IdentityGenerator {
 
-    T next();
+    Long next();
 
-    List<T> bulk(int bulkSize);
+    List<Long> bulk(int bulkSize);
 }

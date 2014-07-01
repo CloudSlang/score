@@ -317,8 +317,8 @@ public class ExecutionQueueServiceTest {
 		}
 
 		@Bean
-		public IdentityGenerator<Long> identifierGenerator() {
-			return new IdentityGenerator<Long>() {
+		public IdentityGenerator identifierGenerator() {
+			return new IdentityGenerator() {
 				long id = 1;
 
 				@Override

@@ -94,7 +94,7 @@ public final class OrchestratorServiceImpl implements OrchestratorService {
     @Transactional
     public Execution createExecution(Long runningExecutionPlanId, Long position, List<String> contextsNames, ExecutionEnums.LogLevel logLevel) {
         Execution execution = new Execution(runningExecutionPlanId, position, contextsNames);
-        execution.setExecutionId(Long.valueOf(String.valueOf(idGenerator.next())));  //TODO - Ugly!!
+        execution.setExecutionId(idGenerator.next());
 
         // calculation of the execution log level, this is NOT a log4j log level,
         // but for "Log Events" that will be created during the execution itself

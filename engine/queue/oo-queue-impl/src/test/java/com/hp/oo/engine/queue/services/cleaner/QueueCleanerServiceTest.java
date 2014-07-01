@@ -177,8 +177,8 @@ public class QueueCleanerServiceTest {
 		}
 
 		@Bean
-		IdentityGenerator<Long> identifierGenerator() {
-			return new IdentityGenerator<Long>() {
+		IdentityGenerator identifierGenerator() {
+			return new IdentityGenerator() {
 				long id = 1;
 
 				@Override

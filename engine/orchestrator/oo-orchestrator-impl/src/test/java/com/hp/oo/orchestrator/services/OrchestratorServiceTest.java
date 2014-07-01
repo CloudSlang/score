@@ -52,7 +52,7 @@ public class OrchestratorServiceTest {
     private ExecutionMessageConverter executionMessageConverter;
 
     @Mock
-    private IdentityGenerator<Long> idGenerator;
+    private IdentityGenerator idGenerator;
 
     @Configuration
     static class EmptyConfig {}

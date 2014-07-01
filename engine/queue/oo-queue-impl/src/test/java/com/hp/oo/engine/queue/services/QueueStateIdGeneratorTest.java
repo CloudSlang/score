@@ -19,7 +19,7 @@ import static org.mockito.Mockito.verify;
 public class QueueStateIdGeneratorTest {
 
     @Mock
-    private IdentityGenerator<Long> identityGenerator;
+    private IdentityGenerator identityGenerator;
 
     @InjectMocks
     private QueueStateIdGeneratorService queueStateIdGeneratorService =

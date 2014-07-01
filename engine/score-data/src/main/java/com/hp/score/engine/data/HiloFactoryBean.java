@@ -11,7 +11,7 @@ public class HiloFactoryBean implements FactoryBean<IdentityGenerator> {
 	@Autowired
     private DataSource dataSource;
 
-    private IdentityGenerator<Long> identityGenerator;
+    private IdentityGenerator identityGenerator;
 
     @PostConstruct
     private void setupGenerator() {
