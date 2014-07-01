@@ -67,7 +67,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback 
 	private ExecutorService executorService;
 
 	@SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-	private Map<String, Future> mapOfRunningTasks;
+	private Map<Long, Future> mapOfRunningTasks;
 
 	private boolean endOfInit = false;
 	private boolean up = false;
@@ -85,7 +85,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback 
 		mapOfRunningTasks = new ConcurrentHashMap<>(numberOfThreads);
 	}
 
-	public void addExecution(String executionId, Runnable runnable) {
+	public void addExecution(Long executionId, Runnable runnable) {
 		if (!recoveryManager.isInRecovery()) {
 			Future future = executorService.submit(runnable);
 			mapOfRunningTasks.put(executionId, future);
@@ -93,7 +93,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback 
 	}
 
 	@Override
-	public void endExecution(String executionId) {
+	public void endExecution(Long executionId) {
 		mapOfRunningTasks.remove(executionId);
 	}
 
