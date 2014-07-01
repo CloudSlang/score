@@ -59,6 +59,10 @@ public class ExecutionConstants {
 
     public static final String SCORE_ERROR_MSG = "error_message";
 
+    public static final String SCORE_ERROR_LOG_MSG = "logMessage";
+
+    public static final String SCORE_ERROR_TYPE = "SCORE_ERROR_TYPE";
+
     //For Workers Groups
     public static final String OPERATION_GROUP = "OPERATION_GROUP"; //the group that the action need to run on
     public static final String OPERATION_WORKER = "worker_uuid"; //the group that the action need to run on

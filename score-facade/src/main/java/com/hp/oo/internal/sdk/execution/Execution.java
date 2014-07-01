@@ -22,7 +22,6 @@ public class Execution implements Serializable {
     private Long position;
     private String groupName;
     private boolean mustGoToQueue;
-    private List<ExecutionEvent> aggregatedEvents;
     private long lastEventDumpTime;
 
     protected Map<String, Serializable> contexts;
@@ -31,7 +30,6 @@ public class Execution implements Serializable {
     protected Map<String, Serializable> serializableSessionContext;
 
     public Execution() {
-        this.aggregatedEvents = new ArrayList<>();
         this.lastEventDumpTime = 0;
         this.mustGoToQueue = false;
         this.contexts = new HashMap<>();
@@ -110,14 +108,6 @@ public class Execution implements Serializable {
 
     public Map<String, Serializable> getSerializableSessionContext() {
         return serializableSessionContext;
-    }
-
-    public List<ExecutionEvent> getAggregatedEvents() {
-        return aggregatedEvents;
-    }
-
-    public void setAggregatedEvents(List<ExecutionEvent> aggregatedEvents) {
-        this.aggregatedEvents = aggregatedEvents;
     }
 
     public long getLastEventDumpTime() {

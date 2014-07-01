@@ -3,7 +3,6 @@ package com.hp.oo.execution.services;
 import com.hp.oo.broker.entities.BranchContextHolder;
 import com.hp.oo.broker.entities.RunningExecutionPlan;
 import com.hp.oo.broker.services.RuntimeValueService;
-import com.hp.oo.engine.execution.events.services.ExecutionEventService;
 import com.hp.oo.enginefacade.execution.ExecutionEnums.ExecutionStatus;
 import com.hp.oo.enginefacade.execution.ExecutionEnums.LogLevelCategory;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
@@ -14,7 +13,6 @@ import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.oo.internal.sdk.execution.OOContext;
 import com.hp.oo.internal.sdk.execution.events.EventBus;
-import com.hp.oo.internal.sdk.execution.events.ExecutionEvent;
 import com.hp.oo.orchestrator.services.CancelExecutionService;
 import com.hp.oo.orchestrator.services.PauseResumeService;
 import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
@@ -65,9 +63,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
     private WorkerConfigurationService configurationService;
 
     @Autowired
-    private ExecutionEventService executionEventService;
-
-    @Autowired
     private CancelExecutionService cancelExecutionService;
 
     @Autowired
@@ -79,20 +74,12 @@ public final class ExecutionServiceImpl implements ExecutionService {
     @Autowired
     private EventBus eventBus;
 
-    private boolean eventsPersistencyOn = Boolean.getBoolean("events.persistency");
-
     @Override
     public Execution execute(Execution execution) {
         try {
-            // sets thread local context with log level
-//            storeCurrentLogLevel(execution);
-
-            // sets thread local context with a reference to the execution objects aggregated events list
-//            storeAggregatedEvents(execution);
 
             // handle flow cancellation
             if (handleCancelledFlow(execution, isDebuggerMode(execution.getSystemContext()))) {
-                dumpExecutionEvents(execution, true);
                 return execution;
             }
 
@@ -124,12 +111,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
             //dum bus event
             dumpBusEvents(execution);
 
-            // add execution events
-            addExecutionEvent(execution);
-
-            // dump execution events
-            dumpExecutionEvents(execution, false);
-
             if (logger.isDebugEnabled()) {
                 logger.debug("End of step: " + execution.getPosition() + " in execution id: " + execution.getExecutionId());
             }
@@ -156,11 +137,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
     //returns null in case the split was not done - flow is paused or cancelled
     public List<Execution> executeSplit(Execution execution) {
         try {
-            // sets thread local context with log level
-//            storeCurrentLogLevel(execution);
-
-            // sets thread local context with a reference to the execution objects aggregated events list
-//            storeAggregatedEvents(execution);
 
             ExecutionStep currStep = loadExecutionStep(execution);
 
@@ -175,12 +151,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
             //Run the navigation
             navigate(execution, currStep);
-
-            // add execution events
-            addExecutionEvent(execution);
-
-            // dump execution events
-            dumpExecutionEvents(execution, true);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("End of step: " + execution.getPosition() + " in execution id: " + execution.getExecutionId());
@@ -365,10 +335,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
         //dump bus events here because out side is too late
         dumpBusEvents(execution);
 
-        //just dump events that were written in afl or just now
-        addExecutionEvent(execution);
-        dumpEvents(execution);
-
         //Write execution to the db! Pay attention - do not do anything to the execution or its context after this line!!!
         pauseService.writeExecutionObject(executionId, branchId, execution);
 
@@ -440,66 +406,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
         return null; // not paused
     }
 
-//    private void storeAggregatedEvents(Execution execution) {
-//        if (execution.getAggregatedEvents() == null) {
-//            execution.setAggregatedEvents(new ArrayList<ExecutionEvent>());
-//        }
-//
-//        ExecutionEventAggregatorHolder.setAggregatedExecutionEvents(execution.getAggregatedEvents());
-//    }
-
-    private void addExecutionEvent(Execution execution) {
-        // move all the events form the SystemContext into the event channel
-        @SuppressWarnings("unchecked") ArrayDeque<ExecutionEvent> eventsQueue = (ArrayDeque) execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
-        for (ExecutionEvent executionEvent : eventsQueue) {
-            execution.getAggregatedEvents().add(executionEvent);
-        }
-
-        eventsQueue.clear();
-        //execution.getSystemContext().remove(ExecutionConstants.EXECUTION_EVENTS_QUEUE);
-        // clean up thread local context to avoid memory leaks
-//        ExecutionLogLevelHolder.removeExecutionLogLevel();
-    }
-
-    private void dumpExecutionEvents(Execution execution, boolean forceDump) {
-        boolean shouldDump = false;
-        long currTime = System.currentTimeMillis();
-
-        //Init it according system context (done in order to support parallel immediate events release of parent lane)
-        if (execution.getSystemContext().get(ExecutionConstants.MUST_RELEASE_EVENTS) != null) {
-            shouldDump = (boolean) execution.getSystemContext().get(ExecutionConstants.MUST_RELEASE_EVENTS);
-            execution.getSystemContext().remove(ExecutionConstants.MUST_RELEASE_EVENTS);
-        }
-
-        // timeout trigger
-        //noinspection ConstantConditions
-        if (isDebuggerMode(execution.getSystemContext())) {
-            shouldDump |= currTime - execution.getLastEventDumpTime() >= EVENT_AGGREGATION_DEBUGGER_TIME_THRESHOLD;
-        } else {
-            shouldDump |= (execution.getLastEventDumpTime() != 0) &&
-                    (currTime - execution.getLastEventDumpTime() >= EVENT_AGGREGATION_TIME_THRESHOLD);
-        }
-
-        // amount trigger
-        shouldDump |= execution.getAggregatedEvents().size() >= EVENT_AGGREGATION_AMOUNT_THRESHOLD;
-
-        // ending execution trigger (null for flow ending, -1L for mi/parralel, -2L for subflow)
-        shouldDump |= isExecutionTerminating(execution);
-
-        // force it ?
-        shouldDump |= forceDump;
-
-        // make sure we are actually sending something
-        shouldDump &= execution.getAggregatedEvents().size() > 0;
-
-        if (shouldDump) {
-            dumpEvents(execution);
-        }
-
-        // clean up thread local context to avoid memory leaks
-//        ExecutionEventAggregatorHolder.removeAggregatedExecutionEvents();
-    }
-
     private boolean isDebuggerMode(Map<String, Serializable> systemContext) {
 
         Boolean isDebuggerMode = (Boolean) systemContext.get(ExecutionConstants.DEBUGGER_MODE);
@@ -508,16 +414,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
         }
 
         return isDebuggerMode;
-    }
-
-    private void dumpEvents(Execution execution) {
-        List<ExecutionEvent> executionEvents = execution.getAggregatedEvents();
-
-        if(eventsPersistencyOn) { //consider flag events and debugger before sending events
-            executionEventService.createEvents(executionEvents);
-        }
-        execution.getAggregatedEvents().clear(); //must clean so we wont send it twice - once from here and once from the QueueListener onTerminated()
-        execution.setLastEventDumpTime(System.currentTimeMillis());
     }
 
     private void dumpBusEvents(Execution execution) {
@@ -530,19 +426,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
         }
         eventsQueue.clear();
     }
-
-//    private void storeCurrentLogLevel(Execution execution) {
-//        String logLevelStr = (String) execution.getSystemContext().get(ExecutionConstants.EXECUTION_EVENTS_LOG_LEVEL);
-//        if (StringUtils.isNotEmpty(logLevelStr)) {
-//            LogLevel logLevel;
-//            try {
-//                logLevel = LogLevel.valueOf(logLevelStr);
-//            } catch (NullPointerException ex) {
-//                logLevel = LogLevel.INFO;
-//            }
-//            ExecutionLogLevelHolder.setExecutionLogLevel(logLevel);
-//        }
-//    }
 
     protected ExecutionStep loadExecutionStep(Execution execution) {
         RunningExecutionPlan runningExecutionPlan;
@@ -591,9 +474,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
         //We add all the contexts to the step data - so inside of each control action we will have access to all contexts
         addContextData(stepData, execution);
 
-        // put in Queue the ExecutionEvent
-        //ArrayDeque<ExecutionEvent> eventsQueue = new ArrayDeque<>();
-        //execution.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_QUEUE, eventsQueue);
         return stepData;
     }
 
@@ -602,8 +482,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
         HashMap<String, Serializable> eventData = new HashMap<>();
         eventData.put(ExecutionConstants.SYSTEM_CONTEXT,new HashMap<>(systemContext));
         eventData.put(ExecutionConstants.SCORE_ERROR_MSG,ex);
-        eventData.put("logMessage", logMessage);  //TODO - change to const
-        eventData.put("logLevelCategory", logLevelCategory.getCategoryName()); //TODO - change to const
+        eventData.put(ExecutionConstants.SCORE_ERROR_LOG_MSG, logMessage);
+        eventData.put(ExecutionConstants.SCORE_ERROR_TYPE, logLevelCategory.getCategoryName());
         ScoreEvent eventWrapper = new ScoreEvent(ExecutionConstants.SCORE_ERROR_EVENT, eventData);
         eventBus.dispatch(eventWrapper);
 
