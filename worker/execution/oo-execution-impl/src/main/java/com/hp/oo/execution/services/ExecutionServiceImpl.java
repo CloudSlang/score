@@ -137,8 +137,23 @@ public final class ExecutionServiceImpl implements ExecutionService {
     //returns null in case the split was not done - flow is paused or cancelled
     public List<Execution> executeSplit(Execution execution) {
         try {
+            List<Execution> newExecutions = new ArrayList<>();
+
+            // handle flow cancellation
+            if (handleCancelledFlow(execution, isDebuggerMode(execution.getSystemContext()))) {
+                newExecutions.add(execution);
+                return newExecutions;
+            }
 
             ExecutionStep currStep = loadExecutionStep(execution);
+
+            //Check if this execution was paused
+            if (!isDebuggerMode(execution.getSystemContext()) && handlePausedFlow(execution)) {
+                return null;
+            }
+
+            //dum bus event
+            dumpBusEvents(execution);
 
             executeStep(execution, currStep);
 
@@ -147,7 +162,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             //Run the split step
             List<StartBranchDataContainer> newBranches = execution.getSystemContext().removeBranchesData();
 
-            List<Execution> newExecutions = createChildExecutions(execution.getExecutionId(), newBranches);
+            newExecutions = createChildExecutions(execution.getExecutionId(), newBranches);
 
             //Run the navigation
             navigate(execution, currStep);
@@ -349,36 +364,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
         eventData.put(ExecutionConstants.SYSTEM_CONTEXT,new HashMap<>(systemContext));
         ScoreEvent eventWrapper = new ScoreEvent(ExecutionConstants.SCORE_PAUSED_EVENT, eventData);
         eventBus.dispatch(eventWrapper);
-    }
-
-    private boolean handlePausedFlowForDebuggerMode(Execution execution) {
-
-        SystemContext systemContext = execution.getSystemContext();
-        Long executionId = execution.getExecutionId();
-        String branchId = (String) systemContext.get(ExecutionConstants.BRANCH_ID);
-
-        //get the type of paused flow
-
-        PauseReason reason = null;
-        ExecutionSummary execSummary = pauseService.readPausedExecution(execution.getExecutionId(), branchId);
-        if (execSummary != null && execSummary.getStatus().equals(ExecutionStatus.PENDING_PAUSE)) {
-            reason = execSummary.getPauseReason();
-        }
-
-        if (reason == null) {
-            return false; //indicate that the flow was not paused
-        }
-        addPauseEvent(systemContext);
-        dumpBusEvents(execution);
-
-        //Write execution to the db! Pay attention - do not do anything to the execution or its context after this line!!!
-        pauseService.writeExecutionObject(executionId, branchId, execution);
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Execution with execution_id: " + execution.getExecutionId() + " is paused!");
-        }
-
-        return true;
     }
 
     private PauseReason findPauseReason(Long executionId, String branchId) {
