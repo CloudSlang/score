@@ -339,7 +339,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         String branchId = (String) systemContext.get(ExecutionConstants.BRANCH_ID);
 
         //If USER_PAUSED send such event
-        if (reason.equals(PauseReason.USER_PAUSED)) {
+        if (!isDebuggerMode(execution.getSystemContext()) && reason.equals(PauseReason.USER_PAUSED)) {
             if (branchId != null) {
                 // we pause the branch because the Parent was user-paused (see findPauseReason)
                 pauseService.pauseExecution(executionId, branchId, reason); // this creates a DB record for this branch, as Pending-paused
