@@ -32,7 +32,7 @@ public class ScoreImpl implements Score {
     }
 
     @Override
-    public Long trigger(ExecutionPlan executionPlan, Map<String, Serializable> context, Map<String, Serializable> runtimeValues, Long startStep) {
+    public Long trigger(ExecutionPlan executionPlan, Map<String, ? extends Serializable> context, Map<String, ? extends Serializable> runtimeValues, Long startStep) {
         return scoreTriggering.trigger(executionPlan, context, runtimeValues, startStep);
     }
 

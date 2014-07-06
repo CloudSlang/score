@@ -43,10 +43,11 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
     private ExecutionStateService executionStateService;
 
     @Override
-    public Long trigger(ExecutionPlan executionPlan, Map<String, Serializable> context, Map<String, Serializable> runtimeValues, Long startStep) {
+    public Long trigger(ExecutionPlan executionPlan, Map<String, ? extends Serializable> context, Map<String, ? extends Serializable> runtimeValues, Long startStep) {
         SystemContext scoreSystemContext = new SystemContext(runtimeValues);
         Long runningExecutionPlanId = saveRunningExecutionPlan(executionPlan, scoreSystemContext);
         Long executionId = (Long) idGenerator.next();
+        scoreSystemContext.put(ExecutionConstants.EXECUTION_ID_CONTEXT, executionId);
         Execution execution = new Execution(executionId, runningExecutionPlanId, startStep, context, scoreSystemContext);
 
         // create execution record in ExecutionSummary table

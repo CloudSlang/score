@@ -1,7 +1,6 @@
 package com.hp.oo.internal.sdk.execution;
 
 import com.hp.oo.enginefacade.execution.EndBranchDataContainer;
-import com.hp.oo.internal.sdk.execution.events.ExecutionEvent;
 import com.hp.score.lang.SystemContext;
 import org.apache.commons.lang.Validate;
 
@@ -36,7 +35,7 @@ public class Execution implements Serializable {
         this.serializableSessionContext = new HashMap<>();
     }
 
-    public Execution(Long executionId, Long runningExecutionPlanId, Long position, Map<String, Serializable> contexts, Map<String, Serializable> systemContext) {
+    public Execution(Long executionId, Long runningExecutionPlanId, Long position, Map<String, ? extends Serializable> contexts, Map<String, Serializable> systemContext) {
         this();
         this.contexts.putAll(contexts);
         this.systemContext.putAll(systemContext);
