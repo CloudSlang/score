@@ -19,7 +19,8 @@
 		<xsd:complexType>
 			<xsd:attribute type="xsd:string" name="id"/>
 			<xsd:attribute type="xsd:string" name="messageDigestAlgorithm"/>
-		</xsd:complexType>
+            <xsd:attribute type="xsd:boolean" name="externalDatabase" />
+        </xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="worker">
