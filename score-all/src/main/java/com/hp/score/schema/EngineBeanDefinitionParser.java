@@ -13,7 +13,12 @@ import com.hp.oo.engine.queue.services.assigner.ExecutionAssignerServiceImpl;
 import com.hp.oo.engine.queue.services.cleaner.QueueCleanerServiceImpl;
 import com.hp.oo.engine.queue.services.recovery.ExecutionRecoveryServiceImpl;
 import com.hp.oo.engine.versioning.services.VersionServiceImpl;
-import com.hp.oo.orchestrator.services.*;
+import com.hp.oo.orchestrator.services.CancelExecutionServiceImpl;
+import com.hp.oo.orchestrator.services.ExecutionSerializationUtil;
+import com.hp.oo.orchestrator.services.OrchestratorDispatcherServiceImpl;
+import com.hp.oo.orchestrator.services.OrchestratorServiceImpl;
+import com.hp.oo.orchestrator.services.RunningExecutionPlanServiceImpl;
+import com.hp.oo.orchestrator.services.SplitJoinServiceImpl;
 import com.hp.oo.partitions.services.PartitionCallback;
 import com.hp.oo.partitions.services.PartitionServiceImpl;
 import com.hp.oo.partitions.services.PartitionTemplateImpl;
@@ -25,12 +30,17 @@ import com.hp.score.engine.data.DataBaseDetector;
 import com.hp.score.engine.data.HiloFactoryBean;
 import com.hp.score.engine.data.SqlInQueryReader;
 import com.hp.score.engine.data.SqlUtils;
+import com.hp.score.schema.context.ScoreDatabaseContext;
+import com.hp.score.schema.context.ScoreDefaultDatasourceContext;
 import com.hp.score.services.ExecutionStateServiceImpl;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
 import org.w3c.dom.Element;
 
@@ -81,32 +91,39 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		registerBeans(parserContext);
 
-		registerRepositoryBeans(parserContext);
+        loadContexts(element, parserContext.getRegistry());
 
 		registerSpecialBeans(element, parserContext);
 
 		return BeanDefinitionBuilder.genericBeanDefinition(ScoreImpl.class).getBeanDefinition();
 	}
 
-	private void registerBeans(ParserContext parserContext){
-		BeanRegistrator beanRegistrator = new BeanRegistrator(parserContext);
-		for (Map.Entry<Class<?>,String> entry : beans.entrySet()) {
-			beanRegistrator
+    private void loadContexts(Element element, BeanDefinitionRegistry beanDefinitionRegistry) {
+        String externalDatabase = element.getAttribute("externalDatabase");
+        if (StringUtils.isBlank(externalDatabase) || externalDatabase.equals(Boolean.FALSE.toString())) {
+            AnnotatedBeanDefinitionReader definitionReader = new AnnotatedBeanDefinitionReader(beanDefinitionRegistry);
+            definitionReader.register(ScoreDefaultDatasourceContext.class);
+            definitionReader.register(ScoreDatabaseContext.class);
+        }
+
+        String repositoriesContextPath = "META-INF/spring/score/context/scoreRepositoryContext.xml";
+        new XmlBeanDefinitionReader(beanDefinitionRegistry).loadBeanDefinitions(repositoriesContextPath);
+    }
+
+    private void registerBeans(ParserContext parserContext) {
+        BeanRegistrator beanRegistrator = new BeanRegistrator(parserContext);
+        for (Map.Entry<Class<?>, String> entry : beans.entrySet()) {
+            beanRegistrator
 					.NAME(entry.getValue())
 					.CLASS(entry.getKey())
 					.register();
 		}
 	}
 
-	private void registerRepositoryBeans(ParserContext parserContext){
-		new XmlBeanDefinitionReader(parserContext.getRegistry())
-				.loadBeanDefinitions("META-INF/spring/score/context/scoreRepositoryContext.xml");
-	}
-
-	private void registerSpecialBeans(Element element, ParserContext parserContext) {
-		registerMessageDigestPasswordEncoder(element.getAttribute("messageDigestAlgorithm"), parserContext);
-		registerPartitionTemplates(parserContext);
-	}
+    private void registerSpecialBeans(Element element, ParserContext parserContext) {
+        registerMessageDigestPasswordEncoder(element.getAttribute("messageDigestAlgorithm"), parserContext);
+        registerPartitionTemplates(parserContext);
+    }
 
 	private void registerMessageDigestPasswordEncoder(String algorithm, ParserContext parserContext) {
 		if (algorithm == null || algorithm.isEmpty()) algorithm = "sha-256";
