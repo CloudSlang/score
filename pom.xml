@@ -2,10 +2,10 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.hp.score</groupId>
-	<artifactId>score-parent</artifactId>
-	<version>0.1.137-SNAPSHOT</version>
-	<packaging>pom</packaging>
+    <groupId>com.hp.score</groupId>
+    <artifactId>score-parent</artifactId>
+    <version>0.1.137-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
     <scm>
         <connection>scm:git:https://github.com/HPSoftware/score.git</connection>
@@ -444,7 +444,6 @@
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-core</artifactId>
                 <version>3.0.7</version>
-                <scope>test</scope>
             </dependency>
 
             <dependency>
