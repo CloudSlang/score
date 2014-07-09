@@ -67,12 +67,19 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
             String subFlowUuid = dependencyExecutionPlan.getFlowUuid();
             Long subFlowRunningId = runningExecutionPlanService.getOrCreateRunningExecutionPlan(dependencyExecutionPlan);
             runningPlansIds.put(subFlowUuid, subFlowRunningId);
-            beginStepsIds.put(subFlowUuid, executionPlan.getBeginStep());
+            beginStepsIds.put(subFlowUuid, dependencyExecutionPlan.getBeginStep());
         }
+
+        // Adding the ids of the running execution plan of the parent + its begin step
+        // since this map should contain all the ids of the running plans
+        Long runningPlanId =  runningExecutionPlanService.getOrCreateRunningExecutionPlan(executionPlan);
+        runningPlansIds.put(executionPlan.getFlowUuid(), runningPlanId);
+        beginStepsIds.put(executionPlan.getFlowUuid(), executionPlan.getBeginStep());
+
         systemContext.put(ExecutionConstants.RUNNING_PLANS_MAP, (Serializable) runningPlansIds);
         systemContext.put(ExecutionConstants.BEGIN_STEPS_MAP, (Serializable) beginStepsIds);
 
-        return runningExecutionPlanService.getOrCreateRunningExecutionPlan(executionPlan);
+        return runningPlanId;
     }
 
     private void enqueue(ExecutionMessage... messages) {
