@@ -79,7 +79,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         try {
 
             // handle flow cancellation
-            if (handleCancelledFlow(execution, isDebuggerMode(execution.getSystemContext()))) {
+            if (handleCancelledFlow(execution)) {
                 return execution;
             }
 
@@ -140,7 +140,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             List<Execution> newExecutions = new ArrayList<>();
 
             // handle flow cancellation
-            if (handleCancelledFlow(execution, isDebuggerMode(execution.getSystemContext()))) {
+            if (handleCancelledFlow(execution)) {
                 newExecutions.add(execution);
                 return newExecutions;
             }
@@ -270,20 +270,12 @@ public final class ExecutionServiceImpl implements ExecutionService {
         }
     }
 
-    protected boolean handleCancelledFlow(Execution execution, boolean isDebugMode) {
+    protected boolean handleCancelledFlow(Execution execution) {
 
         Long executionId = execution.getExecutionId();
-        boolean executionIsCancelled;
 
-        // Different methods to see if the run is cancelled, and cancel it:
-        // in debug-mode we go to the DB (thru the service).
-        // in regular execution we don't want to ask the DB every step (expensive..), so we use the WorkerConfigurationService which goes to the DB every x seconds.
-        if (isDebugMode) {
-            executionIsCancelled = cancelExecutionService.isCanceledExecution(executionId); // in this case we already cancel the execution if needed
-        } else {
-            List<Long> cancelledExecutions = configurationService.getCancelledExecutions(); // in this case - just check if need to cancel. It will set as cancelled later on QueueEventListener
-            executionIsCancelled = cancelledExecutions.contains(executionId);
-        }
+        List<Long> cancelledExecutions = configurationService.getCancelledExecutions(); // in this case - just check if need to cancel. It will set as cancelled later on QueueEventListener
+        boolean executionIsCancelled = cancelledExecutions.contains(executionId);
 
         //Another scenario of getting canceled - it was cancelled from the SplitJoinService (the configuration can still be not updated). Defect #:22060
         if (ExecutionStatus.CANCELED.equals(execution.getSystemContext().get(ExecutionConstants.FLOW_TERMINATION_TYPE))) {

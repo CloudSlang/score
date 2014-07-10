@@ -10,16 +10,17 @@ import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.oo.execution.gateways.EventGateway;
 import com.hp.oo.execution.reflection.ReflectionAdapter;
 import com.hp.oo.execution.services.dbsupport.WorkerDbSupportService;
-import com.hp.score.api.ControlActionMetadata;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
-import com.hp.score.api.ExecutionPlan;
-import com.hp.score.api.ExecutionStep;
+import com.hp.oo.internal.sdk.execution.events.EventBus;
 import com.hp.oo.internal.sdk.execution.events.ExecutionEvent;
 import com.hp.oo.internal.sdk.execution.events.ExecutionEventSequenceOrder;
 import com.hp.oo.orchestrator.services.CancelExecutionService;
 import com.hp.oo.orchestrator.services.PauseResumeService;
 import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
+import com.hp.score.api.ControlActionMetadata;
+import com.hp.score.api.ExecutionPlan;
+import com.hp.score.api.ExecutionStep;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +32,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import com.hp.oo.internal.sdk.execution.events.EventBus;
 
 import java.io.Serializable;
 import java.util.ArrayDeque;
@@ -225,7 +225,7 @@ public class ExecutionServiceTest {
         Execution exe = new Execution(0L, 0L, new ArrayList<String>());
         exe.setExecutionId(EXECUTION_ID_1);
 
-        boolean result = executionService.handleCancelledFlow(exe, false);
+        boolean result = executionService.handleCancelledFlow(exe);
 
         Assert.assertEquals(exe.getPosition(), null);
         Assert.assertEquals(result, true);
@@ -233,7 +233,7 @@ public class ExecutionServiceTest {
         exe = new Execution(0L, 0L, new ArrayList<String>());
         exe.setExecutionId(EXECUTION_ID_2);
 
-        result = executionService.handleCancelledFlow(exe, false);
+        result = executionService.handleCancelledFlow(exe);
 
         Assert.assertEquals(exe.getPosition(), null);
         Assert.assertEquals(result, true);
