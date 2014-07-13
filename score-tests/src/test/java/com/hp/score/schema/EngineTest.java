@@ -1,6 +1,5 @@
 package com.hp.score.schema;
 
-import com.hp.oo.engine.execution.events.services.ExecutionEventService;
 import com.hp.oo.engine.node.services.WorkerNodeService;
 import com.hp.oo.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.engine.queue.services.QueueDispatcherService;
@@ -153,11 +152,6 @@ public class EngineTest {
             // required by executionInterruptsService
         ObjectMapper objectMapper() {
             return new ObjectMapper();
-        }
-
-        @Bean
-        ExecutionEventService executionEventService() {
-            return mock(ExecutionEventService.class);
         }
 
         @Bean

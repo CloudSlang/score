@@ -3,18 +3,14 @@ package com.hp.oo.execution.services;
 import com.hp.oo.broker.entities.BranchContextHolder;
 import com.hp.oo.broker.entities.RunningExecutionPlan;
 import com.hp.oo.broker.services.RuntimeValueService;
-import com.hp.oo.engine.execution.events.services.ExecutionEventService;
 import com.hp.oo.enginefacade.execution.ExecutionEnums;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.enginefacade.execution.PauseReason;
-import com.hp.oo.execution.gateways.EventGateway;
 import com.hp.oo.execution.reflection.ReflectionAdapter;
 import com.hp.oo.execution.services.dbsupport.WorkerDbSupportService;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.oo.internal.sdk.execution.events.EventBus;
-import com.hp.oo.internal.sdk.execution.events.ExecutionEvent;
-import com.hp.oo.internal.sdk.execution.events.ExecutionEventSequenceOrder;
 import com.hp.oo.orchestrator.services.CancelExecutionService;
 import com.hp.oo.orchestrator.services.PauseResumeService;
 import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
@@ -34,7 +30,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.Serializable;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -151,10 +146,6 @@ public class ExecutionServiceTest {
         exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String, List>());
         //for events
         exe.getSystemContext().put(ExecutionConstants.EXECUTION_ID_CONTEXT, executionId);
-        ExecutionEventSequenceOrder order = new ExecutionEventSequenceOrder();
-        exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENT_SEQUENCE_ORDER, order);
-        ArrayDeque<ExecutionEvent> eventsQueue = new ArrayDeque<>();
-        exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_QUEUE, eventsQueue);
         return exe;
     }
 
@@ -311,10 +302,6 @@ public class ExecutionServiceTest {
         exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String, List>());
         //for events
         exe.getSystemContext().put(ExecutionConstants.EXECUTION_ID_CONTEXT, "stam");
-        ExecutionEventSequenceOrder order = new ExecutionEventSequenceOrder();
-        exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENT_SEQUENCE_ORDER, order);
-        ArrayDeque<ExecutionEvent> eventsQueue = new ArrayDeque<>();
-        exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_QUEUE, eventsQueue);
 
         executionService.postExecutionSettings(exe);
 
@@ -362,11 +349,6 @@ public class ExecutionServiceTest {
         }
 
         @Bean
-        public EventGateway getEventGateway() {
-            return mock(EventGateway.class);
-        }
-
-        @Bean
         public PauseResumeService getPauseResumeService() {
             return mock(PauseResumeService.class);
         }
@@ -386,10 +368,6 @@ public class ExecutionServiceTest {
             return mock(WorkerRecoveryManager.class);
         }
 
-        @Bean
-        public ExecutionEventService executionEventService() {
-            return mock(ExecutionEventService.class);
-        }
     }
 }
 

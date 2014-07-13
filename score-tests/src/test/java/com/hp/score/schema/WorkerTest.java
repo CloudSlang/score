@@ -1,7 +1,6 @@
 package com.hp.score.schema;
 
 import com.hp.oo.broker.services.RuntimeValueService;
-import com.hp.oo.engine.execution.events.services.ExecutionEventService;
 import com.hp.oo.engine.node.services.WorkerNodeService;
 import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.engine.queue.services.QueueDispatcherService;
@@ -74,11 +73,6 @@ public class WorkerTest {
 		@Bean
 		WorkerDbSupportService workerDbSupportService(){
 			return mock(WorkerDbSupportService.class);
-		}
-
-		@Bean
-		ExecutionEventService executionEventService(){
-			return mock(ExecutionEventService.class);
 		}
 
 		@Bean

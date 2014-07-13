@@ -1,7 +1,6 @@
 package com.hp.oo.orchestrator.services;
 
 import com.hp.oo.broker.services.RunningExecutionPlanService;
-import com.hp.oo.engine.execution.events.services.ExecutionEventService;
 import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.engine.queue.services.QueueDispatcherService;
 import com.hp.oo.enginefacade.execution.ExecutionEnums;
@@ -38,9 +37,6 @@ public class OrchestratorServiceTest {
 
     @Mock
     private RunningExecutionPlanService runningExecutionPlanService;
-
-    @Mock
-    private ExecutionEventService executionEventService;
 
     @Mock
     private ExecutionStateService executionStateService;
