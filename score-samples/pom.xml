@@ -12,6 +12,7 @@
     <modules>
         <module>hello-score</module>
         <module>control-action-samples</module>
+        <module>stub-services</module>
     </modules>
 
 

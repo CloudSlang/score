@@ -6,4 +6,7 @@
 
     <score:engine />
     <score:worker uuid="id-1" />
+
+    <bean class="com.hp.score.stubs.StubServicesContext"/>
+
 </beans>

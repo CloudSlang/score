@@ -1,14 +1,15 @@
 package com.hp.oo.engine.node.services;
 
+import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
+import org.codehaus.jackson.map.SerializationConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
-import org.springframework.jmx.export.annotation.ManagedOperationParameter;
-import org.springframework.jmx.export.annotation.ManagedOperationParameters;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 
 /**
@@ -20,8 +21,14 @@ public class WorkersMBean {
 	@Autowired
 	private WorkerNodeService workerNodeService;
 
-	@Autowired
-	ObjectMapper objectMapper;
+    private ObjectMapper mapper;
+
+    @PostConstruct
+    private void initObjectMapper(){
+        mapper = new ObjectMapper();
+        mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
+        mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
 
 	@ManagedAttribute(description = "Number of active workers")
 	public int getActiveWorkers(){
@@ -35,7 +42,7 @@ public class WorkersMBean {
 
 	@ManagedOperation(description = "Returns a list of all registered workers")
 	public String showWorkers() throws IOException {
-		ObjectWriter objectWriter = objectMapper.writerWithDefaultPrettyPrinter();
+		ObjectWriter objectWriter = mapper.writerWithDefaultPrettyPrinter();
 		return objectWriter.writeValueAsString(workerNodeService.readAllWorkers());
 	}
 

@@ -26,6 +26,8 @@ public class HelloScore {
     private static ExecutionPlan createExecutionPlan() {
         ExecutionPlan executionPlan = new ExecutionPlan();
 
+        executionPlan.setFlowUuid("1");
+
         ExecutionStep executionStep = new ExecutionStep(0L);
         executionPlan.addStep(executionStep);
 

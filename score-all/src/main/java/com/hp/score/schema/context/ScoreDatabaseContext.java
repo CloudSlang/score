@@ -1,10 +1,7 @@
 package com.hp.score.schema.context;
 
-import com.hp.score.engine.data.HiloFactoryBean;
-import com.hp.score.engine.data.IdentityGenerator;
 import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
 import org.hibernate.ejb.HibernatePersistence;
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +11,7 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 import java.util.Properties;
@@ -21,6 +19,10 @@ import java.util.Properties;
 /**
  * User: maromg
  * Date: 01/07/2014
+ *
+ * This context is used for the case when score does not receive any outside beans related
+ * to the database. In which case score itself will create the datasource (H2) and the schema and
+ * anything else related to hibernate, bean management and transaction management
  */
 public class ScoreDatabaseContext {
 
@@ -42,10 +44,7 @@ public class ScoreDatabaseContext {
 
     @Bean
     JpaVendorAdapter jpaVendorAdapter() {
-        HibernateJpaVendorAdapter jpaVendorAdapter = new HibernateJpaVendorAdapter();
-        jpaVendorAdapter.setGenerateDdl(true);
-        jpaVendorAdapter.setShowSql(true);
-        return jpaVendorAdapter;
+        return new HibernateJpaVendorAdapter();
     }
 
     @Bean
@@ -60,12 +59,13 @@ public class ScoreDatabaseContext {
         emf.setJpaProperties(jpaProperties());
         emf.setJpaVendorAdapter(jpaVendorAdapter());
         emf.setPersistenceProviderClass(HibernatePersistence.class);
-        emf.setPackagesToScan("com.hp.score");
+        //todo: remove scanning of oo package once we move all the entities to score package
+        emf.setPackagesToScan("com.hp.score","com.hp.oo");
         return emf;
     }
 
     @Bean
-    JpaTransactionManager jpaTransactionManager() {
+    JpaTransactionManager transactionManager() {
         JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
         jpaTransactionManager.setEntityManagerFactory(entityManagerFactory().getNativeEntityManagerFactory());
         return jpaTransactionManager;
@@ -79,7 +79,9 @@ public class ScoreDatabaseContext {
     }
 
     @Bean
-    FactoryBean<IdentityGenerator> identityGenerator() {
-        return new HiloFactoryBean();
+    TransactionTemplate transactionTemplate() {
+        TransactionTemplate transactionTemplate = new TransactionTemplate();
+        transactionTemplate.setTransactionManager(transactionManager());
+        return transactionTemplate;
     }
 }
