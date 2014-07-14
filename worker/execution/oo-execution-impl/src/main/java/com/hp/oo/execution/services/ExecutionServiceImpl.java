@@ -43,13 +43,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
     private static final String SYSTEM_CONTEXT = "systemContext";
     private static final String EXECUTION = "execution";
 
-    // max amount of aggregated events
-    private static final int EVENT_AGGREGATION_AMOUNT_THRESHOLD = 50;
-
-    // timeout for event dump
-    private static final long EVENT_AGGREGATION_TIME_THRESHOLD = 2 * 60 * 1000;
-    private static final long EVENT_AGGREGATION_DEBUGGER_TIME_THRESHOLD = 750;
-
     @Autowired
     private PauseResumeService pauseService;
 
