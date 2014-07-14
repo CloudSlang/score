@@ -1,19 +1,26 @@
 package com.hp.oo.execution.reflection;
 
+import java.util.Map;
+
 /**
- * Created by IntelliJ IDEA.
- * User: kravtsov
- * Date: 20/11/11
- * Time: 09:35
+ * @author kravtsov
+ * @author Avi Moradi
+ * @since 20/11/2011
+ * @version $Id$
  */
-@SuppressWarnings("unused")
 public class ReflectionAdapterTestHelper {
 
-    public void myMethod_1(String parameter_1, int parameter_2){
+	@SuppressWarnings("unused")
+	public void myMethod_1(String parameter_1, int parameter_2) {}
 
-    }
+	@SuppressWarnings("static-method")
+	public Integer myMethod_2(int parameter_1, int parameter_2) {
+		return parameter_1 + parameter_2;
+	}
 
-    public Integer myMethod_2(int parameter_1, int parameter_2){
-        return parameter_1 + parameter_2;
-    }
+	@SuppressWarnings({ "static-method", "unused" })
+	public Map<String, ?> myMethod_3(int parameter_1, int parameter_2, Map<String, ?> executionContext) {
+		return executionContext;
+	}
+
 }
