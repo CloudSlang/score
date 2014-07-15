@@ -5,7 +5,7 @@
     <parent>
 		<groupId>com.hp.score</groupId>
 		<artifactId>partitioning</artifactId>
-		<version>0.10.10.5-SNAPSHOT</version>
+		<version>0.10.10.5</version>
 	</parent>
 
 	<artifactId>oo-partitioning-api</artifactId>
