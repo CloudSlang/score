@@ -613,6 +613,7 @@
         <module>score-worker</module>
         <module>score-tests</module>
         <module>score-api</module>
+        <module>score-openstack-actions</module>
         <module>score-samples</module>
     </modules>
 </project>
