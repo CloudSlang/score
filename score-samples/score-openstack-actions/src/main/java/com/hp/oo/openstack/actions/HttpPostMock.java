@@ -1,22 +1,16 @@
 package com.hp.oo.openstack.actions;
 
 import org.apache.http.HttpResponse;
-import org.apache.log4j.Appender;
-import org.apache.log4j.Logger;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.log4j.Logger;
 
 /**
  * Created by bonczida on 7/14/2014.
  */
 public class HttpPostMock {
-    private final Logger logger;
+    private final static Logger logger = Logger.getLogger(HttpPostMock.class);
 
     public HttpPostMock() {
-        this.logger = Logger.getLogger(HttpPostMock.class);
-    }
-
-    public HttpPostMock(Logger logger) {
-        this.logger = logger;
     }
 
     public interface HttpPostCallback {
@@ -39,13 +33,5 @@ public class HttpPostMock {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public void addAppenderToLogger(Appender appender) {
-        logger.addAppender(appender);
-    }
-
-    public void removeAppenderFromLogger(Appender appender) {
-        logger.removeAppender(appender);
     }
 }
