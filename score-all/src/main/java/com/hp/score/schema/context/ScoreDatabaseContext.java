@@ -2,8 +2,6 @@ package com.hp.score.schema.context;
 
 import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
 import org.hibernate.ejb.HibernatePersistence;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -11,8 +9,10 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.util.Properties;
 
@@ -25,9 +25,6 @@ import java.util.Properties;
  * anything else related to hibernate, bean management and transaction management
  */
 public class ScoreDatabaseContext {
-
-    @Autowired
-    private ApplicationContext applicationContext;
 
     @Bean
     Properties jpaProperties() {
@@ -49,14 +46,14 @@ public class ScoreDatabaseContext {
 
     @Bean
     @DependsOn("liquibase")
-    LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-        //Init the IdentityManager
-        SimpleHiloIdentifierGenerator.setDataSource(applicationContext.getBean(DataSource.class));
+	LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
+		//Init the IdentityManager
+		SimpleHiloIdentifierGenerator.setDataSource(dataSource);
 
         //Now create the bean
         LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
-        emf.setDataSource(applicationContext.getBean(DataSource.class));
-        emf.setJpaProperties(jpaProperties());
+		emf.setDataSource(dataSource);
+		emf.setJpaProperties(jpaProperties());
         emf.setJpaVendorAdapter(jpaVendorAdapter());
         emf.setPersistenceProviderClass(HibernatePersistence.class);
         //todo: remove scanning of oo package once we move all the entities to score package
@@ -65,23 +62,23 @@ public class ScoreDatabaseContext {
     }
 
     @Bean
-    JpaTransactionManager transactionManager() {
-        JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
-        jpaTransactionManager.setEntityManagerFactory(entityManagerFactory().getNativeEntityManagerFactory());
-        return jpaTransactionManager;
+	JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
+		JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
+		jpaTransactionManager.setEntityManagerFactory(entityManagerFactory);
+		return jpaTransactionManager;
     }
 
     @Bean
-    JdbcTemplate jdbcTemplate() {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate();
-        jdbcTemplate.setDataSource(applicationContext.getBean(DataSource.class));
-        return jdbcTemplate;
+	JdbcTemplate jdbcTemplate(DataSource dataSource) {
+		JdbcTemplate jdbcTemplate = new JdbcTemplate();
+		jdbcTemplate.setDataSource(dataSource);
+		return jdbcTemplate;
     }
 
     @Bean
-    TransactionTemplate transactionTemplate() {
-        TransactionTemplate transactionTemplate = new TransactionTemplate();
-        transactionTemplate.setTransactionManager(transactionManager());
-        return transactionTemplate;
+	TransactionTemplate transactionTemplate(PlatformTransactionManager transactionManager) {
+		TransactionTemplate transactionTemplate = new TransactionTemplate();
+		transactionTemplate.setTransactionManager(transactionManager);
+		return transactionTemplate;
     }
 }
