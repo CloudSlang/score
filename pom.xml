@@ -614,5 +614,6 @@
         <module>score-tests</module>
         <module>score-api</module>
         <module>score-samples</module>
+        <module>score-events</module>
     </modules>
 </project>

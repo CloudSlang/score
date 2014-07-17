@@ -1,4 +1,4 @@
-package com.hp.oo.internal.sdk.execution.events;
+package com.hp.score.events;
 
 import com.hp.score.api.ScoreEvent;
 
@@ -8,8 +8,8 @@ import com.hp.score.api.ScoreEvent;
  * Date: 09/01/14
  * To change this template use File | Settings | File Templates.
  */
-public interface EventHandler {
+public interface ScoreEventListener {
 
-    void handleEvent(ScoreEvent eventWrapper);
+	void onEvent(ScoreEvent event);
 
 }
