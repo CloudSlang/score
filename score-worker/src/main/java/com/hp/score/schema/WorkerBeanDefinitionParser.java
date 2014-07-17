@@ -34,6 +34,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(com.hp.oo.execution.services.WorkerRecoveryManagerImpl.class, null);
 		put(com.hp.oo.execution.gateways.ExecutionGatewayImpl.class, "runningExecutionGateway");
 		put(com.hp.oo.execution.reflection.ReflectionAdapterImpl.class, null);
+		put(com.hp.oo.execution.services.WorkerRegistration.class, null);
 	}};
 
 	private List<ConfValue> configurationValues = Arrays.asList(

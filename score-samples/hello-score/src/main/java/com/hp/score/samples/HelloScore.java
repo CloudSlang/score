@@ -1,5 +1,6 @@
 package com.hp.score.samples;
 
+import com.hp.score.api.ControlActionMetadata;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ExecutionStep;
 import com.hp.score.api.Score;
@@ -29,7 +30,9 @@ public class HelloScore {
         executionPlan.setFlowUuid("1");
 
         ExecutionStep executionStep = new ExecutionStep(0L);
+        executionStep.setAction(new ControlActionMetadata("com.hp.score.samples.controlactions.ConsoleControlActions", "echoHelloScore"));
         executionPlan.addStep(executionStep);
+        executionPlan.setBeginStep(0L);
 
         return executionPlan;
     }
