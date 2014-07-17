@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
@@ -34,7 +32,6 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 	private ApplicationContext applicationContext;
 	private Map<String, Object> cacheBeans = new ConcurrentHashMap<>();
 	private Map<String, Method> cacheMethods = new ConcurrentHashMap<>();
-	private Lock lock = new ReentrantLock();
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 	private Map<String, String[]> cacheParamNames = new ConcurrentHashMap<>();
 
@@ -42,7 +39,6 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 	public Object executeControlAction(ControlActionMetadata actionMetadata, Map<String, ?> actionData) {
 		Validate.notNull(actionMetadata, "Action metadata is null");
 		if(logger.isDebugEnabled()) logger.debug("Executing control action [" + actionMetadata.getClassName() + '.' + actionMetadata.getMethodName() + ']');
-		if(logger.isTraceEnabled()) logger.trace("");
 		try {
 			Object actionBean = getActionBean(actionMetadata);
 			Method actionMethod = getActionMethod(actionMetadata);
@@ -59,24 +55,24 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 			String message = ex.getTargetException() == null ? ex.getMessage() : ex.getTargetException().getMessage();
 			logger.error(getExceptionMessage(actionMetadata) + ", reason: " + message, ex);
 			throw new FlowExecutionException(message, ex);
-		} catch(ClassNotFoundException | IllegalAccessException ex) {
+		} catch(Exception ex) {
 			throw new FlowExecutionException(getExceptionMessage(actionMetadata) + ", reason: " + ex.getMessage(), ex);
 		}
 	}
 
-	private Object getActionBean(ControlActionMetadata actionMetadata) throws ClassNotFoundException {
+	private Object getActionBean(ControlActionMetadata actionMetadata) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 		Object bean = cacheBeans.get(actionMetadata.getClassName());
 		if(bean == null) {
 			if(logger.isTraceEnabled()) logger.trace(actionMetadata.getClassName() + " wasn't found in the beans cache");
-			lock.lock();
+			Class<?> actionClass = Class.forName(actionMetadata.getClassName());
 			try {
-				bean = applicationContext.getBean(Class.forName(actionMetadata.getClassName()));
-				cacheBeans.put(actionMetadata.getClassName(), bean);
-			} finally {
-				lock.unlock();
+				bean = applicationContext.getBean(actionClass);
+			} catch(Exception ex) { // Not a spring bean
+				if(logger.isTraceEnabled()) logger.trace(ex);
 			}
-		} else if(logger.isTraceEnabled()) {
-			logger.trace(actionMetadata.getClassName() + " was found in the beans cache");
+			if(bean == null) bean = actionClass.newInstance();
+			cacheBeans.put(actionMetadata.getClassName(), bean);
+			if(logger.isTraceEnabled()) logger.trace(actionMetadata.getClassName() + " placed in the beans cache");
 		}
 		return bean;
 	}
@@ -104,7 +100,7 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 	}
 
 	private String getExceptionMessage(ControlActionMetadata actionMetadata) {
-		return ("Failed to run the action! Class: " + actionMetadata.getClassName() + ", method: " + actionMetadata.getMethodName());
+		return "Failed to run the action! Class: " + actionMetadata.getClassName() + ", method: " + actionMetadata.getMethodName();
 	}
 
 	private Object[] buildParametersArray(Method actionMethod, Map<String, ?> actionData) {

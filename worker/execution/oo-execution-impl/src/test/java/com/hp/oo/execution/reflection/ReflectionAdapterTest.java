@@ -3,6 +3,7 @@ package com.hp.oo.execution.reflection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ import junit.framework.Assert;
 @ContextConfiguration
 public class ReflectionAdapterTest {
 
-	private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(getClass().getName());
+	private static final Logger logger = Logger.getLogger(ReflectionAdapterTest.class);
 	@Autowired
 	ReflectionAdapter adapter;
 
@@ -38,7 +39,7 @@ public class ReflectionAdapterTest {
 		try {
 			adapter.executeControlAction(metadata, map);
 		} catch(Exception ex) {
-			logger.error("Failed to run method in reflectionAdapter..." + ex.getMessage());
+			logger.error("Failed to run method in reflectionAdapter...", ex);
 			Assert.fail();
 		}
 	}
@@ -56,6 +57,17 @@ public class ReflectionAdapterTest {
 	@Test
 	public void executeControlActionTest_3() {
 		ControlActionMetadata metadata = new ControlActionMetadata("com.hp.oo.execution.reflection.ReflectionAdapterTestHelper", "myMethod_3");
+		Map<String, Object> actionData = new HashMap<>();
+		actionData.put("parameter_1", 5);
+		actionData.put("parameter_2", 3);
+		@SuppressWarnings("unchecked")
+		Map<String, ?> result = (Map<String, ?>)adapter.executeControlAction(metadata, actionData);
+		Assert.assertEquals(actionData, result);
+	}
+
+	@Test
+	public void executeControlActionTest_4() {
+		ControlActionMetadata metadata = new ControlActionMetadata("com.hp.oo.execution.reflection.ReflectionAdapterTestHelperNoSpring", "myMethod_4");
 		Map<String, Object> actionData = new HashMap<>();
 		actionData.put("parameter_1", 5);
 		actionData.put("parameter_2", 3);
