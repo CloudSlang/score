@@ -53,11 +53,7 @@ public class ExecutionConstants {
 
     public static final String HEADLESS_EXECUTION = "HEADLESS_EXECUTION";
 
-    public static final String SCORE_ERROR_EVENT = "SCORE_ERROR_EVENT";
-
-    public static final String SCORE_PAUSED_EVENT = "SCORE_PAUSED_EVENT";
-
-    public static final String SCORE_ERROR_MSG = "error_message";
+	public static final String SCORE_ERROR_MSG = "error_message";
 
     public static final String SCORE_ERROR_LOG_MSG = "logMessage";
 

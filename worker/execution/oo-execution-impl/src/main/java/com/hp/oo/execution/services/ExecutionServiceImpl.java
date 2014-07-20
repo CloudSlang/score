@@ -18,6 +18,7 @@ import com.hp.score.api.ExecutionStep;
 import com.hp.score.api.ScoreEvent;
 import com.hp.score.api.StartBranchDataContainer;
 import com.hp.score.events.EventBus;
+import com.hp.score.events.EventConstants;
 import com.hp.score.lang.SystemContext;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -342,7 +343,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 		//TODO : add pause reason??
 		HashMap<String, Serializable> eventData = new HashMap<>();
 		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, new HashMap<>(systemContext));
-		ScoreEvent eventWrapper = new ScoreEvent(ExecutionConstants.SCORE_PAUSED_EVENT, eventData);
+		ScoreEvent eventWrapper = new ScoreEvent(EventConstants.SCORE_PAUSED_EVENT, eventData);
 		eventBus.dispatch(eventWrapper);
 	}
 
@@ -450,7 +451,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 		eventData.put(ExecutionConstants.SCORE_ERROR_MSG, ex);
 		eventData.put(ExecutionConstants.SCORE_ERROR_LOG_MSG, logMessage);
 		eventData.put(ExecutionConstants.SCORE_ERROR_TYPE, logLevelCategory.getCategoryName());
-		ScoreEvent eventWrapper = new ScoreEvent(ExecutionConstants.SCORE_ERROR_EVENT, eventData);
+		ScoreEvent eventWrapper = new ScoreEvent(EventConstants.SCORE_ERROR_EVENT, eventData);
 		eventBus.dispatch(eventWrapper);
 
 	}
