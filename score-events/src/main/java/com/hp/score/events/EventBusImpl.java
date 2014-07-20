@@ -15,12 +15,12 @@ public class EventBusImpl implements EventBus {
 
 	private Map<ScoreEventListener, Set<String>> handlers = new ConcurrentHashMap<>();
 
-	public void subscribe(ScoreEventListener eventHandler, Set<String> eventTypes) {
-		handlers.put(eventHandler, eventTypes);
+	public void subscribe(ScoreEventListener eventListener, Set<String> eventTypes) {
+		handlers.put(eventListener, eventTypes);
 	}
 
-	public void unsubscribe(ScoreEventListener eventHandler) {
-		handlers.remove(eventHandler);
+	public void unsubscribe(ScoreEventListener eventListener) {
+		handlers.remove(eventListener);
 	}
 
 	public void dispatch(ScoreEvent... events) {
