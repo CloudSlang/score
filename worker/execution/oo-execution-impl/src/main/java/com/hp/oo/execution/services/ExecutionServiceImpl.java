@@ -127,14 +127,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	//returns null in case the split was not done - flow is paused or cancelled
 	public List<Execution> executeSplit(Execution execution) {
 		try {
-			List<Execution> newExecutions = new ArrayList<>();
-
-			// handle flow cancellation
-			if (handleCancelledFlow(execution)) {
-				newExecutions.add(execution);
-				return newExecutions;
-			}
-
 			ExecutionStep currStep = loadExecutionStep(execution);
 
 			//Check if this execution was paused
@@ -152,7 +144,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 			//Run the split step
 			List<StartBranchDataContainer> newBranches = execution.getSystemContext().removeBranchesData();
 
-			newExecutions = createChildExecutions(execution.getExecutionId(), newBranches);
+			List<Execution> newExecutions = createChildExecutions(execution.getExecutionId(), newBranches);
 
 			//Run the navigation
 			navigate(execution, currStep);
