@@ -28,6 +28,13 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
     <property name="timestamp.type" dbms="postgresql" value="timestamp" />
     <property name="timestamp.type" dbms="h2" value="timestamp" />
 
+    <property name="blob.stream.type" dbms="oracle" value=" blob"/>
+    <property name="blob.stream.type" dbms="mssql" value="image"/>
+    <property name="blob.stream.type" dbms="mysql" value="longblob"/>
+    <property name="blob.stream.type" dbms="postgresql" value="bytea"/>
+    <property name="blob.stream.type" dbms="h2" value="image"/>
+
+
 
     <changeSet id="Manually create the hibernate auto-increment table for OO" author="hibernate">
         <createTable tableName="OO_HILO">

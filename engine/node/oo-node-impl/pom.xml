@@ -48,9 +48,18 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>oo-versioning-api</artifactId>
-		</dependency>
+        </dependency>
 
-		<!-- test artifacts -->
+
+        <!-- test artifacts -->
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>score-data</artifactId>
+            <!--<scope>test</scope>-->
+
+        </dependency>
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
