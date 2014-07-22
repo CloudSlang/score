@@ -10,6 +10,7 @@ import com.hp.score.api.ExecutionStep;
 import com.hp.oo.orchestrator.services.PauseResumeService;
 import com.hp.score.api.Score;
 import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
+import com.hp.score.events.EventBus;
 import liquibase.integration.spring.SpringLiquibase;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.hibernate.ejb.HibernatePersistence;
@@ -170,5 +171,10 @@ public class EngineTest {
         ParallelPersistenceService parallelPersistenceService() {
             return  mock(ParallelPersistenceService.class);
         }
-    }
+
+		@Bean
+		EventBus eventBus() {
+			return mock(EventBus.class);
+		}
+	}
 }

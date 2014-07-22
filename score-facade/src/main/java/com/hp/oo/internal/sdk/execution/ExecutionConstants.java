@@ -17,6 +17,7 @@ public class ExecutionConstants {
 
     //Execution context
     public static final String EXECUTION_ID_CONTEXT = "executionIdContext";
+	public static final String EXECUTION_CONTEXT = "EXECUTION_CONTEXT";
 
     //For Exceptions
     public static final String EXECUTION_STEP_ERROR_KEY = "EXECUTION_STEP_ERROR_KEY";
