@@ -19,6 +19,7 @@ import com.hp.oo.orchestrator.services.OrchestratorDispatcherServiceImpl;
 import com.hp.oo.orchestrator.services.OrchestratorServiceImpl;
 import com.hp.oo.orchestrator.services.RunningExecutionPlanServiceImpl;
 import com.hp.oo.orchestrator.services.SplitJoinServiceImpl;
+import com.hp.oo.orchestrator.services.WorkerDbSupportServiceImpl;
 import com.hp.oo.partitions.services.PartitionCallback;
 import com.hp.oo.partitions.services.PartitionServiceImpl;
 import com.hp.oo.partitions.services.PartitionTemplateImpl;
@@ -85,6 +86,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(HiloFactoryBean.class, "scoreHiloFactoryBean");
 		put(WorkersMBean.class, "com.hp.oo.engine.node.services.WorkersMBean");
 		put(ExecutionStatesCallback.class, "executionStatesCallback");
+        put(WorkerDbSupportServiceImpl.class, null);
 	}};
 
 	@Override

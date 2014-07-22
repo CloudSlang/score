@@ -43,7 +43,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.hp.score</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>stub-services</artifactId>
             <version>${project.version}</version>
         </dependency>

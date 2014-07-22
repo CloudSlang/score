@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:jpa="http://www.springframework.org/schema/data/jpa" xmlns:repository="http://www.springframework.org/schema/data/repository"
-    xmlns:tx="http://www.springframework.org/schema/tx" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-				http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+    xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xmlns:repository="http://www.springframework.org/schema/data/repository"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:cache="http://www.springframework.org/schema/cache"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+				http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
 
     <tx:annotation-driven/>
+    <!--<cache:annotation-driven cache-manager="scoreCacheManager"/>-->
 
     <!-- todo change the base-package to com.hp.score when score packages will be fixed -->
 	<jpa:repositories base-package="com.hp" query-lookup-strategy="create-if-not-found">
@@ -17,4 +22,12 @@
 		<repository:include-filter type="regex" expression="com.hp.oo.orchestrator.repositories.FinishedBranchRepository"/>
 		<repository:include-filter type="regex" expression="com.hp.score.repositories.ExecutionStateRepository"/>
 	</jpa:repositories>
+
+    <!--<bean id="scoreCacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">-->
+        <!--<property name="cacheManager">-->
+            <!--<bean class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean"-->
+                <!--p:configLocation="classpath:score-ehcache-for-methods.xml" autowire-candidate="false"/>-->
+        <!--</property>-->
+    <!--</bean>-->
+
 </beans>

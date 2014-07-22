@@ -2,6 +2,7 @@ package com.hp.score.stubs;
 
 import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -12,7 +13,7 @@ import java.util.List;
 public class StubWorkerConfigurationService implements WorkerConfigurationService {
     @Override
     public List<Long> getCancelledExecutions() {
-        return null;
+        return new ArrayList();
     }
 
     @Override

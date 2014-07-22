@@ -1,8 +1,10 @@
 package com.hp.score.schema;
 
+import com.hp.oo.broker.services.ParallelPersistenceService;
 import com.hp.oo.engine.node.services.WorkerNodeService;
 import com.hp.oo.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.engine.queue.services.QueueDispatcherService;
+import com.hp.oo.orchestrator.services.WorkerDbSupportServiceImpl;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ExecutionStep;
 import com.hp.oo.orchestrator.services.PauseResumeService;
@@ -157,6 +159,16 @@ public class EngineTest {
         @Bean
         PauseResumeService pauseResumeService() {
             return mock(PauseResumeService.class);
+        }
+
+        @Bean
+        WorkerDbSupportServiceImpl workerDbSupportService() {
+            return  new WorkerDbSupportServiceImpl();
+        }
+
+        @Bean
+        ParallelPersistenceService parallelPersistenceService() {
+            return  mock(ParallelPersistenceService.class);
         }
     }
 }

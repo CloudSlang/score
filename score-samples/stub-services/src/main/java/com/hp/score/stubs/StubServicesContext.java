@@ -20,12 +20,12 @@ public class StubServicesContext {
     }
 
     @Bean
-    StubWorkerDbSupportService workerDbSupportService() {
-        return new StubWorkerDbSupportService();
+    StubRuntimeValueService runtimeValueService() {
+        return new StubRuntimeValueService();
     }
 
     @Bean
-    StubRuntimeValueService runtimeValueService() {
-        return new StubRuntimeValueService();
+    StubParallelPersistenceServiceImpl parallelPersistenceService() {
+       return new StubParallelPersistenceServiceImpl();
     }
 }
