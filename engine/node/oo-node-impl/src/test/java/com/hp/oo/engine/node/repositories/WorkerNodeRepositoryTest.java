@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = WorkerNodeRepositoryTest.Conf.class)
@@ -54,6 +55,25 @@ public class WorkerNodeRepositoryTest {
         List<String> expected = Arrays.asList("group1", "group2");
         List<String> result = workerNodeRepository.findGroups(expected);
         Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    public void createTest(){
+        String bulkNum = UUID.randomUUID().toString();
+
+        WorkerNode worker = new WorkerNode();
+        worker.setUuid("1234");
+        worker.setHostName("worker host name");
+        worker.setInstallPath("faked installation path");
+        worker.setPassword("faked password");
+        worker.setStatus(Worker.Status.RUNNING);
+        worker.setActive(true);
+        worker.setGroups(Arrays.asList("group1", "group2", "group3"));
+        worker.setBulkNumber(bulkNum);
+        workerNodeRepository.saveAndFlush(worker);
+
+        String result = workerNodeRepository.findByUuid("1234").getBulkNumber();
+        Assert.assertNotNull(result);
     }
 
     @Configuration

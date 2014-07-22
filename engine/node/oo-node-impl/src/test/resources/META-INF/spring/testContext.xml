@@ -30,9 +30,8 @@ http://www.springframework.org/schema/tx http://www.springframework.org/schema/t
     <util:properties id="test-hibernateProperties">
         <prop key="hibernate.show_sql">false</prop>
         <prop key="hibernate.format_sql">true</prop>
-
         <prop key="hibernate.hbm2ddl.auto">validate</prop>
-        <prop key="hibernate.dialect_resolvers">org.hibernate.service.jdbc.dialect.internal.StandardDialectResolver</prop>
+        <prop key="hibernate.dialect_resolvers">com.hp.score.engine.dialects.ScoreDialectResolver</prop>
         <prop key="hibernate.cache.use_second_level_cache">false</prop>
     </util:properties>
 
@@ -58,31 +57,31 @@ http://www.springframework.org/schema/tx http://www.springframework.org/schema/t
 
     <!--MySQL -->
     <!--<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">-->
-    <!--<property name="url" value="jdbc:mysql://localhost:3306/nata"/>-->
-    <!--<property name="driverClassName" value="com.mysql.jdbc.Driver"/>-->
-    <!--<property name="username" value="root"/>-->
-    <!--<property name="password" value="root"/>-->
+        <!--<property name="url" value="jdbc:mysql://localhost:3306/nata"/>-->
+        <!--<property name="driverClassName" value="com.mysql.jdbc.Driver"/>-->
+        <!--<property name="username" value="root"/>-->
+        <!--<property name="password" value=""/>-->
     <!--</bean>-->
 
     <!--Oracle-->
     <!--<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">-->
-    <!--<property name="url" value="jdbc:oracle:thin:@16.60.152.151:1521:orcl"/>-->
+    <!--<property name="url" value="jdbc:oracle:thin:@16.60.152.151:1521:orcl1"/>-->
     <!--<property name="driverClassName" value="oracle.jdbc.OracleDriver"/>-->
-    <!--<property name="username" value="natasha"/>-->
-    <!--<property name="password" value="natasha"/>-->
+    <!--<property name="username" value="natasha_test"/>-->
+    <!--<property name="password" value="natasha_test"/>-->
     <!--</bean>-->
 
     <!--Postgres-->
     <!--<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"    >-->
-    <!--<property name="url" value="jdbc:postgresql://16.60.152.149:5432/natasha"/>-->
+    <!--<property name="url" value="jdbc:postgresql://localhost:5432/nata"/>-->
     <!--<property name="driverClassName" value="org.postgresql.Driver"/>-->
     <!--<property name="username" value="postgres"/>-->
-    <!--<property name="password" value="password"/>-->
+    <!--<property name="password" value="postgres"/>-->
     <!--</bean>-->
 
     <!--Mssql-->
     <!--<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">-->
-    <!--<property name="url" value="jdbc:jtds:sqlserver://16.60.152.149:1433/natasha;sendStringParametersAsUnicode=true"/>-->
+    <!--<property name="url" value="jdbc:jtds:sqlserver://16.60.152.149:1433/nata;sendStringParametersAsUnicode=true"/>-->
     <!--<property name="driverClassName" value="net.sourceforge.jtds.jdbc.Driver"/>-->
     <!--<property name="username" value="sa"/>-->
     <!--<property name="password" value="mercurypw"/>-->

@@ -36,6 +36,7 @@ public class ScoreDatabaseContext {
         props.setProperty("hibernate.cache.use_second_level_cache", Boolean.FALSE.toString());
         props.setProperty("hibernate.order_updates", Boolean.TRUE.toString());
         props.setProperty("hibernate.order_inserts", Boolean.TRUE.toString());
+        props.setProperty("hibernate.dialect_resolvers", "com.hp.score.engine.dialects.ScoreDialectResolver");
         return props;
     }
 

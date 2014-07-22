@@ -7,7 +7,7 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>oo-node-impl</artifactId>
+    <artifactId>oo-node-impl</artifactId>
 
 	<dependencies>
 		<dependency>
@@ -50,14 +50,11 @@
 			<artifactId>oo-versioning-api</artifactId>
         </dependency>
 
-
         <!-- test artifacts -->
 
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>score-data</artifactId>
-            <!--<scope>test</scope>-->
-
         </dependency>
 
 		<dependency>
@@ -127,7 +124,33 @@
 		<dependency>
 			<groupId>rome</groupId>
 			<artifactId>rome</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>ojdbc6</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sourceforge.jtds</groupId>
+            <artifactId>jtds</artifactId>
+            <version>${jtds.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
 </project>

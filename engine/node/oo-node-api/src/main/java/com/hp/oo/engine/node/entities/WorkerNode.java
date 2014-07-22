@@ -85,6 +85,9 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
 	@Column(name = "GROUP_NAME")
 	private List<String> groups = new ArrayList<>();
 
+    @Column(name = "BULK_NUMBER", length = 48)
+    private String bulkNumber;
+
     @Override
 	public String getUuid() {
 		return uuid;
@@ -208,6 +211,14 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
         this.ackVersion = ackVersion;
     }
 
+    public String getBulkNumber() {
+        return bulkNumber;
+    }
+
+    public void setBulkNumber(String bulkNumber) {
+        this.bulkNumber = bulkNumber;
+    }
+
     @Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -226,12 +237,13 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
 				.append(this.jvm, that.jvm)
 				.append(this.dotNetVersion, that.dotNetVersion)
 				.append(this.groups, that.groups)
+                .append(this.bulkNumber, that.bulkNumber)
 				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(uuid,description,hostName,installPath,active,ackTime,os,jvm,dotNetVersion,groups);
+		return Objects.hash(uuid,description,hostName,installPath,active,ackTime,os,jvm,dotNetVersion,groups,bulkNumber);
 	}
 
 	@Override
@@ -247,6 +259,7 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
 				.append("JVM", jvm)
 				.append(".NET", dotNetVersion)
 				.append("groups", groups)
+                .append("bulkNumber", bulkNumber)
 				.toString()
 		;
 	}
