@@ -5,7 +5,7 @@
     <parent>
 		<groupId>com.hp.score</groupId>
 		<artifactId>engine</artifactId>
-		<version>0.1.148-SNAPSHOT</version>
+		<version>0.1.148</version>
 	</parent>
 
 	<artifactId>partitioning</artifactId>
