@@ -24,6 +24,7 @@ import com.hp.oo.partitions.services.PartitionCallback;
 import com.hp.oo.partitions.services.PartitionServiceImpl;
 import com.hp.oo.partitions.services.PartitionTemplateImpl;
 import com.hp.oo.partitions.services.PartitionUtils;
+import com.hp.score.ScoreDeprecatedImpl;
 import com.hp.score.ScoreImpl;
 import com.hp.score.ScorePauseResumeImpl;
 import com.hp.score.ScoreTriggeringImpl;
@@ -87,6 +88,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(WorkersMBean.class, "com.hp.oo.engine.node.services.WorkersMBean");
 		put(ExecutionStatesCallback.class, "executionStatesCallback");
         put(WorkerDbSupportServiceImpl.class, null);
+        put(ScoreDeprecatedImpl.class, null);
 	}};
 
 	@Override

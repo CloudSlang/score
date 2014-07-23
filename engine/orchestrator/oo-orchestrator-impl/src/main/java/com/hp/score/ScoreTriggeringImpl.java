@@ -44,9 +44,14 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
 
     @Override
     public Long trigger(ExecutionPlan executionPlan, Map<String, ? extends Serializable> context, Map<String, ? extends Serializable> runtimeValues, Long startStep) {
+        Long executionId = idGenerator.next();
+        return trigger(executionId, executionPlan, context, runtimeValues, startStep);
+    }
+
+    @Override
+    public Long trigger(Long executionId, ExecutionPlan executionPlan, Map<String, ? extends Serializable> context, Map<String, ? extends Serializable> runtimeValues, Long startStep) {
         SystemContext scoreSystemContext = new SystemContext(runtimeValues);
         Long runningExecutionPlanId = saveRunningExecutionPlan(executionPlan, scoreSystemContext);
-        Long executionId = (Long) idGenerator.next();
         scoreSystemContext.put(ExecutionConstants.EXECUTION_ID_CONTEXT, executionId);
         Execution execution = new Execution(executionId, runningExecutionPlanId, startStep, context, scoreSystemContext);
 

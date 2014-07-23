@@ -12,4 +12,5 @@ import java.util.Map;
  */
 interface ScoreTriggering {
     Long trigger(ExecutionPlan executionPlan, Map<String, ? extends Serializable> context, Map<String, ? extends Serializable> runtimeValues, Long startStep);
+    Long trigger(Long executionId, ExecutionPlan executionPlan, Map<String, ? extends Serializable> context, Map<String, ? extends Serializable> runtimeValues, Long startStep);
 }
