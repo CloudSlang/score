@@ -29,4 +29,5 @@ public class ScoreDeprecatedImpl implements ScoreDeprecated {
     public Long trigger(Long executionId, ExecutionPlan executionPlan, Map<String, ? extends Serializable> context, Map<String, ? extends Serializable> runtimeValues, Long startStep) {
         return scoreTriggering.trigger(executionId, executionPlan, context, runtimeValues, startStep);
     }
+
 }
