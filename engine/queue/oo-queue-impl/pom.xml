@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>com.hp.score</groupId>
 		<artifactId>queue</artifactId>
-		<version>0.1.148</version>
+		<version>0.1.149-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
