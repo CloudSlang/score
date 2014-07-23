@@ -5,6 +5,7 @@ import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
+import com.hp.oo.orchestrator.services.SplitJoinService;
 import com.hp.score.api.ScoreEvent;
 import com.hp.score.events.EventBus;
 import com.hp.score.events.EventConstants;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +40,9 @@ public class QueueListenerImpl implements QueueListener {
 
 	@Autowired
 	private EventBus eventBus;
+
+	@Autowired
+	private SplitJoinService splitJoinService;
 
 	@Override
 	public void onEnqueue(List<ExecutionMessage> messages, int queueSize) {
@@ -88,6 +93,16 @@ public class QueueListenerImpl implements QueueListener {
 		//deletion of the entire run
 		if (!isBranchExecution(executionMessage)) {
 			executionStateService.deleteExecutionState(Long.valueOf(executionMessage.getMsgId()), ExecutionSummary.EMPTY_BRANCH);
+		} else {
+			Execution execution = extractExecution(executionMessage);
+			finishBranchExecution(execution);
+		}
+	}
+
+	//The logic for this method was copied from oo's FinishedFlowEventsListener
+	private void finishBranchExecution(Execution execution) {
+		if (execution.isNewBranchMechanism()) {
+			splitJoinService.endBranch(Arrays.asList(execution));
 		}
 	}
 
@@ -102,9 +117,9 @@ public class QueueListenerImpl implements QueueListener {
 
 		Map<String, Serializable> eventData = new HashMap<>();
 		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, execution.getSystemContext());
-		eventData.put(ExecutionConstants.FLOW_UUID, execution.getSystemContext().get(ExecutionConstants.FLOW_UUID));
 		eventData.put(ExecutionConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
 		eventData.put(ExecutionConstants.EXECUTION_CONTEXT, (Serializable) execution.getContexts());
+		eventData.put(ExecutionConstants.IS_BRANCH, execution.isBranch() && execution.isNewBranchMechanism());
 		return (Serializable) eventData;
 	}
 

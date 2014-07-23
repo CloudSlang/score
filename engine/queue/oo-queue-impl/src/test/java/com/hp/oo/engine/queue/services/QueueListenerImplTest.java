@@ -4,6 +4,7 @@ import com.hp.oo.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.engine.queue.entities.Payload;
 import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.oo.orchestrator.services.SplitJoinService;
 import com.hp.score.events.EventBus;
 import com.hp.score.services.ExecutionStateService;
 import org.junit.Before;
@@ -58,12 +59,6 @@ public class QueueListenerImplTest {
 		verify(eventBus, never()).dispatch();
 	}
 
-	private ExecutionMessage createExecutionMessage() {
-		ExecutionMessage executionMessage = new ExecutionMessage();
-		executionMessage.setMsgId(String.valueOf(new Random().nextLong()));
-		return executionMessage;
-	}
-
 	private Execution createExecution() {
 		return new Execution(
 				new Random().nextLong(),
@@ -94,6 +89,11 @@ public class QueueListenerImplTest {
 		@Bean
 		EventBus eventBus() {
 			return mock(EventBus.class);
+		}
+
+		@Bean
+		SplitJoinService splitJoinService() {
+			return mock(SplitJoinService.class);
 		}
 	}
 

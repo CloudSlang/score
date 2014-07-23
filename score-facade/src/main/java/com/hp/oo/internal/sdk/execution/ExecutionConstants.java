@@ -38,6 +38,7 @@ public class ExecutionConstants {
     public static final String BRANCH_ID = "BRANCH_ID";
     public static final String BRANCH_NAME = "BRANCH_NAME";
     public static final String SPLIT_ID = "SPLIT_ID";
+	public static final String IS_BRANCH = "IS_BRANCH";
 
     public static final String FLOW_RESPONSE_TYPE = "INTERNAL_FLOW_RESPONSE_TYPE";
     public static final String FLOW_RESPONSE_NAME = "INTERNAL_FLOW_RESPONSE_NAME";
