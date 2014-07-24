@@ -11,10 +11,10 @@ import java.util.Map;
  * @author Bonczidai Levente
  */
 public class HttpClientPostMock {
-    private final static Logger logger = Logger.getLogger(HttpClientPostMock.class);
+	private final static Logger logger = Logger.getLogger(HttpClientPostMock.class);
 
-    public HttpClientPostMock() {
-    }
+	public HttpClientPostMock() {
+	}
 
 	/**
 	 * Mocked action method for Http Client Post Raw action
@@ -25,21 +25,21 @@ public class HttpClientPostMock {
 	 * @param host host of the request
 	 * @return map of action results (in current implementation contains the arguments passed to the method)
 	 */
-    public Map<String, String> post(String username, String password, String url, String host) {
-        Map<String, String> returnMap = new HashMap<>();
+	public Map<String, String> post(String username, String password, String url, String host) {
+		Map<String, String> returnMap = new HashMap<>();
 
-        logger.info("username=" + username);
-        logger.info("password=" + password);
-        logger.info("uri=" + url);
+		logger.info("username=" + username);
+		logger.info("password=" + password);
+		logger.info("uri=" + url);
 		logger.info("host=" + host);
 
 		returnMap.put("username", username);
-        returnMap.put("password", password);
-        returnMap.put("url", url);
+		returnMap.put("password", password);
+		returnMap.put("url", url);
 		returnMap.put("host", host);
 
 		returnMap.put("nextStep", "1");
 
-        return returnMap;
-    }
+		return returnMap;
+	}
 }

@@ -8,16 +8,16 @@ public class HttpClientPostWrapper {
 	public static final String SUCCESS = "success";
 	public static final String FAILURE = "failure";
 
-    private HttpClientPostMock httpClientPostMock;
+	private HttpClientPostMock httpClientPostMock;
 
 	@SuppressWarnings("unused")
 	public HttpClientPostWrapper() {
 		this.httpClientPostMock = new HttpClientPostMock();
 	}
 
-    public HttpClientPostWrapper(HttpClientPostMock httpClientPostMock) {
-        this.httpClientPostMock = httpClientPostMock;
-    }
+	public HttpClientPostWrapper(HttpClientPostMock httpClientPostMock) {
+		this.httpClientPostMock = httpClientPostMock;
+	}
 
 	/**
 	 * Control action that wraps around the Http Client Post Raw action
@@ -28,23 +28,23 @@ public class HttpClientPostWrapper {
 	 * @param host host of the request
 	 * @param executionContext the current execution context
 	 */
-    public void post(String username,
-                     String password,
-                     String url,
-                     String host,
-                     Map<String, Serializable> executionContext) {
+	public void post(String username,
+					 String password,
+					 String url,
+					 String host,
+					 Map<String, Serializable> executionContext) {
 
 
 
 		// invoke “HTTP Client post raw”  action
 		// returnMap contains the results of the action
-        Map<String, String> returnMap = httpClientPostMock.post(username, password, url, host);
+		Map<String, String> returnMap = httpClientPostMock.post(username, password, url, host);
 
-        //merge back the results of the action in the flow execution context
-        if (executionContext != null && returnMap != null) {
+		//merge back the results of the action in the flow execution context
+		if (executionContext != null && returnMap != null) {
 			executionContext.putAll(returnMap);
 		}
-    }
+	}
 
 	public Long postNavigation(Map<String, Serializable> executionContext) {
 		if (executionContext.containsKey(RESPONSE)) {

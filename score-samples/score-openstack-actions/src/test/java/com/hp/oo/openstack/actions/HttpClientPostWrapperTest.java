@@ -42,7 +42,7 @@ public class HttpClientPostWrapperTest {
 	public void testPostCase1() throws Exception {
 		//httpClientPostMock
 		when(httpClientPostMock.post(eq(USERNAME), eq(PASSWORD), eq(URL), eq(HOST))).
-			thenReturn(createMapForMock(USERNAME, PASSWORD, URL));
+																							thenReturn(createMapForMock(USERNAME, PASSWORD, URL));
 
 		executionContext = new HashMap<>();
 		postWrapper.post(USERNAME, PASSWORD, URL, HOST, executionContext);
@@ -56,7 +56,7 @@ public class HttpClientPostWrapperTest {
 		verifyBaseParameters();
 	}
 
-//	/**
+	//	/**
 //	 * executionContext=contains some initial parameters (disjunction with the post return results), parameters = null;
 //	 *
 //	 * @throws Exception

@@ -27,7 +27,7 @@ public class HttpClientPostExecutionPlan {
 				"com.hp.oo.openstack.actions.HttpClientPostWrapper", "postNavigation");
 
 		ExecutionStep successStep = createBasicStep(SUCCESS_STEP_ID, "com.hp.oo.openstack.actions.ReturnStepActions", "successStepAction",
-						"com.hp.oo.openstack.actions.ReturnStepActions", "finalStepNavigation");
+				"com.hp.oo.openstack.actions.ReturnStepActions", "finalStepNavigation");
 
 		ExecutionStep failureStep = createBasicStep(FAILURE_STEP_ID, "com.hp.oo.openstack.actions.ReturnStepActions", "failureStepAction",
 				"com.hp.oo.openstack.actions.ReturnStepActions", "finalStepNavigation");
