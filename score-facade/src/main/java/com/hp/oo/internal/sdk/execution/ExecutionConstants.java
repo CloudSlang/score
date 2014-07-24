@@ -17,10 +17,9 @@ public class ExecutionConstants {
 
     //Execution context
     public static final String EXECUTION_ID_CONTEXT = "executionIdContext";
-	public static final String EXECUTION_CONTEXT = "EXECUTION_CONTEXT";
 
-    //For Exceptions
-    public static final String EXECUTION_STEP_ERROR_KEY = "EXECUTION_STEP_ERROR_KEY";
+	//For Exceptions
+	public static final String EXECUTION_STEP_ERROR_KEY = "EXECUTION_STEP_ERROR_KEY";
     public static final String PLATFORM_RESPONSE_EXCEPTION_TYPE = "EXCEPTION";
     public static final String PLATFORM_RESPONSE_EXCEPTION_NAME = "EXCEPTION";
     public static final String EXCEPTION_STEP_ID = "exceptionStepId";
@@ -38,10 +37,9 @@ public class ExecutionConstants {
     public static final String BRANCH_ID = "BRANCH_ID";
     public static final String BRANCH_NAME = "BRANCH_NAME";
     public static final String SPLIT_ID = "SPLIT_ID";
-	public static final String IS_BRANCH = "IS_BRANCH";
 
-    public static final String FLOW_RESPONSE_TYPE = "INTERNAL_FLOW_RESPONSE_TYPE";
-    public static final String FLOW_RESPONSE_NAME = "INTERNAL_FLOW_RESPONSE_NAME";
+	public static final String FLOW_RESPONSE_TYPE = "INTERNAL_FLOW_RESPONSE_TYPE";
+	public static final String FLOW_RESPONSE_NAME = "INTERNAL_FLOW_RESPONSE_NAME";
 
     // for  Execution Event
     public static final String EXECUTION_EVENTS_QUEUE = "EXECUTION_EVENTS_QUEUE";
@@ -55,14 +53,8 @@ public class ExecutionConstants {
 
     public static final String HEADLESS_EXECUTION = "HEADLESS_EXECUTION";
 
-	public static final String SCORE_ERROR_MSG = "error_message";
-
-    public static final String SCORE_ERROR_LOG_MSG = "logMessage";
-
-    public static final String SCORE_ERROR_TYPE = "SCORE_ERROR_TYPE";
-
-    //For Workers Groups
-    public static final String OPERATION_GROUP = "OPERATION_GROUP"; //the group that the action need to run on
+	//For Workers Groups
+	public static final String OPERATION_GROUP = "OPERATION_GROUP"; //the group that the action need to run on
     public static final String OPERATION_WORKER = "worker_uuid"; //the group that the action need to run on
     public static final String ACTUALLY_OPERATION_GROUP = "ACTUALLY_OPERATION_GROUP"; //the actually entry in the queue that the worker should run. like the name of the worker itself that was chosen from the group
     public static final String DEFAULT_GROUP = "RAS_Operator_Path";

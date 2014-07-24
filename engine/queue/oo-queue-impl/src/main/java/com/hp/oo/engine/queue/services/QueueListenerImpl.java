@@ -119,8 +119,8 @@ public class QueueListenerImpl implements QueueListener {
 		Map<String, Serializable> eventData = new HashMap<>();
 		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, execution.getSystemContext());
 		eventData.put(ExecutionConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
-		eventData.put(ExecutionConstants.EXECUTION_CONTEXT, (Serializable) execution.getContexts());
-		eventData.put(ExecutionConstants.IS_BRANCH, execution.isBranch() && execution.isNewBranchMechanism());
+		eventData.put(EventConstants.EXECUTION_CONTEXT, (Serializable) execution.getContexts());
+		eventData.put(EventConstants.IS_BRANCH, execution.isBranch() && execution.isNewBranchMechanism());
 		return (Serializable) eventData;
 	}
 

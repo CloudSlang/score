@@ -440,9 +440,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	) {
 		HashMap<String, Serializable> eventData = new HashMap<>();
 		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, new HashMap<>(systemContext));
-		eventData.put(ExecutionConstants.SCORE_ERROR_MSG, ex);
-		eventData.put(ExecutionConstants.SCORE_ERROR_LOG_MSG, logMessage);
-		eventData.put(ExecutionConstants.SCORE_ERROR_TYPE, logLevelCategory.getCategoryName());
+		eventData.put(EventConstants.SCORE_ERROR_MSG, ex);
+		eventData.put(EventConstants.SCORE_ERROR_LOG_MSG, logMessage);
+		eventData.put(EventConstants.SCORE_ERROR_TYPE, logLevelCategory.getCategoryName());
 		ScoreEvent eventWrapper = new ScoreEvent(EventConstants.SCORE_ERROR_EVENT, eventData);
 		eventBus.dispatch(eventWrapper);
 
