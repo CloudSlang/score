@@ -72,20 +72,20 @@ public class QueueListenerImpl implements QueueListener {
 
 	@Override
 	public void onTerminated(List<ExecutionMessage> messages) {
-		List<ScoreEvent> scoreEvents = handleTerminatedMessages(messages);
-		if (scoreEvents.size() > 0) {
-			eventBus.dispatch(scoreEvents.toArray(new ScoreEvent[scoreEvents.size()]));
+		ScoreEvent[] scoreEvents = handleTerminatedMessages(messages);
+		if (scoreEvents.length > 0) {
+			eventBus.dispatch(scoreEvents);
 		}
 	}
 
-	private List<ScoreEvent> handleTerminatedMessages(List<ExecutionMessage> messages) {
+	private ScoreEvent[] handleTerminatedMessages(List<ExecutionMessage> messages) {
 		List<ScoreEvent> scoreEvents = new ArrayList<>(messages.size());
 
 		for (ExecutionMessage executionMessage : messages) {
 			handleTerminatedMessage(executionMessage);
 			scoreEvents.add(createScoreEvent(executionMessage));
 		}
-		return scoreEvents;
+		return scoreEvents.toArray(new ScoreEvent[scoreEvents.size()]);
 	}
 
 	private void handleTerminatedMessage(ExecutionMessage executionMessage) {
@@ -100,6 +100,7 @@ public class QueueListenerImpl implements QueueListener {
 	}
 
 	//The logic for this method was copied from oo's FinishedFlowEventsListener
+	//Does the endBranch only for branches that are not non-blocking (parallel, multi-instance and sub-flows)
 	private void finishBranchExecution(Execution execution) {
 		if (execution.isNewBranchMechanism()) {
 			splitJoinService.endBranch(Arrays.asList(execution));
