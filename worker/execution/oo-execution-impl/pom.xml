@@ -12,8 +12,8 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>score-events</artifactId>
-        </dependency>
+			<artifactId>score-api</artifactId>
+		</dependency>
 
         <dependency>
             <groupId>com.googlecode.lambdaj</groupId>

@@ -1,655 +1,655 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <groupId>com.hp.score</groupId>
-    <artifactId>score-parent</artifactId>
-    <version>0.1.149-SNAPSHOT</version>
-    <packaging>pom</packaging>
-
-    <scm>
-        <connection>scm:git:https://github.com/HPSoftware/score.git</connection>
-        <developerConnection>scm:git:git@github.com:HPSoftware/score.git</developerConnection>
-        <url>https://github.com/HPSoftware/score.git</url>
-        <tag>master</tag>
-    </scm>
-
-    <properties>
-        <h2.version>1.3.175</h2.version>
-        <oracle.version>11.2.0.3.0</oracle.version>
-        <jtds.version>1.3.0</jtds.version>
-        <mysql.connector.version>5.1.21</mysql.connector.version>
-        <postgres.driver.version>9.1-901.jdbc4</postgres.driver.version>
-
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-        <spring.version>4.0.0.RELEASE</spring.version>
-        <hibernate.version>4.1.4.Final</hibernate.version>
-        <querydsl.version>3.2.4</querydsl.version>
-    </properties>
-
-    <distributionManagement>
-        <repository>
-            <id>nexus-repository</id>
-            <name>nexus repository</name>
-            <url>http://mydphdb0166.hpswlabs.adapps.hp.com:8081/nexus/content/repositories/releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>nexus-snapshot-repository</id>
-            <name>nexus snapshots repository</name>
-            <url>http://mydphdb0166.hpswlabs.adapps.hp.com:8081/nexus/content/repositories/snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
-
-    <developers>
-        <developer>
-            <id>hararzafrir</id>
-            <email>harar.zafrir@hp.com</email>
-            <name>Harar Zafrir</name>
-            <url>https://github.com/hararzafrir</url>
-            <organization>HP Software</organization>
-            <timezone>+2</timezone>
-        </developer>
-        <developer>
-            <id>morlajb</id>
-            <email>mor.lajb@hp.com</email>
-            <name>Mor Lajb</name>
-            <url>https://github.com/morlajb</url>
-            <organization>HP Software</organization>
-            <timezone>+2</timezone>
-        </developer>
-        <developer>
-            <id>meirwah</id>
-            <email>meir.wahnon@hp.com</email>
-            <name>Meir Wahnon</name>
-            <url>https://github.com/meirwah</url>
-            <organization>HP Software</organization>
-            <timezone>+2</timezone>
-        </developer>
-        <developer>
-            <id>shajyhia</id>
-            <email>shehab.hajyhia@hp.com</email>
-            <name>Shehab Hajyhia</name>
-            <url>https://github.com/shajyhia</url>
-            <organization>HP Software</organization>
-            <timezone>+2</timezone>
-        </developer>
-        <developer>
-            <id>lucian-cm</id>
-            <email>lucian-cristian.musca@hp.com</email>
-            <name>Lucian Musca</name>
-            <url>https://github.com/lucian-cm</url>
-            <organization>HP Software</organization>
-            <timezone>+2</timezone>
-        </developer>
-        <developer>
-            <id>guymarom</id>
-            <email>marom.guy@gmail.com</email>
-            <name>Guy Marom</name>
-            <url>https://github.com/guymarom</url>
-            <organization>HP Software</organization>
-            <timezone>+2</timezone>
-        </developer>
-        <developer>
-            <id>cid77</id>
-            <email>ciprian-eugen.duma@hp.com</email>
-            <name>Ciprian Duma</name>
-            <url>https://github.com/cid77</url>
-            <organization>HP Software</organization>
-            <timezone>+2</timezone>
-        </developer>
-        <developer>
-            <id>zsolt-donca-hp</id>
-            <email>zsolt.donca@hp.com</email>
-            <name>Zsolt Donca</name>
-            <url>https://github.com/zsolt-donca-hp</url>
-            <organization>HP Software</organization>
-            <timezone>+2</timezone>
-        </developer>
-        <developer>
-            <id>orius123</id>
-            <email>eliya.sadan@hp.com</email>
-            <name>Eliya Sadan</name>
-            <url>https://github.com/orius123</url>
-            <organization>HP Software</organization>
-            <timezone>+2</timezone>
-        </developer>
-        <developer>
-            <id>hprotem</id>
-            <email>rotem.eisenthal@hp.com</email>
-            <name>Rotem Eisenthal</name>
-            <url>https://github.com/hprotem</url>
-            <organization>HP Software</organization>
-            <timezone>+2</timezone>
-        </developer>
-        <developer>
-            <id>mzruya</id>
-            <email>matan@hp.com</email>
-            <name>Matan Zruya</name>
-            <url>https://github.com/mzruya</url>
-            <organization>HP Software</organization>
-            <timezone>+2</timezone>
-        </developer>
-        <developer>
-            <id>liat-bensal</id>
-            <email>liat.marom-bensal@hp.com</email>
-            <name>Liat Marom Bensal</name>
-            <url>https://github.com/liat-bensal</url>
-            <organization>HP Software</organization>
-            <timezone>+2</timezone>
-        </developer>
-        <developer>
-            <id>einatneu</id>
-            <email>einat.neuman@hp.com</email>
-            <name>Einat Neuman</name>
-            <url>https://github.com/einatneu</url>
-            <organization>HP Software</organization>
-            <timezone>+2</timezone>
-        </developer>
-        <developer>
-            <id>maayannoy</id>
-            <email>maayan.noy@hp.com</email>
-            <name>Maayan Noy</name>
-            <url>https://github.com/maayannoy</url>
-            <organization>HP Software</organization>
-            <timezone>+2</timezone>
-        </developer>
-        <developer>
-            <id>adriana-chis</id>
-            <email>adriana.chis@hp.com</email>
-            <name>Adriana Chis</name>
-            <url>https://github.com/adriana-chis</url>
-            <organization>HP Software</organization>
-            <timezone>+2</timezone>
-        </developer>
-        <developer>
-            <id>varelasavela</id>
-            <email>evgeny.varela@hp.com</email>
-            <name>Evgeny Varela-Savela</name>
-            <url>https://github.com/varelasavela</url>
-            <organization>HP Software</organization>
-            <timezone>+2</timezone>
-        </developer>
-    </developers>
-
-    <!--contributors>
-        <contributor>
-            <id>johndoe</id>
-            <email>john.doe@foo.bar.com</email>
-            <name>John Doe</name>
-            <url>https://github.com/johndoe</url>
-            <organization>Foo-Bar inc.</organization>
-            <timezone>UTC</timezone>
-        </contributor>
-    </contributors-->
-
-    <licenses>
-        <license>
-            <name>Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-        </license>
-    </licenses>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                <version>1.2.17</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-                <version>1.7.2</version>
-                <scope>runtime</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>2.6</version>
-            </dependency>
-
-            <dependency>
-                <groupId>commons-collections</groupId>
-                <artifactId>commons-collections</artifactId>
-                <version>3.2.1</version>
-            </dependency>
-
-            <dependency>
-                <groupId>commons-io</groupId>
-                <artifactId>commons-io</artifactId>
-                <version>2.3</version>
-            </dependency>
-
-            <dependency>
-                <groupId>commons-pool</groupId>
-                <artifactId>commons-pool</artifactId>
-                <version>1.6</version>
-            </dependency>
-
-            <dependency>
-                <groupId>commons-dbcp</groupId>
-                <artifactId>commons-dbcp</artifactId>
-                <version>1.4</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.googlecode.lambdaj</groupId>
-                <artifactId>lambdaj</artifactId>
-                <version>2.3.3</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>15.0</version>
-            </dependency>
-
-            <dependency>
-                <groupId>cglib</groupId>
-                <artifactId>cglib</artifactId>
-                <version>2.2.2</version>
-            </dependency>
-
-            <dependency>
-                <groupId>net.sf.dozer</groupId>
-                <artifactId>dozer</artifactId>
-                <version>5.3.2</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <!-- spring artifacts -->
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-core</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-beans</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-context</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-context-support</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-tx</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-aop</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-test</artifactId>
-                <version>${spring.version}</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-jdbc</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-expression</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-core</artifactId>
-                <version>3.1.4.RELEASE</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.integration</groupId>
-                <artifactId>spring-integration-core</artifactId>
-                <version>2.2.6.RELEASE</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.data</groupId>
-                <artifactId>spring-data-jpa</artifactId>
-                <version>1.4.2.RELEASE</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>junit</groupId>
-                        <artifactId>junit-dep</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <!-- end of spring artifacts -->
-
-
-            <!-- hibernate artifacts -->
-            <dependency>
-                <groupId>org.hibernate.javax.persistence</groupId>
-                <artifactId>hibernate-jpa-2.0-api</artifactId>
-                <version>1.0.1.Final</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-entitymanager</artifactId>
-                <version>${hibernate.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-core</artifactId>
-                <version>${hibernate.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-validator</artifactId>
-                <version>4.3.0.Final</version>
-                <scope>runtime</scope>
-            </dependency>
-            <!-- end of hibernate artifacts -->
-
-            <!-- querydsl artifacts -->
-            <dependency>
-                <groupId>com.mysema.querydsl</groupId>
-                <artifactId>querydsl-apt</artifactId>
-                <version>${querydsl.version}</version>
-                <scope>provided</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>com.mysema.querydsl</groupId>
-                <artifactId>querydsl-jpa</artifactId>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.hibernate.javax.persistence</groupId>
-                        <artifactId>hibernate-jpa-2.0-api</artifactId>
-                    </exclusion>
-                </exclusions>
-                <version>${querydsl.version}</version>
-            </dependency>
-            <!-- end of querydsl artifacts -->
-
-            <dependency>
-                <groupId>org.codehaus.jackson</groupId>
-                <artifactId>jackson-mapper-asl</artifactId>
-                <version>1.9.7</version>
-            </dependency>
-
-            <dependency>
-                <groupId>rome</groupId>
-                <artifactId>rome</artifactId>
-                <version>1.0</version>
-            </dependency>
-
-            <dependency>
-                <groupId>javax.validation</groupId>
-                <artifactId>validation-api</artifactId>
-                <version>1.1.0.Final</version>
-            </dependency>
-
-            <!-- DB drivers -->
-            <dependency>
-                <groupId>com.h2database</groupId>
-                <artifactId>h2</artifactId>
-                <version>${h2.version}</version>
-            </dependency>
-
-            <!--DB drivers for tests-->
-            <dependency>
-                <groupId>net.sourceforge.jtds</groupId>
-                <artifactId>jtds</artifactId>
-                <version>${jtds.version}</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>com.oracle</groupId>
-                <artifactId>ojdbc6</artifactId>
-                <version>${oracle.version}</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>${mysql.connector.version}</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>postgresql</groupId>
-                <artifactId>postgresql</artifactId>
-                <version>${postgres.driver.version}</version>
-                <scope>test</scope>
-            </dependency>
-
-
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.10</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-all</artifactId>
-                <version>1.9.5</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.easytesting</groupId>
-                <artifactId>fest-assert</artifactId>
-                <version>1.4</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.liquibase</groupId>
-                <artifactId>liquibase-core</artifactId>
-                <version>2.0.5</version>
-            </dependency>
-
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>engine-facade</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>findbugs-maven-plugin</artifactId>
-                    <version>2.4.0</version>
-                    <configuration>
-                        <xmlOutput>true</xmlOutput>
-                        <findbugsXmlOutput>true</findbugsXmlOutput>
-                        <!--
-                            In general the idea is to have as little false positives as possible. So we might ignore
-                            some real stuff, but this is better than having false positives.
-
-                                  Findbugs produces a false positive on System.out and System.err with the FindNullDeref
-                                  detector - this detector is omitted (ever though it is important) until findbugs (finally)
-                                  fix this problem.
-
-                                  The FindDeadLocalStores has a lot of false positives and is relatively uninteresting. See:
-                                  http://findbugs.sourceforge.net/bugDescriptions.html#DLS_DEAD_STORE_OF_CLASS_LITERAL
-
-                                  The NumberConstructor is unavoidable when using Groovy, so we're ignoring that too. See:
-                                  http://findbugs.sourceforge.net/bugDescriptions.html#DM_FP_NUMBER_CTOR
-
-                                  UnreadFields get confused by all the injecting frameworks we use (Guice, Gin, Plexus, Spring)
-                              -->
-                        <omitVisitors>FindNullDeref,FindDeadLocalStores,NumberConstructor,UnreadFields</omitVisitors>
-                    </configuration>
-                </plugin>
-
-                <plugin>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.0</version>
-                    <configuration>
-                        <source>1.7</source>
-                        <target>1.7</target>
-                    </configuration>
-                </plugin>
-
-                <plugin>
-                    <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>2.14</version>
-                    <executions>
-                        <execution>
-                            <id>verify integration tests execution</id>
-                            <phase>post-integration-test</phase>
-                            <goals>
-                                <goal>verify</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <runOrder>alphabetical</runOrder>
-                    </configuration>
-                </plugin>
-
-                <plugin>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.15</version>
-                    <configuration>
-                        <runOrder>alphabetical</runOrder>
-                    </configuration>
-                </plugin>
-
-                <plugin>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>2.8</version>
-                </plugin>
-
-                <plugin>
-                    <artifactId>maven-deploy-plugin</artifactId>
-                    <version>2.7</version>
-                </plugin>
-
-                <plugin>
-                    <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>1.3.1</version>
-                    <executions>
-                        <execution>
-                            <id>enforce-versions</id>
-                            <goals>
-                                <goal>enforce</goal>
-                            </goals>
-                            <configuration>
-                                <rules>
-                                    <requireMavenVersion>
-                                        <version>3.0.4</version>
-                                    </requireMavenVersion>
-                                    <requireJavaVersion>
-                                        <version>1.7</version>
-                                    </requireJavaVersion>
-                                </rules>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-
-                <plugin>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>2.2.1</version>
-                    <executions>
-                        <execution>
-                            <id>attach-sources</id>
-                            <phase>verify</phase>
-                            <goals>
-                                <goal>jar-no-fork</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <attach>true</attach>
-                    </configuration>
-                </plugin>
-
-                <plugin>
-                    <artifactId>maven-war-plugin</artifactId>
-                    <version>2.2</version>
-                    <configuration>
-                        <workDirectory>${project.build.directory}/overlays</workDirectory>
-                    </configuration>
-                </plugin>
-
-                <plugin>
-                    <groupId>com.mysema.maven</groupId>
-                    <artifactId>apt-maven-plugin</artifactId>
-                    <version>1.0.9</version>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>process</goal>
-                            </goals>
-                            <configuration>
-                                <outputDirectory>target/generated-sources/java</outputDirectory>
-                                <processor>com.mysema.query.apt.jpa.JPAAnnotationProcessor</processor>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-
-        <plugins>
-            <plugin>
-                <artifactId>maven-enforcer-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-source-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
-
-    <modules>
-        <module>score-facade</module>
-        <module>engine</module>
-        <module>worker</module>
-        <module>score-all</module>
-        <module>score-worker</module>
-        <module>score-tests</module>
-        <module>score-api</module>
-        <module>score-samples</module>
-        <module>score-events</module>
-    </modules>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.hp.score</groupId>
+	<artifactId>score-parent</artifactId>
+	<version>0.1.149-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<scm>
+		<connection>scm:git:https://github.com/HPSoftware/score.git</connection>
+		<developerConnection>scm:git:git@github.com:HPSoftware/score.git</developerConnection>
+		<url>https://github.com/HPSoftware/score.git</url>
+		<tag>master</tag>
+	</scm>
+
+	<properties>
+		<h2.version>1.3.175</h2.version>
+		<oracle.version>11.2.0.3.0</oracle.version>
+		<jtds.version>1.3.0</jtds.version>
+		<mysql.connector.version>5.1.21</mysql.connector.version>
+		<postgres.driver.version>9.1-901.jdbc4</postgres.driver.version>
+
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<spring.version>4.0.0.RELEASE</spring.version>
+		<hibernate.version>4.1.4.Final</hibernate.version>
+		<querydsl.version>3.2.4</querydsl.version>
+	</properties>
+
+	<distributionManagement>
+		<repository>
+			<id>nexus-repository</id>
+			<name>nexus repository</name>
+			<url>http://mydphdb0166.hpswlabs.adapps.hp.com:8081/nexus/content/repositories/releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>nexus-snapshot-repository</id>
+			<name>nexus snapshots repository</name>
+			<url>http://mydphdb0166.hpswlabs.adapps.hp.com:8081/nexus/content/repositories/snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+	<developers>
+		<developer>
+			<id>hararzafrir</id>
+			<email>harar.zafrir@hp.com</email>
+			<name>Harar Zafrir</name>
+			<url>https://github.com/hararzafrir</url>
+			<organization>HP Software</organization>
+			<timezone>+2</timezone>
+		</developer>
+		<developer>
+			<id>morlajb</id>
+			<email>mor.lajb@hp.com</email>
+			<name>Mor Lajb</name>
+			<url>https://github.com/morlajb</url>
+			<organization>HP Software</organization>
+			<timezone>+2</timezone>
+		</developer>
+		<developer>
+			<id>meirwah</id>
+			<email>meir.wahnon@hp.com</email>
+			<name>Meir Wahnon</name>
+			<url>https://github.com/meirwah</url>
+			<organization>HP Software</organization>
+			<timezone>+2</timezone>
+		</developer>
+		<developer>
+			<id>shajyhia</id>
+			<email>shehab.hajyhia@hp.com</email>
+			<name>Shehab Hajyhia</name>
+			<url>https://github.com/shajyhia</url>
+			<organization>HP Software</organization>
+			<timezone>+2</timezone>
+		</developer>
+		<developer>
+			<id>lucian-cm</id>
+			<email>lucian-cristian.musca@hp.com</email>
+			<name>Lucian Musca</name>
+			<url>https://github.com/lucian-cm</url>
+			<organization>HP Software</organization>
+			<timezone>+2</timezone>
+		</developer>
+		<developer>
+			<id>guymarom</id>
+			<email>marom.guy@gmail.com</email>
+			<name>Guy Marom</name>
+			<url>https://github.com/guymarom</url>
+			<organization>HP Software</organization>
+			<timezone>+2</timezone>
+		</developer>
+		<developer>
+			<id>cid77</id>
+			<email>ciprian-eugen.duma@hp.com</email>
+			<name>Ciprian Duma</name>
+			<url>https://github.com/cid77</url>
+			<organization>HP Software</organization>
+			<timezone>+2</timezone>
+		</developer>
+		<developer>
+			<id>zsolt-donca-hp</id>
+			<email>zsolt.donca@hp.com</email>
+			<name>Zsolt Donca</name>
+			<url>https://github.com/zsolt-donca-hp</url>
+			<organization>HP Software</organization>
+			<timezone>+2</timezone>
+		</developer>
+		<developer>
+			<id>orius123</id>
+			<email>eliya.sadan@hp.com</email>
+			<name>Eliya Sadan</name>
+			<url>https://github.com/orius123</url>
+			<organization>HP Software</organization>
+			<timezone>+2</timezone>
+		</developer>
+		<developer>
+			<id>hprotem</id>
+			<email>rotem.eisenthal@hp.com</email>
+			<name>Rotem Eisenthal</name>
+			<url>https://github.com/hprotem</url>
+			<organization>HP Software</organization>
+			<timezone>+2</timezone>
+		</developer>
+		<developer>
+			<id>mzruya</id>
+			<email>matan@hp.com</email>
+			<name>Matan Zruya</name>
+			<url>https://github.com/mzruya</url>
+			<organization>HP Software</organization>
+			<timezone>+2</timezone>
+		</developer>
+		<developer>
+			<id>liat-bensal</id>
+			<email>liat.marom-bensal@hp.com</email>
+			<name>Liat Marom Bensal</name>
+			<url>https://github.com/liat-bensal</url>
+			<organization>HP Software</organization>
+			<timezone>+2</timezone>
+		</developer>
+		<developer>
+			<id>einatneu</id>
+			<email>einat.neuman@hp.com</email>
+			<name>Einat Neuman</name>
+			<url>https://github.com/einatneu</url>
+			<organization>HP Software</organization>
+			<timezone>+2</timezone>
+		</developer>
+		<developer>
+			<id>maayannoy</id>
+			<email>maayan.noy@hp.com</email>
+			<name>Maayan Noy</name>
+			<url>https://github.com/maayannoy</url>
+			<organization>HP Software</organization>
+			<timezone>+2</timezone>
+		</developer>
+		<developer>
+			<id>adriana-chis</id>
+			<email>adriana.chis@hp.com</email>
+			<name>Adriana Chis</name>
+			<url>https://github.com/adriana-chis</url>
+			<organization>HP Software</organization>
+			<timezone>+2</timezone>
+		</developer>
+		<developer>
+			<id>varelasavela</id>
+			<email>evgeny.varela@hp.com</email>
+			<name>Evgeny Varela-Savela</name>
+			<url>https://github.com/varelasavela</url>
+			<organization>HP Software</organization>
+			<timezone>+2</timezone>
+		</developer>
+	</developers>
+
+	<!--contributors>
+		<contributor>
+			<id>johndoe</id>
+			<email>john.doe@foo.bar.com</email>
+			<name>John Doe</name>
+			<url>https://github.com/johndoe</url>
+			<organization>Foo-Bar inc.</organization>
+			<timezone>UTC</timezone>
+		</contributor>
+	</contributors-->
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
+		</license>
+	</licenses>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>log4j</groupId>
+				<artifactId>log4j</artifactId>
+				<version>1.2.17</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-log4j12</artifactId>
+				<version>1.7.2</version>
+				<scope>runtime</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>commons-lang</groupId>
+				<artifactId>commons-lang</artifactId>
+				<version>2.6</version>
+			</dependency>
+
+			<dependency>
+				<groupId>commons-collections</groupId>
+				<artifactId>commons-collections</artifactId>
+				<version>3.2.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>2.3</version>
+			</dependency>
+
+			<dependency>
+				<groupId>commons-pool</groupId>
+				<artifactId>commons-pool</artifactId>
+				<version>1.6</version>
+			</dependency>
+
+			<dependency>
+				<groupId>commons-dbcp</groupId>
+				<artifactId>commons-dbcp</artifactId>
+				<version>1.4</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.googlecode.lambdaj</groupId>
+				<artifactId>lambdaj</artifactId>
+				<version>2.3.3</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>15.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>cglib</groupId>
+				<artifactId>cglib</artifactId>
+				<version>2.2.2</version>
+			</dependency>
+
+			<dependency>
+				<groupId>net.sf.dozer</groupId>
+				<artifactId>dozer</artifactId>
+				<version>5.3.2</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-log4j12</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<!-- spring artifacts -->
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-core</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-beans</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context-support</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-tx</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-aop</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-test</artifactId>
+				<version>${spring.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-jdbc</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-expression</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-core</artifactId>
+				<version>3.1.4.RELEASE</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.integration</groupId>
+				<artifactId>spring-integration-core</artifactId>
+				<version>2.2.6.RELEASE</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-jpa</artifactId>
+				<version>1.4.2.RELEASE</version>
+				<exclusions>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit-dep</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<!-- end of spring artifacts -->
+
+
+			<!-- hibernate artifacts -->
+			<dependency>
+				<groupId>org.hibernate.javax.persistence</groupId>
+				<artifactId>hibernate-jpa-2.0-api</artifactId>
+				<version>1.0.1.Final</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-entitymanager</artifactId>
+				<version>${hibernate.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-core</artifactId>
+				<version>${hibernate.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-validator</artifactId>
+				<version>4.3.0.Final</version>
+				<scope>runtime</scope>
+			</dependency>
+			<!-- end of hibernate artifacts -->
+
+			<!-- querydsl artifacts -->
+			<dependency>
+				<groupId>com.mysema.querydsl</groupId>
+				<artifactId>querydsl-apt</artifactId>
+				<version>${querydsl.version}</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>com.mysema.querydsl</groupId>
+				<artifactId>querydsl-jpa</artifactId>
+				<exclusions>
+					<exclusion>
+						<groupId>org.hibernate.javax.persistence</groupId>
+						<artifactId>hibernate-jpa-2.0-api</artifactId>
+					</exclusion>
+				</exclusions>
+				<version>${querydsl.version}</version>
+			</dependency>
+			<!-- end of querydsl artifacts -->
+
+			<dependency>
+				<groupId>org.codehaus.jackson</groupId>
+				<artifactId>jackson-mapper-asl</artifactId>
+				<version>1.9.7</version>
+			</dependency>
+
+			<dependency>
+				<groupId>rome</groupId>
+				<artifactId>rome</artifactId>
+				<version>1.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.validation</groupId>
+				<artifactId>validation-api</artifactId>
+				<version>1.1.0.Final</version>
+			</dependency>
+
+			<!-- DB drivers -->
+			<dependency>
+				<groupId>com.h2database</groupId>
+				<artifactId>h2</artifactId>
+				<version>${h2.version}</version>
+			</dependency>
+
+			<!--DB drivers for tests-->
+			<dependency>
+				<groupId>net.sourceforge.jtds</groupId>
+				<artifactId>jtds</artifactId>
+				<version>${jtds.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>com.oracle</groupId>
+				<artifactId>ojdbc6</artifactId>
+				<version>${oracle.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>mysql</groupId>
+				<artifactId>mysql-connector-java</artifactId>
+				<version>${mysql.connector.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>${postgres.driver.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.10</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-all</artifactId>
+				<version>1.9.5</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.easytesting</groupId>
+				<artifactId>fest-assert</artifactId>
+				<version>1.4</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.liquibase</groupId>
+				<artifactId>liquibase-core</artifactId>
+				<version>2.0.5</version>
+			</dependency>
+
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>engine-facade</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>findbugs-maven-plugin</artifactId>
+					<version>2.4.0</version>
+					<configuration>
+						<xmlOutput>true</xmlOutput>
+						<findbugsXmlOutput>true</findbugsXmlOutput>
+						<!--
+							In general the idea is to have as little false positives as possible. So we might ignore
+							some real stuff, but this is better than having false positives.
+
+								  Findbugs produces a false positive on System.out and System.err with the FindNullDeref
+								  detector - this detector is omitted (ever though it is important) until findbugs (finally)
+								  fix this problem.
+
+								  The FindDeadLocalStores has a lot of false positives and is relatively uninteresting. See:
+								  http://findbugs.sourceforge.net/bugDescriptions.html#DLS_DEAD_STORE_OF_CLASS_LITERAL
+
+								  The NumberConstructor is unavoidable when using Groovy, so we're ignoring that too. See:
+								  http://findbugs.sourceforge.net/bugDescriptions.html#DM_FP_NUMBER_CTOR
+
+								  UnreadFields get confused by all the injecting frameworks we use (Guice, Gin, Plexus, Spring)
+							  -->
+						<omitVisitors>FindNullDeref,FindDeadLocalStores,NumberConstructor,UnreadFields</omitVisitors>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.0</version>
+					<configuration>
+						<source>1.7</source>
+						<target>1.7</target>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>2.14</version>
+					<executions>
+						<execution>
+							<id>verify integration tests execution</id>
+							<phase>post-integration-test</phase>
+							<goals>
+								<goal>verify</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<runOrder>alphabetical</runOrder>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.15</version>
+					<configuration>
+						<runOrder>alphabetical</runOrder>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.8</version>
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>2.7</version>
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>1.3.1</version>
+					<executions>
+						<execution>
+							<id>enforce-versions</id>
+							<goals>
+								<goal>enforce</goal>
+							</goals>
+							<configuration>
+								<rules>
+									<requireMavenVersion>
+										<version>3.0.4</version>
+									</requireMavenVersion>
+									<requireJavaVersion>
+										<version>1.7</version>
+									</requireJavaVersion>
+								</rules>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>2.2.1</version>
+					<executions>
+						<execution>
+							<id>attach-sources</id>
+							<phase>verify</phase>
+							<goals>
+								<goal>jar-no-fork</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<attach>true</attach>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>2.2</version>
+					<configuration>
+						<workDirectory>${project.build.directory}/overlays</workDirectory>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<groupId>com.mysema.maven</groupId>
+					<artifactId>apt-maven-plugin</artifactId>
+					<version>1.0.9</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>process</goal>
+							</goals>
+							<configuration>
+								<outputDirectory>target/generated-sources/java</outputDirectory>
+								<processor>com.mysema.query.apt.jpa.JPAAnnotationProcessor</processor>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
+		<plugins>
+			<plugin>
+				<artifactId>maven-enforcer-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-source-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+	<modules>
+		<module>score-facade</module>
+		<module>engine</module>
+		<module>worker</module>
+		<module>score-all</module>
+		<module>score-worker</module>
+		<module>score-tests</module>
+		<module>score-api</module>
+		<module>score-samples</module>
+	</modules>
 </project>
