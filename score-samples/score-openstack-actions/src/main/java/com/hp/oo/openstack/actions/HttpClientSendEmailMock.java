@@ -13,6 +13,7 @@ import java.util.Map;
 @SuppressWarnings("unused")
 public class HttpClientSendEmailMock {
 	private final static Logger logger = Logger.getLogger(HttpClientSendEmailMock.class);
+
 	/**
 	 * Mocked action method for sending an email
 	 *

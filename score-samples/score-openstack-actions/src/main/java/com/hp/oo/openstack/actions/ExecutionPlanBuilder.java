@@ -73,8 +73,18 @@ public class ExecutionPlanBuilder {
 		ApplicationContext context = loadScore();
 		ExecutionPlan executionPlan = builder.getExecutionPlan();
 		Score score = context.getBean(Score.class);
+
 		Map<String, Serializable> executionContext = new HashMap<String, Serializable>();
-		executionContext.put("username", "user");
+		//for post
+		executionContext.put("username", "userTest");
+		executionContext.put("password", "passTest");
+		executionContext.put("host", "hostTest");
+		executionContext.put("url", "urlTest");
+		//for sendEmail
+		executionContext.put("receiver", "receiverTest");
+		executionContext.put("title", "titleTest");
+		executionContext.put("body", "bodyTest");
+
 		score.trigger(executionPlan, executionContext);
 	}
 

@@ -6,7 +6,6 @@ import org.springframework.core.ParameterNameDiscoverer;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -15,6 +14,7 @@ import java.util.Map;
  * @author Bonczidai Levente
  */
 public class OOActionRunner {
+	private static Long nextStepID = 1L; // to be removed
 
 	/**
 	 * Wrapper method for running actions. A method is a valid action if it returns a Map<String, String>.
@@ -134,8 +134,9 @@ public class OOActionRunner {
 				return nextStepId;
 			}
 		}
-		return null;
+		else {
+			Long returnValue = (nextStepID>2)?null:nextStepID++;
+			return returnValue;
+		}
 	}
-
-
 }
