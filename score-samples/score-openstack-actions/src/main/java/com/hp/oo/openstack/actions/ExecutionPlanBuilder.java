@@ -40,7 +40,7 @@ public class ExecutionPlanBuilder {
 						String actionMethodName) {
 		ExecutionStep step = new ExecutionStep(stepCount++);
 
-		step.setAction(new ControlActionMetadata("com.hp.oo.openstack.actions.OOActionRunner", "run"));
+		step.setAction(new ControlActionMetadata("com.hp.oo.openstack.actions.OOActionRunner", "runWithServices"));
 		Map<String, String> actionData = new HashMap<>(2);
 		//put the actual action class name and method name
 		actionData.put(ACTION_CLASS_KEY, actionClassName);
@@ -58,6 +58,7 @@ public class ExecutionPlanBuilder {
 		return step.getExecStepId();
 	}
 
+	@SuppressWarnings("unused")
 	public void setBeginStep(Long beginStepId)
 	{
 		executionPlan.setBeginStep(beginStepId);
@@ -74,7 +75,7 @@ public class ExecutionPlanBuilder {
 		ExecutionPlan executionPlan = builder.getExecutionPlan();
 		Score score = context.getBean(Score.class);
 
-		Map<String, Serializable> executionContext = new HashMap<String, Serializable>();
+		Map<String, Serializable> executionContext = new HashMap<>();
 		//for post
 		executionContext.put("username", "userTest");
 		executionContext.put("password", "passTest");

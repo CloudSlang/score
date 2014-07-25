@@ -16,7 +16,7 @@ public class ReturnStepActions {
 	public Map<String, String> successStepAction() {
 		logger.info("This is a return step action");
 
-		Map<String, String> returnMap = new HashMap<String, String>();
+		Map<String, String> returnMap = new HashMap<>();
 		returnMap.put("nextStep", "null");
 		return returnMap;
 	}

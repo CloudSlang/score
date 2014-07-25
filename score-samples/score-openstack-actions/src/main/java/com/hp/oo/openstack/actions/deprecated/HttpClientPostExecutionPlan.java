@@ -1,4 +1,4 @@
-package com.hp.oo.openstack.actions;
+package com.hp.oo.openstack.actions.deprecated;
 
 import com.hp.score.api.ControlActionMetadata;
 import com.hp.score.api.ExecutionPlan;
@@ -23,8 +23,8 @@ public class HttpClientPostExecutionPlan {
 
 		executionPlan.setFlowUuid(UUID.randomUUID().toString());
 
-		ExecutionStep postStep = createBasicStep(START_STEP_ID, "com.hp.oo.openstack.actions.HttpClientPostWrapper", "post",
-				"com.hp.oo.openstack.actions.HttpClientPostWrapper", "postNavigation");
+		ExecutionStep postStep = createBasicStep(START_STEP_ID, "com.hp.oo.openstack.actions.deprecated.HttpClientPostWrapper", "post",
+				"com.hp.oo.openstack.actions.deprecated.HttpClientPostWrapper", "postNavigation");
 
 		ExecutionStep successStep = createBasicStep(SUCCESS_STEP_ID, "com.hp.oo.openstack.actions.ReturnStepActions", "successStepAction",
 				"com.hp.oo.openstack.actions.ReturnStepActions", "finalStepNavigation");

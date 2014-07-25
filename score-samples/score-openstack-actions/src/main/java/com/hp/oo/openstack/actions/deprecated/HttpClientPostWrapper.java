@@ -1,4 +1,7 @@
-package com.hp.oo.openstack.actions;
+package com.hp.oo.openstack.actions.deprecated;
+
+import com.hp.oo.openstack.actions.HttpClientPostMock;
+import com.hp.oo.openstack.actions.deprecated.HttpClientPostExecutionPlan;
 
 import java.io.Serializable;
 import java.util.Map;

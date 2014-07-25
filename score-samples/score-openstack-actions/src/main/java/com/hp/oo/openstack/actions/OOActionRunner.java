@@ -1,12 +1,20 @@
 package com.hp.oo.openstack.actions;
 
+import com.hp.score.api.ScoreEvent;
+import com.hp.score.events.EventBus;
+import com.hp.score.events.EventBusImpl;
+import com.hp.score.events.ScoreEventListener;
+import com.hp.score.lang.SystemContext;
+import org.apache.log4j.Logger;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Date: 7/22/2014
@@ -14,6 +22,7 @@ import java.util.Map;
  * @author Bonczidai Levente
  */
 public class OOActionRunner {
+	private final static Logger logger = Logger.getLogger(OOActionRunner.class);
 	private static Long nextStepID = 1L; // to be removed
 
 	/**
@@ -50,6 +59,50 @@ public class OOActionRunner {
 
 		//merge back the results of the action in the flow execution context
 		mergeBackResults(executionContext, results);
+	}
+
+	public void runWithServices(Map<String, Serializable> executionContext,
+								SystemContext systemContext,
+								String className,
+								String methodName)
+			throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
+
+		//get the action class
+		Class actionClass = Class.forName(className);
+
+		//get the Method object
+		Method actionMethod = getMethodByName(actionClass, methodName);
+
+		//get the parameter names of the action method
+		ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+		String[] parameterNames = parameterNameDiscoverer.getParameterNames(actionMethod);
+
+		//extract the parameters from execution context
+		Object[] actualParameters = getParametersFromExecutionContext(executionContext, parameterNames);
+
+		// invoke method
+		Map<String, String> results = invokeActionMethod(actionMethod, actionClass.newInstance(), actualParameters);
+
+		//merge back the results of the action in the flow execution context
+		mergeBackResults(executionContext, results);
+
+		//events
+		systemContext.addEvent("type1", "event type1");
+		//systemContext.pause();
+
+		EventBus eventBus = new EventBusImpl();
+
+		Set<String> handlerTypes = new HashSet<>();
+		handlerTypes.add("type2");
+		eventBus.subscribe(new ScoreEventListener() {
+			@Override
+			public void onEvent(ScoreEvent event) {
+				logger.info("Listener invoked on type: " + event.getEventType() + " with data: " + event.getData());
+			}
+		},handlerTypes);
+
+		ScoreEvent eventType2 = new ScoreEvent("type2", "event type2");
+		eventBus.dispatch(eventType2);
 	}
 
 	/**

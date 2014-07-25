@@ -1,5 +1,7 @@
-package com.hp.oo.openstack.actions;
+package com.hp.oo.openstack.actions.deprecated;
 
+import com.hp.oo.openstack.actions.HttpClientPostMock;
+import com.hp.oo.openstack.actions.deprecated.HttpClientPostWrapper;
 import org.junit.Before;
 import org.junit.Test;
 

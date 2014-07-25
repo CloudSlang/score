@@ -24,7 +24,7 @@ public class HttpClientSendEmailMock {
 	 */
 	public Map<String, String> sendEmail(String receiver, String title, String body) {
 
-		Map<String, String> returnMap =  new HashMap<String, String>();
+		Map<String, String> returnMap =  new HashMap<>();
 		logger.info("receiver=" + receiver);
 		logger.info("title=" + title);
 		logger.info("body=" + body);
