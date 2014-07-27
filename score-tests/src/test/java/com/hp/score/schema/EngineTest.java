@@ -1,9 +1,11 @@
 package com.hp.score.schema;
 
 import com.hp.oo.broker.services.ParallelPersistenceService;
+import com.hp.oo.engine.node.services.WorkerLockService;
 import com.hp.oo.engine.node.services.WorkerNodeService;
 import com.hp.oo.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.engine.queue.services.QueueDispatcherService;
+import com.hp.oo.engine.queue.services.recovery.MessageRecoveryService;
 import com.hp.oo.orchestrator.services.WorkerDbSupportServiceImpl;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ExecutionStep;
@@ -170,6 +172,16 @@ public class EngineTest {
         @Bean
         ParallelPersistenceService parallelPersistenceService() {
             return  mock(ParallelPersistenceService.class);
+        }
+
+        @Bean
+        WorkerLockService workerLockService() {
+            return mock(WorkerLockService.class);
+        }
+
+        @Bean
+        MessageRecoveryService messageRecoveryService(){
+            return mock(MessageRecoveryService.class);
         }
 
 		@Bean

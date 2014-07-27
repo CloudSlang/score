@@ -21,6 +21,7 @@
 		<repository:include-filter type="regex" expression="com.hp.oo.orchestrator.repositories.RunningExecutionPlanRepository"/>
 		<repository:include-filter type="regex" expression="com.hp.oo.orchestrator.repositories.FinishedBranchRepository"/>
 		<repository:include-filter type="regex" expression="com.hp.score.repositories.ExecutionStateRepository"/>
+        <repository:include-filter type="regex" expression="com.hp.oo.engine.node.repositories.WorkerLockRepository"/>
 	</jpa:repositories>
 
     <!--<bean id="scoreCacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">-->

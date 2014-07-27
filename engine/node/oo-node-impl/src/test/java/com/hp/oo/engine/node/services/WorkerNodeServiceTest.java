@@ -48,6 +48,7 @@ import java.util.Properties;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -63,6 +64,9 @@ public class WorkerNodeServiceTest {
 
 	@Autowired
 	private WorkerNodeService workerNodeService;
+
+    @Autowired
+    private WorkerLockService workerLockService;
 
 	@Autowired
 	private UserDetailsService userDetailsService;
@@ -82,7 +86,7 @@ public class WorkerNodeServiceTest {
 
     @After
     public void reset(){
-        Mockito.reset(versionService);
+        Mockito.reset(versionService,workerLockService);
     }
 	@Test
 	public void keepAlive() throws Exception {
@@ -102,17 +106,21 @@ public class WorkerNodeServiceTest {
 	@Test
 	public void createNode() throws Exception {
 		workerNodeService.create("H3", "H3", "amit.levin", "c:/dir");
+        verify(workerLockService).create("H3");
 		WorkerNode worker = workerNodeService.readByUUID("H3");
 		Assert.assertNotNull(worker);
 		workerNodeService.delete("H3");
+        verify(workerLockService).delete("H3");
 	}
 
 	@Test(expected = IllegalStateException.class)
 	public void deleteNode() throws Exception {
 		workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
+        verify(workerLockService).create("H3");
 		WorkerNode worker = workerNodeService.readByUUID("H3");
 		Assert.assertNotNull(worker);
 		workerNodeService.delete("H3");
+        verify(workerLockService).delete("H3");
 		workerNodeService.readByUUID("H3");
 	}
 
@@ -441,6 +449,11 @@ public class WorkerNodeServiceTest {
 		WorkerNodeService workerNodeService(){
 			return new WorkerNodeServiceImpl();
 		}
+
+        @Bean
+        WorkerLockService workerLockService() {
+            return mock(WorkerLockService.class);
+        }
 
 		@Bean
 		MessageDigestPasswordEncoder encoder(){

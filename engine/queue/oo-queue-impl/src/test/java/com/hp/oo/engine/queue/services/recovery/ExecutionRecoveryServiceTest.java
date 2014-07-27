@@ -1,6 +1,8 @@
 package com.hp.oo.engine.queue.services.recovery;
 
+import com.hp.oo.engine.node.services.WorkerLockService;
 import com.hp.oo.engine.node.services.WorkerNodeService;
+import com.hp.oo.engine.queue.entities.ExecStatus;
 import com.hp.oo.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.engine.queue.services.CounterNames;
 import com.hp.oo.engine.queue.services.ExecutionQueueService;
@@ -41,6 +43,12 @@ public class ExecutionRecoveryServiceTest {
 	@Autowired
 	private WorkerNodeService workerNodeService;
 
+    @Autowired
+    private WorkerLockService workerLockService;
+
+    @Autowired
+    private MessageRecoveryService messageRecoveryService;
+
 	@Autowired
 	private ExecutionQueueService executionQueueService;
 
@@ -52,7 +60,7 @@ public class ExecutionRecoveryServiceTest {
 
 	@Before
 	public void setUp() {
-		reset(workerNodeService, executionQueueService, versionService, transactionTemplate);
+		reset(workerNodeService, executionQueueService, versionService, transactionTemplate,messageRecoveryService);
 		when(versionService.getCurrentVersion(CounterNames.MSG_RECOVERY_VERSION.name())).thenReturn(0L);
 		when(transactionTemplate.execute(any(TransactionCallbackWithoutResult.class))).thenAnswer(new Answer<Object>() {
 			@Override
@@ -68,7 +76,7 @@ public class ExecutionRecoveryServiceTest {
 	public void testDoRecoveryWithNoNonRespondingWorkers() throws Exception {
 		when(workerNodeService.readNonRespondingWorkers()).thenReturn(new ArrayList<String>());
 		executionRecoveryService.doRecovery();
-		verify(workerNodeService, never()).updateStatus(anyString(), (Worker.Status) anyObject());
+		verify(workerNodeService, never()).updateStatusInSeparateTransaction(anyString(), (Worker.Status) anyObject());
 	}
 
 	@Test
@@ -77,8 +85,9 @@ public class ExecutionRecoveryServiceTest {
 		nonRespondingWorkers.add("worker1");
 		when(workerNodeService.readNonRespondingWorkers()).thenReturn(nonRespondingWorkers);
 		executionRecoveryService.doRecovery();
-		verify(workerNodeService, times(1)).updateStatus("worker1", Worker.Status.IN_RECOVERY);
-		verify(workerNodeService, times(1)).updateStatus("worker1", Worker.Status.RECOVERED);
+        verify(workerLockService, times(1)).lock("worker1");
+		verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("worker1", Worker.Status.IN_RECOVERY);
+		verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("worker1", Worker.Status.RECOVERED);
 
 	}
 
@@ -91,8 +100,8 @@ public class ExecutionRecoveryServiceTest {
 
 		when(executionQueueService.pollMessagesWithoutAck(anyInt(), anyLong())).thenReturn(msgWithNoAck);
 		executionRecoveryService.doRecovery();
+        verify(messageRecoveryService).enqueueMessages(msgWithNoAck, ExecStatus.RECOVERED);
 
-		verify(executionQueueService, times(1)).enqueue(eq(msgWithNoAck));
 	}
 
 	@Configuration
@@ -104,6 +113,14 @@ public class ExecutionRecoveryServiceTest {
 		@Bean WorkerNodeService workerNodeService(){
 			return mock(WorkerNodeService.class);
 		}
+
+        @Bean WorkerLockService workerLockService(){
+            return mock(WorkerLockService.class);
+        }
+
+        @Bean MessageRecoveryService messageRecoveryService(){
+            return mock(MessageRecoveryService.class);
+        }
 
 		@Bean ExecutionQueueService executionQueueService(){
 			return mock(ExecutionQueueService.class);

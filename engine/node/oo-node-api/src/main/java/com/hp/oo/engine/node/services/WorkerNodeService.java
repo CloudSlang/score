@@ -47,6 +47,8 @@ public interface WorkerNodeService {
 
 	void updateStatus(String uuid, Worker.Status status);
 
+    void updateStatusInSeparateTransaction(String uuid, Worker.Status status);
+
     List<String> readAllWorkerGroups();
 
     List<String> readWorkerGroups(String uuid);
