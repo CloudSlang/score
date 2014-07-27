@@ -1,7 +1,5 @@
 package com.hp.score.events;
 
-import com.hp.score.api.ScoreEvent;
-
 import java.util.Set;
 
 /**

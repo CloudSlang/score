@@ -15,7 +15,7 @@ import com.hp.oo.internal.sdk.execution.OOContext;
 import com.hp.oo.orchestrator.services.PauseResumeService;
 import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
 import com.hp.score.api.ExecutionStep;
-import com.hp.score.api.ScoreEvent;
+import com.hp.score.events.ScoreEvent;
 import com.hp.score.api.StartBranchDataContainer;
 import com.hp.score.events.EventBus;
 import com.hp.score.events.EventConstants;

@@ -6,7 +6,7 @@ import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.oo.orchestrator.services.SplitJoinService;
-import com.hp.score.api.ScoreEvent;
+import com.hp.score.events.ScoreEvent;
 import com.hp.score.events.EventBus;
 import com.hp.score.events.EventConstants;
 import com.hp.score.services.ExecutionStateService;

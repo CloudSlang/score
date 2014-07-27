@@ -1,7 +1,5 @@
 package com.hp.score.events;
 
-import com.hp.score.api.ScoreEvent;
-
 /**
  * Created with IntelliJ IDEA.
  * User: Amit Levin
