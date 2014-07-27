@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.hp.score</groupId>
 		<artifactId>worker</artifactId>
-		<version>0.1.150</version>
+		<version>0.1.151-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>oo-worker-impl</artifactId>
