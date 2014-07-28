@@ -362,4 +362,11 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService, UserDetai
         workerNodeRepository.lockByUuid(uuid);
         workerNodeRepository.flush();
     }
+
+    @Override
+    @Transactional
+    public void updateBulkNumber(String workerUuid, String bulkNumber) {
+        WorkerNode worker = readByUUID(workerUuid);
+        worker.setBulkNumber(bulkNumber);
+    }
 }
