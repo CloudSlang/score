@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,13 +15,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import static org.mockito.Matchers.argThat;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.reset;
@@ -62,7 +66,7 @@ public class OutboundBufferTest {
 		}
 
 		buffer.drain();
-        verify(dispatcherService).dispatch(messages);
+        verify(dispatcherService).dispatch((List<? extends Serializable>) argThat(new MessagesSizeMatcher(messages)), anyString(), anyString());
 	}
 
 	/**
@@ -126,8 +130,10 @@ public class OutboundBufferTest {
 		Assert.assertEquals("reading thread should be in a terminated after a message was inserted to the buffer", Thread.State.TERMINATED, thread.getState());
 
 		thread.join();
-        verify(dispatcherService).dispatch(Arrays.asList(messages));
+        verify(dispatcherService).dispatch((List<? extends Serializable>) argThat(new MessagesSizeMatcher(Arrays.asList(messages))), anyString(), anyString());
 	}
+
+
 
 	private void waitForThreadStateToBe(Thread thread, Thread.State state) throws InterruptedException {
 		int waitCount = 0;
@@ -183,7 +189,7 @@ public class OutboundBufferTest {
 				statistics.add(messages.size(), weight);
 				return null;
 			}
-		}).when(dispatcherService).dispatch(anyList());
+		}).when(dispatcherService).dispatch(anyList(), anyString(), anyString());
 
 		new Thread(new Runnable() {
 			@Override
@@ -234,57 +240,76 @@ public class OutboundBufferTest {
         Assert.assertEquals(0,buffer.getWeight());
     }
 
-	static class DrainStatistics{
-		private int counter;
-		private int size;
-		private int weight;
+    private class MessagesSizeMatcher extends ArgumentMatcher{
+        List messages;
 
-		public void add(int size, int weight){
-			counter++;
-			this.size+=size;
-			this.weight+=weight;
-		}
+        public MessagesSizeMatcher(List val) {
+            messages = val;
+        }
 
-		public String report(){
-			return "Buffer has sent " + counter + " bulks, avg(size): " + size/counter + ", avg(weight): " + weight/counter + ", total messages: " + size;
-		}
-	}
+        @Override
+        public boolean matches(Object argument) {
+            if(argument instanceof List){
+                List listConverted = (List)argument;
+                if(listConverted.size() ==  messages.size()){
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    static class DrainStatistics{
+        private int counter;
+        private int size;
+        private int weight;
+
+        public void add(int size, int weight){
+            counter++;
+            this.size+=size;
+            this.weight+=weight;
+        }
+
+        public String report(){
+            return "Buffer has sent " + counter + " bulks, avg(size): " + size/counter + ", avg(weight): " + weight/counter + ", total messages: " + size;
+        }
+    }
 
 
-	static class DummyMsg1 implements Message {
-		public int getWeight() {
-			return 1;
-		}
+    static class DummyMsg1 implements Message {
+        public int getWeight() {
+            return 1;
+        }
 
-		public String getId() {
-			return "";
-		}
+        public String getId() {
+            return "";
+        }
 
-		public List<Message> shrink(List<Message> messages) {
-			return messages;
-		}
-	}
+        public List<Message> shrink(List<Message> messages) {
+            return messages;
+        }
+    }
 
-	static class DummyMsg2 implements Message {
-		public int getWeight() {
-			return 2;
-		}
+    static class DummyMsg2 implements Message {
+        public int getWeight() {
+            return 2;
+        }
 
-		public String getId() {
-			return "";
-		}
+        public String getId() {
+            return "";
+        }
 
-		public List<Message> shrink(List<Message> messages) {
-			return messages;
-		}
-	}
+        public List<Message> shrink(List<Message> messages) {
+            return messages;
+        }
+    }
 
-	@Configuration
-	static class config {
-		static{
-			System.setProperty("out.buffer.max.buffer.weight", String.valueOf(MAX_BUFFER_WEIGHT));
-			System.setProperty("out.buffer.max.bulk.weight", String.valueOf(MAX_BULK_WEIGHT));
-		}
+    @Configuration
+    static class config {
+        static{
+            System.setProperty("out.buffer.max.buffer.weight", String.valueOf(MAX_BUFFER_WEIGHT));
+            System.setProperty("out.buffer.max.bulk.weight", String.valueOf(MAX_BULK_WEIGHT));
+        }
 
 		@Bean
 		public WorkerRecoveryManager workerRecoveryManager() {
@@ -304,7 +329,13 @@ public class OutboundBufferTest {
 		@Bean
 		public OutboundBuffer outboundBuffer() {
 			return new OutboundBufferImpl();
-		}
+        }
+
+        @Bean
+        String workerUuid() {
+            return "1234";
+        }
+
 	}
 
 }

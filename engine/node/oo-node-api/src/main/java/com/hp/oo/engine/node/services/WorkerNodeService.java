@@ -68,4 +68,6 @@ public interface WorkerNodeService {
 	List<String> readWorkerGroups(List<String> groups);
 
 	void lock(String uuid);
+
+    void updateBulkNumber(String workerUuid, String bulkNumber);
 }

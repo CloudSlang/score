@@ -10,4 +10,5 @@ import java.util.List;
  */
 public interface OrchestratorDispatcherService {
 	void dispatch(List<? extends Serializable> messages);
+	void dispatch(List<? extends Serializable> messages, String bulkNumber, String workerUuid);
 }

@@ -275,6 +275,18 @@ public class WorkerNodeServiceTest {
 		workerNodeService.delete("H3");
 	}
 
+    @Test
+    public void updateBulkNumber() {
+        workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
+
+        workerNodeService.updateBulkNumber("H3", "123");
+
+        WorkerNode worker = workerNodeService.readByUUID("H3");
+        Assert.assertEquals("123", worker.getBulkNumber());
+
+        workerNodeService.delete("H3");
+    }
+
 	@Test
 	public void readAllWorkerGroups() {
 		List<String> groups = workerNodeService.readAllWorkerGroups();

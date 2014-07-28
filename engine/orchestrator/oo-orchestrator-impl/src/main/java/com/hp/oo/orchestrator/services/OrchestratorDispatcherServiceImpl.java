@@ -1,5 +1,6 @@
 package com.hp.oo.orchestrator.services;
 
+import com.hp.oo.engine.node.services.WorkerNodeService;
 import com.hp.oo.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.engine.queue.services.QueueDispatcherService;
 import com.hp.oo.orchestrator.entities.SplitMessage;
@@ -28,6 +29,9 @@ public final class OrchestratorDispatcherServiceImpl implements OrchestratorDisp
 
 	@Autowired
 	private SplitJoinService splitJoinService;
+
+    @Autowired
+    private WorkerNodeService workerNodeService;
 
 	@Override
 	@Transactional
@@ -60,6 +64,22 @@ public final class OrchestratorDispatcherServiceImpl implements OrchestratorDisp
 			logger.warn((messages.size() - messagesCounter.get()) + " messages were not being dispatched, since unknown type");
 		}
  	}
+
+    @Override
+    @Transactional
+    public void dispatch(List<? extends Serializable> messages, String bulkNumber, String workerUuid) {
+       Validate.notNull(messages, "Messages list is null");
+
+        String currentBulkNumber = workerNodeService.readByUUID(workerUuid).getBulkNumber();
+        //This is done in order to make sure that if we do retries in worker we won't insert same bulk twice
+        if(currentBulkNumber!=null && currentBulkNumber.equals(bulkNumber)){
+            logger.error("Orchestrator got messages bulk with same bulk number: " + bulkNumber + " This bulk was inserted to DB before. Discarding...");
+        }
+        else {
+            dispatch(messages);
+            workerNodeService.updateBulkNumber(workerUuid, bulkNumber);
+        }
+    }
 
 	private <T extends Serializable> void dispatch(List<? extends Serializable> messages, Class<T> messageClass, Handler<T> handler){
 		@SuppressWarnings("unchecked")

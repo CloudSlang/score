@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -35,6 +37,9 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 
 	@Autowired
 	private OrchestratorDispatcherService dispatcherService;
+
+    @Resource
+    private String workerUuid;
 
 	private Queue<Message> buffer = new LinkedList<>();
 
@@ -162,10 +167,14 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 	private void drainBulk(List<Message> bulkToDrain){
 		long t = System.currentTimeMillis();
 		final List<Message> optimizedBulk = optimize(bulkToDrain);
+        //Bulk number is the same for all retries! This is done to prevent duplications when we insert with retries
+        final String bulkNumber = UUID.randomUUID().toString();
+
 		retryTemplate.retry(retryAmount, retryDelay, new RetryTemplate.RetryCallback() {
 			@Override
 			public void tryOnce() {
-				dispatcherService.dispatch(optimizedBulk);
+				dispatcherService.dispatch(optimizedBulk, bulkNumber, workerUuid);
+//				dispatcherService.dispatch(optimizedBulk);
 			}
 		});
 		if (logger.isDebugEnabled()) logger.debug("bulk was drained in " + (System.currentTimeMillis()-t) + " ms");
