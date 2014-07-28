@@ -83,7 +83,7 @@ public class QueueListenerImpl implements QueueListener {
 
 		for (ExecutionMessage executionMessage : messages) {
 			handleTerminatedMessage(executionMessage);
-			scoreEvents.add(createScoreEvent(executionMessage));
+			scoreEvents.add(createTerminationEvent(executionMessage));
 		}
 		return scoreEvents.toArray(new ScoreEvent[scoreEvents.size()]);
 	}
@@ -107,21 +107,30 @@ public class QueueListenerImpl implements QueueListener {
 		}
 	}
 
-	private ScoreEvent createScoreEvent(ExecutionMessage executionMessage) {
+	private ScoreEvent createTerminationEvent(ExecutionMessage executionMessage) {
 		String eventType = EventConstants.SCORE_FINISHED_EVENT;
-		Serializable eventData = createEventData(executionMessage);
+		Serializable eventData = createTerminationEventData(executionMessage);
 		return new ScoreEvent(eventType, eventData);
 	}
 
-	private Serializable createEventData(ExecutionMessage executionMessage) {
+	private Serializable createTerminationEventData(ExecutionMessage executionMessage) {
 		Execution execution = extractExecution(executionMessage);
 
 		Map<String, Serializable> eventData = new HashMap<>();
 		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, execution.getSystemContext());
 		eventData.put(ExecutionConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
 		eventData.put(EventConstants.EXECUTION_CONTEXT, (Serializable) execution.getContexts());
-		eventData.put(EventConstants.IS_BRANCH, execution.isBranch() && execution.isNewBranchMechanism());
+		eventData.put(EventConstants.IS_BRANCH, isBranch(execution));
 		return (Serializable) eventData;
+	}
+
+	/**
+	 * Returns true when the execution is a branch with the new branch mechanism
+	 * It will return true for executions of parallel, multi-instance and sub-flows but not for non-blocking
+	 * (which is the old mechanism)
+	 */
+	private boolean isBranch(Execution execution) {
+		return execution.isBranch() && execution.isNewBranchMechanism();
 	}
 
 	/*
@@ -143,6 +152,44 @@ public class QueueListenerImpl implements QueueListener {
 
 	@Override
 	public void onFailed(List<ExecutionMessage> messages) {
+		deleteExecutionStateObjects(messages);
+		ScoreEvent[] events = createFailureEvents(messages);
+		if (events.length > 0) {
+			eventBus.dispatch(events);
+		}
+	}
+
+	private ScoreEvent[] createFailureEvents(List<ExecutionMessage> messages) {
+		Execution execution;
+		List<ScoreEvent> events = new ArrayList<>(messages.size());
+		for (ExecutionMessage executionMessage : messages) {
+			execution = extractExecution(executionMessage);
+			if (failedBecauseNoWorker(executionMessage)) {
+				//todo send failed-no-worker event
+			} else if (isBranch(execution)) {
+				//todo send failed-branch event
+			} else {
+				events.add(createFailureEvent(execution));
+			}
+		}
+		return events.toArray(new ScoreEvent[events.size()]);
+	}
+
+	private ScoreEvent createFailureEvent(Execution execution) {
+		String eventType = EventConstants.SCORE_FAILURE_EVENT;
+		Serializable eventData = createFailureEventData(execution);
+		return new ScoreEvent(eventType, eventData);
+	}
+
+	private Serializable createFailureEventData(Execution execution) {
+		Map<String, Serializable> eventData = new HashMap<>();
+		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, execution.getSystemContext());
+		eventData.put(ExecutionConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
+		eventData.put(ExecutionConstants.RUNNING_EXECUTION_PLAN_ID, execution.getRunningExecutionPlanId());
+		return (Serializable) eventData;
+	}
+
+	private void deleteExecutionStateObjects(List<ExecutionMessage> messages) {
 		for (ExecutionMessage executionMessage : messages) {
 			if (!failedBecauseNoWorker(executionMessage)) {
 				executionStateService.deleteExecutionState(Long.valueOf(executionMessage.getMsgId()), ExecutionSummary.EMPTY_BRANCH);

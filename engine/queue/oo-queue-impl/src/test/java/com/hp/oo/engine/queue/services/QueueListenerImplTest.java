@@ -26,6 +26,7 @@ import java.util.Random;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -47,7 +48,8 @@ public class QueueListenerImplTest {
 	private ExecutionMessageConverter executionMessageConverter;
 
 	@Before
-	public void setupExecutionMessageConverter() throws IOException {
+	public void setup() throws IOException {
+		reset(eventBus);
 		when(executionMessageConverter.extractExecution(any(Payload.class))).thenReturn(createExecution());
 	}
 
@@ -56,6 +58,13 @@ public class QueueListenerImplTest {
 		List<ExecutionMessage> messages = new ArrayList<>();
 		queueListener.onTerminated(messages);
 
+		verify(eventBus, never()).dispatch();
+	}
+
+	@Test
+	public void testOnFailedWhenNoMessages() {
+		List<ExecutionMessage> messages = new ArrayList<>();
+		queueListener.onFailed(messages);
 		verify(eventBus, never()).dispatch();
 	}
 
