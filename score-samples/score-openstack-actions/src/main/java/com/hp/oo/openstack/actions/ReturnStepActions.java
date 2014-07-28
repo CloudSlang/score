@@ -13,11 +13,12 @@ import java.util.Map;
 public class ReturnStepActions {
 	private final static Logger logger = Logger.getLogger(ReturnStepActions.class);
 
+	@SuppressWarnings("unused") //todo test when method will be finalized
 	public Map<String, String> successStepAction() {
 		logger.info("This is a return step action");
 
-		Map<String, String> returnMap = new HashMap<>();
-		returnMap.put("nextStep", "null");
-		return returnMap;
+		//Map<String, String> returnMap = new HashMap<>();
+		//returnMap.put("nextStep", "null");
+		return new HashMap<>();
 	}
 }

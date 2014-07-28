@@ -24,7 +24,9 @@ public class OOActionRunnerTest {
 	private static final String PARAMETER1_CONTEXT_VALUE = "ExecutionContextValue1";
 	private static final String PARAMETER2_CONTEXT_VALUE = "ExecutionContextValue2";
 
-	@Test
+	private static final long DEFAULT_TIMEOUT = 1000;
+
+	@Test (timeout = DEFAULT_TIMEOUT)
 	public void testRun() throws Exception {
 		//initialize execution context
 		Map<String, Serializable> executionContext = new HashMap<>();

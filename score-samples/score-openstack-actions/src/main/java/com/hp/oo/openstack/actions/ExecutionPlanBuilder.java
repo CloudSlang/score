@@ -3,15 +3,10 @@ package com.hp.oo.openstack.actions;
 import com.hp.score.api.ControlActionMetadata;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ExecutionStep;
-import com.hp.score.api.Score;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Date: 7/22/2014
@@ -37,7 +32,8 @@ public class ExecutionPlanBuilder {
 	}
 
 	public Long addStep(String actionClassName,
-						String actionMethodName) {
+						String actionMethodName,
+						String nextStepID) {
 		ExecutionStep step = new ExecutionStep(stepCount++);
 
 		step.setAction(new ControlActionMetadata("com.hp.oo.openstack.actions.OOActionRunner", "runWithServices"));
@@ -49,6 +45,7 @@ public class ExecutionPlanBuilder {
 
 		step.setNavigation(new ControlActionMetadata("com.hp.oo.openstack.actions.OOActionRunner", "navigate"));
 		Map<String, String> navigationData = new HashMap<>(1);
+		navigationData.put("nextStep", nextStepID);
 		step.setNavigationData(navigationData);
 
 		step.setSplitStep(false);
@@ -62,34 +59,5 @@ public class ExecutionPlanBuilder {
 	public void setBeginStep(Long beginStepId)
 	{
 		executionPlan.setBeginStep(beginStepId);
-	}
-
-	public static void main(String[] args)
-	{
-		ExecutionPlanBuilder builder = new ExecutionPlanBuilder();
-		builder.addStep("com.hp.oo.openstack.actions.HttpClientPostMock", "post");
-		builder.addStep("com.hp.oo.openstack.actions.HttpClientSendEmailMock", "sendEmail");
-		builder.addStep("com.hp.oo.openstack.actions.ReturnStepActions", "successStepAction");
-
-		ApplicationContext context = loadScore();
-		ExecutionPlan executionPlan = builder.getExecutionPlan();
-		Score score = context.getBean(Score.class);
-
-		Map<String, Serializable> executionContext = new HashMap<>();
-		//for post
-		executionContext.put("username", "userTest");
-		executionContext.put("password", "passTest");
-		executionContext.put("host", "hostTest");
-		executionContext.put("url", "urlTest");
-		//for sendEmail
-		executionContext.put("receiver", "receiverTest");
-		executionContext.put("title", "titleTest");
-		executionContext.put("body", "bodyTest");
-
-		score.trigger(executionPlan, executionContext);
-	}
-
-	private static ApplicationContext loadScore() {
-		return new ClassPathXmlApplicationContext("/META-INF/spring/helloScoreContext.xml");
 	}
 }

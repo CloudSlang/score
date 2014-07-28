@@ -33,7 +33,7 @@ public class HttpClientSendEmailMock {
 		returnMap.put("title", title);
 		returnMap.put("body", body);
 
-		returnMap.put("nextStep", "2");
+		//returnMap.put("nextStep", "2");
 		return returnMap;
 	}
 }

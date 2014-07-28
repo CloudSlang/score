@@ -1,9 +1,5 @@
 package com.hp.oo.openstack.actions;
 
-import com.hp.score.api.ScoreEvent;
-import com.hp.score.events.EventBus;
-import com.hp.score.events.EventBusImpl;
-import com.hp.score.events.ScoreEventListener;
 import com.hp.score.lang.SystemContext;
 import org.apache.log4j.Logger;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -12,9 +8,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Date: 7/22/2014
@@ -23,7 +17,7 @@ import java.util.Set;
  */
 public class OOActionRunner {
 	private final static Logger logger = Logger.getLogger(OOActionRunner.class);
-	private static Long nextStepID = 1L; // to be removed
+	private static int eventCount = 0; // to be removed
 
 	/**
 	 * Wrapper method for running actions. A method is a valid action if it returns a Map<String, String>.
@@ -40,6 +34,7 @@ public class OOActionRunner {
 					String className,
 					String methodName)
 			throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
+		logger.info("run method invocation");
 
 		//get the action class
 		Class actionClass = Class.forName(className);
@@ -61,11 +56,13 @@ public class OOActionRunner {
 		mergeBackResults(executionContext, results);
 	}
 
+	@SuppressWarnings("all") //todo test when method will be finalized, change SystemContext to ExecutionRuntimeServices
 	public void runWithServices(Map<String, Serializable> executionContext,
 								SystemContext systemContext,
 								String className,
 								String methodName)
 			throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
+		logger.info("runWithServices method invocation");
 
 		//get the action class
 		Class actionClass = Class.forName(className);
@@ -87,22 +84,13 @@ public class OOActionRunner {
 		mergeBackResults(executionContext, results);
 
 		//events
-		systemContext.addEvent("type1", "event type1");
-		//systemContext.pause();
+		if ((eventCount++) % 2 == 0) {
+			systemContext.addEvent("type1", "event type1 data");
+		}
+		else {
+			systemContext.addEvent("type2", "event type2 data");
+		}
 
-		EventBus eventBus = new EventBusImpl();
-
-		Set<String> handlerTypes = new HashSet<>();
-		handlerTypes.add("type2");
-		eventBus.subscribe(new ScoreEventListener() {
-			@Override
-			public void onEvent(ScoreEvent event) {
-				logger.info("Listener invoked on type: " + event.getEventType() + " with data: " + event.getData());
-			}
-		},handlerTypes);
-
-		ScoreEvent eventType2 = new ScoreEvent("type2", "event type2");
-		eventBus.dispatch(eventType2);
 	}
 
 	/**
@@ -177,19 +165,22 @@ public class OOActionRunner {
 		}
 	}
 
+	@SuppressWarnings("unused") //todo test when method will be finalized
 	public Long navigate(Map<String, Serializable> executionContext) {
+		logger.info("navigate method invocation");
+
 		if(executionContext.containsKey("nextStep")) {
 			String nextStepValue = executionContext.get("nextStep").toString();
 			if (nextStepValue.equals("null")) {
 				return null;
 			} else {
-				Long nextStepId = Long.parseLong(nextStepValue);
+				Long nextStepId;
+				nextStepId = Long.parseLong(nextStepValue);
 				return nextStepId;
 			}
 		}
 		else {
-			Long returnValue = (nextStepID>2)?null:nextStepID++;
-			return returnValue;
+			return null;
 		}
 	}
 }
