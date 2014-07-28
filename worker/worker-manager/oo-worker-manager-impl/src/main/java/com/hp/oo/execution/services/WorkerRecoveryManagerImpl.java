@@ -1,61 +1,54 @@
 package com.hp.oo.execution.services;
 
-import com.hp.oo.engine.node.services.WorkerNodeService;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.hp.oo.engine.node.services.WorkerNodeService;
+
 /**
- * Date: 6/11/13
- *
  * @author Dima Rassin
+ * @author Avi Moradi
+ * @since 06/11/2013
+ * @version $Id$
  */
-public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager{
-	private final Logger logger = Logger.getLogger(getClass());
+public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager {
+
+	protected static final Logger logger = Logger.getLogger(WorkerRecoveryManagerImpl.class);
 
 	@Autowired
 	private List<WorkerRecoveryListener> listeners;
-
 	@Autowired
-	private WorkerNodeService workerNodeService;
-
+	protected WorkerNodeService workerNodeService;
 	@Autowired
 	private RetryTemplate retryTemplate;
-
 	private Lock lock = new ReentrantLock();
 	private boolean inRecovery;
 
-	public void doRecovery(){
-		if (!lock.tryLock()) return;
-		try{
+	@Override
+	public void doRecovery() {
+		if(!lock.tryLock()) return;
+		try {
 			inRecovery = true;
 			logger.warn("Worker recovery started");
-			for (WorkerRecoveryListener listener : listeners) try{
-				listener.doRecovery();
-			} catch (Exception ex) {
-				logger.error("Failed on recovery", ex);
+			for(WorkerRecoveryListener listener : listeners) {
+				try {
+					listener.doRecovery();
+				} catch(Exception ex) {
+					logger.error("Failed on recovery", ex);
+				}
 			}
-			if (logger.isDebugEnabled()) logger.debug("Listeners recovery is done");
+			if(logger.isDebugEnabled()) logger.debug("Listeners recovery is done");
+			retryTemplate.retry(RetryTemplate.INFINITELY, 30 * 1000L, new RetryTemplate.RetryCallback() {
 
-			retryTemplate.retry(RetryTemplate.INFINITELY, 30*1000L, new RetryTemplate.RetryCallback() {
 				@Override
 				public void tryOnce() {
-					if (logger.isDebugEnabled()) logger.debug("sending worker UP");
-
-                    SecurityTemplate securityTemplate = new SecurityTemplate();   //TODO- remove this from score
-                    securityTemplate.invokeSecured(new SecurityTemplate.SecurityTemplateCallback<Void>() {
-
-                        @Override
-                        public Void doSecured() {
-                            workerNodeService.up(System.getProperty("worker.uuid"));
-                            return null;
-                        }
-                    });
-
-					if (logger.isDebugEnabled()) logger.debug("the worker is UP");
+					if(logger.isDebugEnabled()) logger.debug("sending worker UP");
+					workerNodeService.up(System.getProperty("worker.uuid"));
+					if(logger.isDebugEnabled()) logger.debug("the worker is UP");
 				}
 			});
 			inRecovery = false;
@@ -65,7 +58,9 @@ public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager{
 		}
 	}
 
-	public boolean isInRecovery(){
+	@Override
+	public boolean isInRecovery() {
 		return inRecovery;
 	}
+
 }
