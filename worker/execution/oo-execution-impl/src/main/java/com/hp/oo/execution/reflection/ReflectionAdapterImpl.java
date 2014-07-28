@@ -15,6 +15,8 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 
+import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.oo.internal.sdk.execution.FlowExecutionException;
 import com.hp.score.api.ControlActionMetadata;
 
@@ -99,10 +101,6 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 		return actionMethod;
 	}
 
-	private String getExceptionMessage(ControlActionMetadata actionMetadata) {
-		return "Failed to run the action! Class: " + actionMetadata.getClassName() + ", method: " + actionMetadata.getMethodName();
-	}
-
 	private Object[] buildParametersArray(Method actionMethod, Map<String, ?> actionData) {
 		String actionFullName = actionMethod.getDeclaringClass().getName() + "." + actionMethod.getName();
 		String[] paramNames = cacheParamNames.get(actionFullName);
@@ -113,7 +111,8 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 		List<Object> args = new ArrayList<>(paramNames.length);
 		for(String paramName : paramNames) {
 			if(CONTEXT_PARAM_NAME.equals(paramName)) {
-				args.add(actionData);
+				Execution execution = (Execution)actionData.get(ExecutionConstants.EXECUTION);
+				args.add(execution != null ? execution.getContexts() : null);
 				continue;
 			}
 			Object param = actionData.get(paramName);
@@ -125,6 +124,10 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
+	}
+
+	private static String getExceptionMessage(ControlActionMetadata actionMetadata) {
+		return "Failed to run the action! Class: " + actionMetadata.getClassName() + ", method: " + actionMetadata.getMethodName();
 	}
 
 }

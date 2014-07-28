@@ -62,7 +62,7 @@ public class ReflectionAdapterTest {
 		actionData.put("parameter_2", 3);
 		@SuppressWarnings("unchecked")
 		Map<String, ?> result = (Map<String, ?>)adapter.executeControlAction(metadata, actionData);
-		Assert.assertEquals(actionData, result);
+		Assert.assertNull(result);
 	}
 
 	@Test
@@ -73,7 +73,7 @@ public class ReflectionAdapterTest {
 		actionData.put("parameter_2", 3);
 		@SuppressWarnings("unchecked")
 		Map<String, ?> result = (Map<String, ?>)adapter.executeControlAction(metadata, actionData);
-		Assert.assertEquals(actionData, result);
+		Assert.assertNull(result);
 	}
 
 	@Configuration
