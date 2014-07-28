@@ -4,6 +4,6 @@
 
     <import resource="helloScoreContext.xml" />
 
-    <bean class="com.hp.score.samples.OpenstackApplications" />
+    <bean class="org.score.samples.OpenstackApplications" />
 
 </beans>

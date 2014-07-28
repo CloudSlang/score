@@ -8,11 +8,11 @@
 
     <score:worker uuid="-1"/>
 
-    <bean class="com.hp.score.stubs.StubServicesContext"/>
+    <bean class="org.score.samples.stubs.StubServicesContext"/>
 
     <bean id="workerRegistration" class="com.hp.oo.worker.management.WorkerRegistration"/>
 
 
-    <!--<bean class="com.hp.score.samples.controlactions.ConsoleControlActions"/>-->
+    <!--<bean class="org.score.samples.controlactions.ConsoleControlActions"/>-->
 
 </beans>
