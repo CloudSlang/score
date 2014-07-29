@@ -1,5 +1,6 @@
 package org.score.samples.openstack.actions;
 
+import com.hp.score.lang.ExecutionRuntimeServices;
 import com.hp.score.lang.SystemContext;
 import org.apache.log4j.Logger;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -57,9 +58,9 @@ public class OOActionRunner {
 		mergeBackResults(executionContext, results);
 	}
 
-	//todo test when method will be finished, change SystemContext to ExecutionRuntimeServices
+	//todo test when method will be finished
 	public void runWithServices(Map<String, Serializable> executionContext,
-								SystemContext systemContext,
+								ExecutionRuntimeServices executionRuntimeServices,
 								String className,
 								String methodName
 	)
@@ -87,9 +88,9 @@ public class OOActionRunner {
 
 		//events
 		if ((eventCount++) % 2 == 0) {
-			systemContext.addEvent("type1", "event type1 data");
+			executionRuntimeServices.addEvent("type1", "event type1 data");
 		} else {
-			systemContext.addEvent("type2", "event type2 data");
+			executionRuntimeServices.addEvent("type2", "event type2 data");
 		}
 	}
 
