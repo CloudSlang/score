@@ -23,8 +23,8 @@ public class OOActionRunner {
 	 * Wrapper method for running actions. A method is a valid action if it returns a Map<String, String>.
 	 *
 	 * @param executionContext current Execution Context
-	 * @param className full path of the actual action class
-	 * @param methodName method name of the actual action
+	 * @param className        full path of the actual action class
+	 * @param methodName       method name of the actual action
 	 * @throws ClassNotFoundException
 	 * @throws IllegalAccessException
 	 * @throws InstantiationException
@@ -32,7 +32,8 @@ public class OOActionRunner {
 	 */
 	public void run(Map<String, Serializable> executionContext,
 					String className,
-					String methodName)
+					String methodName
+	)
 			throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
 		logger.info("run method invocation");
 
@@ -56,11 +57,12 @@ public class OOActionRunner {
 		mergeBackResults(executionContext, results);
 	}
 
-	@SuppressWarnings("all") //todo test when method will be finalized, change SystemContext to ExecutionRuntimeServices
+	//todo test when method will be finalized, change SystemContext to ExecutionRuntimeServices
 	public void runWithServices(Map<String, Serializable> executionContext,
 								SystemContext systemContext,
 								String className,
-								String methodName)
+								String methodName
+	)
 			throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
 		logger.info("runWithServices method invocation");
 
@@ -86,8 +88,7 @@ public class OOActionRunner {
 		//events
 		if ((eventCount++) % 2 == 0) {
 			systemContext.addEvent("type1", "event type1 data");
-		}
-		else {
+		} else {
 			systemContext.addEvent("type2", "event type2 data");
 		}
 	}
@@ -96,7 +97,7 @@ public class OOActionRunner {
 	 * Extracts the actual method of the action's class
 	 *
 	 * @param actionClass Class object that represents the actual action class
-	 * @param methodName method name of the actual action
+	 * @param methodName  method name of the actual action
 	 * @return actual method represented by Method object
 	 * @throws ClassNotFoundException
 	 */
@@ -115,7 +116,7 @@ public class OOActionRunner {
 	 * Retrieves a list of parameters from the execution context
 	 *
 	 * @param executionContext current Execution Context
-	 * @param parameterNames list of parameter names to be retrieved
+	 * @param parameterNames   list of parameter names to be retrieved
 	 * @return parameters from the execution context represented as Object list
 	 */
 	private Object[] getParametersFromExecutionContext(Map<String, Serializable> executionContext, String[] parameterNames) {
@@ -140,14 +141,14 @@ public class OOActionRunner {
 	 * Invokes the actual action method with the specified parameters
 	 *
 	 * @param actionMethod action method represented as Method object
-	 * @param instance an instance of the invoker class
-	 * @param parameters method parameters
+	 * @param instance     an instance of the invoker class
+	 * @param parameters   method parameters
 	 * @return results if the action
 	 * @throws InvocationTargetException
 	 * @throws IllegalAccessException
 	 */
 	@SuppressWarnings("unchecked")
-	private Map<String, String> invokeActionMethod(Method actionMethod,Object instance, Object... parameters )
+	private Map<String, String> invokeActionMethod(Method actionMethod, Object instance, Object... parameters)
 			throws InvocationTargetException, IllegalAccessException {
 		return (Map<String, String>) actionMethod.invoke(instance, parameters);
 	}
@@ -156,7 +157,7 @@ public class OOActionRunner {
 	 * Merges back the results in the execution context
 	 *
 	 * @param executionContext current Execution Context
-	 * @param results results to be merged back
+	 * @param results          results to be merged back
 	 */
 	private void mergeBackResults(Map<String, Serializable> executionContext, Map<String, String> results) {
 		if (results != null) {
@@ -165,20 +166,22 @@ public class OOActionRunner {
 	}
 
 	@SuppressWarnings("unused") //todo test when method will be finalized
-	public Long navigate(Map<String, Serializable> executionContext) {
+	public Long navigate(Map<String, Serializable> executionContext, String nextStep) {
 		logger.info("navigate method invocation");
 
-		if(executionContext.containsKey("nextStep")) {
-			String nextStepValue = executionContext.get("nextStep").toString();
-			if (nextStepValue.equals("null")) {
+		if (nextStep != null && !nextStep.isEmpty()) {
+			if (nextStep.equals("null")) {
 				return null;
 			} else {
-				Long nextStepId;
-				nextStepId = Long.parseLong(nextStepValue);
-				return nextStepId;
+				try {
+					Long nextStepId;
+					nextStepId = Long.parseLong(nextStep);
+					return nextStepId;
+				} catch (NumberFormatException ex) {
+					return null;
+				}
 			}
-		}
-		else {
+		} else {
 			return null;
 		}
 	}

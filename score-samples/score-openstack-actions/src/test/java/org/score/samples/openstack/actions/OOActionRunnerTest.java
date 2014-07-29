@@ -3,6 +3,7 @@ package org.score.samples.openstack.actions;
 import org.junit.Test;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,9 +27,37 @@ public class OOActionRunnerTest {
 
 	private static final long DEFAULT_TIMEOUT = 1000;
 
-	@Test (timeout = DEFAULT_TIMEOUT)
+	@Test(timeout = DEFAULT_TIMEOUT)
 	public void testRun() throws Exception {
-		//initialize execution context
+		Map<String, Serializable> actualExecutionContext = prepareActualExecutionContext();
+		Map<String, Serializable> expectedExecutionContext = prepareExpectedExecutionContext(actualExecutionContext);
+
+		runAction(actualExecutionContext);
+
+		testExecutionContext(expectedExecutionContext, actualExecutionContext);
+	}
+
+	private Map<String, Serializable> prepareExpectedExecutionContext(Map<String, Serializable> initialMap) {
+		Map<String, Serializable> expectedExecutionContext = new HashMap<>();
+		expectedExecutionContext.putAll(initialMap);
+
+		Map<String, String> auxiliaryMap = getAuxiliaryMap(ACTION_PARAMETER1_VALUE, ACTION_PARAMETER2_VALUE, ACTION_PARAMETER3_VALUE);
+		expectedExecutionContext.putAll(auxiliaryMap);
+
+		return expectedExecutionContext;
+	}
+
+	private void testExecutionContext(Map<String, Serializable> expectedExecutionContext,
+									  Map<String, Serializable> actualExecutionContext) {
+		assertEquals("execution contexts should be equal", expectedExecutionContext, actualExecutionContext);
+	}
+
+	private void runAction(Map<String, Serializable> executionContext) throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
+		OOActionRunner runner = new OOActionRunner();
+		runner.run(executionContext, "org.score.samples.openstack.actions.OOActionRunnerTest", "auxiliaryAction");
+	}
+
+	private Map<String, Serializable> prepareActualExecutionContext() {
 		Map<String, Serializable> executionContext = new HashMap<>();
 		executionContext.put(PARAMETER1_CONTEXT_KEY, PARAMETER1_CONTEXT_VALUE);
 		executionContext.put(PARAMETER2_CONTEXT_KEY, PARAMETER2_CONTEXT_VALUE);
@@ -37,36 +66,17 @@ public class OOActionRunnerTest {
 		executionContext.put("methodParameter2", ACTION_PARAMETER2_VALUE);
 		executionContext.put("methodParameter3", ACTION_PARAMETER3_VALUE);
 
-		OOActionRunner runner = new OOActionRunner();
-		runner.run(executionContext, "org.score.samples.openstack.actions.OOActionRunnerTest", "auxiliaryAction");
-
-		//Execution Context should contain the values from auxiliaryAction method
-		assertEquals(8, executionContext.size());
-
-		//initial parameter overridden when duplicate
-		assertEquals(true, executionContext.containsKey(PARAMETER1_CONTEXT_KEY));
-		assertEquals(ACTION_PARAMETER1_VALUE, executionContext.get(PARAMETER1_CONTEXT_KEY));
-
-		//initial parameter unchanged when no duplicate
-		assertEquals(true, executionContext.containsKey(PARAMETER2_CONTEXT_KEY));
-		assertEquals(PARAMETER2_CONTEXT_VALUE, executionContext.get(PARAMETER2_CONTEXT_KEY));
-
-		//Execution Context should contain the pairs returned by auxiliaryAction
-		assertEquals(true, executionContext.containsKey(ACTION_PARAMETER_1_KEY));
-		assertEquals(ACTION_PARAMETER1_VALUE, executionContext.get(ACTION_PARAMETER_1_KEY));
-		assertEquals(true, executionContext.containsKey(ACTION_PARAMETER_2_KEY));
-		assertEquals(ACTION_PARAMETER2_VALUE, executionContext.get(ACTION_PARAMETER_2_KEY));
-		assertEquals(true, executionContext.containsKey(ACTION_PARAMETER_3_KEY));
-		assertEquals(ACTION_PARAMETER3_VALUE, executionContext.get(ACTION_PARAMETER_3_KEY));
-
-		assertEquals(true, executionContext.containsKey(RESPONSE_KEY));
-		assertEquals(SUCCESS, executionContext.get(RESPONSE_KEY));
+		return executionContext;
 	}
 
 	@SuppressWarnings("unused")
 	public Map<String, String> auxiliaryAction(String methodParameter1,
 											   String methodParameter2,
 											   String methodParameter3) {
+		return getAuxiliaryMap(methodParameter1, methodParameter2, methodParameter3);
+	}
+
+	private Map<String, String> getAuxiliaryMap(String methodParameter1, String methodParameter2, String methodParameter3) {
 		Map<String, String> returnMap = new HashMap<>();
 		returnMap.put(ACTION_PARAMETER_1_KEY, methodParameter1);
 		returnMap.put(ACTION_PARAMETER_2_KEY, methodParameter2);
@@ -74,4 +84,5 @@ public class OOActionRunnerTest {
 		returnMap.put(RESPONSE_KEY, SUCCESS);
 		return returnMap;
 	}
+
 }
