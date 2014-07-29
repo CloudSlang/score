@@ -1,5 +1,6 @@
 package org.score.samples;
 
+import com.hp.oo.engine.queue.entities.ExecStatus;
 import org.score.samples.openstack.actions.ExecutionPlanBuilder;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.Score;
@@ -9,6 +10,7 @@ import com.hp.score.events.ScoreEventListener;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.Serializable;
@@ -24,6 +26,7 @@ import java.util.Set;
  */
 public class OpenstackApplications {
 	private final static Logger logger = Logger.getLogger(OpenstackApplications.class);
+	private ApplicationContext context;
 
 	@Autowired
 	private Score score;
@@ -35,6 +38,8 @@ public class OpenstackApplications {
 		OpenstackApplications app = loadApp();
 		app.registerEventListeners();
 		app.start();
+		//app.waitForExecutionToComplete();
+		//app.closeContext();
 	}
 
 	private void start() {
@@ -61,7 +66,22 @@ public class OpenstackApplications {
 
 	private static OpenstackApplications loadApp() {
 		ApplicationContext context = new ClassPathXmlApplicationContext("/META-INF/spring/openstackApplicationContext.xml");
-		return context.getBean(OpenstackApplications.class);
+		OpenstackApplications app = context.getBean(OpenstackApplications.class);
+		app.context  = context;
+		return app;
+	}
+
+	private void waitForExecutionToComplete() {
+//		try {
+//			logger.info("Waiting for execution to complete");
+//			Thread.sleep(10000);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+	}
+
+	private void closeContext() {
+		((ConfigurableApplicationContext) context).close();
 	}
 
 	private void registerEventListeners() {
@@ -72,6 +92,13 @@ public class OpenstackApplications {
 		handlerTypes = new HashSet<>();
 		handlerTypes.add("type1");
 		handlerTypes.add("type2");
+		registerEventListener(handlerTypes);
+
+		//handler test for score internal events
+		handlerTypes = new HashSet<>();
+		handlerTypes.add("FINISHED");
+		handlerTypes.add("ERROR");
+		handlerTypes.add("CANCELLED");
 		registerEventListener(handlerTypes);
 	}
 
