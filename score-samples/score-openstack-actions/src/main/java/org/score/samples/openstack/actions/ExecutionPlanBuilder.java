@@ -5,6 +5,7 @@ import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ExecutionStep;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -33,10 +34,10 @@ public class ExecutionPlanBuilder {
 
 	public Long addStep(String actionClassName,
 						String actionMethodName,
-						String nextStepID) {
+						List<NavigationMatcher> navigationMatchers, String defaultNextStepId) {
 		ExecutionStep step = new ExecutionStep(stepCount++);
 
-		step.setAction(new ControlActionMetadata("org.score.samples.openstack.actions.OOActionRunner", "runWithServices"));
+		step.setAction(new ControlActionMetadata("org.score.samples.openstack.actions.OOActionRunner", "run"));
 		Map<String, String> actionData = new HashMap<>(2);
 		//put the actual action class name and method name
 		actionData.put(ACTION_CLASS_KEY, actionClassName);
@@ -45,8 +46,9 @@ public class ExecutionPlanBuilder {
 
 		step.setNavigation(new ControlActionMetadata("org.score.samples.openstack.actions.OOActionRunner", "navigate"));
 		Map<String, Object> navigationData = new HashMap<>(2);
-		navigationData.put("mapKey", new HashMap<>());
-		navigationData.put("nextStep", nextStepID);
+		navigationData.put("navigationMatchers", navigationMatchers);
+		navigationData.put("defaultNextStepId", defaultNextStepId);
+
 		step.setNavigationData(navigationData);
 
 		step.setSplitStep(false);

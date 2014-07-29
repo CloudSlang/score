@@ -1,4 +1,4 @@
-package com.hp.oo.openstack.actions;
+package org.score.samples.openstack.actions;
 
 import org.hamcrest.Matcher;
 import static org.hamcrest.CoreMatchers.equalTo;

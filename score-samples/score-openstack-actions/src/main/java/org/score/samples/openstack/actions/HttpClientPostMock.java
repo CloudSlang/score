@@ -1,4 +1,4 @@
-package com.hp.oo.openstack.actions;
+package org.score.samples.openstack.actions;
 
 import org.apache.log4j.Logger;
 
@@ -37,7 +37,7 @@ public class HttpClientPostMock {
 		returnMap.put("password", password);
 		returnMap.put("url", url);
 		returnMap.put("host", host);
-		returnMap.put("result", "201");
+		returnMap.put("result", "200");
 
 		
 

@@ -1,4 +1,4 @@
-package com.hp.oo.openstack.actions;
+package org.score.samples.openstack.actions;
 
 import org.apache.log4j.Logger;
 

@@ -1,16 +1,15 @@
-package com.hp.oo.openstack.actions;
+package org.score.samples.openstack.actions;
 
+import org.score.samples.openstack.actions.MatcherFactory;
+import org.score.samples.openstack.actions.NavigationMatcher;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.hamcrest.CoreMatchers.equalTo;
 
 /**
  * Date: 7/22/2014
