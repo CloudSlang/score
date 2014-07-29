@@ -1,18 +1,5 @@
 package com.hp.oo.execution.services;
 
-import java.io.Serializable;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.hp.oo.broker.entities.BranchContextHolder;
 import com.hp.oo.broker.entities.RunningExecutionPlan;
 import com.hp.oo.broker.services.RuntimeValueService;
@@ -33,6 +20,18 @@ import com.hp.score.events.EventBus;
 import com.hp.score.events.EventConstants;
 import com.hp.score.events.ScoreEvent;
 import com.hp.score.lang.SystemContext;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.io.Serializable;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * @author Dima Rassin
@@ -445,6 +444,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	private static void addContextData(Map<String, Object> data, Execution execution) {
 		data.putAll(execution.getContexts());
 		data.put(ExecutionConstants.SYSTEM_CONTEXT, execution.getSystemContext());
+		data.put(ExecutionConstants.EXECUTION_RUNTIME_SERVICES, execution.getSystemContext());
 		data.put(ExecutionConstants.SERIALIZABLE_SESSION_CONTEXT, execution.getSerializableSessionContext());
 		data.put(ExecutionConstants.EXECUTION, execution);
 		data.put(ExecutionConstants.RUNNING_EXECUTION_PLAN_ID, execution.getRunningExecutionPlanId());
