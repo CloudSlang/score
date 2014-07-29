@@ -1,4 +1,4 @@
-package org.score.samples.openstack.actions;
+package com.hp.oo.openstack.actions;
 
 import org.apache.log4j.Logger;
 
@@ -13,7 +13,6 @@ import java.util.Map;
 @SuppressWarnings("unused")
 public class HttpClientSendEmailMock {
 	private final static Logger logger = Logger.getLogger(HttpClientSendEmailMock.class);
-
 	/**
 	 * Mocked action method for sending an email
 	 *
@@ -24,7 +23,7 @@ public class HttpClientSendEmailMock {
 	 */
 	public Map<String, String> sendEmail(String receiver, String title, String body) {
 
-		Map<String, String> returnMap =  new HashMap<>();
+		Map<String, String> returnMap =  new HashMap<String, String>();
 		logger.info("receiver=" + receiver);
 		logger.info("title=" + title);
 		logger.info("body=" + body);
@@ -32,7 +31,7 @@ public class HttpClientSendEmailMock {
 		returnMap.put("receiver", receiver);
 		returnMap.put("title", title);
 		returnMap.put("body", body);
-
+		returnMap.put("result", "400");
 		//returnMap.put("nextStep", "2");
 		return returnMap;
 	}
