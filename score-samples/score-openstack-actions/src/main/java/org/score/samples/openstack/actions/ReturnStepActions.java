@@ -13,7 +13,7 @@ import java.util.Map;
 public class ReturnStepActions {
 	private final static Logger logger = Logger.getLogger(ReturnStepActions.class);
 
-	@SuppressWarnings("unused") //todo test when method will be finalized
+	@SuppressWarnings("unused") //todo test when method will be finished
 	public Map<String, String> successStepAction() {
 		logger.info("This is a return step action");
 

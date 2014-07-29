@@ -57,7 +57,7 @@ public class OOActionRunner {
 		mergeBackResults(executionContext, results);
 	}
 
-	//todo test when method will be finalized, change SystemContext to ExecutionRuntimeServices
+	//todo test when method will be finished, change SystemContext to ExecutionRuntimeServices
 	public void runWithServices(Map<String, Serializable> executionContext,
 								SystemContext systemContext,
 								String className,
@@ -165,7 +165,7 @@ public class OOActionRunner {
 		}
 	}
 
-	@SuppressWarnings("unused") //todo test when method will be finalized
+	@SuppressWarnings("unused") //todo test when method will be finished
 	public Long navigate(Map<String, Serializable> executionContext, String nextStep) {
 		logger.info("navigate method invocation");
 
