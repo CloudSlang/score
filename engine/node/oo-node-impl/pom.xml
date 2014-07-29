@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<parent>
 		<groupId>com.hp.score</groupId>
 		<artifactId>node</artifactId>
@@ -7,7 +8,7 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
-    <artifactId>oo-node-impl</artifactId>
+	<artifactId>oo-node-impl</artifactId>
 
 	<dependencies>
 		<dependency>
@@ -48,14 +49,14 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>oo-versioning-api</artifactId>
-        </dependency>
+		</dependency>
 
-        <!-- test artifacts -->
+		<!-- test artifacts -->
 
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>score-data</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>score-data</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -124,33 +125,27 @@
 		<dependency>
 			<groupId>rome</groupId>
 			<artifactId>rome</artifactId>
-            <scope>test</scope>
-        </dependency>
+			<scope>test</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>com.oracle</groupId>
-            <artifactId>ojdbc6</artifactId>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>net.sourceforge.jtds</groupId>
+			<artifactId>jtds</artifactId>
+			<version>${jtds.version}</version>
+			<scope>test</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>net.sourceforge.jtds</groupId>
-            <artifactId>jtds</artifactId>
-            <version>${jtds.version}</version>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<scope>test</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>test</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-    </dependencies>
+	</dependencies>
 </project>
