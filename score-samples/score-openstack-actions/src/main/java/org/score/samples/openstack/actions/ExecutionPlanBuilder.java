@@ -37,7 +37,7 @@ public class ExecutionPlanBuilder {
 						List<NavigationMatcher> navigationMatchers, String defaultNextStepId) {
 		ExecutionStep step = new ExecutionStep(stepCount++);
 
-		step.setAction(new ControlActionMetadata("org.score.samples.openstack.actions.OOActionRunner", "run"));
+		step.setAction(new ControlActionMetadata("org.score.samples.openstack.actions.OOActionRunner", "runWithServices"));
 		Map<String, String> actionData = new HashMap<>(2);
 		//put the actual action class name and method name
 		actionData.put(ACTION_CLASS_KEY, actionClassName);

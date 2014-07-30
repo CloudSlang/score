@@ -20,7 +20,8 @@ import java.util.Map;
  */
 public class OOActionRunner {
 	private final static Logger logger = Logger.getLogger(OOActionRunner.class);
-	private static int eventCount = 0; // to be removed
+	public final static String ACTION_RUNTIME_EVENT_TYPE = "action_runtime_event";
+	public final static String ACTION_EXCEPTION_EVENT_TYPE = "action_exception_event";
 
 	/**
 	 * Wrapper method for running actions. A method is a valid action if it returns a Map<String, String>
@@ -68,6 +69,7 @@ public class OOActionRunner {
 	)
 			throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
 		logger.info("runWithServices method invocation");
+		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Extracting action data");
 
 		//get the action class
 		Class actionClass = Class.forName(className);
@@ -82,18 +84,30 @@ public class OOActionRunner {
 		//extract the parameters from execution context
 		Object[] actualParameters = getParametersFromExecutionContext(executionContext, parameterNames);
 
+		String invokeMessage = "Attempting to invoke action method \"" + methodName + "\"";
+		invokeMessage += " of class " + className;
+
+		// if the action method does not have any parameters then actualParameters is null
+		if (actualParameters != null) {
+			invokeMessage += " with parameters: ";
+			int limit = actualParameters.length - 1;
+			for (int i = 0; i < limit; i++) {
+				String parameter = actualParameters[i] == null ? "null" : actualParameters[i].toString();
+				invokeMessage += parameter + ",";
+			}
+			invokeMessage += actualParameters[actualParameters.length - 1];
+		}
+
+		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, invokeMessage);
+
 		// invoke method
 		Map<String, String> results = invokeActionMethod(actionMethod, actionClass.newInstance(), actualParameters);
+		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Method \"" + methodName + "\" invoked.." +
+				" Attempting to merge back results in the Execution Context");
 
 		//merge back the results of the action in the flow execution context
 		mergeBackResults(executionContext, results);
-
-		//events
-		if ((eventCount++) % 2 == 0) {
-			executionRuntimeServices.addEvent("type1", "event type1 data");
-		} else {
-			executionRuntimeServices.addEvent("type2", "event type2 data");
-		}
+		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Results merged back in the Execution Context");
 	}
 
 	/**
