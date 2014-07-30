@@ -1,9 +1,11 @@
 package org.score.samples.openstack.actions;
 
+import com.hp.score.lang.ExecutionRuntimeServices;
 import org.score.samples.openstack.actions.MatcherFactory;
 import org.score.samples.openstack.actions.NavigationMatcher;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.apache.log4j.Logger;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -17,9 +19,12 @@ import java.util.Map;
  * @author Bonczidai Levente
  */
 public class OOActionRunner {
+	private final static Logger logger = Logger.getLogger(OOActionRunner.class);
+	private static int eventCount = 0; // to be removed
 
 	/**
-	 * Wrapper method for running actions. A method is a valid action if it returns a Map<String, String>.
+	 * Wrapper method for running actions. A method is a valid action if it returns a Map<String, String>
+	 *     and its parameters are serializable.
 	 *
 	 * @param executionContext current Execution Context
 	 * @param className full path of the actual action class
@@ -33,6 +38,7 @@ public class OOActionRunner {
 					String className,
 					String methodName)
 			throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
+		logger.info("run method invocation");
 
 		//get the action class
 		Class actionClass = Class.forName(className);
@@ -52,6 +58,42 @@ public class OOActionRunner {
 
 		//merge back the results of the action in the flow execution context
 		mergeBackResults(executionContext, results);
+	}
+
+	//todo test when method will be finished
+	public void runWithServices(Map<String, Serializable> executionContext,
+								ExecutionRuntimeServices executionRuntimeServices,
+								String className,
+								String methodName
+	)
+			throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
+		logger.info("runWithServices method invocation");
+
+		//get the action class
+		Class actionClass = Class.forName(className);
+
+		//get the Method object
+		Method actionMethod = getMethodByName(actionClass, methodName);
+
+		//get the parameter names of the action method
+		ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+		String[] parameterNames = parameterNameDiscoverer.getParameterNames(actionMethod);
+
+		//extract the parameters from execution context
+		Object[] actualParameters = getParametersFromExecutionContext(executionContext, parameterNames);
+
+		// invoke method
+		Map<String, String> results = invokeActionMethod(actionMethod, actionClass.newInstance(), actualParameters);
+
+		//merge back the results of the action in the flow execution context
+		mergeBackResults(executionContext, results);
+
+		//events
+		if ((eventCount++) % 2 == 0) {
+			executionRuntimeServices.addEvent("type1", "event type1 data");
+		} else {
+			executionRuntimeServices.addEvent("type2", "event type2 data");
+		}
 	}
 
 	/**
@@ -127,6 +169,7 @@ public class OOActionRunner {
 	}
 
 	public Long navigate (Map<String, Serializable> executionContext, List<NavigationMatcher> navigationMatchers, String defaultNextStepId) {
+		logger.info("navigate method invocation");
 
 		if (navigationMatchers == null){
 			return null;
@@ -146,9 +189,5 @@ public class OOActionRunner {
 		return Long.parseLong(defaultNextStepId);
 
 		//return navigationMatcher.getDefaultNextStepId();
-
-
 	}
-
-
 }

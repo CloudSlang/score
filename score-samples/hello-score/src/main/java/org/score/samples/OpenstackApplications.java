@@ -89,12 +89,6 @@ public class OpenstackApplications {
 	}
 
 	private void waitForExecutionToComplete() {
-//		try {
-//			logger.info("Waiting for execution to complete");
-//			Thread.sleep(10000);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
 	}
 
 	private void closeContext() {
