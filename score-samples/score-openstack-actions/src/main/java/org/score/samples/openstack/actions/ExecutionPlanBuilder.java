@@ -17,26 +17,26 @@ import java.util.UUID;
 public class ExecutionPlanBuilder {
 	public static final String ACTION_CLASS_KEY = "className";
 	public static final String ACTION_METHOD_KEY = "methodName";
-	private static Long stepCount;
 
 	private ExecutionPlan executionPlan;
 
 	public ExecutionPlanBuilder() {
 		executionPlan = new ExecutionPlan();
 		executionPlan.setFlowUuid(UUID.randomUUID().toString());
-		stepCount = 0L;
-		executionPlan.setBeginStep(stepCount);
+		executionPlan.setBeginStep(0L);
 	}
 
 	public ExecutionPlan getExecutionPlan() {
 		return executionPlan;
 	}
 
-	public Long addStep(String actionClassName,
-						String actionMethodName,
-						List<NavigationMatcher> navigationMatchers,
-						String defaultNextStepId) {
-		ExecutionStep step = new ExecutionStep(stepCount++);
+	public Long addStep(
+			Long stepId,
+			String actionClassName,
+			String actionMethodName,
+			List<NavigationMatcher> navigationMatchers,
+			String defaultNextStepId) {
+		ExecutionStep step = new ExecutionStep(stepId);
 
 		step.setAction(new ControlActionMetadata("org.score.samples.openstack.actions.OOActionRunner", "run"));
 		Map<String, String> actionData = new HashMap<>(2);

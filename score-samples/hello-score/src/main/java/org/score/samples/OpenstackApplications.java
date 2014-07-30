@@ -53,20 +53,26 @@ public class OpenstackApplications {
 		//navigationMatchers.add(new NavigationMatcher(MatchType.COMPARE_NOT_EQUAL, "result", "200", "2"));y
 
 
-		builder.addStep("org.score.samples.openstack.actions.HttpClientPostMock", "post", navigationMatchers, "2");
+		builder.addStep(0L, "org.score.samples.openstack.actions.HttpClientPostMock", "post", navigationMatchers, "2");
 
 		navigationMatchers = new ArrayList<>();
 		navigationMatchers.add(new NavigationMatcher(MatchType.COMPARE_EQUAL, "result", "400", "2"));
 
-		builder.addStep("org.score.samples.openstack.actions.HttpClientSendEmailMock", "sendEmail", navigationMatchers, "2");
+		builder.addStep(1L, "org.score.samples.openstack.actions.HttpClientSendEmailMock", "sendEmail", navigationMatchers, "2");
 
 		navigationMatchers = null;
 
-		builder.addStep("org.score.samples.openstack.actions.ReturnStepActions", "successStepAction", navigationMatchers, "2");
+		builder.addStep(2L, "org.score.samples.openstack.actions.ReturnStepActions", "successStepAction", navigationMatchers, "2");
 
 		ExecutionPlan executionPlan = builder.getExecutionPlan();
 
 		Map<String, Serializable> executionContext = new HashMap<>();
+		prepareExecutionContext(executionContext);
+
+		executionID = score.trigger(executionPlan, executionContext);
+	}
+
+	private void prepareExecutionContext(Map<String, Serializable> executionContext) {
 		//for post
 		executionContext.put("username", "userTest");
 		executionContext.put("password", "passTest");
@@ -76,8 +82,6 @@ public class OpenstackApplications {
 		executionContext.put("receiver", "receiverTest");
 		executionContext.put("title", "titleTest");
 		executionContext.put("body", "bodyTest");
-
-		executionID = score.trigger(executionPlan, executionContext);
 	}
 
 	private static OpenstackApplications loadApp() {
