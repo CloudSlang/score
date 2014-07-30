@@ -25,11 +25,11 @@ public class OOActionRunner {
 
 	/**
 	 * Wrapper method for running actions. A method is a valid action if it returns a Map<String, String>
-	 *     and its parameters are serializable.
+	 * and its parameters are serializable.
 	 *
 	 * @param executionContext current Execution Context
-	 * @param className full path of the actual action class
-	 * @param methodName method name of the actual action
+	 * @param className        full path of the actual action class
+	 * @param methodName       method name of the actual action
 	 * @throws ClassNotFoundException
 	 * @throws IllegalAccessException
 	 * @throws InstantiationException
@@ -61,20 +61,22 @@ public class OOActionRunner {
 		doMerge(executionContext, results);
 	}
 
-	//todo test when method will be finished
-	public void runWithServices(Map<String, Serializable> executionContext,
-								ExecutionRuntimeServices executionRuntimeServices,
-								String className,
-								String methodName
-	)
-			throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
-		logger.info("runWithServices method invocation");
+	public void runWithServices(
+			Map<String, Serializable> executionContext,
+			ExecutionRuntimeServices executionRuntimeServices,
+			String className,
+			String methodName) {
+		try {
+			logger.info("runWithServices method invocation");
 
-		Object[] actualParameters = extractMethodData(executionContext, executionRuntimeServices, className, methodName);
+			Object[] actualParameters = extractMethodData(executionContext, executionRuntimeServices, className, methodName);
 
-		Map<String, String> results = invokeMethod(executionRuntimeServices, className, methodName, actualParameters);
+			Map<String, String> results = invokeMethod(executionRuntimeServices, className, methodName, actualParameters);
 
-		mergeBackResults(executionContext, executionRuntimeServices, methodName, results);
+			mergeBackResults(executionContext, executionRuntimeServices, methodName, results);
+		} catch (Exception ex) {
+			executionRuntimeServices.addEvent(ACTION_EXCEPTION_EVENT_TYPE, ex);
+		}
 	}
 
 	private void mergeBackResults(Map<String, Serializable> executionContext, ExecutionRuntimeServices executionRuntimeServices, String methodName, Map<String, String> results) {
@@ -128,7 +130,7 @@ public class OOActionRunner {
 	 * Extracts the actual method of the action's class
 	 *
 	 * @param actionClass Class object that represents the actual action class
-	 * @param methodName method name of the actual action
+	 * @param methodName  method name of the actual action
 	 * @return actual method represented by Method object
 	 * @throws ClassNotFoundException
 	 */
@@ -147,7 +149,7 @@ public class OOActionRunner {
 	 * Retrieves a list of parameters from the execution context
 	 *
 	 * @param executionContext current Execution Context
-	 * @param parameterNames list of parameter names to be retrieved
+	 * @param parameterNames   list of parameter names to be retrieved
 	 * @return parameters from the execution context represented as Object list
 	 */
 	private Object[] getParametersFromExecutionContext(Map<String, Serializable> executionContext, String[] parameterNames) {
@@ -172,14 +174,14 @@ public class OOActionRunner {
 	 * Invokes the actual action method with the specified parameters
 	 *
 	 * @param actionMethod action method represented as Method object
-	 * @param instance an instance of the invoker class
-	 * @param parameters method parameters
+	 * @param instance     an instance of the invoker class
+	 * @param parameters   method parameters
 	 * @return results if the action
 	 * @throws InvocationTargetException
 	 * @throws IllegalAccessException
 	 */
 	@SuppressWarnings("unchecked")
-	private Map<String, String> invokeActionMethod(Method actionMethod,Object instance, Object... parameters )
+	private Map<String, String> invokeActionMethod(Method actionMethod, Object instance, Object... parameters)
 			throws InvocationTargetException, IllegalAccessException {
 		return (Map<String, String>) actionMethod.invoke(instance, parameters);
 	}
@@ -188,7 +190,7 @@ public class OOActionRunner {
 	 * Merges back the results in the execution context
 	 *
 	 * @param executionContext current Execution Context
-	 * @param results results to be merged back
+	 * @param results          results to be merged back
 	 */
 	private void doMerge(Map<String, Serializable> executionContext, Map<String, String> results) {
 		if (results != null) {
@@ -196,22 +198,22 @@ public class OOActionRunner {
 		}
 	}
 
-	public Long navigate (Map<String, Serializable> executionContext, List<NavigationMatcher> navigationMatchers, String defaultNextStepId) {
+	public Long navigate(Map<String, Serializable> executionContext, List<NavigationMatcher> navigationMatchers, String defaultNextStepId) {
 		logger.info("navigate method invocation");
 
-		if (navigationMatchers == null){
+		if (navigationMatchers == null) {
 			return null;
 		}
 		MatcherFactory matcherFactory = new MatcherFactory();
-		for(NavigationMatcher navigationMatcher : navigationMatchers)
-		{
+		for (NavigationMatcher navigationMatcher : navigationMatchers) {
 			Serializable response = executionContext.get(navigationMatcher.getContextKey());
-			Integer intResponse = Integer.parseInt(response.toString());
+			if (response != null) {
+				Integer intResponse = Integer.parseInt(response.toString());
 
-			if(matcherFactory.getMatcher(navigationMatcher.getMatchType(), navigationMatcher.getCompareArg()).matches(intResponse)){
-				return Long.parseLong(navigationMatcher.getNextStepId());
+				if (matcherFactory.getMatcher(navigationMatcher.getMatchType(), navigationMatcher.getCompareArg()).matches(intResponse)) {
+					return Long.parseLong(navigationMatcher.getNextStepId());
+				}
 			}
-
 		}
 
 		return Long.parseLong(defaultNextStepId);

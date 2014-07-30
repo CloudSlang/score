@@ -1,6 +1,5 @@
 package org.score.samples;
 
-import com.hp.oo.engine.queue.entities.ExecStatus;
 import org.score.samples.openstack.actions.ExecutionPlanBuilder;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.Score;
@@ -32,6 +31,7 @@ import java.util.Set;
 public class OpenstackApplications {
 	private final static Logger logger = Logger.getLogger(OpenstackApplications.class);
 	private ApplicationContext context;
+	private Long executionID;
 
 	@Autowired
 	private Score score;
@@ -43,8 +43,6 @@ public class OpenstackApplications {
 		OpenstackApplications app = loadApp();
 		app.registerEventListeners();
 		app.start();
-		//app.waitForExecutionToComplete();
-		//app.closeContext();
 	}
 
 	private void start() {
@@ -55,7 +53,7 @@ public class OpenstackApplications {
 		//navigationMatchers.add(new NavigationMatcher(MatchType.COMPARE_NOT_EQUAL, "result", "200", "2"));y
 
 
-		builder.addStep("org.score.samples.openstack.actions.HttpClientPostMock", "post", navigationMatchers, "2");
+		builder.addStep("org.score.samples.openstack.actions.HttpClientPostMockk", "post", navigationMatchers, "2");
 
 		navigationMatchers = new ArrayList<>();
 		navigationMatchers.add(new NavigationMatcher(MatchType.COMPARE_EQUAL, "result", "400", "2"));
@@ -70,8 +68,8 @@ public class OpenstackApplications {
 
 		Map<String, Serializable> executionContext = new HashMap<>();
 		//for post
-		//executionContext.put("username", "userTest");
-		//executionContext.put("password", "passTest");
+		executionContext.put("username", "userTest");
+		executionContext.put("password", "passTest");
 		executionContext.put("host", "hostTest");
 		executionContext.put("url", "urlTest");
 		//for sendEmail
@@ -79,7 +77,7 @@ public class OpenstackApplications {
 		executionContext.put("title", "titleTest");
 		executionContext.put("body", "bodyTest");
 
-		score.trigger(executionPlan, executionContext);
+		executionID = score.trigger(executionPlan, executionContext);
 	}
 
 	private static OpenstackApplications loadApp() {
@@ -87,9 +85,6 @@ public class OpenstackApplications {
 		OpenstackApplications app = context.getBean(OpenstackApplications.class);
 		app.context  = context;
 		return app;
-	}
-
-	private void waitForExecutionToComplete() {
 	}
 
 	private void closeContext() {
@@ -100,26 +95,48 @@ public class OpenstackApplications {
 		//register listener for action runtime events
 		Set<String> handlerTypes = new HashSet<>();
 		handlerTypes.add(OOActionRunner.ACTION_RUNTIME_EVENT_TYPE);
-		registerEventListener(handlerTypes);
+		registerInfoEventListener(handlerTypes);
 
 		//register listener for action exception events
-		handlerTypes = new HashSet<>();
-		handlerTypes.add(OOActionRunner.ACTION_EXCEPTION_EVENT_TYPE);
-		registerEventListener(handlerTypes);
+		registerExceptionEventListener();
 
-		//handler test for score internal events
-		handlerTypes = new HashSet<>();
-		handlerTypes.add("FINISHED");
-		handlerTypes.add("ERROR");
-		handlerTypes.add("CANCELLED");
-		registerEventListener(handlerTypes);
+		// for closing the Application Context when score finishes execution
+		registerScoreEventListener();
 	}
 
-	private void registerEventListener(Set<String> handlerTypes) {
+	private void registerExceptionEventListener() {
+		Set<String> handlerTypes = new HashSet<>();
+		handlerTypes.add(OOActionRunner.ACTION_EXCEPTION_EVENT_TYPE);
 		eventBus.subscribe(new ScoreEventListener() {
 			@Override
 			public void onEvent(ScoreEvent event) {
 				logger.info("Listener " + this.toString() + " invoked on type: " + event.getEventType() + " with data: " + event.getData());
+				logger.info("Attempting to cancel the execution");
+				score.cancelExecution(executionID);
+			}
+		}, handlerTypes);
+	}
+
+	private void registerInfoEventListener(Set<String> handlerTypes) {
+		eventBus.subscribe(new ScoreEventListener() {
+			@Override
+			public void onEvent(ScoreEvent event) {
+				logger.info("Listener " + this.toString() + " invoked on type: " + event.getEventType() + " with data: " + event.getData());
+			}
+		}, handlerTypes);
+	}
+
+	private void registerScoreEventListener() {
+		Set<String> handlerTypes = new HashSet<>();
+		handlerTypes = new HashSet<>();
+		handlerTypes.add("FINISHED");
+		handlerTypes.add("ERROR");
+		handlerTypes.add("CANCELLED");
+		eventBus.subscribe(new ScoreEventListener() {
+			@Override
+			public void onEvent(ScoreEvent event) {
+				logger.info("Listener " + this.toString() + " invoked on type: " + event.getEventType() + " with data: " + event.getData());
+				closeContext();
 			}
 		}, handlerTypes);
 	}
