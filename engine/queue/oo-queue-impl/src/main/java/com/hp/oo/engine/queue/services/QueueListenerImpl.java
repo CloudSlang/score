@@ -27,7 +27,6 @@ import java.util.Map;
  * Date: 19/09/12
  * Time: 15:14
  */
-@SuppressWarnings("unused")
 public class QueueListenerImpl implements QueueListener {
 
 	private static Logger logger = Logger.getLogger(QueueListenerImpl.class);
@@ -153,9 +152,20 @@ public class QueueListenerImpl implements QueueListener {
 	@Override
 	public void onFailed(List<ExecutionMessage> messages) {
 		deleteExecutionStateObjects(messages);
+		handleFailureMessages(messages);
 		ScoreEvent[] events = createFailureEvents(messages);
 		if (events.length > 0) {
 			eventBus.dispatch(events);
+		}
+	}
+
+	private void handleFailureMessages(List<ExecutionMessage> messages) {
+		Execution execution;
+		for (ExecutionMessage executionMessage : messages) {
+			execution = extractExecution(executionMessage);
+			if (isBranch(execution)) {
+				finishBranchExecution(execution);
+			}
 		}
 	}
 
@@ -167,12 +177,26 @@ public class QueueListenerImpl implements QueueListener {
 			if (failedBecauseNoWorker(executionMessage)) {
 				//todo send failed-no-worker event
 			} else if (isBranch(execution)) {
-				//todo send failed-branch event
+				events.add(createFailedBranchEvent(execution));
 			} else {
 				events.add(createFailureEvent(execution));
 			}
 		}
 		return events.toArray(new ScoreEvent[events.size()]);
+	}
+
+	private ScoreEvent createFailedBranchEvent(Execution execution) {
+		String eventType = EventConstants.SCORE_BRANCH_FAILURE_EVENT;
+		Serializable eventData = createBranchFailureEventData(execution);
+		return new ScoreEvent(eventType, eventData);
+	}
+
+	private Serializable createBranchFailureEventData(Execution execution) {
+		Map<String, Serializable> eventData = new HashMap<>();
+		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, execution.getSystemContext());
+		eventData.put(ExecutionConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
+		eventData.put(ExecutionConstants.BRANCH_ID, execution.getBranchId());
+		return (Serializable) eventData;
 	}
 
 	private ScoreEvent createFailureEvent(Execution execution) {
@@ -185,6 +209,7 @@ public class QueueListenerImpl implements QueueListener {
 		Map<String, Serializable> eventData = new HashMap<>();
 		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, execution.getSystemContext());
 		eventData.put(ExecutionConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
+		eventData.put(ExecutionConstants.BRANCH_ID, execution.getBranchId());
 		eventData.put(ExecutionConstants.RUNNING_EXECUTION_PLAN_ID, execution.getRunningExecutionPlanId());
 		return (Serializable) eventData;
 	}
