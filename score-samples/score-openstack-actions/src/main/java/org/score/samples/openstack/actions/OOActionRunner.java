@@ -1,8 +1,6 @@
 package org.score.samples.openstack.actions;
 
 import com.hp.score.lang.ExecutionRuntimeServices;
-import org.score.samples.openstack.actions.MatcherFactory;
-import org.score.samples.openstack.actions.NavigationMatcher;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.apache.log4j.Logger;
@@ -22,6 +20,8 @@ public class OOActionRunner {
 	private final static Logger logger = Logger.getLogger(OOActionRunner.class);
 	public final static String ACTION_RUNTIME_EVENT_TYPE = "action_runtime_event";
 	public final static String ACTION_EXCEPTION_EVENT_TYPE = "action_exception_event";
+	private Class actionClass;
+	private Method actionMethod;
 
 	/**
 	 * Wrapper method for running actions. A method is a valid action if it returns a Map<String, String>
@@ -58,7 +58,7 @@ public class OOActionRunner {
 		Map<String, String> results = invokeActionMethod(actionMethod, actionClass.newInstance(), actualParameters);
 
 		//merge back the results of the action in the flow execution context
-		mergeBackResults(executionContext, results);
+		doMerge(executionContext, results);
 	}
 
 	//todo test when method will be finished
@@ -69,21 +69,24 @@ public class OOActionRunner {
 	)
 			throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
 		logger.info("runWithServices method invocation");
-		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Extracting action data");
 
-		//get the action class
-		Class actionClass = Class.forName(className);
+		Object[] actualParameters = extractMethodData(executionContext, executionRuntimeServices, className, methodName);
 
-		//get the Method object
-		Method actionMethod = getMethodByName(actionClass, methodName);
+		Map<String, String> results = invokeMethod(executionRuntimeServices, className, methodName, actualParameters);
 
-		//get the parameter names of the action method
-		ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
-		String[] parameterNames = parameterNameDiscoverer.getParameterNames(actionMethod);
+		mergeBackResults(executionContext, executionRuntimeServices, methodName, results);
+	}
 
-		//extract the parameters from execution context
-		Object[] actualParameters = getParametersFromExecutionContext(executionContext, parameterNames);
+	private void mergeBackResults(Map<String, Serializable> executionContext, ExecutionRuntimeServices executionRuntimeServices, String methodName, Map<String, String> results) {
+		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Method \"" + methodName + "\" invoked.." +
+				" Attempting to merge back results in the Execution Context");
 
+		//merge back the results of the action in the flow execution context
+		doMerge(executionContext, results);
+		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Results merged back in the Execution Context");
+	}
+
+	private Map<String, String> invokeMethod(ExecutionRuntimeServices executionRuntimeServices, String className, String methodName, Object[] actualParameters) throws InvocationTargetException, IllegalAccessException, InstantiationException {
 		String invokeMessage = "Attempting to invoke action method \"" + methodName + "\"";
 		invokeMessage += " of class " + className;
 
@@ -100,14 +103,25 @@ public class OOActionRunner {
 
 		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, invokeMessage);
 
-		// invoke method
-		Map<String, String> results = invokeActionMethod(actionMethod, actionClass.newInstance(), actualParameters);
-		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Method \"" + methodName + "\" invoked.." +
-				" Attempting to merge back results in the Execution Context");
+		// invoke action method
+		return invokeActionMethod(actionMethod, actionClass.newInstance(), actualParameters);
+	}
 
-		//merge back the results of the action in the flow execution context
-		mergeBackResults(executionContext, results);
-		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Results merged back in the Execution Context");
+	private Object[] extractMethodData(Map<String, Serializable> executionContext, ExecutionRuntimeServices executionRuntimeServices, String className, String methodName) throws ClassNotFoundException {
+		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Extracting action data");
+
+		//get the action class
+		actionClass = Class.forName(className);
+
+		//get the Method object
+		actionMethod = getMethodByName(actionClass, methodName);
+
+		//get the parameter names of the action method
+		ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+		String[] parameterNames = parameterNameDiscoverer.getParameterNames(actionMethod);
+
+		//extract the parameters from execution context
+		return getParametersFromExecutionContext(executionContext, parameterNames);
 	}
 
 	/**
@@ -176,7 +190,7 @@ public class OOActionRunner {
 	 * @param executionContext current Execution Context
 	 * @param results results to be merged back
 	 */
-	private void mergeBackResults(Map<String, Serializable> executionContext, Map<String, String> results) {
+	private void doMerge(Map<String, Serializable> executionContext, Map<String, String> results) {
 		if (results != null) {
 			executionContext.putAll(results);
 		}
