@@ -1,11 +1,18 @@
 package org.score.samples.openstack.actions;
 
+import com.hp.score.lang.ExecutionRuntimeServices;
 import org.junit.Test;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import static org.junit.Assert.assertEquals;
 
@@ -16,25 +23,43 @@ public class OOActionRunnerTest {
 	public static final String ACTION_PARAMETER_1_KEY = "actionParameter1";
 	public static final String ACTION_PARAMETER_2_KEY = "actionParameter2";
 	public static final String ACTION_PARAMETER_3_KEY = "actionParameter3";
-	private static final String ACTION_PARAMETER1_VALUE = "methodPar1";
-	private static final String ACTION_PARAMETER2_VALUE = "methodPar2";
-	private static final String ACTION_PARAMETER3_VALUE = "methodPar3";
+	private static final String ACTION_PARAMETER1_VALUE = "methodParameter1Value";
+	private static final String ACTION_PARAMETER2_VALUE = "methodParameter2Value";
+	private static final String ACTION_PARAMETER3_VALUE = "methodParameter3Value";
 
-	private static final String PARAMETER1_CONTEXT_KEY = ACTION_PARAMETER_1_KEY;
-	private static final String PARAMETER2_CONTEXT_KEY = "ExecutionContextKey2";
-	private static final String PARAMETER1_CONTEXT_VALUE = "ExecutionContextValue1";
-	private static final String PARAMETER2_CONTEXT_VALUE = "ExecutionContextValue2";
+	private static final String INITIAL_CONTEXT_KEY1 = ACTION_PARAMETER_1_KEY; //override occurs here
+	private static final String INITIAL_CONTEXT_KEY2 = "ExecutionContextKey2";
+	private static final String INITIAL_CONTEXT_VALUE1 = "ExecutionContextValue1";
+	private static final String INITIAL_CONTEXT_VALUE2 = "ExecutionContextValue2";
 
-	private static final long DEFAULT_TIMEOUT = 1000;
+	private static final long DEFAULT_TIMEOUT = 5000;
 
-	@Test(timeout = DEFAULT_TIMEOUT)
-	public void testRun() throws Exception {
+	@Test (timeout = DEFAULT_TIMEOUT)
+	public void testRunWithoutExceptions() throws Exception {
+		ExecutionRuntimeServices executionRuntimeServicesMock = mock(ExecutionRuntimeServices.class);
+
 		Map<String, Serializable> actualExecutionContext = prepareActualExecutionContext();
 		Map<String, Serializable> expectedExecutionContext = prepareExpectedExecutionContext(actualExecutionContext);
 
-		runAction(actualExecutionContext);
+		runAction(actualExecutionContext, executionRuntimeServicesMock, "org.score.samples.openstack.actions.OOActionRunnerTest", "auxiliaryAction");
+
+		//verify if method adds the action runtime events
+		verify(executionRuntimeServicesMock, times(4))
+				.addEvent(eq(OOActionRunner.ACTION_RUNTIME_EVENT_TYPE), any(String.class));
 
 		testExecutionContext(expectedExecutionContext, actualExecutionContext);
+	}
+
+	@Test (timeout = DEFAULT_TIMEOUT)
+	public void testRunWithClassNotFoundException() throws Exception {
+		ExecutionRuntimeServices executionRuntimeServicesMock = mock(ExecutionRuntimeServices.class);
+		Map<String, Serializable> actualExecutionContext = prepareActualExecutionContext();
+
+		runAction(actualExecutionContext, executionRuntimeServicesMock, "org.score.samples.openstack.actions.IDontExist", "auxiliaryAction");
+
+		//verify if method adds the exception event
+		verify(executionRuntimeServicesMock)
+				.addEvent(eq(OOActionRunner.ACTION_EXCEPTION_EVENT_TYPE), any(String.class));
 	}
 
 	private Map<String, Serializable> prepareExpectedExecutionContext(Map<String, Serializable> initialMap) {
@@ -52,15 +77,20 @@ public class OOActionRunnerTest {
 		assertEquals("execution contexts should be equal", expectedExecutionContext, actualExecutionContext);
 	}
 
-	private void runAction(Map<String, Serializable> executionContext) throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
+	private void runAction(
+			Map<String, Serializable> executionContext,
+			ExecutionRuntimeServices executionRuntimeServices,
+			String actionClassName,
+			String actionMethodName)
+			throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
 		OOActionRunner runner = new OOActionRunner();
-		runner.run(executionContext, "org.score.samples.openstack.actions.OOActionRunnerTest", "auxiliaryAction");
+		runner.run(executionContext, executionRuntimeServices, actionClassName, actionMethodName);
 	}
 
 	private Map<String, Serializable> prepareActualExecutionContext() {
 		Map<String, Serializable> executionContext = new HashMap<>();
-		executionContext.put(PARAMETER1_CONTEXT_KEY, PARAMETER1_CONTEXT_VALUE);
-		executionContext.put(PARAMETER2_CONTEXT_KEY, PARAMETER2_CONTEXT_VALUE);
+		executionContext.put(INITIAL_CONTEXT_KEY1, INITIAL_CONTEXT_VALUE1);
+		executionContext.put(INITIAL_CONTEXT_KEY2, INITIAL_CONTEXT_VALUE2);
 
 		executionContext.put("methodParameter1", ACTION_PARAMETER1_VALUE);
 		executionContext.put("methodParameter2", ACTION_PARAMETER2_VALUE);

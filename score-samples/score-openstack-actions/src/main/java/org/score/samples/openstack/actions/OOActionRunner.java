@@ -27,47 +27,18 @@ public class OOActionRunner {
 	 * Wrapper method for running actions. A method is a valid action if it returns a Map<String, String>
 	 * and its parameters are serializable.
 	 *
-	 * @param executionContext current Execution Context
-	 * @param className        full path of the actual action class
-	 * @param methodName       method name of the actual action
-	 * @throws ClassNotFoundException
-	 * @throws IllegalAccessException
-	 * @throws InstantiationException
-	 * @throws InvocationTargetException
+	 * @param executionContext executionContext object populated by score
+	 * @param executionRuntimeServices executionRuntimeServices object populated by score
+	 * @param className full path of the actual action class
+	 * @param methodName method name of the actual action
 	 */
-	public void run(Map<String, Serializable> executionContext,
-					String className,
-					String methodName)
-			throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
-		logger.info("run method invocation");
-
-		//get the action class
-		Class actionClass = Class.forName(className);
-
-		//get the Method object
-		Method actionMethod = getMethodByName(actionClass, methodName);
-
-		//get the parameter names of the action method
-		ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
-		String[] parameterNames = parameterNameDiscoverer.getParameterNames(actionMethod);
-
-		//extract the parameters from execution context
-		Object[] actualParameters = getParametersFromExecutionContext(executionContext, parameterNames);
-
-		// invoke method
-		Map<String, String> results = invokeActionMethod(actionMethod, actionClass.newInstance(), actualParameters);
-
-		//merge back the results of the action in the flow execution context
-		doMerge(executionContext, results);
-	}
-
-	public void runWithServices(
+	public void run(
 			Map<String, Serializable> executionContext,
 			ExecutionRuntimeServices executionRuntimeServices,
 			String className,
 			String methodName) {
 		try {
-			logger.info("runWithServices method invocation");
+			logger.info("run method invocation");
 
 			Object[] actualParameters = extractMethodData(executionContext, executionRuntimeServices, className, methodName);
 

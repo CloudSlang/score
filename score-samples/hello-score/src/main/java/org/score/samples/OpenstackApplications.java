@@ -53,7 +53,7 @@ public class OpenstackApplications {
 		//navigationMatchers.add(new NavigationMatcher(MatchType.COMPARE_NOT_EQUAL, "result", "200", "2"));y
 
 
-		builder.addStep("org.score.samples.openstack.actions.HttpClientPostMockk", "post", navigationMatchers, "2");
+		builder.addStep("org.score.samples.openstack.actions.HttpClientPostMock", "post", navigationMatchers, "2");
 
 		navigationMatchers = new ArrayList<>();
 		navigationMatchers.add(new NavigationMatcher(MatchType.COMPARE_EQUAL, "result", "400", "2"));
