@@ -104,6 +104,11 @@ public class QueueListenerImplTest {
 		SplitJoinService splitJoinService() {
 			return mock(SplitJoinService.class);
 		}
+
+		@Bean
+		ScoreEventFactory scoreEventFactory() {
+			return mock(ScoreEventFactory.class);
+		}
 	}
 
 }

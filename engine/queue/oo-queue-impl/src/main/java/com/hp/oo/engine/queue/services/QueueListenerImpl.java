@@ -4,23 +4,18 @@ import com.hp.oo.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.internal.sdk.execution.Execution;
-import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.oo.orchestrator.services.SplitJoinService;
-import com.hp.score.events.ScoreEvent;
 import com.hp.score.events.EventBus;
-import com.hp.score.events.EventConstants;
+import com.hp.score.events.ScoreEvent;
 import com.hp.score.services.ExecutionStateService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * User: Amit Levin
@@ -42,6 +37,9 @@ public class QueueListenerImpl implements QueueListener {
 
 	@Autowired
 	private SplitJoinService splitJoinService;
+
+	@Autowired
+	private ScoreEventFactory scoreEventFactory;
 
 	@Override
 	public void onEnqueue(List<ExecutionMessage> messages, int queueSize) {
@@ -82,7 +80,8 @@ public class QueueListenerImpl implements QueueListener {
 
 		for (ExecutionMessage executionMessage : messages) {
 			handleTerminatedMessage(executionMessage);
-			scoreEvents.add(createTerminationEvent(executionMessage));
+			Execution execution = extractExecution(executionMessage);
+			scoreEvents.add(scoreEventFactory.createFinishedEvent(execution));
 		}
 		return scoreEvents.toArray(new ScoreEvent[scoreEvents.size()]);
 	}
@@ -104,23 +103,6 @@ public class QueueListenerImpl implements QueueListener {
 		if (execution.isNewBranchMechanism()) {
 			splitJoinService.endBranch(Arrays.asList(execution));
 		}
-	}
-
-	private ScoreEvent createTerminationEvent(ExecutionMessage executionMessage) {
-		String eventType = EventConstants.SCORE_FINISHED_EVENT;
-		Serializable eventData = createTerminationEventData(executionMessage);
-		return new ScoreEvent(eventType, eventData);
-	}
-
-	private Serializable createTerminationEventData(ExecutionMessage executionMessage) {
-		Execution execution = extractExecution(executionMessage);
-
-		Map<String, Serializable> eventData = new HashMap<>();
-		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, execution.getSystemContext());
-		eventData.put(ExecutionConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
-		eventData.put(EventConstants.EXECUTION_CONTEXT, (Serializable) execution.getContexts());
-		eventData.put(EventConstants.IS_BRANCH, isBranch(execution));
-		return (Serializable) eventData;
 	}
 
 	/**
@@ -177,41 +159,12 @@ public class QueueListenerImpl implements QueueListener {
 			if (failedBecauseNoWorker(executionMessage)) {
 				//todo send failed-no-worker event
 			} else if (isBranch(execution)) {
-				events.add(createFailedBranchEvent(execution));
+				events.add(scoreEventFactory.createFailedBranchEvent(execution));
 			} else {
-				events.add(createFailureEvent(execution));
+				events.add(scoreEventFactory.createFailureEvent(execution));
 			}
 		}
 		return events.toArray(new ScoreEvent[events.size()]);
-	}
-
-	private ScoreEvent createFailedBranchEvent(Execution execution) {
-		String eventType = EventConstants.SCORE_BRANCH_FAILURE_EVENT;
-		Serializable eventData = createBranchFailureEventData(execution);
-		return new ScoreEvent(eventType, eventData);
-	}
-
-	private Serializable createBranchFailureEventData(Execution execution) {
-		Map<String, Serializable> eventData = new HashMap<>();
-		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, execution.getSystemContext());
-		eventData.put(ExecutionConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
-		eventData.put(ExecutionConstants.BRANCH_ID, execution.getBranchId());
-		return (Serializable) eventData;
-	}
-
-	private ScoreEvent createFailureEvent(Execution execution) {
-		String eventType = EventConstants.SCORE_FAILURE_EVENT;
-		Serializable eventData = createFailureEventData(execution);
-		return new ScoreEvent(eventType, eventData);
-	}
-
-	private Serializable createFailureEventData(Execution execution) {
-		Map<String, Serializable> eventData = new HashMap<>();
-		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, execution.getSystemContext());
-		eventData.put(ExecutionConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
-		eventData.put(ExecutionConstants.BRANCH_ID, execution.getBranchId());
-		eventData.put(ExecutionConstants.RUNNING_EXECUTION_PLAN_ID, execution.getRunningExecutionPlanId());
-		return (Serializable) eventData;
 	}
 
 	private void deleteExecutionStateObjects(List<ExecutionMessage> messages) {

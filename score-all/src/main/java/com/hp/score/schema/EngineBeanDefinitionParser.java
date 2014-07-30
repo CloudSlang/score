@@ -10,6 +10,7 @@ import com.hp.oo.engine.queue.services.ExecutionQueueServiceImpl;
 import com.hp.oo.engine.queue.services.QueueDispatcherServiceImpl;
 import com.hp.oo.engine.queue.services.QueueListenerImpl;
 import com.hp.oo.engine.queue.services.QueueStateIdGeneratorServiceImpl;
+import com.hp.oo.engine.queue.services.ScoreEventFactory;
 import com.hp.oo.engine.queue.services.assigner.ExecutionAssignerServiceImpl;
 import com.hp.oo.engine.queue.services.cleaner.QueueCleanerServiceImpl;
 import com.hp.oo.engine.queue.services.recovery.ExecutionRecoveryServiceImpl;
@@ -73,6 +74,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(VersionServiceImpl.class, null);
 		put(CancelExecutionServiceImpl.class, "cancelExecutionService");
         put(QueueListenerImpl.class, "scoreQueueListenenerImpl");
+		put(ScoreEventFactory.class, "scoreEventFactory");
 		put(SplitJoinServiceImpl.class, "splitJoinService");
 		put(ExecutionRecoveryServiceImpl.class, null);
         put(MessageRecoveryServiceImpl.class, null);
