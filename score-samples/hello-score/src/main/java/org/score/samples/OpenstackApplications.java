@@ -10,6 +10,7 @@ import com.hp.score.events.ScoreEventListener;
 import org.apache.log4j.Logger;
 import org.score.samples.openstack.actions.MatchType;
 import org.score.samples.openstack.actions.NavigationMatcher;
+import org.score.samples.openstack.actions.OOActionRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -56,7 +57,7 @@ public class OpenstackApplications {
 
 		builder.addStep("org.score.samples.openstack.actions.HttpClientPostMock", "post", navigationMatchers, "2");
 
-		navigationMatchers = new ArrayList<>(); // doesnt work if using the same reference
+		navigationMatchers = new ArrayList<>();
 		navigationMatchers.add(new NavigationMatcher(MatchType.COMPARE_EQUAL, "result", "400", "2"));
 
 		builder.addStep("org.score.samples.openstack.actions.HttpClientSendEmailMock", "sendEmail", navigationMatchers, "2");
@@ -69,8 +70,8 @@ public class OpenstackApplications {
 
 		Map<String, Serializable> executionContext = new HashMap<>();
 		//for post
-		executionContext.put("username", "userTest");
-		executionContext.put("password", "passTest");
+		//executionContext.put("username", "userTest");
+		//executionContext.put("password", "passTest");
 		executionContext.put("host", "hostTest");
 		executionContext.put("url", "urlTest");
 		//for sendEmail
@@ -96,13 +97,14 @@ public class OpenstackApplications {
 	}
 
 	private void registerEventListeners() {
+		//register listener for action runtime events
 		Set<String> handlerTypes = new HashSet<>();
-		handlerTypes.add("type1");
+		handlerTypes.add(OOActionRunner.ACTION_RUNTIME_EVENT_TYPE);
 		registerEventListener(handlerTypes);
 
+		//register listener for action exception events
 		handlerTypes = new HashSet<>();
-		handlerTypes.add("type1");
-		handlerTypes.add("type2");
+		handlerTypes.add(OOActionRunner.ACTION_EXCEPTION_EVENT_TYPE);
 		registerEventListener(handlerTypes);
 
 		//handler test for score internal events
