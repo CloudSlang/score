@@ -54,7 +54,7 @@ public class QueueListenerImplTest {
 	}
 
 	@Test
-	public void testEventsNotThrownWhenNoMessages() {
+	public void testOnTerminatedWhenNoMessages() {
 		List<ExecutionMessage> messages = new ArrayList<>();
 		queueListener.onTerminated(messages);
 
