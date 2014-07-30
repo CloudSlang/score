@@ -50,7 +50,7 @@ public class OpenstackApplications {
 		List<NavigationMatcher> navigationMatchers = new ArrayList<>();
 
 		navigationMatchers.add(new NavigationMatcher(MatchType.COMPARE_EQUAL, "result", "200", "1"));
-		//navigationMatchers.add(new NavigationMatcher(MatchType.COMPARE_NOT_EQUAL, "result", "200", "2"));y
+		//navigationMatchers.add(new NavigationMatcher(MatchType.COMPARE_NOT_EQUAL, "result", "200", "2"));
 
 
 		builder.addStep(0L, "org.score.samples.openstack.actions.HttpClientPostMock", "post", navigationMatchers, "2");
@@ -60,9 +60,7 @@ public class OpenstackApplications {
 
 		builder.addStep(1L, "org.score.samples.openstack.actions.HttpClientSendEmailMock", "sendEmail", navigationMatchers, "2");
 
-		navigationMatchers = null;
-
-		builder.addStep(2L, "org.score.samples.openstack.actions.ReturnStepActions", "successStepAction", navigationMatchers, "2");
+		builder.addReturnStep(2L);
 
 		ExecutionPlan executionPlan = builder.getExecutionPlan();
 
@@ -132,7 +130,6 @@ public class OpenstackApplications {
 
 	private void registerScoreEventListener() {
 		Set<String> handlerTypes = new HashSet<>();
-		handlerTypes = new HashSet<>();
 		handlerTypes.add("FINISHED");
 		handlerTypes.add("ERROR");
 		handlerTypes.add("CANCELLED");

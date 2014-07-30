@@ -15,10 +15,7 @@ public class ReturnStepActions {
 
 	@SuppressWarnings("unused") //todo test when method will be finished
 	public Map<String, String> successStepAction() {
-		logger.info("This is a return step action");
-
-		//Map<String, String> returnMap = new HashMap<>();
-		//returnMap.put("nextStep", "null");
+		logger.info("This is a success step action");
 		return new HashMap<>();
 	}
 }
