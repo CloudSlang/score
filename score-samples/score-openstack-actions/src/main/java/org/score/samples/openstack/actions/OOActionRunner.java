@@ -51,8 +51,9 @@ public class OOActionRunner {
 	}
 
 	private void mergeBackResults(Map<String, Serializable> executionContext, ExecutionRuntimeServices executionRuntimeServices, String methodName, Map<String, String> results) {
+		String resultString = results != null ? results.toString() : "";
 		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Method \"" + methodName + "\" invoked.." +
-				" Attempting to merge back results in the Execution Context");
+				" Attempting to merge back results: " + resultString);
 
 		//merge back the results of the action in the flow execution context
 		doMerge(executionContext, results);
