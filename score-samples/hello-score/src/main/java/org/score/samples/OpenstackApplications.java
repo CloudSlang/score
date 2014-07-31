@@ -61,7 +61,7 @@ public class OpenstackApplications {
 
 		builder.addStep(1L, "org.score.samples.openstack.actions.HttpClientSendEmailMock", "sendEmail", navigationMatchers);
 
-		builder.addFinalStep(2L, "org.score.samples.openstack.actions.ReturnStepActions", "successStepAction");
+		builder.addFinalStep(2L, "org.score.samples.openstack.actions.FinalStepActions", "successStepAction");
 
 		ExecutionPlan executionPlan = builder.getExecutionPlan();
 
