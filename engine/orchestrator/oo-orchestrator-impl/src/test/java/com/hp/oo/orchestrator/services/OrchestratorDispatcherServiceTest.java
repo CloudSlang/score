@@ -1,6 +1,7 @@
 package com.hp.oo.orchestrator.services;
 
 import com.hp.oo.engine.node.entities.WorkerNode;
+import com.hp.oo.engine.node.services.WorkerLockService;
 import com.hp.oo.engine.node.services.WorkerNodeService;
 import com.hp.oo.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.orchestrator.entities.Message;
@@ -44,6 +45,9 @@ public class OrchestratorDispatcherServiceTest {
     WorkerNodeService workerNodeService;
 
     @Mock
+    WorkerLockService workerLockService;
+
+    @Mock
     private com.hp.oo.engine.queue.services.QueueDispatcherService queueDispatcher;
 
     @Mock
@@ -68,7 +72,7 @@ public class OrchestratorDispatcherServiceTest {
         when(workerNodeService.readByUUID(anyString())).thenReturn(node);
 
         orchestratorDispatcherService.dispatch(messages, newBulkNumber, uuid);
-
+        Mockito.verify(workerLockService, times(1)).lock(uuid);
         Mockito.verify(queueDispatcher, times(1)).dispatch(anyList());
         Mockito.verify(workerNodeService, times(1)).updateBulkNumber(uuid, newBulkNumber);
     }
@@ -86,7 +90,7 @@ public class OrchestratorDispatcherServiceTest {
         when(workerNodeService.readByUUID(anyString())).thenReturn(node);
 
         orchestratorDispatcherService.dispatch(messages, newBulkNumber, uuid);
-
+        Mockito.verify(workerLockService, times(1)).lock(uuid);
         Mockito.verify(queueDispatcher, times(1)).dispatch(anyList());
         Mockito.verify(workerNodeService, times(1)).updateBulkNumber(uuid, newBulkNumber);
     }
@@ -105,7 +109,7 @@ public class OrchestratorDispatcherServiceTest {
         when(workerNodeService.readByUUID(anyString())).thenReturn(node);
 
         orchestratorDispatcherService.dispatch(messages, newBulkNumber, uuid);
-
+        Mockito.verify(workerLockService, times(1)).lock(uuid);
         Mockito.verify(queueDispatcher, times(0)).dispatch(anyList());
         Mockito.verify(workerNodeService, times(0)).updateBulkNumber(uuid, newBulkNumber);
     }
