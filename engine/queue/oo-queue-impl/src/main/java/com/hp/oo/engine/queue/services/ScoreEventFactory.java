@@ -17,6 +17,12 @@ import java.util.Map;
 @Component
 public class ScoreEventFactory {
 
+//	@Autowired
+//	private PauseResumeService pauseResumeService;
+
+//	@Autowired
+//	private OrchestratorService orchestratorService;
+
 	ScoreEvent createFinishedEvent(Execution execution) {
 		String eventType = EventConstants.SCORE_FINISHED_EVENT;
 		Serializable eventData = createFinishedEventData(execution);
@@ -69,5 +75,34 @@ public class ScoreEventFactory {
 	private boolean isBranchNewMechanism(Execution execution) {
 		return execution.isBranch() && execution.isNewBranchMechanism();
 	}
+
+	public ScoreEvent createNoWorkerEvent(Execution execution) {
+		String eventType = EventConstants.SCORE_NO_WORKER_FAILURE_EVENT;
+		Serializable eventData = createNoWorkerFailureEventData(execution);
+		return new ScoreEvent(eventType, eventData);
+	}
+
+	private Serializable createNoWorkerFailureEventData(Execution execution) {
+//		String flowUuid = extractFlowUuid(execution.getRunningExecutionPlanId());
+//		Long pauseId = extractPauseId(execution.getExecutionId(), execution.getBranchId());
+
+		Map<String, Serializable> eventData = new HashMap<>();
+		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, execution.getSystemContext());
+		eventData.put(ExecutionConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
+		eventData.put(ExecutionConstants.BRANCH_ID, execution.getBranchId());
+		eventData.put(ExecutionConstants.RUNNING_EXECUTION_PLAN_ID, execution.getRunningExecutionPlanId());
+//		eventData.put(ExecutionConstants.FLOW_UUID, flowUuid);
+//		eventData.put(EventConstants.PAUSE_ID, pauseId);
+		return (Serializable) eventData;
+	}
+
+//	private String extractFlowUuid(Long runningExecutionPlanId) {
+//		return orchestratorService.getFlowUuidByRunningExecutionPlanId(runningExecutionPlanId);
+//	}
+
+//	private Long extractPauseId(Long executionId, String branchId) {
+//		ExecutionSummary executionSummary = pauseResumeService.readPausedExecution(executionId, branchId);
+//		return executionSummary.getExecutionId()
+//	}
 
 }

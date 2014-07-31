@@ -41,6 +41,9 @@ public class QueueListenerImpl implements QueueListener {
 	@Autowired
 	private ScoreEventFactory scoreEventFactory;
 
+//	@Autowired
+//	private PauseResumeService pauseResumeService;
+
 	@Override
 	public void onEnqueue(List<ExecutionMessage> messages, int queueSize) {
 		if (logger.isDebugEnabled()) {
@@ -145,11 +148,28 @@ public class QueueListenerImpl implements QueueListener {
 		Execution execution;
 		for (ExecutionMessage executionMessage : messages) {
 			execution = extractExecution(executionMessage);
-			if (isBranch(execution)) {
+			if (failedBecauseNoWorker(executionMessage)) {
+//				pauseExecution(execution);
+			} else if (isBranch(execution)) {
 				finishBranchExecution(execution);
 			}
 		}
 	}
+
+//	private void pauseExecution(Execution execution) {
+//		String branchId = (String) execution.getSystemContext().get(ExecutionConstants.BRANCH_ID);
+//
+//		ExecutionSummary pe = pauseResumeService.readPausedExecution(execution.getExecutionId(), branchId);
+//
+//		//Check if this execution is not paused already (by user)
+//		if (pe == null) {
+//			pauseResumeService.pauseExecution(execution.getExecutionId(), branchId, PauseReason.NO_WORKERS_IN_GROUP);
+//			pauseResumeService.writeExecutionObject(execution.getExecutionId(), branchId, execution);
+//		} else {
+//			//If yes - just write the object
+//			pauseResumeService.writeExecutionObject(execution.getExecutionId(), branchId, execution);
+//		}
+//	}
 
 	private ScoreEvent[] createFailureEvents(List<ExecutionMessage> messages) {
 		Execution execution;
@@ -157,7 +177,7 @@ public class QueueListenerImpl implements QueueListener {
 		for (ExecutionMessage executionMessage : messages) {
 			execution = extractExecution(executionMessage);
 			if (failedBecauseNoWorker(executionMessage)) {
-				//todo send failed-no-worker event
+				events.add(scoreEventFactory.createNoWorkerEvent(execution));
 			} else if (isBranch(execution)) {
 				events.add(scoreEventFactory.createFailedBranchEvent(execution));
 			} else {
