@@ -40,8 +40,6 @@ public class HttpClientPostMock {
 		returnMap.put("host", host);
 		returnMap.put("result", "200");
 
-		
-
 		return returnMap;
 	}
 }

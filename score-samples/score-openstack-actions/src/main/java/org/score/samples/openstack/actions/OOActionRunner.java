@@ -1,7 +1,6 @@
 package org.score.samples.openstack.actions;
 
 import com.hp.score.lang.ExecutionRuntimeServices;
-
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.apache.log4j.Logger;
@@ -170,6 +169,4 @@ public class OOActionRunner {
 			executionContext.putAll(results);
 		}
 	}
-
-
 }

@@ -10,10 +10,9 @@ import java.util.Map;
  *
  * @author Bonczidai Levente
  */
-public class ReturnStepActions {
-	private final static Logger logger = Logger.getLogger(ReturnStepActions.class);
+public class FinalStepActions {
+	private final static Logger logger = Logger.getLogger(FinalStepActions.class);
 
-	@SuppressWarnings("unused") //todo test when method will be finished
 	public Map<String, String> successStepAction() {
 		logger.info("This is a success step action");
 		return new HashMap<>();

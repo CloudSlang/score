@@ -32,7 +32,6 @@ import java.util.Set;
 public class OpenstackApplications {
 	private final static Logger logger = Logger.getLogger(OpenstackApplications.class);
 	private ApplicationContext context;
-	private Long executionID;
 
 	@Autowired
 	private Score score;
@@ -46,13 +45,13 @@ public class OpenstackApplications {
 		app.start();
 	}
 
+	@SuppressWarnings("unchecked")
 	private void start() {
 		ExecutionPlanBuilder builder = new ExecutionPlanBuilder();
 		List<NavigationMatcher> navigationMatchers = new ArrayList<>();
 
 		navigationMatchers.add(new NavigationMatcher(MatchType.EQUAL, "result", "200", 1L));
 		navigationMatchers.add(new NavigationMatcher(MatchType.DEFAULT, 2L));
-
 
 		builder.addStep(0L, "org.score.samples.openstack.actions.HttpClientPostMock", "post", navigationMatchers);
 
@@ -64,14 +63,12 @@ public class OpenstackApplications {
 
 		builder.addFinalStep(2L, "org.score.samples.openstack.actions.ReturnStepActions", "successStepAction");
 
-
-
 		ExecutionPlan executionPlan = builder.getExecutionPlan();
 
 		Map<String, Serializable> executionContext = new HashMap<>();
 		prepareExecutionContext(executionContext);
 
-		executionID = score.trigger(executionPlan, executionContext);
+		score.trigger(executionPlan, executionContext);
 	}
 
 	private void prepareExecutionContext(Map<String, Serializable> executionContext) {
@@ -116,9 +113,7 @@ public class OpenstackApplications {
 		eventBus.subscribe(new ScoreEventListener() {
 			@Override
 			public void onEvent(ScoreEvent event) {
-				logger.info("Listener " + this.toString() + " invoked on type: " + event.getEventType() + " with data: " + event.getData());
-				logger.info("Attempting to cancel the execution");
-				score.cancelExecution(executionID);
+				logListenerEvent(event);
 			}
 		}, handlerTypes);
 	}
@@ -127,7 +122,7 @@ public class OpenstackApplications {
 		eventBus.subscribe(new ScoreEventListener() {
 			@Override
 			public void onEvent(ScoreEvent event) {
-				logger.info("Listener " + this.toString() + " invoked on type: " + event.getEventType() + " with data: " + event.getData());
+				logListenerEvent(event);
 			}
 		}, handlerTypes);
 	}
@@ -140,9 +135,13 @@ public class OpenstackApplications {
 		eventBus.subscribe(new ScoreEventListener() {
 			@Override
 			public void onEvent(ScoreEvent event) {
-				logger.info("Listener " + this.toString() + " invoked on type: " + event.getEventType() + " with data: " + event.getData());
+				logListenerEvent(event);
 				closeContext();
 			}
 		}, handlerTypes);
+	}
+
+	private void logListenerEvent(ScoreEvent event) {
+		logger.info("Event " + event.getEventType() + " occurred: " + event.getData());
 	}
 }
