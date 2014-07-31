@@ -3,8 +3,12 @@ package org.score.samples.openstack.actions;
 import java.io.Serializable;
 
 /**
- * Created by lesant on 7/29/2014.
+ * Date: 7/29/2014.
+ *
+ * @author lesant
  */
+
+
 public class NavigationMatcher<T> implements Serializable {
 
 	private MatchType matchType;
@@ -32,25 +36,17 @@ public class NavigationMatcher<T> implements Serializable {
 	public MatchType getMatchType() {
 		return matchType;
 	}
-	public void setMatchType(MatchType matchType) {
-		this.matchType = matchType;
-	}
+
 	public String getContextKey() {
 		return contextKey;
 	}
-	public void setContextKey(String contextKey) {
-		this.contextKey = contextKey;
-	}
+
 	public T getCompareArg() {
 		return compareArg;
 	}
-	public void setCompareArg(T compareArg) {
-		this.compareArg = compareArg;
-	}
+
 	public Long getNextStepId() {
 		return nextStepId;
 	}
-	public void setNextStepId(Long nextStepId) {
-		this.nextStepId = nextStepId;
-	}
+
 }

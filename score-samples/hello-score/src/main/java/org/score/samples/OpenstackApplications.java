@@ -51,20 +51,20 @@ public class OpenstackApplications {
 		List<NavigationMatcher> navigationMatchers = new ArrayList<>();
 
 		navigationMatchers.add(new NavigationMatcher(MatchType.EQUAL, "result", "200", 1L));
-		navigationMatchers.add(new NavigationMatcher(MatchType.NONE, 2L));
-		//navigationMatchers.add(new NavigationMatcher(MatchType.NOT_EQUAL, "result", "200", 2L));
+		navigationMatchers.add(new NavigationMatcher(MatchType.DEFAULT, 2L));
+
 
 		builder.addStep(0L, "org.score.samples.openstack.actions.HttpClientPostMock", "post", navigationMatchers);
 
 		navigationMatchers = new ArrayList<>(); // doesnt work if using the same reference
 		navigationMatchers.add(new NavigationMatcher(MatchType.EQUAL, "result", "400", 2L));
-		navigationMatchers.add(new NavigationMatcher(MatchType.NONE, 2L));
+		navigationMatchers.add(new NavigationMatcher(MatchType.DEFAULT, 2L));
 
 		builder.addStep(1L, "org.score.samples.openstack.actions.HttpClientSendEmailMock", "sendEmail", navigationMatchers);
 
-		builder.addReturnStep(2L, "org.score.samples.openstack.actions.ReturnStepActions", "successStepAction");
+		builder.addFinalStep(2L, "org.score.samples.openstack.actions.ReturnStepActions", "successStepAction");
 
-		//builder.addStep("org.score.samples.openstack.actions.ReturnStepActions", "successStepAction", navigationMatchers);
+
 
 		ExecutionPlan executionPlan = builder.getExecutionPlan();
 

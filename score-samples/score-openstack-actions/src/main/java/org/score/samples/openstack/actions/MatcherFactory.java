@@ -1,20 +1,21 @@
 package org.score.samples.openstack.actions;
 
+import org.apache.commons.lang.Validate;
 import org.hamcrest.Matcher;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.anything;
-import static org.hamcrest.CoreMatchers.nullValue;
-
-
 
 
 /**
- * Created by lesant on 7/29/2014.
+ * Date: 7/29/2014.
+ *
+ * @author lesant
  */
 public class MatcherFactory {
 	public static <T> Matcher<T> getMatcher(MatchType matchType, T compareArg){
-		Matcher<T> matcher;
+		Validate.notNull(matchType, "Match type cannot be null.");
+		Matcher<T> matcher = anything();
 		switch (matchType) {
 
 			case EQUAL:
@@ -23,12 +24,9 @@ public class MatcherFactory {
 			case NOT_EQUAL:
 				matcher = not(compareArg);
 				break;
-			case NONE:
-				matcher = anything();
+			case DEFAULT:
 				break;
-			default:
-				matcher = nullValue();
-				break;
+
 		}
 
 		return matcher;

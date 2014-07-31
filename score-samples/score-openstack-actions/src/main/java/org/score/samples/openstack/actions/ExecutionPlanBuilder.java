@@ -44,7 +44,7 @@ public class ExecutionPlanBuilder {
 		actionData.put(ACTION_METHOD_KEY, actionMethodName);
 		step.setActionData(actionData);
 
-		step.setNavigation(new ControlActionMetadata("org.score.samples.openstack.actions.OOActionRunner", "navigate"));
+		step.setNavigation(new ControlActionMetadata("org.score.samples.openstack.actions.OOActionNavigator", "navigate"));
 		Map<String, Object> navigationData = new HashMap<>(2);
 		navigationData.put("navigationMatchers", navigationMatchers);
 
@@ -57,7 +57,7 @@ public class ExecutionPlanBuilder {
 		return step.getExecStepId();
 	}
 
-	public Long addReturnStep(Long stepId, String actionClassName, String actionMethodName) {
+	public Long addFinalStep(Long stepId, String actionClassName, String actionMethodName) {
 		return addStep(stepId, actionClassName, actionMethodName, null);
 	}
 

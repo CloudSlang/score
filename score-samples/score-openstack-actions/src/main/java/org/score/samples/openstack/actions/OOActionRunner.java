@@ -1,9 +1,7 @@
 package org.score.samples.openstack.actions;
 
 import com.hp.score.lang.ExecutionRuntimeServices;
-import org.hamcrest.Matcher;
-import org.score.samples.openstack.actions.MatcherFactory;
-import org.score.samples.openstack.actions.NavigationMatcher;
+
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.apache.log4j.Logger;
@@ -11,7 +9,7 @@ import org.apache.log4j.Logger;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
+
 import java.util.Map;
 
 /**
@@ -173,27 +171,5 @@ public class OOActionRunner {
 		}
 	}
 
-	//todo move to another class
-	public <T> Long navigate (Map<String, Serializable> executionContext, List<NavigationMatcher> navigationMatchers) {
-		logger.info("navigate method invocation");
 
-		if (navigationMatchers == null) {
-			return null;
-		}
-
-		for(NavigationMatcher navigationMatcher : navigationMatchers)
-		{
-			Serializable response = executionContext.get(navigationMatcher.getContextKey());
-
-
-			Matcher matcher = MatcherFactory.getMatcher(navigationMatcher.getMatchType(), navigationMatcher.getCompareArg());
-			if(matcher.matches(response)){
-				return navigationMatcher.getNextStepId();
-			}
-		}
-
-		return null;
-
-		//return navigationMatcher.getDefaultNextStepId();
-	}
 }

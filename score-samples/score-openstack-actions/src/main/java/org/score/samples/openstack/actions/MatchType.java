@@ -1,5 +1,10 @@
 package org.score.samples.openstack.actions;
 
+/**
+ * Date: 7/29/2014.
+ *
+ * @author lesant
+ */
 
 public enum MatchType {
     CONTAINS,
@@ -7,7 +12,7 @@ public enum MatchType {
     NOT_EXACT,
     ALL_WORDS,
     AT_LEAST_ONE,
-    NONE,
+	DEFAULT,
     ONE,
     BEGINS_WITH,
     ENDS_WITH,
