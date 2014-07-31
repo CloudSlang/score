@@ -58,10 +58,11 @@ public class OpenstackApplications {
 
 		navigationMatchers = new ArrayList<>(); // doesnt work if using the same reference
 		navigationMatchers.add(new NavigationMatcher(MatchType.EQUAL, "result", "400", 2L));
+		navigationMatchers.add(new NavigationMatcher(MatchType.NONE, 2L));
 
 		builder.addStep(1L, "org.score.samples.openstack.actions.HttpClientSendEmailMock", "sendEmail", navigationMatchers);
 
-		builder.addReturnStep(2L);
+		builder.addReturnStep(2L, "org.score.samples.openstack.actions.ReturnStepActions", "successStepAction");
 
 		//builder.addStep("org.score.samples.openstack.actions.ReturnStepActions", "successStepAction", navigationMatchers);
 

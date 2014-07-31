@@ -174,7 +174,7 @@ public class OOActionRunner {
 	}
 
 	//todo move to another class
-	public <T> Long navigate (Map<String, Serializable> executionContext, List<NavigationMatcher> navigationMatchers, Long defaultNextStepId) {
+	public <T> Long navigate (Map<String, Serializable> executionContext, List<NavigationMatcher> navigationMatchers) {
 		logger.info("navigate method invocation");
 
 		if (navigationMatchers == null) {
@@ -192,7 +192,7 @@ public class OOActionRunner {
 			}
 		}
 
-		return defaultNextStepId;
+		return null;
 
 		//return navigationMatcher.getDefaultNextStepId();
 	}

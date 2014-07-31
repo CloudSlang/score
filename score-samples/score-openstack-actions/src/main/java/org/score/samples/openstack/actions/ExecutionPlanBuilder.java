@@ -57,8 +57,8 @@ public class ExecutionPlanBuilder {
 		return step.getExecStepId();
 	}
 
-	public Long addReturnStep(Long stepId) {
-		return addStep(stepId, "org.score.samples.openstack.actions.ReturnStepActions", "successStepAction", null, "0L");
+	public Long addReturnStep(Long stepId, String actionClassName, String actionMethodName) {
+		return addStep(stepId, actionClassName, actionMethodName, null);
 	}
 
 	@SuppressWarnings("unused")

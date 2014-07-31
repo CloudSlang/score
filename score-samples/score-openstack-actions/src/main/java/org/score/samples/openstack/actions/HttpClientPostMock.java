@@ -37,7 +37,7 @@ public class HttpClientPostMock {
 		returnMap.put("password", password);
 		returnMap.put("url", url);
 		returnMap.put("host", host);
-		returnMap.put("result", "200");
+		returnMap.put("result", "201");
 
 		
 
