@@ -34,8 +34,7 @@ public class ExecutionPlanBuilder {
 			Long stepId,
 			String actionClassName,
 			String actionMethodName,
-			List<NavigationMatcher> navigationMatchers,
-			String defaultNextStepId) {
+			List<NavigationMatcher> navigationMatchers) {
 		ExecutionStep step = new ExecutionStep(stepId);
 
 		step.setAction(new ControlActionMetadata("org.score.samples.openstack.actions.OOActionRunner", "run"));
@@ -48,7 +47,6 @@ public class ExecutionPlanBuilder {
 		step.setNavigation(new ControlActionMetadata("org.score.samples.openstack.actions.OOActionRunner", "navigate"));
 		Map<String, Object> navigationData = new HashMap<>(2);
 		navigationData.put("navigationMatchers", navigationMatchers);
-		navigationData.put("defaultNextStepId", defaultNextStepId);
 
 		step.setNavigationData(navigationData);
 

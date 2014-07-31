@@ -1,5 +1,6 @@
 package org.score.samples;
 
+
 import org.score.samples.openstack.actions.ExecutionPlanBuilder;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.Score;
@@ -49,18 +50,20 @@ public class OpenstackApplications {
 		ExecutionPlanBuilder builder = new ExecutionPlanBuilder();
 		List<NavigationMatcher> navigationMatchers = new ArrayList<>();
 
-		navigationMatchers.add(new NavigationMatcher(MatchType.COMPARE_EQUAL, "result", "200", "1"));
-		//navigationMatchers.add(new NavigationMatcher(MatchType.COMPARE_NOT_EQUAL, "result", "200", "2"));
+		navigationMatchers.add(new NavigationMatcher(MatchType.EQUAL, "result", "200", 1L));
+		navigationMatchers.add(new NavigationMatcher(MatchType.NONE, 2L));
+		//navigationMatchers.add(new NavigationMatcher(MatchType.NOT_EQUAL, "result", "200", 2L));
 
+		builder.addStep(0L, "org.score.samples.openstack.actions.HttpClientPostMock", "post", navigationMatchers);
 
-		builder.addStep(0L, "org.score.samples.openstack.actions.HttpClientPostMock", "post", navigationMatchers, "2");
+		navigationMatchers = new ArrayList<>(); // doesnt work if using the same reference
+		navigationMatchers.add(new NavigationMatcher(MatchType.EQUAL, "result", "400", 2L));
 
-		navigationMatchers = new ArrayList<>();
-		navigationMatchers.add(new NavigationMatcher(MatchType.COMPARE_EQUAL, "result", "400", "2"));
-
-		builder.addStep(1L, "org.score.samples.openstack.actions.HttpClientSendEmailMock", "sendEmail", navigationMatchers, "2");
+		builder.addStep(1L, "org.score.samples.openstack.actions.HttpClientSendEmailMock", "sendEmail", navigationMatchers);
 
 		builder.addReturnStep(2L);
+
+		//builder.addStep("org.score.samples.openstack.actions.ReturnStepActions", "successStepAction", navigationMatchers);
 
 		ExecutionPlan executionPlan = builder.getExecutionPlan();
 

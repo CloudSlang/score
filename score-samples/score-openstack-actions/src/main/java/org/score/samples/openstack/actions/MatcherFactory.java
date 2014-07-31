@@ -7,20 +7,25 @@ import static org.hamcrest.CoreMatchers.anything;
 import static org.hamcrest.CoreMatchers.nullValue;
 
 
+
+
 /**
  * Created by lesant on 7/29/2014.
  */
 public class MatcherFactory {
-	public Matcher getMatcher(MatchType matchType, String compareArg){
-		Matcher matcher = null;
+	public static <T> Matcher<T> getMatcher(MatchType matchType, T compareArg){
+		Matcher<T> matcher;
 		switch (matchType) {
 
-			case COMPARE_EQUAL:
-				matcher = equalTo(Integer.parseInt(compareArg));
+			case EQUAL:
+				matcher = equalTo(compareArg);
 				break;
-			case COMPARE_NOT_EQUAL:
-				matcher = not(Integer.parseInt(compareArg));
-
+			case NOT_EQUAL:
+				matcher = not(compareArg);
+				break;
+			case NONE:
+				matcher = anything();
+				break;
 			default:
 				matcher = nullValue();
 				break;

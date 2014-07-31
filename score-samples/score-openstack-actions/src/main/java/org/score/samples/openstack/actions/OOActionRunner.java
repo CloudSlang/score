@@ -1,6 +1,9 @@
 package org.score.samples.openstack.actions;
 
 import com.hp.score.lang.ExecutionRuntimeServices;
+import org.hamcrest.Matcher;
+import org.score.samples.openstack.actions.MatcherFactory;
+import org.score.samples.openstack.actions.NavigationMatcher;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.apache.log4j.Logger;
@@ -170,25 +173,26 @@ public class OOActionRunner {
 		}
 	}
 
-	public Long navigate(Map<String, Serializable> executionContext, List<NavigationMatcher> navigationMatchers, String defaultNextStepId) {
+	//todo move to another class
+	public <T> Long navigate (Map<String, Serializable> executionContext, List<NavigationMatcher> navigationMatchers, Long defaultNextStepId) {
 		logger.info("navigate method invocation");
 
 		if (navigationMatchers == null) {
 			return null;
 		}
-		MatcherFactory matcherFactory = new MatcherFactory();
-		for (NavigationMatcher navigationMatcher : navigationMatchers) {
-			Serializable response = executionContext.get(navigationMatcher.getContextKey());
-			if (response != null) {
-				Integer intResponse = Integer.parseInt(response.toString());
 
-				if (matcherFactory.getMatcher(navigationMatcher.getMatchType(), navigationMatcher.getCompareArg()).matches(intResponse)) {
-					return Long.parseLong(navigationMatcher.getNextStepId());
-				}
+		for(NavigationMatcher navigationMatcher : navigationMatchers)
+		{
+			Serializable response = executionContext.get(navigationMatcher.getContextKey());
+
+
+			Matcher matcher = MatcherFactory.getMatcher(navigationMatcher.getMatchType(), navigationMatcher.getCompareArg());
+			if(matcher.matches(response)){
+				return navigationMatcher.getNextStepId();
 			}
 		}
 
-		return Long.parseLong(defaultNextStepId);
+		return defaultNextStepId;
 
 		//return navigationMatcher.getDefaultNextStepId();
 	}
