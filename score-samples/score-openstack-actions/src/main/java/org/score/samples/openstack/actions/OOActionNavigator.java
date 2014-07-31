@@ -15,24 +15,23 @@ import java.util.Map;
  *
  * @author lesant
  */
-
 @SuppressWarnings("unused")
 public class OOActionNavigator {
-	private final static Logger logger = Logger.getLogger(OOActionRunner.class);
-	public final static String ACTION_EXCEPTION_EVENT_TYPE = "action_exception_event";
+	private final static Logger logger = Logger.getLogger(OOActionNavigator.class);
 
-	@SuppressWarnings("unused")
 	public <T> Long navigate (Map<String, Serializable> executionContext, List<NavigationMatcher> navigationMatchers, ExecutionRuntimeServices executionRuntimeServices) {
 		logger.info("navigate method invocation");
 
-		if (navigationMatchers == null) {
-			return null;
-		}
+		//check if an exception occurred in run method through events
 		ArrayDeque<ScoreEvent> events = executionRuntimeServices.getEvents();
 		for (ScoreEvent scoreEvent : events) {
-			if (scoreEvent.getEventType().equals(ACTION_EXCEPTION_EVENT_TYPE)) {
+			if (scoreEvent.getEventType().equals(OOActionRunner.ACTION_EXCEPTION_EVENT_TYPE)) {
 				return null;
 			}
+		}
+
+		if (navigationMatchers == null) {
+			return null;
 		}
 
 		for(NavigationMatcher navigationMatcher : navigationMatchers)
