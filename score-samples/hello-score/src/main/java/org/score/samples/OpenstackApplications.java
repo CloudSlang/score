@@ -45,20 +45,19 @@ public class OpenstackApplications {
 		app.start();
 	}
 
-	@SuppressWarnings("unchecked")
 	private void start() {
 		ExecutionPlanBuilder builder = new ExecutionPlanBuilder();
-		List<NavigationMatcher> navigationMatchers = new ArrayList<>();
+		List<NavigationMatcher<Serializable>> navigationMatchers = new ArrayList<>();
 
-		navigationMatchers.add(new NavigationMatcher(MatchType.EQUAL, "returnCode", "0", 1L)); // how will we know the key
-		navigationMatchers.add(new NavigationMatcher(MatchType.DEFAULT, 2L));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, "returnCode", "0", 1L)); // how will we know the key
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, 2L));
 
 		//builder.addStep(0L, "org.score.samples.openstack.actions.HttpClientPostMock", "post", navigationMatchers);
 		builder.addStep(0L, "org.score.content.httpclient.HttpClientAction", "execute", navigationMatchers);
 
 				navigationMatchers = new ArrayList<>(); // doesnt work if using the same reference
-		navigationMatchers.add(new NavigationMatcher(MatchType.EQUAL, "result", "400", 2L));
-		navigationMatchers.add(new NavigationMatcher(MatchType.DEFAULT, 2L));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, "result", "400", 2L));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, 2L));
 
 		builder.addStep(1L, "org.score.samples.openstack.actions.HttpClientSendEmailMock", "sendEmail", navigationMatchers);
 

@@ -4,6 +4,7 @@ import com.hp.score.api.ControlActionMetadata;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ExecutionStep;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,7 @@ public class ExecutionPlanBuilder {
 			Long stepId,
 			String actionClassName,
 			String actionMethodName,
-			List<NavigationMatcher> navigationMatchers) {
+			List<NavigationMatcher<Serializable>> navigationMatchers) {
 		ExecutionStep step = new ExecutionStep(stepId);
 
 		step.setAction(new ControlActionMetadata("org.score.samples.openstack.actions.OOActionRunner", "run"));

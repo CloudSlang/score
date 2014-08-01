@@ -19,7 +19,7 @@ import java.util.Map;
 public class OOActionNavigator {
 	private final static Logger logger = Logger.getLogger(OOActionNavigator.class);
 
-	public <T> Long navigate (Map<String, Serializable> executionContext, List<NavigationMatcher> navigationMatchers, ExecutionRuntimeServices executionRuntimeServices) {
+	public <T> Long navigate (Map<String, Serializable> executionContext, List<NavigationMatcher<Serializable>> navigationMatchers, ExecutionRuntimeServices executionRuntimeServices) {
 		logger.info("navigate method invocation");
 
 		//check if an exception occurred in run method through events

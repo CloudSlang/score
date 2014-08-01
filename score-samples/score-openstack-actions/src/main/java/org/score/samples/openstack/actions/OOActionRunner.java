@@ -74,7 +74,7 @@ public class OOActionRunner {
 		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Results merged back in the Execution Context");
 	}
 
-	private Map<String, String> invokeMethod(ExecutionRuntimeServices executionRuntimeServices, String className, String methodName, Object[] actualParameters) throws InvocationTargetException, IllegalAccessException, InstantiationException {
+	private Map<String, String> invokeMethod(ExecutionRuntimeServices executionRuntimeServices, String className, String methodName, Object[] actualParameters) throws Exception {
 		String invokeMessage = "Attempting to invoke action method \"" + methodName + "\"";
 		invokeMessage += " of class " + className;
 
@@ -168,8 +168,14 @@ public class OOActionRunner {
 	 */
 	@SuppressWarnings("unchecked")
 	private Map<String, String> invokeActionMethod(Method actionMethod, Object instance, Object... parameters)
-			throws InvocationTargetException, IllegalAccessException {
-		return (Map<String, String>) actionMethod.invoke(instance, parameters);
+			throws Exception {
+		Object returnObject = actionMethod.invoke(instance, parameters);
+		Map<String, String> returnMap = (Map<String, String>) returnObject;
+		if (returnMap == null) {
+			throw new Exception("Action method did not return Map<String,String>");
+		} else {
+			return returnMap;
+		}
 	}
 
 	/**
