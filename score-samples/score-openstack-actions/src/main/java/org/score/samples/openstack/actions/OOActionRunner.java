@@ -1,6 +1,8 @@
 package org.score.samples.openstack.actions;
 
 import com.hp.score.lang.ExecutionRuntimeServices;
+import org.score.samples.utility.InputBindingUtility;
+import org.score.samples.utility.InputBindingUtility.BindingConflict;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.apache.log4j.Logger;
@@ -9,6 +11,7 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,11 +45,22 @@ public class OOActionRunner {
 
 			Object[] actualParameters = extractMethodData(executionContext, executionRuntimeServices, className, methodName);
 
+			verifyActionInputs(actualParameters);
+
 			Map<String, String> results = invokeMethod(executionRuntimeServices, className, methodName, actualParameters);
 
 			mergeBackResults(executionContext, executionRuntimeServices, methodName, results);
 		} catch (Exception ex) {
 			executionRuntimeServices.addEvent(ACTION_EXCEPTION_EVENT_TYPE, ex);
+		}
+	}
+
+	private void verifyActionInputs(Object[] actualParameters) throws Exception{
+		Class<?>[] parameterTypes =  actionMethod.getParameterTypes();
+		boolean validParameters = InputBindingUtility.validateParameterArray(parameterTypes, actualParameters);
+		if (!validParameters) {
+			List<BindingConflict> conflicts = InputBindingUtility.getBindingConflicts(parameterTypes, actualParameters);
+			throw new Exception(conflicts.toString());
 		}
 	}
 
