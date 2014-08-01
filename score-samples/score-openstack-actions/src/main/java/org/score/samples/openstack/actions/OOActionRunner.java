@@ -45,7 +45,7 @@ public class OOActionRunner {
 
 			Object[] actualParameters = extractMethodData(executionContext, executionRuntimeServices, className, methodName);
 
-			verifyActionInputs(actualParameters);
+			verifyActionInputs(actualParameters, true);
 
 			Map<String, String> results = invokeMethod(executionRuntimeServices, className, methodName, actualParameters);
 
@@ -55,11 +55,11 @@ public class OOActionRunner {
 		}
 	}
 
-	private void verifyActionInputs(Object[] actualParameters) throws Exception{
+	private void verifyActionInputs(Object[] actualParameters, boolean nullAllowed) throws Exception{
 		Class<?>[] parameterTypes =  actionMethod.getParameterTypes();
-		boolean validParameters = InputBindingUtility.validateParameterArray(parameterTypes, actualParameters);
+		boolean validParameters = InputBindingUtility.validateParameterArray(parameterTypes, actualParameters, nullAllowed);
 		if (!validParameters) {
-			List<BindingConflict> conflicts = InputBindingUtility.getBindingConflicts(parameterTypes, actualParameters);
+			List<BindingConflict> conflicts = InputBindingUtility.getBindingConflicts(parameterTypes, actualParameters, nullAllowed);
 			throw new Exception(conflicts.toString());
 		}
 	}

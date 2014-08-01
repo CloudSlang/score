@@ -11,18 +11,18 @@ import java.util.List;
  * @author Bonczidai Levente
  */
 public class InputBindingUtility {
-	public static boolean validateParameterArray(Class<?>[] types, Object[] values) {
-		List<BindingConflict> conflicts = getBindingConflicts(types, values);
+	public static boolean validateParameterArray(Class<?>[] types, Object[] values, boolean nullAllowed) {
+		List<BindingConflict> conflicts = getBindingConflicts(types, values, nullAllowed);
 		return conflicts.isEmpty();
 	}
 
-	public static List<BindingConflict> getBindingConflicts(Class<?>[] types, Object[] values)
+	public static List<BindingConflict> getBindingConflicts(Class<?>[] types, Object[] values, boolean nullAllowed)
 	{
 		List<BindingConflict> conflicts = new ArrayList<>();
 
 		int values_length = values == null ? 0 : values.length;
 		for (int i = 0; i < values_length; i++) {
-			BindingConflict conflict = verifyValue(types[i], values[i], i);
+			BindingConflict conflict = verifyValue(types[i], values[i], i, nullAllowed);
 			if (conflict != null) {
 				conflicts.add(conflict);
 			}
@@ -31,9 +31,9 @@ public class InputBindingUtility {
 		return conflicts;
 	}
 
-	private static BindingConflict verifyValue(Class<?> expectedClass, Object value, int position) {
+	private static BindingConflict verifyValue(Class<?> expectedClass, Object value, int position, boolean nullAllowed) {
 		BindingConflict bindingConflict = null;
-		if (value == null) {
+		if (!nullAllowed && value == null) {
 			bindingConflict = new BindingConflict(ConflictType.NULL, position);
 		} else {
 			if (!expectedClass.isInstance(value)) {

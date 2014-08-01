@@ -30,6 +30,7 @@
                 <artifactId>commons-httpclient</artifactId>
                 <version>3.1</version>
             </dependency>
+
             <dependency>
                 <groupId>org.score.content</groupId>
                 <artifactId>score-http-client</artifactId>
