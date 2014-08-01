@@ -50,12 +50,13 @@ public class OpenstackApplications {
 		ExecutionPlanBuilder builder = new ExecutionPlanBuilder();
 		List<NavigationMatcher> navigationMatchers = new ArrayList<>();
 
-		navigationMatchers.add(new NavigationMatcher(MatchType.EQUAL, "result", "200", 1L));
+		navigationMatchers.add(new NavigationMatcher(MatchType.EQUAL, "returnCode", "0", 1L)); // how will we know the key
 		navigationMatchers.add(new NavigationMatcher(MatchType.DEFAULT, 2L));
 
-		builder.addStep(0L, "org.score.samples.openstack.actions.HttpClientPostMock", "post", navigationMatchers);
+		//builder.addStep(0L, "org.score.samples.openstack.actions.HttpClientPostMock", "post", navigationMatchers);
+		builder.addStep(0L, "org.score.content.httpclient.HttpClientAction", "execute", navigationMatchers);
 
-		navigationMatchers = new ArrayList<>(); // doesnt work if using the same reference
+				navigationMatchers = new ArrayList<>(); // doesnt work if using the same reference
 		navigationMatchers.add(new NavigationMatcher(MatchType.EQUAL, "result", "400", 2L));
 		navigationMatchers.add(new NavigationMatcher(MatchType.DEFAULT, 2L));
 
@@ -73,14 +74,20 @@ public class OpenstackApplications {
 
 	private void prepareExecutionContext(Map<String, Serializable> executionContext) {
 		//for post
-		executionContext.put("username", "userTest");
-		executionContext.put("password", "passTest");
-		executionContext.put("host", "hostTest");
-		executionContext.put("url", "urlTest");
+//		executionContext.put("username", "userTest");
+//		executionContext.put("password", "passTest");
+//		executionContext.put("host", "hostTest");
+//		executionContext.put("url", "urlTest");
+
+		executionContext.put("url", "http://16.77.61.83:5000/v2.0/tokens");
+		executionContext.put("method", "post");
+		executionContext.put("body", "{\"auth\":{\"passwordCredentials\":{\"username\":\"admin\",\"password\":\"B33f34t3r\"},\"tenantId\":\"612d32e9cac84e27be88828ab9b03383\"}}");
+		executionContext.put("contentType", "application/json");
+
 		//for sendEmail
 		executionContext.put("receiver", "receiverTest");
 		executionContext.put("title", "titleTest");
-		executionContext.put("body", "bodyTest");
+		//executionContext.put("body", "bodyTest");
 	}
 
 	private static OpenstackApplications loadApp() {
