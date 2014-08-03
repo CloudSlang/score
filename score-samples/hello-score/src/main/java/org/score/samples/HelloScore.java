@@ -60,7 +60,7 @@ public class HelloScore {
     private void waitForExecutionToFinish() {
         try {
             synchronized(lock){
-                lock.wait();
+                lock.wait(10000);
             }
         } catch (InterruptedException e) {
             logger.error(e.getStackTrace());

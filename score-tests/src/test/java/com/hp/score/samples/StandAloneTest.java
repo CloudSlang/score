@@ -47,7 +47,7 @@ public class StandAloneTest {
 
     private final static Logger logger = Logger.getLogger(StandAloneTest.class);
 
-    @Test(timeout = 60000)
+    @Test(timeout = 10000)
     public void baseStandAloneTest() {
         new ConsoleControlActions();
         ExecutionPlan executionPlan = createExecutionPlan();
@@ -61,7 +61,7 @@ public class StandAloneTest {
     private void waitForExecutionToFinish() {
         try {
             synchronized(lock){
-                lock.wait();
+                lock.wait(10000);
             }
         } catch (InterruptedException e) {
             logger.error(e.getStackTrace());
