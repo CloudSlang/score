@@ -56,7 +56,7 @@ public class RunningExecutionPlan extends AbstractIdentifiable {
 
         this.executionPlan = (ExecutionPlan) SerializationUtils.clone(executionPlan);
         this.executionPlan.setDependencies(null); //not needed for the RunningExecutionPlan
-        executionPlanZipped = ExecutionPlanCompressUtil.getBytesFromExecutionPlan(executionPlan);
+        executionPlanZipped = ExecutionPlanCompressUtil.getBytesFromExecutionPlan(this.executionPlan);
     }
 
     public String getFlowUUID() {
