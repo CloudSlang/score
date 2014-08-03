@@ -47,7 +47,7 @@ public class StandAloneTest {
 
     private final static Logger logger = Logger.getLogger(StandAloneTest.class);
 
-    @Test(timeout = 10000)
+    @Test(timeout = 20000)
     public void baseStandAloneTest() {
         new ConsoleControlActions();
         ExecutionPlan executionPlan = createExecutionPlan();
