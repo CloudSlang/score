@@ -6,10 +6,10 @@ import com.hp.oo.engine.node.services.WorkerNodeService;
 import com.hp.oo.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.engine.queue.services.QueueDispatcherService;
 import com.hp.oo.engine.queue.services.recovery.MessageRecoveryService;
+import com.hp.oo.orchestrator.services.PauseResumeService;
 import com.hp.oo.orchestrator.services.WorkerDbSupportServiceImpl;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ExecutionStep;
-import com.hp.oo.orchestrator.services.PauseResumeService;
 import com.hp.score.api.Score;
 import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
 import com.hp.score.events.EventBus;
@@ -31,6 +31,7 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -53,6 +54,7 @@ import static org.mockito.Mockito.mock;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = EngineTest.Context.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class EngineTest {
 
     @Autowired

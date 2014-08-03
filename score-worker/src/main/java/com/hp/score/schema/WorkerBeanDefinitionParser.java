@@ -59,7 +59,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 		registerSpringIntegration(parserContext);
 
-//		registerScheduler(DomUtils.getChildElementByTagName(element, "scheduler"), parserContext);
+		registerScheduler(DomUtils.getChildElementByTagName(element, "scheduler"), parserContext);
 
 		return createRootBeanDefinition();
 	}

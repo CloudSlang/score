@@ -12,7 +12,6 @@
 
     <bean id="workerRegistration" class="com.hp.oo.worker.management.WorkerRegistration"/>
 
-
-    <!--<bean class="org.score.samples.controlactions.ConsoleControlActions"/>-->
+    <bean class="org.score.samples.HelloScore" />
 
 </beans>

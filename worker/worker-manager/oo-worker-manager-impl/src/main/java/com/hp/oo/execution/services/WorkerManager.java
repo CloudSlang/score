@@ -1,18 +1,7 @@
 package com.hp.oo.execution.services;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-
+import com.hp.oo.engine.node.services.WorkerNodeService;
+import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +11,17 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 
-import com.hp.oo.engine.node.services.WorkerNodeService;
-import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import java.io.File;
+import java.io.FileFilter;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static ch.lambdaj.Lambda.max;
 import static ch.lambdaj.Lambda.on;
@@ -96,7 +94,7 @@ public class WorkerManager implements ApplicationListener<ApplicationEvent>, End
 					keepAliveFailCount = 0;
 				} catch(Exception e) {
 					keepAliveFailCount++;
-					logger.error("Could not send keep alive to Central, keepAliveFailCount = " + keepAliveFailCount);
+					logger.error("Could not send keep alive to the engine, keepAliveFailCount = " + keepAliveFailCount);
 					if(keepAliveFailCount > KEEP_ALIVE_FAIL_LIMIT) {
 						recoveryManager.doRecovery();
 					}

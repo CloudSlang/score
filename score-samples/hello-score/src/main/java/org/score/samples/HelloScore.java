@@ -4,11 +4,20 @@ import com.hp.score.api.ControlActionMetadata;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ExecutionStep;
 import com.hp.score.api.Score;
+import com.hp.score.events.EventBus;
+import com.hp.score.events.EventConstants;
+import com.hp.score.events.ScoreEvent;
+import com.hp.score.events.ScoreEventListener;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * User: maromg
@@ -16,15 +25,46 @@ import java.util.HashMap;
  */
 public class HelloScore {
 
+    @Autowired
+    private Score score;
+
+    @Autowired
+    private EventBus eventBus;
+
+    private final static Logger logger = Logger.getLogger(HelloScore.class);
+    private ApplicationContext context;
+    private Long executionID;
+    private final Object lock = new Object();
+
     public static void main(String[] args) {
-        ApplicationContext context = loadScore();
-        ExecutionPlan executionPlan = createExecutionPlan();
-        Score score = context.getBean(Score.class);
-        score.trigger(executionPlan);
+        HelloScore app = loadApp();
+        app.registerEventListener();
+        app.start();
+
     }
 
-    private static ApplicationContext loadScore() {
-        return new ClassPathXmlApplicationContext("/META-INF/spring/helloScoreContext.xml");
+    private static HelloScore loadApp() {
+        ApplicationContext context = new ClassPathXmlApplicationContext("/META-INF/spring/helloScoreContext.xml");
+        HelloScore app = context.getBean(HelloScore.class);
+        app.context  = context;
+        return app;
+    }
+
+    private void start() {
+        ExecutionPlan executionPlan = createExecutionPlan();
+        executionID = score.trigger(executionPlan);
+        waitForExecutionToFinish();
+        closeContext();
+    }
+
+    private void waitForExecutionToFinish() {
+        try {
+            synchronized(lock){
+                lock.wait();
+            }
+        } catch (InterruptedException e) {
+            logger.error(e.getStackTrace());
+        }
     }
 
     private static ExecutionPlan createExecutionPlan() {
@@ -49,6 +89,25 @@ public class HelloScore {
         executionPlan.addStep(executionStep2);
 
         return executionPlan;
+    }
+
+    private void registerEventListener() {
+        Set<String> handlerTypes = new HashSet();
+        handlerTypes.add(EventConstants.SCORE_FINISHED_EVENT);
+        handlerTypes.add(EventConstants.SCORE_FAILURE_EVENT);
+        eventBus.subscribe(new ScoreEventListener() {
+            @Override
+            public void onEvent(ScoreEvent event) {
+                logger.info("Listener " + this.toString() + " invoked on type: " + event.getEventType() + " with data: " + event.getData());
+                synchronized (lock) {
+                    lock.notify();
+                }
+            }
+        }, handlerTypes);
+    }
+
+    private void closeContext() {
+        ((ConfigurableApplicationContext) context).close();
     }
 
 }
