@@ -4,7 +4,7 @@ package com.hp.oo.engine.queue.entities;
 import com.hp.oo.engine.node.entities.WorkerNode;
 import com.hp.oo.orchestrator.entities.Message;
 import org.apache.commons.lang.builder.EqualsBuilder;
-import org.codehaus.jackson.annotate.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Arrays;
 import java.util.Date;

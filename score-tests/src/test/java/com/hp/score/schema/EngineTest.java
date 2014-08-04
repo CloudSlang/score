@@ -14,7 +14,7 @@ import com.hp.score.api.Score;
 import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
 import com.hp.score.events.EventBus;
 import liquibase.integration.spring.SpringLiquibase;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hibernate.ejb.HibernatePersistence;
 import org.junit.Test;
 import org.junit.runner.RunWith;

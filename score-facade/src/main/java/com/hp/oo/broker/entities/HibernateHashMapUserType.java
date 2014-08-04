@@ -1,8 +1,9 @@
 package com.hp.oo.broker.entities;
 
-import org.codehaus.jackson.annotate.JsonTypeInfo;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationConfig;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.usertype.UserType;
@@ -71,9 +72,7 @@ public class HibernateHashMapUserType implements UserType {
             ObjectMapper mapper = new ObjectMapper();
             mapper.enableDefaultTyping();
             mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.WRAPPER_OBJECT);
-            SerializationConfig serializationConfig = mapper.getSerializationConfig()
-                    .without(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS);
-            mapper.setSerializationConfig(serializationConfig);
+			mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
             String jsonString;
             try {
                 jsonString = mapper.writeValueAsString(aObject);
