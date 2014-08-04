@@ -108,8 +108,6 @@ public class SimpleExecutionRunnableTest {
         SimpleExecutionRunnable simpleExecutionRunnable = new SimpleExecutionRunnable(executionService, outBuffer,
                 inBuffer, converter, endExecutionCallback, queueStateIdGenerator, "stam",workerConfigurationService);
 
-        simpleExecutionRunnable.setRecoveryFlag(new AtomicBoolean(false));
-
         simpleExecutionRunnable.setExecutionMessage(new ExecutionMessage());
         simpleExecutionRunnable.run();
         verify(executionService, times(1)).execute(execution);

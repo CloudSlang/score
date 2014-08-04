@@ -60,6 +60,7 @@ public class WorkerNodeRepositoryTest {
     @Test
     public void createTest(){
         String bulkNum = UUID.randomUUID().toString();
+        String wrv = UUID.randomUUID().toString();
 
         WorkerNode worker = new WorkerNode();
         worker.setUuid("1234");
@@ -70,9 +71,13 @@ public class WorkerNodeRepositoryTest {
         worker.setActive(true);
         worker.setGroups(Arrays.asList("group1", "group2", "group3"));
         worker.setBulkNumber(bulkNum);
+        worker.setWorkerRecoveryVersion(wrv);
         workerNodeRepository.saveAndFlush(worker);
 
         String result = workerNodeRepository.findByUuid("1234").getBulkNumber();
+        Assert.assertNotNull(result);
+
+        result = workerNodeRepository.findByUuid("1234").getWorkerRecoveryVersion();
         Assert.assertNotNull(result);
     }
 

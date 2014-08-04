@@ -62,6 +62,11 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 
 	@Override
 	public void put(final Message... messages) {
+        //If we are currently in recovery no new messages should be added to outBuffer
+        if(recoveryManager.isInRecovery()){
+            return;
+        }
+
 		Validate.notEmpty(messages, "The array of messages is null or empty");
 		lock.lock();
 		try{
@@ -173,8 +178,8 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 		retryTemplate.retry(retryAmount, retryDelay, new RetryTemplate.RetryCallback() {
 			@Override
 			public void tryOnce() {
-				dispatcherService.dispatch(optimizedBulk, bulkNumber, workerUuid);
-//				dispatcherService.dispatch(optimizedBulk);
+                String wrv = recoveryManager.getWRV();
+				dispatcherService.dispatch(optimizedBulk, bulkNumber, wrv, workerUuid);
 			}
 		});
 		if (logger.isDebugEnabled()) logger.debug("bulk was drained in " + (System.currentTimeMillis()-t) + " ms");
@@ -202,7 +207,9 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 
 	@Override
 	public void doRecovery() {
-		if (logger.isDebugEnabled()) logger.debug("OutboundBuffer in recovery, clearing buffer");
+		if (logger.isDebugEnabled()){
+            logger.debug("OutboundBuffer is in recovery, clearing buffer.");
+        }
         lock.lock();
         try {
             buffer.clear();

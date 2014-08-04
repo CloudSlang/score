@@ -66,7 +66,7 @@ public class OutboundBufferTest {
 		}
 
 		buffer.drain();
-        verify(dispatcherService).dispatch((List<? extends Serializable>) argThat(new MessagesSizeMatcher(messages)), anyString(), anyString());
+        verify(dispatcherService).dispatch((List<? extends Serializable>) argThat(new MessagesSizeMatcher(messages)), anyString(), anyString(),anyString());
 	}
 
 	/**
@@ -130,7 +130,7 @@ public class OutboundBufferTest {
 		Assert.assertEquals("reading thread should be in a terminated after a message was inserted to the buffer", Thread.State.TERMINATED, thread.getState());
 
 		thread.join();
-        verify(dispatcherService).dispatch((List<? extends Serializable>) argThat(new MessagesSizeMatcher(Arrays.asList(messages))), anyString(), anyString());
+        verify(dispatcherService).dispatch((List<? extends Serializable>) argThat(new MessagesSizeMatcher(Arrays.asList(messages))), anyString(), anyString(), anyString());
 	}
 
 
@@ -189,7 +189,7 @@ public class OutboundBufferTest {
 				statistics.add(messages.size(), weight);
 				return null;
 			}
-		}).when(dispatcherService).dispatch(anyList(), anyString(), anyString());
+		}).when(dispatcherService).dispatch(anyList(), anyString(), anyString(), anyString());
 
 		new Thread(new Runnable() {
 			@Override

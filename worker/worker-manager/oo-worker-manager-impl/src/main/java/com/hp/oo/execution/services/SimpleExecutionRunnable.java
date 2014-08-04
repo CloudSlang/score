@@ -15,7 +15,6 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by IntelliJ IDEA.
@@ -40,8 +39,6 @@ public class SimpleExecutionRunnable implements Runnable {
     private EndExecutionCallback endExecutionCallback;
 
     private ExecutionMessage executionMessage;
-
-    private AtomicBoolean recoveryFlag;
 
     private QueueStateIdGeneratorService queueStateIdGeneratorService;
 
@@ -68,11 +65,6 @@ public class SimpleExecutionRunnable implements Runnable {
         this.workerConfigurationService = workerConfigurationService;
     }
 
-    public SimpleExecutionRunnable setRecoveryFlag(AtomicBoolean recoveryFlag) {
-        this.recoveryFlag = recoveryFlag;
-        return this;
-    }
-
     public ExecutionMessage getExecutionMessage() {
         return executionMessage;
     }
@@ -83,27 +75,9 @@ public class SimpleExecutionRunnable implements Runnable {
 
     @Override
     public void run() {
-        long t = System.currentTimeMillis();
-        executionMessage = doRun();
-        int counter = 1;
-        while (executionMessage != null && (System.currentTimeMillis() - t) < 3000) {
-            executionMessage = doRun();
-            counter++;
-        }
-
-        if (executionMessage != null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("go to InBuffer after " + counter + " steps");
-            }
-            inBuffer.addExecutionMessage(executionMessage);
-        } else if (logger.isDebugEnabled()) {
-            logger.debug("end of thread after " + counter + " steps");
-        }
-    }
-
-    private ExecutionMessage doRun() {
         String executionId = executionMessage.getMsgId();
 
+        //We are renaming the thread for logging/monitoring purposes
         String origThreadName = Thread.currentThread().getName();
         Thread.currentThread().setName(origThreadName + "_" + executionId);
 
@@ -114,16 +88,17 @@ public class SimpleExecutionRunnable implements Runnable {
             if (executionService.isSplitStep(execution)) {
                 executeSplitStep(execution);
             } else {
-                return executeRegularStep(execution);
+                executeRegularStep(execution);
             }
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             logger.error("Error during execution!!!", ex);
             //set status FAILED
             executionMessage.setStatus(ExecStatus.FAILED);
             //send only one execution message back - the new one was not created because of error
             outBuffer.put(executionMessage);
-        } finally {
-
+        }
+        finally {
             if (logger.isDebugEnabled()) {
                 logger.debug("Worker has finished to work on execution: " + executionId);
             }
@@ -132,32 +107,23 @@ public class SimpleExecutionRunnable implements Runnable {
                 executionIdL = Long.valueOf(executionId);
             }
             endExecutionCallback.endExecution(executionIdL);
+            //Rename the thread back
             Thread.currentThread().setName(origThreadName);
         }
-        return null;
     }
 
-    private ExecutionMessage executeRegularStep(Execution execution) throws IOException {
-        ExecutionMessage returnValue = null;
-        //Actually execute the step and get the execution object of the next step
+    private void executeRegularStep(Execution execution) throws IOException {
         Execution nextStepExecution;
-        // this do while loop was added to force the worker execute the next execution micro step in case we running under debugger mode
-        // which force executionService.execute to exist so the transaction commit th events insertion into DB
+        Long startTime = System.currentTimeMillis();
+
         do {
+            //Actually execute the step and get the execution object of the next step
             nextStepExecution = executionService.execute(execution);
         }
-        while (nextStepExecution != null && !nextStepExecution.isMustGoToQueue() && !isExecutionTerminating(nextStepExecution) && !executionService.isSplitStep(nextStepExecution));
+        while (shouldContinue(nextStepExecution, startTime));
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Execution done");
-            if (nextStepExecution != null) {
-                logger.debug("Next position: " + nextStepExecution.getPosition());
-            }
-        }
-
-        if (recoveryFlag.get()) {
-            logger.warn("Worker is in recovery. Execution result will be dropped");
-            returnValue = null;
+        if(isInterrupted()){
+            return; //Exit! The thread was interrupted by shutDown of the executor
         }
 
         //set current step to finished
@@ -168,19 +134,50 @@ public class SimpleExecutionRunnable implements Runnable {
         //execution was paused - send the FINISHED message - but don't send the PENDING for next step
         if (nextStepExecution == null) {
             outBuffer.put(executionMessage);
-        } else {
+        }
+        else {
             ExecutionMessage[] executionMessagesToSend = createMessagesToSend(executionMessage, nextStepExecution);
 
-            // for finished status , we don't need the payload.
+            // for finished status, we don't need the payload.
             // but for terminated we need the payload
             outBuffer.put(executionMessagesToSend);
 
             // check if a new step was created for stay in the worker
             if (executionMessagesToSend.length == 2 && executionMessagesToSend[1].getStatus() == ExecStatus.IN_PROGRESS) {
-                returnValue = (ExecutionMessage) executionMessagesToSend[1].clone();
+                ExecutionMessage inProgressMessage = (ExecutionMessage) executionMessagesToSend[1].clone();
+                inBuffer.addExecutionMessage(inProgressMessage);
             }
         }
-        return returnValue;
+    }
+
+    private boolean shouldContinue(Execution nextStepExecution, Long startTime){
+
+        //We should continue to run the next step without exiting in following cases:
+        //1. Thread was not interrupted
+        //2. nextStepExecution is not null
+        //3. nextStepExecution should not go to queue
+        //4. The execution is not terminating
+        //5. The nextStepExecution is not a splitStep
+        //6. Not running too long
+
+        return  !isInterrupted() &&
+                nextStepExecution != null &&
+                !nextStepExecution.isMustGoToQueue() &&
+                !isExecutionTerminating(nextStepExecution) &&
+                !executionService.isSplitStep(nextStepExecution) &&
+                !isRunningTooLong(startTime);
+    }
+
+    private boolean isInterrupted() {
+        return Thread.currentThread().isInterrupted();
+    }
+
+    private boolean isRunningTooLong(Long startTime){
+        Long currentTime = System.currentTimeMillis();
+
+        //Return true if running more than 3 seconds.
+        //We want to exit after 3 seconds from this thread in order to prevent starvation of other tasks.
+        return (currentTime - startTime) > 3000;
     }
 
     private void executeSplitStep(Execution execution) {
@@ -268,5 +265,4 @@ public class SimpleExecutionRunnable implements Runnable {
             throw new RuntimeException("Split executions list is null or empty!!!");
         }
     }
-
 }

@@ -68,10 +68,11 @@ public class OrchestratorDispatcherServiceTest {
 
         WorkerNode node = new WorkerNode();
         node.setBulkNumber("1");
+        node.setWorkerRecoveryVersion("1");
 
         when(workerNodeService.readByUUID(anyString())).thenReturn(node);
 
-        orchestratorDispatcherService.dispatch(messages, newBulkNumber, uuid);
+        orchestratorDispatcherService.dispatch(messages, newBulkNumber, "1", uuid);
         Mockito.verify(workerLockService, times(1)).lock(uuid);
         Mockito.verify(queueDispatcher, times(1)).dispatch(anyList());
         Mockito.verify(workerNodeService, times(1)).updateBulkNumber(uuid, newBulkNumber);
@@ -86,10 +87,11 @@ public class OrchestratorDispatcherServiceTest {
         String uuid = "123";
 
         WorkerNode node = new WorkerNode(); //node with NULL bulk number since it is first dispatch
+        node.setWorkerRecoveryVersion("1");
 
         when(workerNodeService.readByUUID(anyString())).thenReturn(node);
 
-        orchestratorDispatcherService.dispatch(messages, newBulkNumber, uuid);
+        orchestratorDispatcherService.dispatch(messages, newBulkNumber, "1", uuid);
         Mockito.verify(workerLockService, times(1)).lock(uuid);
         Mockito.verify(queueDispatcher, times(1)).dispatch(anyList());
         Mockito.verify(workerNodeService, times(1)).updateBulkNumber(uuid, newBulkNumber);
@@ -105,14 +107,36 @@ public class OrchestratorDispatcherServiceTest {
 
         WorkerNode node = new WorkerNode();
         node.setBulkNumber("1");
+        node.setWorkerRecoveryVersion("1");
 
         when(workerNodeService.readByUUID(anyString())).thenReturn(node);
 
-        orchestratorDispatcherService.dispatch(messages, newBulkNumber, uuid);
+        orchestratorDispatcherService.dispatch(messages, newBulkNumber, "1", uuid);
         Mockito.verify(workerLockService, times(1)).lock(uuid);
         Mockito.verify(queueDispatcher, times(0)).dispatch(anyList());
         Mockito.verify(workerNodeService, times(0)).updateBulkNumber(uuid, newBulkNumber);
     }
+    
+    @Test
+        public void dispatchAfterRecoveryTest(){
+            List<Message> messages = new ArrayList<>();
+            messages.add(new ExecutionMessage());
+    
+            String newBulkNumber = "2";
+            String uuid = "123";
+    
+            WorkerNode node = new WorkerNode();
+            node.setBulkNumber("1");
+            node.setWorkerRecoveryVersion("1");
+    
+            when(workerNodeService.readByUUID(anyString())).thenReturn(node);
+    
+            //worker dispatches with wrong WRV
+            orchestratorDispatcherService.dispatch(messages, newBulkNumber, "0", uuid);
+    
+            Mockito.verify(queueDispatcher, times(0)).dispatch(anyList());
+            Mockito.verify(workerNodeService, times(0)).updateBulkNumber(uuid, newBulkNumber);
+        }
 
     @Configuration
     static class EmptyConfig {

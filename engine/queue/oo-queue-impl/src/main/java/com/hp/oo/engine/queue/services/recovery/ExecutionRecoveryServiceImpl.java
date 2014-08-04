@@ -18,6 +18,7 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -66,15 +67,15 @@ final public class ExecutionRecoveryServiceImpl implements ExecutionRecoveryServ
 		if (logger.isDebugEnabled()) logger.debug("Workers recovery is being started");
 		long time = System.currentTimeMillis();
 		// Recovery all the non-responding workers.
-		List<String> workerNames = workerNodeService.readNonRespondingWorkers();
-        if (workerNames.size()>0) logger.warn(workerNames.size() + " workers will be recovered");
-		else if (logger.isDebugEnabled()) logger.debug(workerNames.size() + " workers will be recovered");
+		List<String> workerUuids = workerNodeService.readNonRespondingWorkers();
+        if (workerUuids.size()>0) logger.warn(workerUuids.size() + " workers will be recovered");
+		else if (logger.isDebugEnabled()) logger.debug(workerUuids.size() + " workers will be recovered");
 
-		for(String workerName: workerNames){
+		for(String workerUuid: workerUuids){
 			try {
-				doWorkerRecovery(workerName);
+				doWorkerRecovery(workerUuid);
 			} catch (Exception ex){
-				logger.error("Failed to recover worker [" + workerName + "]", ex);
+				logger.error("Failed to recover worker [" + workerUuid + "]", ex);
 			}
 		}
 		if (logger.isDebugEnabled()) logger.debug("Workers recovery is done in " + (System.currentTimeMillis()-time) + " ms");
@@ -117,27 +118,28 @@ final public class ExecutionRecoveryServiceImpl implements ExecutionRecoveryServ
 
     @Override
 	@Transactional
-	public void doWorkerRecovery(final String workerName) {
+	public void doWorkerRecovery(final String workerUuid) {
 
         //lock this worker to synchronize with drain action
-        workerLockService.lock(workerName);
+        workerLockService.lock(workerUuid);
 
-        logger.warn("Worker [" + workerName + "] is going to be recovered");
+        logger.warn("Worker [" + workerUuid + "] is going to be recovered");
 	    long time = System.currentTimeMillis();
-		// change status to in_recovery
-		workerNodeService.updateStatusInSeparateTransaction(workerName, Worker.Status.IN_RECOVERY);
+		// change status to in_recovery in separate transaction in order to make it as quickly as possible
+		// so keep-alive wont be stuck and assigning won't take this worker as candidate
+		workerNodeService.updateStatusInSeparateTransaction(workerUuid, Worker.Status.IN_RECOVERY);
 
 	    final AtomicBoolean shouldContinue = new AtomicBoolean(true);
 
 		while (shouldContinue.get()) {
-
-            shouldContinue.set(messageRecoveryService.recoverMessagesBulk(workerName,DEFAULT_POLL_SIZE));
-
+            shouldContinue.set(messageRecoveryService.recoverMessagesBulk(workerUuid, DEFAULT_POLL_SIZE));
 		}
 
-        workerNodeService.updateStatusInSeparateTransaction(workerName, Worker.Status.RECOVERED);
+        String newWRV = UUID.randomUUID().toString();
+        workerNodeService.updateWRV(workerUuid, newWRV);
+        workerNodeService.updateStatus(workerUuid, Worker.Status.RECOVERED);
 
-	    logger.warn("Worker [" + workerName + "] recovery id done in " + (System.currentTimeMillis()-time) + " ms");
+	    logger.warn("Worker [" + workerUuid + "] recovery id done in " + (System.currentTimeMillis()-time) + " ms");
 	}
 
 	@Override

@@ -80,15 +80,4 @@ public class InBufferTest {
 	        Thread.sleep(100L);
         }
     }
-
-    @Test
-    public void testDoRecovery() throws Exception {
-        SimpleExecutionRunnable simpleExecutionRunnable = mock(SimpleExecutionRunnable.class);
-        when(simpleExecutionRunnableFactory.getObject()).thenReturn(simpleExecutionRunnable);
-
-        inBuffer.addExecutionMessage(new ExecutionMessage());
-
-        inBuffer.doRecovery();
-        verify(simpleExecutionRunnable,times(1)).setRecoveryFlag(any(AtomicBoolean.class));
-    }
 }

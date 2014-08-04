@@ -16,7 +16,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,7 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Date: 20/11/12
  * Time: 08:46
  */
-public class InBuffer implements ApplicationListener, Runnable, WorkerRecoveryListener {
+public class InBuffer implements ApplicationListener, Runnable {
 
     private final long MEMORY_THRESHOLD = 50000000; // 50 Mega byte
 
@@ -61,8 +60,6 @@ public class InBuffer implements ApplicationListener, Runnable, WorkerRecoveryLi
 
 	@Autowired
 	private WorkerRecoveryManagerImpl recoveryManager;
-
-	private AtomicBoolean recoveryFlag = new AtomicBoolean(false);
 
     private Date currentCreateDate = new Date(0);
 
@@ -115,8 +112,10 @@ public class InBuffer implements ApplicationListener, Runnable, WorkerRecoveryLi
                         }
                     }
                     else {
-	                    if (recoveryManager.isInRecovery() && logger.isDebugEnabled()) logger.debug("in buffer waits for recovery ...");
-	                    Thread.sleep(coolDownPollingMillis); //if the buffer is not empty enough yet - sleep a while
+	                    if (recoveryManager.isInRecovery() && logger.isDebugEnabled()){
+                            logger.debug("InBuffer waits for recovery... Does not poll messages!");
+                        }
+	                    Thread.sleep(coolDownPollingMillis); //if the buffer is not empty enough yet or in recovery - sleep a while
                     }
                 }
             } catch (Exception ex) {
@@ -127,32 +126,37 @@ public class InBuffer implements ApplicationListener, Runnable, WorkerRecoveryLi
     }
 
     private void ackMessages(List<ExecutionMessage> newMessages) {
-        ExecutionMessage cloned;
-        for (ExecutionMessage message : newMessages) {
-	        // create a unique id for this lane in this specific worker to be used in out buffer optimization
-	        message.setWorkerKey(message.getMsgId() + " : " + message.getExecStateId());
-            cloned = (ExecutionMessage) message.clone();
-            cloned.setStatus(ExecStatus.IN_PROGRESS);
-            cloned.incMsgSeqId();
-            message.incMsgSeqId(); // increment the original message seq too in order to preserve the order of all messages of entire step
-            cloned.setPayload(null); //payload is not needed in ack - make it null in order to minimize the data that is being sent
-	        outBuffer.put(cloned);
+        //Ack messages only if not in recovery! If in recovery they will be recovered anyway by the orchestrator!
+        if (!recoveryManager.isInRecovery()){
+            ExecutionMessage cloned;
+            for (ExecutionMessage message : newMessages) {
+                // create a unique id for this lane in this specific worker to be used in out buffer optimization
+                message.setWorkerKey(message.getMsgId() + " : " + message.getExecStateId());
+                cloned = (ExecutionMessage) message.clone();
+                cloned.setStatus(ExecStatus.IN_PROGRESS);
+                cloned.incMsgSeqId();
+                message.incMsgSeqId(); // increment the original message seq too in order to preserve the order of all messages of entire step
+                cloned.setPayload(null); //payload is not needed in ack - make it null in order to minimize the data that is being sent
+                outBuffer.put(cloned);
+            }
         }
     }
 
 
     public void addExecutionMessage(ExecutionMessage msg) {
-        SimpleExecutionRunnable simpleExecutionRunnable = simpleExecutionRunnableFactory.getObject();
-        simpleExecutionRunnable.setExecutionMessage(msg);
-        simpleExecutionRunnable.setRecoveryFlag(recoveryFlag);
-        Long executionId = null;
-        if (!StringUtils.isEmpty(msg.getMsgId())) {
-            executionId = Long.valueOf(msg.getMsgId());
+        //Add messages only if not in recovery
+        if (!recoveryManager.isInRecovery()){
+            SimpleExecutionRunnable simpleExecutionRunnable = simpleExecutionRunnableFactory.getObject();
+            simpleExecutionRunnable.setExecutionMessage(msg);
+            Long executionId = null;
+            if (!StringUtils.isEmpty(msg.getMsgId())) {
+                executionId = Long.valueOf(msg.getMsgId());
+            }
+            workerManager.addExecution(executionId, simpleExecutionRunnable);
         }
-        workerManager.addExecution(executionId, simpleExecutionRunnable);
     }
 
-	@Override
+    @Override
 	public void onApplicationEvent(ApplicationEvent applicationEvent) {
 		if (applicationEvent instanceof ContextRefreshedEvent && ! endOfInit) {
 			endOfInit = true;
@@ -168,15 +172,6 @@ public class InBuffer implements ApplicationListener, Runnable, WorkerRecoveryLi
 	public void run() {
 		fillBufferPeriodically();
 	}
-
-	@Override
-	public void doRecovery() {
-		if (logger.isDebugEnabled()) logger.debug("Begin in buffer recovery");
-		recoveryFlag.set(true);
-		recoveryFlag = new AtomicBoolean(false);
-		if (logger.isDebugEnabled()) logger.debug("In buffer recovery is done");
-	}
-
 
     public boolean checkFreeMemorySpace(long threshold){
         double allocatedMemory      = Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();

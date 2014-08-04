@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface WorkerNodeService {
 
-	void keepAlive(String uuid);
+	String keepAlive(String uuid);
 
 	void create(String uuid, String password, String hostName, String installDir);
 
@@ -23,7 +23,7 @@ public interface WorkerNodeService {
 
     List<WorkerNode> readAllNotDeletedWorkers();
 
-	void up(String uuid);
+	String up(String uuid);
 
 	void down(String uuid);
 
@@ -70,4 +70,6 @@ public interface WorkerNodeService {
 	void lock(String uuid);
 
     void updateBulkNumber(String workerUuid, String bulkNumber);
+
+    void updateWRV(String workerUuid, String wrv);
 }

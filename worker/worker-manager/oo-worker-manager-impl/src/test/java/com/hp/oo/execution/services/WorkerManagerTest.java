@@ -86,7 +86,7 @@ public class WorkerManagerTest {
 		doThrow(new RuntimeException("try 1"))
 				.doThrow(new RuntimeException("try 2"))
 				.doThrow(new RuntimeException("try 3"))
-				.doNothing()
+				.doReturn("1")
 				.when(workerNodeService).up(CREDENTIAL_UUID);
 
 		workerManager.onApplicationEvent(mock(ContextRefreshedEvent.class));
@@ -94,12 +94,6 @@ public class WorkerManagerTest {
 		Thread.sleep(2000L); // must sleep some time since the start up is being processed in a new thread
 		verify(workerNodeService, times(4)).up(CREDENTIAL_UUID);
 		assertThat(workerManager.isUp()).isTrue();
-	}
-
-	@Test
-	public void testKeepAlive() {
-		workerManager.workerKeepAlive();
-		verify(workerNodeService, times(1)).keepAlive(CREDENTIAL_UUID);
 	}
 
 	@Test(timeout = 10000)

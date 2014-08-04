@@ -87,7 +87,7 @@ public class ExecutionRecoveryServiceTest {
 		executionRecoveryService.doRecovery();
         verify(workerLockService, times(1)).lock("worker1");
 		verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("worker1", Worker.Status.IN_RECOVERY);
-		verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("worker1", Worker.Status.RECOVERED);
+		verify(workerNodeService, times(1)).updateStatus("worker1", Worker.Status.RECOVERED);
 
 	}
 

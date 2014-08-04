@@ -8,4 +8,6 @@ package com.hp.oo.execution.services;
 public interface WorkerRecoveryManager {
 	void doRecovery();
 	boolean isInRecovery();
+    String getWRV();
+    void setWRV(String newWrv);
 }
