@@ -1,5 +1,6 @@
 package com.hp.oo.orchestrator.services;
 
+import com.hp.oo.engine.node.services.WorkerLockService;
 import com.hp.oo.engine.node.services.WorkerNodeService;
 import com.hp.oo.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.engine.queue.services.QueueDispatcherService;
@@ -33,10 +34,15 @@ public final class OrchestratorDispatcherServiceImpl implements OrchestratorDisp
     @Autowired
     private WorkerNodeService workerNodeService;
 
+    @Autowired
+    private WorkerLockService workerLockService;
+
     @Override
     @Transactional
     public void dispatch(List<? extends Serializable> messages, String bulkNumber, String wrv, String workerUuid) {
-       Validate.notNull(messages, "Messages list is null");
+        //lock to synchronize with the recovery job
+        workerLockService.lock(workerUuid);
+        Validate.notNull(messages, "Messages list is null");
 
         String currentBulkNumber = workerNodeService.readByUUID(workerUuid).getBulkNumber();
         //can not be null at this point
