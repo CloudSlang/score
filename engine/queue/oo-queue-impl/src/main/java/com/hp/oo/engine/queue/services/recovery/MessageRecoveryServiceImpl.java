@@ -29,7 +29,6 @@ final public class MessageRecoveryServiceImpl implements MessageRecoveryService{
 
         List<ExecutionMessage> messages = executionQueueService.poll(workerName, defaultPoolSize,
                 ExecStatus.ASSIGNED,
-                ExecStatus.SENT,
                 ExecStatus.IN_PROGRESS);
 
         logMessageRecovery(messages);
