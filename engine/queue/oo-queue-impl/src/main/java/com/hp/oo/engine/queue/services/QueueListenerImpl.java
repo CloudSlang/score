@@ -3,7 +3,10 @@ package com.hp.oo.engine.queue.services;
 import com.hp.oo.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
+import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.oo.internal.sdk.execution.ExecutionConstants;
+import com.hp.oo.orchestrator.services.PauseResumeService;
 import com.hp.oo.orchestrator.services.SplitJoinService;
 import com.hp.score.events.EventBus;
 import com.hp.score.events.ScoreEvent;
@@ -41,8 +44,8 @@ public class QueueListenerImpl implements QueueListener {
 	@Autowired
 	private ScoreEventFactory scoreEventFactory;
 
-//	@Autowired
-//	private PauseResumeService pauseResumeService;
+	@Autowired
+	private PauseResumeService pauseResumeService;
 
 	@Override
 	public void onEnqueue(List<ExecutionMessage> messages, int queueSize) {
@@ -137,39 +140,29 @@ public class QueueListenerImpl implements QueueListener {
 	@Override
 	public void onFailed(List<ExecutionMessage> messages) {
 		deleteExecutionStateObjects(messages);
-		handleFailureMessages(messages);
 		ScoreEvent[] events = createFailureEvents(messages);
 		if (events.length > 0) {
 			eventBus.dispatch(events);
 		}
 	}
 
-	private void handleFailureMessages(List<ExecutionMessage> messages) {
-		Execution execution;
-		for (ExecutionMessage executionMessage : messages) {
-			execution = extractExecution(executionMessage);
-			if (failedBecauseNoWorker(executionMessage)) {
-//				pauseExecution(execution);
-			} else if (isBranch(execution)) {
-				finishBranchExecution(execution);
-			}
-		}
-	}
+	private Long pauseExecution(Execution execution) {
+		String branchId = (String) execution.getSystemContext().get(ExecutionConstants.BRANCH_ID);
 
-//	private void pauseExecution(Execution execution) {
-//		String branchId = (String) execution.getSystemContext().get(ExecutionConstants.BRANCH_ID);
-//
-//		ExecutionSummary pe = pauseResumeService.readPausedExecution(execution.getExecutionId(), branchId);
-//
-//		//Check if this execution is not paused already (by user)
-//		if (pe == null) {
-//			pauseResumeService.pauseExecution(execution.getExecutionId(), branchId, PauseReason.NO_WORKERS_IN_GROUP);
-//			pauseResumeService.writeExecutionObject(execution.getExecutionId(), branchId, execution);
-//		} else {
-//			//If yes - just write the object
-//			pauseResumeService.writeExecutionObject(execution.getExecutionId(), branchId, execution);
-//		}
-//	}
+		ExecutionSummary pe = pauseResumeService.readPausedExecution(execution.getExecutionId(), branchId);
+
+		//Check if this execution is not paused already (by user)
+		Long pauseId;
+		if (pe == null) {
+			pauseId = pauseResumeService.pauseExecution(execution.getExecutionId(), branchId, PauseReason.NO_WORKERS_IN_GROUP);
+			pauseResumeService.writeExecutionObject(execution.getExecutionId(), branchId, execution);
+		} else {
+			pauseId = null;
+			//If yes - just write the object
+			pauseResumeService.writeExecutionObject(execution.getExecutionId(), branchId, execution);
+		}
+		return pauseId;
+	}
 
 	private ScoreEvent[] createFailureEvents(List<ExecutionMessage> messages) {
 		Execution execution;
@@ -177,8 +170,10 @@ public class QueueListenerImpl implements QueueListener {
 		for (ExecutionMessage executionMessage : messages) {
 			execution = extractExecution(executionMessage);
 			if (failedBecauseNoWorker(executionMessage)) {
-				events.add(scoreEventFactory.createNoWorkerEvent(execution));
+				Long pauseID = pauseExecution(execution);
+				events.add(scoreEventFactory.createNoWorkerEvent(execution, pauseID));
 			} else if (isBranch(execution)) {
+				finishBranchExecution(execution);
 				events.add(scoreEventFactory.createFailedBranchEvent(execution));
 			} else {
 				events.add(scoreEventFactory.createFailureEvent(execution));

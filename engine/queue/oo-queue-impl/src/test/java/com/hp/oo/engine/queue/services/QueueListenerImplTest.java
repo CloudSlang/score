@@ -5,6 +5,7 @@ import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
+import com.hp.oo.orchestrator.services.PauseResumeService;
 import com.hp.oo.orchestrator.services.SplitJoinService;
 import com.hp.score.events.EventBus;
 import com.hp.score.events.ScoreEvent;
@@ -217,6 +218,11 @@ public class QueueListenerImplTest {
 		@Bean
 		ScoreEventFactory scoreEventFactory() {
 			return mock(ScoreEventFactory.class);
+		}
+
+		@Bean
+		PauseResumeService pauseResumeService() {
+			return mock(PauseResumeService.class);
 		}
 	}
 

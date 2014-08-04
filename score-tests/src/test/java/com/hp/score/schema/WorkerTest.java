@@ -5,6 +5,7 @@ import com.hp.oo.engine.node.services.WorkerNodeService;
 import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.engine.queue.services.QueueDispatcherService;
 import com.hp.oo.engine.queue.services.QueueStateIdGeneratorService;
+import com.hp.oo.engine.queue.services.ScoreEventFactory;
 import com.hp.oo.execution.services.WorkerManager;
 import com.hp.oo.execution.services.dbsupport.WorkerDbSupportService;
 import com.hp.oo.orchestrator.services.CancelExecutionService;
@@ -90,6 +91,11 @@ public class WorkerTest {
 		@Bean
 		ExecutionMessageConverter executionMessageConverter(){
 			return mock(ExecutionMessageConverter.class);
+		}
+
+		@Bean
+		ScoreEventFactory scoreEventFactory() {
+			return mock(ScoreEventFactory.class);
 		}
 
 		@Bean
