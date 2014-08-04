@@ -33,14 +33,21 @@ public class InputBindingUtility {
 
 	private static BindingConflict verifyValue(Class<?> expectedClass, Object value, int position, boolean nullAllowed) {
 		BindingConflict bindingConflict = null;
-		if (!nullAllowed && value == null) {
-			bindingConflict = new BindingConflict(ConflictType.NULL, position);
+		if (value == null) {
+			if (nullAllowed) {
+				if (expectedClass.isPrimitive()) {
+					bindingConflict = new BindingConflict(ConflictType.TYPE_MISMATCH, position);
+				}
+			} else {
+				bindingConflict = new BindingConflict(ConflictType.NULL, position);
+			}
 		} else {
 			if (!expectedClass.isInstance(value)) {
+				bindingConflict = new BindingConflict(ConflictType.TYPE_MISMATCH, position);
 				if (expectedClass.isPrimitive()) {
 					Class<?> wrapperClass = ClassUtils.primitiveToWrapper(expectedClass);
-					if (!wrapperClass.isInstance(value)) {
-						bindingConflict = new BindingConflict(ConflictType.TYPE_MISMATCH, position);
+					if (wrapperClass.isInstance(value)) {
+						bindingConflict = null;
 					}
 				}
 			}
@@ -67,6 +74,12 @@ public class InputBindingUtility {
 					"position=" + position +
 					", conflictType=" + conflictType +
 					'}';
+		}
+	}
+
+	public static class InputBindingException extends RuntimeException {
+		public InputBindingException(String message) {
+			super(message);
 		}
 	}
 }

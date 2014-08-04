@@ -55,12 +55,12 @@ public class OOActionRunner {
 		}
 	}
 
-	private void verifyActionInputs(Object[] actualParameters, boolean nullAllowed) throws Exception{
+	private void verifyActionInputs(Object[] actualParameters, boolean nullAllowed) {
 		Class<?>[] parameterTypes =  actionMethod.getParameterTypes();
 		boolean validParameters = InputBindingUtility.validateParameterArray(parameterTypes, actualParameters, nullAllowed);
 		if (!validParameters) {
 			List<BindingConflict> conflicts = InputBindingUtility.getBindingConflicts(parameterTypes, actualParameters, nullAllowed);
-			throw new Exception(conflicts.toString());
+			throw new InputBindingUtility.InputBindingException(conflicts.toString());
 		}
 	}
 
