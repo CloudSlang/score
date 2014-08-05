@@ -1,6 +1,7 @@
 package org.score.samples;
 
 
+import com.hp.score.events.EventConstants;
 import com.hp.score.api.TriggeringProperties;
 import org.score.samples.openstack.actions.ExecutionPlanBuilder;
 import com.hp.score.api.ExecutionPlan;
@@ -164,14 +165,14 @@ public class OpenstackApplications {
 
 	private void registerScoreEventListener() {
 		Set<String> handlerTypes = new HashSet<>();
-		handlerTypes.add("FINISHED");
-		handlerTypes.add("ERROR");
-		handlerTypes.add("CANCELLED");
+		handlerTypes.add(EventConstants.SCORE_FINISHED_EVENT);
+		handlerTypes.add(EventConstants.SCORE_ERROR_EVENT);
+		handlerTypes.add(EventConstants.SCORE_FAILURE_EVENT);
 		eventBus.subscribe(new ScoreEventListener() {
 			@Override
 			public void onEvent(ScoreEvent event) {
 				logListenerEvent(event);
-				closeContext();
+				//closeContext(); // todo resolve close context issue
 			}
 		}, handlerTypes);
 	}
