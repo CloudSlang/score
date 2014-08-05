@@ -21,8 +21,8 @@ import java.util.Map;
  */
 public class OOActionRunner {
 	private final static Logger logger = Logger.getLogger(OOActionRunner.class);
-	public final static String ACTION_RUNTIME_EVENT_TYPE = "action_runtime_event";
-	public final static String ACTION_EXCEPTION_EVENT_TYPE = "action_exception_event";
+	public final static String ACTION_RUNTIME_EVENT_TYPE = "ACTION_RUNTIME_EVENT";
+	public final static String ACTION_EXCEPTION_EVENT_TYPE = "ACTION_EXCEPTION_EVENT";
 	private Class actionClass;
 	private Method actionMethod;
 
