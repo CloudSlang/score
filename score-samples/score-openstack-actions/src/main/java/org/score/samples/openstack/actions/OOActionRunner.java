@@ -39,13 +39,15 @@ public class OOActionRunner {
 			Map<String, Serializable> executionContext,
 			ExecutionRuntimeServices executionRuntimeServices,
 			String className,
-			String methodName) {
+			String methodName,
+			Boolean nullAllowed) {
 		try {
 			logger.info("run method invocation");
 
 			Object[] actualParameters = extractMethodData(executionContext, executionRuntimeServices, className, methodName);
 
-			verifyActionInputs(actualParameters, true);
+			nullAllowed = nullAllowed == null ? true : nullAllowed;
+			verifyActionInputs(actualParameters, nullAllowed);
 
 			Map<String, String> results = invokeMethod(executionRuntimeServices, className, methodName, actualParameters);
 

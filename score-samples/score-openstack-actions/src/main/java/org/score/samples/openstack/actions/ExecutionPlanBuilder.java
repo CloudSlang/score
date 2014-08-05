@@ -18,6 +18,7 @@ import java.util.UUID;
 public class ExecutionPlanBuilder {
 	public static final String ACTION_CLASS_KEY = "className";
 	public static final String ACTION_METHOD_KEY = "methodName";
+	public static final String NULL_ALLOWED_KEY = "nullAllowed";
 
 	private ExecutionPlan executionPlan;
 
@@ -35,15 +36,14 @@ public class ExecutionPlanBuilder {
 			Long stepId,
 			String actionClassName,
 			String actionMethodName,
-			List<NavigationMatcher<Serializable>> navigationMatchers
-	) {
+			Boolean nullInputsAllowed,
+			List<NavigationMatcher<Serializable>> navigationMatchers) {
 		ExecutionStep step = new ExecutionStep(stepId);
 
 		step.setAction(new ControlActionMetadata("org.score.samples.openstack.actions.OOActionRunner", "run"));
 		Map<String, String> actionData = new HashMap<>(2);
 		//put the actual action class name and method name
 		actionData.put(ACTION_CLASS_KEY, actionClassName);
-
 		actionData.put(ACTION_METHOD_KEY, actionMethodName);
 		step.setActionData(actionData);
 
@@ -59,20 +59,9 @@ public class ExecutionPlanBuilder {
 
 		return step.getExecStepId();
 	}
-	@SuppressWarnings("unused")
-	public Long addStep(Long stepId, Long nextStep){
 
-		return null;
-	}
-	@SuppressWarnings("unused")
-	public Long simpleNavigate(Long nextStep){
-		return null;
-	}
-
-
-
-	public Long addOOActionFinalStep(Long stepId, String actionClassName, String actionMethodName) {
-		return addOOActionStep(stepId, actionClassName, actionMethodName, null);
+	public Long addFinalStep(Long stepId, String actionClassName, String actionMethodName) {
+		return addStep(stepId, actionClassName, actionMethodName, null);
 	}
 
 	@SuppressWarnings("unused")
