@@ -55,7 +55,6 @@ public class RunningExecutionPlan extends AbstractIdentifiable {
     public void setExecutionPlan(ExecutionPlan executionPlan) {
 
         this.executionPlan = (ExecutionPlan) SerializationUtils.clone(executionPlan);
-        this.executionPlan.setDependencies(null); //not needed for the RunningExecutionPlan
         executionPlanZipped = ExecutionPlanCompressUtil.getBytesFromExecutionPlan(this.executionPlan);
     }
 

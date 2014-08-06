@@ -6,6 +6,7 @@ import com.hp.oo.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.engine.queue.services.QueueDispatcherService;
 import com.hp.score.api.ExecutionPlan;
+import com.hp.score.api.TriggeringProperties;
 import com.hp.score.engine.data.IdentityGenerator;
 import com.hp.score.services.ExecutionStateService;
 import org.junit.Before;
@@ -14,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -62,7 +62,8 @@ public class ScoreTriggeringTest {
     public void testTrigger2() throws Exception {
         ExecutionPlan ep = new ExecutionPlan();
         ep.setBeginStep(1L);
-        scoreTrigger.trigger(ep, new HashMap<String, Serializable>(), new HashMap<String, Serializable>(), 1L);
+        TriggeringProperties triggeringProperties = TriggeringProperties.create(ep);
+        scoreTrigger.trigger(triggeringProperties);
 
         verify(queueDispatcher, times(1)).dispatch(anyListOf(ExecutionMessage.class));
     }
@@ -71,7 +72,8 @@ public class ScoreTriggeringTest {
     public void testSaveOfRunningEP() throws Exception {
         ExecutionPlan ep = new ExecutionPlan();
         ep.setBeginStep(1L);
-        scoreTrigger.trigger(ep, new HashMap<String, Serializable>(), new HashMap<String, Serializable>(), 1L);
+        TriggeringProperties triggeringProperties = TriggeringProperties.create(ep);
+        scoreTrigger.trigger(triggeringProperties);
 
         verify(runningExecutionPlanService, times(1)).getOrCreateRunningExecutionPlan(any(ExecutionPlan.class));
     }
@@ -81,9 +83,9 @@ public class ScoreTriggeringTest {
         ExecutionPlan ep = new ExecutionPlan();
         Map<String, ExecutionPlan> dep = new HashMap<>();
         dep.put("subflowEP", new ExecutionPlan());
-        ep.setDependencies(dep);
         ep.setBeginStep(1L);
-        scoreTrigger.trigger(ep, new HashMap<String, Serializable>(), new HashMap<String, Serializable>(), 1L);
+        TriggeringProperties triggeringProperties = TriggeringProperties.create(ep).setDependencies(dep);
+        scoreTrigger.trigger(triggeringProperties);
 
         verify(runningExecutionPlanService, times(2)).getOrCreateRunningExecutionPlan(any(ExecutionPlan.class));
     }

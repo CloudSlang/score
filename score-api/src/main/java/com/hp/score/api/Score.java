@@ -10,11 +10,7 @@ import java.util.Map;
  */
 public interface Score {
 
-    public Long trigger(ExecutionPlan executionPlan);
-
-    public Long trigger(ExecutionPlan executionPlan, Map<String, Serializable> context);
-
-    public Long trigger(ExecutionPlan executionPlan, Map<String, ? extends Serializable> context, Map<String, ? extends Serializable> runtimeValues, Long startStep);
+    public Long trigger(TriggeringProperties triggeringProperties);
 
     public boolean pauseExecution(Long executionId);
 

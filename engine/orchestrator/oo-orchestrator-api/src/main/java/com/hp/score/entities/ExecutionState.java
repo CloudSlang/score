@@ -21,8 +21,8 @@ import java.util.Arrays;
  * Date: 12/05/2014
  */
 @Entity
-@Table(name = "SCORE_EXECUTION_STATE",
-        uniqueConstraints = {@UniqueConstraint(name = "SCORE_EXECUTION_STATE_UC", columnNames = {"EXECUTION_ID", "BRANCH_ID"})})
+@Table(name = "OO_EXECUTION_STATE",
+		uniqueConstraints = {@UniqueConstraint(name = "OO_EXECUTION_STATE_UC", columnNames = {"EXECUTION_ID", "BRANCH_ID"})})
 public class ExecutionState extends AbstractIdentifiable {
 
     public static final String EMPTY_BRANCH = "EMPTY";

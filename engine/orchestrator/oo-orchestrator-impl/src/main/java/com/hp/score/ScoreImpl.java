@@ -2,6 +2,7 @@ package com.hp.score;
 
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.Score;
+import com.hp.score.api.TriggeringProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
@@ -22,18 +23,8 @@ public class ScoreImpl implements Score {
     private ScorePauseResume scorePauseResume;
 
     @Override
-    public Long trigger(ExecutionPlan executionPlan) {
-        return trigger(executionPlan, new HashMap<String, Serializable>());
-    }
-
-    @Override
-    public Long trigger(ExecutionPlan executionPlan, Map<String, Serializable> input) {
-        return trigger(executionPlan, input, new HashMap<String, Serializable>(), executionPlan.getBeginStep());
-    }
-
-    @Override
-    public Long trigger(ExecutionPlan executionPlan, Map<String, ? extends Serializable> context, Map<String, ? extends Serializable> runtimeValues, Long startStep) {
-        return scoreTriggering.trigger(executionPlan, context, runtimeValues, startStep);
+    public Long trigger(TriggeringProperties triggeringProperties) {
+        return scoreTriggering.trigger(triggeringProperties);
     }
 
     @Override

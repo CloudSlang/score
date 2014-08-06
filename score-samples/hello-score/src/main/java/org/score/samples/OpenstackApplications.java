@@ -1,6 +1,7 @@
 package org.score.samples;
 
 
+import com.hp.score.api.TriggeringProperties;
 import org.score.samples.openstack.actions.ExecutionPlanBuilder;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.Score;
