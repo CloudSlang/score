@@ -1,5 +1,6 @@
 package com.hp.score.schema;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hp.oo.broker.services.ParallelPersistenceService;
 import com.hp.oo.engine.node.services.WorkerLockService;
 import com.hp.oo.engine.node.services.WorkerNodeService;
@@ -11,10 +12,10 @@ import com.hp.oo.orchestrator.services.WorkerDbSupportServiceImpl;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ExecutionStep;
 import com.hp.score.api.Score;
+import com.hp.score.api.TriggeringProperties;
 import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
 import com.hp.score.events.EventBus;
 import liquibase.integration.spring.SpringLiquibase;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hibernate.ejb.HibernatePersistence;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,7 +74,9 @@ public class EngineTest {
         workerNodeService.activate("uuid");
         workerNodeService.up("uuid");
 
-        score.trigger(createExecutionPlan());
+        ExecutionPlan executionPlan = createExecutionPlan();
+        TriggeringProperties triggeringProperties = TriggeringProperties.create(executionPlan);
+        score.trigger(triggeringProperties);
 
         List<ExecutionMessage> messages = dispatcherService.poll("uuid", 10, new Date(0));
 

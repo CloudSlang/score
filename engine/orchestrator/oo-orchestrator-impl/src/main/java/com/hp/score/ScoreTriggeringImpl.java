@@ -10,6 +10,7 @@ import com.hp.oo.engine.queue.services.QueueDispatcherService;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.score.api.ExecutionPlan;
+import com.hp.score.api.TriggeringProperties;
 import com.hp.score.engine.data.IdentityGenerator;
 import com.hp.score.lang.SystemContext;
 import com.hp.score.services.ExecutionStateService;
@@ -43,17 +44,17 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
     private ExecutionStateService executionStateService;
 
     @Override
-    public Long trigger(ExecutionPlan executionPlan, Map<String, ? extends Serializable> context, Map<String, ? extends Serializable> runtimeValues, Long startStep) {
+    public Long trigger(TriggeringProperties triggeringProperties) {
         Long executionId = idGenerator.next();
-        return trigger(executionId, executionPlan, context, runtimeValues, startStep);
+        return trigger(executionId, triggeringProperties);
     }
 
     @Override
-    public Long trigger(Long executionId, ExecutionPlan executionPlan, Map<String, ? extends Serializable> context, Map<String, ? extends Serializable> runtimeValues, Long startStep) {
-        SystemContext scoreSystemContext = new SystemContext(runtimeValues);
-        Long runningExecutionPlanId = saveRunningExecutionPlan(executionPlan, scoreSystemContext);
+    public Long trigger(Long executionId, TriggeringProperties triggeringProperties) {
+        SystemContext scoreSystemContext = new SystemContext(triggeringProperties.getRuntimeValues());
+        Long runningExecutionPlanId = saveRunningExecutionPlan(triggeringProperties.getExecutionPlan(), triggeringProperties.getDependencies(), scoreSystemContext);
         scoreSystemContext.put(ExecutionConstants.EXECUTION_ID_CONTEXT, executionId);
-        Execution execution = new Execution(executionId, runningExecutionPlanId, startStep, context, scoreSystemContext);
+        Execution execution = new Execution(executionId, runningExecutionPlanId, triggeringProperties.getStartStep(), triggeringProperties.getContext(), scoreSystemContext);
 
         // create execution record in ExecutionSummary table
         executionStateService.createParentExecution(execution.getExecutionId());
@@ -64,15 +65,17 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
         return executionId;
     }
 
-    private Long saveRunningExecutionPlan(ExecutionPlan executionPlan, SystemContext systemContext) {
+    private Long saveRunningExecutionPlan(ExecutionPlan executionPlan, Map<String, ExecutionPlan> dependencies, SystemContext systemContext) {
         Map<String, Long> runningPlansIds = new HashMap<>();
         Map<String, Long> beginStepsIds = new HashMap<>();
 
-        for (ExecutionPlan dependencyExecutionPlan : executionPlan.getDependencies().values()) {
-            String subFlowUuid = dependencyExecutionPlan.getFlowUuid();
-            Long subFlowRunningId = runningExecutionPlanService.getOrCreateRunningExecutionPlan(dependencyExecutionPlan);
-            runningPlansIds.put(subFlowUuid, subFlowRunningId);
-            beginStepsIds.put(subFlowUuid, dependencyExecutionPlan.getBeginStep());
+        if(dependencies != null) {
+            for (ExecutionPlan dependencyExecutionPlan : dependencies.values()) {
+                String subFlowUuid = dependencyExecutionPlan.getFlowUuid();
+                Long subFlowRunningId = runningExecutionPlanService.getOrCreateRunningExecutionPlan(dependencyExecutionPlan);
+                runningPlansIds.put(subFlowUuid, subFlowRunningId);
+                beginStepsIds.put(subFlowUuid, dependencyExecutionPlan.getBeginStep());
+            }
         }
 
         // Adding the ids of the running execution plan of the parent + its begin step

@@ -31,8 +31,6 @@ public class ExecutionPlan implements Serializable {
     //Holds the list of it's direct subflows UUIDs
     protected Set<String> subflowsUUIDs = new HashSet<>();
 
-    protected Map<String, ExecutionPlan> dependencies = new HashMap<>();
-
     public Set<String> getSubflowsUUIDs() {
         return subflowsUUIDs;
     }
@@ -95,14 +93,6 @@ public class ExecutionPlan implements Serializable {
         this.name = name;
     }
 
-    public Map<String, ExecutionPlan> getDependencies() {
-        return dependencies;
-    }
-
-    public void setDependencies(Map<String, ExecutionPlan> dependencies) {
-        this.dependencies = dependencies;
-    }
-
     @Override
     public String toString() {
         return "ExecutionPlan: \n" +
@@ -137,7 +127,6 @@ public class ExecutionPlan implements Serializable {
         equalsBuilder.append(this.getLanguage(), other.getLanguage());
         equalsBuilder.append(this.getSubflowsUUIDs(), other.getSubflowsUUIDs());
         equalsBuilder.append(this.getSteps(), other.getSteps());
-        equalsBuilder.append(this.getDependencies(), other.getDependencies());
 
         return equalsBuilder.isEquals();
     }
@@ -152,7 +141,6 @@ public class ExecutionPlan implements Serializable {
         hashCodeBuilder.append(this.getLanguage());
         hashCodeBuilder.append(this.getSubflowsUUIDs());
         hashCodeBuilder.append(this.getSteps());
-        hashCodeBuilder.append(this.getDependencies());
 
         return new HashCodeBuilder().toHashCode();
     }

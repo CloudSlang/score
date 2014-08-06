@@ -4,6 +4,7 @@ import com.hp.score.api.ControlActionMetadata;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ExecutionStep;
 import com.hp.score.api.Score;
+import com.hp.score.api.TriggeringProperties;
 import com.hp.score.events.EventBus;
 import com.hp.score.events.EventConstants;
 import com.hp.score.events.ScoreEvent;
@@ -52,7 +53,7 @@ public class HelloScore {
 
     private void start() {
         ExecutionPlan executionPlan = createExecutionPlan();
-        executionID = score.trigger(executionPlan);
+        executionID = score.trigger(TriggeringProperties.create(executionPlan));
         waitForExecutionToFinish();
         closeContext();
     }

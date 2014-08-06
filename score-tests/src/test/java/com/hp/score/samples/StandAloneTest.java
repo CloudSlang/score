@@ -5,6 +5,7 @@ import com.hp.score.api.ControlActionMetadata;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ExecutionStep;
 import com.hp.score.api.Score;
+import com.hp.score.api.TriggeringProperties;
 import com.hp.score.events.EventBus;
 import com.hp.score.events.EventConstants;
 import com.hp.score.events.ScoreEvent;
@@ -51,8 +52,9 @@ public class StandAloneTest {
     public void baseStandAloneTest() {
         new ConsoleControlActions();
         ExecutionPlan executionPlan = createExecutionPlan();
+        TriggeringProperties triggeringProperties = TriggeringProperties.create(executionPlan);
         registerEventListener();
-        long executionId = score.trigger(executionPlan);
+        long executionId = score.trigger(triggeringProperties);
 
         waitForExecutionToFinish();
         Assert.assertTrue(finishEventExecutionId != null && finishEventExecutionId.equals(executionId));

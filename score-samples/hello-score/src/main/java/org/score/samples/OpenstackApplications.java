@@ -1,6 +1,7 @@
 package org.score.samples;
 
 
+import com.hp.score.api.TriggeringProperties;
 import org.score.samples.openstack.actions.ExecutionPlanBuilder;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.Score;
@@ -71,7 +72,8 @@ public class OpenstackApplications {
 		Map<String, Serializable> executionContext = new HashMap<>();
 		prepareExecutionContext(executionContext);
 
-		score.trigger(executionPlan, executionContext);
+        TriggeringProperties triggeringProperties = TriggeringProperties.create(executionPlan).setContext(executionContext);
+		score.trigger(triggeringProperties);
 	}
 
 	private void prepareExecutionContext(Map<String, Serializable> executionContext) {

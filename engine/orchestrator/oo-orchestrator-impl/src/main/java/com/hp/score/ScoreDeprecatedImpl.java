@@ -2,6 +2,7 @@ package com.hp.score;
 
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ScoreDeprecated;
+import com.hp.score.api.TriggeringProperties;
 import com.hp.score.engine.data.IdentityGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -26,8 +27,10 @@ public class ScoreDeprecatedImpl implements ScoreDeprecated {
     }
 
     @Override
+    //todo: change the method to get the TriggeringProperties object
     public Long trigger(Long executionId, ExecutionPlan executionPlan, Map<String, ? extends Serializable> context, Map<String, ? extends Serializable> runtimeValues, Long startStep) {
-        return scoreTriggering.trigger(executionId, executionPlan, context, runtimeValues, startStep);
+        TriggeringProperties triggeringProperties = TriggeringProperties.create(executionPlan).setContext(context).setRuntimeValues(runtimeValues).setStartStep(startStep);
+        return scoreTriggering.trigger(executionId, triggeringProperties);
     }
 
 }

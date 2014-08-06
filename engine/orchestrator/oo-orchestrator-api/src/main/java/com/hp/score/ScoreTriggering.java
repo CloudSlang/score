@@ -1,9 +1,6 @@
 package com.hp.score;
 
-import com.hp.score.api.ExecutionPlan;
-
-import java.io.Serializable;
-import java.util.Map;
+import com.hp.score.api.TriggeringProperties;
 
 /**
  * User: wahnonm
@@ -11,6 +8,6 @@ import java.util.Map;
  * Time: 11:20
  */
 interface ScoreTriggering {
-    Long trigger(ExecutionPlan executionPlan, Map<String, ? extends Serializable> context, Map<String, ? extends Serializable> runtimeValues, Long startStep);
-    Long trigger(Long executionId, ExecutionPlan executionPlan, Map<String, ? extends Serializable> context, Map<String, ? extends Serializable> runtimeValues, Long startStep);
+    Long trigger(TriggeringProperties triggeringProperties);
+    Long trigger(Long executionId, TriggeringProperties triggeringProperties);
 }
