@@ -26,6 +26,7 @@ public class HttpClientPostMock {
 	 * @return map of action results (in current implementation contains the arguments passed to the method)
 	 */
 	@SuppressWarnings("unused")
+
 	public Map<String, String> post(String username, String password, String url, String host) {
 		Map<String, String> returnMap = new HashMap<>();
 
