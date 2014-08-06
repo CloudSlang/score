@@ -43,9 +43,9 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         </insert>
     </changeSet>
 
-    <changeSet id="Create SCORE_EXECUTION_STATE" author="engine">
-        <createTable tableName="SCORE_EXECUTION_STATE">
-            <column name="ID" type="BIGINT">
+	<changeSet id="Create OO_EXECUTION_STATE" author="engine">
+		<createTable tableName="OO_EXECUTION_STATE">
+		<column name="ID" type="BIGINT">
                 <constraints primaryKey="true" nullable="false" />
             </column>
             <column name="EXECUTION_ID" type="BIGINT">
@@ -60,9 +60,9 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
             <column name="EXECUTION_OBJECT" type="${blob.type}"></column>
         </createTable>
 
-        <addUniqueConstraint tableName="SCORE_EXECUTION_STATE" columnNames="EXECUTION_ID, BRANCH_ID"
-            constraintName="SCORE_EXECUTION_STATE_UC" />
-    </changeSet>
+		<addUniqueConstraint tableName="OO_EXECUTION_STATE" columnNames="EXECUTION_ID, BRANCH_ID"
+			constraintName="OO_EXECUTION_STATE_UC" />
+	</changeSet>
 
     <changeSet id="create OO_EXECUTION_STATES" author="engine">
 
