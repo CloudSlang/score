@@ -1,6 +1,6 @@
 package org.score.samples.openstack.actions;
 
-import com.google.gson.JsonArray;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -8,14 +8,17 @@ import com.google.gson.JsonParser;
 import java.util.HashMap;
 import java.util.Map;
 
+
 /**
- * Created by lesant on 8/5/2014.
+ * Date: 8/5/2014
+ *
+ * @author lesant
  */
+@SuppressWarnings("unused")
 public class ContextMerger {
 	public Map<String, String> merge(String returnResult,  String serverName) {
 
 		Map<String, String> returnMap = new HashMap<>();
-
 
 		JsonElement jelement = new JsonParser().parse(returnResult);
 		JsonObject jobject = jelement.getAsJsonObject();

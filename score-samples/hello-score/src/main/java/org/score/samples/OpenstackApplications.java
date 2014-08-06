@@ -93,11 +93,11 @@ public class OpenstackApplications {
 
 	private void createServerInputs() {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		String username = null;
-		String password = null;
-		String host = null;
-		String port = null;
-		String serverName = null;
+		String username;
+		String password;
+		String host;
+		String port;
+		String serverName;
 		try {
 			System.out.println("Host: ");
 			host = br.readLine();
@@ -188,10 +188,15 @@ public class OpenstackApplications {
 
 		createContextMergerStep(builder);
 
-		startServerStep(host, port, serverName, builder, executionContext);
+		startServerStep(serverName, builder, executionContext);
 
 		ExecutionPlan executionPlan = builder.getExecutionPlan();
-		score.trigger(executionPlan, executionContext);
+		TriggeringProperties properties = TriggeringProperties.create(executionPlan);
+		properties.setContext(executionContext);
+
+		score.trigger(properties);
+		//score.trigger(executionPlan, executionContext);
+
 	}
 
 
@@ -222,9 +227,8 @@ public class OpenstackApplications {
 
 		builder.addOOActionStep(1L, "org.score.samples.openstack.actions.ContextMerger", "merge", navigationMatchers);
 	}
-	private void startServerStep(String host, String port, String serverName, ExecutionPlanBuilder builder, Map<String, Serializable> executionContext){
-		String url = host + ":" + port + "/v2/1ef9a1495c774e969ad6de86e6f025d7/servers";
-		String body = "{\"server\": {\"name\": \"" + serverName + "\",\"imageRef\": \"56ff0279-f1fb-46e5-93dc-fe7093af0b1a\",\"flavorRef\": \"2\",\"max_count\": 1,\"min_count\": 1,\"security_groups\": [{\"name\": \"default\"}]}}";
+	private void startServerStep(String serverName, ExecutionPlanBuilder builder, Map<String, Serializable> executionContext){
+
 
 		executionContext.put("serverName", serverName);
 		executionContext.put("method", "post");
