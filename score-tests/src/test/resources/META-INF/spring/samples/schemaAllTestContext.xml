@@ -12,6 +12,6 @@
 
     <bean class="org.score.samples.stubs.StubServicesContext"/>
 
-    <bean id="workerRegistration" class="com.hp.oo.worker.management.WorkerRegistration"/>
+    <bean id="workerRegistration" class="org.score.worker.management.WorkerRegistration"/>
 
 </beans>

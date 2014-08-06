@@ -368,7 +368,11 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	}
 
 	private Map<String, Object> prepareStepData(Execution execution, ExecutionStep currStep) {
-		Map<String, Object> stepData = new HashMap<>(currStep.getActionData());
+        Map<String, ?> actionData = currStep.getActionData();
+        Map<String, Object> stepData = new HashMap<>();
+        if (actionData != null){
+            stepData.putAll(actionData);
+        }
 		// We add all the contexts to the step data - so inside of each control action we will have access to all contexts
 		addContextData(stepData, execution);
 		return stepData;

@@ -1,4 +1,4 @@
-package com.hp.oo.worker.management;
+package org.score.worker.management;
 
 import com.hp.oo.engine.node.services.WorkerNodeService;
 import org.apache.commons.io.FilenameUtils;
