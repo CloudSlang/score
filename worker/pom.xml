@@ -37,6 +37,5 @@
 	<modules>
 		<module>execution</module>
 		<module>worker-manager</module>
-		<module>oo-worker-impl</module>
 	</modules>
 </project>

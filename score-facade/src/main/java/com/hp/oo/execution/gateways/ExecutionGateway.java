@@ -8,6 +8,7 @@ import com.hp.oo.internal.sdk.execution.Execution;
  * Date: 1/29/12
  * Time: 10:54 AM
  */
+//todo - remove - non blocking
 public interface ExecutionGateway {
     void addExecution(Execution execution);
 }
