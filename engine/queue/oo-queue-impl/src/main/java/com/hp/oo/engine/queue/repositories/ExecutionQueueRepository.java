@@ -22,6 +22,8 @@ public interface ExecutionQueueRepository {
 
 	List<ExecutionMessage> pollMessagesWithoutAck(int maxSize,long minVersionAllowed);
 
+    Integer countMessagesWithoutAckForWorker(int maxSize, long minVersionAllowed, String workerUuid);
+
 	long generateExecStateId();
 
 	void insertExecutionStates(final List<ExecutionMessage> stateMessages);

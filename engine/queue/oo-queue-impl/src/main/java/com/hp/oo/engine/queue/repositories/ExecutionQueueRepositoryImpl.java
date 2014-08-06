@@ -70,6 +70,21 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					"      (q.MSG_VERSION < ?) ";
 
 
+    final private String QUERY_COUNT_MESSAGES_WITHOUT_ACK_FOR_WORKER_SQL =
+            "SELECT COUNT(*)  " +
+                        "  FROM  OO_EXECUTION_QUEUES_1  q  " +
+                        "  WHERE " +
+                        "      (q.ASSIGNED_WORKER  = ? ) AND " +
+                        "      (q.STATUS  = ? ) AND " +
+                        "     (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
+                        "                  FROM OO_EXECUTION_QUEUES_1 qq " +
+                        "                  WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND " +
+                        "                        qq.MSG_SEQ_ID > q.MSG_SEQ_ID " +
+                        "                 )" +
+                        "      ) AND " +
+                        "      (q.MSG_VERSION < ?)  ";
+
+
 	final private String QUERY_WORKER_SQL =
 			"SELECT EXEC_STATE_ID,      " +
 					"       ASSIGNED_WORKER,      " +
@@ -317,6 +332,29 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 		}
 		return result;
 	}
+
+    public Integer countMessagesWithoutAckForWorker(int maxSize, long minVersionAllowed, String workerUuid) {
+        jdbcTemplate.setMaxRows(maxSize);
+        jdbcTemplate.setFetchSize(maxSize);
+
+        Object[] values = {
+                workerUuid,
+                ExecStatus.SENT.getNumber(),
+                minVersionAllowed,
+
+        };
+
+        long time = System.currentTimeMillis();
+        Integer result = jdbcTemplate.queryForObject(QUERY_COUNT_MESSAGES_WITHOUT_ACK_FOR_WORKER_SQL, values,Integer.class);
+
+        if (logger.isTraceEnabled())
+            logger.trace("Query [" + QUERY_COUNT_MESSAGES_WITHOUT_ACK_FOR_WORKER_SQL + "] took " + (System.currentTimeMillis() - time) + " ms");
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Got msg without ack :" + result + ",for version:" + minVersionAllowed + ",for worker:" + workerUuid);
+        }
+        return result.intValue();
+    }
 
 	@Override
 	public Map<Long, Payload> findPayloadByExecutionIds(Long... ids) {

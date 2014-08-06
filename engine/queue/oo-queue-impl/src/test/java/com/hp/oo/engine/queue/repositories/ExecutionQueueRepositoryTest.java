@@ -94,6 +94,28 @@ public class ExecutionQueueRepositoryTest {
     }
 
     @Test
+    public void testCountMessagesWithoutAckWithVersionForWorker(){
+        List<ExecutionMessage> msg = new ArrayList<>();
+        msg.add(generateMessageForWorker("group1","msg1",ExecutionMessage.EMPTY_WORKER));
+        msg.add(generateMessageForWorker("group2","msg2","uuid2"));
+        msg.add(generateMessageForWorker("group3","msg3",ExecutionMessage.EMPTY_WORKER));
+        executionQueueRepository.insertExecutionQueue(msg,1L);
+
+        msg.clear();
+        msg.add(generateMessageForWorker("group2","msg2",ExecutionMessage.EMPTY_WORKER));
+
+        executionQueueRepository.insertExecutionQueue(msg,4L);
+
+        Integer result = executionQueueRepository.countMessagesWithoutAckForWorker(100,3,ExecutionMessage.EMPTY_WORKER);
+        Assert.assertEquals(result.intValue(),2);
+
+        result = executionQueueRepository.countMessagesWithoutAckForWorker(100,3,"uuid2");
+        Assert.assertEquals(result.intValue(),1);
+        result = executionQueueRepository.countMessagesWithoutAckForWorker(100,3,"uuid3");
+        Assert.assertEquals(result.intValue(),0);
+    }
+
+    @Test
     public void testPollMessagesWithoutAckEmptyResult(){
         List<ExecutionMessage> msg = new ArrayList<>();
         msg.add(generateMessage("group1","msg1"));
@@ -215,6 +237,13 @@ public class ExecutionQueueRepositoryTest {
         payloadData = "This is just a test".getBytes();
         Payload payload = new Payload(false, false, payloadData);
         return new ExecutionMessage(-1, ExecutionMessage.EMPTY_WORKER, groupName, msgId , ExecStatus.SENT, payload, 1);
+    }
+
+    private ExecutionMessage generateMessageForWorker(String groupName,String msgId, String workerUuid) {
+        byte[] payloadData;
+        payloadData = "This is just a test".getBytes();
+        Payload payload = new Payload(false, false, payloadData);
+        return new ExecutionMessage(-1, workerUuid, groupName, msgId , ExecStatus.SENT, payload, 1);
     }
 
     @Configuration
