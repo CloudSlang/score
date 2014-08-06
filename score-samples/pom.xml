@@ -34,7 +34,7 @@
             <dependency>
                 <groupId>org.score.content</groupId>
                 <artifactId>score-http-client</artifactId>
-                <version>0.1.1</version>
+                <version>0.1.4</version>
             </dependency>
 
             <dependency>
