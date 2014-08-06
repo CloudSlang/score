@@ -31,11 +31,12 @@ public class ExecutionPlanBuilder {
 		return executionPlan;
 	}
 
-	public Long addStep(
+	public Long addOOActionStep(
 			Long stepId,
 			String actionClassName,
 			String actionMethodName,
-			List<NavigationMatcher<Serializable>> navigationMatchers) {
+			List<NavigationMatcher<Serializable>> navigationMatchers
+	) {
 		ExecutionStep step = new ExecutionStep(stepId);
 
 		step.setAction(new ControlActionMetadata("org.score.samples.openstack.actions.OOActionRunner", "run"));
@@ -58,11 +59,20 @@ public class ExecutionPlanBuilder {
 
 		return step.getExecStepId();
 	}
+	@SuppressWarnings("unused")
+	public Long addStep(Long stepId, Long nextStep){
+
+		return null;
+	}
+	@SuppressWarnings("unused")
+	public Long simpleNavigate(Long nextStep){
+		return null;
+	}
 
 
 
-	public Long addFinalStep(Long stepId, String actionClassName, String actionMethodName) {
-		return addStep(stepId, actionClassName, actionMethodName, null);
+	public Long addOOActionFinalStep(Long stepId, String actionClassName, String actionMethodName) {
+		return addOOActionStep(stepId, actionClassName, actionMethodName, null);
 	}
 
 	@SuppressWarnings("unused")
