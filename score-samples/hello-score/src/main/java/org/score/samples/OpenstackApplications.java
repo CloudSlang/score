@@ -1,5 +1,6 @@
 package org.score.samples;
 
+import com.hp.score.api.TriggeringProperties;
 import com.hp.score.events.EventConstants;
 import org.score.samples.openstack.actions.ExecutionPlanBuilder;
 import com.hp.score.api.ExecutionPlan;
@@ -49,38 +50,38 @@ public class OpenstackApplications {
 	}
 
 	private void start() {
-		    String command = "";
-			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+		String command = "";
+		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
-			while(!command.equals("4")) {
-				System.out.println("Select command:");
-				System.out.println("1 - Create server on OpenStack");
-				System.out.println("2 - List servers from OpenStack");
-				System.out.println("3 - Input missing scenario");
-				System.out.println("4 - Quit\n");
+		while(!command.equals("4")) {
+			System.out.println("Select command:");
+			System.out.println("1 - Create server on OpenStack");
+			System.out.println("2 - List servers from OpenStack");
+			System.out.println("3 - Input missing scenario");
+			System.out.println("4 - Quit\n");
 
-				System.out.print("Command:\n");
-				command = readLineDenyNulls(reader);
+			System.out.print("Command:\n");
+			command = readLineDenyNulls(reader);
 
-				switch (command) {
+			switch (command) {
 
-					case "1":
-						createServerInputs(true);
-						break;
-					case "2":
-						listServerInputs(true);
-						break;
-					case "3":
-						listServerInputs(false);
-						break;
-					case "4":
-						System.exit(0);
-						break;
-					default:
-						System.out.println("Unknown command..");
-						break;
-				}
+				case "1":
+					createServerInputs(true);
+					break;
+				case "2":
+					listServerInputs(true);
+					break;
+				case "3":
+					listServerInputs(false);
+					break;
+				case "4":
+					System.exit(0);
+					break;
+				default:
+					System.out.println("Unknown command..");
+					break;
 			}
+		}
 	}
 
 	private void listServerInputs(Boolean nullAllowed) {
@@ -140,8 +141,7 @@ public class OpenstackApplications {
 
 		startServerStep(serverName, builder, executionContext, nullAllowed);
 
-		ExecutionPlan executionPlan = builder.getExecutionPlan();
-		score.trigger(executionPlan, executionContext);
+		triggerWithContext(builder, executionContext);
 	}
 
 	private void createGetTokenStep(String host, String port, String username, String password, ExecutionPlanBuilder builder, Map<String, Serializable> executionContext, Boolean nullAllowed){
@@ -193,8 +193,15 @@ public class OpenstackApplications {
 
 		createGetServersStep(builder, nullAllowed);
 
+		triggerWithContext(builder, executionContext);
+	}
+
+	private void triggerWithContext(ExecutionPlanBuilder builder, Map<String, Serializable> executionContext) {
 		ExecutionPlan executionPlan = builder.getExecutionPlan();
-		score.trigger(executionPlan, executionContext);
+		TriggeringProperties triggeringProperties = TriggeringProperties.create(executionPlan);
+		triggeringProperties.setContext(executionContext);
+		triggeringProperties.setStartStep(0L);
+		score.trigger(triggeringProperties);
 	}
 
 	private void createPrepareGetServersStep(ExecutionPlanBuilder builder, Boolean nullAllowed) {
