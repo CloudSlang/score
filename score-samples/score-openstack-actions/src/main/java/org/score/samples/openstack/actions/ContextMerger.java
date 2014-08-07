@@ -20,7 +20,6 @@ public class ContextMerger {
 	private static final String TENANT  = "1ef9a1495c774e969ad6de86e6f025d7";
 
 	public Map<String, String> prepareGetServer(String returnResult) {
-		//extract from EC the proper host, port, and token (json)
 		String host = "16.59.58.200";
 		String port = "8774";
 		String token = getToken(returnResult);
@@ -33,6 +32,18 @@ public class ContextMerger {
 		return returnMap;
 	}
 
+	public Map<String, String> prepareCreateServer(String returnResult, String serverName) {
+		Map<String, String> returnMap = new HashMap<>();
+		String token = getToken(returnResult);
+
+		returnMap.put("url", "http://16.59.58.200:8774/v2/" + TENANT + "/servers");
+		returnMap.put("headers", "X-AUTH-TOKEN: " + token);
+		returnMap.put("body", "{\"server\": {\"name\": \"" + serverName + "\",\"imageRef\": \"56ff0279-f1fb-46e5-93dc-fe7093af0b1a\",\"flavorRef\": \"2\",\"max_count\": 1,\"min_count\": 1,\"security_groups\": [{\"name\": \"default\"}]}}");
+		returnMap.put("result", "0");
+
+		return returnMap;
+	}
+
 	private String getToken(String returnResult) {
 		JsonElement jelement = new JsonParser().parse(returnResult);
 		JsonObject jobject = jelement.getAsJsonObject();
@@ -41,24 +52,6 @@ public class ContextMerger {
 		String result = jobject.get("id").toString();
 		result = result.substring(1, result.length()-1);
 		return result;
-	}
-
-	public Map<String, String> prepareCreateServer(String returnResult, String serverName) {
-
-		Map<String, String> returnMap = new HashMap<>();
-
-		JsonElement jelement = new JsonParser().parse(returnResult);
-		JsonObject jobject = jelement.getAsJsonObject();
-		jobject = jobject.getAsJsonObject("access");
-		jobject = jobject.getAsJsonObject("token");
-		String result = jobject.get("id").toString();
-
-		returnMap.put("url", "http://16.59.58.200:8774/v2/1ef9a1495c774e969ad6de86e6f025d7/servers");
-		returnMap.put("headers", "X-AUTH-TOKEN: " + result.substring(1, result.length()-1));
-		returnMap.put("body", "{\"server\": {\"name\": \""+ serverName+"\",\"imageRef\": \"56ff0279-f1fb-46e5-93dc-fe7093af0b1a\",\"flavorRef\": \"2\",\"max_count\": 1,\"min_count\": 1,\"security_groups\": [{\"name\": \"default\"}]}}");
-		returnMap.put("result", "0");
-
-		return returnMap;
 	}
 
 	public Map<String, String> getServerNames(String returnResult){
