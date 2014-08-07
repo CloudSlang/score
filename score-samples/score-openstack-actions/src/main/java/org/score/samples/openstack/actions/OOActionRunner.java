@@ -25,6 +25,7 @@ public class OOActionRunner {
 	public final static String ACTION_EXCEPTION_EVENT_TYPE = "ACTION_EXCEPTION_EVENT";
 	private Class actionClass;
 	private Method actionMethod;
+	private String[] parameterNames;
 
 	/**
 	 * Wrapper method for running actions. A method is a valid action if it returns a Map<String, String>
@@ -62,7 +63,13 @@ public class OOActionRunner {
 		boolean validParameters = InputBindingUtility.validateParameterArray(parameterTypes, actualParameters, nullAllowed);
 		if (!validParameters) {
 			List<BindingConflict> conflicts = InputBindingUtility.getBindingConflicts(parameterTypes, actualParameters, nullAllowed);
-			throw new InputBindingUtility.InputBindingException(conflicts.toString());
+			String conflictsString = "[";
+			for (BindingConflict bindingConflict : conflicts) {
+				conflictsString += parameterNames[bindingConflict.getPosition()] + " -> " + bindingConflict.getConflictType() + ",";
+			}
+			conflictsString = conflictsString.substring(0, conflictsString.length()-1);
+			conflictsString += "]";
+			throw new InputBindingUtility.InputBindingException(conflictsString);
 		}
 	}
 
@@ -108,7 +115,7 @@ public class OOActionRunner {
 
 		//get the parameter names of the action method
 		ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
-		String[] parameterNames = parameterNameDiscoverer.getParameterNames(actionMethod);
+		parameterNames = parameterNameDiscoverer.getParameterNames(actionMethod);
 
 		//extract the parameters from execution context
 		return getParametersFromExecutionContext(executionContext, parameterNames);

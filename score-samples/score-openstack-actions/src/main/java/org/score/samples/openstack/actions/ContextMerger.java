@@ -73,6 +73,7 @@ public class ContextMerger {
 			jobject = jarray.get(i).getAsJsonObject();
 			serverNames.add(jobject.get("name").toString());
 		}
+		System.out.println("Available servers:");
 		for(String currentServerName : serverNames) {
 			System.out.println(currentServerName);
 		}
