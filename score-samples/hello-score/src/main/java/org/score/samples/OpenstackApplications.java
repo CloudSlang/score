@@ -58,21 +58,21 @@ public class OpenstackApplications {
 			System.out.println("1 - Create server on OpenStack");
 			System.out.println("2 - List servers from OpenStack");
 			System.out.println("3 - Input missing scenario");
-			System.out.println("4 - Quit\n");
+			System.out.println("4 - Quit");
 
-			System.out.print("Command:\n");
-			command = readLineDenyNulls(reader);
+			System.out.println("Command: ");
+			command = readLine(reader);
 
 			switch (command) {
 
 				case "1":
-					createServerInputs(true);
+					createServerInputs(reader, true);
 					break;
 				case "2":
-					listServerInputs(true);
+					listServerInputs(reader, true);
 					break;
 				case "3":
-					listServerInputs(false);
+					listServerInputs(reader, false);
 					break;
 				case "4":
 					System.exit(0);
@@ -84,51 +84,30 @@ public class OpenstackApplications {
 		}
 	}
 
-	private void listServerInputs(Boolean nullAllowed) {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+	private void listServerInputs(BufferedReader reader, Boolean nullAllowed) {
 		String username;
 		String password;
 		String host;
 		String port;
-		try {
-			System.out.println("Host: ");
-			host = readLineAdmitNulls(br);
-			System.out.println("Port: ");
-			port = br.readLine();
-			System.out.println("Username: ");
-			username = br.readLine();
-			System.out.println("Password: ");
-			password = br.readLine();
-			listServers(host, port, username, password, nullAllowed);
-		} catch (IOException ioe) {
-			System.out.println("IO error");
-			System.exit(1);
-		}
+		host = readInput(reader, "Host");
+		port = readInput(reader, "Port");
+		username = readInput(reader, "Username");
+		password = readInput(reader, "Password");
+		listServers(host, port, username, password, nullAllowed);
 	}
 
-	private void createServerInputs(Boolean nullAllowed) {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+	private void createServerInputs(BufferedReader reader, Boolean nullAllowed) {
 		String username;
 		String password;
 		String host;
 		String port;
 		String serverName;
-		try {
-			System.out.println("Host: ");
-			host = br.readLine();
-			System.out.println("Port: ");
-			port = br.readLine();
-			System.out.println("Username: ");
-			username = br.readLine();
-			System.out.println("Password: ");
-			password = br.readLine();
-			System.out.println("Server name: ");
-			serverName = br.readLine();
-			createServer(host, port, serverName, username, password, nullAllowed);
-		} catch (IOException ioe) {
-			System.out.println("IO error");
-			System.exit(1);
-		}
+		host = readInput(reader, "Host");
+		port = readInput(reader, "Port");
+		username = readInput(reader, "Username");
+		password = readInput(reader, "Password");
+		serverName = readInput(reader, "Server name");
+		createServer(host, port, serverName, username, password, nullAllowed);
 	}
 
 	private void createServer(String host, String port, String serverName, String username, String password, Boolean nullAllowed){
@@ -229,7 +208,12 @@ public class OpenstackApplications {
 		builder.addOOActionFinalStep(successStepId, "org.score.samples.openstack.actions.FinalStepActions", "successStepAction");
 	}
 
-	private String readLineDenyNulls(BufferedReader reader) {
+	private String readInput(BufferedReader reader, String inputName) {
+		System.out.print(inputName + ": ");
+		return readLine(reader);
+	}
+
+	private String readLine(BufferedReader reader) {
 		String line = null;
 		try {
 			line = reader.readLine();
@@ -238,17 +222,6 @@ public class OpenstackApplications {
 			System.exit(1);
 		}
 		return line;
-	}
-
-	private String readLineAdmitNulls(BufferedReader reader) {
-		String line = null;
-		try {
-			line = reader.readLine();
-		} catch (IOException ioe) {
-			System.out.println("IO error trying to read command");
-			System.exit(1);
-		}
-		return line.isEmpty() ? null : line;
 	}
 
 	private static OpenstackApplications loadApp() {
@@ -270,15 +243,15 @@ public class OpenstackApplications {
 		registerInfoEventListener(handlerTypes);
 
 		//register listener for action exception events
-		registerExceptionEventListener();
+		handlerTypes = new HashSet<>();
+		handlerTypes.add(OOActionRunner.ACTION_EXCEPTION_EVENT_TYPE);
+		registerExceptionEventListener(handlerTypes);
 
 		// for closing the Application Context when score finishes execution
 		registerScoreEventListener();
 	}
 
-	private void registerExceptionEventListener() {
-		Set<String> handlerTypes = new HashSet<>();
-		handlerTypes.add(OOActionRunner.ACTION_EXCEPTION_EVENT_TYPE);
+	private void registerExceptionEventListener(Set<String> handlerTypes) {
 		eventBus.subscribe(new ScoreEventListener() {
 			@Override
 			public void onEvent(ScoreEvent event) {
