@@ -29,10 +29,12 @@ final public class MessageRecoveryServiceImpl implements MessageRecoveryService{
 
         List<ExecutionMessage> messages = executionQueueService.poll(workerName, defaultPoolSize,
                 ExecStatus.ASSIGNED,
+                ExecStatus.SENT,
                 ExecStatus.IN_PROGRESS);
 
         logMessageRecovery(messages);
         enqueueMessages(messages,ExecStatus.RECOVERED);
+        //noinspection RedundantIfStatement
         if (messages == null || messages.size() < defaultPoolSize){
            return false;
         }
@@ -53,7 +55,7 @@ final public class MessageRecoveryServiceImpl implements MessageRecoveryService{
     }
 
     @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
+    @Transactional
     public void enqueueMessages(List<ExecutionMessage> messages, ExecStatus messageStatus) {
         if(!CollectionUtils.isEmpty(messages)){
             for(ExecutionMessage msg:messages){
@@ -63,6 +65,5 @@ final public class MessageRecoveryServiceImpl implements MessageRecoveryService{
             }
             executionQueueService.enqueue(messages);
         }
-
     }
 }

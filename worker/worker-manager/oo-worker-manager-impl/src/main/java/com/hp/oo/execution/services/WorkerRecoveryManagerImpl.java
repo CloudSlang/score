@@ -24,14 +24,16 @@ public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager {
 
 	@Autowired
 	private RetryTemplate retryTemplate;
-	private Lock lock = new ReentrantLock();
+
+    //Package protected variable
+	Lock recoveryLock = new ReentrantLock();
 
 	private volatile boolean inRecovery; //must be volatile since it is read/written in several threads
 
     private volatile String wrv; //must be volatile since it is read/written in several threads
 
 	public void doRecovery(){
-		if (!lock.tryLock()) return;
+		if (!recoveryLock.tryLock()) return;
 		try{
 			inRecovery = true;
             logger.warn("Worker recovery started");
@@ -56,7 +58,7 @@ public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager {
             inRecovery = false;
             logger.warn("Worker recovery is done");
         } finally {
-            lock.unlock();
+            recoveryLock.unlock();
 		}
 	}
 

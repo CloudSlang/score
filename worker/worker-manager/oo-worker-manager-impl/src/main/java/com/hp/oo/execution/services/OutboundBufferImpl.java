@@ -69,21 +69,21 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 
 		Validate.notEmpty(messages, "The array of messages is null or empty");
 		lock.lock();
-		try{
-			while (currentWeight >= maxBufferWeight){
-				logger.warn("Outbound buffer is full. Waiting...");
-				notFull.await();
-			}
+        try{
+            while (currentWeight >= maxBufferWeight){
+                logger.warn("Outbound buffer is full. Waiting...");
+                notFull.await();
+            }
 
-			// in case of multiple messages create a single compound message
-			// to make sure that it will be processed in a single transaction
-			Message message = messages.length==1? messages[0]: new CompoundMessage(messages);
+            // in case of multiple messages create a single compound message
+            // to make sure that it will be processed in a single transaction
+            Message message = messages.length==1? messages[0]: new CompoundMessage(messages);
 
-			if (!buffer.offer(message)){
-				logger.error("Failed to put message into the outgoing buffer");
-				throw new RuntimeException("Failed to put message into the outgoing buffer");
-			}
-			currentWeight += message.getWeight();
+            if (!buffer.offer(message)){
+                logger.error("Failed to put message into the outgoing buffer");
+                throw new RuntimeException("Failed to put message into the outgoing buffer");
+            }
+            currentWeight += message.getWeight();
 			if (logger.isTraceEnabled()) logger.trace(message.getClass().getSimpleName() + " added to the buffer. " + getStatus());
 		} catch (InterruptedException ex) {
 			logger.warn("Buffer put action was interrupted", ex);
@@ -215,6 +215,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
             buffer.clear();
             currentWeight = 0 ;
         } finally {
+            notFull.signalAll();
             lock.unlock();
         }
 	}

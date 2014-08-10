@@ -149,4 +149,10 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 	public List<ExecutionMessage> readMessagesByStatus(int maxSize, ExecStatus... statuses) {
 		return executionQueueRepository.findByStatuses(maxSize, statuses);
 	}
+
+    @Override
+    @Transactional(readOnly = true)
+    public int countMessagesWithoutAckForWorker(int maxSize, long minVersionAllowed, String workerUuid) {
+        return executionQueueRepository.countMessagesWithoutAckForWorker(maxSize, minVersionAllowed, workerUuid);
+    }
 }

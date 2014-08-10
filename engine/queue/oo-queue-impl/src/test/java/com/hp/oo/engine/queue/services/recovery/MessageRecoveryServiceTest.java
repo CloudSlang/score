@@ -61,12 +61,11 @@ public class MessageRecoveryServiceTest {
         int poolSize = 5;
         List<ExecutionMessage> messages = new ArrayList<>();
         messages.add(mock(ExecutionMessage.class));
-        when(executionQueueService.poll(uuid, poolSize, ExecStatus.ASSIGNED,  ExecStatus.IN_PROGRESS)).thenReturn(messages);
+        when(executionQueueService.poll(uuid, poolSize, ExecStatus.ASSIGNED,  ExecStatus.SENT, ExecStatus.IN_PROGRESS)).thenReturn(messages);
         boolean toContinue = messageRecoveryService.recoverMessagesBulk(uuid, poolSize);
         setMessageListToRecovered(messages);
         assertThat("no messages to continue , should not continue", toContinue, is(Boolean.FALSE));
         verify(executionQueueService, times(1)).enqueue(messages);
-
     }
 
     @Test
@@ -77,7 +76,7 @@ public class MessageRecoveryServiceTest {
         List<ExecutionMessage> messages = new ArrayList<>();
         messages.add(mock(ExecutionMessage.class));
         messages.add(mock(ExecutionMessage.class));
-        when(executionQueueService.poll(uuid, poolSize, ExecStatus.ASSIGNED, ExecStatus.IN_PROGRESS)).thenReturn(messages);
+        when(executionQueueService.poll(uuid, poolSize, ExecStatus.ASSIGNED, ExecStatus.SENT, ExecStatus.IN_PROGRESS)).thenReturn(messages);
         boolean toContinue = messageRecoveryService.recoverMessagesBulk(uuid, poolSize);
         setMessageListToRecovered(messages);
         assertThat("no messages, should not continue", toContinue, is(Boolean.TRUE));

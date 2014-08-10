@@ -28,4 +28,6 @@ public interface ExecutionQueueService {
 	Map<Long,Payload> readPayloadByExecutionIds(Long... executionIds);
 
 	List<ExecutionMessage> readMessagesByStatus(int maxSize, ExecStatus... statuses);
+
+    int countMessagesWithoutAckForWorker(int maxSize,long minVersionAllowed, String workerUuid);
 }

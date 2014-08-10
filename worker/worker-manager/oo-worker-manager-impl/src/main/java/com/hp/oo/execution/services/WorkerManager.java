@@ -65,7 +65,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 
 	private Map<Long, Future> mapOfRunningTasks;
 
-	private boolean endOfInit = false;
+	private volatile boolean endOfInit = false;
 	private boolean up = false;
 
 	@PostConstruct

@@ -3,6 +3,7 @@ package com.hp.oo.engine.node.services;
 import com.google.common.collect.Multimap;
 import com.hp.oo.engine.node.entities.WorkerNode;
 import com.hp.oo.enginefacade.Worker;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -72,4 +73,6 @@ public interface WorkerNodeService {
     void updateBulkNumber(String workerUuid, String bulkNumber);
 
     void updateWRV(String workerUuid, String wrv);
+
+    List<String> readAllWorkersUuids();
 }

@@ -175,6 +175,18 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService, UserDetai
 
     @Override
     @Transactional(readOnly = true)
+    public List<String> readAllWorkersUuids() {
+        List<WorkerNode> workers = workerNodeRepository.findAll();
+        List<String> result = new ArrayList<>();
+
+        for(WorkerNode w :workers){
+            result.add(w.getUuid());
+        }
+        return result;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<String> readNonRespondingWorkers() {
         long systemVersion = versionService.getCurrentVersion(MSG_RECOVERY_VERSION_NAME);
         long minVersionAllowed = Math.max(systemVersion - maxVersionGapAllowed, 0);
