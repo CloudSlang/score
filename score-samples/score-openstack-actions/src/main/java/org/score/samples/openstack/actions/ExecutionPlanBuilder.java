@@ -18,6 +18,7 @@ import java.util.UUID;
 public class ExecutionPlanBuilder {
 	public static final String ACTION_CLASS_KEY = "className";
 	public static final String ACTION_METHOD_KEY = "methodName";
+	public static final String NULL_ALLOWED_KEY = "nullAllowed";
 
 	private ExecutionPlan executionPlan;
 
@@ -31,18 +32,21 @@ public class ExecutionPlanBuilder {
 		return executionPlan;
 	}
 
-	public Long addStep(
+	public Long addOOActionStep(
 			Long stepId,
 			String actionClassName,
 			String actionMethodName,
-			List<NavigationMatcher<Serializable>> navigationMatchers) {
+			Boolean nullInputsAllowed,
+			List<NavigationMatcher<Serializable>> navigationMatchers
+	) {
 		ExecutionStep step = new ExecutionStep(stepId);
 
 		step.setAction(new ControlActionMetadata("org.score.samples.openstack.actions.OOActionRunner", "run"));
-		Map<String, String> actionData = new HashMap<>(2);
+		Map<String, Serializable> actionData = new HashMap<>(3);
 		//put the actual action class name and method name
 		actionData.put(ACTION_CLASS_KEY, actionClassName);
 		actionData.put(ACTION_METHOD_KEY, actionMethodName);
+		actionData.put(NULL_ALLOWED_KEY, nullInputsAllowed);
 		step.setActionData(actionData);
 
 		step.setNavigation(new ControlActionMetadata("org.score.samples.openstack.actions.OOActionNavigator", "navigate"));
@@ -58,8 +62,18 @@ public class ExecutionPlanBuilder {
 		return step.getExecStepId();
 	}
 
-	public Long addFinalStep(Long stepId, String actionClassName, String actionMethodName) {
-		return addStep(stepId, actionClassName, actionMethodName, null);
+
+	public Long addOOActionStep(
+			Long stepId,
+			String actionClassName,
+			String actionMethodName,
+			List<NavigationMatcher<Serializable>> navigationMatchers
+	) {
+		return addOOActionStep(stepId, actionClassName, actionMethodName, true, navigationMatchers);
+	}
+
+	public Long addOOActionFinalStep(Long stepId, String actionClassName, String actionMethodName) {
+		return addOOActionStep(stepId, actionClassName, actionMethodName, null);
 	}
 
 	@SuppressWarnings("unused")

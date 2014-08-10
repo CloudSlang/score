@@ -10,7 +10,6 @@ import java.util.Set;
  * User: maromg
  * Date: 10/06/2014
  */
-@Deprecated
 public class SystemContext extends ExecutionRuntimeServices implements Map<String, Serializable> {
 
     private static final long serialVersionUID = -2882205533540314198L;

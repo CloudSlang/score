@@ -68,6 +68,14 @@ public class InputBindingUtility {
 		private int position;
 		private ConflictType conflictType;
 
+		public int getPosition() {
+			return position;
+		}
+
+		public ConflictType getConflictType() {
+			return conflictType;
+		}
+
 		@Override
 		public String toString() {
 			return "BindingConflict{" +

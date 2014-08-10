@@ -1,6 +1,5 @@
 package com.hp.oo.enginefacade.execution;
 
-import com.hp.oo.internal.sdk.execution.OOContext;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;

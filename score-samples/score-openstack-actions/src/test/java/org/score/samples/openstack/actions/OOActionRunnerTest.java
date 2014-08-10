@@ -84,7 +84,7 @@ public class OOActionRunnerTest {
 			String actionMethodName)
 			throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
 		OOActionRunner runner = new OOActionRunner();
-		runner.run(executionContext, executionRuntimeServices, actionClassName, actionMethodName);
+		runner.run(executionContext, executionRuntimeServices, actionClassName, actionMethodName, true);
 	}
 
 	private Map<String, Serializable> prepareActualExecutionContext() {

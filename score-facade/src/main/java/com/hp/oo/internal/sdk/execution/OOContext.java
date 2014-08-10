@@ -19,7 +19,7 @@ import java.util.Set;
  * Date: 2/28/12
  * Time: 3:59 PM
  */
-
+//TODO - remove
 public class OOContext implements Serializable {
 
     private Map<String, String> contextMap;

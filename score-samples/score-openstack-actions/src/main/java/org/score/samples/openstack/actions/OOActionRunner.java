@@ -21,10 +21,11 @@ import java.util.Map;
  */
 public class OOActionRunner {
 	private final static Logger logger = Logger.getLogger(OOActionRunner.class);
-	public final static String ACTION_RUNTIME_EVENT_TYPE = "action_runtime_event";
-	public final static String ACTION_EXCEPTION_EVENT_TYPE = "action_exception_event";
+	public final static String ACTION_RUNTIME_EVENT_TYPE = "ACTION_RUNTIME_EVENT";
+	public final static String ACTION_EXCEPTION_EVENT_TYPE = "ACTION_EXCEPTION_EVENT";
 	private Class actionClass;
 	private Method actionMethod;
+	private String[] parameterNames;
 
 	/**
 	 * Wrapper method for running actions. A method is a valid action if it returns a Map<String, String>
@@ -39,13 +40,15 @@ public class OOActionRunner {
 			Map<String, Serializable> executionContext,
 			ExecutionRuntimeServices executionRuntimeServices,
 			String className,
-			String methodName) {
+			String methodName,
+			Boolean nullAllowed) {
 		try {
 			logger.info("run method invocation");
 
 			Object[] actualParameters = extractMethodData(executionContext, executionRuntimeServices, className, methodName);
 
-			verifyActionInputs(actualParameters, true);
+			nullAllowed = nullAllowed == null ? true : nullAllowed;
+			verifyActionInputs(actualParameters, nullAllowed);
 
 			Map<String, String> results = invokeMethod(executionRuntimeServices, className, methodName, actualParameters);
 
@@ -60,7 +63,13 @@ public class OOActionRunner {
 		boolean validParameters = InputBindingUtility.validateParameterArray(parameterTypes, actualParameters, nullAllowed);
 		if (!validParameters) {
 			List<BindingConflict> conflicts = InputBindingUtility.getBindingConflicts(parameterTypes, actualParameters, nullAllowed);
-			throw new InputBindingUtility.InputBindingException(conflicts.toString());
+			String conflictsString = "[";
+			for (BindingConflict bindingConflict : conflicts) {
+				conflictsString += parameterNames[bindingConflict.getPosition()] + " -> " + bindingConflict.getConflictType() + ",";
+			}
+			conflictsString = conflictsString.substring(0, conflictsString.length()-1);
+			conflictsString += "]";
+			throw new InputBindingUtility.InputBindingException(conflictsString);
 		}
 	}
 
@@ -106,7 +115,7 @@ public class OOActionRunner {
 
 		//get the parameter names of the action method
 		ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
-		String[] parameterNames = parameterNameDiscoverer.getParameterNames(actionMethod);
+		parameterNames = parameterNameDiscoverer.getParameterNames(actionMethod);
 
 		//extract the parameters from execution context
 		return getParametersFromExecutionContext(executionContext, parameterNames);
