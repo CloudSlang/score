@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>com.hp.score</groupId>
 		<artifactId>worker</artifactId>
-		<version>0.1.169</version>
+		<version>0.1.170-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
