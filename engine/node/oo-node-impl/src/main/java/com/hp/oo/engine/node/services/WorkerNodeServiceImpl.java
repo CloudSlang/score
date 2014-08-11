@@ -8,6 +8,7 @@ import com.hp.oo.engine.versioning.services.VersionService;
 import com.hp.oo.enginefacade.Worker;
 import com.hp.oo.enginefacade.Worker.Status;
 import org.apache.commons.lang.Validate;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
@@ -49,6 +50,8 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService, UserDetai
     @Autowired(required = false)
     private List<LoginListener> loginListeners;
 
+    private final Logger logger = Logger.getLogger(getClass());
+
     @Override
     @Transactional
 //	@Secured("ROLE_RUN_WORKER")
@@ -64,7 +67,7 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService, UserDetai
         if (!worker.getStatus().equals(Status.IN_RECOVERY)) {
             worker.setStatus(Status.RUNNING);
         }
-
+        logger.debug("Got keepAlive from Worker with uuid="+ uuid + " and update its ackVersion to "+ version);
         return wrv;
     }
 
