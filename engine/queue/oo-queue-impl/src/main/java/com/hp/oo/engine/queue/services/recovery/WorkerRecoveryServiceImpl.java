@@ -56,6 +56,12 @@ public class WorkerRecoveryServiceImpl implements WorkerRecoveryService, LoginLi
         int messagesCount = getMessagesWithoutAck(DEFAULT_POLL_SIZE, workerUuid);
 
         if (workerUuids.contains(workerUuid) || messagesCount > 0) {
+            if(workerUuids.contains(workerUuid)){
+                logger.warn("Worker : " + workerUuid + " is non responsive! Worker recovery is started.");
+            }
+            if(messagesCount > 0){
+                logger.warn("Worker : " + workerUuid + " has " + messagesCount + " not acknowledged messages. Worker recovery is started.");
+            }
             doWorkerRecovery(workerUuid);
         }
     }
@@ -87,13 +93,13 @@ public class WorkerRecoveryServiceImpl implements WorkerRecoveryService, LoginLi
     }
 
     private int getMessagesWithoutAck(int maxSize, String workerUuid) {
-        if (logger.isDebugEnabled()) logger.debug("Getting messages count without ack...");
+        if (logger.isDebugEnabled()) logger.debug("Getting messages count without ack for worker: " + workerUuid);
 
         long systemVersion = versionService.getCurrentVersion(CounterNames.MSG_RECOVERY_VERSION.name());
         long minVersionAllowed = Math.max( systemVersion - maxAllowedGap , 0);
         int result = executionQueueService.countMessagesWithoutAckForWorker(maxSize, minVersionAllowed, workerUuid);
 
-        if (logger.isDebugEnabled()) logger.debug("Messages without ack found: " + result);
+        if (logger.isDebugEnabled()) logger.debug("Messages without ack found: " + result + " for worker: " + workerUuid);
 
         return result;
     }
