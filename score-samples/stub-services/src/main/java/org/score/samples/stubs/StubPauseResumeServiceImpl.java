@@ -14,6 +14,11 @@ import java.util.Set;
  * User: stoneo
  * Date: 14/07/2014
  * Time: 11:13
+ * TODO -   please don't remove the explanation until the implementation is done!
+ * this implementation is temporary.
+ * the implementation is currently in OO -
+ * we plan to have it implemented in the future
+ * until it done, no pause and resume is possible in score
  */
 public class StubPauseResumeServiceImpl implements PauseResumeService {
 
