@@ -114,16 +114,33 @@ public class OpenstackApplications {
 		ExecutionPlanBuilder builder = new ExecutionPlanBuilder();
 		Map<String, Serializable> executionContext = new HashMap<>();
 
-		createGetTokenStep(host, port, username, password, builder, executionContext, nullAllowed);
+		Long tokenStepId = 0L;
+		Long contextMergerStepId = 1L;
+		Long createServerStepId = 2L;
+		Long successStepId = 3L;
 
-		createContextMergerStep(builder, nullAllowed);
+		createGetTokenStep(host, port, username, password, builder, executionContext, nullAllowed, tokenStepId, contextMergerStepId, successStepId);
 
-		startServerStep(serverName, builder, executionContext, nullAllowed);
+		createContextMergerStep(builder, nullAllowed, contextMergerStepId, createServerStepId, successStepId);
+
+		startServerStep(serverName, builder, executionContext, nullAllowed, createServerStepId, successStepId, successStepId);
+
+		createSuccessStep(builder, successStepId);
 
 		triggerWithContext(builder, executionContext);
 	}
 
-	private void createGetTokenStep(String host, String port, String username, String password, ExecutionPlanBuilder builder, Map<String, Serializable> executionContext, Boolean nullAllowed){
+	private void createGetTokenStep(
+			String host,
+			String port,
+			String username,
+			String password,
+			ExecutionPlanBuilder builder,
+			Map<String, Serializable> executionContext,
+			Boolean nullAllowed,
+			Long stepId,
+			Long nextStepId,
+			Long defaultStepId){
 		String url = "http://" + host + ":" + port + "/v2.0/tokens";
 		String body = "{\"auth\": {\"tenantName\": \"demo\",\"passwordCredentials\": {\"username\": \"" + username +"\",\"password\": \"" + password + "\"}}}";
 
@@ -134,43 +151,64 @@ public class OpenstackApplications {
 
 		List<NavigationMatcher<Serializable>> navigationMatchers = new ArrayList<>();
 
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, "returnCode", "0", 1L)); // how will we know the key
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, 3L));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, "returnCode", "0", nextStepId));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, defaultStepId));
 
-		builder.addOOActionStep(0L, "org.score.content.httpclient.HttpClientAction", "execute", nullAllowed, navigationMatchers);
+		builder.addOOActionStep(stepId, "org.score.content.httpclient.HttpClientAction", "execute", nullAllowed, navigationMatchers);
 	}
 
-	private void createContextMergerStep(ExecutionPlanBuilder builder, Boolean nullAllowed) {
+	private void createContextMergerStep(
+			ExecutionPlanBuilder builder,
+			Boolean nullAllowed,
+			Long stepId,
+			Long nextStepId,
+			Long defaultStepId) {
 		List<NavigationMatcher<Serializable>> navigationMatchers = new ArrayList<>();
 
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, "result", "0", 2L)); // how will we know the key
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, 3L));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, "result", "0", nextStepId));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, defaultStepId));
 
-		builder.addOOActionStep(1L, "org.score.samples.openstack.actions.ContextMerger", "prepareCreateServer", nullAllowed, navigationMatchers);
+		builder.addOOActionStep(stepId, "org.score.samples.openstack.actions.ContextMerger", "prepareCreateServer", nullAllowed, navigationMatchers);
 	}
 
-	private void startServerStep(String serverName, ExecutionPlanBuilder builder, Map<String, Serializable> executionContext, Boolean nullAllowed){
+	private void startServerStep(
+			String serverName,
+			ExecutionPlanBuilder builder,
+			Map<String, Serializable> executionContext,
+			Boolean nullAllowed,
+			Long stepId,
+			Long nextStepId,
+			Long defaultStepId){
 		executionContext.put("serverName", serverName);
 		executionContext.put("method", "post");
 
 		List<NavigationMatcher<Serializable>> navigationMatchers = new ArrayList<>();
 
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, "returnCode", "0", 3L)); // how will we know the key
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, 3L));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, "returnCode", "0", nextStepId));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, defaultStepId));
 
-		builder.addOOActionStep(2L, "org.score.content.httpclient.HttpClientAction", "execute", nullAllowed, navigationMatchers);
-		builder.addOOActionFinalStep(3L, "org.score.samples.openstack.actions.FinalStepActions", "successStepAction");
+		builder.addOOActionStep(stepId, "org.score.content.httpclient.HttpClientAction", "execute", nullAllowed, navigationMatchers);
 	}
 
 	private void listServers(String host, String port, String username, String password, Boolean nullAllowed){
 		ExecutionPlanBuilder builder = new ExecutionPlanBuilder();
 		Map<String, Serializable> executionContext = new HashMap<>();
 
-		createGetTokenStep(host, port, username, password, builder, executionContext, nullAllowed);
+		Long tokenStepId = 0L;
+		Long mergerStepId = 1L;
+		Long getServersStepId = 2L;
+		Long displayStepId = 3L;
+		Long successStepId = 4L;
 
-		createPrepareGetServersStep(builder, nullAllowed);
+		createGetTokenStep(host, port, username, password, builder, executionContext, nullAllowed, tokenStepId, mergerStepId, successStepId);
 
-		createGetServersStep(builder, nullAllowed);
+		createPrepareGetServersStep(builder, nullAllowed, mergerStepId, getServersStepId);
+
+		createGetServersStep(builder, nullAllowed, getServersStepId, displayStepId);
+
+		createDisplayStep(builder, nullAllowed, displayStepId, successStepId);
+
+		createSuccessStep(builder, successStepId);
 
 		triggerWithContext(builder, executionContext);
 	}
@@ -183,29 +221,35 @@ public class OpenstackApplications {
 		score.trigger(triggeringProperties);
 	}
 
-	private void createPrepareGetServersStep(ExecutionPlanBuilder builder, Boolean nullAllowed) {
+	private void createPrepareGetServersStep(
+			ExecutionPlanBuilder builder,
+			Boolean nullAllowed,
+			Long stepId,
+			Long defaultStepId) {
 		//prepare context for get servers
 		List<NavigationMatcher<Serializable>>  navigationMatchers = new ArrayList<>();
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, 2L));
-		builder.addOOActionStep(1L, "org.score.samples.openstack.actions.ContextMerger", "prepareGetServer", nullAllowed, navigationMatchers);
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, defaultStepId));
+		builder.addOOActionStep(stepId, "org.score.samples.openstack.actions.ContextMerger", "prepareGetServer", nullAllowed, navigationMatchers);
 	}
 
-	private void createGetServersStep(ExecutionPlanBuilder builder, Boolean nullAllowed) {
-		Long successStepId = 4L;
-		Long displayStepId = 3L;
+	private void createGetServersStep(ExecutionPlanBuilder builder, Boolean nullAllowed,Long stepId, Long defaultStepId) {
 		List<NavigationMatcher<Serializable>>  navigationMatchers = new ArrayList<>();
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, "statusCode", "200", displayStepId));
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, "statusCode", "203", displayStepId));
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, displayStepId));
-		builder.addOOActionStep(2L, "org.score.content.httpclient.HttpClientAction", "execute", nullAllowed, navigationMatchers);
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, "statusCode", "200", defaultStepId));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, "statusCode", "203", defaultStepId));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, defaultStepId));
+		builder.addOOActionStep(stepId, "org.score.content.httpclient.HttpClientAction", "execute", nullAllowed, navigationMatchers);
+	}
 
-		//display step
-		navigationMatchers = new ArrayList<>();
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, successStepId));
-		builder.addOOActionStep(displayStepId, "org.score.samples.openstack.actions.ContextMerger", "getServerNames", nullAllowed, navigationMatchers);
-
+	private void createSuccessStep(ExecutionPlanBuilder builder, Long successStepId) {
 		//success step
 		builder.addOOActionFinalStep(successStepId, "org.score.samples.openstack.actions.FinalStepActions", "successStepAction");
+	}
+
+	private void createDisplayStep(ExecutionPlanBuilder builder, Boolean nullAllowed, Long stepId, Long defaultStepId) {
+		List<NavigationMatcher<Serializable>> navigationMatchers;//display step
+		navigationMatchers = new ArrayList<>();
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, defaultStepId));
+		builder.addOOActionStep(stepId, "org.score.samples.openstack.actions.ContextMerger", "getServerNames", nullAllowed, navigationMatchers);
 	}
 
 	private String readInput(BufferedReader reader, String inputName) {

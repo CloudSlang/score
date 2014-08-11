@@ -89,14 +89,16 @@ public class OOActionRunner {
 
 		// if the action method does not have any parameters then actualParameters is null
 		if (actualParameters != null) {
-			invokeMessage += " with parameters: ";
+			invokeMessage += " with parameters: [";
 			int limit = actualParameters.length - 1;
 			for (int i = 0; i < limit; i++) {
 				String parameter = actualParameters[i] == null ? "null" : actualParameters[i].toString();
-				invokeMessage += parameter + ",";
+				String pair = parameterNames[i] + " -> " + parameter;
+				invokeMessage += pair + ",";
 			}
 			invokeMessage += actualParameters[actualParameters.length - 1];
 		}
+		invokeMessage += "]";
 
 		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, invokeMessage);
 
