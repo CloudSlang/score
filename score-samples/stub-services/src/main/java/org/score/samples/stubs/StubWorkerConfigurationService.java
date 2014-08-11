@@ -1,5 +1,6 @@
 package org.score.samples.stubs;
 
+import com.google.common.collect.Lists;
 import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
 
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ public class StubWorkerConfigurationService implements WorkerConfigurationServic
 
     @Override
     public List<String> getWorkerGroups() {
-        return null;
+        return Lists.newArrayList("RAS_Operator_Path");
     }
 
     @Override

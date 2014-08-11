@@ -15,5 +15,10 @@
             <artifactId>score-facade</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.google.collections</groupId>
+            <artifactId>google-collections</artifactId>
+        </dependency>
     </dependencies>
 </project>
