@@ -109,6 +109,8 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
                             String currentWrv = recoveryManager.getWRV();
                             //do not update it!!! if it is different than we have - restart worker (clean state)
                             if(!currentWrv.equals(newWrv)){
+                                logger.warn("Got new WRV from Orchestrator during keepAlive(). Going to reload...");
+
                                 recoveryManager.doRecovery();
                             }
                             keepAliveFailCount = 0;
