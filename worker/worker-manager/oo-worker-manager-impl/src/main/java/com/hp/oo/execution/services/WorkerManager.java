@@ -66,6 +66,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 	private Map<Long, Future> mapOfRunningTasks;
 
 	private volatile boolean endOfInit = false;
+    private volatile boolean initStarted = false;
 	private boolean up = false;
 
 	@PostConstruct
@@ -143,7 +144,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 
 	@Override
 	public void onApplicationEvent(final ApplicationEvent applicationEvent) {
-		if (applicationEvent instanceof ContextRefreshedEvent && !endOfInit) {
+		if (applicationEvent instanceof ContextRefreshedEvent && !initStarted) {
 			doStartup();
 		} else if (applicationEvent instanceof ContextClosedEvent) {
 			doShutdown();
@@ -153,8 +154,9 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 	private void doStartup() {
 		new Thread(new Runnable() {
 			@Override public void run() {
+                        initStarted = true;
                         long sleep = initStartUpSleep;
-		                boolean shouldRetry = true;
+                        boolean shouldRetry = true;
 		                while (shouldRetry) {
 			                try {
 				                String newWrv = workerNodeService.up(workerUuid);
@@ -185,6 +187,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 
     private void doShutdown() {
     		endOfInit = false;
+            initStarted = false;
     		workerConfigurationService.enabled(false);
     		workerNodeService.down(workerUuid);
     		up = false;
