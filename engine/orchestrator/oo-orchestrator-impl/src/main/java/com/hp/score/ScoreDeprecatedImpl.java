@@ -27,10 +27,8 @@ public class ScoreDeprecatedImpl implements ScoreDeprecated {
     }
 
     @Override
-    //todo: change the method to get the TriggeringProperties object
-    public Long trigger(Long executionId, ExecutionPlan executionPlan, Map<String, ? extends Serializable> context, Map<String, ? extends Serializable> runtimeValues, Long startStep) {
-        TriggeringProperties triggeringProperties = TriggeringProperties.create(executionPlan).setContext(context).setRuntimeValues(runtimeValues).setStartStep(startStep);
-        return scoreTriggering.trigger(executionId, triggeringProperties);
+    public Long trigger(Long executionId, TriggeringProperties triggeringProperties) {
+         return scoreTriggering.trigger(executionId, triggeringProperties);
     }
 
 }
