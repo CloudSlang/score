@@ -61,6 +61,8 @@ import java.util.Map;
 @SuppressWarnings("unused")
 public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
+    private final static String ENGINE_JOBS_CONTEXT_LOCATION = "META-INF/spring/score/context/scoreEngineSchedulerContext.xml";
+
 	private Map<Class<?>,String> beans = new HashMap<Class<?>,String>(){{
 		put(ScorePauseResumeImpl.class, null);
 		put(OrchestratorServiceImpl.class, "orchestratorService");
@@ -119,7 +121,14 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
         }
 
         String repositoriesContextPath = "META-INF/spring/score/context/scoreRepositoryContext.xml";
-        new XmlBeanDefinitionReader(beanDefinitionRegistry).loadBeanDefinitions(repositoriesContextPath);
+
+        String ignoreEngineJobs = element.getAttribute("ignoreEngineJobs");
+        if(!StringUtils.isBlank(ignoreEngineJobs) && ignoreEngineJobs.equals(Boolean.TRUE.toString())){
+            new XmlBeanDefinitionReader(beanDefinitionRegistry).loadBeanDefinitions(repositoriesContextPath);
+        }
+        else{
+            new XmlBeanDefinitionReader(beanDefinitionRegistry).loadBeanDefinitions(repositoriesContextPath,ENGINE_JOBS_CONTEXT_LOCATION);
+        }
     }
 
     private void registerBeans(ParserContext parserContext) {

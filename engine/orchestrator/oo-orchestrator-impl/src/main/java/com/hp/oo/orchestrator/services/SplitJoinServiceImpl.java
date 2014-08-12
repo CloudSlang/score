@@ -15,12 +15,15 @@ import com.hp.oo.orchestrator.entities.SuspendedExecution;
 import com.hp.oo.orchestrator.repositories.FinishedBranchRepository;
 import com.hp.oo.orchestrator.repositories.SuspendedExecutionsRepository;
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +34,8 @@ import static ch.lambdaj.Lambda.on;
 
 public final class SplitJoinServiceImpl implements SplitJoinService {
     private final Logger logger = Logger.getLogger(getClass());
+
+    private final Integer BULK_SIZE = Integer.getInteger("splitjoin.job.bulk.size", 200);
 
     @Autowired
     private SuspendedExecutionsRepository suspendedExecutionsRepository;
@@ -182,6 +187,16 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         List<SuspendedExecution> suspendedExecutions = suspendedExecutionsRepository.findFinishedSuspendedExecutions(pageRequest);
 
         return joinAndSendToQueue(suspendedExecutions);
+    }
+
+    @Override
+    @Transactional
+    public void joinFinishedSplits() {
+        try {
+            joinFinishedSplits(BULK_SIZE);
+        } catch (Exception ex) {
+            logger.error("SplitJoinJob failed", ex);
+        }
     }
 
     private int joinAndSendToQueue(List<SuspendedExecution> suspendedExecutions) {

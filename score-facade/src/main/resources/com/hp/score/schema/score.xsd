@@ -20,6 +20,7 @@
 			<xsd:attribute type="xsd:string" name="id"/>
 			<xsd:attribute type="xsd:string" name="messageDigestAlgorithm"/>
             <xsd:attribute type="xsd:boolean" name="externalDatabase" />
+            <xsd:attribute type="xsd:boolean" name="ignoreEngineJobs" />
         </xsd:complexType>
 	</xsd:element>
 
