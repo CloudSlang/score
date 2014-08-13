@@ -36,7 +36,7 @@ import com.hp.score.engine.data.DataBaseDetector;
 import com.hp.score.engine.data.HiloFactoryBean;
 import com.hp.score.engine.data.SqlInQueryReader;
 import com.hp.score.engine.data.SqlUtils;
-import com.hp.score.jobs.ScoreEngineJobsImpl;
+import com.hp.score.job.ScoreEngineJobsImpl;
 import com.hp.score.schema.context.ScoreDatabaseContext;
 import com.hp.score.schema.context.ScoreDefaultDatasourceContext;
 import com.hp.score.services.ExecutionStateServiceImpl;

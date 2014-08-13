@@ -1,4 +1,4 @@
-package com.hp.score.jobs;
+package com.hp.score.job;
 
 /**
  * User: wahnonm

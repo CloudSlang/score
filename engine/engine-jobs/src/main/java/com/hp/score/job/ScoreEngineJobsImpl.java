@@ -1,4 +1,4 @@
-package com.hp.score.jobs;
+package com.hp.score.job;
 
 import com.hp.oo.engine.queue.services.CounterNames;
 import com.hp.oo.engine.queue.services.cleaner.QueueCleanerService;
