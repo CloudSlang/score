@@ -60,6 +60,14 @@
 			<version>${project.version}</version>
 		</dependency>
 
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>engine-jobs</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!--end of score engine artifacts  -->
+
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-entitymanager</artifactId>

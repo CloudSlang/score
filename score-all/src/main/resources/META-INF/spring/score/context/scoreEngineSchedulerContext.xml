@@ -5,7 +5,10 @@
 
     <task:scheduler id="scoreOrchestratorScheduler" pool-size="3"/>
     <task:scheduled-tasks scheduler="scoreOrchestratorScheduler">
-        <task:scheduled ref="splitJoinService" method="joinFinishedSplits" fixed-delay="1000" initial-delay="1000" />
-        <task:scheduled ref="OO_EXECUTION_STATES" method="onRolling" fixed-delay="#{3*90*1000}" initial-delay="2000" />
+        <task:scheduled ref="scoreEngineJobs" method="joinFinishedSplitsJob" fixed-delay="1000" initial-delay="1000" />
+        <task:scheduled ref="scoreEngineJobs" method="statesRollingJob" fixed-delay="#{3*90*1000}" initial-delay="2000" />
+        <task:scheduled ref="scoreEngineJobs" method="cleanQueueJob" fixed-delay="60000" initial-delay="120000" />
+        <task:scheduled ref="scoreEngineJobs" method="recoveryVersionJob" fixed-delay="30000" initial-delay="6000" />
+        <task:scheduled ref="scoreEngineJobs" method="executionRecoveryJob" fixed-delay="120000" initial-delay="120000" />
     </task:scheduled-tasks>
 </beans>

@@ -1,7 +1,5 @@
 package com.hp.oo.engine.queue.services.recovery;
 
-import org.springframework.transaction.annotation.Transactional;
-
 /**
  * Created by IntelliJ IDEA.
  * User: Amit Levin
