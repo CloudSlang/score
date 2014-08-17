@@ -1,5 +1,6 @@
 package com.hp.oo.engine.queue.services.recovery;
 
+import com.hp.oo.engine.node.entities.WorkerNode;
 import com.hp.oo.engine.node.services.WorkerLockService;
 import com.hp.oo.engine.node.services.WorkerNodeService;
 import com.hp.oo.engine.queue.services.CounterNames;
@@ -61,7 +62,9 @@ public class WorkerRecoveryServiceTest {
     public void testDoWorkerAndMessageRecoveryResponsiveAndNoMessages() throws Exception {
         when(workerNodeService.readNonRespondingWorkers()).thenReturn(Collections.<String>emptyList());
         when(executionQueueService.countMessagesWithoutAckForWorker(anyInt(), anyLong(), anyString())).thenReturn(0);
-
+        WorkerNode mockWorker = mock(WorkerNode.class);
+        when(mockWorker.getStatus()).thenReturn(Worker.Status.RUNNING);
+        when(workerNodeService.findByUuid("123")).thenReturn(mockWorker);
         workerRecoveryService.doWorkerAndMessageRecovery("123");
 
         //Make sure the methods did not run
@@ -73,7 +76,9 @@ public class WorkerRecoveryServiceTest {
     public void testDoWorkerAndMessageRecoveryNonResponsive() throws Exception {
         when(workerNodeService.readNonRespondingWorkers()).thenReturn(getNonResponsiveWorkers());
         when(executionQueueService.countMessagesWithoutAckForWorker(anyInt(), anyLong(), anyString())).thenReturn(0);
-
+        WorkerNode mockWorker = mock(WorkerNode.class);
+        when(mockWorker.getStatus()).thenReturn(Worker.Status.RUNNING);
+        when(workerNodeService.findByUuid("123")).thenReturn(mockWorker);
         workerRecoveryService.doWorkerAndMessageRecovery("123");
         //Make sure the methods did run
         verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("123", Worker.Status.IN_RECOVERY);
@@ -84,7 +89,23 @@ public class WorkerRecoveryServiceTest {
     public void testDoWorkerAndMessageRecoveryResponsiveAndHasMessages() throws Exception {
         when(workerNodeService.readNonRespondingWorkers()).thenReturn(Collections.<String>emptyList());
         when(executionQueueService.countMessagesWithoutAckForWorker(anyInt(), anyLong(), anyString())).thenReturn(10);
+        WorkerNode mockWorker = mock(WorkerNode.class);
+        when(mockWorker.getStatus()).thenReturn(Worker.Status.RUNNING);
+        when(workerNodeService.findByUuid("123")).thenReturn(mockWorker);
+        workerRecoveryService.doWorkerAndMessageRecovery("123");
 
+        //Make sure the methods did run
+        verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("123", Worker.Status.IN_RECOVERY);
+    }
+
+    @Test
+    //Test the situation when the worker is responsive, in recovery and has no not acked messages
+    public void testDoWorkerAndMessageRecoveryResponsiveInRecoveryAndHasMessages() throws Exception {
+        when(workerNodeService.readNonRespondingWorkers()).thenReturn(Collections.<String>emptyList());
+        when(executionQueueService.countMessagesWithoutAckForWorker(anyInt(), anyLong(), anyString())).thenReturn(0);
+        WorkerNode mockWorker = mock(WorkerNode.class);
+        when(mockWorker.getStatus()).thenReturn(Worker.Status.IN_RECOVERY);
+        when(workerNodeService.findByUuid("123")).thenReturn(mockWorker);
         workerRecoveryService.doWorkerAndMessageRecovery("123");
 
         //Make sure the methods did run
@@ -96,7 +117,9 @@ public class WorkerRecoveryServiceTest {
     public void testDoWorkerAndMessageRecoveryNonResponsiveAndHasMessages() throws Exception {
         when(workerNodeService.readNonRespondingWorkers()).thenReturn(getNonResponsiveWorkers());
         when(executionQueueService.countMessagesWithoutAckForWorker(anyInt(), anyLong(), anyString())).thenReturn(200);
-
+        WorkerNode mockWorker = mock(WorkerNode.class);
+        when(mockWorker.getStatus()).thenReturn(Worker.Status.IN_RECOVERY);
+        when(workerNodeService.findByUuid("123")).thenReturn(mockWorker);
         workerRecoveryService.doWorkerAndMessageRecovery("123");
         //Make sure the methods did run
         verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("123", Worker.Status.IN_RECOVERY);

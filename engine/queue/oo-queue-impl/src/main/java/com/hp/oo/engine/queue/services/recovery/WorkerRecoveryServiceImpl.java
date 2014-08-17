@@ -1,5 +1,6 @@
 package com.hp.oo.engine.queue.services.recovery;
 
+import com.hp.oo.engine.node.entities.WorkerNode;
 import com.hp.oo.engine.node.services.LoginListener;
 import com.hp.oo.engine.node.services.WorkerLockService;
 import com.hp.oo.engine.node.services.WorkerNodeService;
@@ -54,13 +55,16 @@ public class WorkerRecoveryServiceImpl implements WorkerRecoveryService, LoginLi
 
         List<String> workerUuids = workerNodeService.readNonRespondingWorkers();
         int messagesCount = getMessagesWithoutAck(DEFAULT_POLL_SIZE, workerUuid);
-
-        if (workerUuids.contains(workerUuid) || messagesCount > 0) {
+        WorkerNode worker = workerNodeService.findByUuid(workerUuid);
+        if (worker.getStatus().equals(Worker.Status.IN_RECOVERY) || workerUuids.contains(workerUuid) || messagesCount > 0) {
             if(workerUuids.contains(workerUuid)){
                 logger.warn("Worker : " + workerUuid + " is non responsive! Worker recovery is started.");
             }
             if(messagesCount > 0){
                 logger.warn("Worker : " + workerUuid + " has " + messagesCount + " not acknowledged messages. Worker recovery is started.");
+            }
+            if (worker.getStatus().equals(Worker.Status.IN_RECOVERY)){
+                logger.warn("Worker : " + workerUuid + " is IN_RECOVERY status. Worker recovery is started");
             }
             doWorkerRecovery(workerUuid);
         }

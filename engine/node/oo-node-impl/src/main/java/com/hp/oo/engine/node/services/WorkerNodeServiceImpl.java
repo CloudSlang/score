@@ -67,7 +67,7 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService, UserDetai
         if (!worker.getStatus().equals(Status.IN_RECOVERY)) {
             worker.setStatus(Status.RUNNING);
         }
-        logger.debug("Got keepAlive from Worker with uuid="+ uuid + " and update its ackVersion to "+ version);
+        logger.debug("Got keepAlive for Worker with uuid="+ uuid + " and update its ackVersion to "+ version);
         return wrv;
     }
 
@@ -107,12 +107,9 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService, UserDetai
     public void updateWorkerToDeleted(String uuid) {
         WorkerNode worker = readByUUID(uuid);
 		if(worker != null) {
-			if(worker.getStatus() != Status.RUNNING) {
-                worker.setActive(false);
-                worker.setDeleted(true);
-            } else {
-                throw new IllegalArgumentException("The worker is still running and can not be deleted");
-            }
+			worker.setActive(false);
+            worker.setDeleted(true);
+            worker.setStatus(Status.IN_RECOVERY);
         }
     }
 
@@ -164,6 +161,16 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService, UserDetai
     public WorkerNode readByUUID(String uuid) {
         WorkerNode worker = workerNodeRepository.findByUuidAndDeleted(uuid, false);
 		if(worker == null) {
+            throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
+        }
+        return worker;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public WorkerNode findByUuid(String uuid) {
+        WorkerNode worker = workerNodeRepository.findByUuid(uuid);
+        if(worker == null) {
             throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
         }
         return worker;
@@ -237,14 +244,20 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService, UserDetai
     @Override
     @Transactional
     public void updateStatus(String uuid, Worker.Status status) {
-        WorkerNode worker = readByUUID(uuid);
+        WorkerNode worker = workerNodeRepository.findByUuid(uuid);
+        if(worker == null) {
+            throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
+        }
         worker.setStatus(status);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateStatusInSeparateTransaction(String uuid, Worker.Status status) {
-        WorkerNode worker = readByUUID(uuid);
+        WorkerNode worker = workerNodeRepository.findByUuid(uuid);
+        if(worker == null) {
+            throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
+        }
         worker.setStatus(status);
     }
 
@@ -378,7 +391,7 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService, UserDetai
     @Override
     @Transactional
     public void updateWRV(String workerUuid, String wrv) {
-        WorkerNode worker = readByUUID(workerUuid);
+        WorkerNode worker = workerNodeRepository.findByUuid(workerUuid);
         worker.setWorkerRecoveryVersion(wrv);
     }
 }
