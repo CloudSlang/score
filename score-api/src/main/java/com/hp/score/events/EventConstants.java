@@ -12,6 +12,9 @@ public class EventConstants {
 	public static final String SCORE_BRANCH_FAILURE_EVENT = "SCORE_BRANCH_FAILURE_EVENT";
 	public static final String SCORE_NO_WORKER_FAILURE_EVENT = "SCORE_NO_WORKER_FAILURE_EVENT";
 
+    public static final String SCORE_STEP_SPLIT_ERROR = "STEP_SPLIT_ERROR";
+    public static final String SCORE_STEP_NAV_ERROR = "STEP_NAV_ERROR";
+
 	public static final String SCORE_ERROR_MSG = "error_message";
 	public static final String SCORE_ERROR_LOG_MSG = "logMessage";
 	public static final String SCORE_ERROR_TYPE = "SCORE_ERROR_TYPE";

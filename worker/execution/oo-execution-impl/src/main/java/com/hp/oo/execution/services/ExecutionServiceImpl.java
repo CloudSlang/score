@@ -4,7 +4,6 @@ import com.hp.oo.broker.entities.BranchContextHolder;
 import com.hp.oo.broker.entities.RunningExecutionPlan;
 import com.hp.oo.broker.services.RuntimeValueService;
 import com.hp.oo.enginefacade.execution.ExecutionEnums.ExecutionStatus;
-import com.hp.oo.enginefacade.execution.ExecutionEnums.LogLevelCategory;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.oo.execution.reflection.ReflectionAdapter;
@@ -139,7 +138,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 			execution.getSystemContext().put(ExecutionConstants.FLOW_TERMINATION_TYPE, ExecutionStatus.SYSTEM_FAILURE);
 			execution.setPosition(null); // this ends the flow!!!
 			try {
-				createErrorEvent(exception, "Error occurred during split step ", LogLevelCategory.STEP_SPLIT_ERROR, execution.getSystemContext());
+				createErrorEvent(exception, "Error occurred during split step ", EventConstants.SCORE_STEP_SPLIT_ERROR, execution.getSystemContext());
 			} catch(RuntimeException eventEx) {
 				logger.error("Failed to create event: ", eventEx);
 			}
@@ -378,12 +377,12 @@ public final class ExecutionServiceImpl implements ExecutionService {
 		return stepData;
 	}
 
-	private void createErrorEvent(String ex, String logMessage, LogLevelCategory logLevelCategory, SystemContext systemContext) {
+	private void createErrorEvent(String ex, String logMessage, String errorType, SystemContext systemContext) {
 		HashMap<String, Serializable> eventData = new HashMap<>();
 		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, new HashMap<>(systemContext));
 		eventData.put(EventConstants.SCORE_ERROR_MSG, ex);
 		eventData.put(EventConstants.SCORE_ERROR_LOG_MSG, logMessage);
-		eventData.put(EventConstants.SCORE_ERROR_TYPE, logLevelCategory.getCategoryName());
+		eventData.put(EventConstants.SCORE_ERROR_TYPE, errorType);
 		ScoreEvent eventWrapper = new ScoreEvent(EventConstants.SCORE_ERROR_EVENT, eventData);
 		eventBus.dispatch(eventWrapper);
 	}
@@ -408,7 +407,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 			execution.getSystemContext().put(ExecutionConstants.FLOW_TERMINATION_TYPE, ExecutionStatus.SYSTEM_FAILURE);
 			execution.setPosition(null); // this ends the flow!!!
 			try {
-				createErrorEvent(navEx.getMessage(), "Error occurred during navigation execution ", LogLevelCategory.STEP_NAV_ERROR, execution.getSystemContext());
+				createErrorEvent(navEx.getMessage(), "Error occurred during navigation execution ", EventConstants.SCORE_STEP_NAV_ERROR, execution.getSystemContext());
 			} catch(RuntimeException eventEx) {
 				logger.error("Failed to create event: ", eventEx);
 			}
