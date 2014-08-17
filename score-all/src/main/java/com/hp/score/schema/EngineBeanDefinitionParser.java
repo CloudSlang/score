@@ -20,7 +20,6 @@ import com.hp.oo.engine.versioning.services.VersionServiceImpl;
 import com.hp.oo.orchestrator.services.CancelExecutionServiceImpl;
 import com.hp.oo.orchestrator.services.ExecutionSerializationUtil;
 import com.hp.oo.orchestrator.services.OrchestratorDispatcherServiceImpl;
-import com.hp.oo.orchestrator.services.OrchestratorServiceImpl;
 import com.hp.oo.orchestrator.services.RunningExecutionPlanServiceImpl;
 import com.hp.oo.orchestrator.services.SplitJoinServiceImpl;
 import com.hp.oo.orchestrator.services.WorkerDbSupportServiceImpl;
@@ -66,7 +65,6 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	private Map<Class<?>,String> beans = new HashMap<Class<?>,String>(){{
 		put(ScorePauseResumeImpl.class, null);
-		put(OrchestratorServiceImpl.class, "orchestratorService");
         put(OrchestratorDispatcherServiceImpl.class, "orchestratorDispatcherService");
         put(ExecutionStateServiceImpl.class, null);
 		put(QueueDispatcherServiceImpl.class, "queueDispatcherService");

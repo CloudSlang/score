@@ -1,8 +1,8 @@
 package com.hp.oo.engine.queue.services;
 
+import com.hp.oo.broker.services.RunningExecutionPlanService;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
-import com.hp.oo.orchestrator.services.OrchestratorService;
 import com.hp.score.events.EventConstants;
 import com.hp.score.events.ScoreEvent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import java.util.Map;
 public class ScoreEventFactoryImpl implements ScoreEventFactory {
 
 	@Autowired
-	private OrchestratorService orchestratorService;
+	private RunningExecutionPlanService runningExecutionPlanService;
 
 	public ScoreEvent createFinishedEvent(Execution execution) {
 		String eventType = EventConstants.SCORE_FINISHED_EVENT;
@@ -92,7 +92,7 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 	}
 
 	private String extractFlowUuid(Long runningExecutionPlanId) {
-		return orchestratorService.getFlowUuidByRunningExecutionPlanId(runningExecutionPlanId);
+		return runningExecutionPlanService.getFlowUuidByRunningExecutionPlanId(runningExecutionPlanId);
 	}
 
 }

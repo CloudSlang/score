@@ -81,6 +81,16 @@ public final class RunningExecutionPlanServiceImpl implements RunningExecutionPl
         }
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public String getFlowUuidByRunningExecutionPlanId(Long runningExecutionPlanId) {
+        RunningExecutionPlan runningExecutionPlan = readExecutionPlanById(runningExecutionPlanId);
+        if (runningExecutionPlan == null)
+            throw new RuntimeException("runningExecutionPlan is null");
+
+        return runningExecutionPlan.getFlowUUID();
+    }
+
     private Long createNewRunningExecutionPlan(ExecutionPlan executionPlan) {
         //Create new and save in DB
         RunningExecutionPlan runningExecutionPlan = new RunningExecutionPlan();

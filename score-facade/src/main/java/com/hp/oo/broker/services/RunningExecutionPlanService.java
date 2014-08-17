@@ -23,4 +23,6 @@ public interface RunningExecutionPlanService {
     List<RunningExecutionPlan> readByFlowId(String flowId);
 
     Long getOrCreateRunningExecutionPlan(ExecutionPlan executionPlan);
+
+    String getFlowUuidByRunningExecutionPlanId(Long runningExecutionPlanId);
 }
