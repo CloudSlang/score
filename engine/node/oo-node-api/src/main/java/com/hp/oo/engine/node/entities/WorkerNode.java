@@ -6,6 +6,8 @@ import com.hp.score.engine.data.AbstractIdentifiable;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.SelectBeforeUpdate;
 
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -30,6 +32,8 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "OO_WORKER_NODES")
+@DynamicUpdate(value=true)
+@SelectBeforeUpdate(value=true)
 public class WorkerNode extends AbstractIdentifiable implements Worker {
 	public static final String[] DEFAULT_WORKER_GROUPS = {ExecutionConstants.DEFAULT_GROUP};
 
@@ -244,6 +248,7 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
 				.append(this.installPath, that.installPath)
 				.append(this.active, that.active)
 				.append(this.ackTime, that.ackTime)
+                .append(this.ackVersion, that.ackVersion)
 				.append(this.os, that.os)
 				.append(this.jvm, that.jvm)
 				.append(this.dotNetVersion, that.dotNetVersion)
@@ -255,7 +260,7 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(uuid,description,hostName,installPath,active,ackTime,os,jvm,dotNetVersion,groups,bulkNumber,workerRecoveryVersion);
+		return Objects.hash(uuid,description,hostName,installPath,active,ackVersion,ackTime,os,jvm,dotNetVersion,groups,bulkNumber,workerRecoveryVersion);
 	}
 
 	@Override
@@ -265,6 +270,7 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
 				.append("UUID", uuid)
 				.append("active", active)
 				.append("ackTime", ackTime)
+                .append("ackVersion", ackVersion)
 				.append("host", hostName)
 				.append("path", installPath)
 				.append("OS", os)

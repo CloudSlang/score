@@ -160,19 +160,16 @@ public class WorkerNodeServiceTest {
     }
 
     @Test
-    public void cantDeleteRunningWorker() {
+    public void deleteRunningWorkerTest() {
         workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
         WorkerNode worker = workerNodeService.readByUUID("H3");
         Assert.assertEquals(Worker.Status.FAILED, worker.getStatus());
         workerNodeService.up("H3");
-        boolean exceptionHappened = false;
-        try {
-            workerNodeService.updateWorkerToDeleted("H3");
-        }
-        catch (IllegalArgumentException e) {
-            exceptionHappened = true;
-        }
-        Assert.assertTrue(exceptionHappened);
+        Assert.assertEquals(Worker.Status.RUNNING, worker.getStatus());
+        workerNodeService.updateWorkerToDeleted("H3");
+        Assert.assertEquals(Worker.Status.IN_RECOVERY, worker.getStatus());
+        Assert.assertEquals(false, worker.isActive());
+        Assert.assertEquals(true, worker.isDeleted());
         workerNodeService.delete("H3");
     }
 

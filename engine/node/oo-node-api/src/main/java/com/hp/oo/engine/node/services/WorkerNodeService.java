@@ -29,8 +29,11 @@ public interface WorkerNodeService {
 	void down(String uuid);
 
 	void changePassword(String uuid, String password);
-
+   // find not deleted worker by uuid
 	WorkerNode readByUUID(String uuid);
+
+    // is not relating to IS_DELETED property
+    WorkerNode findByUuid(String uuid);
 
 	List<WorkerNode> readAllWorkers();
 
