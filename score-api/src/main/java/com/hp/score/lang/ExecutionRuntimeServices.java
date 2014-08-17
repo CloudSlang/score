@@ -1,5 +1,6 @@
 package com.hp.score.lang;
 
+import com.hp.oo.enginefacade.execution.EndBranchDataContainer;
 import com.hp.score.events.ScoreEvent;
 import com.hp.score.api.StartBranchDataContainer;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -27,6 +28,8 @@ public class ExecutionRuntimeServices implements Serializable {
 	protected static final String SCORE_EVENTS_QUEUE = "SCORE_EVENTS_QUEUE";
 
 	protected static final String NO_WORKERS_IN_GROUP = "NO_WORKERS_IN_GROUP";
+
+    private static final String FINISHED_CHILD_BRANCHES_DATA = "FINISHED_CHILD_BRANCHES_DATA";
 
 	protected Map<String, Serializable> myMap = new HashMap<>();
 
@@ -90,6 +93,13 @@ public class ExecutionRuntimeServices implements Serializable {
 	public List<StartBranchDataContainer> removeBranchesData() {
 		return removeFromMap(BRANCH_DATA);
 	}
+
+    /**
+     * @return a list of all branches ended.
+     */
+    public List<EndBranchDataContainer> getFinishedChildBranchesData() {
+        return (List<EndBranchDataContainer>) getFromMap(FINISHED_CHILD_BRANCHES_DATA);
+    }
 
 	private <T> T removeFromMap(String key) {
 		if (myMap.containsKey(key)) {

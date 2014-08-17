@@ -118,7 +118,7 @@ public class ExecutionConstants {
 	public static final String MUST_RELEASE_EVENTS = "MUST_RELEASE_EVENTS";
 
 	// New Parallel Mechanism
-	public static final String FINISHED_CHILD_BRANCHES_DATA = "FINISHED_CHILD_BRANCHES_DATA";
+	public static final String FINISHED_CHILD_BRANCHES_DATA = "FINISHED_CHILD_BRANCHES_DATA";  //TODO : remove this, all usage in this should be replaced in using ExecutionRuntimeServices, getFinishedChildBranchesData method
 	public static final String NEW_SPLIT_ID = "NEW_SPLIT_ID";
 
 	// For ROI
