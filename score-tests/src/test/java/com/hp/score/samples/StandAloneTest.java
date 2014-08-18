@@ -24,6 +24,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import javax.annotation.PostConstruct;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -46,11 +47,7 @@ public class StandAloneTest {
     @Autowired
     private EventBus eventBus;
 
-    private Long finishEventExecutionId = null;
-
-    private List<Serializable> eventQueue = new ArrayList<Serializable>();
-
-    private final Object lock = new Object();
+    private List<Serializable> eventQueue = Collections.synchronizedList(new ArrayList<Serializable>());
 
     private final static Logger logger = Logger.getLogger(StandAloneTest.class);
 
@@ -68,11 +65,13 @@ public class StandAloneTest {
     public void baseStandAloneTest() {
         ExecutionPlan executionPlan = createExecutionPlan();
         TriggeringProperties triggeringProperties = TriggeringProperties.create(executionPlan);
-        registerEventListener();
+        registerEventListener(EventConstants.SCORE_FINISHED_EVENT);
         long executionId = score.trigger(triggeringProperties);
 
-        waitForExecutionToFinish();
-        Assert.assertTrue(finishEventExecutionId != null && finishEventExecutionId.equals(executionId));
+        waitForAllEventsToArrive(1);
+        long finishEventExecutionId = (Long)((Map)eventQueue.get(0)).get(ExecutionConstants.EXECUTION_ID_CONTEXT);
+        Assert.assertNotNull(finishEventExecutionId);
+        Assert.assertEquals(executionId,finishEventExecutionId);
     }
 
     @Test(timeout = 20000)
@@ -85,7 +84,7 @@ public class StandAloneTest {
         Map<String,Serializable> getRuntimeValues = new HashMap<String, Serializable>();
         getRuntimeValues.put("NEW_BRANCH_MECHANISM",Boolean.TRUE);//TODO - remove this !! needs to work with this on by default, pending Non-Blocking story
         triggeringProperties.setRuntimeValues(getRuntimeValues);
-        registerSubFlowEventListener();
+        registerEventListener("Hello score");
 
         score.trigger(triggeringProperties);
 
@@ -99,16 +98,6 @@ public class StandAloneTest {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    private void waitForExecutionToFinish() {
-        try {
-            synchronized(lock){
-                lock.wait(10000);
-            }
-        } catch (InterruptedException e) {
-            logger.error(e.getStackTrace());
         }
     }
 
@@ -173,24 +162,9 @@ public class StandAloneTest {
         return executionPlan;
     }
 
-    private void registerEventListener() {
+    private void registerEventListener(String eventType) {
         Set<String> handlerTypes = new HashSet();
-        handlerTypes.add(EventConstants.SCORE_FINISHED_EVENT);
-        eventBus.subscribe(new ScoreEventListener() {
-            @Override
-            public void onEvent(ScoreEvent event) {
-                logger.info("Listener " + this.toString() + " invoked on type: " + event.getEventType() + " with data: " + event.getData());
-                finishEventExecutionId = (Long)((Map)event.getData()).get(ExecutionConstants.EXECUTION_ID_CONTEXT);
-                synchronized (lock) {
-                    lock.notify();
-                }
-            }
-        }, handlerTypes);
-    }
-
-    private void registerSubFlowEventListener() {
-        Set<String> handlerTypes = new HashSet();
-        handlerTypes.add("Hello score");
+        handlerTypes.add(eventType);
         eventBus.subscribe(new ScoreEventListener() {
             @Override
             public void onEvent(ScoreEvent event) {
