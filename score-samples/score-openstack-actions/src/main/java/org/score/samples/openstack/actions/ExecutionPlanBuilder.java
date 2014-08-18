@@ -18,7 +18,8 @@ import java.util.UUID;
 public class ExecutionPlanBuilder {
 	public static final String ACTION_CLASS_KEY = "className";
 	public static final String ACTION_METHOD_KEY = "methodName";
-	public static final String NULL_ALLOWED_KEY = "nullAllowed";
+	public static final String INPUT_BINDINGS_KEY = "inputBindings";
+	public static final String NAVIGATION_MATCHERS_KEY = "navigationMatchers";
 
 	private ExecutionPlan executionPlan;
 
@@ -36,9 +37,8 @@ public class ExecutionPlanBuilder {
 			Long stepId,
 			String actionClassName,
 			String actionMethodName,
-			Boolean nullInputsAllowed,
-			List<NavigationMatcher<Serializable>> navigationMatchers
-	) {
+			List<InputBinding> inputBindings,
+			List<NavigationMatcher<Serializable>> navigationMatchers) {
 		ExecutionStep step = new ExecutionStep(stepId);
 
 		step.setAction(new ControlActionMetadata("org.score.samples.openstack.actions.OOActionRunner", "run"));
@@ -46,13 +46,12 @@ public class ExecutionPlanBuilder {
 		//put the actual action class name and method name
 		actionData.put(ACTION_CLASS_KEY, actionClassName);
 		actionData.put(ACTION_METHOD_KEY, actionMethodName);
-		actionData.put(NULL_ALLOWED_KEY, nullInputsAllowed);
+		actionData.put(INPUT_BINDINGS_KEY, (Serializable) inputBindings);
 		step.setActionData(actionData);
 
 		step.setNavigation(new ControlActionMetadata("org.score.samples.openstack.actions.OOActionNavigator", "navigate"));
-		Map<String, Object> navigationData = new HashMap<>(2);
-		navigationData.put("navigationMatchers", navigationMatchers);
-
+		Map<String, Object> navigationData = new HashMap<>(1);
+		navigationData.put(NAVIGATION_MATCHERS_KEY, navigationMatchers);
 		step.setNavigationData(navigationData);
 
 		step.setSplitStep(false);
@@ -62,18 +61,8 @@ public class ExecutionPlanBuilder {
 		return step.getExecStepId();
 	}
 
-
-	public Long addOOActionStep(
-			Long stepId,
-			String actionClassName,
-			String actionMethodName,
-			List<NavigationMatcher<Serializable>> navigationMatchers
-	) {
-		return addOOActionStep(stepId, actionClassName, actionMethodName, true, navigationMatchers);
-	}
-
 	public Long addOOActionFinalStep(Long stepId, String actionClassName, String actionMethodName) {
-		return addOOActionStep(stepId, actionClassName, actionMethodName, null);
+		return addOOActionStep(stepId, actionClassName, actionMethodName, null, null);
 	}
 
 	@SuppressWarnings("unused")

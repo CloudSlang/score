@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -84,7 +85,7 @@ public class OOActionRunnerTest {
 			String actionMethodName)
 			throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
 		OOActionRunner runner = new OOActionRunner();
-		runner.run(executionContext, executionRuntimeServices, actionClassName, actionMethodName, true);
+		runner.run(executionContext, executionRuntimeServices, actionClassName, actionMethodName, new ArrayList<InputBinding>());
 	}
 
 	private Map<String, Serializable> prepareActualExecutionContext() {
