@@ -26,4 +26,9 @@ public class BranchActions {
             executionContext.putAll(branchContext);
         }
     }
+
+    public void parallelSplit(ExecutionRuntimeServices executionRuntimeServices){
+        executionRuntimeServices.addBranch(1L, "1", new HashMap<String, Serializable>());
+        executionRuntimeServices.addBranch(1L, "1", new HashMap<String, Serializable>());
+    }
 }

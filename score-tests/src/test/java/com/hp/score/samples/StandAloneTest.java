@@ -71,7 +71,7 @@ public class StandAloneTest {
         waitForAllEventsToArrive(1);
         long finishEventExecutionId = (Long)((Map)eventQueue.get(0)).get(ExecutionConstants.EXECUTION_ID_CONTEXT);
         Assert.assertNotNull(finishEventExecutionId);
-        Assert.assertEquals(executionId,finishEventExecutionId);
+        Assert.assertEquals(executionId, finishEventExecutionId);
     }
 
     @Test(timeout = 20000)
@@ -90,6 +90,24 @@ public class StandAloneTest {
 
         waitForAllEventsToArrive(2);//this flow should have 2 "Hello score" events only
     }
+
+    @Test
+    public void testParallelFlow(){
+        ExecutionPlan executionPlan = createParallelFlow();
+        ExecutionPlan branchExecutionPlan = createExecutionPlan();
+        executionPlan.setSubflowsUUIDs(Sets.newHashSet(branchExecutionPlan.getFlowUuid()));
+        TriggeringProperties triggeringProperties = TriggeringProperties.create(executionPlan);
+        triggeringProperties.getDependencies().put(branchExecutionPlan.getFlowUuid(),branchExecutionPlan);
+        Map<String,Serializable> getRuntimeValues = new HashMap<String, Serializable>();
+        getRuntimeValues.put("NEW_BRANCH_MECHANISM",Boolean.TRUE);//TODO - remove this !! needs to work with this on by default, pending Non-Blocking story
+        triggeringProperties.setRuntimeValues(getRuntimeValues);
+        registerEventListener("Hello score");
+
+        score.trigger(triggeringProperties);
+
+        waitForAllEventsToArrive(2);//this flow should have 2 "Hello score" events only
+    }
+
 
     private void waitForAllEventsToArrive(int eventsCount) {
         while(eventQueue.size() != eventsCount){
@@ -158,6 +176,33 @@ public class StandAloneTest {
         executionStep3.setActionData(new HashMap<String, Serializable>());
 
         executionPlan.addStep(executionStep3);
+
+        return executionPlan;
+    }
+
+    private ExecutionPlan createParallelFlow() {
+        ExecutionPlan executionPlan = new ExecutionPlan();
+
+        executionPlan.setFlowUuid("parallelFlow");
+
+        executionPlan.setBeginStep(0L);
+
+        ExecutionStep executionSplitStep = new ExecutionStep(0L);
+        executionSplitStep.setSplitStep(true);
+        executionSplitStep.setAction(new ControlActionMetadata("org.score.samples.controlactions.BranchActions", "parallelSplit"));
+        executionSplitStep.setActionData(new HashMap<String, Serializable>());
+        executionSplitStep.setNavigation(new ControlActionMetadata("org.score.samples.controlactions.NavigationActions", "simpleNavigation"));
+        Map<String, Serializable> navigationData = new HashMap<String, Serializable>();
+        navigationData.put("nextStepId",1L);
+        executionSplitStep.setNavigationData(navigationData);
+
+        executionPlan.addStep(executionSplitStep);
+
+        ExecutionStep executionStep2 = new ExecutionStep(1L);
+        executionStep2.setAction(new ControlActionMetadata("org.score.samples.controlactions.BranchActions", "join"));
+        executionStep2.setActionData(new HashMap<String, Serializable>());
+
+        executionPlan.addStep(executionStep2);
 
         return executionPlan;
     }
