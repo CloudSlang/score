@@ -1,6 +1,7 @@
 package com.hp.score.services;
 
-import com.hp.oo.enginefacade.execution.ExecutionEnums;
+
+import com.hp.oo.enginefacade.execution.ExecutionStatus;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.orchestrator.services.ExecutionSerializationUtil;
 import com.hp.score.entities.ExecutionState;
@@ -121,14 +122,14 @@ public class ExecutionStateServiceTest {
 
     @Test
     public void readExecutionIdAndBranchIdByStatuses_EmptyList() {
-        when(executionStateRepository.findExecutionIdByStatuses(anyListOf(ExecutionEnums.ExecutionStatus.class))).thenReturn(new ArrayList<Long>());
-        List<Long> actualExecutionIds = executionStateService.readExecutionIdByStatuses(new ArrayList<ExecutionEnums.ExecutionStatus>());
+        when(executionStateRepository.findExecutionIdByStatuses(anyListOf(ExecutionStatus.class))).thenReturn(new ArrayList<Long>());
+        List<Long> actualExecutionIds = executionStateService.readExecutionIdByStatuses(new ArrayList<ExecutionStatus>());
         assertThat(actualExecutionIds).hasSize(0);
     }
 
     @Test
     public void readExecutionIdAndBranchIdByStatuses() {
-        List<ExecutionEnums.ExecutionStatus> statuses = Arrays.asList(ExecutionEnums.ExecutionStatus.COMPLETED, ExecutionEnums.ExecutionStatus.CANCELED);
+        List<ExecutionStatus> statuses = Arrays.asList(ExecutionStatus.COMPLETED, ExecutionStatus.CANCELED);
         List<Long> expectedExecutionIds = Arrays.asList(1L, 2L);
         when(executionStateRepository.findExecutionIdByStatuses(statuses)).thenReturn(expectedExecutionIds);
         List<Long> actualExecutionIds = executionStateService.readExecutionIdByStatuses(statuses);
@@ -152,7 +153,7 @@ public class ExecutionStateServiceTest {
     @Test
     public void testreadCancelledExecution() {
         Long executionId = 123L;
-        List<ExecutionEnums.ExecutionStatus> statuses = Arrays.asList(ExecutionEnums.ExecutionStatus.CANCELED, ExecutionEnums.ExecutionStatus.PENDING_CANCEL);
+        List<ExecutionStatus> statuses = Arrays.asList(ExecutionStatus.CANCELED, ExecutionStatus.PENDING_CANCEL);
         ExecutionState expectedExecutionState = new ExecutionState();
         when(executionStateRepository.findByExecutionIdAndBranchIdAndStatusIn(executionId, ExecutionState.EMPTY_BRANCH, statuses)).thenReturn(expectedExecutionState);
         ExecutionState actualExecutionState = executionStateService.readCancelledExecution(executionId);
@@ -359,7 +360,7 @@ public class ExecutionStateServiceTest {
     public void testUpdateExecutionStateStatus() {
         Long executionId = 123L;
         String branchId = UUID.randomUUID().toString();
-        ExecutionEnums.ExecutionStatus status = ExecutionEnums.ExecutionStatus.PAUSED;
+        ExecutionStatus status = ExecutionStatus.PAUSED;
 
         ExecutionState executionState = Mockito.mock(ExecutionState.class);
 

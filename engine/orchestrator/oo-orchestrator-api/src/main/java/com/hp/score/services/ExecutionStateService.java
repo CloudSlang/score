@@ -1,6 +1,6 @@
 package com.hp.score.services;
 
-import com.hp.oo.enginefacade.execution.ExecutionEnums;
+import com.hp.oo.enginefacade.execution.ExecutionStatus;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.score.entities.ExecutionState;
 
@@ -22,7 +22,7 @@ public interface ExecutionStateService {
      */
     public List<ExecutionState> readByExecutionId(Long executionId);
 
-    public List<Long> readExecutionIdByStatuses(List<ExecutionEnums.ExecutionStatus> statuses);
+    public List<Long> readExecutionIdByStatuses(List<ExecutionStatus> statuses);
 
     /**
      * Reads a cancelled parent run with the specified run id
@@ -49,7 +49,7 @@ public interface ExecutionStateService {
      */
     public void updateExecutionObject(Long executionId, String branchId, Execution execution);
 
-    public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionEnums.ExecutionStatus status);
+    public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionStatus status);
 
     /**
      * Deletes the specified run, both the parent run and any child runs

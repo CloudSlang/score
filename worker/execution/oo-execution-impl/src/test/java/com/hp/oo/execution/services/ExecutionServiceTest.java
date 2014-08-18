@@ -3,7 +3,7 @@ package com.hp.oo.execution.services;
 import com.hp.oo.broker.entities.BranchContextHolder;
 import com.hp.oo.broker.entities.RunningExecutionPlan;
 import com.hp.oo.broker.services.RuntimeValueService;
-import com.hp.oo.enginefacade.execution.ExecutionEnums;
+import com.hp.oo.enginefacade.execution.ExecutionStatus;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.oo.execution.reflection.ReflectionAdapter;
@@ -101,7 +101,7 @@ public class ExecutionServiceTest {
 
 		ExecutionSummary execSummary = new ExecutionSummary();
 		execSummary.setPauseReason(PauseReason.USER_PAUSED);
-		execSummary.setStatus(ExecutionEnums.ExecutionStatus.PENDING_PAUSE);
+		execSummary.setStatus(ExecutionStatus.PENDING_PAUSE);
 		when(workerConfigurationService.isExecutionPaused(executionId, branch_id)).thenReturn(true);
 		when(pauseResumeService.readPausedExecution(executionId, branch_id)).thenReturn(execSummary);
 
@@ -121,13 +121,13 @@ public class ExecutionServiceTest {
 
 		// branch is not paused
 		ExecutionSummary branch = new ExecutionSummary();
-		branch.setStatus(ExecutionEnums.ExecutionStatus.RUNNING);
+		branch.setStatus(ExecutionStatus.RUNNING);
 		when(workerConfigurationService.isExecutionPaused(executionId, branch_id)).thenReturn(false);
 
 		// parent is paused
 		ExecutionSummary parent = new ExecutionSummary();
 		parent.setPauseReason(PauseReason.USER_PAUSED);
-		parent.setStatus(ExecutionEnums.ExecutionStatus.PENDING_PAUSE);
+		parent.setStatus(ExecutionStatus.PENDING_PAUSE);
 		when(workerConfigurationService.isExecutionPaused(executionId, null)).thenReturn(true);
 		when(pauseResumeService.readPausedExecution(executionId, null)).thenReturn(parent);
 

@@ -13,7 +13,7 @@ public class ExecutionSummary implements Serializable {
     private String branchId;
     private Date startTime;
     private Date endTime;
-    private ExecutionEnums.ExecutionStatus status;
+    private ExecutionStatus status;
     private String resultStatusType;
     private String resultStatusName;
     private PauseReason pauseReason;
@@ -65,11 +65,11 @@ public class ExecutionSummary implements Serializable {
         this.endTime = endTime;
     }
 
-    public ExecutionEnums.ExecutionStatus getStatus() {
+    public ExecutionStatus getStatus() {
         return status;
     }
 
-    public void setStatus(ExecutionEnums.ExecutionStatus status) {
+    public void setStatus(ExecutionStatus status) {
         this.status = status;
     }
 

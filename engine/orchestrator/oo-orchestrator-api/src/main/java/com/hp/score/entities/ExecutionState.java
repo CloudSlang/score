@@ -1,6 +1,6 @@
 package com.hp.score.entities;
 
-import com.hp.oo.enginefacade.execution.ExecutionEnums;
+import com.hp.oo.enginefacade.execution.ExecutionStatus;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.score.engine.data.AbstractIdentifiable;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -35,7 +35,7 @@ public class ExecutionState extends AbstractIdentifiable {
 
     @Enumerated(value = EnumType.STRING)
     @Column(name = "STATUS", nullable = false)
-    private ExecutionEnums.ExecutionStatus status;
+    private ExecutionStatus status;
 
     @Column(name = "EXECUTION_OBJECT")
     @Lob
@@ -58,11 +58,11 @@ public class ExecutionState extends AbstractIdentifiable {
         this.branchId = branchId;
     }
 
-    public ExecutionEnums.ExecutionStatus getStatus() {
+    public ExecutionStatus getStatus() {
         return status;
     }
 
-    public void setStatus(ExecutionEnums.ExecutionStatus status) {
+    public void setStatus(ExecutionStatus status) {
         this.status = status;
     }
 

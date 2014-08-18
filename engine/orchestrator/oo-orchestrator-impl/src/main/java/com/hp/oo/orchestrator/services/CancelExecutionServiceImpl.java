@@ -3,7 +3,7 @@ package com.hp.oo.orchestrator.services;
 import com.hp.oo.engine.queue.entities.ExecStatus;
 import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.engine.queue.services.QueueDispatcherService;
-import com.hp.oo.enginefacade.execution.ExecutionEnums.ExecutionStatus;
+import com.hp.oo.enginefacade.execution.ExecutionStatus;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.score.entities.ExecutionState;

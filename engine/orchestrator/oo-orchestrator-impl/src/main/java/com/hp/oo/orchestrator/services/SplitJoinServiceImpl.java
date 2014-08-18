@@ -5,7 +5,7 @@ import com.hp.oo.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.engine.queue.services.QueueDispatcherService;
 import com.hp.oo.enginefacade.execution.EndBranchDataContainer;
-import com.hp.oo.enginefacade.execution.ExecutionEnums;
+import com.hp.oo.enginefacade.execution.ExecutionStatus;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.oo.orchestrator.entities.BranchContexts;
@@ -15,15 +15,12 @@ import com.hp.oo.orchestrator.entities.SuspendedExecution;
 import com.hp.oo.orchestrator.repositories.FinishedBranchRepository;
 import com.hp.oo.orchestrator.repositories.SuspendedExecutionsRepository;
 import org.apache.commons.lang.Validate;
-import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +63,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     private final Converter<Execution, FinishedBranch> executionToFinishedBranch = new Converter<Execution, FinishedBranch>() {
         @Override
         public FinishedBranch convert(Execution execution) {
-            boolean isBranchCancelled = ExecutionEnums.ExecutionStatus.CANCELED.equals(execution.getSystemContext().get(ExecutionConstants.FLOW_TERMINATION_TYPE));
+            boolean isBranchCancelled = ExecutionStatus.CANCELED.equals(execution.getSystemContext().get(ExecutionConstants.FLOW_TERMINATION_TYPE));
             return new FinishedBranch(execution.getExecutionId().toString(), execution.getBranchId(), execution.getSplitId(), execution.getError(), new BranchContexts(isBranchCancelled, execution.getContexts(), execution.getSystemContext()));
         }
     };
@@ -248,7 +245,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
         //mark cancelled on parent
         if (wasExecutionCancelled) {
-            exec.getSystemContext().put(ExecutionConstants.FLOW_TERMINATION_TYPE, ExecutionEnums.ExecutionStatus.CANCELED);
+            exec.getSystemContext().put(ExecutionConstants.FLOW_TERMINATION_TYPE, ExecutionStatus.CANCELED);
         }
 
         return exec;

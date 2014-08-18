@@ -1,6 +1,6 @@
 package com.hp.score.repositories;
 
-import com.hp.oo.enginefacade.execution.ExecutionEnums;
+import com.hp.oo.enginefacade.execution.ExecutionStatus;
 import com.hp.score.entities.ExecutionState;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,8 +18,8 @@ public interface ExecutionStateRepository extends JpaRepository<ExecutionState, 
 
     public List<ExecutionState> findByExecutionId(Long executionId);
 
-    public ExecutionState findByExecutionIdAndBranchIdAndStatusIn(Long executionId, String branchId, List<ExecutionEnums.ExecutionStatus> statuses);
+    public ExecutionState findByExecutionIdAndBranchIdAndStatusIn(Long executionId, String branchId, List<ExecutionStatus> statuses);
 
     @Query("select executionState.executionId from ExecutionState executionState where executionState.status in :statuses")
-    public List<Long> findExecutionIdByStatuses(@Param("statuses") List<ExecutionEnums.ExecutionStatus> statuses);
+    public List<Long> findExecutionIdByStatuses(@Param("statuses") List<ExecutionStatus> statuses);
 }

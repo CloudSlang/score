@@ -1,6 +1,6 @@
 package com.hp.score.services;
 
-import com.hp.oo.enginefacade.execution.ExecutionEnums;
+import com.hp.oo.enginefacade.execution.ExecutionStatus;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.orchestrator.services.ExecutionSerializationUtil;
 import com.hp.score.entities.ExecutionState;
@@ -42,7 +42,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Long> readExecutionIdByStatuses(List<ExecutionEnums.ExecutionStatus> statuses) {
+    public List<Long> readExecutionIdByStatuses(List<ExecutionStatus> statuses) {
         return executionStateRepository.findExecutionIdByStatuses(statuses);
     }
 
@@ -60,7 +60,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         ExecutionState executionState = new ExecutionState();
         executionState.setExecutionId(executionId);
         executionState.setBranchId(ExecutionState.EMPTY_BRANCH);
-        executionState.setStatus(ExecutionEnums.ExecutionStatus.RUNNING);
+        executionState.setStatus(ExecutionStatus.RUNNING);
         return executionStateRepository.save(executionState);
     }
 
@@ -72,7 +72,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         ExecutionState executionState = new ExecutionState();
         executionState.setExecutionId(executionId);
         executionState.setBranchId(branchId);
-        executionState.setStatus(ExecutionEnums.ExecutionStatus.PENDING_PAUSE);
+        executionState.setStatus(ExecutionStatus.PENDING_PAUSE);
         return executionStateRepository.save(executionState);
     }
 
@@ -100,7 +100,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
 
     @Override
     @Transactional
-    public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionEnums.ExecutionStatus status) {
+    public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionStatus status) {
         validateExecutionId(executionId);
         validateBranchId(branchId);
         Validate.notNull(status, "status cannot be null");
@@ -116,8 +116,8 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         return executionState;
     }
 
-    private List<ExecutionEnums.ExecutionStatus> getCancelStatuses() {
-        return Arrays.asList(ExecutionEnums.ExecutionStatus.CANCELED, ExecutionEnums.ExecutionStatus.PENDING_CANCEL);
+    private List<ExecutionStatus> getCancelStatuses() {
+        return Arrays.asList(ExecutionStatus.CANCELED, ExecutionStatus.PENDING_CANCEL);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.hp.score;
 
-import com.hp.oo.enginefacade.execution.ExecutionEnums;
+import com.hp.oo.enginefacade.execution.ExecutionStatus;
 import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.oo.orchestrator.services.PauseResumeService;
 import com.hp.score.entities.ExecutionState;
@@ -34,7 +34,7 @@ public class ScorePauseResumeImpl implements ScorePauseResume {
     }
 
     private boolean canBePaused(ExecutionState executionState) {
-        return executionState != null && executionState.getStatus().equals(ExecutionEnums.ExecutionStatus.RUNNING);
+        return executionState != null && executionState.getStatus().equals(ExecutionStatus.RUNNING);
     }
 
     @Override

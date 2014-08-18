@@ -1,6 +1,6 @@
 package com.hp.score;
 
-import com.hp.oo.enginefacade.execution.ExecutionEnums;
+import com.hp.oo.enginefacade.execution.ExecutionStatus;
 import com.hp.oo.orchestrator.services.PauseResumeService;
 import com.hp.score.entities.ExecutionState;
 import com.hp.score.services.ExecutionStateService;
@@ -44,7 +44,7 @@ public class ScorePauseResumeTest {
     public void testPauseExecution_ExecutionCannotBePaused() {
         Long executionId = new Random().nextLong();
         ExecutionState executionState = new ExecutionState();
-        executionState.setStatus(ExecutionEnums.ExecutionStatus.CANCELED);
+        executionState.setStatus(ExecutionStatus.CANCELED);
 
         when(executionStateService.readByExecutionIdAndBranchId(executionId, ExecutionState.EMPTY_BRANCH)).thenReturn(executionState);
         assertThat(scorePauseResume.pauseExecution(executionId)).isFalse();
@@ -54,7 +54,7 @@ public class ScorePauseResumeTest {
     public void testPauseExecution_ExecutionCanBePaused() {
         Long executionId = new Random().nextLong();
         ExecutionState executionState = new ExecutionState();
-        executionState.setStatus(ExecutionEnums.ExecutionStatus.RUNNING);
+        executionState.setStatus(ExecutionStatus.RUNNING);
 
         when(executionStateService.readByExecutionIdAndBranchId(executionId, ExecutionState.EMPTY_BRANCH)).thenReturn(executionState);
         assertThat(scorePauseResume.pauseExecution(executionId)).isTrue();

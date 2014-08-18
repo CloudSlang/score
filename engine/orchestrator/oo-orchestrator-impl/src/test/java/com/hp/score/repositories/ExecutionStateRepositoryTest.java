@@ -1,5 +1,6 @@
 package com.hp.score.repositories;
 
+import com.hp.oo.enginefacade.execution.ExecutionStatus;
 import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
 import com.hp.score.entities.ExecutionState;
 import liquibase.integration.spring.SpringLiquibase;
@@ -28,7 +29,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
-import static com.hp.oo.enginefacade.execution.ExecutionEnums.ExecutionStatus;
 import static org.fest.assertions.Assertions.assertThat;
 
 /**

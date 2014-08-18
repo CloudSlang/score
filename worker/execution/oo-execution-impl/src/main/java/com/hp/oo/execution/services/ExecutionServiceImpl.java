@@ -3,7 +3,7 @@ package com.hp.oo.execution.services;
 import com.hp.oo.broker.entities.BranchContextHolder;
 import com.hp.oo.broker.entities.RunningExecutionPlan;
 import com.hp.oo.broker.services.RuntimeValueService;
-import com.hp.oo.enginefacade.execution.ExecutionEnums.ExecutionStatus;
+import com.hp.oo.enginefacade.execution.ExecutionStatus;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.oo.execution.reflection.ReflectionAdapter;
