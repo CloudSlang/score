@@ -21,9 +21,9 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import javax.annotation.PostConstruct;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -57,6 +57,11 @@ public class StandAloneTest {
     @Before
     public void init(){
         eventQueue = new ArrayList<Serializable>();
+    }
+
+    @PostConstruct
+    public void waitToWorkerToBeUp() throws InterruptedException {
+        Thread.sleep(1000L);
     }
 
     @Test(timeout = 20000)
