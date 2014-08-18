@@ -132,13 +132,6 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public WorkerQueueStatistics getNumOfEvents(ExecStatus status, String workerId) {
-		// TODO calculate statistics
-		return null;
-	}
-
-	@Override
-	@Transactional(readOnly = true)
 	public Map<Long, Payload> readPayloadByExecutionIds(Long... ids) {
 		if (ArrayUtils.isEmpty(ids)) throw new IllegalArgumentException("List of IDs is null or empty");
 		return executionQueueRepository.findPayloadByExecutionIds(ids);

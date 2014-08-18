@@ -221,7 +221,7 @@ public class SplitJoinServiceTest {
         Mockito.verify(converter).createPayload(converterCaptor.capture());
         Execution value = converterCaptor.getValue();
 
-        List<EndBranchDataContainer> finishedChildContexts = value.getFinishedChildBranchesData();
+        List<EndBranchDataContainer> finishedChildContexts = value.getSystemContext().getFinishedChildBranchesData();
 
         Map<String, Serializable> ooContexts = suspendedExecution.getFinishedBranches().get(0).getBranchContexts().getContexts();
         Map<String, Serializable> systemContext = suspendedExecution.getFinishedBranches().get(0).getBranchContexts().getSystemContext();

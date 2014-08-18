@@ -175,15 +175,6 @@ public class Execution implements Serializable {
         systemContext.put(ExecutionConstants.FINISHED_CHILD_BRANCHES_DATA, contexts);
     }
 
-    /**
-     * @return a list of Maps of OO Contexts, each map holds the maps of a finished branch, the type ArrayList because
-     * it has to be serializable
-     */
-    public List<EndBranchDataContainer> getFinishedChildBranchesData() {   //TODO - this method looks unneeded!!!! - need to remove!
-        //noinspection unchecked
-        return (List<EndBranchDataContainer>) systemContext.get(ExecutionConstants.FINISHED_CHILD_BRANCHES_DATA);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o)

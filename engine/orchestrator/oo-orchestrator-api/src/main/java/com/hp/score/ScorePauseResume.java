@@ -19,8 +19,10 @@ interface ScorePauseResume {
 
     /**
      * Requests Score to resume the given execution
+     * @param executionId   - the execution to resume
+     * @param context  - the execution context values to run with
+     * @param runtimeValues- values to add to the runtime values
      */
-    //todo document this method better
     void resumeExecution(Long executionId, Map<String, Serializable> context, Map<String, Serializable> runtimeValues);
 
 }

@@ -1,5 +1,6 @@
 package com.hp.score;
 
+import com.hp.oo.orchestrator.services.CancelExecutionService;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.Score;
 import com.hp.score.api.TriggeringProperties;
@@ -22,6 +23,9 @@ public class ScoreImpl implements Score {
     @Autowired
     private ScorePauseResume scorePauseResume;
 
+    @Autowired
+    private CancelExecutionService cancelExecutionService;
+
     @Override
     public Long trigger(TriggeringProperties triggeringProperties) {
         return scoreTriggering.trigger(triggeringProperties);
@@ -39,7 +43,7 @@ public class ScoreImpl implements Score {
 
     @Override
     public void cancelExecution(Long executionId) {
-        //TODO - impl this
+        cancelExecutionService.requestCancelExecution(executionId);
     }
 
 }

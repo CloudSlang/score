@@ -23,8 +23,6 @@ public interface ExecutionQueueService {
 
 	List<ExecutionMessage> pollMessagesWithoutAck(int maxSize,long minVersionAllowed);
 
-	WorkerQueueStatistics getNumOfEvents(ExecStatus status,String workerId);
-
 	Map<Long,Payload> readPayloadByExecutionIds(Long... executionIds);
 
 	List<ExecutionMessage> readMessagesByStatus(int maxSize, ExecStatus... statuses);

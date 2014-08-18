@@ -240,12 +240,6 @@ public class ExecutionQueueServiceTest {
 
 
 	@Test
-	public void getNumOfEvents() throws Exception {
-		executionQueueService.getNumOfEvents(ExecStatus.SENT, "W1");
-	}
-
-
-	@Test
 	public void readPayloadByIds() {
 		Multimap<String, String> groupWorkerMap = ArrayListMultimap.create();
 		groupWorkerMap.put("group1", "worker1");
