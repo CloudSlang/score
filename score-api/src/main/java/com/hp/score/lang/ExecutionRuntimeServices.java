@@ -31,7 +31,15 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String FINISHED_CHILD_BRANCHES_DATA = "FINISHED_CHILD_BRANCHES_DATA";
 
+    public static final String RUNNING_PLANS_MAP = "RUNNING_PLANS_MAP";
+
 	protected Map<String, Serializable> myMap = new HashMap<>();
+
+    public ExecutionRuntimeServices(){}
+
+    public ExecutionRuntimeServices(ExecutionRuntimeServices executionRuntimeServices){
+        myMap.putAll(executionRuntimeServices.myMap);
+    }
 
 	public void pause() {
 		myMap.put(EXECUTION_PAUSED, Boolean.TRUE);
@@ -75,9 +83,15 @@ public class ExecutionRuntimeServices implements Serializable {
 		return null;
 	}
 
-	public void addBranch(Long startPosition, Long executionPlanId, Map<String, Serializable> context) {
+	public void addBranch(Long startPosition, Long executionPlanId, Map<String, Serializable> context) { //TODO : delete this method , use instead the method below
 		addBranch(startPosition, executionPlanId, context, this);
 	}
+
+    public void addBranch(Long startPosition, String flowUuid, Map<String, Serializable> context){
+        Map<String, Long> runningPlansIds = getFromMap(RUNNING_PLANS_MAP);
+        Long runningPlanId = runningPlansIds.get(flowUuid);
+        addBranch(startPosition, runningPlanId, context, new ExecutionRuntimeServices(this));
+    }
 
 	protected void addBranch(Long startPosition, Long executionPlanId, Map<String, Serializable> context, ExecutionRuntimeServices executionRuntimeServices) {
 		if (!myMap.containsKey(BRANCH_DATA)) {

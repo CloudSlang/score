@@ -13,4 +13,8 @@ public class NavigationActions {
         nextStep++;
         return nextStep;
     }
+
+    public long simpleNavigation(Long nextStepId){
+        return nextStepId;
+    }
 }

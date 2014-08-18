@@ -87,7 +87,7 @@ public class QueueListenerImpl implements QueueListener {
 		for (ExecutionMessage executionMessage : messages) {
 			handleTerminatedMessage(executionMessage);
 			Execution execution = extractExecution(executionMessage);
-			scoreEvents.add(scoreEventFactory.createFinishedEvent(execution));
+			scoreEvents.add(scoreEventFactory.createFinishedEvent(execution));//TODO:??? also if it is branch??? need to check this
 		}
 		return scoreEvents.toArray(new ScoreEvent[scoreEvents.size()]);
 	}
