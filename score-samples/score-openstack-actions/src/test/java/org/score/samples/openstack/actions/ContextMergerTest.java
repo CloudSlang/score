@@ -1,6 +1,7 @@
 package org.score.samples.openstack.actions;
 
 
+import com.hp.score.lang.ExecutionRuntimeServices;
 import org.junit.Test;
 
 import java.io.BufferedReader;
@@ -73,14 +74,17 @@ public class ContextMergerTest {
 		String serverName = "serverName";
 		executionContext.put("returnResult", returnResult);
 		executionContext.put("serverName", serverName);
+		executionContext.put("host", "");
+		executionContext.put("computePort", "");
+		executionContext.put("identityPort", "");
+		executionContext.put("imageRef", "");
 
 		String host = "";
 		String expectedBody = "{\"server\": {\"name\": \""+ serverName+"\",\"imageRef\": \"56ff0279-f1fb-46e5-93dc-fe7093af0b1a\",\"flavorRef\": \"2\",\"max_count\": 1,\"min_count\": 1,\"security_groups\": [{\"name\": \"default\"}]}}";
 		String expectedUrl = "http://16.59.58.200:8774/v2/1ef9a1495c774e969ad6de86e6f025d7/servers";
 		String expectedHeaders = "X-AUTH-TOKEN: " + merger.getToken(CREATE_SERVER_RESPONSE_MOCK);
-
-
-		Map<String, String> returnMap = merger.prepareCreateServer(executionContext, null, "");
+		ExecutionRuntimeServices executionRuntimeServices = new ExecutionRuntimeServices();
+		Map<String, String> returnMap = merger.prepareCreateServer(executionContext, executionRuntimeServices, "");
 
 
 		assertEquals("URL not as expected.", expectedUrl, returnMap.get("url"));
