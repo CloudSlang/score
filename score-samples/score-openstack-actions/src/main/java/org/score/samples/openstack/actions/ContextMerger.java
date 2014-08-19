@@ -4,7 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.hp.score.lang.ExecutionRuntimeServices;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,60 +21,147 @@ import java.util.Map;
  */
 @SuppressWarnings("unused")
 public class ContextMerger {
-	private static final String TENANT  = "1ef9a1495c774e969ad6de86e6f025d7";
 
-	public Map<String, String> prepareGetServer(String returnResult) {
-		String host = "16.59.58.200";
-		String port = "8774";
-		String token = getToken(returnResult);
-		Map<String, String> returnMap = new HashMap<>();
-		String url = "http://" + host + ":" + port + "/v2/" + TENANT + "/servers";
-		returnMap.put("url", url);
-		returnMap.put("method", "get");
-		String headers = "X-AUTH-TOKEN: " + token;
-		returnMap.put("headers", headers);
-		return returnMap;
-	}
+	private final static Logger logger = Logger.getLogger(ContextMerger.class);
 
-	public Map<String, String> prepareCreateServer(String returnResult, String serverName) {
-		Map<String, String> returnMap = new HashMap<>();
-		String token = getToken(returnResult);
-
-		returnMap.put("url", "http://16.59.58.200:8774/v2/" + TENANT + "/servers");
-		returnMap.put("headers", "X-AUTH-TOKEN: " + token);
-		returnMap.put("body", "{\"server\": {\"name\": \"" + serverName + "\",\"imageRef\": \"56ff0279-f1fb-46e5-93dc-fe7093af0b1a\",\"flavorRef\": \"2\",\"max_count\": 1,\"min_count\": 1,\"security_groups\": [{\"name\": \"default\"}]}}");
-		returnMap.put("result", "0");
-
-		return returnMap;
-	}
-
-	private String getToken(String returnResult) {
-		JsonElement jelement = new JsonParser().parse(returnResult);
-		JsonObject jobject = jelement.getAsJsonObject();
-		jobject = jobject.getAsJsonObject("access");
-		jobject = jobject.getAsJsonObject("token");
-		String result = jobject.get("id").toString();
-		result = result.substring(1, result.length()-1);
-		return result;
-	}
+	private static final String DEFAULT_COMPUTE_PORT = "8774";
+	private static final String DEFAULT_IDENTITY_PORT = "5000";
+	private static final String DEFAULT_HOST = "16.59.58.200";
+	private static final String IDENTITY_PORT_KEY = "identityPort";
+	private static final String COMPUTE_PORT_KEY = "computePort";
+	private static final String DEFAULT_IMAGEREF = "56ff0279-f1fb-46e5-93dc-fe7093af0b1a";
+	private static final String URL_KEY = "url";
+	private static final String BODY_KEY = "body";
+	private static final String HEADERS_KEY = "headers";
+	private static final String HOST_KEY = "host";
+	private static final String RETURN_RESULT_KEY = "returnResult";
+	private static final String METHOD_KEY = "method";
+	public final static String ACTION_RUNTIME_EVENT_TYPE = "ACTION_RUNTIME_EVENT";
+	public final static String ACTION_EXCEPTION_EVENT_TYPE = "ACTION_EXCEPTION_EVENT";
 
 	public Map<String, String> getServerNames(String returnResult){
 		Map<String, String> returnMap = new HashMap<>();
+		List<String> serverNames = getServerList(returnResult);
+
+		logger.info("Available servers:");
+
+		for(String currentServerName : serverNames) {
+			logger.info(currentServerName);
+		}
+
+		return returnMap;
+	}
+	public Map<String, String> prepareGetServer(Map<String, Serializable> executionContext,ExecutionRuntimeServices executionRuntimeServices, String methodName){//, String returnResult, String host, String methodName) {
+
+		String returnResult = executionContext.get(RETURN_RESULT_KEY).toString();
+		String host = executionContext.get(HOST_KEY).toString();
+		String computePort = executionContext.get(COMPUTE_PORT_KEY).toString();
+
+		if (StringUtils.isEmpty(host)) {
+			host = DEFAULT_HOST;
+		}
+		if(StringUtils.isEmpty(computePort)){
+			computePort = DEFAULT_COMPUTE_PORT;
+		}
+		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Method \"" + methodName + "\" invoked.." +
+				" Attempting to merge back results: " + returnResult);
+
+		Map<String, String> returnMap = new HashMap<>();
+
+		String token = getToken(returnResult);
+		String tenant = getTenant(returnResult);
+
+		String url = "http://" + host + ":" + computePort + "/v2/" + tenant + "/servers";
+		returnMap.put(URL_KEY, url);
+		returnMap.put(METHOD_KEY, "get");
+		returnMap.put(HEADERS_KEY, "X-AUTH-TOKEN: " + token);
+
+		executionContext.putAll(returnMap);
+		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Results merged back in the Execution Context");
+		return returnMap;
+	}
+
+
+
+	public Map<String, String> prepareCreateServer(Map<String, Serializable> executionContext, ExecutionRuntimeServices executionRuntimeServices, String methodName){//}, String returnResult, String serverName, String host, String methodName, String imageRef) {
+
+		String returnResult = executionContext.get(RETURN_RESULT_KEY).toString();
+		String serverName = executionContext.get("serverName").toString();
+		String host = executionContext.get(HOST_KEY).toString();
+		String computePort = executionContext.get(COMPUTE_PORT_KEY).toString();
+		String imageRef = executionContext.get("imageRef").toString();
+
+
+		if(StringUtils.isEmpty(host)){
+			host = DEFAULT_HOST;
+		}
+		if(StringUtils.isEmpty(computePort)){
+			computePort = DEFAULT_COMPUTE_PORT;
+		}
+		if(StringUtils.isEmpty(imageRef)){
+			imageRef = DEFAULT_IMAGEREF;
+		}
+
+		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Method \"" + methodName + "\" invoked.." +
+				" Attempting to merge back results: " + returnResult);
+
+		Map<String, String> returnMap = new HashMap<>();
+
+		String token = getToken(returnResult);
+		String tenant = getTenant(returnResult);
+
+		String url = "http://" + host + ":" + computePort + "/v2/" + tenant + "/servers";
+		String body = "";
+
+		body += "{\"server\": {\"name\": \"" +serverName + "\",";
+		body += "\"imageRef\": \""+imageRef+"\",";
+		body += "\"flavorRef\": \"2\",";
+		body += "\"max_count\": 1,";
+		body += "\"min_count\": 1,";
+		body += "\"security_groups\": [{\"name\": \"default\"}]}}";
+
+		returnMap.put(URL_KEY, url);
+		returnMap.put(HEADERS_KEY, "X-AUTH-TOKEN: " + token);
+		returnMap.put(BODY_KEY, body);
+
+		executionContext.putAll(returnMap);
+		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Results merged back in the Execution Context");
+
+		return returnMap;
+	}
+
+	public List<String> getServerList(String returnResult){
 		List<String> serverNames = new ArrayList<>();
 
-		JsonElement jelement = new JsonParser().parse(returnResult);
-		JsonObject  jobject = jelement.getAsJsonObject();
-		JsonArray jarray = jobject.getAsJsonArray("servers");
+		JsonElement parsedServerList = new JsonParser().parse(returnResult);
+		JsonObject  serverListObject = parsedServerList.getAsJsonObject();
+		JsonArray servers = serverListObject.getAsJsonArray("servers");
 
-		for(int i = 0; i < jarray.size(); ++i){
-			jobject = jarray.get(i).getAsJsonObject();
-			serverNames.add(jobject.get("name").toString());
+		for(int i = 0; i < servers.size(); ++i){
+			serverListObject = servers.get(i).getAsJsonObject();
+			String currentServerName = serverListObject.get("name").toString();
+			serverNames.add(currentServerName);
 		}
-		System.out.println("Available servers:");
-		for(String currentServerName : serverNames) {
-			System.out.println(currentServerName);
-		}
-		returnMap.put("result", "0");
-		return returnMap;
+		return serverNames;
+	}
+	
+	public String getTenant(String returnResult) {
+		JsonElement parsedResult = new JsonParser().parse(returnResult);
+		JsonObject parsedObject = parsedResult.getAsJsonObject();
+		JsonObject accessObject = parsedObject.getAsJsonObject("access");
+		JsonObject tokenObject = accessObject.getAsJsonObject("token");
+		JsonObject tenantObject = tokenObject.getAsJsonObject("tenant");
+		String resultTenant = tenantObject.get("id").toString();
+		resultTenant = resultTenant.substring(1, resultTenant.length()-1);
+		return resultTenant;
+	}
+	public String getToken(String returnResult) {
+		JsonElement parsedResult = new JsonParser().parse(returnResult);
+		JsonObject parsedObject = parsedResult.getAsJsonObject();
+		JsonObject accessObject = parsedObject.getAsJsonObject("access");
+		JsonObject tokenObject = accessObject.getAsJsonObject("token");
+		String resultToken = tokenObject.get("id").toString();
+		resultToken = resultToken.substring(1, resultToken.length()-1);
+		return resultToken;
 	}
 }

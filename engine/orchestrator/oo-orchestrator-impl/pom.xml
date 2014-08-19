@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.hp.score</groupId>
         <artifactId>orchestrator</artifactId>
-        <version>0.1.183-SNAPSHOT</version>
+        <version>0.1.185-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

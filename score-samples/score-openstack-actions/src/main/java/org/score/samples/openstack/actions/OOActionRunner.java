@@ -1,16 +1,15 @@
 package org.score.samples.openstack.actions;
 
 import com.hp.score.lang.ExecutionRuntimeServices;
-import org.score.samples.utility.InputBindingUtility;
-import org.score.samples.utility.InputBindingUtility.BindingConflict;
+import org.apache.log4j.Logger;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.apache.log4j.Logger;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +24,8 @@ public class OOActionRunner {
 	public final static String ACTION_EXCEPTION_EVENT_TYPE = "ACTION_EXCEPTION_EVENT";
 	private Class actionClass;
 	private Method actionMethod;
-	private String[] parameterNames;
+	private String[] parameterNames; // parameter names ordered according to their position in method signature
+	private Map<String, Object> parameters; //parameters as name-value pairs
 
 	/**
 	 * Wrapper method for running actions. A method is a valid action if it returns a Map<String, String>
@@ -41,14 +41,13 @@ public class OOActionRunner {
 			ExecutionRuntimeServices executionRuntimeServices,
 			String className,
 			String methodName,
-			Boolean nullAllowed) {
+			List<InputBinding> inputBindings) {
 		try {
 			logger.info("run method invocation");
 
 			Object[] actualParameters = extractMethodData(executionContext, executionRuntimeServices, className, methodName);
 
-			nullAllowed = nullAllowed == null ? true : nullAllowed;
-			verifyActionInputs(actualParameters, nullAllowed);
+			verifyActionInputs(inputBindings);
 
 			Map<String, String> results = invokeMethod(executionRuntimeServices, className, methodName, actualParameters);
 
@@ -58,18 +57,25 @@ public class OOActionRunner {
 		}
 	}
 
-	private void verifyActionInputs(Object[] actualParameters, boolean nullAllowed) {
-		Class<?>[] parameterTypes =  actionMethod.getParameterTypes();
-		boolean validParameters = InputBindingUtility.validateParameterArray(parameterTypes, actualParameters, nullAllowed);
-		if (!validParameters) {
-			List<BindingConflict> conflicts = InputBindingUtility.getBindingConflicts(parameterTypes, actualParameters, nullAllowed);
-			String conflictsString = "[";
-			for (BindingConflict bindingConflict : conflicts) {
-				conflictsString += parameterNames[bindingConflict.getPosition()] + " -> " + bindingConflict.getConflictType() + ",";
+	private void verifyActionInputs(List<InputBinding> inputBindings) throws IOException, InputBinding.InputBindingException {
+		if (inputBindings != null) {
+			for (InputBinding inputBinding : inputBindings) {
+				if (inputBinding.isRequired()) {
+					if (!foundValue(inputBinding.getInputName())) {
+						String message = "Input \"" + inputBinding.getInputName() + "\" is required but not found!";
+						throw new InputBinding.InputBindingException(message);
+					}
+				}
 			}
-			conflictsString = conflictsString.substring(0, conflictsString.length()-1);
-			conflictsString += "]";
-			throw new InputBindingUtility.InputBindingException(conflictsString);
+		}
+	}
+
+	private boolean foundValue(String key) {
+		Object value = parameters.get(key);
+		if (value instanceof String) {
+			return !((String) value).isEmpty();
+		} else {
+			return value != null;
 		}
 	}
 
@@ -90,13 +96,13 @@ public class OOActionRunner {
 		// if the action method does not have any parameters then actualParameters is null
 		if (actualParameters != null) {
 			invokeMessage += " with parameters: [";
-			int limit = actualParameters.length - 1;
-			for (int i = 0; i < limit; i++) {
+			int lastElementIndex = actualParameters.length - 1;
+			for (int i = 0; i < lastElementIndex; i++) {
 				String parameter = actualParameters[i] == null ? "null" : actualParameters[i].toString();
 				String pair = parameterNames[i] + " -> " + parameter;
 				invokeMessage += pair + ",";
 			}
-			invokeMessage += actualParameters[actualParameters.length - 1];
+			invokeMessage += parameterNames[lastElementIndex] + " -> " + actualParameters[lastElementIndex];
 		}
 		invokeMessage += "]";
 
@@ -150,6 +156,7 @@ public class OOActionRunner {
 	 * @return parameters from the execution context represented as Object list
 	 */
 	private Object[] getParametersFromExecutionContext(Map<String, Serializable> executionContext, String[] parameterNames) {
+		parameters = new HashMap<>();
 		int nrParameters = parameterNames.length;
 		Object[] actualParameters = null;
 		if (nrParameters > 0) {
@@ -162,6 +169,7 @@ public class OOActionRunner {
 				} else {
 					actualParameters[i] = null;
 				}
+				parameters.put(parameterNames[i], actualParameters[i]);
 			}
 		}
 		return actualParameters;
