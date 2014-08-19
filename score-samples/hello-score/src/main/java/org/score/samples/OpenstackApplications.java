@@ -1,6 +1,7 @@
 package org.score.samples;
 
 import com.hp.score.api.ExecutionPlan;
+import org.apache.commons.lang3.StringUtils;
 import org.score.samples.openstack.actions.ExecutionPlanBuilder;
 import org.score.samples.openstack.actions.MatchType;
 import org.score.samples.openstack.actions.NavigationMatcher;
@@ -26,19 +27,33 @@ public class OpenstackApplications {
 		String username;
 		String password;
 		String host;
-		String port;
+		String identityPort;
+		String computePort;
 		host = readInput(reader, "Host");
-		port = readInput(reader, "Port");
+		identityPort = readInput(reader, "Identity Port");
+		computePort = readInput(reader, "Compute Port");
 		username = readInput(reader, "Username");
 		password = readInput(reader, "Password");
 
+		if (StringUtils.isEmpty(host)){
+			host = "16.59.58.200";
+		}
+		if (StringUtils.isEmpty(identityPort)){
+			identityPort = "5000";
+		}
+		if (StringUtils.isEmpty(computePort)){
+			computePort = "8774";
+		}
+
 		Map<String, Serializable> executionContext = new HashMap<>();
-		String url = "http://" + host + ":" + port + "/v2.0/tokens";
+		String url = "http://" + host + ":" + identityPort + "/v2.0/tokens";
 		String body = "{\"auth\": {\"tenantName\": \"demo\",\"passwordCredentials\": {\"username\": \"" + username +"\",\"password\": \"" + password + "\"}}}";
 		executionContext.put("url", url);
 		executionContext.put("method", "post");
 		executionContext.put("body", body);
 		executionContext.put("contentType", "application/json");
+		executionContext.put("computePort", computePort);
+		executionContext.put("host", host);
 
 		return executionContext;
 	}
@@ -49,22 +64,43 @@ public class OpenstackApplications {
 		String username;
 		String password;
 		String host;
-		String port;
+		String identityPort;
+		String computePort;
 		String serverName;
+		String imageRef;
+
 		host = readInput(reader, "Host");
-		port = readInput(reader, "Port");
+		identityPort = readInput(reader, "Identity Port");
+		computePort = readInput(reader, "Compute Port");
+		imageRef = readInput(reader, "ImageRef");
 		username = readInput(reader, "Username");
 		password = readInput(reader, "Password");
 		serverName = readInput(reader, "Server name");
 
+		if (StringUtils.isEmpty(host)){
+			host = "16.59.58.200";
+		}
+		if (StringUtils.isEmpty(identityPort)){
+			identityPort = "5000";
+		}
+		if (StringUtils.isEmpty(computePort)){
+			computePort = "8774";
+		}
+		if (StringUtils.isEmpty(imageRef)){
+			imageRef = "56ff0279-f1fb-46e5-93dc-fe7093af0b1a";
+		}
+
 		Map<String, Serializable> executionContext = new HashMap<>();
-		String url = "http://" + host + ":" + port + "/v2.0/tokens";
+		String url = "http://" + host + ":" + identityPort + "/v2.0/tokens";
 		String body = "{\"auth\": {\"tenantName\": \"demo\",\"passwordCredentials\": {\"username\": \"" + username +"\",\"password\": \"" + password + "\"}}}";
 		executionContext.put("url", url);
 		executionContext.put("method", "post");
 		executionContext.put("body", body);
 		executionContext.put("contentType", "application/json");
 		executionContext.put("serverName", serverName);
+		executionContext.put("computePort", computePort);
+		executionContext.put("imageRef", imageRef);
+		executionContext.put("host", host);
 
 		return executionContext;
 	}
@@ -81,7 +117,7 @@ public class OpenstackApplications {
 
 		createGetTokenStep(builder, tokenStepId, contextMergerStepId, successStepId);
 
-		createContextMergerStep(builder, contextMergerStepId, createServerStepId, successStepId);
+		createContextMergerStep(builder, contextMergerStepId, createServerStepId);
 
 		startServerStep(builder, createServerStepId, successStepId, successStepId);
 
@@ -129,14 +165,9 @@ public class OpenstackApplications {
 	private void createContextMergerStep(
 			ExecutionPlanBuilder builder,
 			Long stepId,
-			Long nextStepId,
-			Long defaultStepId) {
-		List<NavigationMatcher<Serializable>> navigationMatchers = new ArrayList<>();
+			Long nextStepId) {
 
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, "result", "0", nextStepId));
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, defaultStepId));
-
-		builder.addOOActionStep(stepId, "org.score.samples.openstack.actions.ContextMerger", "prepareCreateServer", null, navigationMatchers);
+		builder.addStep(stepId, "org.score.samples.openstack.actions.ContextMerger", "prepareCreateServer", nextStepId);
 	}
 
 	private void startServerStep(
@@ -155,11 +186,8 @@ public class OpenstackApplications {
 	private void createPrepareGetServersStep(
 			ExecutionPlanBuilder builder,
 			Long stepId,
-			Long defaultStepId) {
-		//prepare context for get servers
-		List<NavigationMatcher<Serializable>>  navigationMatchers = new ArrayList<>();
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, defaultStepId));
-		builder.addOOActionStep(stepId, "org.score.samples.openstack.actions.ContextMerger", "prepareGetServer", null, navigationMatchers);
+			Long nextStepId) {
+		builder.addStep(stepId, "org.score.samples.openstack.actions.ContextMerger", "prepareGetServer", nextStepId);
 	}
 
 	private void createGetServersStep(ExecutionPlanBuilder builder, Long stepId, Long defaultStepId) {
@@ -175,11 +203,8 @@ public class OpenstackApplications {
 		builder.addOOActionFinalStep(successStepId, "org.score.samples.openstack.actions.FinalStepActions", "successStepAction");
 	}
 
-	private void createDisplayStep(ExecutionPlanBuilder builder, Long stepId, Long defaultStepId) {
-		List<NavigationMatcher<Serializable>> navigationMatchers;//display step
-		navigationMatchers = new ArrayList<>();
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, defaultStepId));
-		builder.addOOActionStep(stepId, "org.score.samples.openstack.actions.ContextMerger", "getServerNames", null, navigationMatchers);
+	private void createDisplayStep(ExecutionPlanBuilder builder, Long stepId, Long nextStepId) {
+		builder.addStep(stepId, "org.score.samples.openstack.actions.ContextMerger", "getServerNames", nextStepId);
 	}
 
 	private String readInput(BufferedReader reader, String inputName) {

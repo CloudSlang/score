@@ -19,8 +19,8 @@ public class StubWorkerConfigurationService implements WorkerConfigurationServic
 
     @Override
     public List<String> getWorkerGroups() {
-        return Lists.newArrayList("RAS_Operator_Path");
-    }
+		return Lists.newArrayList("RAS_Operator_Path");
+	}
 
     @Override
     public boolean isExecutionPaused(Long executionId, String branchId) {

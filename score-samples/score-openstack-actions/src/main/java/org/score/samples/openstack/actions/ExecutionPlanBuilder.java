@@ -65,6 +65,34 @@ public class ExecutionPlanBuilder {
 		return addOOActionStep(stepId, actionClassName, actionMethodName, null, null);
 	}
 
+
+	public Long addStep(
+			Long stepId, String classPath, String methodName,Long nextStepId
+	) {
+		ExecutionStep step = new ExecutionStep(stepId);
+
+		step.setAction(new ControlActionMetadata(classPath, methodName));
+		Map<String, Serializable> actionData = new HashMap<>(3);
+
+		actionData.put(ACTION_METHOD_KEY, methodName);
+		step.setActionData(actionData);
+
+		step.setNavigation(new ControlActionMetadata("org.score.samples.openstack.actions.ExecutionPlanBuilder", "simpleNavigate"));
+		Map<String, Object> navigationData = new HashMap<>(2);
+		navigationData.put("nextStepId", nextStepId);
+
+		step.setNavigationData(navigationData);
+
+		step.setSplitStep(false);
+
+		executionPlan.addStep(step);
+
+		return step.getExecStepId();
+	}
+	@SuppressWarnings("unused")
+	public Long simpleNavigate(Long nextStepId){
+		return nextStepId;
+	}
 	@SuppressWarnings("unused")
 	public void setBeginStep(Long beginStepId)
 	{

@@ -73,6 +73,7 @@
             <version>${project.version}</version>
         </dependency>
 
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>score-api</artifactId>
@@ -84,6 +85,7 @@
             <artifactId>score-all</artifactId>
             <version>${project.version}</version>
         </dependency>
+
 
         <dependency>
             <groupId>com.google.code.gson</groupId>
