@@ -1,5 +1,19 @@
 package com.hp.oo.execution.services;
 
+import java.io.Serializable;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.score.worker.execution.WorkerConfigurationService;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.hp.oo.broker.entities.BranchContextHolder;
 import com.hp.oo.broker.entities.RunningExecutionPlan;
 import com.hp.oo.broker.services.RuntimeValueService;
@@ -12,25 +26,12 @@ import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.oo.internal.sdk.execution.OOContext;
 import com.hp.oo.orchestrator.services.PauseResumeService;
-import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
 import com.hp.score.api.ExecutionStep;
 import com.hp.score.api.StartBranchDataContainer;
 import com.hp.score.events.EventBus;
 import com.hp.score.events.EventConstants;
 import com.hp.score.events.ScoreEvent;
 import com.hp.score.lang.SystemContext;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.io.Serializable;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
 /**
  * @author Dima Rassin
@@ -49,7 +50,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	@Autowired
 	private WorkerDbSupportService workerDbSupportService;
 	@Autowired
-	private WorkerConfigurationService configurationService;
+	private WorkerConfigurationService workerConfigurationService;
 	@Autowired
 	private RuntimeValueService runtimeValueService;
 	@Autowired
@@ -213,9 +214,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	}
 
 	protected boolean handleCancelledFlow(Execution execution) {
-		Long executionId = execution.getExecutionId();
-		List<Long> cancelledExecutions = configurationService.getCancelledExecutions(); // in this case - just check if need to cancel. It will set as cancelled later on QueueEventListener
-		boolean executionIsCancelled = cancelledExecutions.contains(executionId);
+		boolean executionIsCancelled = workerConfigurationService.isExecutionCancelled(execution.getExecutionId()); // in this case - just check if need to cancel. It will set as cancelled later on QueueEventListener
 		// Another scenario of getting canceled - it was cancelled from the SplitJoinService (the configuration can still be not updated). Defect #:22060
 		if(ExecutionStatus.CANCELED.equals(execution.getSystemContext().get(ExecutionConstants.FLOW_TERMINATION_TYPE))) {
 			executionIsCancelled = true;
@@ -287,14 +286,14 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
 	private PauseReason findPauseReason(Long executionId, String branchId) {
 		// 1. Check the configuration according to branch (can be null or not null...)
-		if(configurationService.isExecutionPaused(executionId, branchId)) {
+		if(workerConfigurationService.isExecutionPaused(executionId, branchId)) {
 			ExecutionSummary execSummary = pauseService.readPausedExecution(executionId, branchId);
 			if(execSummary != null && execSummary.getStatus().equals(ExecutionStatus.PENDING_PAUSE)) {
 				return execSummary.getPauseReason();
 			}
 			// 2. Check the parent if we're in branch (subflow or MI\Parallel lane).
 			// If the user pressed Pause on the Parent then we need to pause the branch (the parent is in the Suspended table).
-		} else if(branchId != null && configurationService.isExecutionPaused(executionId, null)) {
+		} else if(branchId != null && workerConfigurationService.isExecutionPaused(executionId, null)) {
 			ExecutionSummary execSummary = pauseService.readPausedExecution(executionId, null);
 			if(execSummary != null && execSummary.getStatus().equals(ExecutionStatus.PENDING_PAUSE)) {
 				PauseReason reason = execSummary.getPauseReason();

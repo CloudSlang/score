@@ -49,6 +49,7 @@
 					<xsd:complexType>
 						<xsd:attribute type="xsd:int" name="outBufferInterval"/>
 						<xsd:attribute type="xsd:int" name="keepAliveInterval"/>
+						<xsd:attribute type="xsd:int" name="configRefreshInterval"/>
 						<xsd:attribute type="xsd:int" name="statisticsInterval"/>
 					</xsd:complexType>
 				</xsd:element>

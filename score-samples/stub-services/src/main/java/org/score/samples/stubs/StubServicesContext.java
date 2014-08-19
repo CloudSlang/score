@@ -15,11 +15,6 @@ public class StubServicesContext {
     }
 
     @Bean
-    StubWorkerConfigurationService workerConfigurationService(){
-        return new StubWorkerConfigurationService();
-    }
-
-    @Bean
     StubRuntimeValueService runtimeValueService() {
         return new StubRuntimeValueService();
     }
@@ -28,4 +23,5 @@ public class StubServicesContext {
     StubParallelPersistenceServiceImpl parallelPersistenceService() {
        return new StubParallelPersistenceServiceImpl();
     }
+
 }

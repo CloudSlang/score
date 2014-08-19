@@ -11,9 +11,10 @@ import com.hp.oo.execution.services.dbsupport.WorkerDbSupportService;
 import com.hp.oo.orchestrator.services.CancelExecutionService;
 import com.hp.oo.orchestrator.services.OrchestratorDispatcherService;
 import com.hp.oo.orchestrator.services.PauseResumeService;
-import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.score.worker.execution.WorkerConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,5 +1,26 @@
 package com.hp.oo.execution.services;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.mockito.internal.verification.VerificationModeFactory;
+import org.score.worker.execution.WorkerConfigurationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
 import com.hp.oo.broker.entities.BranchContextHolder;
 import com.hp.oo.broker.entities.RunningExecutionPlan;
 import com.hp.oo.broker.services.RuntimeValueService;
@@ -12,31 +33,10 @@ import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.oo.orchestrator.services.CancelExecutionService;
 import com.hp.oo.orchestrator.services.PauseResumeService;
-import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
 import com.hp.score.api.ControlActionMetadata;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ExecutionStep;
 import com.hp.score.events.EventBus;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.mockito.internal.verification.VerificationModeFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -55,8 +55,8 @@ public class ExecutionServiceTest {
 	private static final Long RUNNING_EXE_PLAN_ID = 333L;
 	private static final Long EXECUTION_STEP_1_ID = 1L;
 	private static final Long EXECUTION_STEP_2_ID = 2L;
-	private static final Long EXECUTION_ID_1 = 1111L;
-	private static final Long EXECUTION_ID_2 = 2222L;
+	static final Long EXECUTION_ID_1 = 1111L;
+	static final Long EXECUTION_ID_2 = 2222L;
 
 	@Autowired
 	private ExecutionServiceImpl executionService;
@@ -326,10 +326,8 @@ public class ExecutionServiceTest {
 		@Bean
 		public WorkerConfigurationService getWorkerConfigurationService() {
 			WorkerConfigurationService serviceMock = mock(WorkerConfigurationService.class);
-
-			List<Long> listOfCancelled = Arrays.asList(EXECUTION_ID_1, EXECUTION_ID_2);
-			when(serviceMock.getCancelledExecutions()).thenReturn(listOfCancelled);
-
+			when(serviceMock.isExecutionCancelled(EXECUTION_ID_1)).thenReturn(true);
+			when(serviceMock.isExecutionCancelled(EXECUTION_ID_2)).thenReturn(true);
 			return serviceMock;
 		}
 

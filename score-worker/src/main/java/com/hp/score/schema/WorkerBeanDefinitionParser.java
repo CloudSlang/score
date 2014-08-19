@@ -34,6 +34,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(com.hp.oo.execution.services.WorkerRecoveryManagerImpl.class, null);
 		put(com.hp.oo.execution.gateways.ExecutionGatewayImpl.class, "runningExecutionGateway");
 		put(com.hp.oo.execution.reflection.ReflectionAdapterImpl.class, null);
+		put(org.score.worker.execution.WorkerConfigurationServiceImpl.class, "workerConfiguration");
 //		put(org.score.worker.management.WorkerRegistration.class, null);
 	}};
 
@@ -46,6 +47,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private List<ConfValue> schedulerValues = Arrays.asList(
 			new ConfValue().NAME("outBufferInterval").DEFAULT(100L),
 			new ConfValue().NAME("keepAliveInterval").DEFAULT(10000L),
+			new ConfValue().NAME("configRefreshInterval").DEFAULT(1000L),
 			new ConfValue().NAME("statisticsInterval").DEFAULT(1000L)
 	);
 

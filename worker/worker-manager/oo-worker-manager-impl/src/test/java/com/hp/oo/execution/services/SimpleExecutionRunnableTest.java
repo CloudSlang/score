@@ -1,12 +1,9 @@
 package com.hp.oo.execution.services;
 
-import com.hp.oo.engine.queue.entities.ExecStatus;
-import com.hp.oo.engine.queue.entities.ExecutionMessage;
-import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
-import com.hp.oo.engine.queue.entities.Payload;
-import com.hp.oo.engine.queue.services.QueueStateIdGeneratorService;
-import com.hp.oo.internal.sdk.execution.Execution;
-import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,19 +12,23 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.score.worker.execution.WorkerConfigurationService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import com.hp.oo.engine.queue.entities.ExecStatus;
+import com.hp.oo.engine.queue.entities.ExecutionMessage;
+import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
+import com.hp.oo.engine.queue.entities.Payload;
+import com.hp.oo.engine.queue.services.QueueStateIdGeneratorService;
+import com.hp.oo.internal.sdk.execution.Execution;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created with IntelliJ IDEA.

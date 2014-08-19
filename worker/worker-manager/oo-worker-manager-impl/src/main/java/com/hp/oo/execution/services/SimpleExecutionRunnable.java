@@ -9,9 +9,10 @@ import com.hp.oo.engine.queue.services.QueueStateIdGeneratorService;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.oo.orchestrator.entities.SplitMessage;
-import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.score.worker.execution.WorkerConfigurationService;
 
 import java.io.IOException;
 import java.util.List;
@@ -233,7 +234,7 @@ public class SimpleExecutionRunnable implements Runnable {
         nextStepExecution.getSystemContext().remove(ExecutionConstants.USE_STAY_IN_THE_WORKER);
         boolean useStayInTheWorker = (useStayInTheWorkerObj != null) && (useStayInTheWorkerObj.equals(Boolean.TRUE));
 
-        boolean isSameWorker = workerConfigurationService.getWorkerGroups().contains(workerGroupId) ||
+        boolean isSameWorker = workerConfigurationService.isMemberOf(workerGroupId) ||
                 (workerUUID != null && workerGroupId.endsWith(workerUUID));
 
         if (isSameWorker && useStayInTheWorker) {
@@ -246,23 +247,21 @@ public class SimpleExecutionRunnable implements Runnable {
                     ExecStatus.IN_PROGRESS,
                     converter.createPayload(nextStepExecution),
                     0).setWorkerKey(executionMessage.getWorkerKey());
-        } else {
-            // need to move to anther worker
-            return new ExecutionMessage(ExecutionMessage.EMPTY_EXEC_STATE_ID,
-                    ExecutionMessage.EMPTY_WORKER,
-                    workerGroupId,
-                    executionMessage.getMsgId(),
-                    ExecStatus.PENDING,
-                    converter.createPayload(nextStepExecution),
-                    0).setWorkerKey(executionMessage.getWorkerKey());
         }
+		// need to move to anther worker
+		return new ExecutionMessage(ExecutionMessage.EMPTY_EXEC_STATE_ID,
+		        ExecutionMessage.EMPTY_WORKER,
+		        workerGroupId,
+		        executionMessage.getMsgId(),
+		        ExecStatus.PENDING,
+		        converter.createPayload(nextStepExecution),
+		        0).setWorkerKey(executionMessage.getWorkerKey());
     }
 
     private String getSplitId(List<Execution> newExecutions) {
         if (newExecutions != null && newExecutions.size() > 0) {
             return newExecutions.get(0).getSplitId();
-        } else {
-            throw new RuntimeException("Split executions list is null or empty!!!");
         }
+		throw new RuntimeException("Split executions list is null or empty!!!");
     }
 }

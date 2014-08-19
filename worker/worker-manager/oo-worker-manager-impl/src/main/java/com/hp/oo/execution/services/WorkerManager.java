@@ -1,18 +1,5 @@
 package com.hp.oo.execution.services;
 
-import com.hp.oo.engine.node.services.WorkerNodeService;
-import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextClosedEvent;
-import org.springframework.context.event.ContextRefreshedEvent;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Map;
@@ -23,7 +10,23 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static ch.lambdaj.Lambda.*;
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.log4j.Logger;
+import org.score.worker.execution.WorkerConfigurationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.ContextRefreshedEvent;
+
+import com.hp.oo.engine.node.services.WorkerNodeService;
+
+import static ch.lambdaj.Lambda.max;
+import static ch.lambdaj.Lambda.on;
 
 /**
  * Created with IntelliJ IDEA.
@@ -37,34 +40,25 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 
 	@Resource
 	private String workerUuid;
-
 	@Autowired
-	private WorkerNodeService workerNodeService;
-
+	protected WorkerNodeService workerNodeService;
 	@Autowired
-	private WorkerConfigurationService workerConfigurationService;
-
+	protected WorkerConfigurationService workerConfigurationService;
 	@Autowired
-	private WorkerRecoveryManager recoveryManager;
-
+	protected WorkerRecoveryManager recoveryManager;
 	private LinkedBlockingQueue<Runnable> inBuffer = new LinkedBlockingQueue<>();
-
 	@Autowired
 	@Qualifier("numberOfExecutionThreads")
 	private Integer numberOfThreads;
-
 	@Autowired(required = false)
 	@Qualifier("initStartUpSleep")
 	private Long initStartUpSleep = 15*1000L; // by default 15 seconds
-
 	@Autowired(required = false)
 	@Qualifier("maxStartUpSleep")
 	private Long maxStartUpSleep = 10*60*1000L; // by default 10 minutes
     private int keepAliveFailCount = 0;
 	private ExecutorService executorService;
-
 	private Map<Long, Future> mapOfRunningTasks;
-
 	private volatile boolean endOfInit = false;
     private volatile boolean initStarted = false;
 	private boolean up = false;
@@ -178,7 +172,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 		                //mark that worker is up and its recovery is ended - only now we can start asking for messages from queue
 		                up = true;
 
-		                workerConfigurationService.enabled(true);
+		                workerConfigurationService.setEnabled(true);
 		                workerNodeService.updateEnvironmentParams(workerUuid,
 				                System.getProperty("os.name"),
 				                System.getProperty("java.version"),
@@ -190,7 +184,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
     private void doShutdown() {
     		endOfInit = false;
             initStarted = false;
-    		workerConfigurationService.enabled(false);
+    		workerConfigurationService.setEnabled(false);
     		workerNodeService.down(workerUuid);
     		up = false;
     		logger.info("The worker is down");

@@ -2,9 +2,11 @@ package com.hp.oo.execution.services;
 
 import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.engine.queue.services.QueueStateIdGeneratorService;
-import com.hp.oo.orchestrator.services.configuration.WorkerConfigurationService;
+
+import org.score.worker.execution.WorkerConfigurationService;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import javax.annotation.Resource;
 
 /**
