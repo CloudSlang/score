@@ -98,7 +98,7 @@ public class ExecutionRuntimeServices implements Serializable {
 			myMap.put(BRANCH_DATA, new ArrayList<StartBranchDataContainer>());
 		}
 		List<StartBranchDataContainer> branchesData = getFromMap(BRANCH_DATA);
-		branchesData.add(new StartBranchDataContainer(startPosition, executionPlanId, context, new SystemContext(executionRuntimeServices.myMap)));
+		branchesData.add(new StartBranchDataContainer(startPosition, executionPlanId, context, new SystemContext(executionRuntimeServices.myMap)));//TODO :why SystemContext object here? remove this, need to be ExecutioneRuntimeServices instead..
 	}
 
 	/**

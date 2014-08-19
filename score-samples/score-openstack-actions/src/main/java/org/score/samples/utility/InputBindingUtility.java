@@ -10,6 +10,7 @@ import java.util.List;
  *
  * @author Bonczidai Levente
  */
+@SuppressWarnings("unused")
 public class InputBindingUtility {
 	public static boolean validateParameterArray(Class<?>[] types, Object[] values, boolean nullAllowed) {
 		List<BindingConflict> conflicts = getBindingConflicts(types, values, nullAllowed);
@@ -85,8 +86,8 @@ public class InputBindingUtility {
 		}
 	}
 
-	public static class InputBindingException extends RuntimeException {
-		public InputBindingException(String message) {
+	public static class ListInputBindingException extends RuntimeException {
+		public ListInputBindingException(String message) {
 			super(message);
 		}
 	}

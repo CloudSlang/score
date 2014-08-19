@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * A POJO containing all the data necessary to create a new branch
  */
-public class StartBranchDataContainer {
+public class StartBranchDataContainer implements Serializable{
     private final Long startPosition;
     private final Long executionPlanId;
     private final Map<String, Serializable> contexts;
