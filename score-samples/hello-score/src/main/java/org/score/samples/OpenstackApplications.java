@@ -114,14 +114,17 @@ public class OpenstackApplications {
 		Long contextMergerStepId = 1L;
 		Long createServerStepId = 2L;
 		Long successStepId = 3L;
+		Long failureStepId = 4L;
 
-		createGetTokenStep(builder, tokenStepId, contextMergerStepId, successStepId);
+		createGetTokenStep(builder, tokenStepId, contextMergerStepId, failureStepId);
 
 		createContextMergerStep(builder, contextMergerStepId, createServerStepId);
 
-		startServerStep(builder, createServerStepId, successStepId, successStepId);
+		startServerStep(builder, createServerStepId, successStepId, failureStepId);
 
 		createSuccessStep(builder, successStepId);
+
+		createFailureStep(builder, failureStepId);
 
 		return builder.getExecutionPlan();
 	}
@@ -135,16 +138,19 @@ public class OpenstackApplications {
 		Long getServersStepId = 2L;
 		Long displayStepId = 3L;
 		Long successStepId = 4L;
+		Long failureStepId = 5L;
 
-		createGetTokenStep(builder, tokenStepId, mergerStepId, successStepId);
+		createGetTokenStep(builder, tokenStepId, mergerStepId, failureStepId);
 
 		createPrepareGetServersStep(builder, mergerStepId, getServersStepId);
 
-		createGetServersStep(builder, getServersStepId, displayStepId);
+		createGetServersStep(builder, getServersStepId, displayStepId, failureStepId);
 
 		createDisplayStep(builder, displayStepId, successStepId);
 
 		createSuccessStep(builder, successStepId);
+
+		createFailureStep(builder, failureStepId);
 
 		return builder.getExecutionPlan();
 	}
@@ -152,12 +158,12 @@ public class OpenstackApplications {
 	private void createGetTokenStep(
 			ExecutionPlanBuilder builder,
 			Long stepId,
-			Long nextStepId,
-			Long defaultStepId){
+			Long successStepId,
+			Long failureStepId){
 		List<NavigationMatcher<Serializable>> navigationMatchers = new ArrayList<>();
 
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, "returnCode", "0", nextStepId));
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, defaultStepId));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, "statusCode", "200", successStepId));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, failureStepId));
 
 		builder.addOOActionStep(stepId, "org.score.content.httpclient.HttpClientAction", "execute", null, navigationMatchers);
 	}
@@ -173,12 +179,12 @@ public class OpenstackApplications {
 	private void startServerStep(
 			ExecutionPlanBuilder builder,
 			Long stepId,
-			Long nextStepId,
-			Long defaultStepId){
+			Long successStepId,
+			Long failureStepId){
 		List<NavigationMatcher<Serializable>> navigationMatchers = new ArrayList<>();
 
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, "returnCode", "0", nextStepId));
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, defaultStepId));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, "statusCode", "202", successStepId));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, failureStepId));
 
 		builder.addOOActionStep(stepId, "org.score.content.httpclient.HttpClientAction", "execute", null, navigationMatchers);
 	}
@@ -190,17 +196,21 @@ public class OpenstackApplications {
 		builder.addStep(stepId, "org.score.samples.openstack.actions.ContextMerger", "prepareGetServer", nextStepId);
 	}
 
-	private void createGetServersStep(ExecutionPlanBuilder builder, Long stepId, Long defaultStepId) {
+	private void createGetServersStep(ExecutionPlanBuilder builder, Long stepId, Long successStepId, Long failureStepId) {
 		List<NavigationMatcher<Serializable>>  navigationMatchers = new ArrayList<>();
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, "statusCode", "200", defaultStepId));
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, "statusCode", "203", defaultStepId));
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, defaultStepId));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, "statusCode", "200", successStepId));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, failureStepId));
 		builder.addOOActionStep(stepId, "org.score.content.httpclient.HttpClientAction", "execute", null, navigationMatchers);
 	}
 
 	private void createSuccessStep(ExecutionPlanBuilder builder, Long successStepId) {
 		//success step
 		builder.addOOActionFinalStep(successStepId, "org.score.samples.openstack.actions.FinalStepActions", "successStepAction");
+	}
+
+	private void createFailureStep(ExecutionPlanBuilder builder, Long failureStepId) {
+		//failure step
+		builder.addOOActionFinalStep(failureStepId, "org.score.samples.openstack.actions.FinalStepActions", "failureStepAction");
 	}
 
 	private void createDisplayStep(ExecutionPlanBuilder builder, Long stepId, Long nextStepId) {
