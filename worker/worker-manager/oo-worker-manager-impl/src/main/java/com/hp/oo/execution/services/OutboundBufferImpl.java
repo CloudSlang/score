@@ -41,11 +41,10 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
     @Resource
     private String workerUuid;
 
-	private Queue<Message> buffer = new LinkedList<>();
+    @Autowired
+   	private SynchronizationManager syncManager;
 
-	private final Lock lock = new ReentrantLock();
-	private final Condition notEmpty = lock.newCondition();
-	private final Condition notFull = lock.newCondition();
+	private Queue<Message> buffer = new LinkedList<>();
 
 	private int currentWeight;
 
@@ -62,17 +61,13 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 
 	@Override
 	public void put(final Message... messages) {
-        //If we are currently in recovery no new messages should be added to outBuffer
-        if(recoveryManager.isInRecovery()){
-            return;
-        }
-
 		Validate.notEmpty(messages, "The array of messages is null or empty");
-		lock.lock();
         try{
+            syncManager.startPutMessages();
+
             while (currentWeight >= maxBufferWeight){
                 logger.warn("Outbound buffer is full. Waiting...");
-                notFull.await();
+                syncManager.waitForDrain();
             }
 
             // in case of multiple messages create a single compound message
@@ -88,20 +83,20 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 		} catch (InterruptedException ex) {
 			logger.warn("Buffer put action was interrupted", ex);
 		} finally {
-			notEmpty.signalAll();
-			lock.unlock();
+			syncManager.finishPutMessages();
 		}
 	}
 
 	@Override
 	public void drain() {
-		lock.lock();
-
 		Queue<Message> bufferToDrain;
 		try{
+            syncManager.startDrain();
 			while (buffer.isEmpty()){
-				if (logger.isDebugEnabled()) logger.debug("buffer is empty. Waiting to drain...");
-				notEmpty.await();
+				if (logger.isDebugEnabled()){
+                    logger.debug("buffer is empty. Waiting to drain...");
+                }
+				syncManager.waitForMessages();
 			}
 
 			if (logger.isDebugEnabled()) logger.debug("buffer is going to be drained. " + getStatus());
@@ -113,8 +108,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 			logger.warn("Drain outgoing buffer was interrupted while waiting for messages on the buffer");
 			return;
 		} finally{
-			notFull.signalAll();
-			lock.unlock();
+			syncManager.finishDrain();
 		}
 
 		drainInternal(bufferToDrain);
@@ -179,7 +173,9 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 			@Override
 			public void tryOnce() {
                 String wrv = recoveryManager.getWRV();
+                if (logger.isDebugEnabled()) logger.debug("Dispatch start with bulk number: " + bulkNumber);
 				dispatcherService.dispatch(optimizedBulk, bulkNumber, wrv, workerUuid);
+                if (logger.isDebugEnabled()) logger.debug("Dispatch end with bulk number: " + bulkNumber);
 			}
 		});
 		if (logger.isDebugEnabled()) logger.debug("bulk was drained in " + (System.currentTimeMillis()-t) + " ms");
@@ -206,48 +202,42 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 	}
 
 	@Override
-	public void doRecovery() {
-		if (logger.isDebugEnabled()){
+    public void doRecovery() {
+        if (logger.isDebugEnabled()){
             logger.debug("OutboundBuffer is in recovery, clearing buffer.");
         }
-        lock.lock();
-        try {
-            buffer.clear();
-            currentWeight = 0 ;
-        } finally {
-            notFull.signalAll();
-            lock.unlock();
+        buffer.clear();
+        currentWeight = 0 ;
+    }
+
+    private class CompoundMessage implements Message{
+        private Message[] messages;
+
+        public CompoundMessage(Message[] messages){
+            this.messages = messages.clone();
         }
-	}
 
-	private class CompoundMessage implements Message{
-		private Message[] messages;
+        @Override
+        public int getWeight() {
+            int weight = 0;
+            for (Message message : messages) weight += message.getWeight();
+            return weight;
+        }
 
-		public CompoundMessage(Message[] messages){
-			this.messages = messages.clone();
-		}
+        public List<Message> asList() {
+            return Arrays.asList(messages);
+        }
 
-		@Override
-		public int getWeight() {
-			int weight = 0;
-			for (Message message : messages) weight += message.getWeight();
-			return weight;
-		}
+        @Override
+        public String getId() {
+            return null;
+        }
 
-		public List<Message> asList() {
-			return Arrays.asList(messages);
-		}
-
-		@Override
-		public String getId() {
-			return null;
-		}
-
-		@Override
-		public List<Message> shrink(List<Message> messages) {
-			return messages; // do nothing
-		}
-	}
+        @Override
+        public List<Message> shrink(List<Message> messages) {
+            return messages; // do nothing
+        }
+    }
 
 
     private int defaultBufferCapacity() {

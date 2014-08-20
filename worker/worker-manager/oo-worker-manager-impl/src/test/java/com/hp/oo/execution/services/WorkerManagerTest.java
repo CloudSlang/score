@@ -127,6 +127,11 @@ public class WorkerManagerTest {
 	@Configuration
 	static class Configurator {
 
+        @Bean
+        SynchronizationManager synchronizationManager(){
+            return new SynchronizationManagerImpl();
+        }
+
 		@Bean
 		WorkerManager workerManager() {
 			return new WorkerManager();

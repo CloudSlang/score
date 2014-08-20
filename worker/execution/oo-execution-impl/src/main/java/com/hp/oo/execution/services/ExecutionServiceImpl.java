@@ -59,7 +59,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	private EventBus eventBus;
 
 	@Override
-	public Execution execute(Execution execution) {
+	public Execution execute(Execution execution) throws InterruptedException{
 		try {
 			// handle flow cancellation
 			if(handleCancelledFlow(execution)) {
@@ -90,7 +90,11 @@ public final class ExecutionServiceImpl implements ExecutionService {
 				logger.debug("End of step: " + execution.getPosition() + " in execution id: " + execution.getExecutionId());
 			}
 			return execution;
-		} catch(Exception ex) {
+		}
+        catch(Exception ex) {
+            if(ex instanceof InterruptedException){
+                throw ex; //for recovery purposes, in case thread was in wait on stepLog and was interrupted
+            }
 			// In case this is execution of branch that failed - need special treatment
 			if(execution.getSystemContext().containsKey(ExecutionConstants.SPLIT_ID)) {
 				handleBranchFailure(execution, ex);

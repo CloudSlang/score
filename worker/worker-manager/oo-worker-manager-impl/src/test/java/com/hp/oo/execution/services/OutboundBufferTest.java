@@ -321,6 +321,11 @@ public class OutboundBufferTest {
 			return mock(OrchestratorDispatcherService.class);
 		}
 
+        @Bean
+        SynchronizationManager synchronizationManager(){
+            return new SynchronizationManagerImpl();
+        }
+
 		@Bean
 		public RetryTemplate retryTemplate() {
 			return new RetryTemplate();

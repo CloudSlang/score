@@ -45,10 +45,10 @@ final public class MessageRecoveryServiceImpl implements MessageRecoveryService{
     @Transactional(propagation = Propagation.SUPPORTS)
     public void logMessageRecovery(List<ExecutionMessage> messages) {
         if(!CollectionUtils.isEmpty(messages)){
-            logger.warn("Will do MessageRecovery for " + messages.size() + " Messages. ");
+            logger.warn("Will do recovery for " + messages.size() + " messages. ");
             if(logger.isDebugEnabled()){
                 for(ExecutionMessage msg:messages){
-                    logger.debug("Will do MessageRecovery for messages with ExecStateId = " + msg.getExecStateId());
+                    logger.debug("Will do recovery for messages with ExecStateId = " + msg.getExecStateId());
                 }
             }
         }

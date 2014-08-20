@@ -78,10 +78,8 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 	}
 
 	public void addExecution(Long executionId, Runnable runnable) {
-		if (!recoveryManager.isInRecovery()) {
-			Future future = executorService.submit(runnable);
-			mapOfRunningTasks.put(executionId, future);
-		}
+        Future future = executorService.submit(runnable);
+        mapOfRunningTasks.put(executionId, future);
 	}
 
 	@Override
@@ -95,31 +93,30 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 
 	@SuppressWarnings("unused")
     //scheduled in xml
-	public void workerKeepAlive() {
-		if (!recoveryManager.isInRecovery()) {
-                    if (endOfInit) {
-                        try {
-                            String newWrv = workerNodeService.keepAlive(workerUuid);
-                            String currentWrv = recoveryManager.getWRV();
-                            //do not update it!!! if it is different than we have - restart worker (clean state)
-                            if(!currentWrv.equals(newWrv)){
-                                logger.warn("Got new WRV from Orchestrator during keepAlive(). Going to reload...");
-
-                                recoveryManager.doRecovery();
-                            }
-                            keepAliveFailCount = 0;
-                        } catch (Exception e) {
-                            keepAliveFailCount++;
-                            logger.error("Could not send keep alive to Central, keepAliveFailCount = "+keepAliveFailCount);
-                            if(keepAliveFailCount > KEEP_ALIVE_FAIL_LIMIT){
-                                recoveryManager.doRecovery();
-                            }
-                        }
+    public void workerKeepAlive() {
+        if (!recoveryManager.isInRecovery()) {
+            if (endOfInit) {
+                try {
+                    String newWrv = workerNodeService.keepAlive(workerUuid);
+                    String currentWrv = recoveryManager.getWRV();
+                    //do not update it!!! if it is different than we have - restart worker (clean state)
+                    if(!currentWrv.equals(newWrv)){
+                        logger.warn("Got new WRV from Orchestrator during keepAlive(). Going to reload...");
+                        recoveryManager.doRecovery();
                     }
-		}
+                    keepAliveFailCount = 0;
+                } catch (Exception e) {
+                    keepAliveFailCount++;
+                    logger.error("Could not send keep alive to Central, keepAliveFailCount = " + keepAliveFailCount, e);
+                    if(keepAliveFailCount > KEEP_ALIVE_FAIL_LIMIT){
+                        recoveryManager.doRecovery();
+                    }
+                }
+            }
+        }
         else {
-			if (logger.isDebugEnabled()) logger.debug("worker waits for recovery");
-		}
+            if (logger.isDebugEnabled()) logger.debug("worker waits for recovery");
+        }
 	}
 
 	@SuppressWarnings("unused") // called by scheduler
@@ -230,8 +227,8 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
         executorService.shutdownNow();
 
         try {
-            logger.warn("Worker is in doRecovery(). Cleaning state and cancelling running tasks. It may take up to 5 minutes...");
-            boolean finished = executorService.awaitTermination(5, TimeUnit.MINUTES);
+            logger.warn("Worker is in doRecovery(). Cleaning state and cancelling running tasks. It may take up to 3 minutes...");
+            boolean finished = executorService.awaitTermination(3, TimeUnit.MINUTES);
 
             if(finished){
                 logger.warn("Worker succeeded to cancel running tasks during doRecovery().");
