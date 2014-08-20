@@ -18,7 +18,7 @@ public class ExecutionConstants {
 	public static final String STEP_UUID = "STEP_UUID";
 
 	// Execution context
-	public static final String EXECUTION_ID_CONTEXT = "executionIdContext";
+	public static final String EXECUTION_ID_CONTEXT = "executionIdContext";  //todo - change to getter and setter in the execution runtime services
 
 	// For Exceptions
 	public static final String EXECUTION_STEP_ERROR_KEY = "EXECUTION_STEP_ERROR_KEY";

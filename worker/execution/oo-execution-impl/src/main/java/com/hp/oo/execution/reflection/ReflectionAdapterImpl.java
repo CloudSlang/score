@@ -110,7 +110,7 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 		}
 		List<Object> args = new ArrayList<>(paramNames.length);
 		for(String paramName : paramNames) {
-			if(CONTEXT_PARAM_NAME.equals(paramName)) {
+			if(CONTEXT_PARAM_NAME.equals(paramName)) { //todo - why not use execution context ??
 				Execution execution = (Execution)actionData.get(ExecutionConstants.EXECUTION);
 				args.add(execution != null ? execution.getContexts() : null);
 				continue;
