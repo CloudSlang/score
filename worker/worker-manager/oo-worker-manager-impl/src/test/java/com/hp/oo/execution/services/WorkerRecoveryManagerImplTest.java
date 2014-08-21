@@ -37,8 +37,17 @@ public class WorkerRecoveryManagerImplTest {
     @Autowired
     private List<WorkerRecoveryListener> workerRecoveryListeners;
 
+    @Autowired
+    private SynchronizationManager synchronizationManager;
+
     @Configuration
     static class config {
+
+        @Bean
+        public SynchronizationManager synchronizationManager(){
+            return new SynchronizationManagerImpl();
+        }
+
         @Bean
         public WorkerRecoveryManager workerRecoveryManager(){
             return new WorkerRecoveryManagerImpl();

@@ -11,7 +11,6 @@
     <tx:annotation-driven/>
     <!--<cache:annotation-driven cache-manager="scoreCacheManager"/>-->
 
-    <!-- todo change the base-package to com.hp.score when score packages will be fixed -->
 	<jpa:repositories base-package="com.hp" query-lookup-strategy="create-if-not-found">
 		<repository:include-filter type="regex" expression="com.hp.oo.engine.node.repositories.WorkerNodeRepository"/>
 		<repository:include-filter type="regex" expression="com.hp.oo.engine.versioning.repositories.VersionRepository"/>

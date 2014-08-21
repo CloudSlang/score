@@ -117,11 +117,16 @@ public class SimpleExecutionRunnable implements Runnable {
         Execution nextStepExecution;
         Long startTime = System.currentTimeMillis();
 
-        do {
-            //Actually execute the step and get the execution object of the next step
-            nextStepExecution = executionService.execute(execution);
+        try {
+            do {
+                //Actually execute the step and get the execution object of the next step
+                nextStepExecution = executionService.execute(execution);
+            }
+            while (shouldContinue(nextStepExecution, startTime));
         }
-        while (shouldContinue(nextStepExecution, startTime));
+        catch (InterruptedException ex){
+            return; //Exit! The thread was interrupted by shutDown of the executor and was during Sleep or await() or any other method that supports InterruptedException
+        }
 
         if(isInterrupted()){
             return; //Exit! The thread was interrupted by shutDown of the executor

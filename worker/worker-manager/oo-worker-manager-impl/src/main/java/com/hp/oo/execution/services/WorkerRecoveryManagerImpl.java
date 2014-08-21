@@ -5,8 +5,6 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Date: 6/11/13
@@ -25,23 +23,32 @@ public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager {
 	@Autowired
 	private RetryTemplate retryTemplate;
 
-    //Package protected variable
-	Lock recoveryLock = new ReentrantLock();
+    @Autowired
+    private SynchronizationManager syncManager;
 
 	private volatile boolean inRecovery; //must be volatile since it is read/written in several threads
 
     private volatile String wrv; //must be volatile since it is read/written in several threads
 
 	public void doRecovery(){
-		if (!recoveryLock.tryLock()) return;
 		try{
-			inRecovery = true;
-            logger.warn("Worker recovery started");
+            synchronized (this){
+                //If already in recovery - then return and do nothing
+                if(inRecovery){
+                    return;
+                }
+                inRecovery = true;
+
+            }
+            syncManager.startRecovery();
+
+            logger.warn("Worker internal recovery started");
+
             for (WorkerRecoveryListener listener : listeners){
                 try {
                     listener.doRecovery();
                 } catch (Exception ex) {
-                    logger.error("Failed on recovery", ex);
+                    logger.error("Failed on worker internal recovery", ex);
                 }
             }
             if (logger.isDebugEnabled()) logger.debug("Listeners recovery is done");
@@ -58,7 +65,7 @@ public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager {
             inRecovery = false;
             logger.warn("Worker recovery is done");
         } finally {
-            recoveryLock.unlock();
+            syncManager.finishRecovery();
 		}
 	}
 

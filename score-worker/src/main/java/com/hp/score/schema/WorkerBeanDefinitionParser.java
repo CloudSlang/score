@@ -35,6 +35,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(com.hp.oo.execution.gateways.ExecutionGatewayImpl.class, "runningExecutionGateway");
 		put(com.hp.oo.execution.reflection.ReflectionAdapterImpl.class, null);
         put(com.hp.oo.execution.services.SessionDataServiceImpl.class, "sessionDataService");
+		put(com.hp.oo.execution.services.SynchronizationManagerImpl.class, null);
 		put(org.score.worker.execution.WorkerConfigurationServiceImpl.class, "workerConfiguration");
 //		put(org.score.worker.management.WorkerRegistration.class, null);
 	}};

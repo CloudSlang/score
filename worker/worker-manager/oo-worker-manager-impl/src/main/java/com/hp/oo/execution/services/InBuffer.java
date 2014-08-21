@@ -23,7 +23,7 @@ import java.util.List;
  * Date: 20/11/12
  * Time: 08:46
  */
-public class InBuffer implements ApplicationListener, Runnable {
+public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Runnable{
 
     private final long MEMORY_THRESHOLD = 50000000; // 50 Mega byte
 
@@ -43,7 +43,7 @@ public class InBuffer implements ApplicationListener, Runnable {
 	@Qualifier("coolDownPollingMillis")
 	private Integer coolDownPollingMillis = 300;
 
-	private Thread fillMsgsThread = new Thread(this);
+	private Thread fillBufferThread = new Thread(this);
 
 	private boolean inShutdown;
 
@@ -59,7 +59,7 @@ public class InBuffer implements ApplicationListener, Runnable {
     private OutboundBuffer outBuffer;
 
 	@Autowired
-	private WorkerRecoveryManagerImpl recoveryManager;
+	private SynchronizationManager syncManager;
 
     private Date currentCreateDate = new Date(0);
 
@@ -74,7 +74,7 @@ public class InBuffer implements ApplicationListener, Runnable {
     private void fillBufferPeriodically() {
         long pollCounter = 0;
         while (!inShutdown) {
-            pollCounter = pollCounter+ 1;
+            pollCounter = pollCounter + 1;
             // we reset the currentCreateDate every 100 queries , for the theoretical problem of records
             // with wrong order of create_time in the queue table.
             if ((pollCounter % 100) == 0) {
@@ -86,11 +86,8 @@ public class InBuffer implements ApplicationListener, Runnable {
                     Thread.sleep(3000); //sleep if worker is not fully started yet
                 }
                 else {
-                    //double check if we still need to fill the buffer - we are running multi threaded
-                    int bufferSize = workerManager.getInBufferSize();
-                    if (logger.isDebugEnabled()) logger.debug("InBuffer size: " + bufferSize);
-
-                    if (!recoveryManager.isInRecovery() && bufferSize < (capacity * 0.2) && checkFreeMemorySpace(MEMORY_THRESHOLD)) {
+                    syncManager.startGetMessages(); //we must lock recovery lock before poll - otherwise we will get duplications
+                    if (needToPoll()) {
                         int messagesToGet = capacity - workerManager.getInBufferSize();
 
                         if (logger.isDebugEnabled()) logger.debug("Polling messages from queue (max " + messagesToGet + ")");
@@ -106,54 +103,67 @@ public class InBuffer implements ApplicationListener, Runnable {
                             for(ExecutionMessage msg :newMessages){
                                 addExecutionMessage(msg);
                             }
-							Thread.sleep(coolDownPollingMillis/8); //if there are no messages - sleep a while
-                        } else {
+
+                            syncManager.finishGetMessages(); //release all locks before going to sleep!!!
+
+							Thread.sleep(coolDownPollingMillis/8); //cool down - sleep a while
+                        }
+                        else {
+                            syncManager.finishGetMessages(); //release all locks before going to sleep!!!
+
                             Thread.sleep(coolDownPollingMillis); //if there are no messages - sleep a while
                         }
                     }
                     else {
-	                    if (recoveryManager.isInRecovery() && logger.isDebugEnabled()){
-                            logger.debug("InBuffer waits for recovery... Does not poll messages!");
-                        }
+                        syncManager.finishGetMessages(); //release all locks before going to sleep!!!
+
 	                    Thread.sleep(coolDownPollingMillis); //if the buffer is not empty enough yet or in recovery - sleep a while
                     }
                 }
+            } catch (InterruptedException ex) {
+                logger.error("Fill InBuffer thread was interrupted... ", ex);
+                try {Thread.sleep(1000);} catch (InterruptedException e) {/*ignore*/}
             } catch (Exception ex) {
                 logger.error("Failed to load new ExecutionMessages to the buffer!", ex);
                 try {Thread.sleep(1000);} catch (InterruptedException e) {/*ignore*/}
             }
+            finally {
+                syncManager.finishGetMessages();
+            }
         }
     }
 
+    private boolean needToPoll(){
+        int bufferSize = workerManager.getInBufferSize();
+
+        if (logger.isDebugEnabled()) logger.debug("InBuffer size: " + bufferSize);
+
+        return bufferSize < (capacity * 0.2) && checkFreeMemorySpace(MEMORY_THRESHOLD);
+    }
+
     private void ackMessages(List<ExecutionMessage> newMessages) {
-        //Ack messages only if not in recovery! If in recovery they will be recovered anyway by the orchestrator!
-        if (!recoveryManager.isInRecovery()){
-            ExecutionMessage cloned;
-            for (ExecutionMessage message : newMessages) {
-                // create a unique id for this lane in this specific worker to be used in out buffer optimization
-                message.setWorkerKey(message.getMsgId() + " : " + message.getExecStateId());
-                cloned = (ExecutionMessage) message.clone();
-                cloned.setStatus(ExecStatus.IN_PROGRESS);
-                cloned.incMsgSeqId();
-                message.incMsgSeqId(); // increment the original message seq too in order to preserve the order of all messages of entire step
-                cloned.setPayload(null); //payload is not needed in ack - make it null in order to minimize the data that is being sent
-                outBuffer.put(cloned);
-            }
+        ExecutionMessage cloned;
+        for (ExecutionMessage message : newMessages) {
+            // create a unique id for this lane in this specific worker to be used in out buffer optimization
+            message.setWorkerKey(message.getMsgId() + " : " + message.getExecStateId());
+            cloned = (ExecutionMessage) message.clone();
+            cloned.setStatus(ExecStatus.IN_PROGRESS);
+            cloned.incMsgSeqId();
+            message.incMsgSeqId(); // increment the original message seq too in order to preserve the order of all messages of entire step
+            cloned.setPayload(null); //payload is not needed in ack - make it null in order to minimize the data that is being sent
+            outBuffer.put(cloned);
         }
     }
 
 
     public void addExecutionMessage(ExecutionMessage msg) {
-        //Add messages only if not in recovery
-        if (!recoveryManager.isInRecovery()){
-            SimpleExecutionRunnable simpleExecutionRunnable = simpleExecutionRunnableFactory.getObject();
-            simpleExecutionRunnable.setExecutionMessage(msg);
-            Long executionId = null;
-            if (!StringUtils.isEmpty(msg.getMsgId())) {
-                executionId = Long.valueOf(msg.getMsgId());
-            }
-            workerManager.addExecution(executionId, simpleExecutionRunnable);
+        SimpleExecutionRunnable simpleExecutionRunnable = simpleExecutionRunnableFactory.getObject();
+        simpleExecutionRunnable.setExecutionMessage(msg);
+        Long executionId = null;
+        if (!StringUtils.isEmpty(msg.getMsgId())) {
+            executionId = Long.valueOf(msg.getMsgId());
         }
+        workerManager.addExecution(executionId, simpleExecutionRunnable);
     }
 
     @Override
@@ -161,8 +171,8 @@ public class InBuffer implements ApplicationListener, Runnable {
 		if (applicationEvent instanceof ContextRefreshedEvent && ! endOfInit) {
 			endOfInit = true;
 			inShutdown = false;
-			fillMsgsThread.setName("WorkerFillBufferThread");
-			fillMsgsThread.start();
+			fillBufferThread.setName("WorkerFillBufferThread");
+			fillBufferThread.start();
 		} else if (applicationEvent instanceof ContextClosedEvent) {
 			inShutdown = true;
 		}
@@ -181,5 +191,11 @@ public class InBuffer implements ApplicationListener, Runnable {
             logger.warn("InBuffer would not poll messages, because there is not enough free memory.");
         }
         return result;
+    }
+
+    @Override
+    public void doRecovery() {
+        //We must interrupt the inBuffer thread in case it is stuck in await() because the outBuffer is full
+        fillBufferThread.interrupt();
     }
 }

@@ -1,6 +1,5 @@
 package com.hp.oo.execution.services;
 
-import com.hp.oo.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.engine.queue.services.QueueDispatcherService;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,10 +13,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.verify;
 
 /**
 * User: wahnonm
@@ -46,6 +42,9 @@ public class InBufferTest {
     @Mock
     private WorkerRecoveryManagerImpl recoveryManager;
 
+    @Mock
+    private SynchronizationManager synchronizationManager;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -71,7 +70,6 @@ public class InBufferTest {
         when(workerManager.isUp()).thenReturn(true);
         Thread thread = new Thread(inBuffer);
         thread.start();
-
 
         verify(workerManager,timeout(1000).atLeastOnce()).getInBufferSize();
 
