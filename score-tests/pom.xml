@@ -6,6 +6,10 @@
 	<artifactId>score-tests</artifactId>
 	<version>0.1.186-SNAPSHOT</version>
 
+    <properties>
+        <score.sdk.version>1.2-SNAPSHOT</score.sdk.version>
+    </properties>
+
 	<distributionManagement>
 		<repository>
 			<id>nexus-repository</id>
@@ -20,6 +24,13 @@
 	</distributionManagement>
 
 	<dependencies>
+
+        <dependency>
+            <groupId>com.hp.oo.sdk</groupId>
+            <artifactId>score-sdk</artifactId>
+            <version>${score.sdk.version}</version>
+        </dependency>
+
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>score-all</artifactId>
@@ -87,4 +98,21 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.0</version>
+                    <configuration>
+                        <source>1.7</source>
+                        <target>1.7</target>
+                    </configuration>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

@@ -12,6 +12,7 @@ public class ExecutionConstants {
 	public static final String SYSTEM_CONTEXT = "systemContext";
 	public static final String EXECUTION_RUNTIME_SERVICES = "executionRuntimeServices";
 	public static final String SERIALIZABLE_SESSION_CONTEXT = "serializableSessionContext"; // sits in PluginParams
+    public static final String NON_SERIALIZABLE_EXECUTION_DATA = "nonSerializableExecutionData";
 
 	public static final String EXTERNAL_URL = "EXTERNAL_URL";
 	public static final String FLOW_UUID = "FLOW_UUID";

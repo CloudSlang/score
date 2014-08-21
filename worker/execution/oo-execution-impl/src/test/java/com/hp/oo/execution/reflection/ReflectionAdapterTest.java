@@ -1,8 +1,8 @@
 package com.hp.oo.execution.reflection;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.hp.oo.execution.services.SessionDataService;
+import com.hp.score.api.ControlActionMetadata;
+import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,9 +12,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.hp.score.api.ControlActionMetadata;
-
-import junit.framework.Assert;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author kravtsov
@@ -30,7 +29,10 @@ public class ReflectionAdapterTest {
 	@Autowired
 	ReflectionAdapter adapter;
 
-	@Test
+    @Autowired
+    private SessionDataService sessionDataService;
+
+    @Test
 	public void executeControlActionTest() {
 		ControlActionMetadata metadata = new ControlActionMetadata("com.hp.oo.execution.reflection.ReflectionAdapterTestHelper", "myMethod_1");
 		Map<String, Object> map = new HashMap<>();
@@ -90,6 +92,11 @@ public class ReflectionAdapterTest {
 		ReflectionAdapterTestHelper reflectionAdapterTestHelper() {
 			return new ReflectionAdapterTestHelper();
 		}
+
+        @Bean
+        SessionDataService sessionDataService(){
+            return org.mockito.Mockito.mock(SessionDataService.class);
+        }
 	}
 
 }

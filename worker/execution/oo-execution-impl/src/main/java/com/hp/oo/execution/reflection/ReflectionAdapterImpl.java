@@ -1,24 +1,26 @@
 package com.hp.oo.execution.reflection;
 
+import com.hp.oo.execution.services.SessionDataService;
+import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.oo.internal.sdk.execution.ExecutionConstants;
+import com.hp.oo.internal.sdk.execution.FlowExecutionException;
+import com.hp.score.api.ControlActionMetadata;
+import com.hp.score.lang.SystemContext;
+import org.apache.commons.lang.Validate;
+import org.apache.log4j.Logger;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.ParameterNameDiscoverer;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.commons.lang.Validate;
-import org.apache.log4j.Logger;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.ParameterNameDiscoverer;
-
-import com.hp.oo.internal.sdk.execution.Execution;
-import com.hp.oo.internal.sdk.execution.ExecutionConstants;
-import com.hp.oo.internal.sdk.execution.FlowExecutionException;
-import com.hp.score.api.ControlActionMetadata;
 
 /**
  * @author kravtsov
@@ -27,6 +29,9 @@ import com.hp.score.api.ControlActionMetadata;
  * @version $Id$
  */
 public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationContextAware {
+
+    @Autowired
+    private SessionDataService sessionDataService;
 
 	private static final Logger logger = Logger.getLogger(ReflectionAdapterImpl.class);
 	private static final String CONTEXT_PARAM_NAME = "executionContext";
@@ -101,7 +106,7 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 		return actionMethod;
 	}
 
-	private Object[] buildParametersArray(Method actionMethod, Map<String, ?> actionData) {
+    private Object[] buildParametersArray(Method actionMethod, Map<String, ?> actionData) {
 		String actionFullName = actionMethod.getDeclaringClass().getName() + "." + actionMethod.getName();
 		String[] paramNames = cacheParamNames.get(actionFullName);
 		if(paramNames == null) {
@@ -115,6 +120,14 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 				args.add(execution != null ? execution.getContexts() : null);
 				continue;
 			}
+            if(ExecutionConstants.NON_SERIALIZABLE_EXECUTION_DATA.equals(paramName)) {
+                //todo: change to runtime services once we can
+                SystemContext systemContext = (SystemContext)actionData.get(ExecutionConstants.SYSTEM_CONTEXT);
+                Long executionId = (Long)systemContext.get(ExecutionConstants.EXECUTION_ID_CONTEXT);
+                Map<String, Object> nonSerializableExecutionData = sessionDataService.getNonSerializableExecutionData(executionId);
+                args.add(nonSerializableExecutionData);
+                continue;
+            }
 			Object param = actionData.get(paramName);
 			args.add(param);
 		}

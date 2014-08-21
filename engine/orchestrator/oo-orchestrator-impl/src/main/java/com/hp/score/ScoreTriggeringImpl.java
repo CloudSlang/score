@@ -52,7 +52,7 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
     @Override
     public Long trigger(Long executionId, TriggeringProperties triggeringProperties) {
         SystemContext scoreSystemContext = new SystemContext(triggeringProperties.getRuntimeValues());
-        Long runningExecutionPlanId = saveRunningExecutionPlan(triggeringProperties.getExecutionPlan(), triggeringProperties.getDependencies(), scoreSystemContext);
+        Long runningExecutionPlanId = saveRunningExecutionPlans(triggeringProperties.getExecutionPlan(), triggeringProperties.getDependencies(), scoreSystemContext);
         scoreSystemContext.put(ExecutionConstants.EXECUTION_ID_CONTEXT, executionId);
         Execution execution = new Execution(executionId, runningExecutionPlanId, triggeringProperties.getStartStep(), triggeringProperties.getContext(), scoreSystemContext);
 
@@ -65,7 +65,7 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
         return executionId;
     }
 
-    private Long saveRunningExecutionPlan(ExecutionPlan executionPlan, Map<String, ExecutionPlan> dependencies, SystemContext systemContext) {
+    private Long saveRunningExecutionPlans(ExecutionPlan executionPlan, Map<String, ExecutionPlan> dependencies, SystemContext systemContext) {
         Map<String, Long> runningPlansIds = new HashMap<>();
         Map<String, Long> beginStepsIds = new HashMap<>();
 

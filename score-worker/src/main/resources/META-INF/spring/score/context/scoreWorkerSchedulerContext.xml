@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:task="http://www.springframework.org/schema/task"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:task="http://www.springframework.org/schema/task"
+		xsi:schemaLocation=
+				"http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+				http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
 
 	<task:scheduler id="scoreWorkerScheduler" pool-size="5"/>
 	<task:scheduled-tasks scheduler="scoreWorkerScheduler">
@@ -10,5 +12,13 @@
 		<task:scheduled ref="workerManager" method="workerKeepAlive" fixed-rate="#{keepAliveInterval}"/>
         <task:scheduled ref="workerConfiguration" method="refresh" fixed-delay="#{configRefreshInterval}"/>
 		<task:scheduled ref="workerManager" method="logStatistics" fixed-rate="#{statisticsInterval}"/>
+        <task:scheduled ref="sessionDataService" method="sessionTimeOutScheduler" fixed-rate="60000"/>
 	</task:scheduled-tasks>
+
+    <!--Session timeout job-->
+    <bean id="scoreSessionTimeout" class="java.lang.Long">
+        <constructor-arg type="long" value="1800000"/>
+    </bean>
+
+
 </beans>
