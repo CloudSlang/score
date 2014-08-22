@@ -4,20 +4,13 @@ package org.score.samples.openstack.actions;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.regex.Pattern;
-import javax.mail.Authenticator;
 import javax.mail.Message;
-import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
-import com.sun.mail.smtp.SMTPMessage;
 
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.MimeUtility;
-import javax.mail.BodyPart;
+
 
 
 /**
@@ -36,7 +29,8 @@ public class SimpleSendEmail {
 		final public Map<String, String> execute(String host, String port, String from, String to, String subject, String body){
 
 			Map<String, String> returnResult = new HashMap<>();
-			Session session = null;
+			Session session;
+
 
 			try {
 

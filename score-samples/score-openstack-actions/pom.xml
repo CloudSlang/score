@@ -57,6 +57,7 @@
             <artifactId>h2</artifactId>
         </dependency>
 
+
         <dependency>
             <groupId>org.score.content</groupId>
             <artifactId>score-http-client</artifactId>
@@ -67,6 +68,7 @@
             <artifactId>stub-services</artifactId>
             <version>${project.version}</version>
         </dependency>
+
 
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -85,21 +87,30 @@
             <artifactId>score-all</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
-
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
+
         </dependency>
+        <dependency>
+            <groupId>jaf</groupId>
+            <artifactId>activation</artifactId>
+
+        </dependency>
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+
+        </dependency>
+
 
     </dependencies>
 

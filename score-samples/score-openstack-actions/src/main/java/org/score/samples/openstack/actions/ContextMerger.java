@@ -43,13 +43,36 @@ public class ContextMerger {
 		Map<String, String> returnMap = new HashMap<>();
 		List<String> serverNames = getServerList(returnResult);
 
+		String result = "";
 		logger.info("Available servers:");
 
 		for(String currentServerName : serverNames) {
 			logger.info(currentServerName);
+			result += currentServerName + ",";
 		}
-
+		returnMap.put("returnResult", result);
 		return returnMap;
+	}
+	public Map<String, String> prepareGetServerId(Map<String, Serializable> executionContext, ExecutionRuntimeServices executionRuntimeServices, String methodName){
+		String returnResult = executionContext.get(RETURN_RESULT_KEY).toString();
+
+		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Method \"" + methodName + "\" invoked.." +
+				" Attempting to merge back results: " + returnResult);
+
+		Map<String, String> returnMap = new HashMap<>();
+
+		String token = getToken(returnResult);
+		String tenant = getTenant(returnResult);
+
+		returnMap.put("Token", token);
+		returnMap.put("Tenant", tenant);
+
+		executionContext.putAll(returnMap);
+		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Results merged back in the Execution Context");
+		return returnMap;
+
+
+
 	}
 	public Map<String, String> prepareGetServer(Map<String, Serializable> executionContext,ExecutionRuntimeServices executionRuntimeServices, String methodName){//, String returnResult, String host, String methodName) {
 
@@ -76,13 +99,51 @@ public class ContextMerger {
 		returnMap.put(METHOD_KEY, "get");
 		returnMap.put(HEADERS_KEY, "X-AUTH-TOKEN: " + token);
 
+		returnMap.put("Token", token);
+		returnMap.put("Tenant", tenant);
+
 		executionContext.putAll(returnMap);
 		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Results merged back in the Execution Context");
 		return returnMap;
 	}
 
 
+	public Map<String, String> prepareDeleteServer(Map<String, Serializable> executionContext, ExecutionRuntimeServices executionRuntimeServices, String methodName){
+		String returnResult = executionContext.get(RETURN_RESULT_KEY).toString();
 
+		String serverName = executionContext.get("serverName").toString();
+		String host = executionContext.get(HOST_KEY).toString();
+		String computePort = executionContext.get(COMPUTE_PORT_KEY).toString();
+
+		String tenant = executionContext.get("Tenant").toString();
+		String token = executionContext.get("Token").toString();
+
+		if(StringUtils.isEmpty(host)){
+			host = DEFAULT_HOST;
+		}
+		if(StringUtils.isEmpty(computePort)){
+			computePort = DEFAULT_COMPUTE_PORT;
+		}
+
+		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Method \"" + methodName + "\" invoked.." +
+				" Attempting to merge back results: " + returnResult);
+
+		Map<String, String> returnMap = new HashMap<>();
+
+
+		String url = "http://" + host + ":" + computePort + "/v2/" + tenant + "/servers/" + returnResult;
+		returnMap.put(URL_KEY, url);
+		returnMap.put(METHOD_KEY, "delete");
+		returnMap.put(HEADERS_KEY, "X-AUTH-TOKEN: " + token);
+
+
+		executionContext.putAll(returnMap);
+		executionContext.remove("body");
+
+		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Results merged back in the Execution Context");
+		return returnMap;
+
+	}
 	public Map<String, String> prepareCreateServer(Map<String, Serializable> executionContext, ExecutionRuntimeServices executionRuntimeServices, String methodName){//}, String returnResult, String serverName, String host, String methodName, String imageRef) {
 
 		String returnResult = executionContext.get(RETURN_RESULT_KEY).toString();
@@ -140,9 +201,37 @@ public class ContextMerger {
 		for(int i = 0; i < servers.size(); ++i){
 			serverListObject = servers.get(i).getAsJsonObject();
 			String currentServerName = serverListObject.get("name").toString();
+			currentServerName = currentServerName.substring(1, currentServerName.length()-1);
 			serverNames.add(currentServerName);
 		}
 		return serverNames;
+	}
+
+	public Map<String, String> getServerId(Map<String, Serializable> executionContext, String returnResult, String serverName){
+		Map<String, String> returnMap = new HashMap<>();
+		JsonElement parsedServerList = new JsonParser().parse(returnResult);
+		JsonObject  serverListObject = parsedServerList.getAsJsonObject();
+		JsonArray servers = serverListObject.getAsJsonArray("servers");
+
+		for(int i = 0; i < servers.size(); ++i){
+			serverListObject = servers.get(i).getAsJsonObject();
+			String currentServerName = serverListObject.get("name").toString();
+			currentServerName = currentServerName.substring(1, currentServerName.length()-1);
+			if(currentServerName.equals(serverName)){
+				String serverId = serverListObject.get("id").toString();
+				serverId = serverId.substring(1, serverId.length()-1);
+				returnMap.put("returnResult", serverId);
+				break;
+			}
+		}
+		executionContext.putAll(returnMap);
+		if(returnMap.containsKey("returnResult")) {
+
+			return returnMap;
+		}
+		else returnMap.put("returnResult", "");
+
+		return returnMap;
 	}
 	
 	public String getTenant(String returnResult) {

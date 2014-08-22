@@ -1,11 +1,13 @@
 package org.score.samples.openstack.actions;
 
+
 import org.junit.Test;
 
-import java.util.HashMap;
+
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 /**
  * Date: 8/20/2014
@@ -20,7 +22,8 @@ public class SimpleSendEmailTest {
 	@Test(timeout = DEFAULT_TIMEOUT)
 	public void testExecuteWithMissingInputs(){
 
-		SimpleSendEmail simpleSendEmail = new SimpleSendEmail();
+		//SimpleSendEmail simpleSendEmail = new SimpleSendEmail();
+		SimpleSendEmail simpleSendEmail = mock(SimpleSendEmail.class);
 		Map<String, String> returnResult = simpleSendEmail.execute(null, "25", "xjavatestx@gmail.com", "xjavatestx@gmail.com", "subject", "body");
 		assertEquals("Result not as expected", "1", returnResult.get("returnCode"));
 

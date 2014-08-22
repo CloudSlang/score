@@ -9,6 +9,7 @@ import com.hp.score.events.ScoreEvent;
 import com.hp.score.events.ScoreEventListener;
 import org.apache.log4j.Logger;
 import org.score.samples.openstack.actions.OOActionRunner;
+
 import org.score.samples.utility.ReflectionUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -41,9 +42,11 @@ public class CommandLineApplication {
 
 	private ExecutionPlanMetadata externalExecutionPlan;
 
+	@SuppressWarnings("unused")
 	@Autowired
 	private Score score;
 
+	@SuppressWarnings("unused")
 	@Autowired
 	private EventBus eventBus;
 
