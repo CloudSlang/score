@@ -65,9 +65,7 @@
     <modules>
         <module>orchestrator</module>
         <module>queue</module>
-        <module>versioning</module>
         <module>node</module>
-        <module>partitioning</module>
         <module>engine-jobs</module>
 		<module>data</module>
     </modules>
