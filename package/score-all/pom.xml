@@ -38,7 +38,7 @@
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>oo-orchestrator-impl</artifactId>
+			<artifactId>score-orchestrator-impl</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

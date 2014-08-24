@@ -12,7 +12,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>oo-orchestrator-api</artifactId>
+			<artifactId>score-orchestrator-api</artifactId>
 		</dependency>
 	</dependencies>
 </project>

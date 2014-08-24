@@ -11,7 +11,7 @@
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>oo-orchestrator-api</module>
-		<module>oo-orchestrator-impl</module>
+		<module>score-orchestrator-api</module>
+		<module>score-orchestrator-impl</module>
 	</modules>
 </project>
