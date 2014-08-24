@@ -32,7 +32,7 @@
 
         <dependency>
             <groupId>com.hp.score</groupId>
-            <artifactId>score-data</artifactId>
+            <artifactId>score-data-api</artifactId>
             <version>${project.version}</version>
         </dependency>
 

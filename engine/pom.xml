@@ -20,7 +20,7 @@
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>score-data</artifactId>
+                <artifactId>score-data-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -63,12 +63,12 @@
     </dependencyManagement>
 
     <modules>
-        <module>score-data</module>
         <module>orchestrator</module>
         <module>queue</module>
         <module>versioning</module>
         <module>node</module>
         <module>partitioning</module>
         <module>engine-jobs</module>
+		<module>data</module>
     </modules>
 </project>

@@ -1,24 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	
-    <parent>
+	<parent>
+		<artifactId>data</artifactId>
 		<groupId>com.hp.score</groupId>
-		<artifactId>partitioning</artifactId>
 		<version>0.1.188-SNAPSHOT</version>
 	</parent>
+	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>oo-partitioning-api</artifactId>
+	<artifactId>score-data-impl</artifactId>
 
 	<dependencies>
 		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>score-data-api</artifactId>
-		</dependency>
-	</dependencies>
+    </dependencies>
 </project>

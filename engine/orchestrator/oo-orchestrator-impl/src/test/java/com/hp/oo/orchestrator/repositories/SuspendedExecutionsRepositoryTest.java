@@ -1,7 +1,6 @@
 package com.hp.oo.orchestrator.repositories;
 
 import com.hp.oo.internal.sdk.execution.Execution;
-import com.hp.oo.internal.sdk.execution.OOContext;
 import com.hp.oo.orchestrator.entities.BranchContexts;
 import com.hp.oo.orchestrator.entities.FinishedBranch;
 import com.hp.oo.orchestrator.entities.SuspendedExecution;

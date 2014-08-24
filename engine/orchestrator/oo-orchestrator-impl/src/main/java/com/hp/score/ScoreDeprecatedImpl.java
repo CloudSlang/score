@@ -1,13 +1,9 @@
 package com.hp.score;
 
-import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ScoreDeprecated;
 import com.hp.score.api.TriggeringProperties;
 import com.hp.score.engine.data.IdentityGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.io.Serializable;
-import java.util.Map;
 
 /**
  * Created by peerme on 23/07/2014.
