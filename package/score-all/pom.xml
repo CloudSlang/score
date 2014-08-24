@@ -10,6 +10,11 @@
 	<artifactId>score-all</artifactId>
 
 	<dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>score-data-impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
