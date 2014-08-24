@@ -651,8 +651,7 @@
 		<module>score-facade</module>
 		<module>engine</module>
 		<module>worker</module>
-		<module>score-all</module>
-		<module>score-worker</module>
+        <module>package</module>
 		<module>score-tests</module>
 		<module>score-api</module>
 		<module>score-samples</module>
