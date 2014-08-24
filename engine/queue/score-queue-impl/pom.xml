@@ -7,7 +7,7 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>oo-queue-impl</artifactId>
+	<artifactId>score-queue-impl</artifactId>
 
 	<dependencies>
 		<dependency>
@@ -27,7 +27,7 @@
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>oo-queue-api</artifactId>
+			<artifactId>score-queue-api</artifactId>
 		</dependency>
 
 		<dependency>

@@ -32,7 +32,7 @@
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>oo-queue-api</artifactId>
+                <artifactId>score-queue-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

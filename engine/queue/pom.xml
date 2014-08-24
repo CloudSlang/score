@@ -11,7 +11,7 @@
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>oo-queue-api</module>
-		<module>oo-queue-impl</module>
+		<module>score-queue-api</module>
+		<module>score-queue-impl</module>
 	</modules>
 </project>

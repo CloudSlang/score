@@ -7,7 +7,7 @@
 		<version>0.1.189-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>oo-queue-api</artifactId>
+	<artifactId>score-queue-api</artifactId>
 
 	<dependencies>
 		<dependency>
