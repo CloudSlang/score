@@ -40,11 +40,6 @@
             <artifactId>score-data-api</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>oo-versioning-api</artifactId>
-        </dependency>
-
         <!-- test artifacts -->
         <dependency>
             <groupId>junit</groupId>

@@ -30,11 +30,5 @@
             <artifactId>score-orchestrator-api</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>oo-versioning-api</artifactId>
-        </dependency>
-
-
     </dependencies>
 </project>

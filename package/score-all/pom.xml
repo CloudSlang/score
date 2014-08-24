@@ -44,19 +44,7 @@
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>oo-partitioning-impl</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>${project.groupId}</groupId>
 			<artifactId>oo-queue-impl</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>oo-versioning-impl</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

@@ -44,12 +44,6 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>score-facade</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>oo-versioning-api</artifactId>
-		</dependency>
-
 		<!-- test artifacts -->
 
 		<dependency>

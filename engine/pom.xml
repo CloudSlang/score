@@ -38,12 +38,6 @@
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>oo-versioning-api</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>${project.groupId}</groupId>
                 <artifactId>oo-node-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
