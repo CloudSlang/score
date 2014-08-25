@@ -112,7 +112,7 @@ public class ExecutionRuntimeServices implements Serializable {
      * @return a list of all branches ended.
      */
     public List<EndBranchDataContainer> getFinishedChildBranchesData() {
-        return (List<EndBranchDataContainer>) getFromMap(FINISHED_CHILD_BRANCHES_DATA);
+        return (List<EndBranchDataContainer>) removeFromMap(FINISHED_CHILD_BRANCHES_DATA);
     }
 
 	private <T> T removeFromMap(String key) {
