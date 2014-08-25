@@ -20,6 +20,24 @@ public class BranchActions {
 
     public void split(ExecutionRuntimeServices executionRuntimeServices, Long stepPosition, String executionPlanId){
         executionRuntimeServices.addBranch(stepPosition, executionPlanId, new HashMap<String, Serializable>());
+	}
+
+    public void splitWithContext(ExecutionRuntimeServices executionRuntimeServices,
+								 Map<String, Serializable> executionContext,
+								 String flowUuid,
+								 Map<String, Serializable> context,
+								 List<String> inputKeysFromParentContext){
+		Map<String, Serializable> initialContext = new HashMap<>();
+		initialContext.putAll(context);
+
+		if (inputKeysFromParentContext != null) {
+			for (String inputKey : inputKeysFromParentContext) {
+				initialContext.put(inputKey, executionContext.get(inputKey));
+			}
+		}
+
+		initialContext.remove("NEW_SPLIT_ID");
+		executionRuntimeServices.addBranch(0L, flowUuid, initialContext);
     }
 
     public void join(ExecutionRuntimeServices executionRuntimeServices,Map<String, Serializable> executionContext){

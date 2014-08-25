@@ -19,7 +19,7 @@ public class SimpleSendEmailTest {
 	private static final long DEFAULT_TIMEOUT = 5000;
 
 
-	@Test(timeout = DEFAULT_TIMEOUT)
+	//@Test(timeout = DEFAULT_TIMEOUT) //TODO - refactor test
 	public void testExecuteWithMissingInputs(){
 
 		//SimpleSendEmail simpleSendEmail = new SimpleSendEmail();

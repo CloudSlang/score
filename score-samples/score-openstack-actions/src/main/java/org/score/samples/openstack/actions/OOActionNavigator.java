@@ -24,9 +24,11 @@ public class OOActionNavigator {
 
 		//check if an exception occurred in run method through events
 		ArrayDeque<ScoreEvent> events = executionRuntimeServices.getEvents();
-		for (ScoreEvent scoreEvent : events) {
-			if (scoreEvent.getEventType().equals(OOActionRunner.ACTION_EXCEPTION_EVENT_TYPE)) {
-				return null;
+		if (events != null) {
+			for (ScoreEvent scoreEvent : events) {
+				if (scoreEvent.getEventType().equals(OOActionRunner.ACTION_EXCEPTION_EVENT_TYPE)) {
+					return null;
+				}
 			}
 		}
 

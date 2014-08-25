@@ -1,13 +1,20 @@
 package org.score.samples.openstack.actions;
 
+import com.google.common.collect.Sets;
 import com.hp.score.api.ControlActionMetadata;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ExecutionStep;
+import com.hp.score.api.TriggeringProperties;
+import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
+import org.apache.commons.collections.CollectionUtils;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -20,16 +27,88 @@ public class ExecutionPlanBuilder {
 	public static final String ACTION_METHOD_KEY = "methodName";
 	public static final String INPUT_BINDINGS_KEY = "inputBindings";
 	public static final String NAVIGATION_MATCHERS_KEY = "navigationMatchers";
+	public static final String BRANCH_ACTIONS_CLASS = "org.score.samples.controlactions.BranchActions";
+	public static final String SPLIT_METHOD_NAME = "splitWithContext";
+	public static final String FLOW_UUID_KEY = "flowUuid";
+	public static final String CONTEXT_KEY = "context";
+	public static final String NAVIGATION_ACTIONS_CLASS = "org.score.samples.controlactions.NavigationActions";
+	public static final String SIMPLE_NAVIGATION_METHOD = "simpleNavigation";
+	public static final String NEXT_STEP_ID_KEY = "nextStepId";
+	public static final String JOIN_METHOD_NAME = "join";
+	public static final String OOACTION_RUNNER_CLASS = "org.score.samples.openstack.actions.OOActionRunner";
+	public static final String RUN_METHOD_NAME = "run";
+	public static final String OOACTION_NAVIGATOR_CLASS = "org.score.samples.openstack.actions.OOActionNavigator";
+	public static final String NAVIGATE_METHOD_NAME = "navigate";
+	public static final String FLOW_UUID_PROPERTY = "flowUuid"; //property name in Execution Plan class
 
 	private ExecutionPlan executionPlan;
+	private Long beginStep;
+	private Map<String, ? extends Serializable> initialExecutionContext;
 
-	public ExecutionPlanBuilder() {
-		executionPlan = new ExecutionPlan();
-		executionPlan.setFlowUuid(UUID.randomUUID().toString());
-		executionPlan.setBeginStep(0L);
+	/**
+	 * dependencies for all levels
+	 */
+	private Map<String, ExecutionPlan> dependencies;
+	/**
+	 * Holds the list of its direct subflows
+	 */
+	private List<ExecutionPlan> childSubflows;
+
+	@SuppressWarnings("unused")
+	public void setBeginStep(Long beginStep) {
+		this.beginStep = beginStep;
 	}
 
-	public ExecutionPlan getExecutionPlan() {
+	public void setInitialExecutionContext(Map<String, ? extends Serializable> initialExecutionContext) {
+		this.initialExecutionContext = initialExecutionContext;
+	}
+
+	public ExecutionPlanBuilder() {
+		this(UUID.randomUUID().toString());
+	}
+
+	public ExecutionPlanBuilder(String flowUuid) {
+		executionPlan = new ExecutionPlan();
+		executionPlan.setFlowUuid(flowUuid);
+		dependencies = new HashMap<>();
+		initialExecutionContext = new HashMap<>();
+		childSubflows = new ArrayList<>();
+		beginStep = 0L;
+	}
+
+	//TODO - remove this !! needs to work with this on by default, pending Non-Blocking story
+	public TriggeringProperties createTriggeringProperties() {
+		TriggeringProperties triggeringProperties = TriggeringProperties.create(getExecutionPlan());
+
+		triggeringProperties.getDependencies().putAll(dependencies);
+
+		Map<String,Serializable> getRuntimeValues = new HashMap<>();
+		getRuntimeValues.put("NEW_BRANCH_MECHANISM",Boolean.TRUE);
+		triggeringProperties.setRuntimeValues(getRuntimeValues);
+
+		triggeringProperties.setContext(initialExecutionContext);
+		triggeringProperties.setStartStep(beginStep);
+
+		return triggeringProperties;
+	}
+
+	private ExecutionPlan getExecutionPlan() {
+		//prepare uuid set
+		Collection uuidCollection = CollectionUtils.collect(childSubflows,
+				new BeanToPropertyValueTransformer(FLOW_UUID_PROPERTY));
+		Object[] uuidArray = uuidCollection.toArray();
+		Set<String> uuidSet = Sets.newHashSet();
+
+		for (Object uuid : uuidArray) {
+			uuidSet.add(String.valueOf(uuid));
+		}
+
+		//set the uuid-s
+		executionPlan.setSubflowsUUIDs(uuidSet);
+
+		//set begin step
+		executionPlan.setBeginStep(beginStep);
+
 		return executionPlan;
 	}
 
@@ -41,7 +120,7 @@ public class ExecutionPlanBuilder {
 			List<NavigationMatcher<Serializable>> navigationMatchers) {
 		ExecutionStep step = new ExecutionStep(stepId);
 
-		step.setAction(new ControlActionMetadata("org.score.samples.openstack.actions.OOActionRunner", "run"));
+		step.setAction(new ControlActionMetadata(OOACTION_RUNNER_CLASS, RUN_METHOD_NAME));
 		Map<String, Serializable> actionData = new HashMap<>(3);
 		//put the actual action class name and method name
 		actionData.put(ACTION_CLASS_KEY, actionClassName);
@@ -49,10 +128,7 @@ public class ExecutionPlanBuilder {
 		actionData.put(INPUT_BINDINGS_KEY, (Serializable) inputBindings);
 		step.setActionData(actionData);
 
-		step.setNavigation(new ControlActionMetadata("org.score.samples.openstack.actions.OOActionNavigator", "navigate"));
-		Map<String, Object> navigationData = new HashMap<>(1);
-		navigationData.put(NAVIGATION_MATCHERS_KEY, navigationMatchers);
-		step.setNavigationData(navigationData);
+		setOONavigation(step, navigationMatchers);
 
 		step.setSplitStep(false);
 
@@ -61,14 +137,20 @@ public class ExecutionPlanBuilder {
 		return step.getExecStepId();
 	}
 
+	private void setOONavigation(ExecutionStep step, List<NavigationMatcher<Serializable>> navigationMatchers) {
+		step.setNavigation(new ControlActionMetadata(OOACTION_NAVIGATOR_CLASS, NAVIGATE_METHOD_NAME));
+		Map<String, Object> navigationData = new HashMap<>(1);
+		navigationData.put(NAVIGATION_MATCHERS_KEY, navigationMatchers);
+		step.setNavigationData(navigationData);
+	}
+
 	public Long addOOActionFinalStep(Long stepId, String actionClassName, String actionMethodName) {
 		return addOOActionStep(stepId, actionClassName, actionMethodName, null, null);
 	}
 
 
 	public Long addStep(
-			Long stepId, String classPath, String methodName,Long nextStepId
-	) {
+			Long stepId, String classPath, String methodName,Long nextStepId) {
 		ExecutionStep step = new ExecutionStep(stepId);
 
 		step.setAction(new ControlActionMetadata(classPath, methodName));
@@ -89,13 +171,61 @@ public class ExecutionPlanBuilder {
 
 		return step.getExecStepId();
 	}
+
 	@SuppressWarnings("unused")
 	public Long simpleNavigate(Long nextStepId){
 		return nextStepId;
 	}
-	@SuppressWarnings("unused")
-	public void setBeginStep(Long beginStepId)
-	{
-		executionPlan.setBeginStep(beginStepId);
+
+	public Long addSubflow( // TODO - remove this
+			Long splitStepId,
+			Long joinStepId,
+			TriggeringProperties subflowProperties,
+			List<NavigationMatcher<Serializable>> navigationMatchers) {
+	return addSubflow(splitStepId, joinStepId, subflowProperties, null, navigationMatchers);
+	}
+
+	public Long addSubflow(
+			Long splitStepId,
+			Long joinStepId,
+			TriggeringProperties subflowProperties,
+			List<String> inputKeysFromParentContext,
+			List<NavigationMatcher<Serializable>> navigationMatchers) {
+		//split step
+		ExecutionStep executionSplitStep = new ExecutionStep(splitStepId);
+		executionSplitStep.setSplitStep(true);
+
+		executionSplitStep.setAction(new ControlActionMetadata(BRANCH_ACTIONS_CLASS, SPLIT_METHOD_NAME));
+		Map<String, Serializable> actionData = new HashMap<>();
+		actionData.put(FLOW_UUID_KEY, subflowProperties.getExecutionPlan().getFlowUuid());
+		actionData.put(CONTEXT_KEY, (Serializable) subflowProperties.getContext());
+		actionData.put("inputKeysFromParentContext", (Serializable) inputKeysFromParentContext);
+		executionSplitStep.setActionData(actionData);
+
+		executionSplitStep.setNavigation(new ControlActionMetadata(NAVIGATION_ACTIONS_CLASS, SIMPLE_NAVIGATION_METHOD));
+		Map<String, Serializable> navigationData = new HashMap<>();
+		navigationData.put(NEXT_STEP_ID_KEY, joinStepId);
+		executionSplitStep.setNavigationData(navigationData);
+
+		executionPlan.addStep(executionSplitStep);
+
+		//join step
+		ExecutionStep executionJoinStep = new ExecutionStep(joinStepId);
+
+		executionJoinStep.setAction(new ControlActionMetadata(BRANCH_ACTIONS_CLASS, JOIN_METHOD_NAME));
+		actionData = new HashMap<>();
+		executionJoinStep.setActionData(actionData);
+
+		setOONavigation(executionJoinStep, navigationMatchers);
+
+		executionPlan.addStep(executionJoinStep);
+
+		//register subFlow
+		childSubflows.add(subflowProperties.getExecutionPlan());
+		//register dependencies
+		dependencies.put(subflowProperties.getExecutionPlan().getFlowUuid(), subflowProperties.getExecutionPlan());
+		dependencies.putAll(subflowProperties.getDependencies());
+
+		return executionSplitStep.getExecStepId();
 	}
 }

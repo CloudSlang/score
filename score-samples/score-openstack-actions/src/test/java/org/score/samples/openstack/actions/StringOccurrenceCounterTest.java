@@ -18,10 +18,10 @@ public class StringOccurrenceCounterTest {
 	public void testExecuteWithMissingInputs(){
 
 		StringOccurrenceCounter stringOccurrenceCounter = new StringOccurrenceCounter();
-		Map<String, String> returnResult = stringOccurrenceCounter.execute(null, "string", true);
+		Map<String, String> returnResult = stringOccurrenceCounter.execute(null, "string", "true");
 		assertEquals("Return code not as expected", "1", returnResult.get("returnCode"));
 
-		returnResult = stringOccurrenceCounter.execute("string1, string2", null, true);
+		returnResult = stringOccurrenceCounter.execute("string1, string2", null, "true");
 		assertEquals("Return code not as expected", "1", returnResult.get("returnCode"));
 
 		returnResult = stringOccurrenceCounter.execute("string1, string2", "string1", null);
@@ -31,21 +31,16 @@ public class StringOccurrenceCounterTest {
 	@Test(timeout = DEFAULT_TIMEOUT)
 	public void testExecute(){
 		StringOccurrenceCounter stringOccurrenceCounter = new StringOccurrenceCounter();
-		Map<String, String> returnResult = stringOccurrenceCounter.execute("string1, string2", "string1", false);
+		Map<String, String> returnResult = stringOccurrenceCounter.execute("string1, string2", "string1", "false");
 		assertEquals("Return code not as expected", "0", returnResult.get("returnCode"));
 		assertEquals("Result not as expected", "1", returnResult.get("returnResult"));
 
-		returnResult = stringOccurrenceCounter.execute("string2, string2", "string2", false);
+		returnResult = stringOccurrenceCounter.execute("string2, string2", "string2", "false");
 		assertEquals("Result not as expected", "2", returnResult.get("returnResult"));
 
-		returnResult = stringOccurrenceCounter.execute("string2, string2", "String2", true);
+		returnResult = stringOccurrenceCounter.execute("string2, string2", "String2", "true");
 		assertEquals("Result not as expected", "2", returnResult.get("returnResult"));
-		returnResult = stringOccurrenceCounter.execute("string2, string2", "String2", false);
+		returnResult = stringOccurrenceCounter.execute("string2, string2", "String2", "false");
 		assertEquals("Result not as expected", "0", returnResult.get("returnResult"));
-
-
-
 	}
-
-
 }

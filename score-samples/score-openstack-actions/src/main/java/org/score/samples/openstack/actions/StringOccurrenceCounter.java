@@ -12,12 +12,12 @@ public class StringOccurrenceCounter {
 	public static final String RETURN_CODE = "returnCode";
 	public static final String SUCCESS = "0";
 	public static final String FAILED = "1";
-	private static final String RETURN_RESULT = "returnResult";
+	public static final String RETURN_RESULT = "returnResult";
 
-	public Map<String, String> execute(String container, String toFind, Boolean ignoreCase){
+	public Map<String, String> execute(String container, String toFind, String ignoreCase){
 		Map<String, String> returnResult = new HashMap<>();
 		try {
-			if (ignoreCase) {
+			if (ignoreCase.equals("true")) {
 				container = container.toLowerCase();
 				toFind = toFind.toLowerCase();
 			}
@@ -33,7 +33,6 @@ public class StringOccurrenceCounter {
 			returnResult.put(RETURN_CODE, FAILED);
 
 		}
-
 
 		return returnResult;
 	}

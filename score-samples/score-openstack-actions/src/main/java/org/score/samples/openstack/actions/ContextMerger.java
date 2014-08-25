@@ -26,7 +26,7 @@ public class ContextMerger {
 
 	private static final String DEFAULT_COMPUTE_PORT = "8774";
 	private static final String DEFAULT_IDENTITY_PORT = "5000";
-	private static final String DEFAULT_HOST = "16.59.58.200";
+	private static final String DEFAULT_HOST = "16.59.58.200"; //todo remove near hardcoded strings
 	private static final String IDENTITY_PORT_KEY = "identityPort";
 	private static final String COMPUTE_PORT_KEY = "computePort";
 	private static final String DEFAULT_IMAGEREF = "56ff0279-f1fb-46e5-93dc-fe7093af0b1a";
@@ -38,6 +38,7 @@ public class ContextMerger {
 	private static final String METHOD_KEY = "method";
 	public final static String ACTION_RUNTIME_EVENT_TYPE = "ACTION_RUNTIME_EVENT";
 	public final static String ACTION_EXCEPTION_EVENT_TYPE = "ACTION_EXCEPTION_EVENT";
+	public static final String SERVERS_KEY = "returnResult";
 
 	public Map<String, String> getServerNames(String returnResult){
 		Map<String, String> returnMap = new HashMap<>();
@@ -50,7 +51,7 @@ public class ContextMerger {
 			logger.info(currentServerName);
 			result += currentServerName + ",";
 		}
-		returnMap.put("returnResult", result);
+		returnMap.put(SERVERS_KEY, result);
 		return returnMap;
 	}
 	public Map<String, String> prepareGetServerId(Map<String, Serializable> executionContext, ExecutionRuntimeServices executionRuntimeServices, String methodName){
@@ -70,10 +71,8 @@ public class ContextMerger {
 		executionContext.putAll(returnMap);
 		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Results merged back in the Execution Context");
 		return returnMap;
-
-
-
 	}
+	
 	public Map<String, String> prepareGetServer(Map<String, Serializable> executionContext,ExecutionRuntimeServices executionRuntimeServices, String methodName){//, String returnResult, String host, String methodName) {
 
 		String returnResult = executionContext.get(RETURN_RESULT_KEY).toString();
@@ -144,7 +143,7 @@ public class ContextMerger {
 		return returnMap;
 
 	}
-	public Map<String, String> prepareCreateServer(Map<String, Serializable> executionContext, ExecutionRuntimeServices executionRuntimeServices, String methodName){//}, String returnResult, String serverName, String host, String methodName, String imageRef) {
+	public Map<String, String> prepareCreateServer(Map<String, Serializable> executionContext, ExecutionRuntimeServices executionRuntimeServices, String methodName) {
 
 		String returnResult = executionContext.get(RETURN_RESULT_KEY).toString();
 		String serverName = executionContext.get("serverName").toString();
@@ -252,5 +251,37 @@ public class ContextMerger {
 		String resultToken = tokenObject.get("id").toString();
 		resultToken = resultToken.substring(1, resultToken.length()-1);
 		return resultToken;
+	}
+
+	public Map<String, String> prepareStringOccurrences(String returnResult, String serverName) {
+		Map<String, String> returnMap = new HashMap<>();
+		returnMap.put("container", returnResult);
+		returnMap.put("toFind", serverName);
+		returnMap.put("ignoreCase", "true");
+		return returnMap;
+	}
+
+	public void prepareSendEmail(Map<String, Serializable> executionContext, ExecutionRuntimeServices executionRuntimeServices) {
+
+		if(!executionContext.containsKey("emailHost")) {
+			executionContext.put("host", "smtp-americas.hp.com"); //todo remove near hardcoded strings
+		}
+		else {
+			executionContext.put("host", executionContext.get("emailHost"));
+		}
+		if(!executionContext.containsKey("emailPort")){
+			executionContext.put("port", "25");
+		}
+		else {
+			executionContext.put("port", executionContext.get("emailHost"));
+		}
+
+		executionContext.put("from", "meshi.peer@hp.com"); //todo remove near hardcoded strings
+
+
+		executionContext.put("subject", "OpenStack failure");
+		executionContext.put("body", "Failure in OpenStack flows");
+
+		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "prepareSendEmail");
 	}
 }

@@ -38,7 +38,7 @@ public class DisplayMessageExecutionPlan {
 
 		builder.addOOActionFinalStep(1L, "org.score.samples.openstack.actions.FinalStepActions", "successStepAction");
 
-		return builder.getExecutionPlan();
+		return builder.createTriggeringProperties().getExecutionPlan();
 	}
 
 	public Map<String, Serializable> createDisplayExecutionContext() {
