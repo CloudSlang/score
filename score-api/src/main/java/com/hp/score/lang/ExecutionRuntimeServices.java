@@ -33,12 +33,18 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public static final String RUNNING_PLANS_MAP = "RUNNING_PLANS_MAP";
 
+    public static final String NEW_SPLIT_ID = "NEW_SPLIT_ID";
+
+    public static final String BRANCH_ID = "BRANCH_ID";
+
 	protected Map<String, Serializable> myMap = new HashMap<>();
 
     public ExecutionRuntimeServices(){}
 
     public ExecutionRuntimeServices(ExecutionRuntimeServices executionRuntimeServices){
         myMap.putAll(executionRuntimeServices.myMap);
+        myMap.remove(NEW_SPLIT_ID);
+        myMap.remove(BRANCH_ID);
     }
 
 	public void pause() {

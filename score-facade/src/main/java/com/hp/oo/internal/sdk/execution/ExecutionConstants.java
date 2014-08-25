@@ -37,7 +37,7 @@ public class ExecutionConstants {
 	public static final String IS_AFTER_SUB_FLOW_END = "isAfterSubFlowEnd";
 
 	// For parallel/multi instance
-	public static final String BRANCH_ID = "BRANCH_ID";
+	public static final String BRANCH_ID = "BRANCH_ID";  //todo : duplicate .. remove...
 	public static final String BRANCH_NAME = "BRANCH_NAME";
 	public static final String SPLIT_ID = "SPLIT_ID";
 
@@ -120,7 +120,7 @@ public class ExecutionConstants {
 
 	// New Parallel Mechanism
 	public static final String FINISHED_CHILD_BRANCHES_DATA = "FINISHED_CHILD_BRANCHES_DATA";  //TODO : remove this, all usage in this should be replaced in using ExecutionRuntimeServices, getFinishedChildBranchesData method
-	public static final String NEW_SPLIT_ID = "NEW_SPLIT_ID";
+	public static final String NEW_SPLIT_ID = "NEW_SPLIT_ID";   //todo : duplicate .. remove...
 
 	// For ROI
 	public static final double DEFAULT_TRANSITION_VALUE = 0.0;
