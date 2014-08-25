@@ -54,7 +54,7 @@
         <module>orchestrator</module>
         <module>queue</module>
         <module>node</module>
-        <module>engine-jobs</module>
+        <module>score-engine-jobs</module>
 		<module>data</module>
     </modules>
 </project>
