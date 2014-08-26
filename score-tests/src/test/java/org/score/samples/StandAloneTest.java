@@ -109,11 +109,13 @@ public class StandAloneTest {
         Map<String,Serializable> getRuntimeValues = new HashMap<>();
         getRuntimeValues.put("NEW_BRANCH_MECHANISM",Boolean.TRUE);//TODO - remove this !! needs to work with this on by default, pending Non-Blocking story
         triggeringProperties.setRuntimeValues(getRuntimeValues);
-        registerEventListener("Hello score");
+        registerEventListener("Hello score",EventConstants.SCORE_FINISHED_EVENT);
 
         score.trigger(triggeringProperties);
 
-        waitForAllEventsToArrive(2);//this flow should have 2 "Hello score" events only
+        waitForAllEventsToArrive(3);//this flow should have 2 "Hello score" events only + 1 finish event
+
+        Assert.assertEquals(2,countEvents("Hello score"));
     }
 
 
@@ -167,6 +169,16 @@ public class StandAloneTest {
                 e.printStackTrace();
             }
         }
+    }
+
+    private int countEvents(String eventType) {
+        int i = 0;
+        for(ScoreEvent event:eventQueue){
+            if(event.getEventType().equalsIgnoreCase(eventType)){
+                i++;
+            }
+        }
+        return i;
     }
 
     private static ExecutionPlan createExecutionPlan() {
