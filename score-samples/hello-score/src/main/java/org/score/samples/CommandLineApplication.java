@@ -113,7 +113,7 @@ public class CommandLineApplication {
 		for (ExecutionPlanMetadata executionPlanMetadata : predefinedExecutionPlans) {
 			System.out.println(predefinedExecutionPlans.indexOf(executionPlanMetadata) + " - " + executionPlanMetadata.getName());
 		}
-		return readIntegerInput(reader, "Insert the flow number: ");
+		return readIntegerInput(reader, "Insert the flow number");
 	}
 
 	private void runFlow(String className, String methodName) throws Exception {
