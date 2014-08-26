@@ -60,7 +60,7 @@
 
         <dependency>
             <groupId>org.score.content</groupId>
-            <artifactId>score-http-client</artifactId>
+            <artifactId>score-http-client-actions</artifactId>
         </dependency>
 
         <dependency>
@@ -108,9 +108,7 @@
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
-
         </dependency>
-
 
     </dependencies>
 

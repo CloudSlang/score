@@ -18,8 +18,8 @@ import java.util.Map;
 @SuppressWarnings("unused")
 public class OOActionNavigator {
 	private final static Logger logger = Logger.getLogger(OOActionNavigator.class);
-
-	public <T> Long navigate (Map<String, Serializable> executionContext, List<NavigationMatcher<Serializable>> navigationMatchers, ExecutionRuntimeServices executionRuntimeServices) {
+	public final static String FAILURE_EVENT_KEY = "failureEvent";
+	public <T> Long navigate(Map<String, Serializable> executionContext, List<NavigationMatcher<Serializable>> navigationMatchers, ExecutionRuntimeServices executionRuntimeServices) {
 		logger.info("navigate method invocation");
 
 		//check if an exception occurred in run method through events
@@ -36,15 +36,16 @@ public class OOActionNavigator {
 			return null;
 		}
 
-		for(NavigationMatcher navigationMatcher : navigationMatchers)
-		{
+		for (NavigationMatcher navigationMatcher : navigationMatchers) {
 			Serializable response = executionContext.get(navigationMatcher.getContextKey());
 			Matcher matcher = MatcherFactory.getMatcher(navigationMatcher.getMatchType(), navigationMatcher.getCompareArg());
-			if(matcher.matches(response)){
+			if (matcher.matches(response)) {
 				return navigationMatcher.getNextStepId();
 			}
 		}
 
 		return null;
+
 	}
+
 }

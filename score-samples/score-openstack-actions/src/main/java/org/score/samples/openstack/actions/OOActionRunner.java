@@ -1,6 +1,7 @@
 package org.score.samples.openstack.actions;
 
 import com.hp.score.lang.ExecutionRuntimeServices;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -22,6 +23,7 @@ public class OOActionRunner {
 	private final static Logger logger = Logger.getLogger(OOActionRunner.class);
 	public final static String ACTION_RUNTIME_EVENT_TYPE = "ACTION_RUNTIME_EVENT";
 	public final static String ACTION_EXCEPTION_EVENT_TYPE = "ACTION_EXCEPTION_EVENT";
+	public final static String FAILURE_EVENT_KEY = "failureEvent";
 	private Class actionClass;
 	private Method actionMethod;
 	private String[] parameterNames; // parameter names ordered according to their position in method signature
@@ -50,10 +52,12 @@ public class OOActionRunner {
 			verifyActionInputs(inputBindings);
 
 			Map<String, String> results = invokeMethod(executionRuntimeServices, className, methodName, actualParameters);
-
+			// look for exception
 			mergeBackResults(executionContext, executionRuntimeServices, methodName, results);
 		} catch (Exception ex) {
 			executionRuntimeServices.addEvent(ACTION_EXCEPTION_EVENT_TYPE, ex);
+			executionContext.put(FAILURE_EVENT_KEY, ex.getStackTrace());
+
 		}
 	}
 
@@ -80,7 +84,14 @@ public class OOActionRunner {
 	}
 
 	private void mergeBackResults(Map<String, Serializable> executionContext, ExecutionRuntimeServices executionRuntimeServices, String methodName, Map<String, String> results) {
+
+		for (String key : results.keySet()) {
+			if (key.equals("exception")) {
+				results.put("exception", StringUtils.substring(results.get("exception"), 0, 50));
+			}
+		}
 		String resultString = results != null ? results.toString() : "";
+
 		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Method \"" + methodName + "\" invoked.." +
 				" Attempting to merge back results: " + resultString);
 

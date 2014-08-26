@@ -40,6 +40,7 @@ public class OpenstackApplications {
 	public static final String COMPUTE_PORT_MESSAGE = "Compute Port";
 	public static final String OPENSTACK_USERNAME_MESSAGE = "OpenStack Username";
 	public static final String OPENSTACK_PASSWORD_MESSAGE = "OpenStack Password";
+	public static final String FLOW_DESCRIPTION = "flowDescription";
 
 	private String username;
 	private String password;
@@ -120,6 +121,7 @@ public class OpenstackApplications {
 		Long failureId = 3L;
 		Long prepareStringOccurrencesId = 4L;
 		Long stringOccurencesId = 5L;
+		Long resultFormatterId = 6L;
 
 		//get servers
 		List<NavigationMatcher<Serializable>> navigationMatchers = new ArrayList<>();
@@ -136,12 +138,15 @@ public class OpenstackApplications {
 		//string occurrence
 		navigationMatchers = new ArrayList<>();
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, RETURN_RESULT, "1", successId));
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, failureId));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, resultFormatterId));
 		builder.addOOActionStep(stringOccurencesId,
 				"org.score.samples.openstack.actions.StringOccurrenceCounter",
 				"execute",
 				null,
 				navigationMatchers);
+
+		//result formatter step
+		builder.addStep(resultFormatterId, CONTEXT_MERGER_CLASS, "validateServerResult", failureId);
 
 		//success step
 		builder.addOOActionFinalStep(successId, FINAL_STEP_ACTIONS_CLASS, SUCCESS_STEP_ACTION);
@@ -150,7 +155,10 @@ public class OpenstackApplications {
 		builder.addOOActionFinalStep(failureId, FINAL_STEP_ACTIONS_CLASS, FAILURE_STEP_ACTION);
 
 		triggeringProperties = builder.createTriggeringProperties();
-
+		@SuppressWarnings("unchecked")
+		Map<String, Serializable> context = (Map<String, Serializable>) triggeringProperties.getContext();
+		context.put(FLOW_DESCRIPTION, "Validate servers");
+		triggeringProperties.setContext(context);
 		return triggeringProperties;
 	}
 
@@ -175,6 +183,7 @@ public class OpenstackApplications {
 		} else {
 			triggeringProperties.setContext(prepareListServerContext());
 		}
+
 		triggeringProperties.setStartStep(0L);
 		return triggeringProperties;
 	}
@@ -185,7 +194,9 @@ public class OpenstackApplications {
 
 	public TriggeringProperties createServersFlow() {
 		TriggeringProperties triggeringProperties = TriggeringProperties.create(prepareCreateServerExecutionPlan());
-		triggeringProperties.setContext(prepareCreateServerExecutionContext());
+		Map<String, Serializable> context = prepareCreateServerExecutionContext();
+		context.put(FLOW_DESCRIPTION, "Create Server");
+		triggeringProperties.setContext(context);
 		triggeringProperties.setStartStep(0L);
 		return triggeringProperties;
 	}
@@ -429,7 +440,9 @@ public class OpenstackApplications {
 
 	public TriggeringProperties deleteServerFlow() {
 		TriggeringProperties triggeringProperties = TriggeringProperties.create(prepareDeleteServerExecutionPlan());
-		triggeringProperties.setContext(prepareDeleteServerContext());
+		Map<String, Serializable> context = prepareDeleteServerContext();
+		context.put(FLOW_DESCRIPTION, "Delete Server");
+		triggeringProperties.setContext(context);
 		triggeringProperties.setStartStep(0L);
 		return triggeringProperties;
 	}
