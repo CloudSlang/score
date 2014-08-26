@@ -4,7 +4,7 @@ import com.hp.score.engine.queue.services.CounterNames;
 import com.hp.score.engine.queue.services.cleaner.QueueCleanerService;
 import com.hp.score.engine.queue.services.recovery.ExecutionRecoveryService;
 import com.hp.score.engine.versioning.services.VersionService;
-import com.hp.oo.orchestrator.services.SplitJoinService;
+import com.hp.score.orchestrator.services.SplitJoinService;
 import com.hp.score.engine.partitions.services.PartitionTemplate;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;

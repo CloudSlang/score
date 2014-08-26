@@ -3,7 +3,7 @@ package org.score.samples.stubs;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.oo.internal.sdk.execution.Execution;
-import com.hp.oo.orchestrator.services.PauseResumeService;
+import com.hp.score.orchestrator.services.PauseResumeService;
 
 import java.io.Serializable;
 import java.util.List;

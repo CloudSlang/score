@@ -7,8 +7,8 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.hp.oo.engine.node.services.WorkerNodeService;
-import com.hp.oo.orchestrator.services.CancelExecutionService;
-import com.hp.oo.orchestrator.services.PauseResumeService;
+import com.hp.score.orchestrator.services.CancelExecutionService;
+import com.hp.score.orchestrator.services.PauseResumeService;
 
 /**
  * @author kravtsov

@@ -1,6 +1,6 @@
 package com.hp.score.engine.queue.entities;
 
-import com.hp.oo.orchestrator.entities.Message;
+import com.hp.score.orchestrator.entities.Message;
 import org.junit.Test;
 
 import java.util.Arrays;

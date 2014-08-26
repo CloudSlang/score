@@ -8,9 +8,9 @@ import com.hp.score.engine.queue.services.QueueStateIdGeneratorService;
 import com.hp.score.engine.queue.services.ScoreEventFactory;
 import com.hp.oo.execution.services.WorkerManager;
 import com.hp.oo.execution.services.dbsupport.WorkerDbSupportService;
-import com.hp.oo.orchestrator.services.CancelExecutionService;
-import com.hp.oo.orchestrator.services.OrchestratorDispatcherService;
-import com.hp.oo.orchestrator.services.PauseResumeService;
+import com.hp.score.orchestrator.services.CancelExecutionService;
+import com.hp.score.orchestrator.services.OrchestratorDispatcherService;
+import com.hp.score.orchestrator.services.PauseResumeService;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

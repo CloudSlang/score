@@ -14,12 +14,12 @@
 	<jpa:repositories base-package="com.hp" query-lookup-strategy="create-if-not-found">
 		<repository:include-filter type="regex" expression="com.hp.oo.engine.node.repositories.WorkerNodeRepository"/>
 		<repository:include-filter type="regex" expression="com.hp.score.engine.versioning.repositories.VersionRepository"/>
-		<repository:include-filter type="regex" expression="com.hp.oo.orchestrator.repositories.SuspendedExecutionsRepository"/>
-		<repository:include-filter type="regex" expression="com.hp.oo.orchestrator.repositories.ExecutionInterruptsRepository"/>
+		<repository:include-filter type="regex" expression="com.hp.score.orchestrator.repositories.SuspendedExecutionsRepository"/>
+		<repository:include-filter type="regex" expression="com.hp.score.orchestrator.repositories.ExecutionInterruptsRepository"/>
 		<repository:include-filter type="regex" expression="com.hp.score.engine.partitions.repositories.PartitionGroupRepository"/>
-		<repository:include-filter type="regex" expression="com.hp.oo.orchestrator.repositories.RunningExecutionPlanRepository"/>
-		<repository:include-filter type="regex" expression="com.hp.oo.orchestrator.repositories.FinishedBranchRepository"/>
-		<repository:include-filter type="regex" expression="com.hp.score.repositories.ExecutionStateRepository"/>
+		<repository:include-filter type="regex" expression="com.hp.score.orchestrator.repositories.RunningExecutionPlanRepository"/>
+		<repository:include-filter type="regex" expression="com.hp.score.orchestrator.repositories.FinishedBranchRepository"/>
+		<repository:include-filter type="regex" expression="com.hp.score.orchestrator.repositories.ExecutionStateRepository"/>
         <repository:include-filter type="regex" expression="com.hp.oo.engine.node.repositories.WorkerLockRepository"/>
 	</jpa:repositories>
 

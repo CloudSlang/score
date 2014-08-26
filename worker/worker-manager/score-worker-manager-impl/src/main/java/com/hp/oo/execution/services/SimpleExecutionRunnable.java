@@ -8,7 +8,7 @@ import com.hp.score.engine.queue.entities.Payload;
 import com.hp.score.engine.queue.services.QueueStateIdGeneratorService;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
-import com.hp.oo.orchestrator.entities.SplitMessage;
+import com.hp.score.orchestrator.entities.SplitMessage;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;

@@ -1,8 +1,8 @@
 package com.hp.oo.execution.services;
 
 import ch.lambdaj.group.Group;
-import com.hp.oo.orchestrator.entities.Message;
-import com.hp.oo.orchestrator.services.OrchestratorDispatcherService;
+import com.hp.score.orchestrator.entities.Message;
+import com.hp.score.orchestrator.services.OrchestratorDispatcherService;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +18,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import static ch.lambdaj.Lambda.*;
 

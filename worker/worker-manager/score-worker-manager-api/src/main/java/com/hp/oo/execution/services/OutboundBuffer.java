@@ -1,6 +1,6 @@
 package com.hp.oo.execution.services;
 
-import com.hp.oo.orchestrator.entities.Message;
+import com.hp.score.orchestrator.entities.Message;
 
 /**
  * User: zruya

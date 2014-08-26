@@ -1,7 +1,7 @@
 package com.hp.oo.execution.services;//package com.hp.oo.execution.services;
 
-import com.hp.oo.orchestrator.entities.Message;
-import com.hp.oo.orchestrator.services.OrchestratorDispatcherService;
+import com.hp.score.orchestrator.entities.Message;
+import com.hp.score.orchestrator.services.OrchestratorDispatcherService;
 import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.Before;

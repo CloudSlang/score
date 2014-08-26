@@ -25,7 +25,7 @@ import com.hp.oo.execution.services.dbsupport.WorkerDbSupportService;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.oo.internal.sdk.execution.OOContext;
-import com.hp.oo.orchestrator.services.PauseResumeService;
+import com.hp.score.orchestrator.services.PauseResumeService;
 import com.hp.score.api.ExecutionStep;
 import com.hp.score.api.StartBranchDataContainer;
 import com.hp.score.events.EventBus;
