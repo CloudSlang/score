@@ -7,7 +7,7 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>oo-worker-manager-api</artifactId>
+	<artifactId>score-worker-manager-api</artifactId>
 
 	<dependencies>
 		<dependency>
