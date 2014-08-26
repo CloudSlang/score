@@ -22,7 +22,7 @@
 
 			<dependency>
 				<groupId>com.hp.score</groupId>
-				<artifactId>oo-execution-api</artifactId>
+				<artifactId>score-worker-execution-api</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
