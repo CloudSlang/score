@@ -2,9 +2,9 @@ package com.hp.score;
 
 import com.hp.oo.broker.entities.RunningExecutionPlan;
 import com.hp.oo.broker.services.RunningExecutionPlanService;
-import com.hp.oo.engine.queue.entities.ExecutionMessage;
-import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
-import com.hp.oo.engine.queue.services.QueueDispatcherService;
+import com.hp.score.engine.queue.entities.ExecutionMessage;
+import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
+import com.hp.score.engine.queue.services.QueueDispatcherService;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.TriggeringProperties;
 import com.hp.score.engine.data.IdentityGenerator;

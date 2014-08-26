@@ -1,6 +1,6 @@
 package com.hp.oo.execution.services;
 
-import com.hp.oo.engine.queue.services.QueueDispatcherService;
+import com.hp.score.engine.queue.services.QueueDispatcherService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

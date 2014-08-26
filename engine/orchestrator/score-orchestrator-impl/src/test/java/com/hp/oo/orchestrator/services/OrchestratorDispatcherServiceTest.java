@@ -3,9 +3,8 @@ package com.hp.oo.orchestrator.services;
 import com.hp.oo.engine.node.entities.WorkerNode;
 import com.hp.oo.engine.node.services.WorkerLockService;
 import com.hp.oo.engine.node.services.WorkerNodeService;
-import com.hp.oo.engine.queue.entities.ExecutionMessage;
+import com.hp.score.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.orchestrator.entities.Message;
-import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,7 +17,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.Matchers.any;
@@ -48,7 +46,7 @@ public class OrchestratorDispatcherServiceTest {
     WorkerLockService workerLockService;
 
     @Mock
-    private com.hp.oo.engine.queue.services.QueueDispatcherService queueDispatcher;
+    private com.hp.score.engine.queue.services.QueueDispatcherService queueDispatcher;
 
     @Mock
     private SplitJoinService splitJoinService;

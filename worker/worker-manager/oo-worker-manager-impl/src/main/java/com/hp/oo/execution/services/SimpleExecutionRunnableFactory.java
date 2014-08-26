@@ -1,7 +1,7 @@
 package com.hp.oo.execution.services;
 
-import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
-import com.hp.oo.engine.queue.services.QueueStateIdGeneratorService;
+import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
+import com.hp.score.engine.queue.services.QueueStateIdGeneratorService;
 
 import org.score.worker.execution.WorkerConfigurationService;
 import org.springframework.beans.factory.FactoryBean;

@@ -1,8 +1,8 @@
 package com.hp.oo.execution.services;
 
-import com.hp.oo.engine.queue.entities.ExecStatus;
-import com.hp.oo.engine.queue.entities.ExecutionMessage;
-import com.hp.oo.engine.queue.services.QueueDispatcherService;
+import com.hp.score.engine.queue.entities.ExecStatus;
+import com.hp.score.engine.queue.entities.ExecutionMessage;
+import com.hp.score.engine.queue.services.QueueDispatcherService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

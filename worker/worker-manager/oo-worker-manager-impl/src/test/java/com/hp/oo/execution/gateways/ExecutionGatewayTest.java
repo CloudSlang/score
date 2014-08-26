@@ -1,7 +1,7 @@
 package com.hp.oo.execution.gateways;
 
-import com.hp.oo.engine.queue.entities.ExecutionMessage;
-import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
+import com.hp.score.engine.queue.entities.ExecutionMessage;
+import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.execution.services.OutboundBuffer;
 import com.hp.oo.internal.sdk.execution.Execution;
 import org.junit.Before;
