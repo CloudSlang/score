@@ -7,7 +7,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>oo-execution-impl</artifactId>
+    <artifactId>score-worker-execution-impl</artifactId>
 
     <dependencies>
         <dependency>
@@ -76,7 +76,7 @@
         <!-- engine artifacts -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>oo-execution-api</artifactId>
+            <artifactId>score-worker-execution-api</artifactId>
         </dependency>
 
         <dependency>

@@ -11,7 +11,7 @@
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>oo-execution-api</module>
-		<module>oo-execution-impl</module>
+		<module>score-worker-execution-api</module>
+		<module>score-worker-execution-impl</module>
 	</modules>
 </project>
