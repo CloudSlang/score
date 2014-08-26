@@ -2,10 +2,10 @@ package com.hp.score.schema;
 
 import com.hp.oo.broker.services.RuntimeValueService;
 import com.hp.oo.engine.node.services.WorkerNodeService;
-import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
-import com.hp.oo.engine.queue.services.QueueDispatcherService;
-import com.hp.oo.engine.queue.services.QueueStateIdGeneratorService;
-import com.hp.oo.engine.queue.services.ScoreEventFactory;
+import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
+import com.hp.score.engine.queue.services.QueueDispatcherService;
+import com.hp.score.engine.queue.services.QueueStateIdGeneratorService;
+import com.hp.score.engine.queue.services.ScoreEventFactory;
 import com.hp.oo.execution.services.WorkerManager;
 import com.hp.oo.execution.services.dbsupport.WorkerDbSupportService;
 import com.hp.oo.orchestrator.services.CancelExecutionService;

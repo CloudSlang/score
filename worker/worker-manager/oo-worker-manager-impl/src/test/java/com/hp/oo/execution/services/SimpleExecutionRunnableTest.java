@@ -17,11 +17,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.hp.oo.engine.queue.entities.ExecStatus;
-import com.hp.oo.engine.queue.entities.ExecutionMessage;
-import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
-import com.hp.oo.engine.queue.entities.Payload;
-import com.hp.oo.engine.queue.services.QueueStateIdGeneratorService;
+import com.hp.score.engine.queue.entities.ExecStatus;
+import com.hp.score.engine.queue.entities.ExecutionMessage;
+import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
+import com.hp.score.engine.queue.entities.Payload;
+import com.hp.score.engine.queue.services.QueueStateIdGeneratorService;
 import com.hp.oo.internal.sdk.execution.Execution;
 
 import static org.mockito.Matchers.any;

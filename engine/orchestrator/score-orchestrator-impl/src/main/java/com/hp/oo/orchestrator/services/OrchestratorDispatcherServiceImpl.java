@@ -2,8 +2,8 @@ package com.hp.oo.orchestrator.services;
 
 import com.hp.oo.engine.node.services.WorkerLockService;
 import com.hp.oo.engine.node.services.WorkerNodeService;
-import com.hp.oo.engine.queue.entities.ExecutionMessage;
-import com.hp.oo.engine.queue.services.QueueDispatcherService;
+import com.hp.score.engine.queue.entities.ExecutionMessage;
+import com.hp.score.engine.queue.services.QueueDispatcherService;
 import com.hp.oo.orchestrator.entities.SplitMessage;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;

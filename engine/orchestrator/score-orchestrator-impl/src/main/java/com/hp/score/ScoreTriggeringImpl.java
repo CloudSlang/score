@@ -2,11 +2,11 @@ package com.hp.score;
 
 import com.hp.oo.broker.services.RunningExecutionPlanService;
 import com.hp.oo.engine.node.entities.WorkerNode;
-import com.hp.oo.engine.queue.entities.ExecStatus;
-import com.hp.oo.engine.queue.entities.ExecutionMessage;
-import com.hp.oo.engine.queue.entities.ExecutionMessageConverter;
-import com.hp.oo.engine.queue.entities.Payload;
-import com.hp.oo.engine.queue.services.QueueDispatcherService;
+import com.hp.score.engine.queue.entities.ExecStatus;
+import com.hp.score.engine.queue.entities.ExecutionMessage;
+import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
+import com.hp.score.engine.queue.entities.Payload;
+import com.hp.score.engine.queue.services.QueueDispatcherService;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.score.api.ExecutionPlan;

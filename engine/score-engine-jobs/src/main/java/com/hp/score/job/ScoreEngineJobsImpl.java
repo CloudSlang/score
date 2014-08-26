@@ -1,8 +1,8 @@
 package com.hp.score.job;
 
-import com.hp.oo.engine.queue.services.CounterNames;
-import com.hp.oo.engine.queue.services.cleaner.QueueCleanerService;
-import com.hp.oo.engine.queue.services.recovery.ExecutionRecoveryService;
+import com.hp.score.engine.queue.services.CounterNames;
+import com.hp.score.engine.queue.services.cleaner.QueueCleanerService;
+import com.hp.score.engine.queue.services.recovery.ExecutionRecoveryService;
 import com.hp.score.engine.versioning.services.VersionService;
 import com.hp.oo.orchestrator.services.SplitJoinService;
 import com.hp.score.engine.partitions.services.PartitionTemplate;
