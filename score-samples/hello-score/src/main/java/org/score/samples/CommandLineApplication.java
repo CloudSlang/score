@@ -46,7 +46,10 @@ public class CommandLineApplication {
 	}
 
 	private void registerPredefinedExecutionPlans() {
-		registerExecutionPlan("Validate server exists", OPENSTACK_APPLICATIONS, "validateServerExistsStandAlone");
+		registerExecutionPlan("Create server in OpenStack", OPENSTACK_APPLICATIONS, "createServersFlow");
+		registerExecutionPlan("List servers in OpenStack", OPENSTACK_APPLICATIONS, "listServersFlowStandAlone");
+		registerExecutionPlan("Delete server in OpenStack", OPENSTACK_APPLICATIONS, "deleteServerFlowStandAlone");
+		registerExecutionPlan("Validate server exists in OpenStack", OPENSTACK_APPLICATIONS, "validateServerExistsStandAlone");
 		registerExecutionPlan("OpenStack health check", OPENSTACK_APPLICATIONS, "openStackHealthCheck");
 	}
 

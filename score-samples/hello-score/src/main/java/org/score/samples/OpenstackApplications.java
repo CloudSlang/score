@@ -179,6 +179,10 @@ public class OpenstackApplications {
 		return triggeringProperties;
 	}
 
+	public TriggeringProperties listServersFlowStandAlone() {
+		return listServersFlow(true);
+	}
+
 	public TriggeringProperties createServersFlow() {
 		TriggeringProperties triggeringProperties = TriggeringProperties.create(prepareCreateServerExecutionPlan());
 		triggeringProperties.setContext(prepareCreateServerExecutionContext());
@@ -416,6 +420,13 @@ public class OpenstackApplications {
 		return builder.createTriggeringProperties().getExecutionPlan();
 	}
 
+	public TriggeringProperties deleteServerFlowStandAlone() {
+		TriggeringProperties triggeringProperties = TriggeringProperties.create(prepareDeleteServerExecutionPlan());
+		triggeringProperties.setContext(prepareDeleteServerExecutionContext());
+		triggeringProperties.setStartStep(0L);
+		return triggeringProperties;
+	}
+
 	public TriggeringProperties deleteServerFlow() {
 		TriggeringProperties triggeringProperties = TriggeringProperties.create(prepareDeleteServerExecutionPlan());
 		triggeringProperties.setContext(prepareDeleteServerContext());
@@ -450,21 +461,25 @@ public class OpenstackApplications {
 		String serverName;
 		String imageRef;
 
-		host = readInput(reader, "Host");
-		identityPort = readInput(reader, "Identity Port");
-		computePort = readInput(reader, "Compute Port");
+		String defaultHost = "16.59.58.200"; //todo remove near hardcoded strings
+		String defualtIdentityPort =  "5000";
+		String defaultComputePort = "8774";
+
+		host = readPredefinedInput(reader, "Host", defaultHost);
+		identityPort = readPredefinedInput(reader, "Identity Port", defualtIdentityPort);
+		computePort = readPredefinedInput(reader, "Compute Port", defaultComputePort);
 		username = readInput(reader, "Username");
 		password = readInput(reader, "Password");
 		serverName = readInput(reader, "Server name");
 
 		if (StringUtils.isEmpty(host)){
-			host = "16.59.58.200"; //todo remove near hardcoded strings
+			host = defaultHost; //todo remove near hardcoded strings
 		}
 		if (StringUtils.isEmpty(identityPort)){
-			identityPort = "5000";
+			identityPort = defualtIdentityPort;
 		}
 		if (StringUtils.isEmpty(computePort)){
-			computePort = "8774";
+			computePort = defaultComputePort;
 		}
 
 
@@ -482,6 +497,7 @@ public class OpenstackApplications {
 
 		return executionContext;
 	}
+
 	@SuppressWarnings("unused")
 	public ExecutionPlan prepareDeleteServerExecutionPlan(){
 		ExecutionPlanBuilder builder = new ExecutionPlanBuilder();
