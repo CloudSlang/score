@@ -33,9 +33,9 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public static final String RUNNING_PLANS_MAP = "RUNNING_PLANS_MAP";
 
-    public static final String NEW_SPLIT_ID = "NEW_SPLIT_ID";
+    private static final String NEW_SPLIT_ID = "NEW_SPLIT_ID";
 
-    public static final String BRANCH_ID = "BRANCH_ID";
+    private static final String BRANCH_ID = "BRANCH_ID";
 
 	protected Map<String, Serializable> myMap = new HashMap<>();
 
@@ -47,7 +47,24 @@ public class ExecutionRuntimeServices implements Serializable {
         myMap.remove(BRANCH_ID);
     }
 
-	public void pause() {
+    public String getBrunchId(){
+        return getFromMap(BRANCH_ID);
+    }
+
+    public void setBrunchId(String brunchId) {
+        myMap.put(BRANCH_ID, brunchId);
+    }
+
+    public String getSplitId(){
+        return getFromMap(NEW_SPLIT_ID);
+    }
+
+    public void setSplitId(String splitId) {
+        myMap.put(NEW_SPLIT_ID, splitId);
+    }
+
+
+    public void pause() {
 		myMap.put(EXECUTION_PAUSED, Boolean.TRUE);
 	}
 

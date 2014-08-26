@@ -45,7 +45,7 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 		Map<String, Serializable> eventData = new HashMap<>();
 		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, execution.getSystemContext());
 		eventData.put(ExecutionConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
-		eventData.put(ExecutionConstants.BRANCH_ID, execution.getBranchId());
+		eventData.put(EventConstants.BRANCH_ID, execution.getBranchId());
 		return (Serializable) eventData;
 	}
 
@@ -59,7 +59,7 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 		Map<String, Serializable> eventData = new HashMap<>();
 		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, execution.getSystemContext());
 		eventData.put(ExecutionConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
-		eventData.put(ExecutionConstants.BRANCH_ID, execution.getBranchId());
+		eventData.put(EventConstants.BRANCH_ID, execution.getBranchId());
 		eventData.put(ExecutionConstants.RUNNING_EXECUTION_PLAN_ID, execution.getRunningExecutionPlanId());
 		return (Serializable) eventData;
 	}
@@ -85,7 +85,7 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 		Map<String, Serializable> eventData = new HashMap<>();
 		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, execution.getSystemContext());
 		eventData.put(ExecutionConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
-		eventData.put(ExecutionConstants.BRANCH_ID, execution.getBranchId());
+		eventData.put(EventConstants.BRANCH_ID, execution.getBranchId());
 		eventData.put(ExecutionConstants.FLOW_UUID, flowUuid);
 		eventData.put(EventConstants.PAUSE_ID, pauseId);
 		return (Serializable) eventData;

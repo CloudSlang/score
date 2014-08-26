@@ -3,7 +3,7 @@ package com.hp.oo.engine.queue.repositories;
 import com.hp.oo.engine.queue.entities.ExecStatus;
 import com.hp.oo.engine.queue.entities.ExecutionMessage;
 import com.hp.oo.engine.queue.entities.Payload;
-import com.hp.oo.partitions.services.PartitionTemplate;
+import com.hp.score.engine.partitions.services.PartitionTemplate;
 import com.hp.score.engine.data.IdentityGenerator;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;

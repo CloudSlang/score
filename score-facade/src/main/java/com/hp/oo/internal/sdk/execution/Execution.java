@@ -2,6 +2,7 @@ package com.hp.oo.internal.sdk.execution;
 
 import com.hp.oo.enginefacade.execution.EndBranchDataContainer;
 import com.hp.score.lang.SystemContext;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 
 import java.io.Serializable;
@@ -137,7 +138,7 @@ public class Execution implements Serializable {
         - Matan
     */
     public boolean isBranch() {
-        return systemContext.containsKey(ExecutionConstants.BRANCH_ID);
+        return !StringUtils.isEmpty(systemContext.getBrunchId());
     }
 
     public boolean isNewBranchMechanism() {
@@ -145,21 +146,21 @@ public class Execution implements Serializable {
     }
 
     public String getBranchId() {
-        return (String) getSystemContext().get(ExecutionConstants.BRANCH_ID);
+        return getSystemContext().getBrunchId();
     }
 
     public void putBranchId(String branchId) {
-        Validate.isTrue(!getSystemContext().containsKey(ExecutionConstants.BRANCH_ID), "not allowed to overwrite branch id");
-        getSystemContext().put(ExecutionConstants.BRANCH_ID, branchId);
+        Validate.isTrue(StringUtils.isEmpty(getSystemContext().getBrunchId()), "not allowed to overwrite branch id");
+        getSystemContext().setBrunchId(branchId);
     }
 
     public String getSplitId() {
-        return (String) getSystemContext().get(ExecutionConstants.NEW_SPLIT_ID);
+        return getSystemContext().getSplitId();
     }
 
     public void putSplitId(String splitId) {
-        Validate.isTrue(!getSystemContext().containsKey(ExecutionConstants.NEW_SPLIT_ID), "not allowed to overwrite split id");
-        getSystemContext().put(ExecutionConstants.NEW_SPLIT_ID, splitId);
+        Validate.isTrue(StringUtils.isEmpty(getSystemContext().getSplitId()), "not allowed to overwrite split id");
+        getSystemContext().setSplitId(splitId);
     }
 
     public String getError() {

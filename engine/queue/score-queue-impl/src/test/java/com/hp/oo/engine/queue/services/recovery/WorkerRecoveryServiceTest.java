@@ -5,7 +5,7 @@ import com.hp.oo.engine.node.services.WorkerLockService;
 import com.hp.oo.engine.node.services.WorkerNodeService;
 import com.hp.oo.engine.queue.services.CounterNames;
 import com.hp.oo.engine.queue.services.ExecutionQueueService;
-import com.hp.oo.engine.versioning.services.VersionService;
+import com.hp.score.engine.versioning.services.VersionService;
 import com.hp.oo.enginefacade.Worker;
 import org.junit.Before;
 import org.junit.Test;

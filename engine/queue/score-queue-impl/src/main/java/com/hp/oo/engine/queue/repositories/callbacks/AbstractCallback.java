@@ -1,6 +1,6 @@
 package com.hp.oo.engine.queue.repositories.callbacks;
 
-import com.hp.oo.partitions.services.PartitionCallback;
+import com.hp.score.engine.partitions.services.PartitionCallback;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;

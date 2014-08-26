@@ -21,4 +21,6 @@ public class EventConstants {
 	public static final String EXECUTION_CONTEXT = "EXECUTION_CONTEXT";
 	public static final String IS_BRANCH = "IS_BRANCH";
 	public static final String PAUSE_ID = "PAUSE_ID";
+
+    public static final String BRANCH_ID = "BRANCH_ID";
 }

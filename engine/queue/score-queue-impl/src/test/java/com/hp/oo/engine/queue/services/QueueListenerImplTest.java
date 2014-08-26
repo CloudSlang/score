@@ -121,7 +121,7 @@ public class QueueListenerImplTest {
 
 	private Execution createBranchExecution() {
 		SystemContext systemContext = new SystemContext();
-		systemContext.put(ExecutionConstants.BRANCH_ID, UUID.randomUUID().toString());
+		systemContext.setBrunchId(UUID.randomUUID().toString());
 		systemContext.put(ExecutionConstants.NEW_BRANCH_MECHANISM, Boolean.TRUE);
 		Random random = new Random();
 		return new Execution(random.nextLong(), random.nextLong(), 0L, new HashMap<String, String>(0), systemContext);

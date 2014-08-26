@@ -82,7 +82,7 @@ public class ExecutionServiceTest {
 	public void handlePausedFlow_NotPausedExecutionTest() {
 		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
 		exe.setExecutionId(111L);
-		exe.getSystemContext().put(ExecutionConstants.BRANCH_ID, "branch_id");
+		exe.getSystemContext().setBrunchId("branch_id");
 		exe.getSystemContext().put(ExecutionConstants.FLOW_UUID, "flow_uuid");
 		exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String, List>());
 
@@ -141,7 +141,7 @@ public class ExecutionServiceTest {
 	private Execution getExecutionObjToPause(Long executionId, String branch_id) {
 		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
 		exe.setExecutionId(executionId);
-		exe.getSystemContext().put(ExecutionConstants.BRANCH_ID, branch_id);
+		exe.getSystemContext().setBrunchId(branch_id);
 		exe.getSystemContext().put(ExecutionConstants.FLOW_UUID, "flow_uuid");
 		exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String, List>());
 		//for events
@@ -179,7 +179,7 @@ public class ExecutionServiceTest {
 		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
 		exe.setExecutionId(111L);
 		exe.getSystemContext().put(ExecutionConstants.SPLIT_ID, "split_id");
-		exe.getSystemContext().put(ExecutionConstants.BRANCH_ID, "branch_id");
+		exe.getSystemContext().setBrunchId("branch_id");
 		exe.getSystemContext().put(ExecutionConstants.ACQUIRED_LOCKS, (Serializable) locks);
 		exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String, List>());
 		executionService.handleBranchFailure(exe, new Exception("Test exception..."));

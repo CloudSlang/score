@@ -3,7 +3,7 @@ package com.hp.oo.engine.node.services;
 import com.google.common.collect.Multimap;
 import com.hp.oo.engine.node.entities.WorkerNode;
 import com.hp.oo.engine.node.repositories.WorkerNodeRepository;
-import com.hp.oo.engine.versioning.services.VersionService;
+import com.hp.score.engine.versioning.services.VersionService;
 import com.hp.oo.enginefacade.Worker;
 import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
 import junit.framework.Assert;

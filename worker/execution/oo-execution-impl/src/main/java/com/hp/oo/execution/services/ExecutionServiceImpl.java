@@ -178,7 +178,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	// This method deals with the situation when a branch execution was terminated because of a system failure - not execution exception
 	protected void handleBranchFailure(Execution execution, Exception exception) {
 		String splitId = (String)execution.getSystemContext().get(ExecutionConstants.SPLIT_ID);
-		String branchId = (String)execution.getSystemContext().get(ExecutionConstants.BRANCH_ID);
+		String branchId = execution.getSystemContext().getBrunchId();
 		logger.error("Branch failed due to SYSTEM FAILURE! Execution id: " + execution.getExecutionId() + " Branch id: " + branchId, exception);
 		BranchContextHolder branchContextHolder = new BranchContextHolder();
 		branchContextHolder.setSplitId(splitId);
@@ -235,7 +235,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
 	// check if the execution should be Paused, and pause it if needed
 	protected boolean handlePausedFlow(Execution execution) {
-		String branchId = (String)execution.getSystemContext().get(ExecutionConstants.BRANCH_ID);
+		String branchId = execution.getSystemContext().getBrunchId();
 		PauseReason reason = findPauseReason(execution.getExecutionId(), branchId);
 		if(reason != null) { // need to pause the execution
 			pauseFlow(reason, execution);
@@ -246,7 +246,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
 	// no need to check if paused - because this is called after the step, when the Pause flag exists in the context
 	private boolean handlePausedFlowAfterStep(Execution execution) {
-		String branchId = (String)execution.getSystemContext().get(ExecutionConstants.BRANCH_ID);
+		String branchId = execution.getSystemContext().getBrunchId();
 		PauseReason reason = null;
 		ExecutionSummary execSummary = pauseService.readPausedExecution(execution.getExecutionId(), branchId);
 		if(execSummary != null && execSummary.getStatus().equals(ExecutionStatus.PENDING_PAUSE)) {
@@ -262,7 +262,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	private void pauseFlow(PauseReason reason, Execution execution) {
 		SystemContext systemContext = execution.getSystemContext();
 		Long executionId = execution.getExecutionId();
-		String branchId = (String)systemContext.get(ExecutionConstants.BRANCH_ID);
+		String branchId = systemContext.getBrunchId();
 		// If USER_PAUSED send such event
 		if(!isDebuggerMode(execution.getSystemContext()) && reason.equals(PauseReason.USER_PAUSED)) {
 			if(branchId != null) {
