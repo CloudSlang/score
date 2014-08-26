@@ -15,9 +15,11 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.score.samples.utility.ReadInputUtility.readIntegerInput;
@@ -178,6 +180,12 @@ public class CommandLineApplication {
 		eventBus.subscribe(new ScoreEventListener() {
 			@Override
 			public void onEvent(ScoreEvent event) {
+                if(event.getEventType().equals(EventConstants.SCORE_FINISHED_EVENT)){   //TODO - temp solution, till only end flow events send SCORE_FINISHED_EVENT (now also branch throw this event)
+                    Map<String,Serializable> data = (Map<String,Serializable>)event.getData();
+                    if ((Boolean)data.get(EventConstants.IS_BRANCH)) {
+                        return;
+                    }
+                }
 				logScoreListenerEvent(event);
 			}
 		}, handlerTypes);
