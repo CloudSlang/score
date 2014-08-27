@@ -1,4 +1,4 @@
-package com.hp.oo.execution.reflection;
+package com.hp.score.worker.execution.reflection;
 
 import com.hp.score.api.ControlActionMetadata;
 

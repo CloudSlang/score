@@ -1,5 +1,8 @@
 package com.hp.score.schema;
 
+import com.hp.score.worker.execution.reflection.ReflectionAdapterImpl;
+import com.hp.score.worker.execution.services.ExecutionServiceImpl;
+import com.hp.score.worker.execution.services.SessionDataServiceImpl;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
@@ -25,7 +28,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private Map<Class<?>,String> beans = new HashMap<Class<?>,String>(){{
 		put(com.hp.oo.execution.services.WorkerManager.class, "workerManager");
 		put(com.hp.score.events.EventBusImpl.class, null);
-		put(com.hp.oo.execution.services.ExecutionServiceImpl.class, "agent");
+		put(ExecutionServiceImpl.class, "agent");
 		put(com.hp.oo.execution.services.InBuffer.class, null);
 		put(com.hp.oo.execution.services.OutboundBufferImpl.class, "outBuffer");
 		put(com.hp.oo.execution.services.RetryTemplate.class, null);
@@ -33,8 +36,8 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(com.hp.oo.execution.services.WorkerManagerMBean.class, "com.hp.oo.execution.services.WorkerManagerMBean");
 		put(com.hp.oo.execution.services.WorkerRecoveryManagerImpl.class, null);
 		put(com.hp.oo.execution.gateways.ExecutionGatewayImpl.class, "runningExecutionGateway");
-		put(com.hp.oo.execution.reflection.ReflectionAdapterImpl.class, null);
-        put(com.hp.oo.execution.services.SessionDataServiceImpl.class, "sessionDataService");
+		put(ReflectionAdapterImpl.class, null);
+        put(SessionDataServiceImpl.class, "sessionDataService");
 		put(com.hp.oo.execution.services.SynchronizationManagerImpl.class, null);
 		put(org.score.worker.execution.WorkerConfigurationServiceImpl.class, "workerConfiguration");
 //		put(org.score.worker.management.WorkerRegistration.class, null);

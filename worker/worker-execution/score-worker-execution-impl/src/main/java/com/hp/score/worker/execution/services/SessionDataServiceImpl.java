@@ -1,4 +1,4 @@
-package com.hp.oo.execution.services;
+package com.hp.score.worker.execution.services;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Date: 19/08/2014
  * Time: 17:22
  */
-public class SessionDataServiceImpl implements SessionDataService{
+public class SessionDataServiceImpl implements SessionDataService {
 
     @Autowired(required = false)
     @Qualifier("scoreSessionTimeout")

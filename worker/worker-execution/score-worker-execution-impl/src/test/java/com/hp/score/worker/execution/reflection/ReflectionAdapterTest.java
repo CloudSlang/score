@@ -1,6 +1,6 @@
-package com.hp.oo.execution.reflection;
+package com.hp.score.worker.execution.reflection;
 
-import com.hp.oo.execution.services.SessionDataService;
+import com.hp.score.worker.execution.services.SessionDataService;
 import com.hp.score.api.ControlActionMetadata;
 import junit.framework.Assert;
 import org.apache.log4j.Logger;
@@ -27,14 +27,14 @@ public class ReflectionAdapterTest {
 
 	private static final Logger logger = Logger.getLogger(ReflectionAdapterTest.class);
 	@Autowired
-	ReflectionAdapter adapter;
+    ReflectionAdapter adapter;
 
     @Autowired
     private SessionDataService sessionDataService;
 
     @Test
 	public void executeControlActionTest() {
-		ControlActionMetadata metadata = new ControlActionMetadata("com.hp.oo.execution.reflection.ReflectionAdapterTestHelper", "myMethod_1");
+		ControlActionMetadata metadata = new ControlActionMetadata("com.hp.score.worker.execution.reflection.ReflectionAdapterTestHelper", "myMethod_1");
 		Map<String, Object> map = new HashMap<>();
 		map.put("parameter_1", "TEST");
 		map.put("parameter_2", 3);
@@ -48,7 +48,7 @@ public class ReflectionAdapterTest {
 
 	@Test
 	public void executeControlActionTest_2() {
-		ControlActionMetadata metadata = new ControlActionMetadata("com.hp.oo.execution.reflection.ReflectionAdapterTestHelper", "myMethod_2");
+		ControlActionMetadata metadata = new ControlActionMetadata("com.hp.score.worker.execution.reflection.ReflectionAdapterTestHelper", "myMethod_2");
 		Map<String, Object> map = new HashMap<>();
 		map.put("parameter_1", 5);
 		map.put("parameter_2", 3);
@@ -58,7 +58,7 @@ public class ReflectionAdapterTest {
 
 	@Test
 	public void executeControlActionTest_3() {
-		ControlActionMetadata metadata = new ControlActionMetadata("com.hp.oo.execution.reflection.ReflectionAdapterTestHelper", "myMethod_3");
+		ControlActionMetadata metadata = new ControlActionMetadata("com.hp.score.worker.execution.reflection.ReflectionAdapterTestHelper", "myMethod_3");
 		Map<String, Object> actionData = new HashMap<>();
 		actionData.put("parameter_1", 5);
 		actionData.put("parameter_2", 3);
@@ -69,7 +69,7 @@ public class ReflectionAdapterTest {
 
 	@Test
 	public void executeControlActionTest_4() {
-		ControlActionMetadata metadata = new ControlActionMetadata("com.hp.oo.execution.reflection.ReflectionAdapterTestHelperNoSpring", "myMethod_4");
+		ControlActionMetadata metadata = new ControlActionMetadata("com.hp.score.worker.execution.reflection.ReflectionAdapterTestHelperNoSpring", "myMethod_4");
 		Map<String, Object> actionData = new HashMap<>();
 		actionData.put("parameter_1", 5);
 		actionData.put("parameter_2", 3);

@@ -1,4 +1,4 @@
-package com.hp.oo.execution.services;
+package com.hp.score.worker.execution.services;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.hp.oo.execution.services.WorkerRecoveryManager;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +28,7 @@ import com.hp.oo.broker.services.RuntimeValueService;
 import com.hp.oo.enginefacade.execution.ExecutionStatus;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.enginefacade.execution.PauseReason;
-import com.hp.oo.execution.reflection.ReflectionAdapter;
+import com.hp.score.worker.execution.reflection.ReflectionAdapter;
 import com.hp.oo.execution.services.dbsupport.WorkerDbSupportService;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
