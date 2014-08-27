@@ -19,10 +19,8 @@ import java.util.Map;
 public class OOActionNavigator {
 	private final static Logger logger = Logger.getLogger(OOActionNavigator.class);
 	public final static String FAILURE_EVENT_KEY = "failureEvent";
-	public <T> Long navigate(Map<String, Serializable> executionContext, List<NavigationMatcher<Serializable>> navigationMatchers, ExecutionRuntimeServices executionRuntimeServices) {
+	public <T extends Comparable> Long navigate(Map<String, Serializable> executionContext, List<NavigationMatcher<Serializable>> navigationMatchers, ExecutionRuntimeServices executionRuntimeServices) {
 		logger.info("navigate method invocation");
-
-		//check if an exception occurred in run method through events
 		ArrayDeque<ScoreEvent> events = executionRuntimeServices.getEvents();
 		if (events != null) {
 			for (ScoreEvent scoreEvent : events) {
@@ -38,7 +36,7 @@ public class OOActionNavigator {
 
 		for (NavigationMatcher navigationMatcher : navigationMatchers) {
 			Serializable response = executionContext.get(navigationMatcher.getContextKey());
-			Matcher matcher = MatcherFactory.getMatcher(navigationMatcher.getMatchType(), navigationMatcher.getCompareArg());
+			Matcher matcher = MatcherFactory.getMatcher(navigationMatcher.getMatchType(), (Comparable) navigationMatcher.getCompareArg());
 			if (matcher.matches(response)) {
 				return navigationMatcher.getNextStepId();
 			}

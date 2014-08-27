@@ -24,6 +24,10 @@ public class OOActionRunner {
 	public final static String ACTION_RUNTIME_EVENT_TYPE = "ACTION_RUNTIME_EVENT";
 	public final static String ACTION_EXCEPTION_EVENT_TYPE = "ACTION_EXCEPTION_EVENT";
 	public final static String FAILURE_EVENT_KEY = "failureEvent";
+	public final static String EXCEPTION_KEY = "exception";
+	public final static Integer STRING_START_INDEX = 0;
+	public final static Integer STRING_END_INDEX = 50;
+
 	private Class actionClass;
 	private Method actionMethod;
 	private String[] parameterNames; // parameter names ordered according to their position in method signature
@@ -85,12 +89,20 @@ public class OOActionRunner {
 
 	private void mergeBackResults(Map<String, Serializable> executionContext, ExecutionRuntimeServices executionRuntimeServices, String methodName, Map<String, String> results) {
 
-		for (String key : results.keySet()) {
-			if (key.equals("exception")) {
-				results.put("exception", StringUtils.substring(results.get("exception"), 0, 50));
+
+		String resultString;
+		if(results != null) {
+			for (String key : results.keySet()) {
+				if (key.equals(EXCEPTION_KEY)) {
+					results.put(EXCEPTION_KEY, StringUtils.substring(results.get(EXCEPTION_KEY), STRING_START_INDEX, STRING_END_INDEX));
+				}
 			}
+
+			resultString = results.toString();
 		}
-		String resultString = results != null ? results.toString() : "";
+		else {
+			resultString = "";
+		}
 
 		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Method \"" + methodName + "\" invoked.." +
 				" Attempting to merge back results: " + resultString);

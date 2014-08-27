@@ -2,6 +2,7 @@ package org.score.samples;
 
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.TriggeringProperties;
+
 import org.apache.commons.lang3.StringUtils;
 import org.score.samples.openstack.actions.ExecutionPlanBuilder;
 import org.score.samples.openstack.actions.MatchType;
@@ -41,6 +42,12 @@ public class OpenstackApplications {
 	public static final String OPENSTACK_USERNAME_MESSAGE = "OpenStack Username";
 	public static final String OPENSTACK_PASSWORD_MESSAGE = "OpenStack Password";
 	public static final String FLOW_DESCRIPTION = "flowDescription";
+	public static final String BODY_KEY = "body";
+	public static final String URL_KEY = "url";
+	public static final String CONTENT_TYPE_KEY = "contentType";
+	public static final String METHOD_KEY = "method";
+	public static final String COMPUTE_PORT_KEY = "computePort";
+	public static final String HOST_KEY = "host";
 
 	private String username;
 	private String password;
@@ -137,7 +144,7 @@ public class OpenstackApplications {
 
 		//string occurrence
 		navigationMatchers = new ArrayList<>();
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, RETURN_RESULT, "1", successId));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.COMPARE_GREATER, RETURN_RESULT, "0", successId));
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, resultFormatterId));
 		builder.addOOActionStep(stringOccurencesId,
 				"org.score.samples.openstack.actions.StringOccurrenceCounter",
@@ -205,12 +212,12 @@ public class OpenstackApplications {
 		Map<String, Serializable> executionContext = new HashMap<>();
 		String url = "http://" + host + ":" + identityPort + "/v2.0/tokens";
 		String body = "{\"auth\": {\"tenantName\": \"demo\",\"passwordCredentials\": {\"username\": \"" + username +"\",\"password\": \"" + password + "\"}}}";
-		executionContext.put("url", url);
-		executionContext.put("method", "post");
-		executionContext.put("body", body);
-		executionContext.put("contentType", "application/json");
-		executionContext.put("computePort", computePort);
-		executionContext.put("host", host);
+		executionContext.put(URL_KEY, url);
+		executionContext.put(METHOD_KEY, "post");
+		executionContext.put(BODY_KEY, body);
+		executionContext.put(CONTENT_TYPE_KEY, "application/json");
+		executionContext.put(COMPUTE_PORT_KEY, computePort);
+		executionContext.put(HOST_KEY, host);
 
 		return executionContext;
 	}
@@ -223,18 +230,18 @@ public class OpenstackApplications {
 		String identityPort;
 		String computePort;
 
-		String defaultHost = "16.59.58.200";//todo remove near hardcoded strings
+
 		String defualtIdentityPort =  "5000";
 		String defaultComputePort = "8774";
 
-		host = readPredefinedInput(reader, OPENSTACK_HOST_MESSAGE, defaultHost);
+		host = readInput(reader, OPENSTACK_HOST_MESSAGE);
 		identityPort = readPredefinedInput(reader, IDENTITY_PORT_MESSAGE, defualtIdentityPort);
 		computePort = readPredefinedInput(reader, COMPUTE_PORT_MESSAGE, defaultComputePort);
 		username = readInput(reader, OPENSTACK_USERNAME_MESSAGE);
 		password = readInput(reader, OPENSTACK_PASSWORD_MESSAGE);
 
 		if (StringUtils.isEmpty(host)){
-			host = defaultHost;
+			host = "";
 		}
 		if (StringUtils.isEmpty(identityPort)){
 			identityPort = defualtIdentityPort;
@@ -246,12 +253,12 @@ public class OpenstackApplications {
 		Map<String, Serializable> executionContext = new HashMap<>();
 		String url = "http://" + host + ":" + identityPort + "/v2.0/tokens";
 		String body = "{\"auth\": {\"tenantName\": \"demo\",\"passwordCredentials\": {\"username\": \"" + username +"\",\"password\": \"" + password + "\"}}}";
-		executionContext.put("url", url);
-		executionContext.put("method", "post");
-		executionContext.put("body", body);
-		executionContext.put("contentType", "application/json");
-		executionContext.put("computePort", computePort);
-		executionContext.put("host", host);
+		executionContext.put(URL_KEY, url);
+		executionContext.put(METHOD_KEY, "post");
+		executionContext.put(BODY_KEY, body);
+		executionContext.put(CONTENT_TYPE_KEY, "application/json");
+		executionContext.put(COMPUTE_PORT_KEY, computePort);
+		executionContext.put(HOST_KEY, host);
 
 		return executionContext;
 	}
@@ -266,12 +273,12 @@ public class OpenstackApplications {
 		String serverName;
 		String imageRef;
 
-		String defaultHost = "16.59.58.200"; //todo remove near hardcoded strings
+
 		String defualtIdentityPort =  "5000";
 		String defaultComputePort = "8774";
 		String defaultImageRef = "56ff0279-f1fb-46e5-93dc-fe7093af0b1a";
 
-		host = readPredefinedInput(reader, OPENSTACK_HOST_MESSAGE, defaultHost);
+		host = readInput(reader, OPENSTACK_HOST_MESSAGE);
 		identityPort = readPredefinedInput(reader, IDENTITY_PORT_MESSAGE, defualtIdentityPort);
 		computePort = readPredefinedInput(reader, COMPUTE_PORT_MESSAGE, defaultComputePort);
 		imageRef = readPredefinedInput(reader, "ImageRef", defaultImageRef);
@@ -280,7 +287,7 @@ public class OpenstackApplications {
 		serverName = readInput(reader, "Server name");
 
 		if (StringUtils.isEmpty(host)){
-			host = defaultHost;
+			host = "";
 		}
 		if (StringUtils.isEmpty(identityPort)){
 			identityPort = defualtIdentityPort;
@@ -302,14 +309,14 @@ public class OpenstackApplications {
 		Map<String, Serializable> executionContext = new HashMap<>();
 		String url = "http://" + host + ":" + identityPort + "/v2.0/tokens";
 		String body = "{\"auth\": {\"tenantName\": \"demo\",\"passwordCredentials\": {\"username\": \"" + username +"\",\"password\": \"" + password + "\"}}}";
-		executionContext.put("url", url);
-		executionContext.put("method", "post");
-		executionContext.put("body", body);
-		executionContext.put("contentType", "application/json");
+		executionContext.put(URL_KEY, url);
+		executionContext.put(METHOD_KEY, "post");
+		executionContext.put(BODY_KEY, body);
+		executionContext.put(CONTENT_TYPE_KEY, "application/json");
 		executionContext.put(SERVER_NAME_KEY, serverName);
-		executionContext.put("computePort", computePort);
+		executionContext.put(COMPUTE_PORT_KEY, computePort);
 		executionContext.put("imageRef", imageRef);
-		executionContext.put("host", host);
+		executionContext.put(HOST_KEY, host);
 
 		return executionContext;
 	}
@@ -321,8 +328,10 @@ public class OpenstackApplications {
 		String emailHost;
 		String to;
 		String emailPort;
-		emailHost = readPredefinedInput(reader, "Email host", "smtp-americas.hp.com"); //todo remove near hardcoded strings
-		emailPort = readPredefinedInput(reader, "Email port", "25");
+		String from;
+		emailHost = readInput(reader, "Email host");
+		emailPort = readInput(reader, "Email port");
+		from = readInput(reader, "Fail email sender");
 		to = readInput(reader, "Fail email recipient");
 
 		if(!StringUtils.isEmpty(emailHost)) {
@@ -333,6 +342,9 @@ public class OpenstackApplications {
 		}
 		if(!StringUtils.isEmpty(to)) {
 			context.put("to", to);
+		}
+		if(!StringUtils.isEmpty(from)) {
+			context.put("from", from);
 		}
 
 		return context;
@@ -358,19 +370,19 @@ public class OpenstackApplications {
 
 
 		if (StringUtils.isEmpty(host)){
-			host = "smtp-americas.hp.com"; //todo remove near hardcoded strings
+			host = "";
 		}
 		if (StringUtils.isEmpty(port)){
-			port = "25";
+			port = "";
 		}
 
 		Map<String, Serializable> executionContext = new HashMap<>();
-		executionContext.put("host", host);
+		executionContext.put(HOST_KEY, host);
 		executionContext.put("port", port);
 		executionContext.put("from", from);
 		executionContext.put("to", to);
 		executionContext.put("subject", subject);
-		executionContext.put("body", text);
+		executionContext.put(BODY_KEY, text);
 
 		return executionContext;
 	}
@@ -451,12 +463,12 @@ public class OpenstackApplications {
 		Map<String, Serializable> executionContext = new HashMap<>();
 		String url = "http://" + host + ":" + identityPort + "/v2.0/tokens";
 		String body = "{\"auth\": {\"tenantName\": \"demo\",\"passwordCredentials\": {\"username\": \"" + username +"\",\"password\": \"" + password + "\"}}}";
-		executionContext.put("url", url);
-		executionContext.put("method", "post");
-		executionContext.put("body", body);
-		executionContext.put("contentType", "application/json");
-		executionContext.put("serverName", serverName);
-		executionContext.put("computePort", computePort);
+		executionContext.put(URL_KEY, url);
+		executionContext.put(METHOD_KEY, "post");
+		executionContext.put(BODY_KEY, body);
+		executionContext.put(CONTENT_TYPE_KEY, "application/json");
+		executionContext.put(SERVER_NAME_KEY, serverName);
+		executionContext.put(COMPUTE_PORT_KEY, computePort);
 
 		executionContext.put("host", host);
 
@@ -474,11 +486,10 @@ public class OpenstackApplications {
 		String serverName;
 		String imageRef;
 
-		String defaultHost = "16.59.58.200"; //todo remove near hardcoded strings
 		String defualtIdentityPort =  "5000";
 		String defaultComputePort = "8774";
 
-		host = readPredefinedInput(reader, "Host", defaultHost);
+		host = readInput(reader, "Host");
 		identityPort = readPredefinedInput(reader, "Identity Port", defualtIdentityPort);
 		computePort = readPredefinedInput(reader, "Compute Port", defaultComputePort);
 		username = readInput(reader, "Username");
@@ -486,7 +497,7 @@ public class OpenstackApplications {
 		serverName = readInput(reader, "Server name");
 
 		if (StringUtils.isEmpty(host)){
-			host = defaultHost; //todo remove near hardcoded strings
+			host = "";
 		}
 		if (StringUtils.isEmpty(identityPort)){
 			identityPort = defualtIdentityPort;
@@ -499,14 +510,14 @@ public class OpenstackApplications {
 		Map<String, Serializable> executionContext = new HashMap<>();
 		String url = "http://" + host + ":" + identityPort + "/v2.0/tokens";
 		String body = "{\"auth\": {\"tenantName\": \"demo\",\"passwordCredentials\": {\"username\": \"" + username +"\",\"password\": \"" + password + "\"}}}";
-		executionContext.put("url", url);
-		executionContext.put("method", "post");
-		executionContext.put("body", body);
-		executionContext.put("contentType", "application/json");
-		executionContext.put("serverName", serverName);
-		executionContext.put("computePort", computePort);
+		executionContext.put(URL_KEY, url);
+		executionContext.put(METHOD_KEY, "post");
+		executionContext.put(BODY_KEY, body);
+		executionContext.put(CONTENT_TYPE_KEY, "application/json");
+		executionContext.put(SERVER_NAME_KEY, serverName);
+		executionContext.put(COMPUTE_PORT_KEY, computePort);
 
-		executionContext.put("host", host);
+		executionContext.put(HOST_KEY, host);
 
 		return executionContext;
 	}

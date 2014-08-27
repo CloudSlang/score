@@ -29,7 +29,6 @@ public class ContextMerger {
 
 	private static final String DEFAULT_COMPUTE_PORT = "8774";
 	private static final String DEFAULT_IDENTITY_PORT = "5000";
-	private static final String DEFAULT_HOST = "16.59.58.200"; //todo remove near hardcoded strings
 	private static final String IDENTITY_PORT_KEY = "identityPort";
 	private static final String COMPUTE_PORT_KEY = "computePort";
 	private static final String PORT_KEY = "port";
@@ -42,6 +41,7 @@ public class ContextMerger {
 	private static final String METHOD_KEY = "method";
 	private static final String TOKEN_KEY = "Token";
 	private static final String TENANT_KEY = "Tenant";
+	private static final String SERVER_NAME_KEY = "serverName";
 	public final static String ACTION_RUNTIME_EVENT_TYPE = "ACTION_RUNTIME_EVENT";
 	public final static String ACTION_EXCEPTION_EVENT_TYPE = "ACTION_EXCEPTION_EVENT";
 	public static final String SERVERS_KEY = "returnResult";
@@ -87,7 +87,7 @@ public class ContextMerger {
 		String computePort = executionContext.get(COMPUTE_PORT_KEY).toString();
 
 		if (StringUtils.isEmpty(host)) {
-			host = DEFAULT_HOST;
+			host = "";
 		}
 		if(StringUtils.isEmpty(computePort)){
 			computePort = DEFAULT_COMPUTE_PORT;
@@ -117,7 +117,7 @@ public class ContextMerger {
 	public Map<String, String> prepareDeleteServer(Map<String, Serializable> executionContext, ExecutionRuntimeServices executionRuntimeServices, String methodName){
 		String returnResult = executionContext.get(RETURN_RESULT_KEY).toString();
 
-		String serverName = executionContext.get("serverName").toString();
+		String serverName = executionContext.get(SERVER_NAME_KEY).toString();
 		String host = executionContext.get(HOST_KEY).toString();
 		String computePort = executionContext.get(COMPUTE_PORT_KEY).toString();
 
@@ -125,7 +125,7 @@ public class ContextMerger {
 		String token = executionContext.get(TOKEN_KEY).toString();
 
 		if(StringUtils.isEmpty(host)){
-			host = DEFAULT_HOST;
+			host = "";
 		}
 		if(StringUtils.isEmpty(computePort)){
 			computePort = DEFAULT_COMPUTE_PORT;
@@ -153,14 +153,14 @@ public class ContextMerger {
 	public Map<String, String> prepareCreateServer(Map<String, Serializable> executionContext, ExecutionRuntimeServices executionRuntimeServices, String methodName) {
 
 		String returnResult = executionContext.get(RETURN_RESULT_KEY).toString();
-		String serverName = executionContext.get("serverName").toString();
+		String serverName = executionContext.get(SERVER_NAME_KEY).toString();
 		String host = executionContext.get(HOST_KEY).toString();
 		String computePort = executionContext.get(COMPUTE_PORT_KEY).toString();
 		String imageRef = executionContext.get("imageRef").toString();
 
 
 		if(StringUtils.isEmpty(host)){
-			host = DEFAULT_HOST;
+			host = "";
 		}
 		if(StringUtils.isEmpty(computePort)){
 			computePort = DEFAULT_COMPUTE_PORT;
@@ -271,19 +271,18 @@ public class ContextMerger {
 	public void prepareSendEmail(Map<String, Serializable> executionContext, ExecutionRuntimeServices executionRuntimeServices) {
 
 		if(!executionContext.containsKey("emailHost")) {
-			executionContext.put(HOST_KEY, "smtp-americas.hp.com"); //todo remove near hardcoded strings
+			executionContext.put(HOST_KEY, "");
 		}
 		else {
 			executionContext.put(HOST_KEY, executionContext.get("emailHost"));
 		}
 		if(!executionContext.containsKey("emailPort")){
-			executionContext.put(PORT_KEY, "25");
+			executionContext.put(PORT_KEY, "");
 		}
 		else {
-			executionContext.put(PORT_KEY, executionContext.get("emailHost"));
+			executionContext.put(PORT_KEY, executionContext.get("emailPort"));
 		}
 
-		executionContext.put("from", "meshi.peer@hp.com"); //todo remove near hardcoded strings
 
 		String failureFrom = "Failure from step \""+ executionContext.get(FLOW_DESCRIPTION) + "\"";
 
@@ -306,6 +305,6 @@ public class ContextMerger {
 		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "prepareSendEmail");
 	}
 	public void validateServerResult(Map<String, Serializable> executionContext, ExecutionRuntimeServices executionRuntimeServices){
-		executionContext.put(RETURN_RESULT_KEY, "The specified server (" +executionContext.get("serverName") + ") was not created or server already exists.");
+		executionContext.put(RETURN_RESULT_KEY, "The specified server (" +executionContext.get(SERVER_NAME_KEY) + ") was not created or server already exists.");
 	}
 }
