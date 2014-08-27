@@ -1,4 +1,4 @@
-package com.hp.oo.engine.node.entities;
+package com.hp.score.engine.node.entities;
 
 import com.hp.score.engine.data.AbstractIdentifiable;
 

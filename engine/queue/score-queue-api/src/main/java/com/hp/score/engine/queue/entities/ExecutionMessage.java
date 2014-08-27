@@ -1,7 +1,7 @@
 package com.hp.score.engine.queue.entities;
 
 
-import com.hp.oo.engine.node.entities.WorkerNode;
+import com.hp.score.engine.node.entities.WorkerNode;
 import com.hp.score.orchestrator.entities.Message;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import com.fasterxml.jackson.annotation.JsonIgnore;

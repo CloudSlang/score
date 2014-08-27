@@ -2,8 +2,8 @@ package com.hp.score.schema;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hp.oo.broker.services.ParallelPersistenceService;
-import com.hp.oo.engine.node.services.WorkerLockService;
-import com.hp.oo.engine.node.services.WorkerNodeService;
+import com.hp.score.engine.node.services.WorkerLockService;
+import com.hp.score.engine.node.services.WorkerNodeService;
 import com.hp.score.engine.queue.entities.ExecutionMessage;
 import com.hp.score.engine.queue.services.QueueDispatcherService;
 import com.hp.score.engine.queue.services.recovery.MessageRecoveryService;

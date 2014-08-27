@@ -1,6 +1,6 @@
 package com.hp.score.worker.management.services;
 
-import com.hp.oo.engine.node.services.WorkerNodeService;
+import com.hp.score.engine.node.services.WorkerNodeService;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;

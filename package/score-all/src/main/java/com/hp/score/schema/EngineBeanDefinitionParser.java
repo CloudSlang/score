@@ -1,8 +1,8 @@
 package com.hp.score.schema;
 
-import com.hp.oo.engine.node.services.WorkerLockServiceImpl;
-import com.hp.oo.engine.node.services.WorkerNodeServiceImpl;
-import com.hp.oo.engine.node.services.WorkersMBean;
+import com.hp.score.engine.node.services.WorkerLockServiceImpl;
+import com.hp.score.engine.node.services.WorkerNodeServiceImpl;
+import com.hp.score.engine.node.services.WorkersMBean;
 import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.score.engine.queue.repositories.ExecutionQueueRepositoryImpl;
 import com.hp.score.engine.queue.repositories.callbacks.ExecutionStatesCallback;

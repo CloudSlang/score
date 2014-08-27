@@ -6,7 +6,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.hp.oo.engine.node.services.WorkerNodeService;
+import com.hp.score.engine.node.services.WorkerNodeService;
 import com.hp.score.orchestrator.services.CancelExecutionService;
 import com.hp.score.orchestrator.services.PauseResumeService;
 

@@ -1,9 +1,9 @@
-package com.hp.oo.engine.node.services;
+package com.hp.score.engine.node.services;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.hp.oo.engine.node.entities.WorkerNode;
-import com.hp.oo.engine.node.repositories.WorkerNodeRepository;
+import com.hp.score.engine.node.entities.WorkerNode;
+import com.hp.score.engine.node.repositories.WorkerNodeRepository;
 import com.hp.oo.enginefacade.Worker;
 import com.hp.oo.enginefacade.Worker.Status;
 import com.hp.score.engine.versioning.services.VersionService;

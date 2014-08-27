@@ -1,6 +1,6 @@
-package com.hp.oo.engine.node.repositories;
+package com.hp.score.engine.node.repositories;
 
-import com.hp.oo.engine.node.entities.WorkerNode;
+import com.hp.score.engine.node.entities.WorkerNode;
 import com.hp.oo.enginefacade.Worker;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

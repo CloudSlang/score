@@ -23,7 +23,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 
-import com.hp.oo.engine.node.services.WorkerNodeService;
+import com.hp.score.engine.node.services.WorkerNodeService;
 
 import static ch.lambdaj.Lambda.max;
 import static ch.lambdaj.Lambda.on;

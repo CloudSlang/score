@@ -1,7 +1,7 @@
 package com.hp.score.engine.queue.services.assigner;
 
 import com.google.common.collect.Multimap;
-import com.hp.oo.engine.node.services.WorkerNodeService;
+import com.hp.score.engine.node.services.WorkerNodeService;
 import com.hp.score.engine.queue.entities.ExecStatus;
 import com.hp.score.engine.queue.entities.ExecutionMessage;
 import com.hp.score.engine.queue.entities.ExecutionMessageConverter;

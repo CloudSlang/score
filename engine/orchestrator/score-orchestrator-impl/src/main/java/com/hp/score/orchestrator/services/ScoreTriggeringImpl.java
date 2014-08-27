@@ -1,7 +1,7 @@
 package com.hp.score.orchestrator.services;
 
 import com.hp.oo.broker.services.RunningExecutionPlanService;
-import com.hp.oo.engine.node.entities.WorkerNode;
+import com.hp.score.engine.node.entities.WorkerNode;
 import com.hp.score.engine.queue.entities.ExecStatus;
 import com.hp.score.engine.queue.entities.ExecutionMessage;
 import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
@@ -13,8 +13,6 @@ import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.TriggeringProperties;
 import com.hp.score.engine.data.IdentityGenerator;
 import com.hp.score.lang.SystemContext;
-import com.hp.score.orchestrator.services.ExecutionStateService;
-import com.hp.score.orchestrator.services.ScoreTriggering;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;

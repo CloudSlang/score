@@ -1,7 +1,7 @@
-package com.hp.oo.engine.node.repositories;
+package com.hp.score.engine.node.repositories;
 
-import com.hp.oo.engine.node.entities.WorkerLock;
-import com.hp.oo.engine.node.entities.WorkerNode;
+import com.hp.score.engine.node.entities.WorkerLock;
+import com.hp.score.engine.node.entities.WorkerNode;
 import com.hp.oo.enginefacade.Worker;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
-import java.util.Arrays;
 import java.util.List;
 import javax.sql.DataSource;
 
@@ -94,7 +93,7 @@ public class WorkerLockRepositoryTest {
 
     @Configuration
     @ImportResource({"classpath:/META-INF/spring/testContext.xml"})
-    @EnableJpaRepositories("com.hp.oo.engine.node.repositories")
+    @EnableJpaRepositories("com.hp.score.engine.node.repositories")
     static class Conf {
 
     }

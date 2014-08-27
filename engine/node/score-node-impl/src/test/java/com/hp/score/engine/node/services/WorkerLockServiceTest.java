@@ -1,7 +1,7 @@
-package com.hp.oo.engine.node.services;
+package com.hp.score.engine.node.services;
 
-import com.hp.oo.engine.node.entities.WorkerLock;
-import com.hp.oo.engine.node.repositories.WorkerLockRepository;
+import com.hp.score.engine.node.entities.WorkerLock;
+import com.hp.score.engine.node.repositories.WorkerLockRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

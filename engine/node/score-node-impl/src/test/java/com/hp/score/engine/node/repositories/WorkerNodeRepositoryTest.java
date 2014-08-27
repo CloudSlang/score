@@ -1,6 +1,6 @@
-package com.hp.oo.engine.node.repositories;
+package com.hp.score.engine.node.repositories;
 
-import com.hp.oo.engine.node.entities.WorkerNode;
+import com.hp.score.engine.node.entities.WorkerNode;
 import com.hp.oo.enginefacade.Worker;
 import junit.framework.Assert;
 import org.junit.Test;
@@ -83,7 +83,7 @@ public class WorkerNodeRepositoryTest {
 
     @Configuration
     @ImportResource({"classpath:/META-INF/spring/testContext.xml"})
-    @EnableJpaRepositories("com.hp.oo.engine.node.repositories")
+    @EnableJpaRepositories("com.hp.score.engine.node.repositories")
     static class Conf {
 
     }

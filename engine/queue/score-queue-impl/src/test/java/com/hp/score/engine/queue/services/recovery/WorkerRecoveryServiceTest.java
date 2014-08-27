@@ -1,8 +1,8 @@
 package com.hp.score.engine.queue.services.recovery;
 
-import com.hp.oo.engine.node.entities.WorkerNode;
-import com.hp.oo.engine.node.services.WorkerLockService;
-import com.hp.oo.engine.node.services.WorkerNodeService;
+import com.hp.score.engine.node.entities.WorkerNode;
+import com.hp.score.engine.node.services.WorkerLockService;
+import com.hp.score.engine.node.services.WorkerNodeService;
 import com.hp.score.engine.queue.services.CounterNames;
 import com.hp.score.engine.queue.services.ExecutionQueueService;
 import com.hp.score.engine.versioning.services.VersionService;

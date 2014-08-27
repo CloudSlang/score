@@ -1,8 +1,8 @@
 package com.hp.score.orchestrator.services;
 
-import com.hp.oo.engine.node.entities.WorkerNode;
-import com.hp.oo.engine.node.services.WorkerLockService;
-import com.hp.oo.engine.node.services.WorkerNodeService;
+import com.hp.score.engine.node.entities.WorkerNode;
+import com.hp.score.engine.node.services.WorkerLockService;
+import com.hp.score.engine.node.services.WorkerNodeService;
 import com.hp.score.engine.queue.entities.ExecutionMessage;
 import com.hp.score.orchestrator.entities.Message;
 import org.junit.Before;
