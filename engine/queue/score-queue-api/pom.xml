@@ -32,7 +32,7 @@
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>oo-node-api</artifactId>
+			<artifactId>score-node-api</artifactId>
 		</dependency>
 
 		<dependency>

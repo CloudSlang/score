@@ -38,7 +38,7 @@
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>oo-node-api</artifactId>
+                <artifactId>score-node-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

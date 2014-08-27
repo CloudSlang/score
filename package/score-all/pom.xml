@@ -37,7 +37,7 @@
 		<!--score engine artifacts  -->
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>oo-node-impl</artifactId>
+			<artifactId>score-node-impl</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
