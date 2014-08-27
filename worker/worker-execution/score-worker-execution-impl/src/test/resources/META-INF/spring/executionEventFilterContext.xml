@@ -12,7 +12,7 @@
                          default-request-channel="event_Channel"/>
 
 
-	<bean id="filterTest" class="com.hp.oo.execution.services.ExecutionEventLogFilterServiceTest"/>
+	<bean id="filterTest" class="com.hp.score.worker.management.services.ExecutionEventLogFilterServiceTest"/>
 
 	<!-- put the response in the success List -->
     <integration:service-activator input-channel="event_ChannelAfterFilter" ref="filterTest" method="updateSuccessFilterList"/>

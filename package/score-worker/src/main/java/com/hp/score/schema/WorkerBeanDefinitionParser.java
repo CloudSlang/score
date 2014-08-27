@@ -26,20 +26,20 @@ import java.util.Map;
 public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	private Map<Class<?>,String> beans = new HashMap<Class<?>,String>(){{
-		put(com.hp.oo.execution.services.WorkerManager.class, "workerManager");
+		put(com.hp.score.worker.management.services.WorkerManager.class, "workerManager");
 		put(com.hp.score.events.EventBusImpl.class, null);
 		put(ExecutionServiceImpl.class, "agent");
-		put(com.hp.oo.execution.services.InBuffer.class, null);
-		put(com.hp.oo.execution.services.OutboundBufferImpl.class, "outBuffer");
-		put(com.hp.oo.execution.services.RetryTemplate.class, null);
-		put(com.hp.oo.execution.services.SimpleExecutionRunnableFactory.class, null);
-		put(com.hp.oo.execution.services.WorkerManagerMBean.class, "com.hp.oo.execution.services.WorkerManagerMBean");
-		put(com.hp.oo.execution.services.WorkerRecoveryManagerImpl.class, null);
+		put(com.hp.score.worker.management.services.InBuffer.class, null);
+		put(com.hp.score.worker.management.services.OutboundBufferImpl.class, "outBuffer");
+		put(com.hp.score.worker.management.services.RetryTemplate.class, null);
+		put(com.hp.score.worker.management.services.SimpleExecutionRunnableFactory.class, null);
+		put(com.hp.score.worker.management.services.WorkerManagerMBean.class, "com.hp.oo.execution.services.WorkerManagerMBean");
+		put(com.hp.score.worker.management.services.WorkerRecoveryManagerImpl.class, null);
 		put(com.hp.oo.execution.gateways.ExecutionGatewayImpl.class, "runningExecutionGateway");
 		put(ReflectionAdapterImpl.class, null);
         put(SessionDataServiceImpl.class, "sessionDataService");
-		put(com.hp.oo.execution.services.SynchronizationManagerImpl.class, null);
-		put(org.score.worker.execution.WorkerConfigurationServiceImpl.class, "workerConfiguration");
+		put(com.hp.score.worker.management.services.SynchronizationManagerImpl.class, null);
+		put(com.hp.score.worker.management.WorkerConfigurationServiceImpl.class, "workerConfiguration");
 //		put(org.score.worker.management.WorkerRegistration.class, null);
 	}};
 

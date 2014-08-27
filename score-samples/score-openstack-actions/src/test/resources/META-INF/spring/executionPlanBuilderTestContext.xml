@@ -10,7 +10,7 @@
 
     <bean class="org.score.samples.stubs.StubServicesContext"/>
 
-    <bean id="workerRegistration" class="org.score.worker.management.WorkerRegistration"/>
+    <bean id="workerRegistration" class="com.hp.score.worker.management.WorkerRegistration"/>
 
     <bean class="org.score.samples.openstack.actions.ExecutionPlanBuilderTest" />
 

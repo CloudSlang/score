@@ -5,7 +5,7 @@ import com.hp.score.engine.queue.entities.ExecStatus;
 import com.hp.score.engine.queue.entities.ExecutionMessage;
 import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.score.engine.queue.entities.Payload;
-import com.hp.oo.execution.services.OutboundBuffer;
+import com.hp.score.worker.management.services.OutboundBuffer;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.FlowExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;

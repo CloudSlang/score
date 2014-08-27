@@ -6,15 +6,15 @@ import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.score.engine.queue.services.QueueDispatcherService;
 import com.hp.score.engine.queue.services.QueueStateIdGeneratorService;
 import com.hp.score.engine.queue.services.ScoreEventFactory;
-import com.hp.oo.execution.services.WorkerManager;
-import com.hp.oo.execution.services.dbsupport.WorkerDbSupportService;
+import com.hp.score.worker.management.services.WorkerManager;
+import com.hp.score.worker.management.services.dbsupport.WorkerDbSupportService;
 import com.hp.score.orchestrator.services.CancelExecutionService;
 import com.hp.score.orchestrator.services.OrchestratorDispatcherService;
 import com.hp.score.orchestrator.services.PauseResumeService;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.score.worker.execution.WorkerConfigurationService;
+import com.hp.score.worker.management.WorkerConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

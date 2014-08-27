@@ -9,11 +9,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import com.hp.oo.execution.services.WorkerRecoveryManager;
+import com.hp.score.worker.management.services.WorkerRecoveryManager;
 import com.hp.score.worker.execution.reflection.ReflectionAdapter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.score.worker.execution.WorkerConfigurationService;
+import com.hp.score.worker.management.WorkerConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.hp.oo.broker.entities.BranchContextHolder;
@@ -22,7 +22,7 @@ import com.hp.oo.broker.services.RuntimeValueService;
 import com.hp.oo.enginefacade.execution.ExecutionStatus;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.enginefacade.execution.PauseReason;
-import com.hp.oo.execution.services.dbsupport.WorkerDbSupportService;
+import com.hp.score.worker.management.services.dbsupport.WorkerDbSupportService;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.oo.internal.sdk.execution.OOContext;
