@@ -100,11 +100,7 @@
             <artifactId>mail</artifactId>
 
         </dependency>
-        <dependency>
-            <groupId>jaf</groupId>
-            <artifactId>activation</artifactId>
 
-        </dependency>
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
