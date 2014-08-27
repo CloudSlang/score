@@ -32,7 +32,7 @@ import static org.score.samples.utility.ReadInputUtility.readLine;
  */
 public class CommandLineApplication {
 	private final static Logger logger = Logger.getLogger(CommandLineApplication.class);
-	public static final String OPENSTACK_APPLICATIONS = "org.score.samples.OpenstackApplications";
+	public static final String OPENSTACK_FLOWS_PACKAGE = "org.score.samples.openstack";
 
 	private List<ExecutionPlanMetadata> predefinedExecutionPlans;
 
@@ -48,14 +48,15 @@ public class CommandLineApplication {
 	}
 
 	private void registerPredefinedExecutionPlans() {
-		registerExecutionPlan("Create server in OpenStack", OPENSTACK_APPLICATIONS, "createServersFlow");
-		registerExecutionPlan("List servers in OpenStack", OPENSTACK_APPLICATIONS, "listServersFlowStandAlone");
-		registerExecutionPlan("Delete server in OpenStack", OPENSTACK_APPLICATIONS, "deleteServerFlowStandAlone");
-		registerExecutionPlan("Validate server exists in OpenStack", OPENSTACK_APPLICATIONS, "validateServerExistsStandAlone");
-		registerExecutionPlan("OpenStack health check", OPENSTACK_APPLICATIONS, "openStackHealthCheck");
+		registerFlow("Simple display message flow", "org.score.samples.DisplayMessageFlow", "displayMessageFlow");
+		registerFlow("Create server in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".CreateServer", "createServersFlow");
+		registerFlow("List servers in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".ListServers", "listServersFlowStandAlone");
+		registerFlow("Delete server in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".DeleteServer", "deleteServerFlowStandAlone");
+		registerFlow("Validate server exists in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".ValidateServerExists", "validateServerExistsStandAlone");
+		registerFlow("OpenStack health check", OPENSTACK_FLOWS_PACKAGE + ".OpenStackHealthCheck", "openStackHealthCheck");
 	}
 
-	public void registerExecutionPlan(String name, String className, String methodName) {
+	public void registerFlow(String name, String className, String methodName) {
 		ExecutionPlanMetadata executionPlanMetadata = new ExecutionPlanMetadata(name, className, methodName);
 		predefinedExecutionPlans.add(executionPlanMetadata);
 	}
@@ -181,7 +182,8 @@ public class CommandLineApplication {
 			@Override
 			public void onEvent(ScoreEvent event) {
                 if(event.getEventType().equals(EventConstants.SCORE_FINISHED_EVENT)){   //TODO - temp solution, till only end flow events send SCORE_FINISHED_EVENT (now also branch throw this event)
-                    Map<String,Serializable> data = (Map<String,Serializable>)event.getData();
+                    @SuppressWarnings("all")
+					Map<String,Serializable> data = (Map<String,Serializable>)event.getData();
                     if ((Boolean)data.get(EventConstants.IS_BRANCH)) {
                         return;
                     }

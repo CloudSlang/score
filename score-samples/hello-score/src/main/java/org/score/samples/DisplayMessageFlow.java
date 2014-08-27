@@ -1,6 +1,8 @@
 package org.score.samples;
 
 import com.hp.score.api.ExecutionPlan;
+import com.hp.score.api.TriggeringProperties;
+import org.apache.log4j.Logger;
 import org.score.samples.openstack.actions.ExecutionPlanBuilder;
 import org.score.samples.openstack.actions.InputBinding;
 import org.score.samples.openstack.actions.MatchType;
@@ -22,10 +24,18 @@ import static org.score.samples.utility.ReadInputUtility.readStepInput;
  * @author Bonczidai Levente
  */
 @SuppressWarnings("unused")
-public class DisplayMessageExecutionPlan {
+public class DisplayMessageFlow {
+	private final static Logger logger = Logger.getLogger(DisplayMessageFlow.class);
 	public static final String STATUS = "status";
 	public static final String MESSAGE = "message";
 	public static final String USER = "user";
+
+	public TriggeringProperties displayMessageFlow() {
+		TriggeringProperties triggeringProperties = TriggeringProperties.create(createDisplayExecutionPlan());
+		triggeringProperties.setContext(createDisplayExecutionContext());
+		triggeringProperties.setStartStep(0L);
+		return triggeringProperties;
+	}
 
 	public ExecutionPlan createDisplayExecutionPlan() {
 		ExecutionPlanBuilder builder = new ExecutionPlanBuilder();
@@ -34,7 +44,7 @@ public class DisplayMessageExecutionPlan {
 		inputBindings.add(new InputBinding("message", true));
 		List<NavigationMatcher<Serializable>> navigationMatchers = new ArrayList<>();
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, 1L));
-		builder.addOOActionStep(0L, "org.score.samples.DisplayMessageExecutionPlan", "displayMessage", inputBindings, navigationMatchers);
+		builder.addOOActionStep(0L, "org.score.samples.DisplayMessageFlow", "displayMessage", inputBindings, navigationMatchers);
 
 		builder.addOOActionFinalStep(1L, "org.score.samples.openstack.actions.FinalStepActions", "successStepAction");
 
@@ -51,8 +61,7 @@ public class DisplayMessageExecutionPlan {
 	}
 
 	public Map<String, String> displayMessage(String message, String status, String user) {
-		System.out.print(status + " -> ");
-		System.out.println(user + " : " + message);
+		logger.info(status + " -> " + user + " : " + message);
 		return new HashMap<>();
 	}
 }
