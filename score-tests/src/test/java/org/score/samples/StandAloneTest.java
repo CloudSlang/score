@@ -59,7 +59,7 @@ public class StandAloneTest {
 
     @Before
     public void init(){
-        eventQueue = new ArrayList<>();
+        eventQueue = Collections.synchronizedList(new ArrayList<ScoreEvent>());
     }
 
     @PostConstruct
