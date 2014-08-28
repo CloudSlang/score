@@ -62,47 +62,6 @@ public class CreateServer {
 		return builder.createTriggeringProperties().getExecutionPlan();
 	}
 
-	public Map<String, Serializable> prepareListServerExecutionContext() {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-		String username;
-		String password;
-		String host;
-		String identityPort;
-		String computePort;
-
-		String defaultHost = "16.59.58.200";//todo remove near hardcoded strings
-		String defualtIdentityPort =  "5000";
-		String defaultComputePort = "8774";
-
-		host = readPredefinedInput(reader, OPENSTACK_HOST_MESSAGE, defaultHost);
-		identityPort = readPredefinedInput(reader, IDENTITY_PORT_MESSAGE, defualtIdentityPort);
-		computePort = readPredefinedInput(reader, COMPUTE_PORT_MESSAGE, defaultComputePort);
-		username = readInput(reader, OPENSTACK_USERNAME_MESSAGE);
-		password = readInput(reader, OPENSTACK_PASSWORD_MESSAGE);
-
-		if (StringUtils.isEmpty(host)){
-			host = defaultHost;
-		}
-		if (StringUtils.isEmpty(identityPort)){
-			identityPort = defualtIdentityPort;
-		}
-		if (StringUtils.isEmpty(computePort)){
-			computePort = defaultComputePort;
-		}
-
-		Map<String, Serializable> executionContext = new HashMap<>();
-		String url = "http://" + host + ":" + identityPort + "/v2.0/tokens";
-		String body = "{\"auth\": {\"tenantName\": \"demo\",\"passwordCredentials\": {\"username\": \"" + username +"\",\"password\": \"" + password + "\"}}}";
-		executionContext.put("url", url);
-		executionContext.put("method", "post");
-		executionContext.put("body", body);
-		executionContext.put("contentType", "application/json");
-		executionContext.put("computePort", computePort);
-		executionContext.put("host", host);
-
-		return executionContext;
-	}
-
 	public Map<String, Serializable> prepareCreateServerExecutionContext() {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 		String username;
@@ -113,12 +72,12 @@ public class CreateServer {
 		String serverName;
 		String imageRef;
 
-		String defaultHost = "16.59.58.200"; //todo remove near hardcoded strings
+
 		String defualtIdentityPort =  "5000";
 		String defaultComputePort = "8774";
 		String defaultImageRef = "56ff0279-f1fb-46e5-93dc-fe7093af0b1a";
 
-		host = readPredefinedInput(reader, OPENSTACK_HOST_MESSAGE, defaultHost);
+		host = readInput(reader, OPENSTACK_HOST_MESSAGE);
 		identityPort = readPredefinedInput(reader, IDENTITY_PORT_MESSAGE, defualtIdentityPort);
 		computePort = readPredefinedInput(reader, COMPUTE_PORT_MESSAGE, defaultComputePort);
 		imageRef = readPredefinedInput(reader, "ImageRef", defaultImageRef);
@@ -127,7 +86,7 @@ public class CreateServer {
 		serverName = readInput(reader, "Server name");
 
 		if (StringUtils.isEmpty(host)){
-			host = defaultHost;
+			host = "";
 		}
 		if (StringUtils.isEmpty(identityPort)){
 			identityPort = defualtIdentityPort;
@@ -149,14 +108,14 @@ public class CreateServer {
 		Map<String, Serializable> executionContext = new HashMap<>();
 		String url = "http://" + host + ":" + identityPort + "/v2.0/tokens";
 		String body = "{\"auth\": {\"tenantName\": \"demo\",\"passwordCredentials\": {\"username\": \"" + username +"\",\"password\": \"" + password + "\"}}}";
-		executionContext.put("url", url);
-		executionContext.put("method", "post");
-		executionContext.put("body", body);
-		executionContext.put("contentType", "application/json");
+		executionContext.put(URL_KEY, url);
+		executionContext.put(METHOD_KEY, "post");
+		executionContext.put(BODY_KEY, body);
+		executionContext.put(CONTENT_TYPE_KEY, "application/json");
 		executionContext.put(SERVER_NAME_KEY, serverName);
-		executionContext.put("computePort", computePort);
+		executionContext.put(COMPUTE_PORT_KEY, computePort);
 		executionContext.put("imageRef", imageRef);
-		executionContext.put("host", host);
+		executionContext.put(HOST_KEY, host);
 
 		return executionContext;
 	}

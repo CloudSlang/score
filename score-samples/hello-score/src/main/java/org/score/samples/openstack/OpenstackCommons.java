@@ -31,6 +31,12 @@ public class OpenstackCommons {
 	public static final String OPENSTACK_USERNAME_MESSAGE = "OpenStack Username";
 	public static final String OPENSTACK_PASSWORD_MESSAGE = "OpenStack Password";
 	public static final String FLOW_DESCRIPTION = "flowDescription";
+	public static final String BODY_KEY = "body";
+	public static final String URL_KEY = "url";
+	public static final String CONTENT_TYPE_KEY = "contentType";
+	public static final String METHOD_KEY = "method";
+	public static final String COMPUTE_PORT_KEY = "computePort";
+	public static final String HOST_KEY = "host";
 
 	public static void createGetTokenStep(
 			ExecutionPlanBuilder builder,

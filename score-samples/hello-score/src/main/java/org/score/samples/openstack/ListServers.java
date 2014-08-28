@@ -80,12 +80,12 @@ public class ListServers {
 		Map<String, Serializable> executionContext = new HashMap<>();
 		String url = "http://" + host + ":" + identityPort + "/v2.0/tokens";
 		String body = "{\"auth\": {\"tenantName\": \"demo\",\"passwordCredentials\": {\"username\": \"" + username +"\",\"password\": \"" + password + "\"}}}";
-		executionContext.put("url", url);
-		executionContext.put("method", "post");
-		executionContext.put("body", body);
-		executionContext.put("contentType", "application/json");
-		executionContext.put("computePort", computePort);
-		executionContext.put("host", host);
+		executionContext.put(URL_KEY, url);
+		executionContext.put(METHOD_KEY, "post");
+		executionContext.put(BODY_KEY, body);
+		executionContext.put(CONTENT_TYPE_KEY, "application/json");
+		executionContext.put(COMPUTE_PORT_KEY, computePort);
+		executionContext.put(HOST_KEY, host);
 
 		return executionContext;
 	}
@@ -98,18 +98,18 @@ public class ListServers {
 		String identityPort;
 		String computePort;
 
-		String defaultHost = "16.59.58.200";//todo remove near hardcoded strings
+
 		String defualtIdentityPort =  "5000";
 		String defaultComputePort = "8774";
 
-		host = readPredefinedInput(reader, OPENSTACK_HOST_MESSAGE, defaultHost);
+		host = readInput(reader, OPENSTACK_HOST_MESSAGE);
 		identityPort = readPredefinedInput(reader, IDENTITY_PORT_MESSAGE, defualtIdentityPort);
 		computePort = readPredefinedInput(reader, COMPUTE_PORT_MESSAGE, defaultComputePort);
 		username = readInput(reader, OPENSTACK_USERNAME_MESSAGE);
 		password = readInput(reader, OPENSTACK_PASSWORD_MESSAGE);
 
 		if (StringUtils.isEmpty(host)){
-			host = defaultHost;
+			host = "";
 		}
 		if (StringUtils.isEmpty(identityPort)){
 			identityPort = defualtIdentityPort;
@@ -121,12 +121,12 @@ public class ListServers {
 		Map<String, Serializable> executionContext = new HashMap<>();
 		String url = "http://" + host + ":" + identityPort + "/v2.0/tokens";
 		String body = "{\"auth\": {\"tenantName\": \"demo\",\"passwordCredentials\": {\"username\": \"" + username +"\",\"password\": \"" + password + "\"}}}";
-		executionContext.put("url", url);
-		executionContext.put("method", "post");
-		executionContext.put("body", body);
-		executionContext.put("contentType", "application/json");
-		executionContext.put("computePort", computePort);
-		executionContext.put("host", host);
+		executionContext.put(URL_KEY, url);
+		executionContext.put(METHOD_KEY, "post");
+		executionContext.put(BODY_KEY, body);
+		executionContext.put(CONTENT_TYPE_KEY, "application/json");
+		executionContext.put(COMPUTE_PORT_KEY, computePort);
+		executionContext.put(HOST_KEY, host);
 
 		return executionContext;
 	}

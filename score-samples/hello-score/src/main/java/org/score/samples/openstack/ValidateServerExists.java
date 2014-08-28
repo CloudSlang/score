@@ -67,7 +67,7 @@ public class ValidateServerExists {
 		} else {
 			triggeringProperties = listServers.listServersFlow(username, password, host, identityPort, computePort, serverName);
 		}
-		builder.addSubflow(splitId, joinId, triggeringProperties, navigationMatchers);
+		builder.addSubflow(splitId, joinId, triggeringProperties, null, navigationMatchers);
 
 		//prepare string occurrences
 		navigationMatchers = new ArrayList<>();
@@ -76,7 +76,7 @@ public class ValidateServerExists {
 
 		//string occurrence
 		navigationMatchers = new ArrayList<>();
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, RETURN_RESULT, "1", successId));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.COMPARE_GREATER, RETURN_RESULT, "0", successId));
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, resultFormatterId));
 		builder.addOOActionStep(stringOccurencesId,
 				"org.score.samples.openstack.actions.StringOccurrenceCounter",

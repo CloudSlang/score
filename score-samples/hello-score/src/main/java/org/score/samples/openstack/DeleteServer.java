@@ -56,14 +56,14 @@ public class DeleteServer {
 		Map<String, Serializable> executionContext = new HashMap<>();
 		String url = "http://" + host + ":" + identityPort + "/v2.0/tokens";
 		String body = "{\"auth\": {\"tenantName\": \"demo\",\"passwordCredentials\": {\"username\": \"" + username +"\",\"password\": \"" + password + "\"}}}";
-		executionContext.put("url", url);
-		executionContext.put("method", "post");
-		executionContext.put("body", body);
-		executionContext.put("contentType", "application/json");
-		executionContext.put("serverName", serverName);
-		executionContext.put("computePort", computePort);
+		executionContext.put(URL_KEY, url);
+		executionContext.put(METHOD_KEY, "post");
+		executionContext.put(BODY_KEY, body);
+		executionContext.put(CONTENT_TYPE_KEY, "application/json");
+		executionContext.put(SERVER_NAME_KEY, serverName);
+		executionContext.put(COMPUTE_PORT_KEY, computePort);
 
-		executionContext.put("host", host);
+		executionContext.put(HOST_KEY, host);
 
 		return executionContext;
 	}
@@ -79,11 +79,10 @@ public class DeleteServer {
 		String serverName;
 		String imageRef;
 
-		String defaultHost = "16.59.58.200"; //todo remove near hardcoded strings
 		String defualtIdentityPort =  "5000";
 		String defaultComputePort = "8774";
 
-		host = readPredefinedInput(reader, "Host", defaultHost);
+		host = readInput(reader, "Host");
 		identityPort = readPredefinedInput(reader, "Identity Port", defualtIdentityPort);
 		computePort = readPredefinedInput(reader, "Compute Port", defaultComputePort);
 		username = readInput(reader, "Username");
@@ -91,7 +90,7 @@ public class DeleteServer {
 		serverName = readInput(reader, "Server name");
 
 		if (StringUtils.isEmpty(host)){
-			host = defaultHost; //todo remove near hardcoded strings
+			host = "";
 		}
 		if (StringUtils.isEmpty(identityPort)){
 			identityPort = defualtIdentityPort;
@@ -104,14 +103,14 @@ public class DeleteServer {
 		Map<String, Serializable> executionContext = new HashMap<>();
 		String url = "http://" + host + ":" + identityPort + "/v2.0/tokens";
 		String body = "{\"auth\": {\"tenantName\": \"demo\",\"passwordCredentials\": {\"username\": \"" + username +"\",\"password\": \"" + password + "\"}}}";
-		executionContext.put("url", url);
-		executionContext.put("method", "post");
-		executionContext.put("body", body);
-		executionContext.put("contentType", "application/json");
-		executionContext.put("serverName", serverName);
-		executionContext.put("computePort", computePort);
+		executionContext.put(URL_KEY, url);
+		executionContext.put(METHOD_KEY, "post");
+		executionContext.put(BODY_KEY, body);
+		executionContext.put(CONTENT_TYPE_KEY, "application/json");
+		executionContext.put(SERVER_NAME_KEY, serverName);
+		executionContext.put(COMPUTE_PORT_KEY, computePort);
 
-		executionContext.put("host", host);
+		executionContext.put(HOST_KEY, host);
 
 		return executionContext;
 	}

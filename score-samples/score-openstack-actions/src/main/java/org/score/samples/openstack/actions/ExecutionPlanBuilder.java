@@ -76,12 +76,12 @@ public class ExecutionPlanBuilder {
 		beginStep = 0L;
 	}
 
-	//TODO - remove this !! needs to work with this on by default, pending Non-Blocking story
 	public TriggeringProperties createTriggeringProperties() {
 		TriggeringProperties triggeringProperties = TriggeringProperties.create(getExecutionPlan());
 
 		triggeringProperties.getDependencies().putAll(dependencies);
 
+		//TODO - remove this !! needs to work with this on by default, pending Non-Blocking story
 		Map<String,Serializable> getRuntimeValues = new HashMap<>();
 		getRuntimeValues.put("NEW_BRANCH_MECHANISM",Boolean.TRUE);
 		triggeringProperties.setRuntimeValues(getRuntimeValues);
@@ -175,14 +175,6 @@ public class ExecutionPlanBuilder {
 	@SuppressWarnings("unused")
 	public Long simpleNavigate(Long nextStepId){
 		return nextStepId;
-	}
-
-	public Long addSubflow( // TODO - remove this
-			Long splitStepId,
-			Long joinStepId,
-			TriggeringProperties subflowProperties,
-			List<NavigationMatcher<Serializable>> navigationMatchers) {
-	return addSubflow(splitStepId, joinStepId, subflowProperties, null, navigationMatchers);
 	}
 
 	public Long addSubflow(

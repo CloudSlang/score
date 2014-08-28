@@ -100,8 +100,10 @@ public class OpenStackHealthCheck {
 		String emailHost;
 		String to;
 		String emailPort;
-		emailHost = readPredefinedInput(reader, "Email host", "smtp-americas.hp.com"); //todo remove near hardcoded strings
-		emailPort = readPredefinedInput(reader, "Email port", "25");
+		String from;
+		emailHost = readInput(reader, "Email host");
+		emailPort = readInput(reader, "Email port");
+		from = readInput(reader, "Fail email sender");
 		to = readInput(reader, "Fail email recipient");
 
 		if(!StringUtils.isEmpty(emailHost)) {
@@ -112,6 +114,9 @@ public class OpenStackHealthCheck {
 		}
 		if(!StringUtils.isEmpty(to)) {
 			context.put("to", to);
+		}
+		if(!StringUtils.isEmpty(from)) {
+			context.put("from", from);
 		}
 
 		return context;
