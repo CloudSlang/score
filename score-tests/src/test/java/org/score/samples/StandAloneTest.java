@@ -99,7 +99,7 @@ public class StandAloneTest {
         waitForAllEventsToArrive(2);//this flow should have 2 "Hello score" events only
     }
 
-    @Test
+    @Test(timeout = 20000)
     public void testParallelFlow(){
         ExecutionPlan executionPlan = createParallelFlow();
         ExecutionPlan branchExecutionPlan = createExecutionPlan();
