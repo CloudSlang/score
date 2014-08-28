@@ -62,7 +62,6 @@ public class StartBranchDataContainer implements Serializable{
                 .append(this.startPosition, that.startPosition)
                 .append(this.executionPlanId, that.executionPlanId)
                 .append(this.contexts, that.contexts)
-                .append(this.systemContext, that.systemContext)
                 .isEquals();
     }
 
@@ -71,8 +70,6 @@ public class StartBranchDataContainer implements Serializable{
         return new HashCodeBuilder()
                 .append(this.startPosition)
                 .append(this.executionPlanId)
-                .append(this.contexts)
-                .append(this.systemContext)
                 .toHashCode();
     }
 }
