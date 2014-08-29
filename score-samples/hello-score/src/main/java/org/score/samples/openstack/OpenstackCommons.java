@@ -1,6 +1,8 @@
 package org.score.samples.openstack;
 
+import org.apache.commons.collections.list.SetUniqueList;
 import org.score.samples.openstack.actions.ExecutionPlanBuilder;
+import org.score.samples.openstack.actions.InputBinding;
 import org.score.samples.openstack.actions.MatchType;
 import org.score.samples.openstack.actions.NavigationMatcher;
 
@@ -8,7 +10,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Date: 8/27/2014
@@ -26,23 +30,34 @@ public class OpenstackCommons {
 	public static final String SEND_EMAIL_CLASS = "org.score.samples.openstack.actions.SimpleSendEmail";
 	public static final String SEND_EMAIL_METHOD = "execute";
 	public static final String OPENSTACK_HOST_MESSAGE = "OpenStack Host";
-	public static final String IDENTITY_PORT_MESSAGE = "Identity Port";
-	public static final String COMPUTE_PORT_MESSAGE = "Compute Port";
 	public static final String OPENSTACK_USERNAME_MESSAGE = "OpenStack Username";
 	public static final String OPENSTACK_PASSWORD_MESSAGE = "OpenStack Password";
 	public static final String FLOW_DESCRIPTION = "flowDescription";
-	public static final String BODY_KEY = "body";
-	public static final String URL_KEY = "url";
-	public static final String CONTENT_TYPE_KEY = "contentType";
-	public static final String METHOD_KEY = "method";
 	public static final String COMPUTE_PORT_KEY = "computePort";
+	public static final String IDENTITY_PORT_KEY = "identityPort";
 	public static final String HOST_KEY = "host";
+	public static final String DEFUALT_IDENTITY_PORT = "5000";
+	public static final String DEFAULT_COMPUTE_PORT = "8774";
+	public static final String DEFAULT_IMAGE_REF = "56ff0279-f1fb-46e5-93dc-fe7093af0b1a";
+	public static final String USERNAME_KEY = "username";
+	public static final String PASSWORD_KEY = "password";
+	public static final String IMAGE_REFERENCE_KEY = "imgRef";
+	public static final String IDENTITY_PORT_MESSAGE = "Identity port";
+	public static final String COMPUTE_PORT_MESSAGE = "Compute port";
+	public static final String OPEN_STACK_IMAGE_REFERENCE_MESSAGE = "OpenStack image reference";
+	public static final String SERVER_NAME_MESSAGE = "serverName";
+	public static final String PREPARE_GET_TOKEN_METHOD = "prepareGetToken";
+	public static final String GET_SERVER_NAMES_METHOD = "getServerNames";
+	public static final String PREPARE_DELETE_SERVER_METHOD = "prepareDeleteServer";
+	public static final String GET_SERVER_ID_METHOD = "getServerId";
+	public static final String PREPARE_SEND_EMAIL_METHOD = "prepareSendEmail";
 
 	public static void createGetTokenStep(
 			ExecutionPlanBuilder builder,
 			Long stepId,
 			Long successStepId,
-			Long failureStepId){
+			Long failureStepId
+	) {
 		List<NavigationMatcher<Serializable>> navigationMatchers = new ArrayList<>();
 
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, "statusCode", "200", successStepId));
@@ -64,7 +79,8 @@ public class OpenstackCommons {
 	public static void createPrepareGetServersStep(
 			ExecutionPlanBuilder builder,
 			Long stepId,
-			Long nextStepId) {
+			Long nextStepId
+	) {
 		builder.addStep(stepId, CONTEXT_MERGER_CLASS, "prepareGetServer", nextStepId);
 	}
 
@@ -81,7 +97,7 @@ public class OpenstackCommons {
 	}
 
 	public static String readPredefinedInput(BufferedReader reader, String inputName, String defaultValue) {
-		System.out.print(inputName + " (default value = " + defaultValue +" --hit Enter): ");
+		System.out.print(inputName + " (default value = " + defaultValue + " --hit Enter): ");
 		return readLine(reader);
 	}
 
@@ -94,5 +110,28 @@ public class OpenstackCommons {
 			System.exit(1);
 		}
 		return line;
+	}
+
+	public static Map<String, Serializable> prepareExecutionContext(List<InputBinding> inputBindings) {
+		Map<String, Serializable> executionContext = new HashMap<>();
+
+		for (InputBinding inputBinding : inputBindings) {
+			executionContext.put(inputBinding.getInputKey(), inputBinding.getValue());
+		}
+
+		return executionContext;
+	}
+
+	public static void createPrepareGetTokenStep(ExecutionPlanBuilder builder, Long stepId, Long nextStepId) {
+		builder.addStep(stepId, CONTEXT_MERGER_CLASS, PREPARE_GET_TOKEN_METHOD, nextStepId);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static List<InputBinding> mergeInputsWithoutDuplicates(List<InputBinding>... bindingLists) {
+		SetUniqueList uniqueList = SetUniqueList.decorate(new ArrayList<>());
+		for (List<InputBinding> bindingList : bindingLists) {
+			uniqueList.addAll(bindingList);
+		}
+		return uniqueList.subList(0, uniqueList.size());
 	}
 }

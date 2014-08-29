@@ -26,7 +26,7 @@ public class ReflectionUtility {
 			returnObject = actionMethod.invoke(clazz.newInstance(), parameters);
 			return returnObject;
 		} else {
-			throw new Exception("Method not found");
+			throw new Exception("Method " + className + "." + methodName + " not found");
 		}
 	}
 }

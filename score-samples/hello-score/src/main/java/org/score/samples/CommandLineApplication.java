@@ -7,6 +7,7 @@ import com.hp.score.events.EventConstants;
 import com.hp.score.events.ScoreEvent;
 import com.hp.score.events.ScoreEventListener;
 import org.apache.log4j.Logger;
+import org.score.samples.openstack.actions.InputBinding;
 import org.score.samples.openstack.actions.OOActionRunner;
 import org.score.samples.utility.ReflectionUtility;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,16 +18,20 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.score.samples.openstack.OpenstackCommons.prepareExecutionContext;
+import static org.score.samples.openstack.OpenstackCommons.readInput;
+import static org.score.samples.openstack.OpenstackCommons.readPredefinedInput;
 import static org.score.samples.utility.ReadInputUtility.readIntegerInput;
 import static org.score.samples.utility.ReadInputUtility.readLine;
 
 /**
- * Date: 8/12/2014
+ * Date: 8/28/2014
  *
  * @author Bonczidai Levente
  */
@@ -48,16 +53,16 @@ public class CommandLineApplication {
 	}
 
 	private void registerPredefinedExecutionPlans() {
-		registerFlow("Simple display message flow", "org.score.samples.DisplayMessageFlow", "displayMessageFlow");
-		registerFlow("Create server in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".CreateServer", "createServersFlow");
-		registerFlow("List servers in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".ListServers", "listServersFlowStandAlone");
-		registerFlow("Delete server in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".DeleteServer", "deleteServerFlowStandAlone");
-		registerFlow("Validate server exists in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".ValidateServerExists", "validateServerExistsStandAlone");
-		registerFlow("OpenStack health check", OPENSTACK_FLOWS_PACKAGE + ".OpenStackHealthCheck", "openStackHealthCheck");
+		registerFlow("Simple display message flow", "org.score.samples.DisplayMessageFlow", "displayMessageFlow", "getInputBindings");
+		registerFlow("Create server in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".CreateServerFlow", "createServerFlow", "getInputBindings");
+		registerFlow("List servers in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".ListServersFlow", "listServersFlow", "getInputBindings");
+		registerFlow("Delete server in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".DeleteServerFlow", "deleteServerFlow", "getInputBindings");
+		registerFlow("Validate server exists in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".ValidateServerExistsFlow", "validateServerExistsFlow", "getInputBindings");
+		registerFlow("OpenStack health check", OPENSTACK_FLOWS_PACKAGE + ".OpenStackHealthCheckFlow", "openStackHealthCheckFlow", "getInputBindings");
 	}
 
-	public void registerFlow(String name, String className, String methodName) {
-		ExecutionPlanMetadata executionPlanMetadata = new ExecutionPlanMetadata(name, className, methodName);
+	public void registerFlow(String name, String className, String triggeringPropertiesMethodName, String inputBindingsMethodName) {
+		ExecutionPlanMetadata executionPlanMetadata = new ExecutionPlanMetadata(name, className, triggeringPropertiesMethodName, inputBindingsMethodName);
 		predefinedExecutionPlans.add(executionPlanMetadata);
 	}
 
@@ -100,15 +105,16 @@ public class CommandLineApplication {
 	private void displayAvailableFlows(BufferedReader reader) {
 		int executionPlanNumber = listPredefinedFlows(reader);
 		try {
-			runPredefinedFlows(executionPlanNumber);
+			runPredefinedFlows(executionPlanNumber, reader);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void runPredefinedFlows(int executionPlanNumber) throws Exception {
+	private void runPredefinedFlows(int executionPlanNumber, BufferedReader reader) throws Exception {
 		ExecutionPlanMetadata executionPlanMetadata = predefinedExecutionPlans.get(executionPlanNumber);
-		runFlow(executionPlanMetadata.getClassName(), executionPlanMetadata.getMethodName());
+		runFlow(executionPlanMetadata.getClassName(), executionPlanMetadata.getTriggeringPropertiesMethodName(),
+				executionPlanMetadata.getInputBindingsMethodName(), reader);
 	}
 
 	private int listPredefinedFlows(BufferedReader reader) {
@@ -119,22 +125,62 @@ public class CommandLineApplication {
 		return readIntegerInput(reader, "Insert the flow number");
 	}
 
-	private void runFlow(String className, String methodName) throws Exception {
-		TriggeringProperties triggeringProperties = prepareTriggeringProperties(className, methodName);
+	private void runFlow(String className, String triggeringPropertiesMethodName, String inputBindingMethodName, BufferedReader reader) throws Exception {
+		List<InputBinding> bindings = prepareInputBindings(className, inputBindingMethodName);
+		manageBindings(bindings, reader);
+		TriggeringProperties triggeringProperties = prepareTriggeringProperties(className, triggeringPropertiesMethodName, bindings);
 		score.trigger(triggeringProperties);
 	}
 
-	private TriggeringProperties prepareTriggeringProperties(String className, String methodName) throws Exception {
+	private void manageBindings(List<InputBinding> bindings, BufferedReader reader) {
+		for (InputBinding inputBinding : bindings) {
+			String input = null;
+			boolean validValueEntered = false;
+			while (!validValueEntered) {
+				if (inputBinding.hasDefaultValue()) {
+					input = readPredefinedInput(reader, inputBinding.getDescription(), inputBinding.getValue());
+					validValueEntered = true;
+				} else {
+					input = readInput(reader, inputBinding.getDescription());
+					validValueEntered = !input.isEmpty();
+				}
+			}
+			//if input is empty use the default value already set, otherwise use input
+			if (!input.isEmpty()) {
+				inputBinding.setValue(input);
+			}
+		}
+	}
+
+	private List<InputBinding> prepareInputBindings(String className, String methodName) throws Exception {
+		Object returnValue = ReflectionUtility.invokeMethodByName(className, methodName);
+		try {
+			@SuppressWarnings("unchecked")
+			List<InputBinding> bindings = (List<InputBinding>) returnValue;
+			return bindings;
+		}
+		catch (ClassCastException ex) {
+			throw new Exception("Exception occurred during input binding extraction");
+		}
+	}
+
+	private TriggeringProperties prepareTriggeringProperties(String className, String methodName, List<InputBinding> bindings) throws Exception {
 		Object returnValue = ReflectionUtility.invokeMethodByName(className, methodName);
 		if (returnValue instanceof TriggeringProperties) {
-			return (TriggeringProperties) returnValue;
+			TriggeringProperties triggeringProperties = (TriggeringProperties) returnValue;
+			//merge the flow inputs with the initial context (flow may have default values in context)
+			Map<String, Serializable> context = new HashMap<>();
+			context.putAll(triggeringProperties.getContext());
+			context.putAll(prepareExecutionContext(bindings));
+			triggeringProperties.setContext(context);
+			return triggeringProperties;
 		} else {
-			throw new Exception("Exception occurred during TriggeringProperties creation");
+			throw new Exception("Exception occurred during TriggeringProperties extraction");
 		}
 	}
 
 	private static CommandLineApplication loadApp() {
-		ApplicationContext context = new ClassPathXmlApplicationContext("/META-INF/spring/myCommandLineApplicationContext.xml");
+		ApplicationContext context = new ClassPathXmlApplicationContext("/META-INF/spring/commandLineApplicationContext.xml");
 		@SuppressWarnings("all")
 		CommandLineApplication app = context.getBean(CommandLineApplication.class);
 		return app;
@@ -181,13 +227,13 @@ public class CommandLineApplication {
 		eventBus.subscribe(new ScoreEventListener() {
 			@Override
 			public void onEvent(ScoreEvent event) {
-                if(event.getEventType().equals(EventConstants.SCORE_FINISHED_EVENT)){   //TODO - temp solution, till only end flow events send SCORE_FINISHED_EVENT (now also branch throw this event)
-                    @SuppressWarnings("all")
+				if(event.getEventType().equals(EventConstants.SCORE_FINISHED_EVENT)){   //TODO - temp solution, till only end flow events send SCORE_FINISHED_EVENT (now also branch throw this event)
+					@SuppressWarnings("all")
 					Map<String,Serializable> data = (Map<String,Serializable>)event.getData();
-                    if ((Boolean)data.get(EventConstants.IS_BRANCH)) {
-                        return;
-                    }
-                }
+					if ((Boolean)data.get(EventConstants.IS_BRANCH)) {
+						return;
+					}
+				}
 				logScoreListenerEvent(event);
 			}
 		}, handlerTypes);
@@ -208,24 +254,30 @@ public class CommandLineApplication {
 	private static class ExecutionPlanMetadata {
 		private String name;
 		private String className;
-		private String methodName;
+		private String triggeringPropertiesMethodName;
+		private String inputBindingsMethodName;
 
-		private ExecutionPlanMetadata(String name, String className, String methodName) {
+		private ExecutionPlanMetadata(String name, String className, String triggeringPropertiesMethodName, String inputBindingsMethodName) {
 			this.name = name;
 			this.className = className;
-			this.methodName = methodName;
+			this.triggeringPropertiesMethodName = triggeringPropertiesMethodName;
+			this.inputBindingsMethodName = inputBindingsMethodName;
 		}
 
 		public String getClassName() {
 			return className;
 		}
 
-		public String getMethodName() {
-			return methodName;
+		public String getTriggeringPropertiesMethodName() {
+			return triggeringPropertiesMethodName;
 		}
 
 		public String getName() {
 			return name;
+		}
+
+		public String getInputBindingsMethodName() {
+			return inputBindingsMethodName;
 		}
 	}
 }

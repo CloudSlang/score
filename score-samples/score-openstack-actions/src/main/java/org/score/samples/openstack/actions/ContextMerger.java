@@ -46,6 +46,29 @@ public class ContextMerger {
 	public final static String ACTION_EXCEPTION_EVENT_TYPE = "ACTION_EXCEPTION_EVENT";
 	public static final String SERVERS_KEY = "returnResult";
 	private static final String FLOW_DESCRIPTION = "flowDescription";
+	public static final String USERNAME_KEY = "username";
+	public static final String PASSWORD_KEY = "password";
+	public static final String IMAGE_REFERENCE_KEY = "imgRef";
+	public static final String CONTENT_TYPE_KEY = "contentType";
+	public static final String IMAGE_REF_KEY = "imageRef";
+
+	public void prepareGetToken(Map<String, Serializable> executionContext) {
+		String host = executionContext.get(HOST_KEY).toString();
+		String identityPort = executionContext.get(IDENTITY_PORT_KEY).toString();
+		String username = executionContext.get(USERNAME_KEY).toString();
+		String password = executionContext.get(PASSWORD_KEY).toString();
+		String computePort = executionContext.get(COMPUTE_PORT_KEY).toString();
+
+		String url = "http://" + host + ":" + identityPort + "/v2.0/tokens";
+		String body = "{\"auth\": {\"tenantName\": \"demo\",\"passwordCredentials\": {\"username\": \"" + username +"\",\"password\": \"" + password + "\"}}}";
+
+		executionContext.put(URL_KEY, url);
+		executionContext.put(METHOD_KEY, "post");
+		executionContext.put(BODY_KEY, body);
+		executionContext.put(CONTENT_TYPE_KEY, "application/json");
+		executionContext.put(COMPUTE_PORT_KEY, computePort);
+		executionContext.put(HOST_KEY, host);
+	}
 
 	public Map<String, String> getServerNames(String returnResult){
 		Map<String, String> returnMap = new HashMap<>();
@@ -156,8 +179,7 @@ public class ContextMerger {
 		String serverName = executionContext.get(SERVER_NAME_KEY).toString();
 		String host = executionContext.get(HOST_KEY).toString();
 		String computePort = executionContext.get(COMPUTE_PORT_KEY).toString();
-		String imageRef = executionContext.get("imageRef").toString();
-
+		String imageRef = executionContext.get(IMAGE_REFERENCE_KEY).toString();
 
 		if(StringUtils.isEmpty(host)){
 			host = "";
