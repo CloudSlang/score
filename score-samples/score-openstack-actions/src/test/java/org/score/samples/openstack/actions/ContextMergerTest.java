@@ -4,21 +4,12 @@ package org.score.samples.openstack.actions;
 import com.hp.score.lang.ExecutionRuntimeServices;
 import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.Serializable;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 
 /**
@@ -74,9 +65,8 @@ public class ContextMergerTest {
 		executionContext.put("host", "url");
 		executionContext.put("computePort", "");
 		executionContext.put("identityPort", "");
-		executionContext.put("imageRef", "");
+		executionContext.put("imgRef", "");
 
-		String host = "";
 		String expectedBody = "{\"server\": {\"name\": \""+ serverName+"\",\"imageRef\": \"56ff0279-f1fb-46e5-93dc-fe7093af0b1a\",\"flavorRef\": \"2\",\"max_count\": 1,\"min_count\": 1,\"security_groups\": [{\"name\": \"default\"}]}}";
 		String expectedUrl = "http://url:8774/v2/1ef9a1495c774e969ad6de86e6f025d7/servers";
 		String expectedHeaders = "X-AUTH-TOKEN: " + merger.getToken(CREATE_SERVER_RESPONSE_MOCK);
