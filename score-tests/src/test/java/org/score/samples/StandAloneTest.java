@@ -100,7 +100,6 @@ public class StandAloneTest {
         waitForAllEventsToArrive(2);//this flow should have 2 "Hello score" events only
     }
 
-    @Ignore
     @Test(timeout = 20000)
     public void testParallelFlow(){
         ExecutionPlan executionPlan = createParallelFlow();
@@ -118,6 +117,7 @@ public class StandAloneTest {
         waitForAllEventsToArrive(3);//this flow should have 2 "Hello score" events only + 1 finish event
 
         Assert.assertEquals(2,countEvents("Hello score"));
+        Assert.assertEquals(1,countEvents(EventConstants.SCORE_FINISHED_EVENT));
     }
 
 
@@ -164,7 +164,7 @@ public class StandAloneTest {
     }
 
      private void waitForAllEventsToArrive(int eventsCount) {
-        while(eventQueue.size() != eventsCount){
+        while(eventQueue.size() < eventsCount){
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
