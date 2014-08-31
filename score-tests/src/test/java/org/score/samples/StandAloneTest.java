@@ -14,6 +14,7 @@ import com.hp.score.events.ScoreEventListener;
 import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.score.samples.controlactions.BranchActions;
@@ -99,6 +100,7 @@ public class StandAloneTest {
         waitForAllEventsToArrive(2);//this flow should have 2 "Hello score" events only
     }
 
+    @Ignore
     @Test(timeout = 20000)
     public void testParallelFlow(){
         ExecutionPlan executionPlan = createParallelFlow();
