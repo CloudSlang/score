@@ -45,7 +45,7 @@ public class OpenstackCommons {
 	public static final String IDENTITY_PORT_MESSAGE = "Identity port";
 	public static final String COMPUTE_PORT_MESSAGE = "Compute port";
 	public static final String OPEN_STACK_IMAGE_REFERENCE_MESSAGE = "OpenStack image reference";
-	public static final String SERVER_NAME_MESSAGE = "serverName";
+	public static final String SERVER_NAME_MESSAGE = "Server name";
 	public static final String PREPARE_GET_TOKEN_METHOD = "prepareGetToken";
 	public static final String GET_SERVER_NAMES_METHOD = "getServerNames";
 	public static final String PREPARE_DELETE_SERVER_METHOD = "prepareDeleteServer";
