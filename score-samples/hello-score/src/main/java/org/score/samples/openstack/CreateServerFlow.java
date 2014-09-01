@@ -94,6 +94,7 @@ public class CreateServerFlow {
 		builder.addOOActionStep(stepId, HTTP_CLIENT_ACTION_CLASS, HTTP_CLIENT_ACTION_METHOD, null, navigationMatchers);
 	}
 
+    //TODO - Levi:public methods should be at the beginning
 	public List<InputBinding> getInputBindings() {
 		return inputBindings;
 	}

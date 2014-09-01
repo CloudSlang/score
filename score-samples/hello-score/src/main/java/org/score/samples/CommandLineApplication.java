@@ -187,6 +187,8 @@ public class CommandLineApplication {
 	}
 
 	private void registerEventListeners() {
+
+        //TODO - Levi: create private method of  registerOOActionRunnerEventListener
 		//register listener for action runtime events
 		Set<String> handlerTypes = new HashSet<>();
 		handlerTypes.add(OOActionRunner.ACTION_RUNTIME_EVENT_TYPE);
@@ -210,6 +212,7 @@ public class CommandLineApplication {
 		}, handlerTypes);
 	}
 
+    //TODO - Levi: why its called info? i changed it all to system.out...
 	private void registerInfoEventListener(Set<String> handlerTypes) {
 		eventBus.subscribe(new ScoreEventListener() {
 			@Override
@@ -239,16 +242,17 @@ public class CommandLineApplication {
 		}, handlerTypes);
 	}
 
+    //TODO - Levi: the follow 3 method should be one!!
 	private void logExceptionListenerEvent(ScoreEvent event) {
-		logger.info("Event " + event.getEventType() + " occurred: " + event.getData());
+		System.out.println("Event " + event.getEventType() + " occurred: " + event.getData());
 	}
 
 	private void logListenerEvent(ScoreEvent event) {
-		logger.info("Event " + event.getEventType() + " occurred: " + event.getData());
+        System.out.println("Event " + event.getEventType() + " occurred: " + event.getData());
 	}
 
 	private void logScoreListenerEvent(ScoreEvent event) {
-		logger.info("Event " + event.getEventType() + " occurred");
+        System.out.println("Event " + event.getEventType() + " occurred");
 	}
 
 	private static class FlowMetadata {
