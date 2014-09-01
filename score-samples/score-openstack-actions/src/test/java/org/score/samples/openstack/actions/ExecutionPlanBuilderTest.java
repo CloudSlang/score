@@ -55,7 +55,7 @@ public class ExecutionPlanBuilderTest {
 		eventList = Collections.synchronizedList(new ArrayList<ScoreEvent>());
 	}
 
-	@Test(timeout = DEFAULT_TIMEOUT) //TODO - refactor test / solve timeout exception
+	@Test(timeout = DEFAULT_TIMEOUT)
 	public void testSubflow() throws Exception {
 		ExecutionPlanBuilderTest app = loadApp();
 
