@@ -123,12 +123,18 @@ public final class ExecutionServiceImpl implements ExecutionService {
 			dumpBusEvents(execution);
 			executeStep(execution, currStep);
 			failFlowIfSplitStepFailed(execution);
-			// Run the split step
+
+            dumpBusEvents(execution);
+
+            // Run the split step
 			List<StartBranchDataContainer> newBranches = execution.getSystemContext().removeBranchesData();
 			List<Execution> newExecutions = createChildExecutions(execution.getExecutionId(), newBranches);
 			// Run the navigation
 			navigate(execution, currStep);
-			if(logger.isDebugEnabled()) {
+
+            dumpBusEvents(execution);
+
+            if(logger.isDebugEnabled()) {
 				logger.debug("End of step: " + execution.getPosition() + " in execution id: " + execution.getExecutionId());
 			}
 			return newExecutions;
