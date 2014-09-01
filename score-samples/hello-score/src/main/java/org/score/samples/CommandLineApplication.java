@@ -39,7 +39,7 @@ public class CommandLineApplication {
 	private final static Logger logger = Logger.getLogger(CommandLineApplication.class);
 	public static final String OPENSTACK_FLOWS_PACKAGE = "org.score.samples.openstack";
 
-	private List<ExecutionPlanMetadata> predefinedExecutionPlans;
+	private List<FlowMetadata> predefinedFlows;
 
 	@Autowired
 	private Score score;
@@ -48,22 +48,22 @@ public class CommandLineApplication {
 	private EventBus eventBus;
 
 	public CommandLineApplication() {
-		predefinedExecutionPlans = new ArrayList<>();
+		predefinedFlows = new ArrayList<>();
 		registerPredefinedExecutionPlans();
 	}
 
 	private void registerPredefinedExecutionPlans() {
-		registerFlow("Simple display message flow", "org.score.samples.DisplayMessageFlow", "displayMessageFlow", "getInputBindings");
-		registerFlow("Create server in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".CreateServerFlow", "createServerFlow", "getInputBindings");
-		registerFlow("List servers in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".ListServersFlow", "listServersFlow", "getInputBindings");
-		registerFlow("Delete server in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".DeleteServerFlow", "deleteServerFlow", "getInputBindings");
-		registerFlow("Validate server exists in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".ValidateServerExistsFlow", "validateServerExistsFlow", "getInputBindings");
-		registerFlow("OpenStack health check", OPENSTACK_FLOWS_PACKAGE + ".OpenStackHealthCheckFlow", "openStackHealthCheckFlow", "getInputBindings");
+		registerFlow("display_message", "Simple display message flow", "org.score.samples.DisplayMessageFlow", "displayMessageFlow", "getInputBindings");
+		registerFlow("create_server_open_stack", "Create server in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".CreateServerFlow", "createServerFlow", "getInputBindings");
+		registerFlow("list_servers_open_stack", "List servers in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".ListServersFlow", "listServersFlow", "getInputBindings");
+		registerFlow("delete_server_open_stack", "Delete server in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".DeleteServerFlow", "deleteServerFlow", "getInputBindings");
+		registerFlow("validate_server_open_stack", "Validate server exists in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".ValidateServerExistsFlow", "validateServerExistsFlow", "getInputBindings");
+		registerFlow("health_check_open_stack", "OpenStack health check", OPENSTACK_FLOWS_PACKAGE + ".OpenStackHealthCheckFlow", "openStackHealthCheckFlow", "getInputBindings");
 	}
 
-	public void registerFlow(String name, String className, String triggeringPropertiesMethodName, String inputBindingsMethodName) {
-		ExecutionPlanMetadata executionPlanMetadata = new ExecutionPlanMetadata(name, className, triggeringPropertiesMethodName, inputBindingsMethodName);
-		predefinedExecutionPlans.add(executionPlanMetadata);
+	public void registerFlow(String identifier, String description, String className, String triggeringPropertiesMethodName, String inputBindingsMethodName) {
+		FlowMetadata flowMetadata = new FlowMetadata(identifier, description, className, triggeringPropertiesMethodName, inputBindingsMethodName);
+		predefinedFlows.add(flowMetadata);
 	}
 
 	public static void main(String[] args) {
@@ -112,15 +112,15 @@ public class CommandLineApplication {
 	}
 
 	private void runPredefinedFlows(int executionPlanNumber, BufferedReader reader) throws Exception {
-		ExecutionPlanMetadata executionPlanMetadata = predefinedExecutionPlans.get(executionPlanNumber);
-		runFlow(executionPlanMetadata.getClassName(), executionPlanMetadata.getTriggeringPropertiesMethodName(),
-				executionPlanMetadata.getInputBindingsMethodName(), reader);
+		FlowMetadata flowMetadata = predefinedFlows.get(executionPlanNumber);
+		runFlow(flowMetadata.getClassName(), flowMetadata.getTriggeringPropertiesMethodName(),
+				flowMetadata.getInputBindingsMethodName(), reader);
 	}
 
 	private int listPredefinedFlows(BufferedReader reader) {
 		System.out.println("Available flows");
-		for (ExecutionPlanMetadata executionPlanMetadata : predefinedExecutionPlans) {
-			System.out.println(predefinedExecutionPlans.indexOf(executionPlanMetadata) + " - " + executionPlanMetadata.getName());
+		for (FlowMetadata flowMetadata : predefinedFlows) {
+			System.out.println(predefinedFlows.indexOf(flowMetadata) + " - " + flowMetadata.getDescription());
 		}
 		return readIntegerInput(reader, "Insert the flow number");
 	}
@@ -251,17 +251,28 @@ public class CommandLineApplication {
 		logger.info("Event " + event.getEventType() + " occurred");
 	}
 
-	private static class ExecutionPlanMetadata {
-		private String name;
+	private static class FlowMetadata {
+		private String identifier;
+		private String description;
 		private String className;
 		private String triggeringPropertiesMethodName;
 		private String inputBindingsMethodName;
 
-		private ExecutionPlanMetadata(String name, String className, String triggeringPropertiesMethodName, String inputBindingsMethodName) {
-			this.name = name;
+		private FlowMetadata(String identifier, String description, String className, String triggeringPropertiesMethodName, String inputBindingsMethodName) {
+			this.identifier = identifier;
+			this.description = description;
 			this.className = className;
 			this.triggeringPropertiesMethodName = triggeringPropertiesMethodName;
 			this.inputBindingsMethodName = inputBindingsMethodName;
+		}
+
+		public String getDescription() {
+			return description;
+		}
+
+		@SuppressWarnings("unused")
+		public String getIdentifier() {
+			return identifier;
 		}
 
 		public String getClassName() {
@@ -270,10 +281,6 @@ public class CommandLineApplication {
 
 		public String getTriggeringPropertiesMethodName() {
 			return triggeringPropertiesMethodName;
-		}
-
-		public String getName() {
-			return name;
 		}
 
 		public String getInputBindingsMethodName() {
