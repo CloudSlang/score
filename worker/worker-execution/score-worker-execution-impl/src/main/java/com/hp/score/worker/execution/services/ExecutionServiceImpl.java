@@ -6,26 +6,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
-import com.hp.score.worker.management.services.WorkerRecoveryManager;
 import com.hp.score.worker.execution.reflection.ReflectionAdapter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import com.hp.score.worker.management.WorkerConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.hp.oo.broker.entities.BranchContextHolder;
 import com.hp.oo.broker.entities.RunningExecutionPlan;
-import com.hp.oo.broker.services.RuntimeValueService;
 import com.hp.oo.enginefacade.execution.ExecutionStatus;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.score.worker.management.services.dbsupport.WorkerDbSupportService;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
-import com.hp.oo.internal.sdk.execution.OOContext;
 import com.hp.score.orchestrator.services.PauseResumeService;
 import com.hp.score.api.ExecutionStep;
 import com.hp.score.api.StartBranchDataContainer;
@@ -52,10 +47,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	private WorkerDbSupportService workerDbSupportService;
 	@Autowired
 	private WorkerConfigurationService workerConfigurationService;
-	@Autowired
-	private RuntimeValueService runtimeValueService;
-	@Autowired
-	private WorkerRecoveryManager recoveryManager;
 	@Autowired
 	private EventBus eventBus;
 
@@ -96,12 +87,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
             if(ex instanceof InterruptedException){
                 throw ex; //for recovery purposes, in case thread was in wait on stepLog and was interrupted
             }
-			// In case this is execution of branch that failed - need special treatment
-			if(execution.getSystemContext().containsKey(ExecutionConstants.SPLIT_ID)) {
-				handleBranchFailure(execution, ex);
-				execution.setPosition(-1L); // finishing this branch but not finishing the entire flow
-				return execution;
-			}
 			logger.error("Error during execution: ", ex);
 			execution.getSystemContext().put(ExecutionConstants.EXECUTION_STEP_ERROR_KEY, ex.getMessage()); // this is done only fo reporting
 			execution.getSystemContext().put(ExecutionConstants.FLOW_TERMINATION_TYPE, ExecutionStatus.SYSTEM_FAILURE);
@@ -176,53 +161,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	public boolean isSplitStep(Execution execution) {
 		ExecutionStep currStep = loadExecutionStep(execution);
 		return currStep.isSplitStep();
-	}
-
-	protected static boolean isExecutionTerminating(Execution execution) {
-        //TODO - NonBlocking
-		return (execution.getPosition() == null || execution.getPosition() == -1L || execution.getPosition() == -2L);
-	}
-
-	// This method deals with the situation when a branch execution was terminated because of a system failure - not execution exception
-	protected void handleBranchFailure(Execution execution, Exception exception) {
-		String splitId = (String)execution.getSystemContext().get(ExecutionConstants.SPLIT_ID);
-		String branchId = execution.getSystemContext().getBrunchId();
-		logger.error("Branch failed due to SYSTEM FAILURE! Execution id: " + execution.getExecutionId() + " Branch id: " + branchId, exception);
-		BranchContextHolder branchContextHolder = new BranchContextHolder();
-		branchContextHolder.setSplitId(splitId);
-		branchContextHolder.setBranchId(branchId);
-		branchContextHolder.setExecutionId((String)execution.getSystemContext().get(ExecutionConstants.EXECUTION_ID_CONTEXT));
-		Map<String, OOContext> context = new HashMap<>();
-		branchContextHolder.setContext(context);
-		branchContextHolder.setBranchException(exception.getMessage());
-		while(!recoveryManager.isInRecovery()) {
-			try {
-				workerDbSupportService.createBranchContext(branchContextHolder);
-				// todo - maybe add events like in endBranch action
-				try {
-					clearBranchLocks(execution);
-				} catch(Exception ex) {
-					logger.error("Failed to clear locks on execution " + execution.getExecutionId(), ex);
-				}
-				return;
-			} catch(Exception ex) {
-				logger.error("Failed to save branch failure. Retrying...", ex);
-				try {
-					Thread.sleep(5000L);
-				} catch(InterruptedException iex) {/* do nothing */}
-			}
-		}
-	}
-
-	protected void clearBranchLocks(Execution execution) {
-		@SuppressWarnings("unchecked")
-		Set<String> acquiredLockIds = (Set<String>)execution.getSystemContext().get(ExecutionConstants.ACQUIRED_LOCKS);
-		if(acquiredLockIds != null) {
-			for(String lockId : acquiredLockIds) {
-				runtimeValueService.remove(ExecutionConstants.LOCK_PREFIX_IN_DB + lockId);
-			}
-			execution.getSystemContext().remove(ExecutionConstants.ACQUIRED_LOCKS);
-		}
 	}
 
 	protected boolean handleCancelledFlow(Execution execution) {

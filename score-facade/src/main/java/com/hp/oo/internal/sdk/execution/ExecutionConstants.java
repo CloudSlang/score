@@ -38,7 +38,6 @@ public class ExecutionConstants {
 
 	// For parallel/multi instance
 	public static final String BRANCH_NAME = "BRANCH_NAME";
-	public static final String SPLIT_ID = "SPLIT_ID";   //TODO - NonBlocking
 
 	public static final String FLOW_RESPONSE_TYPE = "INTERNAL_FLOW_RESPONSE_TYPE";
 	public static final String FLOW_RESPONSE_NAME = "INTERNAL_FLOW_RESPONSE_NAME";

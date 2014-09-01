@@ -1,43 +1,39 @@
 package com.hp.score.worker.execution.services;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.hp.oo.broker.entities.RunningExecutionPlan;
+import com.hp.oo.broker.services.RuntimeValueService;
+import com.hp.oo.enginefacade.execution.ExecutionStatus;
+import com.hp.oo.enginefacade.execution.ExecutionSummary;
+import com.hp.oo.enginefacade.execution.PauseReason;
+import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.oo.internal.sdk.execution.ExecutionConstants;
+import com.hp.score.api.ControlActionMetadata;
+import com.hp.score.api.ExecutionPlan;
+import com.hp.score.api.ExecutionStep;
+import com.hp.score.events.EventBus;
+import com.hp.score.orchestrator.services.CancelExecutionService;
+import com.hp.score.orchestrator.services.PauseResumeService;
+import com.hp.score.worker.execution.reflection.ReflectionAdapter;
+import com.hp.score.worker.management.WorkerConfigurationService;
 import com.hp.score.worker.management.services.WorkerRecoveryManager;
+import com.hp.score.worker.management.services.dbsupport.WorkerDbSupportService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.internal.verification.VerificationModeFactory;
-import com.hp.score.worker.management.WorkerConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.hp.oo.broker.entities.BranchContextHolder;
-import com.hp.oo.broker.entities.RunningExecutionPlan;
-import com.hp.oo.broker.services.RuntimeValueService;
-import com.hp.oo.enginefacade.execution.ExecutionStatus;
-import com.hp.oo.enginefacade.execution.ExecutionSummary;
-import com.hp.oo.enginefacade.execution.PauseReason;
-import com.hp.score.worker.execution.reflection.ReflectionAdapter;
-import com.hp.score.worker.management.services.dbsupport.WorkerDbSupportService;
-import com.hp.oo.internal.sdk.execution.Execution;
-import com.hp.oo.internal.sdk.execution.ExecutionConstants;
-import com.hp.score.orchestrator.services.CancelExecutionService;
-import com.hp.score.orchestrator.services.PauseResumeService;
-import com.hp.score.api.ControlActionMetadata;
-import com.hp.score.api.ExecutionPlan;
-import com.hp.score.api.ExecutionStep;
-import com.hp.score.events.EventBus;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -148,68 +144,6 @@ public class ExecutionServiceTest {
 		//for events
 		exe.getSystemContext().put(ExecutionConstants.EXECUTION_ID_CONTEXT, executionId);
 		return exe;
-	}
-
-	@Test
-	public void isExecutionTerminatingTest() {
-		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
-		exe.setExecutionId(111L);
-		exe.setPosition(null);
-
-		boolean result = executionService.isExecutionTerminating(exe);
-		Assert.assertTrue(result);
-
-		exe.setPosition(-1L);
-		result = executionService.isExecutionTerminating(exe);
-		Assert.assertTrue(result);
-
-		exe.setPosition(-2L);
-		result = executionService.isExecutionTerminating(exe);
-		Assert.assertTrue(result);
-
-		exe.setPosition(100L);
-		result = executionService.isExecutionTerminating(exe);
-		Assert.assertFalse(result);
-	}
-
-	@Test
-	public void handleBranchFailureTest() {
-		Set<String> locks = new HashSet<>();
-		locks.add("lock_1");
-
-		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
-		exe.setExecutionId(111L);
-		exe.getSystemContext().put(ExecutionConstants.SPLIT_ID, "split_id");
-		exe.getSystemContext().setBrunchId("branch_id");
-		exe.getSystemContext().put(ExecutionConstants.ACQUIRED_LOCKS, (Serializable) locks);
-		exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String, List>());
-		executionService.handleBranchFailure(exe, new Exception("Test exception..."));
-
-		Mockito.verify(workerDbSupportService, VerificationModeFactory.times(1)).createBranchContext(any(BranchContextHolder.class));
-
-		Mockito.verify(runtimeValueService, VerificationModeFactory.times(1)).remove(ExecutionConstants.LOCK_PREFIX_IN_DB + "lock_1");
-
-	}
-
-	@Test
-	public void clearBranchLocksTest() {
-		Set<String> locks = new HashSet<>();
-		locks.add("lock_1");
-		locks.add("lock_2");
-		locks.add("lock_3");
-
-		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
-		exe.setExecutionId(111l);
-		exe.getSystemContext().put(ExecutionConstants.ACQUIRED_LOCKS, (Serializable) locks);
-		exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String, List>());
-		executionService.clearBranchLocks(exe);
-
-		//3 times runtimeService
-		Mockito.verify(runtimeValueService, VerificationModeFactory.times(1)).remove(ExecutionConstants.LOCK_PREFIX_IN_DB + "lock_1");
-		Mockito.verify(runtimeValueService, VerificationModeFactory.times(1)).remove(ExecutionConstants.LOCK_PREFIX_IN_DB + "lock_2");
-		Mockito.verify(runtimeValueService, VerificationModeFactory.times(1)).remove(ExecutionConstants.LOCK_PREFIX_IN_DB + "lock_3");
-
-		Assert.assertNull(exe.getSystemContext().get(ExecutionConstants.ACQUIRED_LOCKS));
 	}
 
 	@Test
