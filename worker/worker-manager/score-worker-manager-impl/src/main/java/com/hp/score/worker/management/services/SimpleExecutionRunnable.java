@@ -201,6 +201,7 @@ public class SimpleExecutionRunnable implements Runnable {
     }
 
     private boolean isExecutionTerminating(Execution execution) {
+        //TODO - non blocking, should use ExecutionService?
         return (execution.getPosition() == null || execution.getPosition() == -1L || execution.getPosition() == -2L);
     }
 
@@ -217,6 +218,7 @@ public class SimpleExecutionRunnable implements Runnable {
             finalMessage.setPayload(payload);
             return new ExecutionMessage[]{executionMessage, finalMessage};
         }
+        //TODO - NonBlocking
         //Subflow was started or Parallel was started - this execution should be terminated
         else if (nextPosition == SUBFLOW_POSITION || nextPosition == PARALLEL_POSITION) {
             //we do not call here the finish flow - since it is not finished yet!!!

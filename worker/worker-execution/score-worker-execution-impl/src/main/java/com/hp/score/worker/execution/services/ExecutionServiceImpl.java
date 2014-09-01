@@ -179,6 +179,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	}
 
 	protected static boolean isExecutionTerminating(Execution execution) {
+        //TODO - NonBlocking
 		return (execution.getPosition() == null || execution.getPosition() == -1L || execution.getPosition() == -2L);
 	}
 

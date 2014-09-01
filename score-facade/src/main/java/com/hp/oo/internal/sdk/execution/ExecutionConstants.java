@@ -38,7 +38,7 @@ public class ExecutionConstants {
 
 	// For parallel/multi instance
 	public static final String BRANCH_NAME = "BRANCH_NAME";
-	public static final String SPLIT_ID = "SPLIT_ID";
+	public static final String SPLIT_ID = "SPLIT_ID";   //TODO - NonBlocking
 
 	public static final String FLOW_RESPONSE_TYPE = "INTERNAL_FLOW_RESPONSE_TYPE";
 	public static final String FLOW_RESPONSE_NAME = "INTERNAL_FLOW_RESPONSE_NAME";
@@ -126,7 +126,7 @@ public class ExecutionConstants {
 
 	// TODO temporary while we have 2 different mechanisms for parallel executions
 	// TODO it is used to differentiate between the 2
-	public static final String NEW_BRANCH_MECHANISM = "NEW_BRANCH_MECHANISM";
+	public static final String NEW_BRANCH_MECHANISM = "NEW_BRANCH_MECHANISM";  //TODO - NonBlocking
 
 	public static final String RUNNING_EXECUTION_PLAN_ID = "RUNNING_EXECUTION_PLAN_ID";
 	public static final String PARENT_STEP_UUID = "PARENT_STEP_UUID";
