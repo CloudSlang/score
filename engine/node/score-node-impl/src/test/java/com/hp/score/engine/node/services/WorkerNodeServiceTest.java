@@ -27,9 +27,6 @@ import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
@@ -66,9 +63,6 @@ public class WorkerNodeServiceTest {
 
     @Autowired
     private WorkerLockService workerLockService;
-
-	@Autowired
-	private UserDetailsService userDetailsService;
 
 	@Autowired
 	private WorkerNodeRepository workerNodeRepository;
@@ -343,23 +337,6 @@ public class WorkerNodeServiceTest {
 		Assert.assertEquals(1, workerNames.size());
 
 
-		workerNodeService.delete("H3");
-	}
-
-	@Test
-	public void loadUserDetails() throws Exception {
-		try {
-            userDetailsService.loadUserByUsername("H3");
-			Assert.assertTrue(true);
-		} catch(UsernameNotFoundException e){
-
-		}
-
-		workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
-		UserDetails userDetails = userDetailsService.loadUserByUsername("H3");
-		Assert.assertEquals("H3",userDetails.getUsername());
-		Assert.assertEquals(4,userDetails.getAuthorities().size());
-		
 		workerNodeService.delete("H3");
 	}
 
