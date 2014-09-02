@@ -19,7 +19,7 @@ import com.hp.oo.enginefacade.execution.ExecutionStatus;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.enginefacade.execution.PauseReason;
 import com.hp.score.worker.management.services.dbsupport.WorkerDbSupportService;
-import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.score.facade.entities.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.score.orchestrator.services.PauseResumeService;
 import com.hp.score.api.ExecutionStep;

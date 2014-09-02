@@ -4,7 +4,7 @@ import com.hp.score.facade.entities.RunningExecutionPlan;
 import com.hp.oo.enginefacade.execution.ExecutionStatus;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.enginefacade.execution.PauseReason;
-import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.score.facade.entities.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.score.api.ControlActionMetadata;
 import com.hp.score.api.ExecutionPlan;
@@ -73,9 +73,9 @@ public class ExecutionServiceTest {
 
 	@Test
 	public void handlePausedFlow_NotPausedExecutionTest() {
-		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
+		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
 		exe.setExecutionId(111L);
-		exe.getSystemContext().setBrunchId("branch_id");
+		exe.getSystemContext().setBranchId("branch_id");
 		exe.getSystemContext().put(ExecutionConstants.FLOW_UUID, "flow_uuid");
 		exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String, List>());
 
@@ -132,9 +132,9 @@ public class ExecutionServiceTest {
 	}
 
 	private Execution getExecutionObjToPause(Long executionId, String branch_id) {
-		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
+		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
 		exe.setExecutionId(executionId);
-		exe.getSystemContext().setBrunchId(branch_id);
+		exe.getSystemContext().setBranchId(branch_id);
 		exe.getSystemContext().put(ExecutionConstants.FLOW_UUID, "flow_uuid");
 		exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String, List>());
 		//for events
@@ -144,7 +144,7 @@ public class ExecutionServiceTest {
 
 	@Test
 	public void handleCancelledFlowsTest() {
-		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
+		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
 		exe.setExecutionId(EXECUTION_ID_1);
 
 		boolean result = executionService.handleCancelledFlow(exe);
@@ -152,7 +152,7 @@ public class ExecutionServiceTest {
 		Assert.assertEquals(exe.getPosition(), null);
 		Assert.assertEquals(result, true);
 
-		exe = new Execution(0L, 0L, new ArrayList<String>());
+		exe = new Execution(0L, 0L, new HashMap<String,String>());
 		exe.setExecutionId(EXECUTION_ID_2);
 
 		result = executionService.handleCancelledFlow(exe);
@@ -167,7 +167,7 @@ public class ExecutionServiceTest {
 		//FromSystemContext
 		ExecutionStep executionStep = new ExecutionStep(EXECUTION_STEP_1_ID);
 
-		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
+		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
 		exe.setExecutionId(EXECUTION_ID_1);
 
 		exe.getSystemContext().put(ExecutionConstants.CONTENT_EXECUTION_STEP, executionStep);
@@ -187,7 +187,7 @@ public class ExecutionServiceTest {
 
 		executionStep = new ExecutionStep(EXECUTION_STEP_2_ID);
 
-		exe = new Execution(RUNNING_EXE_PLAN_ID, EXECUTION_STEP_2_ID, new ArrayList<String>());
+		exe = new Execution(RUNNING_EXE_PLAN_ID, EXECUTION_STEP_2_ID, new HashMap<String,String>());
 
 		loadedStep = executionService.loadExecutionStep(exe);
 
@@ -200,7 +200,7 @@ public class ExecutionServiceTest {
 		ExecutionStep executionStep = new ExecutionStep(EXECUTION_STEP_1_ID);
 		executionStep.setActionData(new HashMap<String, Serializable>());
 
-		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
+		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
 
 		executionService.executeStep(exe, executionStep);
 
@@ -215,7 +215,7 @@ public class ExecutionServiceTest {
 		executionStep.setNavigation(new ControlActionMetadata("class", "method"));
 		executionStep.setNavigationData(new HashMap<String, Serializable>());
 
-		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
+		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
 
 		executionService.navigate(exe, executionStep);
 
@@ -225,7 +225,7 @@ public class ExecutionServiceTest {
 
 	@Test
 	public void postExecutionSettingsTest() {
-		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
+		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
 		exe.setExecutionId(1111111L);
 
 		exe.getSystemContext().put(ExecutionConstants.ACTUALLY_OPERATION_GROUP, "Real_Group");

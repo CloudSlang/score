@@ -213,23 +213,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         </createTable>
     </changeSet>
 
-    <changeSet author="engine" id="create OO_RUNTIME_VALUE_STORE">
-        <createTable tableName="OO_RUNTIME_VALUE_STORE">
-            <column name="ID" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="PK_OO_RUNTIME_VALUE_STORE" />
-            </column>
-            <!-- This must be a Unicode-friendly type, because AFL Lock IDs may include Unicode characters. -->
-            <column name="KEY_" type="${nvarchar.type}(255)">
-                <constraints nullable="false" unique="true" uniqueConstraintName="UQ_OO_RUNTIME_VALUE_STORE_KEY" />
-            </column>
-            <column name="VALUE" type="${nvarchar.type}(4000)" />
-            <column name="OWNER_ID" type="VARCHAR(255)" />
-        </createTable>
-        <createIndex indexName="OID_OO_RUNTIME_VALUE_STORE" tableName="OO_RUNTIME_VALUE_STORE">
-            <column name="OWNER_ID" />
-        </createIndex>
-    </changeSet>
-
     <changeSet id="add table OO_VERSION_COUNTERS" author="engine">
         <createTable tableName="OO_VERSION_COUNTERS">
             <column name="ID" type="BIGINT">

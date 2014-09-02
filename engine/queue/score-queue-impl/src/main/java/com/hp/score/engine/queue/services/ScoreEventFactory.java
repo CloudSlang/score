@@ -1,6 +1,6 @@
 package com.hp.score.engine.queue.services;
 
-import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.score.facade.entities.Execution;
 import com.hp.score.events.ScoreEvent;
 
 /**

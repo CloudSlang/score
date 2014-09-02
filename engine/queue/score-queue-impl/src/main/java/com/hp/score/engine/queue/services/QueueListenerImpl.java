@@ -4,7 +4,7 @@ import com.hp.score.engine.queue.entities.ExecutionMessage;
 import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.enginefacade.execution.PauseReason;
-import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.score.facade.entities.Execution;
 import com.hp.score.orchestrator.services.PauseResumeService;
 import com.hp.score.orchestrator.services.SplitJoinService;
 import com.hp.score.events.EventBus;

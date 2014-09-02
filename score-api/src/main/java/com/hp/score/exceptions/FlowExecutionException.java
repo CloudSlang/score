@@ -1,4 +1,4 @@
-package com.hp.oo.internal.sdk.execution;
+package com.hp.score.exceptions;
 
 /**
  * Created by IntelliJ IDEA.

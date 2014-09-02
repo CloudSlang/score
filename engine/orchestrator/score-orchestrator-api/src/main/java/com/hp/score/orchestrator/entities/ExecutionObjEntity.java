@@ -1,6 +1,6 @@
 package com.hp.score.orchestrator.entities;
 
-import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.score.facade.entities.Execution;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;

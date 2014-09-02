@@ -4,7 +4,7 @@ import com.hp.score.engine.queue.entities.ExecStatus;
 import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.score.engine.queue.services.QueueDispatcherService;
 import com.hp.oo.enginefacade.execution.ExecutionStatus;
-import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.score.facade.entities.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.score.orchestrator.entities.ExecutionState;
 import org.apache.log4j.Logger;

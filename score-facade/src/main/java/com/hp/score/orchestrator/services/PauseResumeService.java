@@ -2,7 +2,7 @@ package com.hp.score.orchestrator.services;
 
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.enginefacade.execution.PauseReason;
-import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.score.facade.entities.Execution;
 
 import java.io.Serializable;
 import java.util.List;

@@ -1,6 +1,6 @@
 package com.hp.score.lang;
 
-import com.hp.oo.enginefacade.execution.EndBranchDataContainer;
+import com.hp.score.api.EndBranchDataContainer;
 import com.hp.score.events.ScoreEvent;
 import com.hp.score.api.StartBranchDataContainer;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -51,8 +51,8 @@ public class ExecutionRuntimeServices implements Serializable {
         return getFromMap(BRANCH_ID);
     }
 
-    public void setBrunchId(String brunchId) {
-        myMap.put(BRANCH_ID, brunchId);
+    public void setBranchId(String branchId) {
+        myMap.put(BRANCH_ID, branchId);
     }
 
     public String getSplitId(){

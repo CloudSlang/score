@@ -1,6 +1,6 @@
 package org.score.samples.controlactions;
 
-import com.hp.oo.enginefacade.execution.EndBranchDataContainer;
+import com.hp.score.api.EndBranchDataContainer;
 import com.hp.score.lang.ExecutionRuntimeServices;
 
 import java.io.Serializable;

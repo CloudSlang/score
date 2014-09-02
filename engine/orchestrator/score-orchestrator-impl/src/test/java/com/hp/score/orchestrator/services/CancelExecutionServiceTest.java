@@ -3,7 +3,7 @@ package com.hp.score.orchestrator.services;
 import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.score.engine.queue.services.QueueDispatcherService;
 import com.hp.oo.enginefacade.execution.ExecutionStatus;
-import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.score.facade.entities.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.score.orchestrator.entities.ExecutionState;
 import org.junit.Before;
@@ -17,7 +17,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.hp.oo.enginefacade.execution.ExecutionSummary.EMPTY_BRANCH;
 import static org.fest.assertions.Assertions.assertThat;
@@ -58,8 +60,11 @@ public class CancelExecutionServiceTest {
         // Running
         checkValidRequestCancel(ExecutionStatus.RUNNING, ExecutionStatus.PENDING_CANCEL);
 
+
+        Map<String, String> contexts = new HashMap<>();
+        contexts.put("context_a", "");
         // Paused
-        Execution pausedExecutionObj = new Execution(1L, 1L, Collections.singletonList("context_a"));
+        Execution pausedExecutionObj = new Execution(1L, 1L, contexts);
         when(executionSerializationUtil.objFromBytes(any(byte[].class))).thenReturn(pausedExecutionObj);
         checkValidRequestCancel(ExecutionStatus.PAUSED, ExecutionStatus.PENDING_CANCEL);
         assertThat(pausedExecutionObj.getPosition()).isNull();
@@ -103,7 +108,10 @@ public class CancelExecutionServiceTest {
         ExecutionState branch1 = createRun(executionId, ExecutionStatus.PAUSED);
         branch1.setBranchId("b1");
 
-        Execution pausedExecutionObj = new Execution(1L, 1L, Collections.singletonList("context_a"));
+        Map<String, String> contexts = new HashMap<>();
+        contexts.put("context_a", "");
+
+        Execution pausedExecutionObj = new Execution(1L, 1L, contexts);
         when(executionSerializationUtil.objFromBytes(any(byte[].class))).thenReturn(pausedExecutionObj);
         when(executionStateService.readByExecutionId(executionId)).thenReturn(Arrays.asList(parent, branch1));
 

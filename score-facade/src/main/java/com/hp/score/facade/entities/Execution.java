@@ -1,6 +1,7 @@
-package com.hp.oo.internal.sdk.execution;
+package com.hp.score.facade.entities;
 
-import com.hp.oo.enginefacade.execution.EndBranchDataContainer;
+import com.hp.oo.internal.sdk.execution.ExecutionConstants;
+import com.hp.score.api.EndBranchDataContainer;
 import com.hp.score.lang.SystemContext;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
@@ -45,15 +46,12 @@ public class Execution implements Serializable {
         this.executionId = executionId;
     }
 
-    public Execution(Long runningExecutionPlanId, Long position, List<String> contextsNames) {
+    public Execution(Long runningExecutionPlanId, Long position, Map<String, ? extends Serializable> contexts) {
         this();
         this.position = position;
         this.runningExecutionPlanId = runningExecutionPlanId;
-        //todo later populate the global context with real global vars - to be  impl in separate global var user story
-        if (contextsNames != null && contextsNames.size() > 0) {
-            for (String contextName : contextsNames) {
-                contexts.put(contextName, new OOContext());
-            }
+        if(contexts != null) {
+            this.contexts.putAll(contexts);
         }
     }
 
@@ -118,12 +116,6 @@ public class Execution implements Serializable {
         this.lastEventDumpTime = lastEventDumpTime;
     }
 
-    public Execution createChildExecution(Long runningExecutionPlanId, Long position, List<String> contextsNames) {
-        Execution child = new Execution(runningExecutionPlanId, position, contextsNames);
-        child.setExecutionId(getExecutionId());
-        return child;
-    }
-
     /*  TODO :
         System Context Wrapper APIs
         ----------------------------
@@ -151,7 +143,7 @@ public class Execution implements Serializable {
 
     public void putBranchId(String branchId) {
         Validate.isTrue(StringUtils.isEmpty(getSystemContext().getBranchId()), "not allowed to overwrite branch id");
-        getSystemContext().setBrunchId(branchId);
+        getSystemContext().setBranchId(branchId);
     }
 
     public String getSplitId() {

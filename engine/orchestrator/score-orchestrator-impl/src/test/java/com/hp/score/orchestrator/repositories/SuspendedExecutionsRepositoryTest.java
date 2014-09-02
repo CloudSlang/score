@@ -1,6 +1,6 @@
 package com.hp.score.orchestrator.repositories;
 
-import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.score.facade.entities.Execution;
 import com.hp.score.orchestrator.entities.BranchContexts;
 import com.hp.score.orchestrator.entities.FinishedBranch;
 import com.hp.score.orchestrator.entities.SuspendedExecution;
@@ -52,9 +52,9 @@ public class SuspendedExecutionsRepositoryTest {
     @Test
     public void simpleCreateAndReadTest(){
 
-        List<String> contextNames = new ArrayList<>();
-        contextNames.add("flowContext");
-        Execution exec = new Execution(2L, 0L, contextNames);
+        Map<String, String> contexts = new HashMap<>();
+        contexts.put("flowContext", "");
+        Execution exec = new Execution(2L, 0L, contexts);
         SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec);
 
         repository.save(suspendedExecution);
@@ -67,9 +67,10 @@ public class SuspendedExecutionsRepositoryTest {
     @Test
     public void simpleCreateAndReadWithFinishedBranchesTest(){
 
-        List<String> contextNames = new ArrayList<>();
-        contextNames.add("flowContext");
-        Execution exec = new Execution(2L, 0L, contextNames);
+        Map<String, String> contexts = new HashMap<>();
+        contexts.put("flowContext", "");
+
+        Execution exec = new Execution(2L, 0L, contexts);
         SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec);
 
         SuspendedExecution saved = repository.save(suspendedExecution);
@@ -93,9 +94,10 @@ public class SuspendedExecutionsRepositoryTest {
     @Test
     public void findBySplitIdsTest(){
 
-        List<String> contextNames = new ArrayList<>();
-        contextNames.add("flowContext");
-        Execution exec = new Execution(2L, 0L, contextNames);
+        Map<String, String> contexts = new HashMap<>();
+        contexts.put("flowContext", "");
+
+        Execution exec = new Execution(2L, 0L, contexts);
         SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec);
 
         repository.save(suspendedExecution);
@@ -112,9 +114,9 @@ public class SuspendedExecutionsRepositoryTest {
     @Test
     public void findFinishedSuspendedExecutionsTest(){
 
-        List<String> contextNames = new ArrayList<>();
-        contextNames.add("flowContext");
-        Execution exec = new Execution(2L, 0L, contextNames);
+        Map<String, String> contexts = new HashMap<>();
+        contexts.put("flowContext", "");
+        Execution exec = new Execution(2L, 0L, contexts);
         SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 1, exec);
 
         SuspendedExecution saved = repository.save(suspendedExecution);
@@ -135,9 +137,9 @@ public class SuspendedExecutionsRepositoryTest {
     @Test
     public void findFinishedSuspendedExecutionsNegativeTest(){
 
-        List<String> contextNames = new ArrayList<>();
-        contextNames.add("flowContext");
-        Execution exec = new Execution(2L, 0L, contextNames);
+        Map<String, String> contexts = new HashMap<>();
+        contexts.put("flowContext", "");
+        Execution exec = new Execution(2L, 0L, contexts);
         SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec);
 
         SuspendedExecution saved = repository.save(suspendedExecution);

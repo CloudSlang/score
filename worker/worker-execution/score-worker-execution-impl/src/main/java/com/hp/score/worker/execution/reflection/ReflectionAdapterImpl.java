@@ -1,9 +1,9 @@
 package com.hp.score.worker.execution.reflection;
 
 import com.hp.score.worker.execution.services.SessionDataService;
-import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.score.facade.entities.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
-import com.hp.oo.internal.sdk.execution.FlowExecutionException;
+import com.hp.score.exceptions.FlowExecutionException;
 import com.hp.score.api.ControlActionMetadata;
 import com.hp.score.lang.SystemContext;
 import org.apache.commons.lang.Validate;

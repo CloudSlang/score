@@ -3,7 +3,7 @@ package com.hp.score.engine.queue.services;
 import com.hp.score.engine.queue.entities.ExecutionMessage;
 import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
-import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.score.facade.entities.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.score.orchestrator.services.PauseResumeService;
 import com.hp.score.orchestrator.services.SplitJoinService;
@@ -121,7 +121,8 @@ public class QueueListenerImplTest {
 
 	private Execution createBranchExecution() {
 		SystemContext systemContext = new SystemContext();
-		systemContext.setBrunchId(UUID.randomUUID().toString());
+		systemContext.setBranchId(UUID.randomUUID()
+                                      .toString());
 		systemContext.put(ExecutionConstants.NEW_BRANCH_MECHANISM, Boolean.TRUE);
 		Random random = new Random();
 		return new Execution(random.nextLong(), random.nextLong(), 0L, new HashMap<String, String>(0), systemContext);

@@ -1,6 +1,6 @@
 package com.hp.score.orchestrator.services;
 
-import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.score.facade.entities.Execution;
 import com.hp.score.orchestrator.entities.SplitMessage;
 
 import java.util.List;
