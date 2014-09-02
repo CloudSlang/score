@@ -1,6 +1,6 @@
 package com.hp.score.worker.execution.services;
 
-import com.hp.oo.broker.entities.RunningExecutionPlan;
+import com.hp.score.facade.entities.RunningExecutionPlan;
 import com.hp.oo.enginefacade.execution.ExecutionStatus;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.enginefacade.execution.PauseReason;

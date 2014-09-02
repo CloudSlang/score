@@ -1,7 +1,7 @@
 package com.hp.score.orchestrator.services;
 
-import com.hp.oo.broker.entities.RunningExecutionPlan;
-import com.hp.oo.broker.services.RunningExecutionPlanService;
+import com.hp.score.facade.entities.RunningExecutionPlan;
+import com.hp.score.facade.services.RunningExecutionPlanService;
 import com.hp.score.worker.management.services.dbsupport.WorkerDbSupportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;

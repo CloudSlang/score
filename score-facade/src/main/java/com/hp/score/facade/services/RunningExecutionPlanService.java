@@ -1,6 +1,6 @@
-package com.hp.oo.broker.services;
+package com.hp.score.facade.services;
 
-import com.hp.oo.broker.entities.RunningExecutionPlan;
+import com.hp.score.facade.entities.RunningExecutionPlan;
 import com.hp.score.api.ExecutionPlan;
 
 import java.util.List;

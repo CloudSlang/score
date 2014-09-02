@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
 import com.hp.score.worker.management.WorkerConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.hp.oo.broker.entities.RunningExecutionPlan;
+import com.hp.score.facade.entities.RunningExecutionPlan;
 import com.hp.oo.enginefacade.execution.ExecutionStatus;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.enginefacade.execution.PauseReason;

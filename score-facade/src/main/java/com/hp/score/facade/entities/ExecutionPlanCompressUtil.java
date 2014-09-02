@@ -1,4 +1,4 @@
-package com.hp.oo.broker.entities;
+package com.hp.score.facade.entities;
 
 import com.hp.score.api.ExecutionPlan;
 import org.apache.log4j.Logger;

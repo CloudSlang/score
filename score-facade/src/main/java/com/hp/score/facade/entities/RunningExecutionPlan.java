@@ -1,4 +1,4 @@
-package com.hp.oo.broker.entities;
+package com.hp.score.facade.entities;
 
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.engine.data.AbstractIdentifiable;

@@ -1,6 +1,6 @@
 package com.hp.score.orchestrator.services;
 
-import com.hp.oo.broker.services.RunningExecutionPlanService;
+import com.hp.score.facade.services.RunningExecutionPlanService;
 import com.hp.score.engine.node.entities.WorkerNode;
 import com.hp.score.engine.queue.entities.ExecStatus;
 import com.hp.score.engine.queue.entities.ExecutionMessage;

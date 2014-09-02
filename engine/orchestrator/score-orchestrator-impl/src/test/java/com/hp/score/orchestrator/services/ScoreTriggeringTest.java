@@ -1,16 +1,13 @@
 package com.hp.score.orchestrator.services;
 
-import com.hp.oo.broker.entities.RunningExecutionPlan;
-import com.hp.oo.broker.services.RunningExecutionPlanService;
+import com.hp.score.facade.entities.RunningExecutionPlan;
+import com.hp.score.facade.services.RunningExecutionPlanService;
 import com.hp.score.engine.queue.entities.ExecutionMessage;
 import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.score.engine.queue.services.QueueDispatcherService;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.TriggeringProperties;
 import com.hp.score.engine.data.IdentityGenerator;
-import com.hp.score.orchestrator.services.ExecutionStateService;
-import com.hp.score.orchestrator.services.ScoreTriggering;
-import com.hp.score.orchestrator.services.ScoreTriggeringImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;

@@ -1,6 +1,6 @@
 package com.hp.score.engine.queue.services;
 
-import com.hp.oo.broker.services.RunningExecutionPlanService;
+import com.hp.score.facade.services.RunningExecutionPlanService;
 import com.hp.oo.internal.sdk.execution.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.score.events.EventConstants;

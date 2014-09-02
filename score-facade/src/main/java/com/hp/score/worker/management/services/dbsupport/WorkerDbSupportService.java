@@ -1,8 +1,5 @@
 package com.hp.score.worker.management.services.dbsupport;
-import com.hp.oo.broker.entities.BranchContextHolder;
-import com.hp.oo.broker.entities.RunningExecutionPlan;
-
-import java.util.List;
+import com.hp.score.facade.entities.RunningExecutionPlan;
 
 /**
  * Created by IntelliJ IDEA.

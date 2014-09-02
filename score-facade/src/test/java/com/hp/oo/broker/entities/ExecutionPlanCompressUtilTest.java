@@ -3,6 +3,7 @@ package com.hp.oo.broker.entities;
 import com.hp.score.api.ControlActionMetadata;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ExecutionStep;
+import com.hp.score.facade.entities.ExecutionPlanCompressUtil;
 import junit.framework.Assert;
 import org.junit.Test;
 
