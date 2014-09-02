@@ -13,10 +13,4 @@ public class StubServicesContext {
     StubPauseResumeServiceImpl pauseResumeService(){
         return new StubPauseResumeServiceImpl();
     }
-
-    @Bean
-    StubRuntimeValueService runtimeValueService() {
-        return new StubRuntimeValueService();
-    }
-
 }

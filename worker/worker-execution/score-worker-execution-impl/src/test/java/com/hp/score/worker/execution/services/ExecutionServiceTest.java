@@ -1,7 +1,6 @@
 package com.hp.score.worker.execution.services;
 
 import com.hp.oo.broker.entities.RunningExecutionPlan;
-import com.hp.oo.broker.services.RuntimeValueService;
 import com.hp.oo.enginefacade.execution.ExecutionStatus;
 import com.hp.oo.enginefacade.execution.ExecutionSummary;
 import com.hp.oo.enginefacade.execution.PauseReason;
@@ -59,9 +58,6 @@ public class ExecutionServiceTest {
 	private ExecutionServiceImpl executionService;
 
 	@Autowired
-	private RuntimeValueService runtimeValueService;
-
-	@Autowired
 	private WorkerDbSupportService workerDbSupportService;
 
 	@Autowired
@@ -72,7 +68,7 @@ public class ExecutionServiceTest {
 
 	@Before
 	public void init() {
-		Mockito.reset(runtimeValueService, workerDbSupportService, pauseResumeService);
+		Mockito.reset(workerDbSupportService, pauseResumeService);
 	}
 
 	@Test
@@ -289,11 +285,6 @@ public class ExecutionServiceTest {
 		@Bean
 		public CancelExecutionService getCancelExecutionService() {
 			return mock(CancelExecutionService.class);
-		}
-
-		@Bean
-		public RuntimeValueService runtimeValueService() {
-			return mock(RuntimeValueService.class);
 		}
 
 		@Bean
