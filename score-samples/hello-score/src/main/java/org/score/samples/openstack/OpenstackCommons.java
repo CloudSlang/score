@@ -51,6 +51,7 @@ public class OpenstackCommons {
 	public static final String PREPARE_DELETE_SERVER_METHOD = "prepareDeleteServer";
 	public static final String GET_SERVER_ID_METHOD = "getServerId";
 	public static final String PREPARE_SEND_EMAIL_METHOD = "prepareSendEmail";
+	public static final String OPEN_STACK_HEALTH_CHECK_SERVER_NAME = "health_check_server";
 
 	public static void createGetTokenStep(
 			ExecutionPlanBuilder builder,

@@ -28,20 +28,6 @@ public class CreateServerFlow {
 		inputBindings = generateInitialInputBindings();
 	}
 
-	private List<InputBinding> generateInitialInputBindings() {
-		List<InputBinding> bindings = new ArrayList<>();
-
-		bindings.add(createInputBinding(OPENSTACK_HOST_MESSAGE, HOST_KEY, true));
-		bindings.add(createInputBindingWithDefaultValue(IDENTITY_PORT_MESSAGE, IDENTITY_PORT_KEY, true, DEFUALT_IDENTITY_PORT));
-		bindings.add(createInputBindingWithDefaultValue(COMPUTE_PORT_MESSAGE, COMPUTE_PORT_KEY, true, DEFAULT_COMPUTE_PORT));
-		bindings.add(createInputBindingWithDefaultValue(OPEN_STACK_IMAGE_REFERENCE_MESSAGE, IMAGE_REFERENCE_KEY, true, DEFAULT_IMAGE_REF));
-		bindings.add(createInputBinding(OPENSTACK_USERNAME_MESSAGE, USERNAME_KEY, true));
-		bindings.add(createInputBinding(OPENSTACK_PASSWORD_MESSAGE, PASSWORD_KEY, true));
-		bindings.add(createInputBinding(SERVER_NAME_MESSAGE, SERVER_NAME_KEY, true));
-
-		return bindings;
-	}
-
 	public TriggeringProperties createServerFlow() {
 		ExecutionPlanBuilder builder = new ExecutionPlanBuilder();
 
@@ -73,6 +59,24 @@ public class CreateServerFlow {
 		return builder.createTriggeringProperties();
 	}
 
+	public List<InputBinding> getInputBindings() {
+		return inputBindings;
+	}
+
+	private List<InputBinding> generateInitialInputBindings() {
+		List<InputBinding> bindings = new ArrayList<>();
+
+		bindings.add(createInputBinding(OPENSTACK_HOST_MESSAGE, HOST_KEY, true));
+		bindings.add(createInputBindingWithDefaultValue(IDENTITY_PORT_MESSAGE, IDENTITY_PORT_KEY, true, DEFUALT_IDENTITY_PORT));
+		bindings.add(createInputBindingWithDefaultValue(COMPUTE_PORT_MESSAGE, COMPUTE_PORT_KEY, true, DEFAULT_COMPUTE_PORT));
+		bindings.add(createInputBindingWithDefaultValue(OPEN_STACK_IMAGE_REFERENCE_MESSAGE, IMAGE_REFERENCE_KEY, true, DEFAULT_IMAGE_REF));
+		bindings.add(createInputBinding(OPENSTACK_USERNAME_MESSAGE, USERNAME_KEY, true));
+		bindings.add(createInputBinding(OPENSTACK_PASSWORD_MESSAGE, PASSWORD_KEY, true));
+		bindings.add(createInputBinding(SERVER_NAME_MESSAGE, SERVER_NAME_KEY, true));
+
+		return bindings;
+	}
+
 	private void prepareCreateServerStep(
 			ExecutionPlanBuilder builder,
 			Long stepId,
@@ -92,10 +96,5 @@ public class CreateServerFlow {
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, failureStepId));
 
 		builder.addOOActionStep(stepId, HTTP_CLIENT_ACTION_CLASS, HTTP_CLIENT_ACTION_METHOD, null, navigationMatchers);
-	}
-
-    //TODO - Levi:public methods should be at the beginning
-	public List<InputBinding> getInputBindings() {
-		return inputBindings;
 	}
 }

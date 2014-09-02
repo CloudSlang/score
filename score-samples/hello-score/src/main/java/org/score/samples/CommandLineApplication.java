@@ -6,7 +6,6 @@ import com.hp.score.events.EventBus;
 import com.hp.score.events.EventConstants;
 import com.hp.score.events.ScoreEvent;
 import com.hp.score.events.ScoreEventListener;
-import org.apache.log4j.Logger;
 import org.score.samples.openstack.actions.InputBinding;
 import org.score.samples.openstack.actions.OOActionRunner;
 import org.score.samples.utility.ReflectionUtility;
@@ -15,6 +14,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -28,7 +29,6 @@ import static org.score.samples.openstack.OpenstackCommons.prepareExecutionConte
 import static org.score.samples.openstack.OpenstackCommons.readInput;
 import static org.score.samples.openstack.OpenstackCommons.readPredefinedInput;
 import static org.score.samples.utility.ReadInputUtility.readIntegerInput;
-import static org.score.samples.utility.ReadInputUtility.readLine;
 
 /**
  * Date: 8/28/2014
@@ -36,10 +36,11 @@ import static org.score.samples.utility.ReadInputUtility.readLine;
  * @author Bonczidai Levente
  */
 public class CommandLineApplication {
-	private final static Logger logger = Logger.getLogger(CommandLineApplication.class);
 	public static final String OPENSTACK_FLOWS_PACKAGE = "org.score.samples.openstack";
 
 	private List<FlowMetadata> predefinedFlows;
+	private Integer triggeringStatus; //1-running flow, 0-ready for trigger
+	private static final String ALLEGRO_BANNER_PATH = "/allegro_banner.txt";
 
 	@Autowired
 	private Score score;
@@ -50,6 +51,7 @@ public class CommandLineApplication {
 	public CommandLineApplication() {
 		predefinedFlows = new ArrayList<>();
 		registerPredefinedExecutionPlans();
+		triggeringStatus = 0;
 	}
 
 	private void registerPredefinedExecutionPlans() {
@@ -67,39 +69,50 @@ public class CommandLineApplication {
 	}
 
 	public static void main(String[] args) {
+		displaySignature();
 		CommandLineApplication app = loadApp();
 		app.registerEventListeners();
 		app.start();
 	}
 
+	private static void displaySignature() {
+		System.out.println(loadBanner(ALLEGRO_BANNER_PATH));
+	}
+
+	private static String loadBanner(String relativePath) {
+		InputStream inputStream = CommandLineApplication.class.getResourceAsStream(relativePath);
+		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+		StringBuilder bannerBuilder = new StringBuilder();
+		String line;
+		try {
+			while ((line = reader.readLine()) != null) {
+				bannerBuilder.append(line);
+				bannerBuilder.append("\n");
+			}
+			reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return bannerBuilder.toString();
+	}
+
 	private void start() {
-		String command = "";
 		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-
-		while(!command.equals("2")) {
-			System.out.println("Select command:");
-			System.out.println("1 - Trigger flow");
-			System.out.println("2 - Quit");
-
-			System.out.println("Command: ");
-			command = readLine(reader);
-
-			try {
-				switch (command) {
-					case "1":
-						displayAvailableFlows(reader);
-						break;
-					case "2":
-						System.exit(0);
-						break;
-					default:
-						System.out.println("Unknown command..");
-						break;
+		while (true) {
+			if (!isFlowRunning()) {
+				displayAvailableFlows(reader);
+			} else {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
-			} catch (Exception ex) {
-				ex.printStackTrace();
 			}
 		}
+	}
+
+	private boolean isFlowRunning() {
+			return triggeringStatus == 1;
 	}
 
 	private void displayAvailableFlows(BufferedReader reader) {
@@ -129,6 +142,7 @@ public class CommandLineApplication {
 		List<InputBinding> bindings = prepareInputBindings(className, inputBindingMethodName);
 		manageBindings(bindings, reader);
 		TriggeringProperties triggeringProperties = prepareTriggeringProperties(className, triggeringPropertiesMethodName, bindings);
+		setTriggeringStatus(1);
 		score.trigger(triggeringProperties);
 	}
 
@@ -187,37 +201,29 @@ public class CommandLineApplication {
 	}
 
 	private void registerEventListeners() {
-
-        //TODO - Levi: create private method of  registerOOActionRunnerEventListener
-		//register listener for action runtime events
-		Set<String> handlerTypes = new HashSet<>();
-		handlerTypes.add(OOActionRunner.ACTION_RUNTIME_EVENT_TYPE);
-		registerInfoEventListener(handlerTypes);
-
-		//register listener for action exception events
-		handlerTypes = new HashSet<>();
-		handlerTypes.add(OOActionRunner.ACTION_EXCEPTION_EVENT_TYPE);
-		registerExceptionEventListener(handlerTypes);
-
-		// for closing the Application Context when score finishes execution
+		registerOOActionRunnerEventListener();
+		registerExceptionEventListener();
 		registerScoreEventListener();
 	}
 
-	private void registerExceptionEventListener(Set<String> handlerTypes) {
+	private void registerOOActionRunnerEventListener() {
+		Set<String> handlerTypes = new HashSet<>();
+		handlerTypes.add(OOActionRunner.ACTION_RUNTIME_EVENT_TYPE);
 		eventBus.subscribe(new ScoreEventListener() {
 			@Override
 			public void onEvent(ScoreEvent event) {
-				logExceptionListenerEvent(event);
+				logListenerEvent(event, true);
 			}
 		}, handlerTypes);
 	}
 
-    //TODO - Levi: why its called info? i changed it all to system.out...
-	private void registerInfoEventListener(Set<String> handlerTypes) {
+	private void registerExceptionEventListener() {
+		Set<String> handlerTypes = new HashSet<>();
+		handlerTypes.add(OOActionRunner.ACTION_EXCEPTION_EVENT_TYPE);
 		eventBus.subscribe(new ScoreEventListener() {
 			@Override
 			public void onEvent(ScoreEvent event) {
-				logListenerEvent(event);
+				logListenerEvent(event, true);
 			}
 		}, handlerTypes);
 	}
@@ -237,22 +243,24 @@ public class CommandLineApplication {
 						return;
 					}
 				}
-				logScoreListenerEvent(event);
+				logListenerEvent(event, false);
+				setTriggeringStatus(0);
 			}
 		}, handlerTypes);
 	}
 
-    //TODO - Levi: the follow 3 method should be one!!
-	private void logExceptionListenerEvent(ScoreEvent event) {
-		System.out.println("Event " + event.getEventType() + " occurred: " + event.getData());
+	private void setTriggeringStatus(Integer status) {
+		triggeringStatus = status;
 	}
 
-	private void logListenerEvent(ScoreEvent event) {
-        System.out.println("Event " + event.getEventType() + " occurred: " + event.getData());
-	}
-
-	private void logScoreListenerEvent(ScoreEvent event) {
-        System.out.println("Event " + event.getEventType() + " occurred");
+	private void logListenerEvent(ScoreEvent event, boolean displayData) {
+		String message;
+		if (displayData) {
+			message = "Event " + event.getEventType() + " occurred: " + event.getData();
+		} else {
+			message = "Event " + event.getEventType() + " occurred";
+		}
+		System.out.println(message);
 	}
 
 	private static class FlowMetadata {

@@ -75,15 +75,16 @@ public class ContextMerger {
 		List<String> serverNames = getServerList(returnResult);
 
 		String result = "";
-		logger.info("Available servers:");
+		System.out.println("Available servers:");
 
 		for(String currentServerName : serverNames) {
-			logger.info(currentServerName);
+			System.out.println(currentServerName);
 			result += currentServerName + ",";
 		}
 		returnMap.put(SERVERS_KEY, result);
 		return returnMap;
 	}
+
 	public Map<String, String> prepareGetServerId(Map<String, Serializable> executionContext, ExecutionRuntimeServices executionRuntimeServices, String methodName){
 		String returnResult = executionContext.get(RETURN_RESULT_KEY).toString();
 

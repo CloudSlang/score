@@ -30,15 +30,6 @@ public class ValidateServerExistsFlow {
 		inputBindings = generateInitialInputBindings();
 	}
 
-	private List<InputBinding> generateInitialInputBindings() {
-		List<InputBinding> bindings = new ArrayList<>();
-
-		bindings.addAll(new ListServersFlow().getInputBindings());
-		bindings.add(createInputBinding(SERVER_NAME_MESSAGE, SERVER_NAME_KEY, true));
-
-		return bindings;
-	}
-
 	public TriggeringProperties validateServerExistsFlow() {
 		ExecutionPlanBuilder builder = new ExecutionPlanBuilder("validate");
 		Long splitId = 0L;
@@ -49,42 +40,17 @@ public class ValidateServerExistsFlow {
 		Long stringOccurencesId = 5L;
 		Long resultFormatterId = 6L;
 
-		//get servers
-		List<NavigationMatcher<Serializable>> navigationMatchers = new ArrayList<>();
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, RESPONSE_KEY, SUCCESS_KEY, prepareStringOccurrencesId));
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, failureId));
-		ListServersFlow listServersFlow = new ListServersFlow();
-		TriggeringProperties triggeringProperties = listServersFlow.listServersFlow();
-		List<String> inputKeys = new ArrayList<>();
-		for (InputBinding inputBinding : listServersFlow.getInputBindings()) {
-			inputKeys.add(inputBinding.getInputKey());
-		}
+		createGetServersSubflow(builder, splitId, joinId, failureId, prepareStringOccurrencesId);
 
-		builder.addSubflow(splitId, joinId, triggeringProperties, inputKeys, navigationMatchers);
+		createPrepareStringOccurencesStep(builder, prepareStringOccurrencesId, stringOccurencesId);
 
-		//prepare string occurrences
-		navigationMatchers = new ArrayList<>();
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, stringOccurencesId));
-		builder.addOOActionStep(prepareStringOccurrencesId, CONTEXT_MERGER_CLASS, "prepareStringOccurrences", null, navigationMatchers);
+		createStringOccurencesStep(builder, stringOccurencesId, successId, resultFormatterId);
 
-		//string occurrence
-		navigationMatchers = new ArrayList<>();
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.COMPARE_GREATER, RETURN_RESULT, "0", successId));
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, resultFormatterId));
-		builder.addOOActionStep(stringOccurencesId,
-				"org.score.samples.openstack.actions.StringOccurrenceCounter",
-				"execute",
-				null,
-				navigationMatchers);
+		createSuccessStep(builder, successId);
 
-		//result formatter step
-		builder.addStep(resultFormatterId, CONTEXT_MERGER_CLASS, "validateServerResult", failureId);
+		createResultFormatterStepForFailure(builder, failureId, resultFormatterId);
 
-		//success step
-		builder.addOOActionFinalStep(successId, FINAL_STEP_ACTIONS_CLASS, SUCCESS_STEP_ACTION);
-
-		//failure step
-		builder.addOOActionFinalStep(failureId, FINAL_STEP_ACTIONS_CLASS, FAILURE_STEP_ACTION);
+		createFailureStep(builder, failureId);
 
 		Map<String, Serializable> context = new HashMap<>();
 		context.put(FLOW_DESCRIPTION, "Validate servers");
@@ -97,5 +63,54 @@ public class ValidateServerExistsFlow {
 
 	public List<InputBinding> getInputBindings() {
 		return inputBindings;
+	}
+
+	private void createPrepareStringOccurencesStep(ExecutionPlanBuilder builder, Long prepareStringOccurrencesId, Long stringOccurencesId) {
+		//prepare string occurrences
+		List<NavigationMatcher<Serializable>> navigationMatchers;
+		navigationMatchers = new ArrayList<>();
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, stringOccurencesId));
+		builder.addOOActionStep(prepareStringOccurrencesId, CONTEXT_MERGER_CLASS, "prepareStringOccurrences", null, navigationMatchers);
+	}
+
+	private void createResultFormatterStepForFailure(ExecutionPlanBuilder builder, Long failureId, Long resultFormatterId) {
+		//result formatter step
+		builder.addStep(resultFormatterId, CONTEXT_MERGER_CLASS, "validateServerResult", failureId);
+	}
+
+	private void createStringOccurencesStep(ExecutionPlanBuilder builder, Long stringOccurencesId, Long successId, Long resultFormatterId) {
+		List<NavigationMatcher<Serializable>> navigationMatchers;//string occurrence
+		navigationMatchers = new ArrayList<>();
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.COMPARE_GREATER, RETURN_RESULT, "0", successId));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, resultFormatterId));
+		builder.addOOActionStep(stringOccurencesId,
+				"org.score.samples.openstack.actions.StringOccurrenceCounter",
+				"execute",
+				null,
+				navigationMatchers);
+	}
+
+	private void createGetServersSubflow(ExecutionPlanBuilder builder, Long splitId, Long joinId, Long failureId, Long prepareStringOccurrencesId) {
+		//get servers
+		List<NavigationMatcher<Serializable>> navigationMatchers = new ArrayList<>();
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, RESPONSE_KEY, SUCCESS_KEY, prepareStringOccurrencesId));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, failureId));
+		ListServersFlow listServersFlow = new ListServersFlow();
+		TriggeringProperties triggeringProperties = listServersFlow.listServersFlow();
+		List<String> inputKeys = new ArrayList<>();
+		for (InputBinding inputBinding : listServersFlow.getInputBindings()) {
+			inputKeys.add(inputBinding.getInputKey());
+		}
+
+		builder.addSubflow(splitId, joinId, triggeringProperties, inputKeys, navigationMatchers);
+	}
+
+	private List<InputBinding> generateInitialInputBindings() {
+		List<InputBinding> bindings = new ArrayList<>();
+
+		bindings.addAll(new ListServersFlow().getInputBindings());
+		bindings.add(createInputBinding(SERVER_NAME_MESSAGE, SERVER_NAME_KEY, true));
+
+		return bindings;
 	}
 }
