@@ -155,13 +155,6 @@ public class SplitJoinServiceTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void notNullPositionEndBranchTest() {
-        Execution branch = Mockito.mock(Execution.class);
-        Mockito.when(branch.getPosition()).thenReturn(-1L);
-        splitJoinService.endBranch(Arrays.asList(branch));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
     public void nullParamEndBranchTest() {
         splitJoinService.endBranch(null);
     }

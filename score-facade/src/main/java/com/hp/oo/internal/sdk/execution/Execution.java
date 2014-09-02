@@ -138,7 +138,7 @@ public class Execution implements Serializable {
         - Matan
     */
     public boolean isBranch() {
-        return !StringUtils.isEmpty(systemContext.getBrunchId());
+        return !StringUtils.isEmpty(systemContext.getBranchId());
     }
 
     public boolean isNewBranchMechanism() {
@@ -146,11 +146,11 @@ public class Execution implements Serializable {
     }
 
     public String getBranchId() {
-        return getSystemContext().getBrunchId();
+        return getSystemContext().getBranchId();
     }
 
     public void putBranchId(String branchId) {
-        Validate.isTrue(StringUtils.isEmpty(getSystemContext().getBrunchId()), "not allowed to overwrite branch id");
+        Validate.isTrue(StringUtils.isEmpty(getSystemContext().getBranchId()), "not allowed to overwrite branch id");
         getSystemContext().setBrunchId(branchId);
     }
 

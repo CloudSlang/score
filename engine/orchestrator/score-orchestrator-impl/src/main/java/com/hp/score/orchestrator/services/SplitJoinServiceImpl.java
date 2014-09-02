@@ -113,11 +113,6 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             return;
 
         for (Execution execution : executions) {
-            //TODO - NonBlocking this will be deleted when the old branch mechanism is completely removed (after NB is re-implemented)
-            Validate.isTrue(
-                    (execution.getPosition() == null) ||
-                            (execution.getPosition() != -1L && execution.getPosition() != -2L),
-                    "branch finished with position = " + execution.getPosition() + " -> new branch mechanism is ending a branch from old mechanism");
             if (logger.isDebugEnabled())
                 logger.debug("finishing branch " + execution.getBranchId() + " for execution " + execution.getExecutionId());
         }

@@ -47,7 +47,7 @@ public class ExecutionRuntimeServices implements Serializable {
         myMap.remove(BRANCH_ID);
     }
 
-    public String getBrunchId(){
+    public String getBranchId(){
         return getFromMap(BRANCH_ID);
     }
 

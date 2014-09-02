@@ -146,7 +146,7 @@ public class QueueListenerImpl implements QueueListener {
 	}
 
 	private Long pauseExecution(Execution execution) {
-		String branchId = execution.getSystemContext().getBrunchId();
+		String branchId = execution.getSystemContext().getBranchId();
 
 		ExecutionSummary pe = pauseResumeService.readPausedExecution(execution.getExecutionId(), branchId);
 

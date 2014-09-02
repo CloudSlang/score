@@ -122,27 +122,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
     </changeSet>
 
-    <changeSet author="engine" id="create OO_BRANCH_CONTEXTS">
-        <createTable tableName="OO_BRANCH_CONTEXTS">
-            <column name="ID" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="PK_OO_BRANCH_CONTEXTS" />
-            </column>
-            <column name="SPLIT_ID" type="VARCHAR(255)">
-                <constraints nullable="false" />
-            </column>
-            <column name="BRANCH_CONTEXT" type="${clob.type}">
-                <constraints nullable="false" />
-            </column>
-            <column name="EXECUTION_ID" type="VARCHAR(255)" />
-            <column name="BRANCH_EXCEPTION" type="${clob.type}" />
-            <column name="BRANCH_ID" type="VARCHAR(255)" />
-        </createTable>
-
-        <createIndex indexName="SPLIT_ID_OO_BRANCH_CONTEXTS" tableName="OO_BRANCH_CONTEXTS">
-            <column name="SPLIT_ID" />
-        </createIndex>
-    </changeSet>
-
     <!--Create new tables for the Split mechanism in orchestrator-->
     <changeSet id="Create OO_SUSPENDED_EXECUTIONS" author="engine">
         <createTable tableName="OO_SUSPENDED_EXECUTIONS">
