@@ -12,11 +12,4 @@ import java.util.List;
  */
 public interface WorkerDbSupportService {
     RunningExecutionPlan readExecutionPlanById(Long id);
-
-     //For parallel execution
-    List<BranchContextHolder> readBranchContextById(String splitId);
-    Long createBranchContext(BranchContextHolder branchContextHolder);
-    void deleteParallelRecordsById(String splitId);
-
-    int countBranchContextBySplitId(String splitId);
 }

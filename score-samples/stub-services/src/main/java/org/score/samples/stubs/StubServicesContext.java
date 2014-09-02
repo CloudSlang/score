@@ -19,9 +19,4 @@ public class StubServicesContext {
         return new StubRuntimeValueService();
     }
 
-    @Bean
-    StubParallelPersistenceServiceImpl parallelPersistenceService() {
-       return new StubParallelPersistenceServiceImpl();
-    }
-
 }
