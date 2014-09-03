@@ -18,71 +18,71 @@ public class SystemContext extends ExecutionRuntimeServices implements Map<Strin
     }
 
     public SystemContext(Map<? extends String, ? extends Serializable> map) {
-        this.myMap = new HashMap<>(map);
+        this.contextMap = new HashMap<>(map);
     }
 
     @Override
     public int size() {
-        return myMap.size();
+        return contextMap.size();
     }
 
     @Override
     public boolean isEmpty() {
-        return myMap.isEmpty();
+        return contextMap.isEmpty();
     }
 
     @Override
     public boolean containsKey(Object key) {
-        return myMap.containsKey(key);
+        return contextMap.containsKey(key);
     }
 
     @Override
     public boolean containsValue(Object value) {
-        return myMap.containsValue(value);
+        return contextMap.containsValue(value);
     }
 
     @Override
     public Serializable get(Object key) {
-        return myMap.get(key);
+        return contextMap.get(key);
     }
 
     @Override
     public Serializable put(String key, Serializable value) {
-        return myMap.put(key, value);
+        return contextMap.put(key, value);
     }
 
     @Override
     public Serializable remove(Object key) {
-        return myMap.remove(key);
+        return contextMap.remove(key);
     }
 
     @Override
     public void putAll(Map<? extends String, ? extends Serializable> m) {
-        myMap.putAll(m);
+        contextMap.putAll(m);
     }
 
     @Override
     public void clear() {
-        myMap.clear();
+        contextMap.clear();
     }
 
     @Override
     public Set<String> keySet() {
-        return myMap.keySet();
+        return contextMap.keySet();
     }
 
     @Override
     public Collection<Serializable> values() {
-        return myMap.values();
+        return contextMap.values();
     }
 
     @Override
     public Set<Entry<String, Serializable>> entrySet() {
-        return myMap.entrySet();
+        return contextMap.entrySet();
     }
 
     public void resume() {
-        myMap.remove(EXECUTION_PAUSED);
+        contextMap.remove(EXECUTION_PAUSED);
     }
 
     public void addBranch(Long startPosition, Long executionPlanId, Map<String, Serializable> context, SystemContext systemContext) {

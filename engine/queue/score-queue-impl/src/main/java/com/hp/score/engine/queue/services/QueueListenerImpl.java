@@ -84,14 +84,20 @@ public class QueueListenerImpl implements QueueListener {
 		List<ScoreEvent> scoreEvents = new ArrayList<>(messages.size());
 
 		for (ExecutionMessage executionMessage : messages) {
-			handleTerminatedMessage(executionMessage);
-			Execution execution = extractExecution(executionMessage);
-			scoreEvents.add(scoreEventFactory.createFinishedEvent(execution));//TODO:??? also if it is branch??? need to check this
+            Boolean isBranch = isBranchExecution(executionMessage);
+            handleTerminatedMessage(executionMessage,isBranch);
+            Execution execution = extractExecution(executionMessage);
+            if(!isBranch){
+                scoreEvents.add(scoreEventFactory.createFinishedEvent(execution));
+            }
+            else{
+                scoreEvents.add(scoreEventFactory.createFinishedBranchEvent(execution));
+            }
 		}
 		return scoreEvents.toArray(new ScoreEvent[scoreEvents.size()]);
 	}
 
-	private void handleTerminatedMessage(ExecutionMessage executionMessage) {
+	private void handleTerminatedMessage(ExecutionMessage executionMessage,Boolean isBranch) {
 		//Only delete parent runs and not branches because the Terminated event of branches should not cause the
 		//deletion of the entire run
 		if (!isBranchExecution(executionMessage)) {

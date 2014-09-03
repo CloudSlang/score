@@ -79,7 +79,14 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 		return new ScoreEvent(eventType, eventData);
 	}
 
-	private Serializable createNoWorkerFailureEventData(Execution execution, Long pauseId) {
+    @Override
+    public ScoreEvent createFinishedBranchEvent(Execution execution) {
+        String eventType = EventConstants.SCORE_FINISHED_BRANCH_EVENT;
+        Serializable eventData = createFinishedEventData(execution);
+        return new ScoreEvent(eventType, eventData);
+    }
+
+    private Serializable createNoWorkerFailureEventData(Execution execution, Long pauseId) {
 		String flowUuid = extractFlowUuid(execution.getRunningExecutionPlanId());
 
 		Map<String, Serializable> eventData = new HashMap<>();

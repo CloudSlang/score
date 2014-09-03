@@ -17,4 +17,5 @@ public interface ScoreEventFactory {
 
 	public ScoreEvent createNoWorkerEvent(Execution execution, Long pauseId);
 
+    public ScoreEvent createFinishedBranchEvent(Execution execution);
 }

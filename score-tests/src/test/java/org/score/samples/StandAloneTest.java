@@ -109,14 +109,15 @@ public class StandAloneTest {
         Map<String,Serializable> getRuntimeValues = new HashMap<>();
         getRuntimeValues.put("NEW_BRANCH_MECHANISM",Boolean.TRUE);//TODO - remove this !! needs to work with this on by default, pending Non-Blocking story
         triggeringProperties.setRuntimeValues(getRuntimeValues);
-        registerEventListener("Hello score",EventConstants.SCORE_FINISHED_EVENT);
+        registerEventListener("Hello score",EventConstants.SCORE_FINISHED_EVENT,EventConstants.SCORE_FINISHED_BRANCH_EVENT);
 
         score.trigger(triggeringProperties);
 
-        waitForAllEventsToArrive(3);//this flow should have 2 "Hello score" events only + 1 finish event
+        waitForAllEventsToArrive(5);
 
         Assert.assertEquals(2,countEvents("Hello score"));
-        //Assert.assertEquals(2,countEvents(EventConstants.SCORE_FINISHED_EVENT));//todo - temp until fix to be only 1 finish event
+        Assert.assertEquals(1,countEvents(EventConstants.SCORE_FINISHED_EVENT));
+        Assert.assertEquals(2,countEvents(EventConstants.SCORE_FINISHED_BRANCH_EVENT));
     }
 
 
@@ -142,7 +143,12 @@ public class StandAloneTest {
         Map<String, ExecutionPlan> dependencies = new HashMap<>();
         dependencies.put(subFlowExecutionPlan.getFlowUuid(), subFlowExecutionPlan);
 
-        TriggeringProperties triggeringProperties = TriggeringProperties.create(executionPlan).setDependencies(dependencies);
+        Map<String,Serializable> getRuntimeValues = new HashMap<>();
+        getRuntimeValues.put("NEW_BRANCH_MECHANISM",Boolean.TRUE);//TODO - remove this !! needs to work with this on by default, pending Non-Blocking story
+
+        TriggeringProperties triggeringProperties = TriggeringProperties.create(executionPlan).
+                setDependencies(dependencies).setRuntimeValues(getRuntimeValues);
+
         registerEventListener(EventConstants.SCORE_FINISHED_EVENT, SessionDataActions.SESSION_BEFORE_PUT_DATA_EVENT, SessionDataActions.SESSION_GET_DATA_EVENT);
         score.trigger(triggeringProperties);
 
@@ -191,7 +197,7 @@ public class StandAloneTest {
     }
 
      private void waitForAllEventsToArrive(int eventsCount) {
-        while(eventQueue.size() < eventsCount){
+        while(eventQueue.size() != eventsCount){
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
