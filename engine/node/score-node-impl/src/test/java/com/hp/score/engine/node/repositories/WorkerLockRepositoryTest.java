@@ -1,8 +1,9 @@
 package com.hp.score.engine.node.repositories;
 
+import com.hp.score.api.nodes.WorkerStatus;
 import com.hp.score.engine.node.entities.WorkerLock;
 import com.hp.score.engine.node.entities.WorkerNode;
-import com.hp.oo.enginefacade.Worker;
+//import com.hp.oo.enginefacade.Worker;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -81,7 +82,7 @@ public class WorkerLockRepositoryTest {
         worker.setHostName("worker host name");
         worker.setInstallPath("faked installation path");
         worker.setPassword("faked password");
-        worker.setStatus(Worker.Status.RUNNING);
+        worker.setStatus(WorkerStatus.RUNNING);
         worker.setActive(true);
         workerNodeRepository.saveAndFlush(worker);
     }

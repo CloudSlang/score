@@ -1,11 +1,8 @@
 package com.hp.score.orchestrator.services;
 
-import com.hp.oo.enginefacade.execution.ExecutionStatus;
-import com.hp.oo.enginefacade.execution.PauseReason;
-import com.hp.score.orchestrator.services.PauseResumeService;
+import com.hp.score.facade.execution.ExecutionStatus;
+import com.hp.score.facade.execution.PauseReason;
 import com.hp.score.orchestrator.entities.ExecutionState;
-import com.hp.score.orchestrator.services.ExecutionStateService;
-import com.hp.score.orchestrator.services.ScorePauseResume;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;

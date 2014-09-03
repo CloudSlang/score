@@ -1,9 +1,8 @@
 package com.hp.score.orchestrator.repositories;
 
-import com.hp.oo.enginefacade.execution.ExecutionStatus;
+import com.hp.score.facade.execution.ExecutionStatus;
 import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
 import com.hp.score.orchestrator.entities.ExecutionState;
-import com.hp.score.orchestrator.repositories.ExecutionStateRepository;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.hibernate.ejb.HibernatePersistence;

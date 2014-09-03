@@ -2,7 +2,7 @@ package com.hp.score.orchestrator.services;
 
 import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.score.engine.queue.services.QueueDispatcherService;
-import com.hp.oo.enginefacade.execution.ExecutionStatus;
+import com.hp.score.facade.execution.ExecutionStatus;
 import com.hp.score.facade.entities.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.score.orchestrator.entities.ExecutionState;
@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.hp.oo.enginefacade.execution.ExecutionSummary.EMPTY_BRANCH;
+import static com.hp.score.facade.execution.ExecutionSummary.EMPTY_BRANCH;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;

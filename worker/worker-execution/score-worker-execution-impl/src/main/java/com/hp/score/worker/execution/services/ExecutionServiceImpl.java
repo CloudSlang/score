@@ -15,9 +15,9 @@ import com.hp.score.worker.management.WorkerConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.hp.score.facade.entities.RunningExecutionPlan;
-import com.hp.oo.enginefacade.execution.ExecutionStatus;
-import com.hp.oo.enginefacade.execution.ExecutionSummary;
-import com.hp.oo.enginefacade.execution.PauseReason;
+import com.hp.score.facade.execution.ExecutionStatus;
+import com.hp.score.facade.execution.ExecutionSummary;
+import com.hp.score.facade.execution.PauseReason;
 import com.hp.score.worker.management.services.dbsupport.WorkerDbSupportService;
 import com.hp.score.facade.entities.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;

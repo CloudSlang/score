@@ -1,4 +1,6 @@
-package com.hp.oo.enginefacade;
+package com.hp.score.engine.node.entities;
+
+import com.hp.score.api.nodes.WorkerStatus;
 
 import java.util.List;
 
@@ -7,13 +9,12 @@ import java.util.List;
  * Date: 08/11/2O12
  */
 public interface Worker {
-	enum Status {RUNNING, FAILED, IN_RECOVERY, RECOVERED}
 
 	String getUuid();
 
 	boolean isActive();
 
-	Status getStatus();
+    WorkerStatus getStatus();
 
 	String getHostName();
 

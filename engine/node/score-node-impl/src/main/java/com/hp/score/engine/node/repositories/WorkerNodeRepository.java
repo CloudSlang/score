@@ -1,7 +1,8 @@
 package com.hp.score.engine.node.repositories;
 
+import com.hp.score.api.nodes.WorkerStatus;
 import com.hp.score.engine.node.entities.WorkerNode;
-import com.hp.oo.enginefacade.Worker;
+//import com.hp.oo.enginefacade.Worker;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -22,12 +23,12 @@ public interface WorkerNodeRepository extends JpaRepository<WorkerNode,Long> {
 
     List<WorkerNode> findByDeleted(boolean deleted);
 
-	List<WorkerNode> findByActiveAndStatusAndDeleted(boolean isActive, Worker.Status status, boolean deleted);
+	List<WorkerNode> findByActiveAndStatusAndDeleted(boolean isActive, WorkerStatus status, boolean deleted);
 
 	List<WorkerNode> findByGroupsAndDeleted(String group, boolean deleted);
 
 	@Query("select w.uuid from WorkerNode w where (w.ackVersion < ?1) and w.status <> ?2")
-	List<String> findNonRespondingWorkers(long ackVersion, Worker.Status status);
+	List<String> findNonRespondingWorkers(long ackVersion, WorkerStatus status);
 
 	@Query("select distinct g from WorkerNode w join w.groups g where w.deleted = false")
 	List<String> findGroups();

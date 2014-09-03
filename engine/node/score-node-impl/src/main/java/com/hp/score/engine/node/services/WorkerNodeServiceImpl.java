@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import com.hp.score.api.nodes.WorkerStatus;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.hp.oo.enginefacade.Worker;
-import com.hp.oo.enginefacade.Worker.Status;
 import com.hp.score.engine.node.entities.WorkerNode;
 import com.hp.score.engine.node.repositories.WorkerNodeRepository;
 import com.hp.score.engine.versioning.services.VersionService;
@@ -52,8 +51,8 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService {
 		String wrv = worker.getWorkerRecoveryVersion();
 		long version = versionService.getCurrentVersion(MSG_RECOVERY_VERSION_NAME);
 		worker.setAckVersion(version);
-		if(!worker.getStatus().equals(Status.IN_RECOVERY)) {
-			worker.setStatus(Status.RUNNING);
+		if(!worker.getStatus().equals(WorkerStatus.IN_RECOVERY)) {
+			worker.setStatus(WorkerStatus.RUNNING);
 		}
 		logger.debug("Got keepAlive for Worker with uuid=" + uuid + " and update its ackVersion to " + version);
 		return wrv;
@@ -68,7 +67,7 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService {
 		worker.setHostName(hostName);
 		worker.setActive(false);
 		worker.setInstallPath(installDir);
-		worker.setStatus(Status.FAILED);
+		worker.setStatus(WorkerStatus.FAILED);
 		password = passwordEncoder.encodePassword(password, uuid);
 		worker.setPassword(password);
 		worker.setGroups(Arrays.asList(WorkerNode.DEFAULT_WORKER_GROUPS));
@@ -94,7 +93,7 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService {
 		if(worker != null) {
 			worker.setActive(false);
 			worker.setDeleted(true);
-			worker.setStatus(Status.IN_RECOVERY);
+			worker.setStatus(WorkerStatus.IN_RECOVERY);
 		}
 	}
 
@@ -177,7 +176,7 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService {
 	public List<String> readNonRespondingWorkers() {
 		long systemVersion = versionService.getCurrentVersion(MSG_RECOVERY_VERSION_NAME);
 		long minVersionAllowed = Math.max(systemVersion - maxVersionGapAllowed, 0);
-		return workerNodeRepository.findNonRespondingWorkers(minVersionAllowed, Status.RECOVERED);
+		return workerNodeRepository.findNonRespondingWorkers(minVersionAllowed, WorkerStatus.RECOVERED);
 	}
 
 	@Override
@@ -218,7 +217,7 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService {
 
 	@Override
 	@Transactional
-	public void updateStatus(String uuid, Worker.Status status) {
+	public void updateStatus(String uuid, WorkerStatus status) {
 		WorkerNode worker = workerNodeRepository.findByUuid(uuid);
 		if(worker == null) {
 			throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
@@ -228,7 +227,7 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void updateStatusInSeparateTransaction(String uuid, Worker.Status status) {
+	public void updateStatusInSeparateTransaction(String uuid, WorkerStatus status) {
 		WorkerNode worker = workerNodeRepository.findByUuid(uuid);
 		if(worker == null) {
 			throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
@@ -298,7 +297,7 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService {
 	public Multimap<String, String> readGroupWorkersMapActiveAndRunning() {
 		Multimap<String, String> result = ArrayListMultimap.create();
 		List<WorkerNode> workers;
-		workers = workerNodeRepository.findByActiveAndStatusAndDeleted(true, Status.RUNNING, false);
+		workers = workerNodeRepository.findByActiveAndStatusAndDeleted(true, WorkerStatus.RUNNING, false);
 		for(WorkerNode worker : workers) {
 			for(String groupName : worker.getGroups()) {
 				result.put(groupName, worker.getUuid());

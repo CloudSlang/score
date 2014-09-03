@@ -1,7 +1,7 @@
 package com.hp.score.engine.node.entities;
 
-import com.hp.oo.enginefacade.Worker;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
+import com.hp.score.api.nodes.WorkerStatus;
 import com.hp.score.engine.data.AbstractIdentifiable;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -41,7 +41,7 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
 	private String uuid;
 
 	@Column(name = "STATUS", nullable = false, length = 20)
-	private Worker.Status status;
+	private WorkerStatus status;
 
 	@Column(name = "IS_ACTIVE", nullable = false)
 	private boolean active = true;
@@ -105,11 +105,11 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
 	}
 
     @Override
-	public Worker.Status getStatus() {
+	public WorkerStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(Worker.Status status) {
+	public void setStatus(WorkerStatus status) {
 		this.status = status;
 	}
 

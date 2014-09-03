@@ -1,11 +1,7 @@
 package com.hp.score.orchestrator.services;
 
-import com.hp.oo.enginefacade.execution.ExecutionStatus;
-import com.hp.score.orchestrator.services.PauseResumeService;
+import com.hp.score.facade.execution.ExecutionStatus;
 import com.hp.score.orchestrator.entities.ExecutionState;
-import com.hp.score.orchestrator.services.ExecutionStateService;
-import com.hp.score.orchestrator.services.ScorePauseResume;
-import com.hp.score.orchestrator.services.ScorePauseResumeImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
