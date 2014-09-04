@@ -7,7 +7,7 @@
 	<version>0.1.209-SNAPSHOT</version>
 
     <properties>
-        <score.sdk.version>1.1</score.sdk.version>
+        <score.sdk.version>1.2</score.sdk.version>
     </properties>
 
 	<distributionManagement>

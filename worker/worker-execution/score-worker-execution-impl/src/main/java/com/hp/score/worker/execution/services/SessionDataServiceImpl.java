@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,9 @@ public class SessionDataServiceImpl implements SessionDataService {
 
         long currentTime =  System.currentTimeMillis();
         for (SessionDataHolder sessionDataHolder : sessionDataHolders) {
+            logger.error("Checking if we need to clean. Current time: " + (new Date(currentTime)).toString()+ ".   session time: " + (new Date(sessionDataHolder.getTimeStamp())).toString());
             if (currentTime - sessionDataHolder.getTimeStamp() > sessionTimeout) {
+                logger.error("Cleaning session. Current time: " + (new Date(currentTime)).toString()+ ".   session time: " + (new Date(sessionDataHolder.getTimeStamp())).toString());
                 nonSerializableExecutionDataMap.remove(sessionDataHolder.getExecutionId());
             }
         }
@@ -40,17 +43,38 @@ public class SessionDataServiceImpl implements SessionDataService {
 
     @Override
     public Map<String, Object> getNonSerializableExecutionData(Long executionId){
-        SessionDataHolder nonSerializableExecutionData = nonSerializableExecutionDataMap.get(executionId);
-        if (nonSerializableExecutionData == null) {
-            nonSerializableExecutionData = new SessionDataHolder(executionId);
-            nonSerializableExecutionDataMap.put(nonSerializableExecutionData.getExecutionId(), nonSerializableExecutionData);
-        }
-        if (logger.isDebugEnabled() && nonSerializableExecutionData.getSessionData() != null ) {
+        SessionDataHolder nonSerializableExecutionData = getNonSerializableSessionDataHolder(executionId);
+        if (logger.isDebugEnabled()) {
             logger.debug("Execution " +executionId + " contains " + nonSerializableExecutionData.getSessionData().size() + " items");
         }
         // Resets the timestamp of the map to now for the clear session data mechanism
         nonSerializableExecutionData.resetTimeStamp();
         return nonSerializableExecutionData.getSessionData();
+    }
+
+    private SessionDataHolder getNonSerializableSessionDataHolder(Long executionId) {
+        SessionDataHolder nonSerializableExecutionData = nonSerializableExecutionDataMap.get(executionId);
+        if (nonSerializableExecutionData == null) {
+            nonSerializableExecutionData = new SessionDataHolder(executionId);
+            nonSerializableExecutionDataMap.put(nonSerializableExecutionData.getExecutionId(), nonSerializableExecutionData);
+        }
+        return nonSerializableExecutionData;
+    }
+
+    @Override
+    public void lockSessionData(Long executionId){
+        if(executionId == null)
+            return;
+        SessionDataHolder nonSerializableExecutionData = getNonSerializableSessionDataHolder(executionId);
+        nonSerializableExecutionData.setMaxTimestamp();
+    }
+
+    @Override
+    public void unlockSessionData(Long executionId){
+        if(executionId == null)
+            return;
+        SessionDataHolder nonSerializableExecutionData = getNonSerializableSessionDataHolder(executionId);
+        nonSerializableExecutionData.resetTimeStamp();
     }
 
     /**
@@ -65,8 +89,7 @@ public class SessionDataServiceImpl implements SessionDataService {
         SessionDataHolder(Long executionId) {
             this.executionId = executionId;
             sessionData = new HashMap<>();
-            //todo: check why we need this strange init - initial value will be large long value, until it will reset - solves BUG : 170636
-            timeStamp = Long.MAX_VALUE;
+            timeStamp = System.currentTimeMillis();
         }
 
         Long getExecutionId() {
@@ -82,7 +105,15 @@ public class SessionDataServiceImpl implements SessionDataService {
         }
 
         void resetTimeStamp() {
+            if(logger.isDebugEnabled()) logger.debug("Resetting session timestamp for execution: " + executionId);
             timeStamp = System.currentTimeMillis();
+        }
+
+        // set value to large long value before running an action. Reset it after action finishes -
+        // in order to prevent resetting in the middle of running long actions- solves BUG : 170636
+        void setMaxTimestamp() {
+            if(logger.isDebugEnabled()) logger.debug("Locking session timestamp for execution: " + executionId);
+            timeStamp = Long.MAX_VALUE;
         }
     }
 

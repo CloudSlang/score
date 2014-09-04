@@ -40,7 +40,8 @@ public class SessionDataActions {
 
     public void sleepAction(){
         try {
-            Thread.sleep(2000);
+            System.out.println("Sleeping...");
+            Thread.sleep(4000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
