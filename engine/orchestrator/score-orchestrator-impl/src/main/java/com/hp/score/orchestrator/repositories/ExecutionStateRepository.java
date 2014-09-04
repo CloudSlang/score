@@ -1,6 +1,6 @@
 package com.hp.score.orchestrator.repositories;
 
-import com.hp.oo.enginefacade.execution.ExecutionStatus;
+import com.hp.score.facade.execution.ExecutionStatus;
 import com.hp.score.orchestrator.entities.ExecutionState;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

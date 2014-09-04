@@ -1,5 +1,6 @@
 package com.hp.score.engine.queue.services.recovery;
 
+import com.hp.score.api.nodes.WorkerStatus;
 import com.hp.score.engine.node.entities.WorkerNode;
 import com.hp.score.engine.node.services.LoginListener;
 import com.hp.score.engine.node.services.WorkerLockService;
@@ -7,7 +8,6 @@ import com.hp.score.engine.node.services.WorkerNodeService;
 import com.hp.score.engine.queue.services.CounterNames;
 import com.hp.score.engine.queue.services.ExecutionQueueService;
 import com.hp.score.engine.versioning.services.VersionService;
-import com.hp.oo.enginefacade.Worker;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,20 +56,20 @@ public class WorkerRecoveryServiceImpl implements WorkerRecoveryService, LoginLi
         List<String> workerUuids = workerNodeService.readNonRespondingWorkers();
         int messagesCount = getMessagesWithoutAck(DEFAULT_POLL_SIZE, workerUuid);
         WorkerNode worker = workerNodeService.findByUuid(workerUuid);
-        if (worker.getStatus().equals(Worker.Status.IN_RECOVERY) || workerUuids.contains(workerUuid) || messagesCount > 0) {
+        if (worker.getStatus().equals(WorkerStatus.IN_RECOVERY) || workerUuids.contains(workerUuid) || messagesCount > 0) {
             if(workerUuids.contains(workerUuid)){
                 logger.warn("Worker : " + workerUuid + " is non responsive! Worker recovery is started.");
             }
             if(messagesCount > 0){
                 logger.warn("Worker : " + workerUuid + " has " + messagesCount + " not acknowledged messages. Worker recovery is started.");
             }
-            if (worker.getStatus().equals(Worker.Status.IN_RECOVERY)){
+            if (worker.getStatus().equals(WorkerStatus.IN_RECOVERY)){
                 logger.warn("Worker : " + workerUuid + " is IN_RECOVERY status. Worker recovery is started");
             }
             doWorkerRecovery(workerUuid);
         }
         else {
-            logger.debug("Worker : " + workerUuid + " is NOT for recovery");
+            logger.info("Worker : " + workerUuid + " is NOT for recovery");
         }
     }
 
@@ -84,7 +84,7 @@ public class WorkerRecoveryServiceImpl implements WorkerRecoveryService, LoginLi
         long time = System.currentTimeMillis();
         // change status to in_recovery in separate transaction in order to make it as quickly as possible
         // so keep-alive wont be stuck and assigning won't take this worker as candidate
-        workerNodeService.updateStatusInSeparateTransaction(workerUuid, Worker.Status.IN_RECOVERY);
+        workerNodeService.updateStatusInSeparateTransaction(workerUuid, WorkerStatus.IN_RECOVERY);
 
         final AtomicBoolean shouldContinue = new AtomicBoolean(true);
 
@@ -94,7 +94,7 @@ public class WorkerRecoveryServiceImpl implements WorkerRecoveryService, LoginLi
 
         String newWRV = UUID.randomUUID().toString();
         workerNodeService.updateWRV(workerUuid, newWRV);
-        workerNodeService.updateStatus(workerUuid, Worker.Status.RECOVERED);
+        workerNodeService.updateStatus(workerUuid, WorkerStatus.RECOVERED);
 
         logger.warn("Worker [" + workerUuid + "] recovery id done in " + (System.currentTimeMillis() - time) + " ms");
     }

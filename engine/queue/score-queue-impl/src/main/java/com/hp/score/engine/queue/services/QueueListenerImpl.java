@@ -2,14 +2,14 @@ package com.hp.score.engine.queue.services;
 
 import com.hp.score.engine.queue.entities.ExecutionMessage;
 import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
-import com.hp.oo.enginefacade.execution.ExecutionSummary;
-import com.hp.oo.enginefacade.execution.PauseReason;
-import com.hp.oo.internal.sdk.execution.Execution;
-import com.hp.score.orchestrator.services.PauseResumeService;
-import com.hp.score.orchestrator.services.SplitJoinService;
 import com.hp.score.events.EventBus;
 import com.hp.score.events.ScoreEvent;
+import com.hp.score.facade.entities.Execution;
+import com.hp.score.facade.execution.ExecutionSummary;
+import com.hp.score.facade.execution.PauseReason;
 import com.hp.score.orchestrator.services.ExecutionStateService;
+import com.hp.score.orchestrator.services.PauseResumeService;
+import com.hp.score.orchestrator.services.SplitJoinService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,14 +84,20 @@ public class QueueListenerImpl implements QueueListener {
 		List<ScoreEvent> scoreEvents = new ArrayList<>(messages.size());
 
 		for (ExecutionMessage executionMessage : messages) {
-			handleTerminatedMessage(executionMessage);
-			Execution execution = extractExecution(executionMessage);
-			scoreEvents.add(scoreEventFactory.createFinishedEvent(execution));//TODO:??? also if it is branch??? need to check this
+            Boolean isBranch = isBranchExecution(executionMessage);
+            handleTerminatedMessage(executionMessage,isBranch);
+            Execution execution = extractExecution(executionMessage);
+            if(!isBranch){
+                scoreEvents.add(scoreEventFactory.createFinishedEvent(execution));
+            }
+            else{
+                scoreEvents.add(scoreEventFactory.createFinishedBranchEvent(execution));
+            }
 		}
 		return scoreEvents.toArray(new ScoreEvent[scoreEvents.size()]);
 	}
 
-	private void handleTerminatedMessage(ExecutionMessage executionMessage) {
+	private void handleTerminatedMessage(ExecutionMessage executionMessage,Boolean isBranch) {
 		//Only delete parent runs and not branches because the Terminated event of branches should not cause the
 		//deletion of the entire run
 		if (!isBranchExecution(executionMessage)) {
@@ -102,13 +108,11 @@ public class QueueListenerImpl implements QueueListener {
 		}
 	}
 
-	//The logic for this method was copied from oo's FinishedFlowEventsListener
-	//Does the endBranch only for branches that are not non-blocking (parallel, multi-instance and sub-flows)
-	private void finishBranchExecution(Execution execution) {
-		if (execution.isNewBranchMechanism()) {
-			splitJoinService.endBranch(Arrays.asList(execution));
-		}
-	}
+    //The logic for this method was copied from oo's FinishedFlowEventsListener
+    //Does the endBranch only for branches that are not non-blocking (parallel, multi-instance and sub-flows)
+    private void finishBranchExecution(Execution execution) {
+        splitJoinService.endBranch(Arrays.asList(execution));
+    }
 
 	/**
 	 * Returns true when the execution is a branch with the new branch mechanism
@@ -116,7 +120,7 @@ public class QueueListenerImpl implements QueueListener {
 	 * (which is the old mechanism)
 	 */
 	private boolean isBranch(Execution execution) {
-		return execution.isBranch() && execution.isNewBranchMechanism();
+		return execution.isBranch();
 	}
 
 	/*
@@ -146,7 +150,7 @@ public class QueueListenerImpl implements QueueListener {
 	}
 
 	private Long pauseExecution(Execution execution) {
-		String branchId = execution.getSystemContext().getBrunchId();
+		String branchId = execution.getSystemContext().getBranchId();
 
 		ExecutionSummary pe = pauseResumeService.readPausedExecution(execution.getExecutionId(), branchId);
 

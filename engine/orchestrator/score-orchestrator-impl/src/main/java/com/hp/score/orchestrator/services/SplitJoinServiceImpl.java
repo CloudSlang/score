@@ -4,9 +4,9 @@ import ch.lambdaj.function.convert.Converter;
 import com.hp.score.engine.queue.entities.ExecutionMessage;
 import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.score.engine.queue.services.QueueDispatcherService;
-import com.hp.oo.enginefacade.execution.EndBranchDataContainer;
-import com.hp.oo.enginefacade.execution.ExecutionStatus;
-import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.score.api.EndBranchDataContainer;
+import com.hp.score.facade.execution.ExecutionStatus;
+import com.hp.score.facade.entities.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.score.orchestrator.entities.BranchContexts;
 import com.hp.score.orchestrator.entities.FinishedBranch;
@@ -113,11 +113,6 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             return;
 
         for (Execution execution : executions) {
-            // this will be deleted when the old branch mechanism is completely removed (after NB is re-implemented)
-            Validate.isTrue(
-                    (execution.getPosition() == null) ||
-                            (execution.getPosition() != -1L && execution.getPosition() != -2L),
-                    "branch finished with position = " + execution.getPosition() + " -> new branch mechanism is ending a branch from old mechanism");
             if (logger.isDebugEnabled())
                 logger.debug("finishing branch " + execution.getBranchId() + " for execution " + execution.getExecutionId());
         }

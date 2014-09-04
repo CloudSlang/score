@@ -1,43 +1,39 @@
 package com.hp.score.worker.execution.services;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.hp.score.events.EventConstants;
+import com.hp.score.facade.TempConstants;
+import com.hp.score.facade.entities.RunningExecutionPlan;
+import com.hp.score.facade.execution.ExecutionStatus;
+import com.hp.score.facade.execution.ExecutionSummary;
+import com.hp.score.facade.execution.PauseReason;
+import com.hp.score.facade.entities.Execution;
+import com.hp.oo.internal.sdk.execution.ExecutionConstants;
+import com.hp.score.api.ControlActionMetadata;
+import com.hp.score.api.ExecutionPlan;
+import com.hp.score.api.ExecutionStep;
+import com.hp.score.events.EventBus;
+import com.hp.score.orchestrator.services.CancelExecutionService;
+import com.hp.score.orchestrator.services.PauseResumeService;
+import com.hp.score.worker.execution.reflection.ReflectionAdapter;
+import com.hp.score.worker.management.WorkerConfigurationService;
 import com.hp.score.worker.management.services.WorkerRecoveryManager;
+import com.hp.score.worker.management.services.dbsupport.WorkerDbSupportService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.internal.verification.VerificationModeFactory;
-import com.hp.score.worker.management.WorkerConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.hp.oo.broker.entities.BranchContextHolder;
-import com.hp.oo.broker.entities.RunningExecutionPlan;
-import com.hp.oo.broker.services.RuntimeValueService;
-import com.hp.oo.enginefacade.execution.ExecutionStatus;
-import com.hp.oo.enginefacade.execution.ExecutionSummary;
-import com.hp.oo.enginefacade.execution.PauseReason;
-import com.hp.score.worker.execution.reflection.ReflectionAdapter;
-import com.hp.score.worker.management.services.dbsupport.WorkerDbSupportService;
-import com.hp.oo.internal.sdk.execution.Execution;
-import com.hp.oo.internal.sdk.execution.ExecutionConstants;
-import com.hp.score.orchestrator.services.CancelExecutionService;
-import com.hp.score.orchestrator.services.PauseResumeService;
-import com.hp.score.api.ControlActionMetadata;
-import com.hp.score.api.ExecutionPlan;
-import com.hp.score.api.ExecutionStep;
-import com.hp.score.events.EventBus;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -63,9 +59,6 @@ public class ExecutionServiceTest {
 	private ExecutionServiceImpl executionService;
 
 	@Autowired
-	private RuntimeValueService runtimeValueService;
-
-	@Autowired
 	private WorkerDbSupportService workerDbSupportService;
 
 	@Autowired
@@ -76,16 +69,15 @@ public class ExecutionServiceTest {
 
 	@Before
 	public void init() {
-		Mockito.reset(runtimeValueService, workerDbSupportService, pauseResumeService);
+		Mockito.reset(workerDbSupportService, pauseResumeService);
 	}
 
 	@Test
 	public void handlePausedFlow_NotPausedExecutionTest() {
-		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
+		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
 		exe.setExecutionId(111L);
-		exe.getSystemContext().setBrunchId("branch_id");
-		exe.getSystemContext().put(ExecutionConstants.FLOW_UUID, "flow_uuid");
-		exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String, List>());
+		exe.getSystemContext().setBranchId("branch_id");
+		exe.getSystemContext().put(EventConstants.FLOW_UUID, "flow_uuid");
 
 		//since the resumeService mock will return null - there no such execution in pause state, expect to get false
 		boolean result = executionService.handlePausedFlow(exe);
@@ -140,81 +132,18 @@ public class ExecutionServiceTest {
 	}
 
 	private Execution getExecutionObjToPause(Long executionId, String branch_id) {
-		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
+		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
 		exe.setExecutionId(executionId);
-		exe.getSystemContext().setBrunchId(branch_id);
-		exe.getSystemContext().put(ExecutionConstants.FLOW_UUID, "flow_uuid");
-		exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String, List>());
+		exe.getSystemContext().setBranchId(branch_id);
+		exe.getSystemContext().put(EventConstants.FLOW_UUID, "flow_uuid");
 		//for events
 		exe.getSystemContext().put(ExecutionConstants.EXECUTION_ID_CONTEXT, executionId);
 		return exe;
 	}
 
 	@Test
-	public void isExecutionTerminatingTest() {
-		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
-		exe.setExecutionId(111L);
-		exe.setPosition(null);
-
-		boolean result = executionService.isExecutionTerminating(exe);
-		Assert.assertTrue(result);
-
-		exe.setPosition(-1L);
-		result = executionService.isExecutionTerminating(exe);
-		Assert.assertTrue(result);
-
-		exe.setPosition(-2L);
-		result = executionService.isExecutionTerminating(exe);
-		Assert.assertTrue(result);
-
-		exe.setPosition(100L);
-		result = executionService.isExecutionTerminating(exe);
-		Assert.assertFalse(result);
-	}
-
-	@Test
-	public void handleBranchFailureTest() {
-		Set<String> locks = new HashSet<>();
-		locks.add("lock_1");
-
-		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
-		exe.setExecutionId(111L);
-		exe.getSystemContext().put(ExecutionConstants.SPLIT_ID, "split_id");
-		exe.getSystemContext().setBrunchId("branch_id");
-		exe.getSystemContext().put(ExecutionConstants.ACQUIRED_LOCKS, (Serializable) locks);
-		exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String, List>());
-		executionService.handleBranchFailure(exe, new Exception("Test exception..."));
-
-		Mockito.verify(workerDbSupportService, VerificationModeFactory.times(1)).createBranchContext(any(BranchContextHolder.class));
-
-		Mockito.verify(runtimeValueService, VerificationModeFactory.times(1)).remove(ExecutionConstants.LOCK_PREFIX_IN_DB + "lock_1");
-
-	}
-
-	@Test
-	public void clearBranchLocksTest() {
-		Set<String> locks = new HashSet<>();
-		locks.add("lock_1");
-		locks.add("lock_2");
-		locks.add("lock_3");
-
-		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
-		exe.setExecutionId(111l);
-		exe.getSystemContext().put(ExecutionConstants.ACQUIRED_LOCKS, (Serializable) locks);
-		exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String, List>());
-		executionService.clearBranchLocks(exe);
-
-		//3 times runtimeService
-		Mockito.verify(runtimeValueService, VerificationModeFactory.times(1)).remove(ExecutionConstants.LOCK_PREFIX_IN_DB + "lock_1");
-		Mockito.verify(runtimeValueService, VerificationModeFactory.times(1)).remove(ExecutionConstants.LOCK_PREFIX_IN_DB + "lock_2");
-		Mockito.verify(runtimeValueService, VerificationModeFactory.times(1)).remove(ExecutionConstants.LOCK_PREFIX_IN_DB + "lock_3");
-
-		Assert.assertNull(exe.getSystemContext().get(ExecutionConstants.ACQUIRED_LOCKS));
-	}
-
-	@Test
 	public void handleCancelledFlowsTest() {
-		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
+		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
 		exe.setExecutionId(EXECUTION_ID_1);
 
 		boolean result = executionService.handleCancelledFlow(exe);
@@ -222,7 +151,7 @@ public class ExecutionServiceTest {
 		Assert.assertEquals(exe.getPosition(), null);
 		Assert.assertEquals(result, true);
 
-		exe = new Execution(0L, 0L, new ArrayList<String>());
+		exe = new Execution(0L, 0L, new HashMap<String,String>());
 		exe.setExecutionId(EXECUTION_ID_2);
 
 		result = executionService.handleCancelledFlow(exe);
@@ -237,10 +166,10 @@ public class ExecutionServiceTest {
 		//FromSystemContext
 		ExecutionStep executionStep = new ExecutionStep(EXECUTION_STEP_1_ID);
 
-		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
+		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
 		exe.setExecutionId(EXECUTION_ID_1);
 
-		exe.getSystemContext().put(ExecutionConstants.CONTENT_EXECUTION_STEP, executionStep);
+		exe.getSystemContext().put(TempConstants.CONTENT_EXECUTION_STEP, executionStep);
 
 		ExecutionStep loadedStep = executionService.loadExecutionStep(exe);
 
@@ -257,7 +186,7 @@ public class ExecutionServiceTest {
 
 		executionStep = new ExecutionStep(EXECUTION_STEP_2_ID);
 
-		exe = new Execution(RUNNING_EXE_PLAN_ID, EXECUTION_STEP_2_ID, new ArrayList<String>());
+		exe = new Execution(RUNNING_EXE_PLAN_ID, EXECUTION_STEP_2_ID, new HashMap<String,String>());
 
 		loadedStep = executionService.loadExecutionStep(exe);
 
@@ -270,7 +199,7 @@ public class ExecutionServiceTest {
 		ExecutionStep executionStep = new ExecutionStep(EXECUTION_STEP_1_ID);
 		executionStep.setActionData(new HashMap<String, Serializable>());
 
-		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
+		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
 
 		executionService.executeStep(exe, executionStep);
 
@@ -285,7 +214,7 @@ public class ExecutionServiceTest {
 		executionStep.setNavigation(new ControlActionMetadata("class", "method"));
 		executionStep.setNavigationData(new HashMap<String, Serializable>());
 
-		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
+		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
 
 		executionService.navigate(exe, executionStep);
 
@@ -295,12 +224,11 @@ public class ExecutionServiceTest {
 
 	@Test
 	public void postExecutionSettingsTest() {
-		Execution exe = new Execution(0L, 0L, new ArrayList<String>());
+		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
 		exe.setExecutionId(1111111L);
 
-		exe.getSystemContext().put(ExecutionConstants.ACTUALLY_OPERATION_GROUP, "Real_Group");
-		exe.getSystemContext().put(ExecutionConstants.MUST_GO_TO_QUEUE, true);
-		exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String, List>());
+		exe.getSystemContext().put(TempConstants.ACTUALLY_OPERATION_GROUP, "Real_Group");
+		exe.getSystemContext().put(TempConstants.MUST_GO_TO_QUEUE, true);
 		//for events
 		exe.getSystemContext().put(ExecutionConstants.EXECUTION_ID_CONTEXT, "stam");
 
@@ -308,7 +236,7 @@ public class ExecutionServiceTest {
 
 		Assert.assertEquals("Real_Group", exe.getGroupName());
 		Assert.assertEquals(true, exe.isMustGoToQueue());
-		Assert.assertEquals(false, exe.getSystemContext().get(ExecutionConstants.MUST_GO_TO_QUEUE));
+		Assert.assertEquals(false, exe.getSystemContext().get(TempConstants.MUST_GO_TO_QUEUE));
 	}
 
 	@Configuration
@@ -355,11 +283,6 @@ public class ExecutionServiceTest {
 		@Bean
 		public CancelExecutionService getCancelExecutionService() {
 			return mock(CancelExecutionService.class);
-		}
-
-		@Bean
-		public RuntimeValueService runtimeValueService() {
-			return mock(RuntimeValueService.class);
 		}
 
 		@Bean

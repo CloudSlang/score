@@ -1,7 +1,7 @@
 package com.hp.score.orchestrator.entities;
 
-import com.hp.oo.enginefacade.execution.ExecutionStatus;
-import com.hp.oo.enginefacade.execution.ExecutionSummary;
+import com.hp.score.facade.execution.ExecutionStatus;
+import com.hp.score.facade.execution.ExecutionSummary;
 import com.hp.score.engine.data.AbstractIdentifiable;
 import org.apache.commons.lang.builder.EqualsBuilder;
 

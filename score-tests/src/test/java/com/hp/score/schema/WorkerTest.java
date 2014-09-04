@@ -1,6 +1,5 @@
 package com.hp.score.schema;
 
-import com.hp.oo.broker.services.RuntimeValueService;
 import com.hp.score.engine.node.services.WorkerNodeService;
 import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.score.engine.queue.services.QueueDispatcherService;
@@ -82,11 +81,6 @@ public class WorkerTest {
 		@Bean
 		CancelExecutionService cancelExecutionService(){
 			return mock(CancelExecutionService.class);
-		}
-
-		@Bean
-		RuntimeValueService runtimeValueService(){
-			return mock(RuntimeValueService.class);
 		}
 
 		@Bean

@@ -21,4 +21,18 @@ public interface SessionDataService {
      * @return the map of execution session data object
      */
     public Map<String, Object> getNonSerializableExecutionData(Long executionId);
+
+    /**
+     * Lock the session data of the execution so that no timeout can occur
+     * Should be used before executing an action, so that there will be no timeout in the middle of executing an action
+     * @param executionId
+     */
+    void lockSessionData(Long executionId);
+
+    /**
+     * Unlock the session data of the execution
+     * Should be used after executing an action, so that timeout might occur if needed
+     * @param executionId
+     */
+    void unlockSessionData(Long executionId);
 }

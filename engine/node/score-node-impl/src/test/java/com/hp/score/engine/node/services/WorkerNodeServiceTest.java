@@ -1,11 +1,11 @@
 package com.hp.score.engine.node.services;
 
 import com.google.common.collect.Multimap;
+import com.hp.score.api.nodes.WorkerStatus;
+import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
 import com.hp.score.engine.node.entities.WorkerNode;
 import com.hp.score.engine.node.repositories.WorkerNodeRepository;
 import com.hp.score.engine.versioning.services.VersionService;
-import com.hp.oo.enginefacade.Worker;
-import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
 import junit.framework.Assert;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
@@ -27,9 +27,6 @@ import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
@@ -66,9 +63,6 @@ public class WorkerNodeServiceTest {
 
     @Autowired
     private WorkerLockService workerLockService;
-
-	@Autowired
-	private UserDetailsService userDetailsService;
 
 	@Autowired
 	private WorkerNodeRepository workerNodeRepository;
@@ -127,10 +121,10 @@ public class WorkerNodeServiceTest {
 	public void login() throws Exception {
 		workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
 		WorkerNode worker = workerNodeService.readByUUID("H3");
-		Assert.assertEquals(Worker.Status.FAILED, worker.getStatus());
+		Assert.assertEquals(WorkerStatus.FAILED, worker.getStatus());
 		workerNodeService.up("H3");
 		worker = workerNodeService.readByUUID("H3");
-		Assert.assertEquals(Worker.Status.RUNNING, worker.getStatus());
+		Assert.assertEquals(WorkerStatus.RUNNING, worker.getStatus());
 
 		workerNodeService.delete("H3");
 	}
@@ -162,11 +156,11 @@ public class WorkerNodeServiceTest {
     public void deleteRunningWorkerTest() {
         workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
         WorkerNode worker = workerNodeService.readByUUID("H3");
-        Assert.assertEquals(Worker.Status.FAILED, worker.getStatus());
+        Assert.assertEquals(WorkerStatus.FAILED, worker.getStatus());
         workerNodeService.up("H3");
-        Assert.assertEquals(Worker.Status.RUNNING, worker.getStatus());
+        Assert.assertEquals(WorkerStatus.RUNNING, worker.getStatus());
         workerNodeService.updateWorkerToDeleted("H3");
-        Assert.assertEquals(Worker.Status.IN_RECOVERY, worker.getStatus());
+        Assert.assertEquals(WorkerStatus.IN_RECOVERY, worker.getStatus());
         Assert.assertEquals(false, worker.isActive());
         Assert.assertEquals(true, worker.isDeleted());
         workerNodeService.delete("H3");
@@ -262,11 +256,11 @@ public class WorkerNodeServiceTest {
 	public void updateStatus() {
 		workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
 		WorkerNode worker = workerNodeService.readByUUID("H3");
-		Assert.assertEquals(Worker.Status.FAILED, worker.getStatus());
+		Assert.assertEquals(WorkerStatus.FAILED, worker.getStatus());
 
-		workerNodeService.updateStatus("H3",Worker.Status.RUNNING);
+		workerNodeService.updateStatus("H3",WorkerStatus.RUNNING);
 		worker = workerNodeService.readByUUID("H3");
-		Assert.assertEquals(Worker.Status.RUNNING, worker.getStatus());
+		Assert.assertEquals(WorkerStatus.RUNNING, worker.getStatus());
 
 		workerNodeService.delete("H3");
 	}
@@ -343,23 +337,6 @@ public class WorkerNodeServiceTest {
 		Assert.assertEquals(1, workerNames.size());
 
 
-		workerNodeService.delete("H3");
-	}
-
-	@Test
-	public void loadUserDetails() throws Exception {
-		try {
-            userDetailsService.loadUserByUsername("H3");
-			Assert.assertTrue(true);
-		} catch(UsernameNotFoundException e){
-
-		}
-
-		workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
-		UserDetails userDetails = userDetailsService.loadUserByUsername("H3");
-		Assert.assertEquals("H3",userDetails.getUsername());
-		Assert.assertEquals(4,userDetails.getAuthorities().size());
-		
 		workerNodeService.delete("H3");
 	}
 

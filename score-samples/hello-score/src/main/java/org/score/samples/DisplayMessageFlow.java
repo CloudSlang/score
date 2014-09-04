@@ -2,7 +2,6 @@ package org.score.samples;
 
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.TriggeringProperties;
-import org.apache.log4j.Logger;
 import org.score.samples.openstack.actions.ExecutionPlanBuilder;
 import org.score.samples.openstack.actions.InputBinding;
 import org.score.samples.openstack.actions.MatchType;
@@ -21,7 +20,6 @@ import java.util.Map;
  */
 @SuppressWarnings("unused")
 public class DisplayMessageFlow {
-	private final static Logger logger = Logger.getLogger(DisplayMessageFlow.class);
 	public static final String STATUS = "status";
 	public static final String MESSAGE = "message";
 	public static final String USER = "user";
@@ -29,16 +27,6 @@ public class DisplayMessageFlow {
 
 	public DisplayMessageFlow() {
 		inputBindings = generateInitialInputBindings();
-	}
-
-	private List<InputBinding> generateInitialInputBindings() {
-		List<InputBinding> bindings = new ArrayList<>();
-
-		bindings.add(InputBinding.createInputBinding("status", "status", true));
-		bindings.add(InputBinding.createInputBinding("message", "message", true));
-		bindings.add(InputBinding.createInputBinding("user", "user", true));
-
-		return bindings;
 	}
 
 	public TriggeringProperties displayMessageFlow() {
@@ -62,11 +50,21 @@ public class DisplayMessageFlow {
 	}
 
 	public Map<String, String> displayMessage(String message, String status, String user) {
-		logger.info(status + " -> " + user + " : " + message);
+		System.out.println(status + " -> " + user + " : " + message);
 		return new HashMap<>();
 	}
 
 	public List<InputBinding> getInputBindings() {
 		return inputBindings;
+	}
+
+	private List<InputBinding> generateInitialInputBindings() {
+		List<InputBinding> bindings = new ArrayList<>();
+
+		bindings.add(InputBinding.createInputBinding("status", "status", true));
+		bindings.add(InputBinding.createInputBinding("message", "message", true));
+		bindings.add(InputBinding.createInputBinding("user", "user", true));
+
+		return bindings;
 	}
 }

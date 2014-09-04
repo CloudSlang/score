@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.hp.score</groupId>
         <artifactId>score-parent</artifactId>
-        <version>0.1.198-SNAPSHOT</version>
+        <version>0.1.209-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -50,6 +50,11 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>score-api</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
         </dependency>
     </dependencies>
 </project>

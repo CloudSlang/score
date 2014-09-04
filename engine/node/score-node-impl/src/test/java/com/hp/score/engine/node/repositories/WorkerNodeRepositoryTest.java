@@ -1,10 +1,10 @@
 package com.hp.score.engine.node.repositories;
 
+import com.hp.score.api.nodes.WorkerStatus;
 import com.hp.score.engine.node.entities.WorkerNode;
-import com.hp.oo.enginefacade.Worker;
 import junit.framework.Assert;
-import org.junit.Test;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -47,7 +47,7 @@ public class WorkerNodeRepositoryTest {
         worker.setHostName("worker host name");
         worker.setInstallPath("faked installation path");
         worker.setPassword("faked password");
-        worker.setStatus(Worker.Status.RUNNING);
+        worker.setStatus(WorkerStatus.RUNNING);
         worker.setActive(true);
         worker.setGroups(Arrays.asList("group1", "group2", "group3"));
         workerNodeRepository.saveAndFlush(worker);
@@ -67,7 +67,7 @@ public class WorkerNodeRepositoryTest {
         worker.setHostName("worker host name");
         worker.setInstallPath("faked installation path");
         worker.setPassword("faked password");
-        worker.setStatus(Worker.Status.RUNNING);
+        worker.setStatus(WorkerStatus.RUNNING);
         worker.setActive(true);
         worker.setGroups(Arrays.asList("group1", "group2", "group3"));
         worker.setBulkNumber(bulkNum);

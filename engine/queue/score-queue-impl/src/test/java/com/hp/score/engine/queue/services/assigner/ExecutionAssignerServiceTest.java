@@ -8,7 +8,7 @@ import com.hp.score.engine.queue.entities.ExecutionMessage;
 import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.score.engine.queue.entities.Payload;
 import com.hp.score.engine.queue.services.ExecutionQueueService;
-import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.score.facade.entities.Execution;
 import com.hp.score.lang.SystemContext;
 import junit.framework.Assert;
 import org.junit.Test;

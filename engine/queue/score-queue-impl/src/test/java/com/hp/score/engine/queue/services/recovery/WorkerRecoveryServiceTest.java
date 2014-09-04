@@ -1,12 +1,12 @@
 package com.hp.score.engine.queue.services.recovery;
 
+import com.hp.score.api.nodes.WorkerStatus;
 import com.hp.score.engine.node.entities.WorkerNode;
 import com.hp.score.engine.node.services.WorkerLockService;
 import com.hp.score.engine.node.services.WorkerNodeService;
 import com.hp.score.engine.queue.services.CounterNames;
 import com.hp.score.engine.queue.services.ExecutionQueueService;
 import com.hp.score.engine.versioning.services.VersionService;
-import com.hp.oo.enginefacade.Worker;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,7 +21,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Created with IntelliJ IDEA.
@@ -63,12 +70,12 @@ public class WorkerRecoveryServiceTest {
         when(workerNodeService.readNonRespondingWorkers()).thenReturn(Collections.<String>emptyList());
         when(executionQueueService.countMessagesWithoutAckForWorker(anyInt(), anyLong(), anyString())).thenReturn(0);
         WorkerNode mockWorker = mock(WorkerNode.class);
-        when(mockWorker.getStatus()).thenReturn(Worker.Status.RUNNING);
+        when(mockWorker.getStatus()).thenReturn(WorkerStatus.RUNNING);
         when(workerNodeService.findByUuid("123")).thenReturn(mockWorker);
         workerRecoveryService.doWorkerAndMessageRecovery("123");
 
         //Make sure the methods did not run
-        verify(workerNodeService, never()).updateStatusInSeparateTransaction("123", Worker.Status.IN_RECOVERY);
+        verify(workerNodeService, never()).updateStatusInSeparateTransaction("123", WorkerStatus.IN_RECOVERY);
     }
 
     @Test
@@ -77,11 +84,11 @@ public class WorkerRecoveryServiceTest {
         when(workerNodeService.readNonRespondingWorkers()).thenReturn(getNonResponsiveWorkers());
         when(executionQueueService.countMessagesWithoutAckForWorker(anyInt(), anyLong(), anyString())).thenReturn(0);
         WorkerNode mockWorker = mock(WorkerNode.class);
-        when(mockWorker.getStatus()).thenReturn(Worker.Status.RUNNING);
+        when(mockWorker.getStatus()).thenReturn(WorkerStatus.RUNNING);
         when(workerNodeService.findByUuid("123")).thenReturn(mockWorker);
         workerRecoveryService.doWorkerAndMessageRecovery("123");
         //Make sure the methods did run
-        verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("123", Worker.Status.IN_RECOVERY);
+        verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("123", WorkerStatus.IN_RECOVERY);
     }
 
     @Test
@@ -90,12 +97,12 @@ public class WorkerRecoveryServiceTest {
         when(workerNodeService.readNonRespondingWorkers()).thenReturn(Collections.<String>emptyList());
         when(executionQueueService.countMessagesWithoutAckForWorker(anyInt(), anyLong(), anyString())).thenReturn(10);
         WorkerNode mockWorker = mock(WorkerNode.class);
-        when(mockWorker.getStatus()).thenReturn(Worker.Status.RUNNING);
+        when(mockWorker.getStatus()).thenReturn(WorkerStatus.RUNNING);
         when(workerNodeService.findByUuid("123")).thenReturn(mockWorker);
         workerRecoveryService.doWorkerAndMessageRecovery("123");
 
         //Make sure the methods did run
-        verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("123", Worker.Status.IN_RECOVERY);
+        verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("123", WorkerStatus.IN_RECOVERY);
     }
 
     @Test
@@ -104,12 +111,12 @@ public class WorkerRecoveryServiceTest {
         when(workerNodeService.readNonRespondingWorkers()).thenReturn(Collections.<String>emptyList());
         when(executionQueueService.countMessagesWithoutAckForWorker(anyInt(), anyLong(), anyString())).thenReturn(0);
         WorkerNode mockWorker = mock(WorkerNode.class);
-        when(mockWorker.getStatus()).thenReturn(Worker.Status.IN_RECOVERY);
+        when(mockWorker.getStatus()).thenReturn(WorkerStatus.IN_RECOVERY);
         when(workerNodeService.findByUuid("123")).thenReturn(mockWorker);
         workerRecoveryService.doWorkerAndMessageRecovery("123");
 
         //Make sure the methods did run
-        verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("123", Worker.Status.IN_RECOVERY);
+        verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("123", WorkerStatus.IN_RECOVERY);
     }
 
     @Test
@@ -118,11 +125,11 @@ public class WorkerRecoveryServiceTest {
         when(workerNodeService.readNonRespondingWorkers()).thenReturn(getNonResponsiveWorkers());
         when(executionQueueService.countMessagesWithoutAckForWorker(anyInt(), anyLong(), anyString())).thenReturn(200);
         WorkerNode mockWorker = mock(WorkerNode.class);
-        when(mockWorker.getStatus()).thenReturn(Worker.Status.IN_RECOVERY);
+        when(mockWorker.getStatus()).thenReturn(WorkerStatus.IN_RECOVERY);
         when(workerNodeService.findByUuid("123")).thenReturn(mockWorker);
         workerRecoveryService.doWorkerAndMessageRecovery("123");
         //Make sure the methods did run
-        verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("123", Worker.Status.IN_RECOVERY);
+        verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("123", WorkerStatus.IN_RECOVERY);
     }
 
     @Test
@@ -130,8 +137,8 @@ public class WorkerRecoveryServiceTest {
         workerRecoveryService.doWorkerRecovery("worker1");
 
         verify(workerLockService, times(1)).lock("worker1");
-        verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("worker1", Worker.Status.IN_RECOVERY);
-        verify(workerNodeService, times(1)).updateStatus("worker1", Worker.Status.RECOVERED);
+        verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("worker1", WorkerStatus.IN_RECOVERY);
+        verify(workerNodeService, times(1)).updateStatus("worker1", WorkerStatus.RECOVERED);
     }
 
     private List<String> getNonResponsiveWorkers() {

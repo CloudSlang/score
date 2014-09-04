@@ -1,13 +1,14 @@
 package com.hp.score.worker.management.services;
 
 import com.hp.score.engine.node.entities.WorkerNode;
+import com.hp.score.facade.TempConstants;
 import com.hp.score.worker.execution.services.ExecutionService;
 import com.hp.score.engine.queue.entities.ExecStatus;
 import com.hp.score.engine.queue.entities.ExecutionMessage;
 import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.score.engine.queue.entities.Payload;
 import com.hp.score.engine.queue.services.QueueStateIdGeneratorService;
-import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.score.facade.entities.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.score.orchestrator.entities.SplitMessage;
 
@@ -26,9 +27,6 @@ import java.util.List;
 public class SimpleExecutionRunnable implements Runnable {
 
     private final Logger logger = Logger.getLogger(this.getClass());
-
-    private static final int SUBFLOW_POSITION = -1;
-    private static final int PARALLEL_POSITION = -2;
 
     private ExecutionService executionService;
 
@@ -201,26 +199,19 @@ public class SimpleExecutionRunnable implements Runnable {
     }
 
     private boolean isExecutionTerminating(Execution execution) {
-        return (execution.getPosition() == null || execution.getPosition() == -1L || execution.getPosition() == -2L);
+        return execution.getPosition() == null;
     }
 
     // Prepares executionMessage from previous executionMessage and new Execution object
     private ExecutionMessage[] createMessagesToSend(ExecutionMessage executionMessage, Execution nextStepExecution) throws IOException {
-        Long nextPosition = nextStepExecution.getPosition();
-
         //Flow is finished - does not matter if successfully or not
-        if (nextPosition == null) {
+        if (isExecutionTerminating(nextStepExecution)) {
             Payload payload = converter.createPayload(nextStepExecution);
             ExecutionMessage finalMessage = (ExecutionMessage) executionMessage.clone();
             finalMessage.setStatus(ExecStatus.TERMINATED);//in queue it is checked and finish flow is called
             finalMessage.incMsgSeqId();
             finalMessage.setPayload(payload);
             return new ExecutionMessage[]{executionMessage, finalMessage};
-        }
-        //Subflow was started or Parallel was started - this execution should be terminated
-        else if (nextPosition == SUBFLOW_POSITION || nextPosition == PARALLEL_POSITION) {
-            //we do not call here the finish flow - since it is not finished yet!!!
-            return new ExecutionMessage[]{executionMessage};
         }
 
         ExecutionMessage nextExecutionMessage = prepareNextStepExecutionMessage(executionMessage, nextStepExecution);
@@ -236,8 +227,8 @@ public class SimpleExecutionRunnable implements Runnable {
         if (workerGroupId == null) {
             workerGroupId = WorkerNode.DEFAULT_WORKER_GROUPS[0];
         }
-        Object useStayInTheWorkerObj = nextStepExecution.getSystemContext().get(ExecutionConstants.USE_STAY_IN_THE_WORKER);
-        nextStepExecution.getSystemContext().remove(ExecutionConstants.USE_STAY_IN_THE_WORKER);
+        Object useStayInTheWorkerObj = nextStepExecution.getSystemContext().get(TempConstants.USE_STAY_IN_THE_WORKER);
+        nextStepExecution.getSystemContext().remove(TempConstants.USE_STAY_IN_THE_WORKER);
         boolean useStayInTheWorker = (useStayInTheWorkerObj != null) && (useStayInTheWorkerObj.equals(Boolean.TRUE));
 
         boolean isSameWorker = workerConfigurationService.isMemberOf(workerGroupId) ||

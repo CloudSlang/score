@@ -27,18 +27,6 @@ public class ListServersFlow {
 		inputBindings = generateInitialInputBindings();
 	}
 
-	private List<InputBinding> generateInitialInputBindings() {
-		List<InputBinding> bindings = new ArrayList<>();
-
-		bindings.add(createInputBinding(OPENSTACK_HOST_MESSAGE, HOST_KEY, true));
-		bindings.add(createInputBindingWithDefaultValue(IDENTITY_PORT_MESSAGE, IDENTITY_PORT_KEY, true, DEFUALT_IDENTITY_PORT));
-		bindings.add(createInputBindingWithDefaultValue(COMPUTE_PORT_MESSAGE, COMPUTE_PORT_KEY, true, DEFAULT_COMPUTE_PORT));
-		bindings.add(createInputBinding(OPENSTACK_USERNAME_MESSAGE, USERNAME_KEY, true));
-		bindings.add(createInputBinding(OPENSTACK_PASSWORD_MESSAGE, PASSWORD_KEY, true));
-
-		return bindings;
-	}
-
 	public TriggeringProperties listServersFlow() {
 		ExecutionPlanBuilder builder = new ExecutionPlanBuilder("list servers");
 
@@ -74,6 +62,18 @@ public class ListServersFlow {
 
 	public List<InputBinding> getInputBindings() {
 		return inputBindings;
+	}
+
+	private List<InputBinding> generateInitialInputBindings() {
+		List<InputBinding> bindings = new ArrayList<>();
+
+		bindings.add(createInputBinding(OPENSTACK_HOST_MESSAGE, HOST_KEY, true));
+		bindings.add(createInputBindingWithDefaultValue(IDENTITY_PORT_MESSAGE, IDENTITY_PORT_KEY, true, DEFUALT_IDENTITY_PORT));
+		bindings.add(createInputBindingWithDefaultValue(COMPUTE_PORT_MESSAGE, COMPUTE_PORT_KEY, true, DEFAULT_COMPUTE_PORT));
+		bindings.add(createInputBinding(OPENSTACK_USERNAME_MESSAGE, USERNAME_KEY, true));
+		bindings.add(createInputBinding(OPENSTACK_PASSWORD_MESSAGE, PASSWORD_KEY, true));
+
+		return bindings;
 	}
 
 	private void createDisplayStep(ExecutionPlanBuilder builder, Long stepId, Long nextStepId) {

@@ -1,8 +1,8 @@
 package com.hp.score.engine.node.services;
 
 import com.google.common.collect.Multimap;
+import com.hp.score.api.nodes.WorkerStatus;
 import com.hp.score.engine.node.entities.WorkerNode;
-import com.hp.oo.enginefacade.Worker;
 
 import java.util.List;
 
@@ -48,9 +48,9 @@ public interface WorkerNodeService {
 
 	void updateDescription(String uuid, String description);
 
-	void updateStatus(String uuid, Worker.Status status);
+	void updateStatus(String uuid, WorkerStatus status);
 
-    void updateStatusInSeparateTransaction(String uuid, Worker.Status status);
+    void updateStatusInSeparateTransaction(String uuid, WorkerStatus status);
 
     List<String> readAllWorkerGroups();
 

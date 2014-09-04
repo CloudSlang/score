@@ -1,6 +1,6 @@
 package com.hp.score.lang;
 
-import com.hp.oo.enginefacade.execution.EndBranchDataContainer;
+import com.hp.score.api.EndBranchDataContainer;
 import com.hp.score.events.ScoreEvent;
 import com.hp.score.api.StartBranchDataContainer;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -37,22 +37,22 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String BRANCH_ID = "BRANCH_ID";
 
-	protected Map<String, Serializable> myMap = new HashMap<>();
+	protected Map<String, Serializable> contextMap = new HashMap<>();
 
     public ExecutionRuntimeServices(){}
 
     public ExecutionRuntimeServices(ExecutionRuntimeServices executionRuntimeServices){
-        myMap.putAll(executionRuntimeServices.myMap);
-        myMap.remove(NEW_SPLIT_ID);
-        myMap.remove(BRANCH_ID);
+        contextMap.putAll(executionRuntimeServices.contextMap);
+        contextMap.remove(NEW_SPLIT_ID);
+        contextMap.remove(BRANCH_ID);
     }
 
-    public String getBrunchId(){
+    public String getBranchId(){
         return getFromMap(BRANCH_ID);
     }
 
-    public void setBrunchId(String brunchId) {
-        myMap.put(BRANCH_ID, brunchId);
+    public void setBranchId(String brunchId) {
+        contextMap.put(BRANCH_ID, brunchId);
     }
 
     public String getSplitId(){
@@ -60,16 +60,16 @@ public class ExecutionRuntimeServices implements Serializable {
     }
 
     public void setSplitId(String splitId) {
-        myMap.put(NEW_SPLIT_ID, splitId);
+        contextMap.put(NEW_SPLIT_ID, splitId);
     }
 
 
     public void pause() {
-		myMap.put(EXECUTION_PAUSED, Boolean.TRUE);
+		contextMap.put(EXECUTION_PAUSED, Boolean.TRUE);
 	}
 
 	public boolean isPaused() {
-		return myMap.containsKey(EXECUTION_PAUSED) && myMap.get(EXECUTION_PAUSED).equals(Boolean.TRUE);
+		return contextMap.containsKey(EXECUTION_PAUSED) && contextMap.get(EXECUTION_PAUSED).equals(Boolean.TRUE);
 	}
 
 	public void addEvent(String eventType, Serializable eventData) {
@@ -77,7 +77,7 @@ public class ExecutionRuntimeServices implements Serializable {
 		Queue<ScoreEvent> eventsQueue = getFromMap(SCORE_EVENTS_QUEUE);
 		if (eventsQueue == null) {
 			eventsQueue = new ArrayDeque<>();
-			myMap.put(SCORE_EVENTS_QUEUE, (ArrayDeque) eventsQueue);
+			contextMap.put(SCORE_EVENTS_QUEUE, (ArrayDeque) eventsQueue);
 		}
 		eventsQueue.add(new ScoreEvent(eventType, eventData));
 	}
@@ -87,7 +87,7 @@ public class ExecutionRuntimeServices implements Serializable {
 	}
 
 	public void setNoWorkerInGroup(String groupName) {
-		myMap.put(NO_WORKERS_IN_GROUP, groupName);
+		contextMap.put(NO_WORKERS_IN_GROUP, groupName);
 	}
 
 	public String getNoWorkerInGroupName() {
@@ -95,8 +95,8 @@ public class ExecutionRuntimeServices implements Serializable {
 	}
 
 	protected <T> T getFromMap(String key) {
-		if (myMap.containsKey(key)) {
-			Serializable value = myMap.get(key);
+		if (contextMap.containsKey(key)) {
+			Serializable value = contextMap.get(key);
 			if (value != null) {
 				@SuppressWarnings("unchecked")
 				T retVal = (T) value;
@@ -117,11 +117,11 @@ public class ExecutionRuntimeServices implements Serializable {
     }
 
 	protected void addBranch(Long startPosition, Long executionPlanId, Map<String, Serializable> context, ExecutionRuntimeServices executionRuntimeServices) {
-		if (!myMap.containsKey(BRANCH_DATA)) {
-			myMap.put(BRANCH_DATA, new ArrayList<StartBranchDataContainer>());
+		if (!contextMap.containsKey(BRANCH_DATA)) {
+			contextMap.put(BRANCH_DATA, new ArrayList<StartBranchDataContainer>());
 		}
 		List<StartBranchDataContainer> branchesData = getFromMap(BRANCH_DATA);
-		branchesData.add(new StartBranchDataContainer(startPosition, executionPlanId, context, new SystemContext(executionRuntimeServices.myMap)));//TODO :why SystemContext object here? remove this, need to be ExecutioneRuntimeServices instead..
+		branchesData.add(new StartBranchDataContainer(startPosition, executionPlanId, context, new SystemContext(executionRuntimeServices.contextMap)));//TODO :why SystemContext object here? remove this, need to be ExecutioneRuntimeServices instead..
 	}
 
 	/**
@@ -139,8 +139,8 @@ public class ExecutionRuntimeServices implements Serializable {
     }
 
 	private <T> T removeFromMap(String key) {
-		if (myMap.containsKey(key)) {
-			Serializable value = myMap.remove(key);
+		if (contextMap.containsKey(key)) {
+			Serializable value = contextMap.remove(key);
 			if (value != null) {
 				@SuppressWarnings("unchecked")
 				T retVal = (T) value;
@@ -162,14 +162,14 @@ public class ExecutionRuntimeServices implements Serializable {
 		ExecutionRuntimeServices that = (ExecutionRuntimeServices) o;
 
 		return new EqualsBuilder()
-				.append(this.myMap, that.myMap)
+				.append(this.contextMap, that.contextMap)
 				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder()
-				.append(this.myMap)
+				.append(this.contextMap)
 				.toHashCode();
 	}
 }

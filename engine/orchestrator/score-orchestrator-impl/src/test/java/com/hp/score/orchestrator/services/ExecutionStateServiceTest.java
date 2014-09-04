@@ -1,13 +1,10 @@
 package com.hp.score.orchestrator.services;
 
 
-import com.hp.oo.enginefacade.execution.ExecutionStatus;
-import com.hp.oo.internal.sdk.execution.Execution;
-import com.hp.score.orchestrator.services.ExecutionSerializationUtil;
+import com.hp.score.facade.execution.ExecutionStatus;
+import com.hp.score.facade.entities.Execution;
 import com.hp.score.orchestrator.entities.ExecutionState;
-import com.hp.score.orchestrator.services.ExecutionStateService;
 import com.hp.score.orchestrator.repositories.ExecutionStateRepository;
-import com.hp.score.orchestrator.services.ExecutionStateServiceImpl;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;

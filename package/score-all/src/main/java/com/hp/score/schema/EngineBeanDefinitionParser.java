@@ -72,7 +72,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(ExecutionAssignerServiceImpl.class, "executionAssignerService");
 		put(PartitionServiceImpl.class, null);
 		put(RunningExecutionPlanServiceImpl.class, "runningEP");
-		put(WorkerNodeServiceImpl.class, "ooUserDetailsService");
+		put(WorkerNodeServiceImpl.class, null);
 		put(VersionServiceImpl.class, null);
 		put(CancelExecutionServiceImpl.class, "cancelExecutionService");
 		put(ScoreEventFactoryImpl.class, "scoreEventFactory");

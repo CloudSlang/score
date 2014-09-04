@@ -1,6 +1,6 @@
 package org.score.samples.controlactions;
 
-import com.hp.oo.enginefacade.execution.EndBranchDataContainer;
+import com.hp.score.api.EndBranchDataContainer;
 import com.hp.score.lang.ExecutionRuntimeServices;
 
 import java.io.Serializable;
@@ -36,7 +36,7 @@ public class BranchActions {
 			}
 		}
 
-		initialContext.remove("NEW_SPLIT_ID");
+		initialContext.remove("NEW_SPLIT_ID");  // todo - use const!!
 		executionRuntimeServices.addBranch(0L, flowUuid, initialContext);
     }
 

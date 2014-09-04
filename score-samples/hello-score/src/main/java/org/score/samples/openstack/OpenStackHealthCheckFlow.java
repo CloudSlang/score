@@ -11,17 +11,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.score.samples.openstack.OpenstackCommons.CONTEXT_MERGER_CLASS;
-import static org.score.samples.openstack.OpenstackCommons.FAILURE_STEP_ACTION;
-import static org.score.samples.openstack.OpenstackCommons.FINAL_STEP_ACTIONS_CLASS;
-import static org.score.samples.openstack.OpenstackCommons.PREPARE_SEND_EMAIL_METHOD;
-import static org.score.samples.openstack.OpenstackCommons.SEND_EMAIL_CLASS;
-import static org.score.samples.openstack.OpenstackCommons.SEND_EMAIL_METHOD;
-import static org.score.samples.openstack.OpenstackCommons.SUCCESS_STEP_ACTION;
-import static org.score.samples.openstack.OpenstackCommons.mergeInputsWithoutDuplicates;
+import static org.score.samples.openstack.OpenstackCommons.*;
 import static org.score.samples.openstack.actions.FinalStepActions.RESPONSE_KEY;
 import static org.score.samples.openstack.actions.FinalStepActions.SUCCESS_KEY;
 import static org.score.samples.openstack.actions.InputBinding.createInputBinding;
+import static org.score.samples.openstack.actions.InputBinding.createInputBindingWithDefaultValue;
 
 /**
  * Date: 8/29/2014
@@ -34,21 +28,6 @@ public class OpenStackHealthCheckFlow {
 
 	public OpenStackHealthCheckFlow() {
 		inputBindings = generateInitialInputBindings();
-	}
-
-	@SuppressWarnings("unchecked")
-	private List<InputBinding> generateInitialInputBindings() {
-		List<InputBinding> bindings = mergeInputsWithoutDuplicates(
-				new CreateServerFlow().getInputBindings(),
-				new ValidateServerExistsFlow().getInputBindings(),
-				new DeleteServerFlow().getInputBindings());
-
-		bindings.add(createInputBinding("Email host", "emailHost", true));
-		bindings.add(createInputBinding("Email port", "emailPort", true));
-		bindings.add(createInputBinding("Fail email recipient", "to", true));
-		bindings.add(createInputBinding("Fail email sender", "from", true));
-
-		return bindings;
 	}
 
 	public TriggeringProperties openStackHealthCheckFlow() {
@@ -65,6 +44,28 @@ public class OpenStackHealthCheckFlow {
 		Long failureId = 8L;
 		Long prepareSendEmailId = 9L;
 
+		createCreateServerSubflow(builder, createServerSplitId, createServerJoinId, validateServerSplitId, prepareSendEmailId);
+
+		createValidateServerSubflow(builder, validateServerSplitId, validateServerJoinId, deleteServerSplitId, prepareSendEmailId);
+
+		createDeleteServerSubflow(builder, deleteServerSplitId, deleteServerJoinId, successId, prepareSendEmailId);
+
+		createPrepareSendEmailStep(builder, sendEmailId, prepareSendEmailId);
+
+		createSendEmailStep(builder, sendEmailId, failureId);
+
+		createSuccessStep(builder, successId);
+
+		createFailureStep(builder, failureId);
+
+		return builder.createTriggeringProperties();
+	}
+
+	public List<InputBinding> getInputBindings() {
+		return inputBindings;
+	}
+
+	private void createCreateServerSubflow(ExecutionPlanBuilder builder, Long createServerSplitId, Long createServerJoinId, Long validateServerSplitId, Long prepareSendEmailId) {
 		//create server subflow
 		List<NavigationMatcher<Serializable>> navigationMatchers = new ArrayList<>();
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, RESPONSE_KEY, SUCCESS_KEY, validateServerSplitId));
@@ -75,9 +76,14 @@ public class OpenStackHealthCheckFlow {
 		for (InputBinding inputBinding : createServerFlow.getInputBindings()) {
 			inputKeys.add(inputBinding.getInputKey());
 		}
-		builder.addSubflow(createServerSplitId, createServerJoinId, triggeringProperties, inputKeys, navigationMatchers);
 
-		//validate server subflow
+		builder.addSubflow(createServerSplitId, createServerJoinId, triggeringProperties, inputKeys, navigationMatchers);
+	}
+
+	private void createValidateServerSubflow(ExecutionPlanBuilder builder, Long validateServerSplitId, Long validateServerJoinId, Long deleteServerSplitId, Long prepareSendEmailId) {
+		TriggeringProperties triggeringProperties;
+		List<String> inputKeys;
+		List<NavigationMatcher<Serializable>> navigationMatchers;//validate server subflow
 		ValidateServerExistsFlow validateServerExistsFlow = new ValidateServerExistsFlow();
 		triggeringProperties = validateServerExistsFlow.validateServerExistsFlow();
 		inputKeys = new ArrayList<>();
@@ -88,8 +94,12 @@ public class OpenStackHealthCheckFlow {
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, RESPONSE_KEY, SUCCESS_KEY, deleteServerSplitId));
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, prepareSendEmailId));
 		builder.addSubflow(validateServerSplitId, validateServerJoinId, triggeringProperties, inputKeys, navigationMatchers);
+	}
 
-		//delete server subflow
+	private void createDeleteServerSubflow(ExecutionPlanBuilder builder, Long deleteServerSplitId, Long deleteServerJoinId, Long successId, Long prepareSendEmailId) {
+		TriggeringProperties triggeringProperties;
+		List<String> inputKeys;
+		List<NavigationMatcher<Serializable>> navigationMatchers;//delete server subflow
 		DeleteServerFlow deleteServerFlow = new DeleteServerFlow();
 		triggeringProperties = deleteServerFlow.deleteServerFlow();
 		inputKeys = new ArrayList<>();
@@ -100,26 +110,35 @@ public class OpenStackHealthCheckFlow {
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, RESPONSE_KEY, SUCCESS_KEY, successId));
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, prepareSendEmailId));
 		builder.addSubflow(deleteServerSplitId, deleteServerJoinId, triggeringProperties, inputKeys, navigationMatchers);
+	}
 
+	private void createPrepareSendEmailStep(ExecutionPlanBuilder builder, Long sendEmailId, Long prepareSendEmailId) {
 		//prepare send email
 		builder.addStep(prepareSendEmailId, CONTEXT_MERGER_CLASS, PREPARE_SEND_EMAIL_METHOD, sendEmailId);
+	}
 
-		//send email step
+	private void createSendEmailStep(ExecutionPlanBuilder builder, Long sendEmailId, Long failureId) {
+		List<NavigationMatcher<Serializable>> navigationMatchers;//send email step
 		navigationMatchers = new ArrayList<>();
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, SimpleSendEmail.RETURN_CODE, SimpleSendEmail.SUCCESS, failureId));
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, failureId));
 		builder.addOOActionStep(sendEmailId, SEND_EMAIL_CLASS, SEND_EMAIL_METHOD, null, navigationMatchers);
-
-		//success step
-		builder.addOOActionFinalStep(successId, FINAL_STEP_ACTIONS_CLASS, SUCCESS_STEP_ACTION);
-
-		//failure step
-		builder.addOOActionFinalStep(failureId, FINAL_STEP_ACTIONS_CLASS, FAILURE_STEP_ACTION);
-
-		return builder.createTriggeringProperties();
 	}
 
-	public List<InputBinding> getInputBindings() {
-		return inputBindings;
+	@SuppressWarnings("unchecked")
+	private List<InputBinding> generateInitialInputBindings() {
+		List<InputBinding> bindings = mergeInputsWithoutDuplicates(
+				new CreateServerFlow().getInputBindings(),
+				new ValidateServerExistsFlow().getInputBindings(),
+				new DeleteServerFlow().getInputBindings());
+
+		bindings.remove(createInputBinding(SERVER_NAME_MESSAGE, SERVER_NAME_KEY, true));
+		bindings.add(createInputBindingWithDefaultValue(SERVER_NAME_MESSAGE, SERVER_NAME_KEY, true, OPEN_STACK_HEALTH_CHECK_SERVER_NAME));
+		bindings.add(createInputBinding("Email host", "emailHost", true));
+		bindings.add(createInputBinding("Email port", "emailPort", true));
+		bindings.add(createInputBinding("Fail email recipient", "to", true));
+		bindings.add(createInputBinding("Fail email sender", "from", true));
+
+		return bindings;
 	}
 }

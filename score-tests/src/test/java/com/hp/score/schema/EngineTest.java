@@ -1,20 +1,19 @@
 package com.hp.score.schema;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hp.oo.broker.services.ParallelPersistenceService;
-import com.hp.score.engine.node.services.WorkerLockService;
-import com.hp.score.engine.node.services.WorkerNodeService;
-import com.hp.score.engine.queue.entities.ExecutionMessage;
-import com.hp.score.engine.queue.services.QueueDispatcherService;
-import com.hp.score.engine.queue.services.recovery.MessageRecoveryService;
-import com.hp.score.orchestrator.services.PauseResumeService;
-import com.hp.score.orchestrator.services.WorkerDbSupportServiceImpl;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ExecutionStep;
 import com.hp.score.api.Score;
 import com.hp.score.api.TriggeringProperties;
 import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
+import com.hp.score.engine.node.services.WorkerLockService;
+import com.hp.score.engine.node.services.WorkerNodeService;
+import com.hp.score.engine.queue.entities.ExecutionMessage;
+import com.hp.score.engine.queue.services.QueueDispatcherService;
+import com.hp.score.engine.queue.services.recovery.MessageRecoveryService;
 import com.hp.score.events.EventBus;
+import com.hp.score.orchestrator.services.PauseResumeService;
+import com.hp.score.orchestrator.services.WorkerDbSupportServiceImpl;
 import liquibase.integration.spring.SpringLiquibase;
 import org.hibernate.ejb.HibernatePersistence;
 import org.junit.Test;
@@ -172,11 +171,6 @@ public class EngineTest {
         @Bean
         WorkerDbSupportServiceImpl workerDbSupportService() {
             return  new WorkerDbSupportServiceImpl();
-        }
-
-        @Bean
-        ParallelPersistenceService parallelPersistenceService() {
-            return  mock(ParallelPersistenceService.class);
         }
 
         @Bean

@@ -1,7 +1,7 @@
 package com.hp.score.orchestrator.services;
 
-import com.hp.oo.enginefacade.execution.ExecutionStatus;
-import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.score.facade.execution.ExecutionStatus;
+import com.hp.score.facade.entities.Execution;
 import com.hp.score.orchestrator.entities.ExecutionState;
 
 import java.util.List;

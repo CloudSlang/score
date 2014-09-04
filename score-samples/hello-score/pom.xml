@@ -3,7 +3,7 @@
     <parent>
         <artifactId>score-samples</artifactId>
         <groupId>com.hp.score</groupId>
-        <version>0.1.198-SNAPSHOT</version>
+        <version>0.1.209-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -57,6 +57,11 @@
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
         </dependency>
 
     </dependencies>

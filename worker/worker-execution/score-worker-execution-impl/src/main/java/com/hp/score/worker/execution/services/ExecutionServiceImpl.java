@@ -6,26 +6,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
-import com.hp.score.worker.management.services.WorkerRecoveryManager;
+import com.hp.score.api.execution.ExecutionParametersConsts;
+import com.hp.score.facade.TempConstants;
 import com.hp.score.worker.execution.reflection.ReflectionAdapter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import com.hp.score.worker.management.WorkerConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.hp.oo.broker.entities.BranchContextHolder;
-import com.hp.oo.broker.entities.RunningExecutionPlan;
-import com.hp.oo.broker.services.RuntimeValueService;
-import com.hp.oo.enginefacade.execution.ExecutionStatus;
-import com.hp.oo.enginefacade.execution.ExecutionSummary;
-import com.hp.oo.enginefacade.execution.PauseReason;
+import com.hp.score.facade.entities.RunningExecutionPlan;
+import com.hp.score.facade.execution.ExecutionStatus;
+import com.hp.score.facade.execution.ExecutionSummary;
+import com.hp.score.facade.execution.PauseReason;
 import com.hp.score.worker.management.services.dbsupport.WorkerDbSupportService;
-import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.score.facade.entities.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
-import com.hp.oo.internal.sdk.execution.OOContext;
 import com.hp.score.orchestrator.services.PauseResumeService;
 import com.hp.score.api.ExecutionStep;
 import com.hp.score.api.StartBranchDataContainer;
@@ -52,10 +49,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	private WorkerDbSupportService workerDbSupportService;
 	@Autowired
 	private WorkerConfigurationService workerConfigurationService;
-	@Autowired
-	private RuntimeValueService runtimeValueService;
-	@Autowired
-	private WorkerRecoveryManager recoveryManager;
 	@Autowired
 	private EventBus eventBus;
 
@@ -96,12 +89,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
             if(ex instanceof InterruptedException){
                 throw ex; //for recovery purposes, in case thread was in wait on stepLog and was interrupted
             }
-			// In case this is execution of branch that failed - need special treatment
-			if(execution.getSystemContext().containsKey(ExecutionConstants.SPLIT_ID)) {
-				handleBranchFailure(execution, ex);
-				execution.setPosition(-1L); // finishing this branch but not finishing the entire flow
-				return execution;
-			}
 			logger.error("Error during execution: ", ex);
 			execution.getSystemContext().put(ExecutionConstants.EXECUTION_STEP_ERROR_KEY, ex.getMessage()); // this is done only fo reporting
 			execution.getSystemContext().put(ExecutionConstants.FLOW_TERMINATION_TYPE, ExecutionStatus.SYSTEM_FAILURE);
@@ -123,12 +110,18 @@ public final class ExecutionServiceImpl implements ExecutionService {
 			dumpBusEvents(execution);
 			executeStep(execution, currStep);
 			failFlowIfSplitStepFailed(execution);
-			// Run the split step
+
+            dumpBusEvents(execution);
+
+            // Run the split step
 			List<StartBranchDataContainer> newBranches = execution.getSystemContext().removeBranchesData();
 			List<Execution> newExecutions = createChildExecutions(execution.getExecutionId(), newBranches);
 			// Run the navigation
 			navigate(execution, currStep);
-			if(logger.isDebugEnabled()) {
+
+            dumpBusEvents(execution);
+
+            if(logger.isDebugEnabled()) {
 				logger.debug("End of step: " + execution.getPosition() + " in execution id: " + execution.getExecutionId());
 			}
 			return newExecutions;
@@ -172,52 +165,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
 		return currStep.isSplitStep();
 	}
 
-	protected static boolean isExecutionTerminating(Execution execution) {
-		return (execution.getPosition() == null || execution.getPosition() == -1L || execution.getPosition() == -2L);
-	}
-
-	// This method deals with the situation when a branch execution was terminated because of a system failure - not execution exception
-	protected void handleBranchFailure(Execution execution, Exception exception) {
-		String splitId = (String)execution.getSystemContext().get(ExecutionConstants.SPLIT_ID);
-		String branchId = execution.getSystemContext().getBrunchId();
-		logger.error("Branch failed due to SYSTEM FAILURE! Execution id: " + execution.getExecutionId() + " Branch id: " + branchId, exception);
-		BranchContextHolder branchContextHolder = new BranchContextHolder();
-		branchContextHolder.setSplitId(splitId);
-		branchContextHolder.setBranchId(branchId);
-		branchContextHolder.setExecutionId((String)execution.getSystemContext().get(ExecutionConstants.EXECUTION_ID_CONTEXT));
-		Map<String, OOContext> context = new HashMap<>();
-		branchContextHolder.setContext(context);
-		branchContextHolder.setBranchException(exception.getMessage());
-		while(!recoveryManager.isInRecovery()) {
-			try {
-				workerDbSupportService.createBranchContext(branchContextHolder);
-				// todo - maybe add events like in endBranch action
-				try {
-					clearBranchLocks(execution);
-				} catch(Exception ex) {
-					logger.error("Failed to clear locks on execution " + execution.getExecutionId(), ex);
-				}
-				return;
-			} catch(Exception ex) {
-				logger.error("Failed to save branch failure. Retrying...", ex);
-				try {
-					Thread.sleep(5000L);
-				} catch(InterruptedException iex) {/* do nothing */}
-			}
-		}
-	}
-
-	protected void clearBranchLocks(Execution execution) {
-		@SuppressWarnings("unchecked")
-		Set<String> acquiredLockIds = (Set<String>)execution.getSystemContext().get(ExecutionConstants.ACQUIRED_LOCKS);
-		if(acquiredLockIds != null) {
-			for(String lockId : acquiredLockIds) {
-				runtimeValueService.remove(ExecutionConstants.LOCK_PREFIX_IN_DB + lockId);
-			}
-			execution.getSystemContext().remove(ExecutionConstants.ACQUIRED_LOCKS);
-		}
-	}
-
 	protected boolean handleCancelledFlow(Execution execution) {
 		boolean executionIsCancelled = workerConfigurationService.isExecutionCancelled(execution.getExecutionId()); // in this case - just check if need to cancel. It will set as cancelled later on QueueEventListener
 		// Another scenario of getting canceled - it was cancelled from the SplitJoinService (the configuration can still be not updated). Defect #:22060
@@ -236,7 +183,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
 	// check if the execution should be Paused, and pause it if needed
 	protected boolean handlePausedFlow(Execution execution) {
-		String branchId = execution.getSystemContext().getBrunchId();
+		String branchId = execution.getSystemContext().getBranchId();
 		PauseReason reason = findPauseReason(execution.getExecutionId(), branchId);
 		if(reason != null) { // need to pause the execution
 			pauseFlow(reason, execution);
@@ -247,7 +194,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
 	// no need to check if paused - because this is called after the step, when the Pause flag exists in the context
 	private boolean handlePausedFlowAfterStep(Execution execution) {
-		String branchId = execution.getSystemContext().getBrunchId();
+		String branchId = execution.getSystemContext().getBranchId();
 		PauseReason reason = null;
 		ExecutionSummary execSummary = pauseService.readPausedExecution(execution.getExecutionId(), branchId);
 		if(execSummary != null && execSummary.getStatus().equals(ExecutionStatus.PENDING_PAUSE)) {
@@ -263,7 +210,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	private void pauseFlow(PauseReason reason, Execution execution) {
 		SystemContext systemContext = execution.getSystemContext();
 		Long executionId = execution.getExecutionId();
-		String branchId = systemContext.getBrunchId();
+		String branchId = systemContext.getBranchId();
 		// If USER_PAUSED send such event
 		if(!isDebuggerMode(execution.getSystemContext()) && reason.equals(PauseReason.USER_PAUSED)) {
 			if(branchId != null) {
@@ -284,7 +231,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	private void addPauseEvent(SystemContext systemContext) {
 		// TODO : add pause reason??
 		HashMap<String, Serializable> eventData = new HashMap<>();
-		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, new HashMap<>(systemContext));
+		eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, new HashMap<>(systemContext));
 		ScoreEvent eventWrapper = new ScoreEvent(EventConstants.SCORE_PAUSED_EVENT, eventData);
 		eventBus.dispatch(eventWrapper);
 	}
@@ -313,7 +260,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	}
 
 	private static boolean isDebuggerMode(Map<String, Serializable> systemContext) {
-		Boolean isDebuggerMode = (Boolean)systemContext.get(ExecutionConstants.DEBUGGER_MODE);
+		Boolean isDebuggerMode = (Boolean)systemContext.get(TempConstants.DEBUGGER_MODE);
 		if(isDebuggerMode == null) {
 			return false;
 		}
@@ -335,8 +282,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
 		RunningExecutionPlan runningExecutionPlan;
 		if(execution != null) {
 			// Optimization for external workers - run the content only without loading the execution plan
-			if(execution.getSystemContext().get(ExecutionConstants.CONTENT_EXECUTION_STEP) != null) {
-				return (ExecutionStep)execution.getSystemContext().get(ExecutionConstants.CONTENT_EXECUTION_STEP);
+			if(execution.getSystemContext().get(TempConstants.CONTENT_EXECUTION_STEP) != null) {
+				return (ExecutionStep)execution.getSystemContext().get(TempConstants.CONTENT_EXECUTION_STEP);
 			}
 			Long position = execution.getPosition();
 			if(position != null) {
@@ -383,7 +330,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
 	private void createErrorEvent(String ex, String logMessage, String errorType, SystemContext systemContext) {
 		HashMap<String, Serializable> eventData = new HashMap<>();
-		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, new HashMap<>(systemContext));
+		eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, new HashMap<>(systemContext));
 		eventData.put(EventConstants.SCORE_ERROR_MSG, ex);
 		eventData.put(EventConstants.SCORE_ERROR_LOG_MSG, logMessage);
 		eventData.put(EventConstants.SCORE_ERROR_TYPE, errorType);
@@ -419,7 +366,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	}
 
 	private static boolean useDefaultGroup(Execution execution) {
-		Boolean useDefaultGroup = (Boolean)execution.getSystemContext().get(ExecutionConstants.USE_DEFAULT_GROUP);
+		Boolean useDefaultGroup = (Boolean)execution.getSystemContext().get(TempConstants.USE_DEFAULT_GROUP);
 		if(useDefaultGroup == null) {
 			return false;
 		}
@@ -428,8 +375,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
 	protected static void postExecutionSettings(Execution execution) {
 		// Decide on Group
-		String group = (String)execution.getSystemContext().get(ExecutionConstants.ACTUALLY_OPERATION_GROUP);
-		if(StringUtils.isEmpty(group) || ExecutionConstants.DEFAULT_GROUP.equals(group)) {
+		String group = (String)execution.getSystemContext().get(TempConstants.ACTUALLY_OPERATION_GROUP);
+		if(StringUtils.isEmpty(group) || TempConstants.DEFAULT_GROUP.equals(group)) {
 			execution.setGroupName(null);
 		} else {
 			execution.setGroupName(group);
@@ -440,21 +387,21 @@ public final class ExecutionServiceImpl implements ExecutionService {
 			}
 		}
 		// Decide Whether should go to jms or perform an internal agent recursion
-		Boolean mustGoToQueue = (Boolean)execution.getSystemContext().get(ExecutionConstants.MUST_GO_TO_QUEUE);
+		Boolean mustGoToQueue = (Boolean)execution.getSystemContext().get(TempConstants.MUST_GO_TO_QUEUE);
 		mustGoToQueue = (mustGoToQueue == null) ? Boolean.FALSE : mustGoToQueue;
 		// execution.mustGoToQueue is the value checked upon return
 		execution.setMustGoToQueue(mustGoToQueue);
 		// reset the flag in the context
-		execution.getSystemContext().put(ExecutionConstants.MUST_GO_TO_QUEUE, Boolean.FALSE);
+		execution.getSystemContext().put(TempConstants.MUST_GO_TO_QUEUE, Boolean.FALSE);
 	}
 
 	private static void addContextData(Map<String, Object> data, Execution execution) {
 		data.putAll(execution.getContexts());
-		data.put(ExecutionConstants.SYSTEM_CONTEXT, execution.getSystemContext());
-		data.put(ExecutionConstants.EXECUTION_RUNTIME_SERVICES, execution.getSystemContext());
-		data.put(ExecutionConstants.SERIALIZABLE_SESSION_CONTEXT, execution.getSerializableSessionContext());
-		data.put(ExecutionConstants.EXECUTION, execution);
-		data.put(ExecutionConstants.RUNNING_EXECUTION_PLAN_ID, execution.getRunningExecutionPlanId());
+		data.put(ExecutionParametersConsts.SYSTEM_CONTEXT, execution.getSystemContext());
+		data.put(ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES, execution.getSystemContext());
+		data.put(ExecutionParametersConsts.SERIALIZABLE_SESSION_CONTEXT, execution.getSerializableSessionContext());
+		data.put(ExecutionParametersConsts.EXECUTION, execution);
+		data.put(ExecutionParametersConsts.RUNNING_EXECUTION_PLAN_ID, execution.getRunningExecutionPlanId());
 	}
 
 }

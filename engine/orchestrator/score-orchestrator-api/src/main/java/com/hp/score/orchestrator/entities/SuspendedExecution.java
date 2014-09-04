@@ -1,6 +1,6 @@
 package com.hp.score.orchestrator.entities;
 
-import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.score.facade.entities.Execution;
 import com.hp.score.engine.data.AbstractIdentifiable;
 
 import javax.persistence.*;

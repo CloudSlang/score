@@ -1,7 +1,7 @@
 package com.hp.score.orchestrator.services;
 
-import com.hp.oo.broker.entities.RunningExecutionPlan;
-import com.hp.oo.broker.services.RunningExecutionPlanService;
+import com.hp.score.facade.entities.RunningExecutionPlan;
+import com.hp.score.facade.services.RunningExecutionPlanService;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.orchestrator.repositories.RunningExecutionPlanRepository;
 import junit.framework.Assert;

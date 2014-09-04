@@ -4,15 +4,17 @@ import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.Score;
 import com.hp.score.api.TriggeringProperties;
 import com.hp.score.events.EventBus;
-import com.hp.score.events.EventConstants;
 import com.hp.score.events.ScoreEvent;
 import com.hp.score.events.ScoreEventListener;
 import com.hp.score.lang.ExecutionRuntimeServices;
 import org.apache.log4j.Logger;
 import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -23,11 +25,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.hp.score.events.EventConstants.SCORE_FINISHED_EVENT;
-import static org.junit.Assert.assertEquals;
 import static org.score.samples.openstack.actions.FinalStepActions.RESPONSE_KEY;
 import static org.score.samples.openstack.actions.FinalStepActions.SUCCESS_KEY;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = "classpath:/META-INF/spring/executionPlanBuilderTestContext.xml")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class ExecutionPlanBuilderTest {
 	public static final String FINAL_STEP_ACTIONS_CLASS = "org.score.samples.openstack.actions.FinalStepActions";
 	private final static Logger logger = Logger.getLogger(ExecutionPlanBuilderTest.class);
@@ -39,7 +42,7 @@ public class ExecutionPlanBuilderTest {
 	public static final String MESSAGE_SUBFLOW = "MESSAGE";
 	public static final String MESSAGE_PARENT = "NO_OVERRIDE";
 	private static final String ECHO_EVENT = "echo event";
-	private List<ScoreEvent> eventList;
+	private List<ScoreEvent> eventList = Collections.synchronizedList(new ArrayList<ScoreEvent>());
 
 	private static final long DEFAULT_TIMEOUT = 60000;
 
@@ -54,20 +57,26 @@ public class ExecutionPlanBuilderTest {
 		eventList = Collections.synchronizedList(new ArrayList<ScoreEvent>());
 	}
 
-	//@Test (timeout = DEFAULT_TIMEOUT) TODO - refactor test / solve timeout exception
+	@Test(timeout = DEFAULT_TIMEOUT)
 	public void testSubflow() throws Exception {
-		ExecutionPlanBuilderTest app = loadApp();
-
 		ExecutionPlan subFlow = createSubFlow();
 		TriggeringProperties parentFlowProperties = createParentFlow(subFlow);
 
-		registerEventListeners(app);
+		registerEventListener(ECHO_EVENT);
 
-		app.score.trigger(parentFlowProperties);
+		score.trigger(parentFlowProperties);
 
-		waitForScoreToFinish();
+		waitForAllEventsToArrive(2); //2 echo events should have been fired
+	}
 
-		assertEquals("2 echo events should have been fired", 2, filterEventsQueue(eventList, ECHO_EVENT).size());
+	@SuppressWarnings("unused")
+	public Map<String, String> echo(String message, ExecutionRuntimeServices executionRuntimeServices) {
+		if (message == null) {
+			message = "DEFAULT";
+		}
+		logger.info("ECHO action invoked - " + message);
+		executionRuntimeServices.addEvent(ECHO_EVENT, ECHO_EVENT);
+		return new HashMap<>();
 	}
 
 	private ExecutionPlan createSubFlow() {
@@ -112,15 +121,8 @@ public class ExecutionPlanBuilderTest {
 		return builder.createTriggeringProperties();
 	}
 
-	private static ExecutionPlanBuilderTest loadApp() {
-		ApplicationContext context = new ClassPathXmlApplicationContext("/META-INF/spring/executionPlanBuilderTestContext.xml");
-		ExecutionPlanBuilderTest app;
-		app = context.getBean(ExecutionPlanBuilderTest.class);
-		return app;
-	}
-
-	private void waitForScoreToFinish() {
-		while(filterEventsQueue(eventList, SCORE_FINISHED_EVENT).size() != 1){
+	private void waitForAllEventsToArrive(int eventsCount) {
+		while(eventList.size() < eventsCount){
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -129,92 +131,15 @@ public class ExecutionPlanBuilderTest {
 		}
 	}
 
-	private List<ScoreEvent> filterEventsQueue(List<ScoreEvent> eventQueue, String eventType) {
-		List<ScoreEvent> returnList = new ArrayList<>();
-		for (ScoreEvent event : eventQueue) {
-			if (event.getEventType().equals(eventType)) {
-				returnList.add(event);
-			}
-		}
-		return returnList;
-	}
-
-	@SuppressWarnings("unused")
-	public Map<String, String> echo(String message, ExecutionRuntimeServices executionRuntimeServices) {
-		if (message == null) {
-			message = "DEFAULT";
-		}
-		logger.info("ECHO action invoked - " + message);
-		executionRuntimeServices.addEvent(ECHO_EVENT, ECHO_EVENT);
-		return new HashMap<>();
-	}
-
-	private void registerEventListeners(ExecutionPlanBuilderTest app) {
+	private void registerEventListener(String... eventTypes) {
 		Set<String> handlerTypes = new HashSet<>();
-		handlerTypes.add(OOActionRunner.ACTION_RUNTIME_EVENT_TYPE);
-		handlerTypes.add(ECHO_EVENT);
-		registerInfoEventListener(app, handlerTypes);
-
-		//register listener for action exception events
-		handlerTypes = new HashSet<>();
-		handlerTypes.add(OOActionRunner.ACTION_EXCEPTION_EVENT_TYPE);
-		registerExceptionEventListener(app, handlerTypes);
-
-		registerScoreEventListener(app);
-	}
-
-	private void registerExceptionEventListener(ExecutionPlanBuilderTest app, Set<String> handlerTypes) {
-		app.eventBus.subscribe(new ScoreEventListener() {
+		Collections.addAll(handlerTypes, eventTypes);
+		eventBus.subscribe(new ScoreEventListener() {
 			@Override
 			public void onEvent(ScoreEvent event) {
+				logger.info("Listener " + this.toString() + " invoked on type: " + event.getEventType() + " with data: " + event.getData());
 				eventList.add(event);
-				logExceptionListenerEvent(event);
 			}
 		}, handlerTypes);
-	}
-
-	private void registerInfoEventListener(ExecutionPlanBuilderTest app, Set<String> handlerTypes) {
-		app.eventBus.subscribe(new ScoreEventListener() {
-			@Override
-			public void onEvent(ScoreEvent event) {
-				eventList.add(event);
-				logListenerEvent(event);
-			}
-		}, handlerTypes);
-	}
-
-	private void registerScoreEventListener(ExecutionPlanBuilderTest app) {
-		Set<String> handlerTypes = new HashSet<>();
-		handlerTypes.add(EventConstants.SCORE_FINISHED_EVENT);
-		handlerTypes.add(EventConstants.SCORE_ERROR_EVENT);
-		handlerTypes.add(EventConstants.SCORE_FAILURE_EVENT);
-		app.eventBus.subscribe(new ScoreEventListener() {
-			@Override
-			public void onEvent(ScoreEvent event) {
-				if(event.getEventType().equals(EventConstants.SCORE_FINISHED_EVENT)){   //TODO - temp solution, till only end flow events send SCORE_FINISHED_EVENT (now also branch throw this event)
-					@SuppressWarnings("all")
-					Map<String,Serializable> data = (Map<String,Serializable>)event.getData();
-					if ((Boolean)data.get(EventConstants.IS_BRANCH)) {
-						return;
-					}
-				}
-				eventList.add(event);
-				logScoreListenerEvent(event);
-			}
-		}, handlerTypes);
-	}
-
-	private void logExceptionListenerEvent(ScoreEvent event) {
-		logger.info("Event " + event.getEventType() + " occurred: " + event.getData());
-		Exception exception = (Exception) event.getData();
-		exception.printStackTrace();
-	}
-
-	private void logListenerEvent(ScoreEvent event) {
-		logger.info("Event " + event.getEventType() + " occurred: " + event.getData());
-	}
-
-	private void logScoreListenerEvent(ScoreEvent event) {
-		logger.info("Event " + event.getEventType() + " occurred");
 	}
 }

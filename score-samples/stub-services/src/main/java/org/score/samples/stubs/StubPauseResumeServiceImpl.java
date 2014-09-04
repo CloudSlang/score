@@ -1,8 +1,8 @@
 package org.score.samples.stubs;
 
-import com.hp.oo.enginefacade.execution.ExecutionSummary;
-import com.hp.oo.enginefacade.execution.PauseReason;
-import com.hp.oo.internal.sdk.execution.Execution;
+import com.hp.score.facade.execution.ExecutionSummary;
+import com.hp.score.facade.execution.PauseReason;
+import com.hp.score.facade.entities.Execution;
 import com.hp.score.orchestrator.services.PauseResumeService;
 
 import java.io.Serializable;

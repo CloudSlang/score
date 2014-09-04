@@ -1,8 +1,5 @@
 package com.hp.score.worker.management.services.dbsupport;
-import com.hp.oo.broker.entities.BranchContextHolder;
-import com.hp.oo.broker.entities.RunningExecutionPlan;
-
-import java.util.List;
+import com.hp.score.facade.entities.RunningExecutionPlan;
 
 /**
  * Created by IntelliJ IDEA.
@@ -12,11 +9,4 @@ import java.util.List;
  */
 public interface WorkerDbSupportService {
     RunningExecutionPlan readExecutionPlanById(Long id);
-
-     //For parallel execution
-    List<BranchContextHolder> readBranchContextById(String splitId);
-    Long createBranchContext(BranchContextHolder branchContextHolder);
-    void deleteParallelRecordsById(String splitId);
-
-    int countBranchContextBySplitId(String splitId);
 }

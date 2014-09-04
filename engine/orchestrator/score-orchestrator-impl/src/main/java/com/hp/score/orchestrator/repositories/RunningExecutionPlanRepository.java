@@ -1,6 +1,6 @@
 package com.hp.score.orchestrator.repositories;
 
-import com.hp.oo.broker.entities.RunningExecutionPlan;
+import com.hp.score.facade.entities.RunningExecutionPlan;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;

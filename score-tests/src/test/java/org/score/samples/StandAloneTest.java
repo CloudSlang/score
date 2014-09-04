@@ -14,7 +14,6 @@ import com.hp.score.events.ScoreEventListener;
 import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.score.samples.controlactions.BranchActions;
@@ -91,7 +90,6 @@ public class StandAloneTest {
         dependencies.put(subFlowExecutionPlan.getFlowUuid(),subFlowExecutionPlan);
         triggeringProperties.setDependencies(dependencies);
         Map<String,Serializable> getRuntimeValues = new HashMap<>();
-        getRuntimeValues.put("NEW_BRANCH_MECHANISM",Boolean.TRUE);//TODO - remove this !! needs to work with this on by default, pending Non-Blocking story
         triggeringProperties.setRuntimeValues(getRuntimeValues);
         registerEventListener("Hello score");
 
@@ -108,16 +106,16 @@ public class StandAloneTest {
         TriggeringProperties triggeringProperties = TriggeringProperties.create(executionPlan);
         triggeringProperties.getDependencies().put(branchExecutionPlan.getFlowUuid(),branchExecutionPlan);
         Map<String,Serializable> getRuntimeValues = new HashMap<>();
-        getRuntimeValues.put("NEW_BRANCH_MECHANISM",Boolean.TRUE);//TODO - remove this !! needs to work with this on by default, pending Non-Blocking story
         triggeringProperties.setRuntimeValues(getRuntimeValues);
-        registerEventListener("Hello score",EventConstants.SCORE_FINISHED_EVENT);
+        registerEventListener("Hello score",EventConstants.SCORE_FINISHED_EVENT,EventConstants.SCORE_FINISHED_BRANCH_EVENT);
 
         score.trigger(triggeringProperties);
 
-        waitForAllEventsToArrive(3);//this flow should have 2 "Hello score" events only + 1 finish event
+        waitForAllEventsToArrive(5);
 
         Assert.assertEquals(2,countEvents("Hello score"));
-        //Assert.assertEquals(2,countEvents(EventConstants.SCORE_FINISHED_EVENT));//todo - temp until fix to be only 1 finish event
+        Assert.assertEquals(1,countEvents(EventConstants.SCORE_FINISHED_EVENT));
+        Assert.assertEquals(2,countEvents(EventConstants.SCORE_FINISHED_BRANCH_EVENT));
     }
 
 
@@ -135,24 +133,56 @@ public class StandAloneTest {
         Assert.assertEquals(sessionGetEvent.getData(), SessionDataActions.TEST_VALUE);
     }
 
-//    @Test//(timeout = 20000)
-//    public void shareSessionDataWithSubflowTest() {
-//        ExecutionPlan executionPlan = createParentPutOnSessionExecutionPlan("childGetFromSessionFlow");
-//        ExecutionPlan subFlowExecutionPlan = createChildGetFromSessionExecutionPlan();
-//        executionPlan.setSubflowsUUIDs(Sets.newHashSet(subFlowExecutionPlan.getFlowUuid()));
-//        Map<String, ExecutionPlan> dependencies = new HashMap<>();
-//        dependencies.put(subFlowExecutionPlan.getFlowUuid(), subFlowExecutionPlan);
-//
-//        TriggeringProperties triggeringProperties = TriggeringProperties.create(executionPlan).setDependencies(dependencies);
-//        registerEventListener(EventConstants.SCORE_FINISHED_EVENT, SessionDataActions.SESSION_BEFORE_PUT_DATA_EVENT, SessionDataActions.SESSION_GET_DATA_EVENT);
-//        score.trigger(triggeringProperties);
-//
-//        waitForAllEventsToArrive(3);
-//        ScoreEvent sessionBeforePutEvent = getEventFromQueueByType(SessionDataActions.SESSION_BEFORE_PUT_DATA_EVENT);
-//        Assert.assertEquals(sessionBeforePutEvent.getData(), null);
-//        ScoreEvent sessionGetEvent = getEventFromQueueByType(SessionDataActions.SESSION_GET_DATA_EVENT);
-//        Assert.assertEquals(sessionGetEvent.getData(), SessionDataActions.TEST_VALUE);
-//    }
+    @Test(timeout = 20000)
+    public void shareSessionDataWithSubflowTest() {
+        ExecutionPlan executionPlan = createParentPutOnSessionExecutionPlan("childGetFromSessionFlow");
+        ExecutionPlan subFlowExecutionPlan = createChildGetFromSessionExecutionPlan();
+        executionPlan.setSubflowsUUIDs(Sets.newHashSet(subFlowExecutionPlan.getFlowUuid()));
+        Map<String, ExecutionPlan> dependencies = new HashMap<>();
+        dependencies.put(subFlowExecutionPlan.getFlowUuid(), subFlowExecutionPlan);
+
+        Map<String,Serializable> getRuntimeValues = new HashMap<>();
+
+        TriggeringProperties triggeringProperties = TriggeringProperties.create(executionPlan).
+                setDependencies(dependencies).setRuntimeValues(getRuntimeValues);
+
+        registerEventListener(EventConstants.SCORE_FINISHED_EVENT, SessionDataActions.SESSION_BEFORE_PUT_DATA_EVENT, SessionDataActions.SESSION_GET_DATA_EVENT);
+        score.trigger(triggeringProperties);
+
+        waitForAllEventsToArrive(3);
+        ScoreEvent sessionBeforePutEvent = getEventFromQueueByType(SessionDataActions.SESSION_BEFORE_PUT_DATA_EVENT);
+        Assert.assertEquals(sessionBeforePutEvent.getData(), null);
+        ScoreEvent sessionGetEvent = getEventFromQueueByType(SessionDataActions.SESSION_GET_DATA_EVENT);
+        Assert.assertEquals(sessionGetEvent.getData(), SessionDataActions.TEST_VALUE);
+    }
+
+    @Test(timeout = 20000)
+    public void sessionDataNotSharedBetweenExecutions() {
+        ExecutionPlan putDataExecutionPlan = new ExecutionPlan();
+        putDataExecutionPlan.setFlowUuid("putDataOnSessionFlow");
+        putDataExecutionPlan.setBeginStep(0L);
+
+        ExecutionStep executionPutDataStep = createPutDataOnSessionStep(0L, null);
+        putDataExecutionPlan.addStep(executionPutDataStep);
+
+        ExecutionPlan getDataExecutionPlan = new ExecutionPlan();
+        getDataExecutionPlan.setFlowUuid("getDataFromSessionFlow");
+        getDataExecutionPlan.setBeginStep(0L);
+        ExecutionStep executionGetDataStep = createGetDataFromSessionStep(0L);
+        getDataExecutionPlan.addStep(executionGetDataStep);
+
+        TriggeringProperties putTriggeringProperties = TriggeringProperties.create(putDataExecutionPlan);
+        TriggeringProperties getTriggeringProperties = TriggeringProperties.create(getDataExecutionPlan);
+        registerEventListener(EventConstants.SCORE_FINISHED_EVENT, SessionDataActions.SESSION_BEFORE_PUT_DATA_EVENT, SessionDataActions.SESSION_GET_DATA_EVENT);
+        score.trigger(putTriggeringProperties);
+        score.trigger(getTriggeringProperties);
+        waitForAllEventsToArrive(4);
+
+        ScoreEvent sessionBeforePutEvent = getEventFromQueueByType(SessionDataActions.SESSION_BEFORE_PUT_DATA_EVENT);
+        Assert.assertEquals(sessionBeforePutEvent.getData(), null);
+        ScoreEvent sessionGetEvent = getEventFromQueueByType(SessionDataActions.SESSION_GET_DATA_EVENT);
+        Assert.assertEquals(sessionGetEvent.getData(), null);
+    }
 
     private ScoreEvent getEventFromQueueByType(String eventType){
 
@@ -164,7 +194,7 @@ public class StandAloneTest {
     }
 
      private void waitForAllEventsToArrive(int eventsCount) {
-        while(eventQueue.size() < eventsCount){
+        while(eventQueue.size() != eventsCount){
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -252,17 +282,27 @@ public class StandAloneTest {
         executionPlan.setFlowUuid("basicSessionDataFlow");
         executionPlan.setBeginStep(0L);
 
-        ExecutionStep executionPutDataStep = createExecutionStep(0L, "org.score.samples.controlactions.SessionDataActions", "putObject", new HashMap<String, Serializable>());
-        addNavigationToExecutionStep(1L, navigationActionClassName, simpleNavigationMethodName, executionPutDataStep);
+        ExecutionStep executionPutDataStep = createPutDataOnSessionStep(0L, 1L);
         executionPlan.addStep(executionPutDataStep);
 
 //        ExecutionStep sleepDataStep = createExecutionStep(1L, "org.score.samples.controlactions.SessionDataActions", "sleepAction");
 //        addNavigationToExecutionStep(2L, simpleNavigationMethodName, navigationActionClassName, sleepDataStep);
 //        executionPlan.addStep(sleepDataStep);
 
-        ExecutionStep executionGetDataStep = createExecutionStep(1L, "org.score.samples.controlactions.SessionDataActions", "getObject", new HashMap<String, Serializable>());
+        ExecutionStep executionGetDataStep = createGetDataFromSessionStep(1L);
         executionPlan.addStep(executionGetDataStep);
         return executionPlan;
+    }
+
+    private static ExecutionStep createGetDataFromSessionStep(Long stepId) {
+        return createExecutionStep(stepId, "org.score.samples.controlactions.SessionDataActions", "getObject", new HashMap<String, Serializable>());
+    }
+
+    private static ExecutionStep createPutDataOnSessionStep(Long stepId, Long nextStepId) {
+        ExecutionStep executionPutDataStep = createExecutionStep(stepId, "org.score.samples.controlactions.SessionDataActions", "putObject", new HashMap<String, Serializable>());
+        if(nextStepId != null)
+            addNavigationToExecutionStep(nextStepId, navigationActionClassName, simpleNavigationMethodName, executionPutDataStep);
+        return executionPutDataStep;
     }
 
     private ExecutionPlan createParentPutOnSessionExecutionPlan(String childFlowId) {
@@ -270,12 +310,11 @@ public class StandAloneTest {
         executionPlan.setFlowUuid("parentPutOnSessionFlow");
         executionPlan.setBeginStep(0L);
 
-        ExecutionStep executionPutDataStep = createExecutionStep(0L, "org.score.samples.controlactions.SessionDataActions", "putObject", new HashMap<String, Serializable>());
-        addNavigationToExecutionStep(1L, navigationActionClassName, simpleNavigationMethodName, executionPutDataStep);
+        ExecutionStep executionPutDataStep = createPutDataOnSessionStep(0L, 1L);
         executionPlan.addStep(executionPutDataStep);
 
         Map<String, Serializable> actionData = new HashMap<>();
-        actionData.put(BranchActions.STEP_POSITION, 1L);
+        actionData.put(BranchActions.STEP_POSITION, 0L);
         actionData.put(BranchActions.EXECUTION_PLAN_ID, childFlowId);
 
         ExecutionStep executionSplitStep = createExecutionStep(1L, "org.score.samples.controlactions.BranchActions", "split", actionData);
@@ -295,7 +334,7 @@ public class StandAloneTest {
         executionPlan.setFlowUuid("childGetFromSessionFlow");
         executionPlan.setBeginStep(0L);
 
-        ExecutionStep executionGetDataStep = createExecutionStep(0L, "org.score.samples.controlactions.SessionDataActions", "getObject",new HashMap<String, Serializable>());
+        ExecutionStep executionGetDataStep = createGetDataFromSessionStep(0L);
         executionPlan.addStep(executionGetDataStep);
 
         return executionPlan;

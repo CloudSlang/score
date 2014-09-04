@@ -28,19 +28,6 @@ public class DeleteServerFlow {
 		inputBindings = generateInitialInputBindings();
 	}
 
-	private List<InputBinding> generateInitialInputBindings() {
-		List<InputBinding> bindings = new ArrayList<>();
-
-		bindings.add(createInputBinding(OPENSTACK_HOST_MESSAGE, HOST_KEY, true));
-		bindings.add(createInputBindingWithDefaultValue(IDENTITY_PORT_MESSAGE, IDENTITY_PORT_KEY, true, DEFUALT_IDENTITY_PORT));
-		bindings.add(createInputBindingWithDefaultValue(COMPUTE_PORT_MESSAGE, COMPUTE_PORT_KEY, true, DEFAULT_COMPUTE_PORT));
-		bindings.add(createInputBinding(OPENSTACK_USERNAME_MESSAGE, USERNAME_KEY, true));
-		bindings.add(createInputBinding(OPENSTACK_PASSWORD_MESSAGE, PASSWORD_KEY, true));
-		bindings.add(createInputBinding(SERVER_NAME_MESSAGE, SERVER_NAME_KEY, true));
-
-		return bindings;
-	}
-
 	public TriggeringProperties deleteServerFlow(){
 		ExecutionPlanBuilder builder = new ExecutionPlanBuilder();
 
@@ -81,6 +68,23 @@ public class DeleteServerFlow {
 		return builder.createTriggeringProperties();
 	}
 
+	public List<InputBinding> getInputBindings() {
+		return inputBindings;
+	}
+
+	private List<InputBinding> generateInitialInputBindings() {
+		List<InputBinding> bindings = new ArrayList<>();
+
+		bindings.add(createInputBinding(OPENSTACK_HOST_MESSAGE, HOST_KEY, true));
+		bindings.add(createInputBindingWithDefaultValue(IDENTITY_PORT_MESSAGE, IDENTITY_PORT_KEY, true, DEFUALT_IDENTITY_PORT));
+		bindings.add(createInputBindingWithDefaultValue(COMPUTE_PORT_MESSAGE, COMPUTE_PORT_KEY, true, DEFAULT_COMPUTE_PORT));
+		bindings.add(createInputBinding(OPENSTACK_USERNAME_MESSAGE, USERNAME_KEY, true));
+		bindings.add(createInputBinding(OPENSTACK_PASSWORD_MESSAGE, PASSWORD_KEY, true));
+		bindings.add(createInputBinding(SERVER_NAME_MESSAGE, SERVER_NAME_KEY, true));
+
+		return bindings;
+	}
+
 	private void createDeleteServerStep(ExecutionPlanBuilder builder, Long stepId, Long nextStepId, Long defaultStepId) {
 		List<NavigationMatcher<Serializable>> navigationMatchers = new ArrayList<>();
 
@@ -96,9 +100,5 @@ public class DeleteServerFlow {
 
 	private void createGetServerIdStep(ExecutionPlanBuilder builder, Long stepId, Long nextStepId) {
 		builder.addStep(stepId, CONTEXT_MERGER_CLASS, GET_SERVER_ID_METHOD, nextStepId);
-	}
-
-	public List<InputBinding> getInputBindings() {
-		return inputBindings;
 	}
 }
