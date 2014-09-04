@@ -33,9 +33,9 @@ public class SessionDataServiceImpl implements SessionDataService {
 
         long currentTime =  System.currentTimeMillis();
         for (SessionDataHolder sessionDataHolder : sessionDataHolders) {
-            logger.error("Checking if we need to clean. Current time: " + (new Date(currentTime)).toString()+ ".   session time: " + (new Date(sessionDataHolder.getTimeStamp())).toString());
+            if(logger.isDebugEnabled()) logger.debug("Checking if we need to clean. Current time: " + (new Date(currentTime)).toString()+ ".   session time: " + (new Date(sessionDataHolder.getTimeStamp())).toString());
             if (currentTime - sessionDataHolder.getTimeStamp() > sessionTimeout) {
-                logger.error("Cleaning session. Current time: " + (new Date(currentTime)).toString()+ ".   session time: " + (new Date(sessionDataHolder.getTimeStamp())).toString());
+                if(logger.isDebugEnabled()) logger.debug("Cleaning session. Current time: " + (new Date(currentTime)).toString()+ ".   session time: " + (new Date(sessionDataHolder.getTimeStamp())).toString());
                 nonSerializableExecutionDataMap.remove(sessionDataHolder.getExecutionId());
             }
         }
