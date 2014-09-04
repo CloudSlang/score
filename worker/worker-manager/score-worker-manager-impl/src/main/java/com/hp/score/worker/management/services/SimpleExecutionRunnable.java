@@ -1,6 +1,7 @@
 package com.hp.score.worker.management.services;
 
 import com.hp.score.engine.node.entities.WorkerNode;
+import com.hp.score.facade.TempConstants;
 import com.hp.score.worker.execution.services.ExecutionService;
 import com.hp.score.engine.queue.entities.ExecStatus;
 import com.hp.score.engine.queue.entities.ExecutionMessage;
@@ -226,8 +227,8 @@ public class SimpleExecutionRunnable implements Runnable {
         if (workerGroupId == null) {
             workerGroupId = WorkerNode.DEFAULT_WORKER_GROUPS[0];
         }
-        Object useStayInTheWorkerObj = nextStepExecution.getSystemContext().get(ExecutionConstants.USE_STAY_IN_THE_WORKER);
-        nextStepExecution.getSystemContext().remove(ExecutionConstants.USE_STAY_IN_THE_WORKER);
+        Object useStayInTheWorkerObj = nextStepExecution.getSystemContext().get(TempConstants.USE_STAY_IN_THE_WORKER);
+        nextStepExecution.getSystemContext().remove(TempConstants.USE_STAY_IN_THE_WORKER);
         boolean useStayInTheWorker = (useStayInTheWorkerObj != null) && (useStayInTheWorkerObj.equals(Boolean.TRUE));
 
         boolean isSameWorker = workerConfigurationService.isMemberOf(workerGroupId) ||

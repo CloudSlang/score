@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.hp.score.api.execution.ExecutionParametersConsts;
+import com.hp.score.facade.TempConstants;
 import com.hp.score.worker.execution.reflection.ReflectionAdapter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -229,7 +231,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	private void addPauseEvent(SystemContext systemContext) {
 		// TODO : add pause reason??
 		HashMap<String, Serializable> eventData = new HashMap<>();
-		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, new HashMap<>(systemContext));
+		eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, new HashMap<>(systemContext));
 		ScoreEvent eventWrapper = new ScoreEvent(EventConstants.SCORE_PAUSED_EVENT, eventData);
 		eventBus.dispatch(eventWrapper);
 	}
@@ -258,7 +260,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	}
 
 	private static boolean isDebuggerMode(Map<String, Serializable> systemContext) {
-		Boolean isDebuggerMode = (Boolean)systemContext.get(ExecutionConstants.DEBUGGER_MODE);
+		Boolean isDebuggerMode = (Boolean)systemContext.get(TempConstants.DEBUGGER_MODE);
 		if(isDebuggerMode == null) {
 			return false;
 		}
@@ -280,8 +282,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
 		RunningExecutionPlan runningExecutionPlan;
 		if(execution != null) {
 			// Optimization for external workers - run the content only without loading the execution plan
-			if(execution.getSystemContext().get(ExecutionConstants.CONTENT_EXECUTION_STEP) != null) {
-				return (ExecutionStep)execution.getSystemContext().get(ExecutionConstants.CONTENT_EXECUTION_STEP);
+			if(execution.getSystemContext().get(TempConstants.CONTENT_EXECUTION_STEP) != null) {
+				return (ExecutionStep)execution.getSystemContext().get(TempConstants.CONTENT_EXECUTION_STEP);
 			}
 			Long position = execution.getPosition();
 			if(position != null) {
@@ -328,7 +330,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
 	private void createErrorEvent(String ex, String logMessage, String errorType, SystemContext systemContext) {
 		HashMap<String, Serializable> eventData = new HashMap<>();
-		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, new HashMap<>(systemContext));
+		eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, new HashMap<>(systemContext));
 		eventData.put(EventConstants.SCORE_ERROR_MSG, ex);
 		eventData.put(EventConstants.SCORE_ERROR_LOG_MSG, logMessage);
 		eventData.put(EventConstants.SCORE_ERROR_TYPE, errorType);
@@ -364,7 +366,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	}
 
 	private static boolean useDefaultGroup(Execution execution) {
-		Boolean useDefaultGroup = (Boolean)execution.getSystemContext().get(ExecutionConstants.USE_DEFAULT_GROUP);
+		Boolean useDefaultGroup = (Boolean)execution.getSystemContext().get(TempConstants.USE_DEFAULT_GROUP);
 		if(useDefaultGroup == null) {
 			return false;
 		}
@@ -373,8 +375,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
 	protected static void postExecutionSettings(Execution execution) {
 		// Decide on Group
-		String group = (String)execution.getSystemContext().get(ExecutionConstants.ACTUALLY_OPERATION_GROUP);
-		if(StringUtils.isEmpty(group) || ExecutionConstants.DEFAULT_GROUP.equals(group)) {
+		String group = (String)execution.getSystemContext().get(TempConstants.ACTUALLY_OPERATION_GROUP);
+		if(StringUtils.isEmpty(group) || TempConstants.DEFAULT_GROUP.equals(group)) {
 			execution.setGroupName(null);
 		} else {
 			execution.setGroupName(group);
@@ -385,21 +387,21 @@ public final class ExecutionServiceImpl implements ExecutionService {
 			}
 		}
 		// Decide Whether should go to jms or perform an internal agent recursion
-		Boolean mustGoToQueue = (Boolean)execution.getSystemContext().get(ExecutionConstants.MUST_GO_TO_QUEUE);
+		Boolean mustGoToQueue = (Boolean)execution.getSystemContext().get(TempConstants.MUST_GO_TO_QUEUE);
 		mustGoToQueue = (mustGoToQueue == null) ? Boolean.FALSE : mustGoToQueue;
 		// execution.mustGoToQueue is the value checked upon return
 		execution.setMustGoToQueue(mustGoToQueue);
 		// reset the flag in the context
-		execution.getSystemContext().put(ExecutionConstants.MUST_GO_TO_QUEUE, Boolean.FALSE);
+		execution.getSystemContext().put(TempConstants.MUST_GO_TO_QUEUE, Boolean.FALSE);
 	}
 
 	private static void addContextData(Map<String, Object> data, Execution execution) {
 		data.putAll(execution.getContexts());
-		data.put(ExecutionConstants.SYSTEM_CONTEXT, execution.getSystemContext());
-		data.put(ExecutionConstants.EXECUTION_RUNTIME_SERVICES, execution.getSystemContext());
-		data.put(ExecutionConstants.SERIALIZABLE_SESSION_CONTEXT, execution.getSerializableSessionContext());
-		data.put(ExecutionConstants.EXECUTION, execution);
-		data.put(ExecutionConstants.RUNNING_EXECUTION_PLAN_ID, execution.getRunningExecutionPlanId());
+		data.put(ExecutionParametersConsts.SYSTEM_CONTEXT, execution.getSystemContext());
+		data.put(ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES, execution.getSystemContext());
+		data.put(ExecutionParametersConsts.SERIALIZABLE_SESSION_CONTEXT, execution.getSerializableSessionContext());
+		data.put(ExecutionParametersConsts.EXECUTION, execution);
+		data.put(ExecutionParametersConsts.RUNNING_EXECUTION_PLAN_ID, execution.getRunningExecutionPlanId());
 	}
 
 }

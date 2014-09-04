@@ -1,5 +1,6 @@
 package com.hp.score.engine.queue.services;
 
+import com.hp.score.api.execution.ExecutionParametersConsts;
 import com.hp.score.facade.services.RunningExecutionPlanService;
 import com.hp.score.facade.entities.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
@@ -28,10 +29,10 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 
 	private Serializable createFinishedEventData(Execution execution) {
 		Map<String, Serializable> eventData = new HashMap<>();
-		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, execution.getSystemContext());
+		eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, execution.getSystemContext());
 		eventData.put(ExecutionConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
 		eventData.put(EventConstants.EXECUTION_CONTEXT, (Serializable) execution.getContexts());
-		eventData.put(EventConstants.IS_BRANCH, isBranchNewMechanism(execution));
+		eventData.put(EventConstants.IS_BRANCH, execution.isBranch());
 		return (Serializable) eventData;
 	}
 
@@ -43,7 +44,7 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 
 	private Serializable createBranchFailureEventData(Execution execution) {
 		Map<String, Serializable> eventData = new HashMap<>();
-		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, execution.getSystemContext());
+		eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, execution.getSystemContext());
 		eventData.put(ExecutionConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
 		eventData.put(EventConstants.BRANCH_ID, execution.getBranchId());
 		return (Serializable) eventData;
@@ -57,20 +58,11 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 
 	private Serializable createFailureEventData(Execution execution) {
 		Map<String, Serializable> eventData = new HashMap<>();
-		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, execution.getSystemContext());
+		eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, execution.getSystemContext());
 		eventData.put(ExecutionConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
 		eventData.put(EventConstants.BRANCH_ID, execution.getBranchId());
-		eventData.put(ExecutionConstants.RUNNING_EXECUTION_PLAN_ID, execution.getRunningExecutionPlanId());
+		eventData.put(ExecutionParametersConsts.RUNNING_EXECUTION_PLAN_ID, execution.getRunningExecutionPlanId());
 		return (Serializable) eventData;
-	}
-
-	/**
-	 * Returns true when the execution is a branch with the new branch mechanism
-	 * It will return true for executions of parallel, multi-instance and sub-flows but not for non-blocking
-	 * (which is the old mechanism)
-	 */
-	private boolean isBranchNewMechanism(Execution execution) {
-		return execution.isBranch() && execution.isNewBranchMechanism();
 	}
 
 	public ScoreEvent createNoWorkerEvent(Execution execution, Long pauseId) {
@@ -90,10 +82,10 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 		String flowUuid = extractFlowUuid(execution.getRunningExecutionPlanId());
 
 		Map<String, Serializable> eventData = new HashMap<>();
-		eventData.put(ExecutionConstants.SYSTEM_CONTEXT, execution.getSystemContext());
+		eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, execution.getSystemContext());
 		eventData.put(ExecutionConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
 		eventData.put(EventConstants.BRANCH_ID, execution.getBranchId());
-		eventData.put(ExecutionConstants.FLOW_UUID, flowUuid);
+		eventData.put(EventConstants.FLOW_UUID, flowUuid);
 		eventData.put(EventConstants.PAUSE_ID, pauseId);
 		return (Serializable) eventData;
 	}

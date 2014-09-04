@@ -24,4 +24,5 @@ public class EventConstants {
 	public static final String PAUSE_ID = "PAUSE_ID";
 
     public static final String BRANCH_ID = "BRANCH_ID";
+    public static final String FLOW_UUID = "FLOW_UUID";
 }

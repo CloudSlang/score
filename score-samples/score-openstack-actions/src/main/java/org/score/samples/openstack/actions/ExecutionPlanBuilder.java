@@ -81,9 +81,7 @@ public class ExecutionPlanBuilder {
 
 		triggeringProperties.getDependencies().putAll(dependencies);
 
-		//TODO - remove this !! needs to work with this on by default, pending Non-Blocking story
 		Map<String,Serializable> getRuntimeValues = new HashMap<>();
-		getRuntimeValues.put("NEW_BRANCH_MECHANISM",Boolean.TRUE);
 		triggeringProperties.setRuntimeValues(getRuntimeValues);
 
 		triggeringProperties.setContext(initialExecutionContext);

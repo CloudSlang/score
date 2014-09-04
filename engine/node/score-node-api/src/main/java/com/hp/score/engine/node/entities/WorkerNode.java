@@ -3,6 +3,7 @@ package com.hp.score.engine.node.entities;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.score.api.nodes.WorkerStatus;
 import com.hp.score.engine.data.AbstractIdentifiable;
+import com.hp.score.facade.TempConstants;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
@@ -35,7 +36,7 @@ import java.util.Objects;
 @DynamicUpdate(value=true)
 @SelectBeforeUpdate(value=true)
 public class WorkerNode extends AbstractIdentifiable implements Worker {
-	public static final String[] DEFAULT_WORKER_GROUPS = {ExecutionConstants.DEFAULT_GROUP};
+	public static final String[] DEFAULT_WORKER_GROUPS = {TempConstants.DEFAULT_GROUP};
 
 	@Column(name = "UUID", nullable = false, unique = true, length = 48)
 	private String uuid;

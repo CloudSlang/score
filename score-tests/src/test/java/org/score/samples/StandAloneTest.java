@@ -90,7 +90,6 @@ public class StandAloneTest {
         dependencies.put(subFlowExecutionPlan.getFlowUuid(),subFlowExecutionPlan);
         triggeringProperties.setDependencies(dependencies);
         Map<String,Serializable> getRuntimeValues = new HashMap<>();
-        getRuntimeValues.put("NEW_BRANCH_MECHANISM",Boolean.TRUE);//TODO - remove this !! needs to work with this on by default, pending Non-Blocking story
         triggeringProperties.setRuntimeValues(getRuntimeValues);
         registerEventListener("Hello score");
 
@@ -107,7 +106,6 @@ public class StandAloneTest {
         TriggeringProperties triggeringProperties = TriggeringProperties.create(executionPlan);
         triggeringProperties.getDependencies().put(branchExecutionPlan.getFlowUuid(),branchExecutionPlan);
         Map<String,Serializable> getRuntimeValues = new HashMap<>();
-        getRuntimeValues.put("NEW_BRANCH_MECHANISM",Boolean.TRUE);//TODO - remove this !! needs to work with this on by default, pending Non-Blocking story
         triggeringProperties.setRuntimeValues(getRuntimeValues);
         registerEventListener("Hello score",EventConstants.SCORE_FINISHED_EVENT,EventConstants.SCORE_FINISHED_BRANCH_EVENT);
 
@@ -144,7 +142,6 @@ public class StandAloneTest {
         dependencies.put(subFlowExecutionPlan.getFlowUuid(), subFlowExecutionPlan);
 
         Map<String,Serializable> getRuntimeValues = new HashMap<>();
-        getRuntimeValues.put("NEW_BRANCH_MECHANISM",Boolean.TRUE);//TODO - remove this !! needs to work with this on by default, pending Non-Blocking story
 
         TriggeringProperties triggeringProperties = TriggeringProperties.create(executionPlan).
                 setDependencies(dependencies).setRuntimeValues(getRuntimeValues);

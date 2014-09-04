@@ -1,5 +1,6 @@
 package com.hp.score.worker.execution.reflection;
 
+import com.hp.score.api.execution.ExecutionParametersConsts;
 import com.hp.score.worker.execution.services.SessionDataService;
 import com.hp.score.facade.entities.Execution;
 import com.hp.oo.internal.sdk.execution.ExecutionConstants;
@@ -116,13 +117,13 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 		List<Object> args = new ArrayList<>(paramNames.length);
 		for(String paramName : paramNames) {
 			if(CONTEXT_PARAM_NAME.equals(paramName)) { //todo - why not use execution context ??
-				Execution execution = (Execution)actionData.get(ExecutionConstants.EXECUTION);
+				Execution execution = (Execution)actionData.get(ExecutionParametersConsts.EXECUTION);
 				args.add(execution != null ? execution.getContexts() : null);
 				continue;
 			}
-            if(ExecutionConstants.NON_SERIALIZABLE_EXECUTION_DATA.equals(paramName)) {
+            if(ExecutionParametersConsts.NON_SERIALIZABLE_EXECUTION_DATA.equals(paramName)) {
                 //todo: change to runtime services once we can
-                SystemContext systemContext = (SystemContext)actionData.get(ExecutionConstants.SYSTEM_CONTEXT);
+                SystemContext systemContext = (SystemContext)actionData.get(ExecutionParametersConsts.SYSTEM_CONTEXT);
                 Long executionId = (Long)systemContext.get(ExecutionConstants.EXECUTION_ID_CONTEXT);
                 Map<String, Object> nonSerializableExecutionData = sessionDataService.getNonSerializableExecutionData(executionId);
                 args.add(nonSerializableExecutionData);

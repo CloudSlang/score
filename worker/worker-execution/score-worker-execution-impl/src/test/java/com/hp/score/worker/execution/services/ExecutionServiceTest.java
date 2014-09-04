@@ -1,5 +1,7 @@
 package com.hp.score.worker.execution.services;
 
+import com.hp.score.events.EventConstants;
+import com.hp.score.facade.TempConstants;
 import com.hp.score.facade.entities.RunningExecutionPlan;
 import com.hp.score.facade.execution.ExecutionStatus;
 import com.hp.score.facade.execution.ExecutionSummary;
@@ -75,8 +77,7 @@ public class ExecutionServiceTest {
 		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
 		exe.setExecutionId(111L);
 		exe.getSystemContext().setBranchId("branch_id");
-		exe.getSystemContext().put(ExecutionConstants.FLOW_UUID, "flow_uuid");
-		exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String, List>());
+		exe.getSystemContext().put(EventConstants.FLOW_UUID, "flow_uuid");
 
 		//since the resumeService mock will return null - there no such execution in pause state, expect to get false
 		boolean result = executionService.handlePausedFlow(exe);
@@ -134,8 +135,7 @@ public class ExecutionServiceTest {
 		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
 		exe.setExecutionId(executionId);
 		exe.getSystemContext().setBranchId(branch_id);
-		exe.getSystemContext().put(ExecutionConstants.FLOW_UUID, "flow_uuid");
-		exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String, List>());
+		exe.getSystemContext().put(EventConstants.FLOW_UUID, "flow_uuid");
 		//for events
 		exe.getSystemContext().put(ExecutionConstants.EXECUTION_ID_CONTEXT, executionId);
 		return exe;
@@ -169,7 +169,7 @@ public class ExecutionServiceTest {
 		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
 		exe.setExecutionId(EXECUTION_ID_1);
 
-		exe.getSystemContext().put(ExecutionConstants.CONTENT_EXECUTION_STEP, executionStep);
+		exe.getSystemContext().put(TempConstants.CONTENT_EXECUTION_STEP, executionStep);
 
 		ExecutionStep loadedStep = executionService.loadExecutionStep(exe);
 
@@ -227,9 +227,8 @@ public class ExecutionServiceTest {
 		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
 		exe.setExecutionId(1111111L);
 
-		exe.getSystemContext().put(ExecutionConstants.ACTUALLY_OPERATION_GROUP, "Real_Group");
-		exe.getSystemContext().put(ExecutionConstants.MUST_GO_TO_QUEUE, true);
-		exe.getSystemContext().put(ExecutionConstants.EXECUTION_EVENTS_STEP_MAPPED, new HashMap<String, List>());
+		exe.getSystemContext().put(TempConstants.ACTUALLY_OPERATION_GROUP, "Real_Group");
+		exe.getSystemContext().put(TempConstants.MUST_GO_TO_QUEUE, true);
 		//for events
 		exe.getSystemContext().put(ExecutionConstants.EXECUTION_ID_CONTEXT, "stam");
 
@@ -237,7 +236,7 @@ public class ExecutionServiceTest {
 
 		Assert.assertEquals("Real_Group", exe.getGroupName());
 		Assert.assertEquals(true, exe.isMustGoToQueue());
-		Assert.assertEquals(false, exe.getSystemContext().get(ExecutionConstants.MUST_GO_TO_QUEUE));
+		Assert.assertEquals(false, exe.getSystemContext().get(TempConstants.MUST_GO_TO_QUEUE));
 	}
 
 	@Configuration

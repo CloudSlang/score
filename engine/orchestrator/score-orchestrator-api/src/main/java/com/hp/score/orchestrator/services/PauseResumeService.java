@@ -49,10 +49,6 @@ public interface PauseResumeService {
 
     /**
      * Returns the execution if its status is Paused*. Otherwise returns null.
-     * TODO:
-     *  After moving PauseResumeService to the engine, this method should returns ExecutionSummaryEntity,
-     *  and the EngineFacadeImpl should map it to ExecutionSummary.
-     *  In general, this module shouldn't use classes from the facade
      */
     ExecutionSummary readPausedExecution(Long executionId, String branchId);
 

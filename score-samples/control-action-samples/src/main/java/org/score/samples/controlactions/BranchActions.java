@@ -36,7 +36,7 @@ public class BranchActions {
 			}
 		}
 
-		initialContext.remove("NEW_SPLIT_ID");
+		initialContext.remove("NEW_SPLIT_ID");  // todo - use const!!
 		executionRuntimeServices.addBranch(0L, flowUuid, initialContext);
     }
 

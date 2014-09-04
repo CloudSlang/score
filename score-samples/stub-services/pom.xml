@@ -12,7 +12,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>score-facade</artifactId>
+            <artifactId>score-orchestrator-api</artifactId>
             <version>${project.version}</version>
         </dependency>
 

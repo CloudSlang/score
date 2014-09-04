@@ -116,7 +116,7 @@ public class Execution implements Serializable {
         this.lastEventDumpTime = lastEventDumpTime;
     }
 
-    /*  TODO :
+    /*  TODO Meshi:
         System Context Wrapper APIs
         ----------------------------
         The following methods are here to provide a cleaner API above the SystemContext,
@@ -131,10 +131,6 @@ public class Execution implements Serializable {
     */
     public boolean isBranch() {
         return !StringUtils.isEmpty(systemContext.getBranchId());
-    }
-
-    public boolean isNewBranchMechanism() {
-        return systemContext.containsKey(ExecutionConstants.NEW_BRANCH_MECHANISM);
     }
 
     public String getBranchId() {
