@@ -24,9 +24,7 @@ public class OOActionRunner {
 	public final static String ACTION_RUNTIME_EVENT_TYPE = "ACTION_RUNTIME_EVENT";
 	public final static String ACTION_EXCEPTION_EVENT_TYPE = "ACTION_EXCEPTION_EVENT";
 	public final static String FAILURE_EVENT_KEY = "failureEvent";
-	public final static String EXCEPTION_KEY = "exception";
-	public final static Integer STRING_START_INDEX = 0;
-	public final static Integer STRING_END_INDEX = 50;
+	public final static Integer SUBSTRING_LENGTH = 80;
 
 	private Class actionClass;
 	private Method actionMethod;
@@ -90,17 +88,20 @@ public class OOActionRunner {
 	private void mergeBackResults(Map<String, Serializable> executionContext, ExecutionRuntimeServices executionRuntimeServices, String methodName, Map<String, String> results) {
 
 
-		String resultString;
-		if(results != null) {
+		String resultString = "";
+		if (results != null) {
 			for (String key : results.keySet()) {
-				if (key.equals(EXCEPTION_KEY)) {
-					results.put(EXCEPTION_KEY, StringUtils.substring(results.get(EXCEPTION_KEY), STRING_START_INDEX, STRING_END_INDEX));
+				resultString += key + "=";
+				String value = results.get(key);
+				if (value.length() > SUBSTRING_LENGTH) {
+					resultString += StringUtils.substring(value, 0, SUBSTRING_LENGTH);
+					resultString += "...";
 				}
+				resultString += ", ";
 			}
 
-			resultString = results.toString();
-		}
-		else {
+			resultString = StringUtils.substring(resultString, 0, resultString.length()-2);
+		} else {
 			resultString = "";
 		}
 
