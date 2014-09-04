@@ -5,51 +5,56 @@ import java.net.UnknownHostException;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import com.hp.score.engine.node.entities.WorkerNode;
 import com.hp.score.engine.node.services.WorkerNodeService;
 
 /**
- * User: stoneo
- * Date: 15/07/2014
- * Time: 15:39
+ * @author stoneo
+ * @author Avi Moradi
+ * @since 15/07/2014
+ * @version $Id$
  */
 public class WorkerRegistration {
 
-	private static final Logger logger = Logger.getLogger(WorkerRegistration.class);
+	private static final Logger log = Logger.getLogger(WorkerRegistration.class);
 
-	@Autowired
-	private WorkerNodeService workerNodeService;
-	@Autowired
-	private String workerUuid;
+	@Resource
+	protected String workerUuid;
+	@Resource
+	protected WorkerNodeService workerNodeService;
 
 	@PostConstruct
-	public void registerWorkerPostConstruct() {
+	public void registerWorkerPostConstruct() throws Exception {
 		try {
 			registerWorker();
-		} catch(Exception e) {
-			logger.error("Failed to register worker due to: " + e.getMessage(), e);
-			throw new RuntimeException("Failed to register worker", e);
+		} catch(Exception ex) {
+			log.error("Failed to register worker due to: " + ex.getMessage(), ex);
+			throw ex;
 		}
 	}
 
-	private void registerWorker() {
-		if(logger.isDebugEnabled()) logger.debug("Registering embedded worker...");
-		String password = UUID.randomUUID().toString();
-		workerNodeService.create(workerUuid, password, getHostName(), FilenameUtils.separatorsToSystem("C:\\"));
-		workerNodeService.activate(workerUuid);
-	}
-
-	private static String getHostName() {
+	protected void registerWorker() throws Exception {
 		try {
-			return InetAddress.getLocalHost().getCanonicalHostName();
-		} catch(UnknownHostException ex) {
-			logger.fatal("Unable to register embedded worker due to failure in host name resolving", ex);
-			throw new RuntimeException("Failed to resolve host name", ex);
-		}
+			WorkerNode workerNode = workerNodeService.readByUUID(workerUuid);
+			if(workerNode != null) {
+				log.info("Worker already registered: " + workerNode);
+				return;
+			}
+		} catch(Exception ex) { /* Worker not found, register it */ }
+		log.info("Registering worker " + workerUuid);
+		String password = UUID.randomUUID().toString();
+		createWorker(workerUuid, password, System.getProperty("user.dir"));
+	}
+
+	protected void createWorker(String uuid, String password, String installPath) throws UnknownHostException {
+		log.info("Creating worker...");
+		workerNodeService.create(uuid, password, InetAddress.getLocalHost().getCanonicalHostName(), installPath);
+		workerNodeService.activate(uuid);
+		log.info("Worker [" + uuid + "] registered and activated");
 	}
 
 }

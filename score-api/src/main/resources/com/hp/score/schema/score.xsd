@@ -55,8 +55,9 @@
 				</xsd:element>
 			</xsd:all>
 			<xsd:attribute type="xsd:string" name="id"/>
-			<xsd:attribute  type="xsd:string" name="uuid" use="required"/>
+			<xsd:attribute type="xsd:string" name="uuid" use="required"/>
 			<xsd:attribute type="xsd:string" name="depends-on"/>
+			<xsd:attribute type="xsd:boolean" name="register"/>
 		</xsd:complexType>
 	</xsd:element>
 </xsd:schema>
