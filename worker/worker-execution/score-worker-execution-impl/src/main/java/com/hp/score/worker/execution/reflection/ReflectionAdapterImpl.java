@@ -52,8 +52,10 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 			Method actionMethod = getActionMethod(actionMetadata);
 			Object[] arguments = buildParametersArray(actionMethod, actionData);
 			if(logger.isTraceEnabled()) logger.trace("Invoking...");
+            sessionDataService.lockSessionData(getExecutionIdFromActionData(actionData));
 			Object result = actionMethod.invoke(actionBean, arguments);
-			if(logger.isDebugEnabled()) logger.debug("Control action [" + actionMetadata.getClassName() + '.' + actionMetadata.getMethodName() + "] done");
+            sessionDataService.unlockSessionData(getExecutionIdFromActionData(actionData));
+            if(logger.isDebugEnabled()) logger.debug("Control action [" + actionMetadata.getClassName() + '.' + actionMetadata.getMethodName() + "] done");
 			return result;
 		} catch(IllegalArgumentException ex) {
 			String message = "Failed to run the action! Wrong arguments were passed to class: " + actionMetadata.getClassName() + ", method: " + actionMetadata.getMethodName() +
@@ -68,7 +70,7 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 		}
 	}
 
-	private Object getActionBean(ControlActionMetadata actionMetadata) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+    private Object getActionBean(ControlActionMetadata actionMetadata) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 		Object bean = cacheBeans.get(actionMetadata.getClassName());
 		if(bean == null) {
 			if(logger.isTraceEnabled()) logger.trace(actionMetadata.getClassName() + " wasn't found in the beans cache");
@@ -123,8 +125,7 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 			}
             if(ExecutionParametersConsts.NON_SERIALIZABLE_EXECUTION_DATA.equals(paramName)) {
                 //todo: change to runtime services once we can
-                SystemContext systemContext = (SystemContext)actionData.get(ExecutionParametersConsts.SYSTEM_CONTEXT);
-                Long executionId = (Long)systemContext.get(ExecutionConstants.EXECUTION_ID_CONTEXT);
+                Long executionId = getExecutionIdFromActionData(actionData);
                 Map<String, Object> nonSerializableExecutionData = sessionDataService.getNonSerializableExecutionData(executionId);
                 args.add(nonSerializableExecutionData);
                 continue;
@@ -135,7 +136,15 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 		return args.toArray(new Object[args.size()]);
 	}
 
-	@Override
+    private Long getExecutionIdFromActionData(Map<String, ?> actionData) {
+        SystemContext systemContext = (SystemContext)actionData.get(ExecutionParametersConsts.SYSTEM_CONTEXT);
+        if(systemContext != null)
+            return (Long)systemContext.get(ExecutionConstants.EXECUTION_ID_CONTEXT);
+        else
+            return null;
+    }
+
+    @Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
 	}
