@@ -69,10 +69,11 @@ public class CommandLineApplication {
 	}
 
 	public static void main(String[] args) {
-		displaySignature();
 		CommandLineApplication app = loadApp();
+        displaySignature();
 		app.registerEventListeners();
 		app.start();
+
 	}
 
 	private static void displaySignature() {
