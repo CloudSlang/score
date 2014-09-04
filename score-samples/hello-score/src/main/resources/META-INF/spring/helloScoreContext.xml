@@ -10,8 +10,6 @@
 
     <bean class="org.score.samples.stubs.StubServicesContext"/>
 
-    <bean id="workerRegistration" class="com.hp.score.worker.management.WorkerRegistration"/>
-
     <bean class="org.score.samples.HelloScore" />
 
 </beans>
