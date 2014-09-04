@@ -69,7 +69,7 @@ public class WorkerRecoveryServiceImpl implements WorkerRecoveryService, LoginLi
             doWorkerRecovery(workerUuid);
         }
         else {
-            logger.info("Worker : " + workerUuid + " is NOT for recovery");
+            logger.debug("Worker : " + workerUuid + " is NOT for recovery");
         }
     }
 
