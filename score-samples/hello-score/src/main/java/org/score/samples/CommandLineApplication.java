@@ -113,7 +113,7 @@ public class CommandLineApplication {
 	}
 
 	private boolean isFlowRunning() {
-			return triggeringStatus == 1;
+		return triggeringStatus == 1;
 	}
 
 	private void displayAvailableFlows(BufferedReader reader) {
