@@ -69,7 +69,7 @@ public class OOActionRunner {
 		if (inputBindings != null) {
 			for (InputBinding inputBinding : inputBindings) {
 				if (inputBinding.isRequired()) {
-					if (!foundValue(inputBinding.getInputKey())) {
+					if (!foundValue(inputBinding.getSourceKey())) {
 						String message = "Input \"" + inputBinding.getDescription() + "\" is required but not found!";
 						throw new InputBinding.InputBindingException(message);
 					}

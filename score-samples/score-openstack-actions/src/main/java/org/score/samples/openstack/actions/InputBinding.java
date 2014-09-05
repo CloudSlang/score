@@ -8,38 +8,39 @@ import java.io.Serializable;
  * @author Bonczidai Levente
  */
 @SuppressWarnings("unused")
-public class InputBinding implements Serializable{
+public class InputBinding implements Serializable{ //todo private constructors?
 	private String description;
 	private boolean required;
 	private boolean hasDefaultValue;
 	private String value;
-	private String inputKey;
+	private String sourceKey;
+	private String destinationKey;
 
-	public static InputBinding createInputBindingWithDefaultValue(String description, String inputKey, boolean required, String value) {
-		return new InputBinding(description, inputKey, required, value);
-	}
-
-	public static InputBinding createInputBinding(String description, String inputKey, boolean required) {
-		return new InputBinding(description, inputKey, required);
-	}
-
-	private InputBinding(String description, String inputKey, boolean required, String value) {
+    InputBinding(String description, String sourceKey, boolean required, String value) {
 		this.description = description;
-		this.inputKey = inputKey;
+		this.sourceKey = sourceKey;
 		this.required = required;
 		this.hasDefaultValue = true;
 		this.value = value;
 	}
 
-	private InputBinding(String description, String inputKey, boolean required) {
+	InputBinding(String description, String sourceKey, boolean required) {
 		this.description = description;
-		this.inputKey = inputKey;
+		this.sourceKey = sourceKey;
 		this.required = required;
 		this.hasDefaultValue = false;
 	}
 
-	public String getInputKey() {
-		return inputKey;
+
+	public String getDestinationKey() {
+		return destinationKey;
+	}
+
+	public void setDestinationKey(String destinationKey) {
+		this.destinationKey = destinationKey;
+	}
+	public String getSourceKey() {
+		return sourceKey;
 	}
 
 	public boolean hasDefaultValue() {
@@ -52,6 +53,10 @@ public class InputBinding implements Serializable{
 
 	public void setValue(String value) {
 		this.value = value;
+	}
+
+	public void setSourceKey(String sourceKey) {
+		this.sourceKey = sourceKey;
 	}
 
 	public String getDescription() {
@@ -77,23 +82,11 @@ public class InputBinding implements Serializable{
 
 		InputBinding that = (InputBinding) o;
 
-		if (hasDefaultValue != that.hasDefaultValue) {
-			return false;
-		}
-		if (required != that.required) {
-			return false;
-		}
-		if (description != null ? !description.equals(that.description) : that.description != null) {
-			return false;
-		}
-		if (inputKey != null ? !inputKey.equals(that.inputKey) : that.inputKey != null) {
-			return false;
-		}
-		if (value != null ? !value.equals(that.value) : that.value != null) {
-			return false;
-		}
+		return hasDefaultValue == that.hasDefaultValue && required == that.required
+				&& !(description != null ? !description.equals(that.description) : that.description != null)
+				&& !(sourceKey != null ? !sourceKey.equals(that.sourceKey) : that.sourceKey != null)
+				&& !((value != null) ? !value.equals(that.value) : (that.value != null));
 
-		return true;
 	}
 
 	@Override
@@ -102,13 +95,14 @@ public class InputBinding implements Serializable{
 		result = 31 * result + (required ? 1 : 0);
 		result = 31 * result + (hasDefaultValue ? 1 : 0);
 		result = 31 * result + (value != null ? value.hashCode() : 0);
-		result = 31 * result + (inputKey != null ? inputKey.hashCode() : 0);
+		result = 31 * result + (sourceKey != null ? sourceKey.hashCode() : 0);
 		return result;
 	}
 
-	public static class InputBindingException extends Exception {
+	public static class InputBindingException extends Exception { //todo no static class inside
 		public InputBindingException(String message) {
 			super(message);
 		}
 	}
+
 }
