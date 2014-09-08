@@ -122,9 +122,11 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
                 }
             } catch (InterruptedException ex) {
                 logger.error("Fill InBuffer thread was interrupted... ", ex);
+                syncManager.finishGetMessages(); //release all locks before going to sleep!!!
                 try {Thread.sleep(1000);} catch (InterruptedException e) {/*ignore*/}
             } catch (Exception ex) {
                 logger.error("Failed to load new ExecutionMessages to the buffer!", ex);
+                syncManager.finishGetMessages(); //release all locks before going to sleep!!!
                 try {Thread.sleep(1000);} catch (InterruptedException e) {/*ignore*/}
             }
             finally {
@@ -141,7 +143,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
         return bufferSize < (capacity * 0.2) && checkFreeMemorySpace(MEMORY_THRESHOLD);
     }
 
-    private void ackMessages(List<ExecutionMessage> newMessages) {
+    private void ackMessages(List<ExecutionMessage> newMessages) throws InterruptedException {
         ExecutionMessage cloned;
         for (ExecutionMessage message : newMessages) {
             // create a unique id for this lane in this specific worker to be used in out buffer optimization

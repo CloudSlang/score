@@ -57,7 +57,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
     }
 
 	@Override
-	public void put(final Message... messages) {
+    public void put(final Message... messages) throws InterruptedException{
 		Validate.notEmpty(messages, "The array of messages is null or empty");
         try{
             syncManager.startPutMessages();
@@ -71,6 +71,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
             // to make sure that it will be processed in a single transaction
             Message message = messages.length==1? messages[0]: new CompoundMessage(messages);
 
+            //put message into the buffer
             if (!buffer.offer(message)){
                 logger.error("Failed to put message into the outgoing buffer");
                 throw new RuntimeException("Failed to put message into the outgoing buffer");
@@ -79,6 +80,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 			if (logger.isTraceEnabled()) logger.trace(message.getClass().getSimpleName() + " added to the buffer. " + getStatus());
 		} catch (InterruptedException ex) {
 			logger.warn("Buffer put action was interrupted", ex);
+            throw ex;
 		} finally {
 			syncManager.finishPutMessages();
 		}
@@ -141,7 +143,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 			if (logger.isDebugEnabled()) logger.debug("trying to drain bulk: " + logMap.toString() + ", " + getStatus());
 			drainBulk(bulk);
 		} catch (Exception ex) {
-			logger.error("Failed to drain buffer, invoking recovery", ex);
+            logger.error("Failed to drain buffer, invoking worker internal recovery... ", ex);
 			recoveryManager.doRecovery();
 		}
 	}

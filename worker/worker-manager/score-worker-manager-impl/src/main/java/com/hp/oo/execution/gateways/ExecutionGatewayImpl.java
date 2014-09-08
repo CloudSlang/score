@@ -33,7 +33,7 @@ public class ExecutionGatewayImpl implements ExecutionGateway, SubFlowExecutionG
         try {
             ExecutionMessage message = createExecutionMessage(execution);
             outBuffer.put(message);
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
            throw new FlowExecutionException("Failed to put new execution object to the gateway...", e);
         }
     }

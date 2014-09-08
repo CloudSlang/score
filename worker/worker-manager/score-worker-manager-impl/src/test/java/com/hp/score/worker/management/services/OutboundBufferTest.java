@@ -58,7 +58,7 @@ public class OutboundBufferTest {
 	 * Makes sure the buffer aggregates messages and dispatches them in bulk
 	 */
 	@Test
-	public void testAggregation() {
+	public void testAggregation() throws InterruptedException{
 		List<DummyMsg1> messages = Arrays.asList(new DummyMsg1(), new DummyMsg1());
 
 		for (DummyMsg1 message : messages) {
@@ -86,7 +86,11 @@ public class OutboundBufferTest {
 		Thread thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				buffer.put(new DummyMsg1());
+                try {
+                    buffer.put(new DummyMsg1());
+                } catch (InterruptedException e) {
+                    //ignore
+                }
 			}
 		});
 		thread.start();
@@ -227,7 +231,7 @@ public class OutboundBufferTest {
      * Makes sure the recovery clears worker state
      */
     @Test
-    public void testRecovery() {
+    public void testRecovery() throws InterruptedException {
         List<DummyMsg1> messages = Arrays.asList(new DummyMsg1(), new DummyMsg1());
 
         for (DummyMsg1 message : messages) {

@@ -14,7 +14,7 @@ public interface OutboundBuffer {
 	 *
 	 * @param messages collection of elements to be added
 	 */
-	void put(Message... messages);
+    void put(final Message... messages) throws InterruptedException;
 
 	/**
 	 * Drains the buffer
