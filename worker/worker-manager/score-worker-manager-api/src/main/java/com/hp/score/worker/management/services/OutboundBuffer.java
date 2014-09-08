@@ -12,9 +12,9 @@ public interface OutboundBuffer {
 	 * Add a collection of messages to the buffer
 	 * Thread safe
 	 *
-	 * @param messages collection of elements to be added
-	 */
-	void put(Message... messages);
+     * @param messages collection of elements to be added
+     */
+	void put(final Message... messages) throws InterruptedException;
 
 	/**
 	 * Drains the buffer

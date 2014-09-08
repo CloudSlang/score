@@ -36,7 +36,7 @@ import static ch.lambdaj.Lambda.on;
  */
 public class WorkerManager implements ApplicationListener, EndExecutionCallback, WorkerRecoveryListener {
 	private final Logger logger = Logger.getLogger(this.getClass());
-	private static final int KEEP_ALIVE_FAIL_LIMIT = 4;
+	private static final int KEEP_ALIVE_FAIL_LIMIT = 5;
 
 	@Resource
 	private String workerUuid;
@@ -108,7 +108,8 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
                 } catch (Exception e) {
                     keepAliveFailCount++;
                     logger.error("Could not send keep alive to Central, keepAliveFailCount = " + keepAliveFailCount, e);
-                    if(keepAliveFailCount > KEEP_ALIVE_FAIL_LIMIT){
+                    if(keepAliveFailCount >= KEEP_ALIVE_FAIL_LIMIT){
+                        logger.error("Failed sending keepAlive for " + KEEP_ALIVE_FAIL_LIMIT + " times. Invoking worker internal recovery...");
                         recoveryManager.doRecovery();
                     }
                 }
