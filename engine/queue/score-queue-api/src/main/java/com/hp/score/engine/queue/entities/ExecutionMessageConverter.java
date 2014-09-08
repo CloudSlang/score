@@ -9,8 +9,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,29 +25,6 @@ public class ExecutionMessageConverter {
 	public Payload createPayload(Object execution) {
 		byte[] objBytes = objToBytes(execution);
 		return new Payload(true, false, objBytes);
-	}
-
-	private byte[] unzip(byte[] input) throws IOException {
-		ByteArrayInputStream is = new ByteArrayInputStream(input);
-		GZIPInputStream gis = new GZIPInputStream(is);
-
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-
-		IOUtils.copy(gis, outputStream);
-		return outputStream.toByteArray();
-	}
-
-	private byte[] zip(byte[] input) throws IOException {
-		ByteArrayOutputStream bout = new ByteArrayOutputStream();
-		GZIPOutputStream gzipout = new GZIPOutputStream(bout);
-
-		try{
-			gzipout.write(input);
-			gzipout.flush();
-			return  bout.toByteArray();
-		} finally {
-			IOUtils.closeQuietly(gzipout);
-		}
 	}
 
 	private <T> T objFromBytes(byte[] bytes) {
