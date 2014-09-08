@@ -20,6 +20,8 @@ import java.util.Set;
  * we plan to have it implemented in the future
  * until it done, no pause and resume is possible in score
  */
+
+//TODO - move it to orchestartion impl, with option to change the context, remove stub project
 public class StubPauseResumeServiceImpl implements PauseResumeService {
 
     @Override
