@@ -8,6 +8,7 @@ import com.hp.score.api.TriggeringProperties;
 import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
 import org.apache.commons.collections.CollectionUtils;
 
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,6 +34,7 @@ public class ExecutionPlanBuilder {
 	public static final String CONTEXT_KEY = "context";
 	public static final String NAVIGATION_ACTIONS_CLASS = "org.score.samples.controlactions.NavigationActions";
 	public static final String SIMPLE_NAVIGATION_METHOD = "simpleNavigation";
+
 	public static final String NEXT_STEP_ID_KEY = "nextStepId";
 	public static final String JOIN_METHOD_NAME = "join";
 	public static final String OOACTION_RUNNER_CLASS = "org.score.samples.openstack.actions.OOActionRunner";
@@ -40,6 +42,8 @@ public class ExecutionPlanBuilder {
 	public static final String OOACTION_NAVIGATOR_CLASS = "org.score.samples.openstack.actions.OOActionNavigator";
 	public static final String NAVIGATE_METHOD_NAME = "navigate";
 	public static final String FLOW_UUID_PROPERTY = "flowUuid"; //property name in Execution Plan class
+	private static final String EXECUTION_PLAN_BUILDER_CLASS = "org.score.samples.openstack.actions.ExecutionPlanBuilder";
+	private static final String SIMPLE_NAVIGATE_METHOD = "simpleNavigate";
 
 	private ExecutionPlan executionPlan;
 	private Long beginStep;
@@ -146,6 +150,28 @@ public class ExecutionPlanBuilder {
 		return addOOActionStep(stepId, actionClassName, actionMethodName, null, null);
 	}
 
+	public Long addStep(Long stepId, String classPath, String methodName, List<InputBinding> inputs, Long nextStepId) {
+		ExecutionStep step = new ExecutionStep(stepId);
+
+		step.setAction(new ControlActionMetadata(classPath, methodName));
+		Map<String, Serializable> actionData = new HashMap<>(3);
+
+		actionData.put(ACTION_METHOD_KEY, methodName);
+		actionData.put("inputs", (Serializable) inputs);
+		step.setActionData(actionData);
+
+		step.setNavigation(new ControlActionMetadata(EXECUTION_PLAN_BUILDER_CLASS, SIMPLE_NAVIGATE_METHOD));
+		Map<String, Object> navigationData = new HashMap<>(2);
+		navigationData.put(NEXT_STEP_ID_KEY, nextStepId);
+
+		step.setNavigationData(navigationData);
+
+		step.setSplitStep(false);
+
+		executionPlan.addStep(step);
+
+		return step.getExecStepId();
+	}
 
 	public Long addStep(
 			Long stepId, String classPath, String methodName,Long nextStepId) {
@@ -155,11 +181,12 @@ public class ExecutionPlanBuilder {
 		Map<String, Serializable> actionData = new HashMap<>(3);
 
 		actionData.put(ACTION_METHOD_KEY, methodName);
+
 		step.setActionData(actionData);
 
-		step.setNavigation(new ControlActionMetadata("org.score.samples.openstack.actions.ExecutionPlanBuilder", "simpleNavigate"));
+		step.setNavigation(new ControlActionMetadata(EXECUTION_PLAN_BUILDER_CLASS, SIMPLE_NAVIGATE_METHOD));
 		Map<String, Object> navigationData = new HashMap<>(2);
-		navigationData.put("nextStepId", nextStepId);
+		navigationData.put(NEXT_STEP_ID_KEY, nextStepId);
 
 		step.setNavigationData(navigationData);
 
@@ -199,7 +226,7 @@ public class ExecutionPlanBuilder {
 
 		executionPlan.addStep(executionSplitStep);
 
-		//join step
+		// join step
 		ExecutionStep executionJoinStep = new ExecutionStep(joinStepId);
 
 		executionJoinStep.setAction(new ControlActionMetadata(BRANCH_ACTIONS_CLASS, JOIN_METHOD_NAME));

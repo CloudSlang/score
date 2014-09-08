@@ -2,8 +2,10 @@ package org.score.samples;
 
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.TriggeringProperties;
+
 import org.score.samples.openstack.actions.ExecutionPlanBuilder;
 import org.score.samples.openstack.actions.InputBinding;
+import org.score.samples.openstack.actions.InputBindingFactory;
 import org.score.samples.openstack.actions.MatchType;
 import org.score.samples.openstack.actions.NavigationMatcher;
 
@@ -12,6 +14,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.score.samples.openstack.OpenstackCommons.FINAL_STEP_ACTIONS_CLASS;
+import static org.score.samples.openstack.OpenstackCommons.SUCCESS_STEP_ACTION_METHOD;
 
 /**
  * Date: 8/18/2014
@@ -29,6 +34,16 @@ public class DisplayMessageFlow {
 		inputBindings = generateInitialInputBindings();
 	}
 
+	private List<InputBinding> generateInitialInputBindings() {
+		List<InputBinding> bindings = new ArrayList<>();
+
+		bindings.add(InputBindingFactory.createInputBinding("status", "status", true));
+		bindings.add(InputBindingFactory.createInputBinding("message", "message", true));
+		bindings.add(InputBindingFactory.createInputBinding("user", "user", true));
+
+		return bindings;
+	}
+
 	public TriggeringProperties displayMessageFlow() {
 		TriggeringProperties triggeringProperties = TriggeringProperties.create(createDisplayExecutionPlan());
 		Map<String, Serializable> context = new HashMap<>();
@@ -44,7 +59,7 @@ public class DisplayMessageFlow {
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, 1L));
 		builder.addOOActionStep(0L, "org.score.samples.DisplayMessageFlow", "displayMessage", null, navigationMatchers);
 
-		builder.addOOActionFinalStep(1L, "org.score.samples.openstack.actions.FinalStepActions", "successStepAction");
+		builder.addOOActionFinalStep(1L, FINAL_STEP_ACTIONS_CLASS, SUCCESS_STEP_ACTION_METHOD);
 
 		return builder.createTriggeringProperties().getExecutionPlan();
 	}
@@ -56,15 +71,5 @@ public class DisplayMessageFlow {
 
 	public List<InputBinding> getInputBindings() {
 		return inputBindings;
-	}
-
-	private List<InputBinding> generateInitialInputBindings() {
-		List<InputBinding> bindings = new ArrayList<>();
-
-		bindings.add(InputBinding.createInputBinding("status", "status", true));
-		bindings.add(InputBinding.createInputBinding("message", "message", true));
-		bindings.add(InputBinding.createInputBinding("user", "user", true));
-
-		return bindings;
 	}
 }

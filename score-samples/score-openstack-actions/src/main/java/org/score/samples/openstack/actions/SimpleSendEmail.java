@@ -25,42 +25,36 @@ public class SimpleSendEmail {
 	public static final String SUCCESS = "0";
 	public static final String FAILED = "1";
 
+	final public Map<String, String> execute(String host, String port, String from, String to, String subject, String body){
 
-		final public Map<String, String> execute(String host, String port, String from, String to, String subject, String body){
+		Map<String, String> returnResult = new HashMap<>();
+		Session session;
+		try {
 
-			Map<String, String> returnResult = new HashMap<>();
-			Session session;
+			Properties props = System.getProperties();
 
+			props.put("mail.smtp.starttls.enable", "true");
+			props.put("mail.smtp.host", host);
+			props.put("mail.smtp.port", port);
 
-			try {
+			session = Session.getDefaultInstance(props);
 
-				Properties props = System.getProperties();
+			MimeMessage message = new MimeMessage(session);
+			message.setFrom(new InternetAddress(from));
+			message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+			message.setSubject(subject);
+			message.setText(body);
 
-				props.put("mail.smtp.starttls.enable", "true");
-				props.put("mail.smtp.host", host);
-				props.put("mail.smtp.port", port);
+			Transport.send(message);
 
-				session = Session.getDefaultInstance(props);
+			returnResult.put(RETURN_CODE, SUCCESS);
 
-				MimeMessage message = new MimeMessage(session);
-				message.setFrom(new InternetAddress(from));
-				message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
-				message.setSubject(subject);
-				message.setText(body);
-
-				Transport.send(message);
-
-				returnResult.put(RETURN_CODE, SUCCESS);
-
-			} catch (Exception e) {
-				returnResult.put(RETURN_CODE, FAILED);
-			}
-
-			return returnResult;
-
+		} catch (Exception e) {
+			returnResult.put(RETURN_CODE, FAILED);
 		}
 
+		return returnResult;
 
-
+	}
 }
 

@@ -30,6 +30,7 @@ public class StringOccurrenceCounterTest {
 	}
 	@Test(timeout = DEFAULT_TIMEOUT)
 	public void testExecute(){
+
 		StringOccurrenceCounter stringOccurrenceCounter = new StringOccurrenceCounter();
 		Map<String, String> returnResult = stringOccurrenceCounter.execute("string1, string2", "string1", "false");
 		assertEquals("Return code not as expected", "0", returnResult.get("returnCode"));
@@ -42,5 +43,6 @@ public class StringOccurrenceCounterTest {
 		assertEquals("Result not as expected", "2", returnResult.get("returnResult"));
 		returnResult = stringOccurrenceCounter.execute("string2, string2", "String2", "false");
 		assertEquals("Result not as expected", "0", returnResult.get("returnResult"));
+
 	}
 }

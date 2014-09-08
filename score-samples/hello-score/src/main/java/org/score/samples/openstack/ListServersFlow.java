@@ -3,6 +3,7 @@ package org.score.samples.openstack;
 import com.hp.score.api.TriggeringProperties;
 import org.score.samples.openstack.actions.ExecutionPlanBuilder;
 import org.score.samples.openstack.actions.InputBinding;
+import org.score.samples.openstack.actions.InputBindingFactory;
 import org.score.samples.openstack.actions.MatchType;
 import org.score.samples.openstack.actions.NavigationMatcher;
 
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.score.samples.openstack.OpenstackCommons.*;
-import static org.score.samples.openstack.actions.InputBinding.*;
+
 
 /**
  * Date: 8/29/2014
@@ -27,24 +28,45 @@ public class ListServersFlow {
 		inputBindings = generateInitialInputBindings();
 	}
 
+	private List<InputBinding> generateInitialInputBindings() {
+		List<InputBinding> bindings = new ArrayList<>(5);
+
+		bindings.add(InputBindingFactory.createInputBinding(OPENSTACK_HOST_MESSAGE, HOST_KEY, true));
+		bindings.add(InputBindingFactory.createInputBindingWithDefaultValue(IDENTITY_PORT_MESSAGE, IDENTITY_PORT_KEY, true, DEFAULT_IDENTITY_PORT));
+		bindings.add(InputBindingFactory.createInputBindingWithDefaultValue(COMPUTE_PORT_MESSAGE, COMPUTE_PORT_KEY, true, DEFAULT_COMPUTE_PORT));
+		bindings.add(InputBindingFactory.createInputBinding(OPENSTACK_USERNAME_MESSAGE, USERNAME_KEY, true));
+		bindings.add(InputBindingFactory.createInputBinding(OPENSTACK_PASSWORD_MESSAGE, PASSWORD_KEY, true));
+
+		return bindings;
+	}
+
 	public TriggeringProperties listServersFlow() {
 		ExecutionPlanBuilder builder = new ExecutionPlanBuilder("list servers");
 
 		Long prepareGetTokenId = 0L;
-		Long tokenStepId = 1L;
-		Long mergerStepId = 2L;
-		Long getServersStepId = 3L;
-		Long displayStepId = 4L;
-		Long successStepId = 5L;
-		Long failureStepId = 6L;
+		Long authenticationStepId = 1L;
+		Long parseAuthenticationStepId = 2L;
+		Long mergerStepId = 3L;
+		Long getServersStepId = 4L;
+		Long displayStepId = 5L;
+		Long successStepId = 6L;
+		Long failureStepId = 7L;
+		Long prepareParseAuthenticationStepId = 8L;
+		Long prepareDisplayStepId = 9L;
 
-		createPrepareGetTokenStep(builder, prepareGetTokenId, tokenStepId);
+		createPrepareGetAuthenticationStep(builder, prepareGetTokenId, authenticationStepId);
 
-		createGetTokenStep(builder, tokenStepId, mergerStepId, failureStepId);
+		createGetAuthenticationStep(builder, authenticationStepId, prepareParseAuthenticationStepId, failureStepId);
+
+		createPrepareParseAuthenticationStep(builder, prepareParseAuthenticationStepId, parseAuthenticationStepId);
+
+		createParseAuthenticationStep(builder, parseAuthenticationStepId, mergerStepId, failureStepId);
 
 		createPrepareGetServersStep(builder, mergerStepId, getServersStepId);
 
-		createGetServersStep(builder, getServersStepId, displayStepId, failureStepId);
+		createGetServersStep(builder, getServersStepId, prepareDisplayStepId, failureStepId);
+
+		createPrepareDisplayStep(builder, prepareDisplayStepId, displayStepId);
 
 		createDisplayStep(builder, displayStepId, successStepId);
 
@@ -64,21 +86,27 @@ public class ListServersFlow {
 		return inputBindings;
 	}
 
-	private List<InputBinding> generateInitialInputBindings() {
-		List<InputBinding> bindings = new ArrayList<>();
+	private void createPrepareDisplayStep(ExecutionPlanBuilder builder, Long stepId, Long nextStepId){
+		List<InputBinding> inputs  = new ArrayList<>(1);
 
-		bindings.add(createInputBinding(OPENSTACK_HOST_MESSAGE, HOST_KEY, true));
-		bindings.add(createInputBindingWithDefaultValue(IDENTITY_PORT_MESSAGE, IDENTITY_PORT_KEY, true, DEFUALT_IDENTITY_PORT));
-		bindings.add(createInputBindingWithDefaultValue(COMPUTE_PORT_MESSAGE, COMPUTE_PORT_KEY, true, DEFAULT_COMPUTE_PORT));
-		bindings.add(createInputBinding(OPENSTACK_USERNAME_MESSAGE, USERNAME_KEY, true));
-		bindings.add(createInputBinding(OPENSTACK_PASSWORD_MESSAGE, PASSWORD_KEY, true));
+		inputs.add(InputBindingFactory.createMergeInputBindingWithSource(GET_SERVERS_RESPONSE_KEY, RETURN_RESULT_KEY));
 
-		return bindings;
+		builder.addStep(stepId, CONTEXT_MERGER_CLASS, MERGE_METHOD, inputs, nextStepId);
 	}
 
 	private void createDisplayStep(ExecutionPlanBuilder builder, Long stepId, Long nextStepId) {
-		List<NavigationMatcher<Serializable>>  navigationMatchers = new ArrayList<>();
+		List<NavigationMatcher<Serializable>>  navigationMatchers = new ArrayList<>(1);
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, nextStepId));
-		builder.addOOActionStep(stepId, CONTEXT_MERGER_CLASS, GET_SERVER_NAMES_METHOD, null, navigationMatchers);
+		builder.addOOActionStep(stepId, OPENSTACK_UTILS_CLASS, GET_SERVER_NAMES_METHOD, null, navigationMatchers);
 	}
+
+	private void createParseAuthenticationStep(ExecutionPlanBuilder builder, Long stepId, Long successStepId, Long failureStepId) {
+		List<NavigationMatcher<Serializable>> navigationMatchers = new ArrayList<>(1);
+
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, RETURN_CODE, SUCCESS, successStepId));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, failureStepId));
+
+		builder.addOOActionStep(stepId, OPENSTACK_UTILS_CLASS, PARSE_AUTHENTICATION_METHOD, null, navigationMatchers);
+	}
+
 }

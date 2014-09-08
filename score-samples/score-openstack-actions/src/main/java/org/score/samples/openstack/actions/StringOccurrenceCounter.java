@@ -31,6 +31,7 @@ public class StringOccurrenceCounter {
 			returnResult.put(RETURN_RESULT, occurrences.toString());
 		}catch(Exception e){
 			returnResult.put(RETURN_CODE, FAILED);
+			returnResult.put(RETURN_RESULT, "0");
 
 		}
 
