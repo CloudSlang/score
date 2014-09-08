@@ -96,7 +96,11 @@ public class SimpleExecutionRunnable implements Runnable {
             //set status FAILED
             executionMessage.setStatus(ExecStatus.FAILED);
             //send only one execution message back - the new one was not created because of error
-            outBuffer.put(executionMessage);
+            try {
+                outBuffer.put(executionMessage);
+            } catch (InterruptedException e) {
+                logger.warn("Thread was interrupted! Exiting the execution... ", ex);
+            }
         }
         finally {
             if (logger.isDebugEnabled()) {
@@ -124,10 +128,12 @@ public class SimpleExecutionRunnable implements Runnable {
             while (shouldContinue(nextStepExecution, startTime));
         }
         catch (InterruptedException ex){
+            logger.warn("Thread was interrupted! Exiting the execution... ", ex);
             return; //Exit! The thread was interrupted by shutDown of the executor and was during Sleep or await() or any other method that supports InterruptedException
         }
 
         if(isInterrupted()){
+            logger.warn("Thread was interrupted! Exiting the execution... ");
             return; //Exit! The thread was interrupted by shutDown of the executor
         }
 
@@ -138,14 +144,25 @@ public class SimpleExecutionRunnable implements Runnable {
 
         //execution was paused - send the FINISHED message - but don't send the PENDING for next step
         if (nextStepExecution == null) {
-            outBuffer.put(executionMessage);
+            try {
+                outBuffer.put(executionMessage);
+            } catch (InterruptedException e) {
+                logger.warn("Thread was interrupted! Exiting the execution... ", e);
+                //noinspection UnnecessaryReturnStatement
+                return; //Exit! The thread was interrupted by shutDown of the executor
+            }
         }
         else {
             ExecutionMessage[] executionMessagesToSend = createMessagesToSend(executionMessage, nextStepExecution);
 
             // for finished status, we don't need the payload.
             // but for terminated we need the payload
-            outBuffer.put(executionMessagesToSend);
+            try {
+                outBuffer.put(executionMessagesToSend);
+            } catch (InterruptedException e) {
+                logger.warn("Thread was interrupted! Exiting the execution... ", e);
+                return; //Exit! The thread was interrupted by shutDown of the executor
+            }
 
             // check if a new step was created for stay in the worker
             if (executionMessagesToSend.length == 2 && executionMessagesToSend[1].getStatus() == ExecStatus.IN_PROGRESS) {
@@ -195,7 +212,11 @@ public class SimpleExecutionRunnable implements Runnable {
         executionMessage.setPayload(null);
         String splitId = getSplitId(newExecutions);
         SplitMessage splitMessage = new SplitMessage(splitId, execution, newExecutions);
-        outBuffer.put(executionMessage, splitMessage);
+        try {
+            outBuffer.put(executionMessage, splitMessage);
+        } catch (InterruptedException e) {
+            logger.warn("Thread was interrupted! Exiting the execution... ", e);
+        }
     }
 
     private boolean isExecutionTerminating(Execution execution) {
