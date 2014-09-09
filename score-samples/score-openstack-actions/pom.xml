@@ -99,7 +99,6 @@
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
-
         </dependency>
 
         <dependency>
