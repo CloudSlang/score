@@ -10,6 +10,7 @@ import com.hp.score.facade.execution.PauseReason;
 import com.hp.score.orchestrator.services.ExecutionStateService;
 import com.hp.score.orchestrator.services.PauseResumeService;
 import com.hp.score.orchestrator.services.SplitJoinService;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,52 +83,33 @@ public class QueueListenerImpl implements QueueListener {
 
 	private ScoreEvent[] handleTerminatedMessages(List<ExecutionMessage> messages) {
 		List<ScoreEvent> scoreEvents = new ArrayList<>(messages.size());
+        List<Execution> branches = new ArrayList<>();
 
 		for (ExecutionMessage executionMessage : messages) {
-            Boolean isBranch = isBranchExecution(executionMessage);
-            handleTerminatedMessage(executionMessage,isBranch);
             Execution execution = extractExecution(executionMessage);
+            Boolean isBranch = isBranch(execution);
             if(!isBranch){
                 scoreEvents.add(scoreEventFactory.createFinishedEvent(execution));
+                executionStateService.deleteExecutionState(Long.valueOf(executionMessage.getMsgId()), ExecutionSummary.EMPTY_BRANCH);
             }
             else{
+                branches.add(execution);
                 scoreEvents.add(scoreEventFactory.createFinishedBranchEvent(execution));
             }
 		}
+
+        if (CollectionUtils.isNotEmpty(branches)) {
+            splitJoinService.endBranch(branches);
+        }
+
 		return scoreEvents.toArray(new ScoreEvent[scoreEvents.size()]);
 	}
 
-	private void handleTerminatedMessage(ExecutionMessage executionMessage,Boolean isBranch) {
-		//Only delete parent runs and not branches because the Terminated event of branches should not cause the
-		//deletion of the entire run
-		if (!isBranchExecution(executionMessage)) {
-			executionStateService.deleteExecutionState(Long.valueOf(executionMessage.getMsgId()), ExecutionSummary.EMPTY_BRANCH);
-		} else {
-			Execution execution = extractExecution(executionMessage);
-			finishBranchExecution(execution);
-		}
-	}
-
-    //The logic for this method was copied from oo's FinishedFlowEventsListener
-    //Does the endBranch only for branches that are not non-blocking (parallel, multi-instance and sub-flows)
-    private void finishBranchExecution(Execution execution) {
-        splitJoinService.endBranch(Arrays.asList(execution));
-    }
-
 	/**
 	 * Returns true when the execution is a branch with the new branch mechanism
-	 * It will return true for executions of parallel, multi-instance and sub-flows but not for non-blocking
-	 * (which is the old mechanism)
+	 * It will return true for executions of parallel, multi-instance, sub-flows and non blocking
 	 */
 	private boolean isBranch(Execution execution) {
-		return execution.isBranch();
-	}
-
-	/*
-	Parses the payload of the execution message and returns true if the execution is marked as a branch
-	 */
-	private boolean isBranchExecution(ExecutionMessage executionMessage) {
-		Execution execution = extractExecution(executionMessage);
 		return execution != null && execution.isBranch();
 	}
 
@@ -172,11 +154,11 @@ public class QueueListenerImpl implements QueueListener {
 		List<ScoreEvent> events = new ArrayList<>(messages.size());
 		for (ExecutionMessage executionMessage : messages) {
 			execution = extractExecution(executionMessage);
-			if (failedBecauseNoWorker(executionMessage)) {
+			if (failedBecauseNoWorker(execution)) {
 				Long pauseID = pauseExecution(execution);
 				events.add(scoreEventFactory.createNoWorkerEvent(execution, pauseID));
 			} else if (isBranch(execution)) {
-				finishBranchExecution(execution);
+				splitJoinService.endBranch(Arrays.asList(execution));
 				events.add(scoreEventFactory.createFailedBranchEvent(execution));
 			} else {
 				events.add(scoreEventFactory.createFailureEvent(execution));
@@ -187,14 +169,13 @@ public class QueueListenerImpl implements QueueListener {
 
 	private void deleteExecutionStateObjects(List<ExecutionMessage> messages) {
 		for (ExecutionMessage executionMessage : messages) {
-			if (!failedBecauseNoWorker(executionMessage)) {
+			if (!failedBecauseNoWorker(extractExecution(executionMessage))) {
 				executionStateService.deleteExecutionState(Long.valueOf(executionMessage.getMsgId()), ExecutionSummary.EMPTY_BRANCH);
 			}
 		}
 	}
 
-	private boolean failedBecauseNoWorker(ExecutionMessage executionMessage) {
-		Execution execution = extractExecution(executionMessage);
+	private boolean failedBecauseNoWorker(Execution execution) {
 		return execution != null && !StringUtils.isEmpty(execution.getSystemContext().getNoWorkerInGroupName());
 	}
 
