@@ -114,6 +114,7 @@ public class WorkerRecoveryServiceImpl implements WorkerRecoveryService, LoginLi
     @Override
     @Transactional
     public void preLogin(String uuid) {
+        logger.warn("Worker [" + uuid + "] is up and will be recovered");
         doWorkerRecovery(uuid);
     }
 
