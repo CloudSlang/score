@@ -237,13 +237,6 @@ public class CommandLineApplication {
 		eventBus.subscribe(new ScoreEventListener() {
 			@Override
 			public void onEvent(ScoreEvent event) {
-				if(event.getEventType().equals(EventConstants.SCORE_FINISHED_EVENT)){   //TODO - temp solution, till only end flow events send SCORE_FINISHED_EVENT (now also branch throw this event)
-					@SuppressWarnings("all")
-					Map<String,Serializable> data = (Map<String,Serializable>)event.getData();
-					if ((Boolean)data.get(EventConstants.IS_BRANCH)) {
-						return;
-					}
-				}
 				logListenerEvent(event, false);
 				setTriggeringStatus(0);
 			}
