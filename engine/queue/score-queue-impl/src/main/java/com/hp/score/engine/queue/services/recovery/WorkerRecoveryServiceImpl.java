@@ -75,7 +75,7 @@ public class WorkerRecoveryServiceImpl implements WorkerRecoveryService, LoginLi
 
     @Override
     @Transactional
-    public void doWorkerRecovery(final String workerUuid) {
+    public void doWorkerRecovery(String workerUuid) {
 
         //lock this worker to synchronize with drain action
         workerLockService.lock(workerUuid);
@@ -114,6 +114,7 @@ public class WorkerRecoveryServiceImpl implements WorkerRecoveryService, LoginLi
     @Override
     @Transactional
     public void preLogin(String uuid) {
+        logger.warn("Worker [" + uuid + "] is up and will be recovered");
         doWorkerRecovery(uuid);
     }
 
