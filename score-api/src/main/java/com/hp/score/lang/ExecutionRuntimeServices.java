@@ -169,10 +169,6 @@ public class ExecutionRuntimeServices implements Serializable {
 		return null;
 	}
 
-	public void addBranch(Long startPosition, Long executionPlanId, Map<String, Serializable> context) { //TODO : delete this method , use instead the method below
-		addBranch(startPosition, executionPlanId, context, this);
-	}
-
     public void addBranch(Long startPosition, String flowUuid, Map<String, Serializable> context){
         Map<String, Long> runningPlansIds = getFromMap(RUNNING_PLANS_MAP);
         Long runningPlanId = runningPlansIds.get(flowUuid);
