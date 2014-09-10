@@ -20,7 +20,7 @@ import java.util.List;
 public interface RunningExecutionPlanRepository extends JpaRepository<RunningExecutionPlan,Long> {
 
     //We are not using the default name findByUuid() because then we won't be able to use the query cache
-    //enhancement request should be opened to spring JPA - todo
+    //enhancement request should be opened to spring JPA
     @Query("from RunningExecutionPlan r where r.flowUUID = :flowUUID")
     @QueryHints({ @QueryHint(name = "org.hibernate.cacheable", value ="true") })
     public List<RunningExecutionPlan> findByUuidCached(@Param("flowUUID") String flowUUID);
