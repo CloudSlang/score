@@ -284,8 +284,8 @@ public class StandAloneTest {
         ExecutionStep executionPutDataStep = createPutDataOnSessionStep(0L, 1L);
         executionPlan.addStep(executionPutDataStep);
 
-//        ExecutionStep sleepDataStep = createExecutionStep(1L, "org.score.samples.controlactions.SessionDataActions", "sleepAction");
-//        addNavigationToExecutionStep(2L, simpleNavigationMethodName, navigationActionClassName, sleepDataStep);
+//        ExecutionStep sleepDataStep = createExecutionStep(1L, "org.score.samples.controlactions.SessionDataActions", "sleepAction", new HashMap<String, Serializable>());
+//        addNavigationToExecutionStep(2L, navigationActionClassName, simpleNavigationMethodName, sleepDataStep);
 //        executionPlan.addStep(sleepDataStep);
 
         ExecutionStep executionGetDataStep = createGetDataFromSessionStep(1L);

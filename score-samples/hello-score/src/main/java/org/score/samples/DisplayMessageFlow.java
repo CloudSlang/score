@@ -1,8 +1,8 @@
 package org.score.samples;
 
+import com.hp.oo.sdk.content.annotations.Param;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.TriggeringProperties;
-
 import org.score.samples.openstack.actions.ExecutionPlanBuilder;
 import org.score.samples.openstack.actions.InputBinding;
 import org.score.samples.openstack.actions.InputBindingFactory;
@@ -64,7 +64,9 @@ public class DisplayMessageFlow {
 		return builder.createTriggeringProperties().getExecutionPlan();
 	}
 
-	public Map<String, String> displayMessage(String message, String status, String user) {
+	public Map<String, String> displayMessage(@Param("message") String message,
+                                              @Param("status") String status,
+                                              @Param("user") String user) {
 		System.out.println(status + " -> " + user + " : " + message);
 		return new HashMap<>();
 	}

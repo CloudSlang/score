@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Date: 19/08/2014
  * Time: 17:22
  */
-public class SessionDataServiceImpl implements SessionDataService {
+public class SessionDataHandlerImpl implements SessionDataHandler {
 
     @Autowired(required = false)
     @Qualifier("scoreSessionTimeout")
@@ -24,7 +24,7 @@ public class SessionDataServiceImpl implements SessionDataService {
 
     private Map<Long, SessionDataHolder> nonSerializableExecutionDataMap = new ConcurrentHashMap<>();
 
-    private static final Logger logger = Logger.getLogger(SessionDataServiceImpl.class);
+    private static final Logger logger = Logger.getLogger(SessionDataHandlerImpl.class);
 
 
     @Override
@@ -62,7 +62,7 @@ public class SessionDataServiceImpl implements SessionDataService {
     }
 
     @Override
-    public void lockSessionData(Long executionId){
+    public void setSessionDataActive(Long executionId){
         if(executionId == null)
             return;
         SessionDataHolder nonSerializableExecutionData = getNonSerializableSessionDataHolder(executionId);
@@ -70,7 +70,7 @@ public class SessionDataServiceImpl implements SessionDataService {
     }
 
     @Override
-    public void unlockSessionData(Long executionId){
+    public void setSessionDataInactive(Long executionId){
         if(executionId == null)
             return;
         SessionDataHolder nonSerializableExecutionData = getNonSerializableSessionDataHolder(executionId);

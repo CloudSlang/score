@@ -1,5 +1,9 @@
 package org.score.samples.openstack.actions;
 
+import com.hp.oo.sdk.content.annotations.Param;
+import com.hp.oo.sdk.content.plugin.GlobalSessionObject;
+import com.hp.oo.sdk.content.plugin.SerializableSessionObject;
+import com.hp.score.api.execution.ExecutionParametersConsts;
 import com.hp.score.lang.ExecutionRuntimeServices;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -8,8 +12,10 @@ import org.springframework.core.ParameterNameDiscoverer;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,12 +44,14 @@ public class OOActionRunner {
 	 * and its parameters are serializable.
 	 *
 	 * @param executionContext executionContext object populated by score
+     * @param nonSerializableExecutionData
 	 * @param executionRuntimeServices executionRuntimeServices object populated by score
 	 * @param className full path of the actual action class
 	 * @param methodName method name of the actual action
 	 */
 	public void run(
 			Map<String, Serializable> executionContext,
+            Map<String, Object> nonSerializableExecutionData,
 			ExecutionRuntimeServices executionRuntimeServices,
 			String className,
 			String methodName,
@@ -51,7 +59,7 @@ public class OOActionRunner {
 		try {
 			logger.info("run method invocation");
 
-			Object[] actualParameters = extractMethodData(executionContext, executionRuntimeServices, className, methodName);
+			Object[] actualParameters = extractMethodData(executionContext, nonSerializableExecutionData, executionRuntimeServices, className, methodName);
 
 			verifyActionInputs(inputBindings);
 
@@ -59,6 +67,7 @@ public class OOActionRunner {
 			// look for exception
 			mergeBackResults(executionContext, executionRuntimeServices, methodName, results);
 		} catch (Exception ex) {
+            logger.error("Exception running action: " + ex.getMessage());
 			executionRuntimeServices.addEvent(ACTION_EXCEPTION_EVENT_TYPE, ex);
 			executionContext.put(FAILURE_EVENT_KEY, ex.getStackTrace());
 
@@ -117,7 +126,7 @@ public class OOActionRunner {
 		invokeMessage += " of class " + className;
 
 		// if the action method does not have any parameters then actualParameters is null
-		if (actualParameters != null) {
+		if (actualParameters != null && actualParameters.length > 0) {
 			invokeMessage += " with parameters: [";
 			int lastElementIndex = actualParameters.length - 1;
 			for (int i = 0; i < lastElementIndex; i++) {
@@ -135,7 +144,7 @@ public class OOActionRunner {
 		return invokeActionMethod(actionMethod, actionClass.newInstance(), actualParameters);
 	}
 
-	private Object[] extractMethodData(Map<String, Serializable> executionContext, ExecutionRuntimeServices executionRuntimeServices, String className, String methodName) throws ClassNotFoundException {
+	private Object[] extractMethodData(Map<String, Serializable> executionContext, Map<String, Object> nonSerializableExecutionData, ExecutionRuntimeServices executionRuntimeServices, String className, String methodName) throws ClassNotFoundException {
 		executionRuntimeServices.addEvent(ACTION_RUNTIME_EVENT_TYPE, "Extracting action data");
 
 		//get the action class
@@ -149,10 +158,60 @@ public class OOActionRunner {
 		parameterNames = parameterNameDiscoverer.getParameterNames(actionMethod);
 
 		//extract the parameters from execution context
-		return getParametersFromExecutionContext(executionContext, parameterNames);
+		return resolveActionArguments(executionContext, nonSerializableExecutionData);
 	}
 
-	/**
+    protected Object[] resolveActionArguments(Map<String, Serializable> executionContext, Map<String, Object> nonSerializableExecutionData) {
+        List<Object> args = new ArrayList<>();
+
+        int index = 0;
+        for (Annotation[] annotations : actionMethod.getParameterAnnotations()) {
+            index++;
+            for (Annotation annotation : annotations) {
+                if (annotation instanceof Param) {
+                    if(actionMethod.getParameterTypes()[index - 1].equals(GlobalSessionObject.class)){
+                        handleNonSerializableSessionContextArgument(nonSerializableExecutionData, args, (Param)annotation);
+                    } else if (actionMethod.getParameterTypes()[index - 1].equals(SerializableSessionObject.class)) {
+                        handleSerializableSessionContextArgument(executionContext, args, (Param)annotation);
+                    } else {
+                        args.add(executionContext.get(((Param) annotation).value()));
+                    }
+                }
+            }
+            if (args.size() != index) {
+                throw new RuntimeException("All action arguments should be annotated with @Param");
+            }
+        }
+        return args.toArray(new Object[args.size()]);
+    }
+
+    private void handleNonSerializableSessionContextArgument(Map<String, Object> nonSerializableExecutionData, List<Object> args, Param annotation) {
+        String key = annotation.value();
+        Object nonSerializableSessionContextObject = nonSerializableExecutionData.get(key);
+        if (nonSerializableSessionContextObject == null) {
+            nonSerializableSessionContextObject = new GlobalSessionObject<>();
+            nonSerializableExecutionData.put(key, nonSerializableSessionContextObject);
+        }
+        args.add(nonSerializableSessionContextObject);
+    }
+
+    private void handleSerializableSessionContextArgument(Map<String, Serializable> context, List<Object> args, Param annotation) {
+        String key = annotation.value();
+        Serializable serializableSessionMapValue = context.get(ExecutionParametersConsts.SERIALIZABLE_SESSION_CONTEXT);
+        if (serializableSessionMapValue == null){
+            serializableSessionMapValue = new HashMap<String, Serializable>();
+            context.put(ExecutionParametersConsts.SERIALIZABLE_SESSION_CONTEXT, serializableSessionMapValue);
+        }
+        Serializable serializableSessionContextObject = ((Map<String, Serializable>)serializableSessionMapValue).get(key);
+        if (serializableSessionContextObject == null) {
+            serializableSessionContextObject = new SerializableSessionObject();
+            //noinspection unchecked
+            ((Map<String, Serializable>)serializableSessionMapValue).put(key, serializableSessionContextObject);
+        }
+        args.add(serializableSessionContextObject);
+    }
+
+    /**
 	 * Extracts the actual method of the action's class
 	 *
 	 * @param actionClass Class object that represents the actual action class

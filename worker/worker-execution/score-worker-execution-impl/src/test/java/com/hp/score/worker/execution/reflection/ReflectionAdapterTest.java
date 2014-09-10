@@ -1,6 +1,6 @@
 package com.hp.score.worker.execution.reflection;
 
-import com.hp.score.worker.execution.services.SessionDataService;
+import com.hp.score.worker.execution.services.SessionDataHandler;
 import com.hp.score.api.ControlActionMetadata;
 import junit.framework.Assert;
 import org.apache.log4j.Logger;
@@ -30,7 +30,7 @@ public class ReflectionAdapterTest {
     ReflectionAdapter adapter;
 
     @Autowired
-    private SessionDataService sessionDataService;
+    private SessionDataHandler sessionDataHandler;
 
     @Test
 	public void executeControlActionTest() {
@@ -94,8 +94,8 @@ public class ReflectionAdapterTest {
 		}
 
         @Bean
-        SessionDataService sessionDataService(){
-            return org.mockito.Mockito.mock(SessionDataService.class);
+        SessionDataHandler sessionDataHandler(){
+            return org.mockito.Mockito.mock(SessionDataHandler.class);
         }
 	}
 

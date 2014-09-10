@@ -1,23 +1,9 @@
 package com.hp.score.schema;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
-import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.util.StringUtils;
-import org.springframework.util.xml.DomUtils;
-import org.w3c.dom.Element;
-
 import com.hp.score.events.EventBusImpl;
 import com.hp.score.worker.execution.reflection.ReflectionAdapterImpl;
 import com.hp.score.worker.execution.services.ExecutionServiceImpl;
-import com.hp.score.worker.execution.services.SessionDataServiceImpl;
+import com.hp.score.worker.execution.services.SessionDataHandlerImpl;
 import com.hp.score.worker.management.WorkerConfigurationServiceImpl;
 import com.hp.score.worker.management.WorkerRegistration;
 import com.hp.score.worker.management.services.InBuffer;
@@ -28,6 +14,19 @@ import com.hp.score.worker.management.services.SynchronizationManagerImpl;
 import com.hp.score.worker.management.services.WorkerManager;
 import com.hp.score.worker.management.services.WorkerManagerMBean;
 import com.hp.score.worker.management.services.WorkerRecoveryManagerImpl;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
+import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.util.StringUtils;
+import org.springframework.util.xml.DomUtils;
+import org.w3c.dom.Element;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Dima Rassin
@@ -46,7 +45,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(WorkerManagerMBean.class, "com.hp.score.worker.management.services.WorkerManagerMBean");
 		put(WorkerRecoveryManagerImpl.class, null);
 		put(ReflectionAdapterImpl.class, null);
-        put(SessionDataServiceImpl.class, "sessionDataService");
+        put(SessionDataHandlerImpl.class, "sessionDataHandler");
 		put(SynchronizationManagerImpl.class, null);
 		put(WorkerConfigurationServiceImpl.class, "workerConfiguration");
 	}};

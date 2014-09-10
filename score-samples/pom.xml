@@ -32,9 +32,9 @@
             </dependency>
 
             <dependency>
-                <groupId>org.score.content</groupId>
+                <groupId>com.hp.score.content</groupId>
                 <artifactId>score-http-client-actions</artifactId>
-                <version>0.1.14</version>
+                <version>0.1.20</version>
             </dependency>
 
             <dependency>

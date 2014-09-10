@@ -1,15 +1,16 @@
 package org.score.samples.openstack.actions;
 
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import com.hp.oo.sdk.content.annotations.Param;
+
 import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Transport;
-
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 
 
@@ -25,8 +26,9 @@ public class SimpleSendEmail {
 	public static final String SUCCESS = "0";
 	public static final String FAILED = "1";
 
-	final public Map<String, String> execute(String host, String port, String from, String to, String subject, String body){
-
+	final public Map<String, String> execute(
+            @Param("host") String host, @Param("port") String port, @Param("from") String from,
+            @Param("to") String to, @Param("subject") String subject, @Param("body") String body){
 		Map<String, String> returnResult = new HashMap<>();
 		Session session;
 		try {

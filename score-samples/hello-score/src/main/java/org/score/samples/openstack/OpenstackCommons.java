@@ -37,7 +37,7 @@ public class OpenstackCommons {
 	public static final String CONTEXT_MERGER_CLASS = "org.score.samples.openstack.actions.ContextMerger";
 	public static final String OPENSTACK_UTILS_CLASS = "org.score.samples.openstack.actions.OpenstackUtils";
 	public static final String SEND_EMAIL_CLASS = "org.score.samples.openstack.actions.SimpleSendEmail";
-	public static final String HTTP_CLIENT_ACTION_CLASS = "org.score.content.httpclient.HttpClientAction";
+	public static final String HTTP_CLIENT_ACTION_CLASS = "com.hp.score.content.httpclient.HttpClientAction";
 	public static final String STRING_OCCURRENCE_COUNTER_CLASS = "org.score.samples.openstack.actions.StringOccurrenceCounter";
 	public static final String SUCCESS_STEP_ACTION_METHOD = "successStepAction";
 	public static final String FAILURE_STEP_ACTION_METHOD = "failureStepAction";

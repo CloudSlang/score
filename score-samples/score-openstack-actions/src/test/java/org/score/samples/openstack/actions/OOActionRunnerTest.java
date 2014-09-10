@@ -1,5 +1,6 @@
 package org.score.samples.openstack.actions;
 
+import com.hp.oo.sdk.content.annotations.Param;
 import com.hp.score.lang.ExecutionRuntimeServices;
 import org.junit.Test;
 
@@ -9,13 +10,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
-import static org.junit.Assert.assertEquals;
 
 public class OOActionRunnerTest {
 	private static final String RESPONSE_KEY = "response";
@@ -42,7 +42,7 @@ public class OOActionRunnerTest {
 		Map<String, Serializable> actualExecutionContext = prepareActualExecutionContext();
 		Map<String, Serializable> expectedExecutionContext = prepareExpectedExecutionContext(actualExecutionContext);
 
-		runAction(actualExecutionContext, executionRuntimeServicesMock, "org.score.samples.openstack.actions.OOActionRunnerTest", "auxiliaryAction");
+		runAction(actualExecutionContext, new HashMap<String, Object>(), executionRuntimeServicesMock, "org.score.samples.openstack.actions.OOActionRunnerTest", "auxiliaryAction");
 
 		//verify if method adds the action runtime events
 		verify(executionRuntimeServicesMock, times(4))
@@ -56,7 +56,7 @@ public class OOActionRunnerTest {
 		ExecutionRuntimeServices executionRuntimeServicesMock = mock(ExecutionRuntimeServices.class);
 		Map<String, Serializable> actualExecutionContext = prepareActualExecutionContext();
 
-		runAction(actualExecutionContext, executionRuntimeServicesMock, "org.score.samples.openstack.actions.IDontExist", "auxiliaryAction");
+		runAction(actualExecutionContext, new HashMap<String, Object>(), executionRuntimeServicesMock, "org.score.samples.openstack.actions.IDontExist", "auxiliaryAction");
 
 		//verify if method adds the exception event
 		verify(executionRuntimeServicesMock)
@@ -80,12 +80,13 @@ public class OOActionRunnerTest {
 
 	private void runAction(
 			Map<String, Serializable> executionContext,
-			ExecutionRuntimeServices executionRuntimeServices,
+            Map<String, Object> nonSerializableExecutionData,
+            ExecutionRuntimeServices executionRuntimeServices,
 			String actionClassName,
 			String actionMethodName)
 			throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
 		OOActionRunner runner = new OOActionRunner();
-		runner.run(executionContext, executionRuntimeServices, actionClassName, actionMethodName, new ArrayList<InputBinding>());
+		runner.run(executionContext, nonSerializableExecutionData, executionRuntimeServices, actionClassName, actionMethodName, new ArrayList<InputBinding>());
 	}
 
 	private Map<String, Serializable> prepareActualExecutionContext() {
@@ -101,9 +102,9 @@ public class OOActionRunnerTest {
 	}
 
 	@SuppressWarnings("unused")
-	public Map<String, String> auxiliaryAction(String methodParameter1,
-											   String methodParameter2,
-											   String methodParameter3) {
+	public Map<String, String> auxiliaryAction(@Param("methodParameter1") String methodParameter1,
+                                               @Param("methodParameter2") String methodParameter2,
+                                               @Param("methodParameter3") String methodParameter3) {
 		return getAuxiliaryMap(methodParameter1, methodParameter2, methodParameter3);
 	}
 

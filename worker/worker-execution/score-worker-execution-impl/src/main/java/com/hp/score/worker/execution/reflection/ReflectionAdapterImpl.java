@@ -5,7 +5,7 @@ import com.hp.score.api.execution.ExecutionParametersConsts;
 import com.hp.score.exceptions.FlowExecutionException;
 import com.hp.score.facade.entities.Execution;
 import com.hp.score.lang.SystemContext;
-import com.hp.score.worker.execution.services.SessionDataService;
+import com.hp.score.worker.execution.services.SessionDataHandler;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationContextAware {
 
     @Autowired
-    private SessionDataService sessionDataService;
+    private SessionDataHandler sessionDataHandler;
 
 	private static final Logger logger = Logger.getLogger(ReflectionAdapterImpl.class);
 	private static final String CONTEXT_PARAM_NAME = "executionContext";
@@ -50,11 +50,12 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 			Object actionBean = getActionBean(actionMetadata);
 			Method actionMethod = getActionMethod(actionMetadata);
 			Object[] arguments = buildParametersArray(actionMethod, actionData);
-			if(logger.isTraceEnabled()) logger.trace("Invoking...");
-            sessionDataService.lockSessionData(getExecutionIdFromActionData(actionData));
+			if(logger.isTraceEnabled())
+                logger.trace("Invoking...");
 			Object result = actionMethod.invoke(actionBean, arguments);
-            sessionDataService.unlockSessionData(getExecutionIdFromActionData(actionData));
-            if(logger.isDebugEnabled()) logger.debug("Control action [" + actionMetadata.getClassName() + '.' + actionMetadata.getMethodName() + "] done");
+            clearStateAfterInvocation(actionData);
+            if(logger.isDebugEnabled())
+                logger.debug("Control action [" + actionMetadata.getClassName() + '.' + actionMetadata.getMethodName() + "] done");
 			return result;
 		} catch(IllegalArgumentException ex) {
 			String message = "Failed to run the action! Wrong arguments were passed to class: " + actionMetadata.getClassName() + ", method: " + actionMetadata.getMethodName() +
@@ -68,6 +69,10 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 			throw new FlowExecutionException(getExceptionMessage(actionMetadata) + ", reason: " + ex.getMessage(), ex);
 		}
 	}
+
+    private void clearStateAfterInvocation(Map<String, ?> actionData) {
+        sessionDataHandler.setSessionDataInactive(getExecutionIdFromActionData(actionData));
+    }
 
     private Object getActionBean(ControlActionMetadata actionMetadata) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 		Object bean = cacheBeans.get(actionMetadata.getClassName());
@@ -125,8 +130,11 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
             if(ExecutionParametersConsts.NON_SERIALIZABLE_EXECUTION_DATA.equals(paramName)) {
                 //todo: change to runtime services once we can
                 Long executionId = getExecutionIdFromActionData(actionData);
-                Map<String, Object> nonSerializableExecutionData = sessionDataService.getNonSerializableExecutionData(executionId);
+                Map<String, Object> nonSerializableExecutionData = sessionDataHandler.getNonSerializableExecutionData(executionId);
                 args.add(nonSerializableExecutionData);
+                // If the control action requires non-serializable session data, we add it to the arguments array
+                // and set the session data as active, so that it won't be cleared
+                sessionDataHandler.setSessionDataActive(getExecutionIdFromActionData(actionData));
                 continue;
             }
 			Object param = actionData.get(paramName);

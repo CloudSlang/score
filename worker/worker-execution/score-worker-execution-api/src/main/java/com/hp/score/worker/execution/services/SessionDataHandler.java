@@ -7,7 +7,7 @@ import java.util.Map;
  * Date: 19/08/2014
  * Time: 17:22
  */
-public interface SessionDataService {
+public interface SessionDataHandler {
 
     /**
      * This method should be called by a scheduler, in order to clean session data if expired
@@ -23,16 +23,16 @@ public interface SessionDataService {
     public Map<String, Object> getNonSerializableExecutionData(Long executionId);
 
     /**
-     * Lock the session data of the execution so that no timeout can occur
+     * Set the session data of the execution as active so that no timeout can occur
      * Should be used before executing an action, so that there will be no timeout in the middle of executing an action
      * @param executionId
      */
-    void lockSessionData(Long executionId);
+    void setSessionDataActive(Long executionId);
 
     /**
-     * Unlock the session data of the execution
+     * Set the session data of the execution as inactive
      * Should be used after executing an action, so that timeout might occur if needed
      * @param executionId
      */
-    void unlockSessionData(Long executionId);
+    void setSessionDataInactive(Long executionId);
 }

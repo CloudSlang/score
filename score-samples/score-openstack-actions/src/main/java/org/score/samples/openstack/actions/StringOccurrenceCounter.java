@@ -1,5 +1,7 @@
 package org.score.samples.openstack.actions;
 
+import com.hp.oo.sdk.content.annotations.Param;
+
 import java.util.HashMap;
 import java.util.Map;
 /**
@@ -14,7 +16,9 @@ public class StringOccurrenceCounter {
 	public static final String FAILED = "1";
 	public static final String RETURN_RESULT = "returnResult";
 
-	public Map<String, String> execute(String container, String toFind, String ignoreCase){
+	public Map<String, String> execute(@Param("container") String container,
+                                       @Param("toFind") String toFind,
+                                       @Param("ignoreCase") String ignoreCase){
 		Map<String, String> returnResult = new HashMap<>();
 		try {
 			if (ignoreCase.equals("true")) {

@@ -5,8 +5,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.apache.log4j.Logger;
+import com.hp.oo.sdk.content.annotations.Param;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,7 +40,7 @@ public class OpenstackUtils {
 	private final static Logger logger = Logger.getLogger(OpenstackUtils.class);
 
 	@SuppressWarnings("unused")
-	public Map<String, String> getServerNames(String getServersResponse) {
+	public Map<String, String> getServerNames(@Param("getServersResponse") String getServersResponse) {
 		Map<String, String> returnMap = new HashMap<>();
 		List<String> serverNames = getServerList(getServersResponse);
 
@@ -70,7 +71,8 @@ public class OpenstackUtils {
 		return serverNames;
 	}
 	@SuppressWarnings("unused")
-	public Map<String, String> getServerId(String getServersResponse, String serverName){
+	public Map<String, String> getServerId(@Param("getServersResponse") String getServersResponse,
+                                           @Param("serverName") String serverName){
 		Map<String, String> returnMap = new HashMap<>();
 		JsonElement parsedServerList = new JsonParser().parse(getServersResponse);
 		JsonObject  serverListObject = parsedServerList.getAsJsonObject();
@@ -97,7 +99,7 @@ public class OpenstackUtils {
 		return returnMap;
 	}
 	@SuppressWarnings("unused")
-	public Map<String, String> parseAuthentication(String jsonAuthenticationResponse) { //todo jsonutils
+	public Map<String, String> parseAuthentication(@Param("jsonAuthenticationResponse") String jsonAuthenticationResponse) { //todo jsonutils
 		Map<String, String> returnMap = new HashMap<>();
 		JsonElement parsedResult = new JsonParser().parse(jsonAuthenticationResponse);
 		JsonObject parsedObject = parsedResult.getAsJsonObject();

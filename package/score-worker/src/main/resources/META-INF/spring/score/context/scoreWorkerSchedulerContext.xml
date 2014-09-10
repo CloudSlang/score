@@ -12,7 +12,7 @@
 		<task:scheduled ref="workerManager" method="workerKeepAlive" fixed-rate="#{keepAliveInterval}"/>
         <task:scheduled ref="workerConfiguration" method="refresh" fixed-delay="#{configRefreshInterval}"/>
 		<task:scheduled ref="workerManager" method="logStatistics" fixed-rate="#{statisticsInterval}"/>
-        <task:scheduled ref="sessionDataService" method="sessionTimeOutScheduler" fixed-rate="60000"/>
+        <task:scheduled ref="sessionDataHandler" method="sessionTimeOutScheduler" fixed-rate="60000"/>
 	</task:scheduled-tasks>
 
     <!--Session timeout job-->
