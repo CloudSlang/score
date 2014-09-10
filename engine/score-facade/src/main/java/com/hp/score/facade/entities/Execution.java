@@ -17,7 +17,6 @@ public class Execution implements Serializable {
     private Long position;
     private String groupName;
     private boolean mustGoToQueue;
-//    private long lastEventDumpTime;
 
     protected Map<String, Serializable> contexts;
     protected SystemContext systemContext = new SystemContext();
@@ -26,7 +25,6 @@ public class Execution implements Serializable {
     protected Map<String, Serializable> serializableSessionContext;
 
     public Execution() {
-//        this.lastEventDumpTime = 0;
         this.mustGoToQueue = false;
         this.contexts = new HashMap<>();
         this.serializableSessionContext = new HashMap<>();
@@ -34,10 +32,9 @@ public class Execution implements Serializable {
 
     public Execution(Long executionId, Long runningExecutionPlanId, Long position, Map<String, ? extends Serializable> contexts, Map<String, Serializable> systemContext) {
         this(runningExecutionPlanId, position, contexts);
-//        this.contexts.putAll(contexts);
-        this.systemContext.putAll(systemContext);
-//        this.position = position;
-//        this.runningExecutionPlanId = runningExecutionPlanId;
+        if(systemContext != null) {
+            this.systemContext.putAll(systemContext);
+        }
         this.executionId = executionId;
     }
 
@@ -68,11 +65,6 @@ public class Execution implements Serializable {
 
     public Long getExecutionId() {
         return executionId;
-    }
-
-    //todo - Meshi why we need this??
-    public void setExecutionId(Long executionId) {
-        this.executionId = executionId;
     }
 
     public Long getRunningExecutionPlanId() {

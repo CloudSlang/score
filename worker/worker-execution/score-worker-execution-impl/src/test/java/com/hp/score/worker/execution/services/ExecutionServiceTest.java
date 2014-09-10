@@ -11,6 +11,7 @@ import com.hp.score.facade.entities.RunningExecutionPlan;
 import com.hp.score.facade.execution.ExecutionStatus;
 import com.hp.score.facade.execution.ExecutionSummary;
 import com.hp.score.facade.execution.PauseReason;
+import com.hp.score.lang.SystemContext;
 import com.hp.score.orchestrator.services.CancelExecutionService;
 import com.hp.score.orchestrator.services.PauseResumeService;
 import com.hp.score.worker.execution.reflection.ReflectionAdapter;
@@ -72,8 +73,7 @@ public class ExecutionServiceTest {
 
 	@Test
 	public void handlePausedFlow_NotPausedExecutionTest() {
-		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
-		exe.setExecutionId(111L);
+		Execution exe = new Execution(111L,0L, 0L, new HashMap<String,String>(), null);
 		exe.getSystemContext().setBranchId("branch_id");
 		exe.getSystemContext().put(EventConstants.FLOW_UUID, "flow_uuid");
 
@@ -130,8 +130,7 @@ public class ExecutionServiceTest {
 	}
 
 	private Execution getExecutionObjToPause(Long executionId, String branch_id) {
-		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
-		exe.setExecutionId(executionId);
+		Execution exe = new Execution(executionId,0L, 0L, new HashMap<String,String>(), null);
 		exe.getSystemContext().setBranchId(branch_id);
 		exe.getSystemContext().put(EventConstants.FLOW_UUID, "flow_uuid");
 		//for events
@@ -141,16 +140,14 @@ public class ExecutionServiceTest {
 
 	@Test
 	public void handleCancelledFlowsTest() {
-		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
-		exe.setExecutionId(EXECUTION_ID_1);
+		Execution exe = new Execution(EXECUTION_ID_1,0L, 0L, new HashMap<String,String>(), null);
 
 		boolean result = executionService.handleCancelledFlow(exe);
 
 		Assert.assertEquals(exe.getPosition(), null);
 		Assert.assertEquals(result, true);
 
-		exe = new Execution(0L, 0L, new HashMap<String,String>());
-		exe.setExecutionId(EXECUTION_ID_2);
+		exe = new Execution(EXECUTION_ID_2,0L, 0L, new HashMap<String,String>(), null);
 
 		result = executionService.handleCancelledFlow(exe);
 
@@ -164,8 +161,7 @@ public class ExecutionServiceTest {
 		//FromSystemContext
 		ExecutionStep executionStep = new ExecutionStep(EXECUTION_STEP_1_ID);
 
-		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
-		exe.setExecutionId(EXECUTION_ID_1);
+		Execution exe = new Execution(EXECUTION_ID_1,0L, 0L, new HashMap<String,String>(), null);
 
 		exe.getSystemContext().put(TempConstants.CONTENT_EXECUTION_STEP, executionStep);
 
@@ -222,8 +218,7 @@ public class ExecutionServiceTest {
 
 	@Test
 	public void postExecutionSettingsTest() {
-		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
-		exe.setExecutionId(1111111L);
+		Execution exe = new Execution(1111111L,0L, 0L, new HashMap<String,String>(), null);
 
 		exe.getSystemContext().put(TempConstants.ACTUALLY_OPERATION_GROUP, "Real_Group");
 		exe.getSystemContext().put(TempConstants.MUST_GO_TO_QUEUE, true);

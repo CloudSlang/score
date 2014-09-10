@@ -37,7 +37,7 @@ public class ScorePauseResumeImpl implements ScorePauseResume {
 
     @Override
     public void resumeExecution(Long executionId, Map<String, Serializable> context, Map<String, Serializable> runtimeValues) {
-        //todo impl
+        throw new RuntimeException("score resume not implemented yet!");
     }
 
 }

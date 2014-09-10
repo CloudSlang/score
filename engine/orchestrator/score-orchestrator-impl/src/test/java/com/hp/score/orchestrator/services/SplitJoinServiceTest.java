@@ -201,8 +201,7 @@ public class SplitJoinServiceTest {
 
     // private helpers
     private Execution createExecution(Long id) {
-        Execution res = new Execution(null, null, null);
-        res.setExecutionId(id);
+        Execution res = new Execution(id,null, null, null, new SystemContext());
         return res;
     }
 
