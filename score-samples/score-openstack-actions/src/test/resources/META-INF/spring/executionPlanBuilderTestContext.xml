@@ -10,6 +10,6 @@
     <score:engine />
     <score:worker uuid="-1" />
 
-    <bean class="org.score.samples.stubs.StubServicesContext"/>
+    <bean class="com.hp.score.samples.stubs.StubServicesContext"/>
 
 </beans>

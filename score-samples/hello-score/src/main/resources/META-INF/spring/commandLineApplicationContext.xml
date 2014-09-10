@@ -4,6 +4,6 @@
 
     <import resource="helloScoreContext.xml" />
 
-    <bean class="org.score.samples.CommandLineApplication" />
+    <bean class="com.hp.score.samples.CommandLineApplication" />
 
 </beans>

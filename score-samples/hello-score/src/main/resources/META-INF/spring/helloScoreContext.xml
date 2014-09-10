@@ -8,8 +8,8 @@
 
     <score:worker uuid="-1"/>
 
-    <bean class="org.score.samples.stubs.StubServicesContext"/>
+    <bean class="com.hp.score.samples.stubs.StubServicesContext"/>
 
-    <bean class="org.score.samples.HelloScore" />
+    <bean class="com.hp.score.samples.HelloScore" />
 
 </beans>

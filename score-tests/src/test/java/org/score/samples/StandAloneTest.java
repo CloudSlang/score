@@ -15,7 +15,7 @@ import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.score.samples.controlactions.BranchActions;
+import com.hp.score.samples.controlactions.BranchActions;
 import org.score.samples.controlactions.SessionDataActions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
@@ -54,7 +54,7 @@ public class StandAloneTest {
     private final static Logger logger = Logger.getLogger(StandAloneTest.class);
 
     private final static String simpleNavigationMethodName = "simpleNavigation";
-    private final static String navigationActionClassName = "org.score.samples.controlactions.NavigationActions";
+    private final static String navigationActionClassName = "com.hp.score.samples.controlactions.NavigationActions";
 
     @Before
     public void init(){
@@ -219,11 +219,11 @@ public class StandAloneTest {
 
         executionPlan.setBeginStep(0L);
 
-        ExecutionStep executionStep = createExecutionStep(0L, "org.score.samples.controlactions.ConsoleControlActions", "echoHelloScore", new HashMap<String, Serializable>());
+        ExecutionStep executionStep = createExecutionStep(0L, "com.hp.score.samples.controlactions.ConsoleControlActions", "echoHelloScore", new HashMap<String, Serializable>());
         addNavigationToExecutionStep(1L, navigationActionClassName, simpleNavigationMethodName, executionStep);
         executionPlan.addStep(executionStep);
 
-        ExecutionStep executionStep2 = createExecutionStep(1L, "org.score.samples.controlactions.ConsoleControlActions", "echoHelloScore", new HashMap<String, Serializable>());
+        ExecutionStep executionStep2 = createExecutionStep(1L, "com.hp.score.samples.controlactions.ConsoleControlActions", "echoHelloScore", new HashMap<String, Serializable>());
         executionPlan.addStep(executionStep2);
 
         return executionPlan;
@@ -239,16 +239,16 @@ public class StandAloneTest {
         Map<String, Serializable> actionData = new HashMap<>();
         actionData.put(BranchActions.STEP_POSITION, 1L);
         actionData.put(BranchActions.EXECUTION_PLAN_ID, "1");
-        ExecutionStep executionSplitStep = createExecutionStep(0L, "org.score.samples.controlactions.BranchActions", "split", actionData);
+        ExecutionStep executionSplitStep = createExecutionStep(0L, "com.hp.score.samples.controlactions.BranchActions", "split", actionData);
         executionSplitStep.setSplitStep(true);
         addNavigationToExecutionStep(1L, navigationActionClassName, simpleNavigationMethodName, executionSplitStep);
         executionPlan.addStep(executionSplitStep);
 
-        ExecutionStep executionStep2 = createExecutionStep(1L, "org.score.samples.controlactions.BranchActions", "join", new HashMap<String, Serializable>());
+        ExecutionStep executionStep2 = createExecutionStep(1L, "com.hp.score.samples.controlactions.BranchActions", "join", new HashMap<String, Serializable>());
         addNavigationToExecutionStep(2L, navigationActionClassName, simpleNavigationMethodName, executionStep2);
         executionPlan.addStep(executionStep2);
 
-        ExecutionStep executionStep3 = createExecutionStep(2L, "org.score.samples.controlactions.ConsoleControlActions", "echoHelloScore", actionData);
+        ExecutionStep executionStep3 = createExecutionStep(2L, "com.hp.score.samples.controlactions.ConsoleControlActions", "echoHelloScore", actionData);
         executionPlan.addStep(executionStep3);
 
         return executionPlan;
@@ -264,12 +264,12 @@ public class StandAloneTest {
         Map<String, Serializable> actionData = new HashMap<>();
         actionData.put(BranchActions.STEP_POSITION, 1L);
         actionData.put(BranchActions.EXECUTION_PLAN_ID, "1");
-        ExecutionStep executionSplitStep = createExecutionStep(0L, "org.score.samples.controlactions.BranchActions", "parallelSplit", actionData);
+        ExecutionStep executionSplitStep = createExecutionStep(0L, "com.hp.score.samples.controlactions.BranchActions", "parallelSplit", actionData);
         executionSplitStep.setSplitStep(true);
         addNavigationToExecutionStep(1L, navigationActionClassName, simpleNavigationMethodName, executionSplitStep);
         executionPlan.addStep(executionSplitStep);
 
-        ExecutionStep executionStep2 = createExecutionStep(1L, "org.score.samples.controlactions.BranchActions", "join", new HashMap<String, Serializable>());
+        ExecutionStep executionStep2 = createExecutionStep(1L, "com.hp.score.samples.controlactions.BranchActions", "join", new HashMap<String, Serializable>());
 
         executionPlan.addStep(executionStep2);
 
@@ -316,12 +316,12 @@ public class StandAloneTest {
         actionData.put(BranchActions.STEP_POSITION, 0L);
         actionData.put(BranchActions.EXECUTION_PLAN_ID, childFlowId);
 
-        ExecutionStep executionSplitStep = createExecutionStep(1L, "org.score.samples.controlactions.BranchActions", "split", actionData);
+        ExecutionStep executionSplitStep = createExecutionStep(1L, "com.hp.score.samples.controlactions.BranchActions", "split", actionData);
         executionSplitStep.setSplitStep(true);
         addNavigationToExecutionStep(2L, navigationActionClassName, simpleNavigationMethodName, executionSplitStep);
         executionPlan.addStep(executionSplitStep);
 
-        ExecutionStep executionJoinStep = createExecutionStep(2L, "org.score.samples.controlactions.BranchActions", "join", new HashMap<String, Serializable>());
+        ExecutionStep executionJoinStep = createExecutionStep(2L, "com.hp.score.samples.controlactions.BranchActions", "join", new HashMap<String, Serializable>());
         executionPlan.addStep(executionJoinStep);
 
         return executionPlan;
