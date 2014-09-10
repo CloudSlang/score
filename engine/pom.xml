@@ -56,5 +56,6 @@
         <module>node</module>
         <module>score-engine-jobs</module>
 		<module>data</module>
+        <module>score-facade</module>
     </modules>
 </project>

@@ -1,8 +1,6 @@
 package com.hp.score.facade.entities;
 
 import com.hp.score.lang.SystemContext;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.Validate;
 
 import java.io.Serializable;
 import java.util.HashMap;

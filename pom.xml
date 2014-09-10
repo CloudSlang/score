@@ -648,7 +648,6 @@
 	</build>
 
 	<modules>
-		<module>score-facade</module>
 		<module>engine</module>
 		<module>worker</module>
         <module>package</module>

@@ -4,10 +4,7 @@ import com.hp.score.engine.queue.entities.ExecStatus;
 import com.hp.score.engine.queue.entities.ExecutionMessage;
 import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.score.engine.queue.services.QueueDispatcherService;
-import com.hp.score.api.EndBranchDataContainer;
 import com.hp.score.facade.entities.Execution;
-import com.hp.score.orchestrator.entities.BranchContexts;
-import com.hp.score.orchestrator.entities.FinishedBranch;
 import com.hp.score.orchestrator.entities.SplitMessage;
 import com.hp.score.orchestrator.entities.SuspendedExecution;
 import com.hp.score.orchestrator.repositories.FinishedBranchRepository;
@@ -23,15 +20,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.Serializable;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import static ch.lambdaj.Lambda.having;
