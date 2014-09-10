@@ -74,13 +74,13 @@ public class OOActionRunner {
 		}
 	}
 
-	private void verifyActionInputs(List<InputBinding> inputBindings) throws IOException, InputBinding.InputBindingException {
+	private void verifyActionInputs(List<InputBinding> inputBindings) throws IOException, InputBindingException {
 		if (inputBindings != null) {
 			for (InputBinding inputBinding : inputBindings) {
 				if (inputBinding.isRequired()) {
 					if (!foundValue(inputBinding.getSourceKey())) {
 						String message = "Input \"" + inputBinding.getDescription() + "\" is required but not found!";
-						throw new InputBinding.InputBindingException(message);
+						throw new InputBindingException(message);
 					}
 				}
 			}

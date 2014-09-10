@@ -43,8 +43,10 @@ public class OpenstackCommons {
 	public static final String FAILURE_STEP_ACTION_METHOD = "failureStepAction";
 	public static final String HTTP_CLIENT_ACTION_METHOD = "execute";
 	public static final String PARSE_AUTHENTICATION_METHOD = "parseAuthentication";
+	public static final String GET_MULTI_INSTANCE_RESPONSE_METHOD = "getMultiInstanceResponse";
 	public static final String MERGE_METHOD = "merge";
 	public static final String VALIDATE_SERVER_RESULT_METHOD = "validateServerResult";
+	public static final String SPLIT_SERVERS_INTO_BRANCH_CONTEXTS_METHOD = "splitServersIntoBranchContexts";
 	public static final String EXECUTE_METHOD = "execute";
 	public static final String SEND_EMAIL_METHOD = "execute";
 	public static final String OPENSTACK_HOST_MESSAGE = "OpenStack Host";
@@ -59,7 +61,7 @@ public class OpenstackCommons {
 	public static final String HOST_KEY = "host";
 	public static final String DEFAULT_IDENTITY_PORT = "5000";
 	public static final String DEFAULT_COMPUTE_PORT = "8774";
-	public static final String DEFAULT_IMAGE_REF = "56ff0279-f1fb-46e5-93dc-fe7093af0b1a";
+	public static final String DEFAULT_IMAGE_REF = "4d183e54-677e-4dcb-a097-13a026747541";
 	public static final String USERNAME_KEY = "username";
 	public static final String PASSWORD_KEY = "password";
 	public static final String PARSED_TOKEN_KEY = "parsedToken";
@@ -69,11 +71,13 @@ public class OpenstackCommons {
 	public static final String PORT_KEY = "port";
 	public static final String RETURN_RESULT_KEY = "returnResult";
 	public static final String PARSED_TENANT_KEY = "parsedTenant";
+	public static final String SERVER_NAMES_LIST_KEY = "serverNamesList";
 	public static final String IMAGE_REFERENCE_KEY = "imgRef";
 	public static final String IDENTITY_PORT_MESSAGE = "Identity port";
 	public static final String COMPUTE_PORT_MESSAGE = "Compute port";
 	public static final String OPEN_STACK_IMAGE_REFERENCE_MESSAGE = "OpenStack image reference";
 	public static final String SERVER_NAME_MESSAGE = "Server name";
+	public static final String SERVER_NAMES_LIST_MESSAGE = "Server names separated by comma (\",\")";
 	public static final String STATUS_CODE = "statusCode";
 	public static final String RETURN_CODE = "returnCode";
 	public static final String GET_SERVER_NAMES_METHOD = "getServerNames";
@@ -81,7 +85,10 @@ public class OpenstackCommons {
 	public static final String OPEN_STACK_HEALTH_CHECK_SERVER_NAME = "health_check_server";
 	public static final String JSON_AUTHENTICATION_RESPONSE_KEY = "jsonAuthenticationResponse";
 	public static final String GET_SERVERS_RESPONSE_KEY = "getServersResponse";
-	public static final String SUCCESS = "0";
+	public static final String SUCCESS_CODE = "0";
+	public static final String RESPONSE_KEY = "response";
+	public static final String SUCCESS_RESPONSE = "success";
+
 
 
 	public static void createPrepareGetServerIdStep(ExecutionPlanBuilder builder, Long stepId, Long nextStepId){

@@ -15,7 +15,7 @@ import java.util.Map;
 
 import static org.score.samples.openstack.OpenstackCommons.*;
 import static org.score.samples.openstack.actions.FinalStepActions.RESPONSE_KEY;
-import static org.score.samples.openstack.actions.FinalStepActions.SUCCESS_KEY;
+import static org.score.samples.openstack.actions.FinalStepActions.SUCCESS;
 import static org.score.samples.openstack.actions.StringOccurrenceCounter.RETURN_RESULT;
 
 /**
@@ -76,7 +76,7 @@ public class ValidateServerExistsFlow {
 	private void createGetServersSubflow(ExecutionPlanBuilder builder, Long splitId, Long joinId, Long failureId, Long prepareStringOccurrencesId) {
 		//get servers
 		List<NavigationMatcher<Serializable>> navigationMatchers = new ArrayList<>(2);
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, RESPONSE_KEY, SUCCESS_KEY, prepareStringOccurrencesId));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, RESPONSE_KEY, SUCCESS, prepareStringOccurrencesId));
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, failureId));
 		ListServersFlow listServersFlow = new ListServersFlow();
 		TriggeringProperties triggeringProperties = listServersFlow.listServersFlow();

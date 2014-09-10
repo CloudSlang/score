@@ -61,6 +61,7 @@ public class CommandLineApplication {
 		registerFlow("delete_server_open_stack", "Delete server in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".DeleteServerFlow", "deleteServerFlow", "getInputBindings");
 		registerFlow("validate_server_open_stack", "Validate server exists in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".ValidateServerExistsFlow", "validateServerExistsFlow", "getInputBindings");
 		registerFlow("health_check_open_stack", "OpenStack health check", OPENSTACK_FLOWS_PACKAGE + ".OpenStackHealthCheckFlow", "openStackHealthCheckFlow", "getInputBindings");
+		registerFlow("health_multi_instance_servers_open_stack", "Create Multi Instance Servers in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".CreateMultiInstanceServersFlow", "createMultiInstanceServersFlow", "getInputBindings");
 	}
 
 	public void registerFlow(String identifier, String description, String className, String triggeringPropertiesMethodName, String inputBindingsMethodName) {
@@ -99,6 +100,7 @@ public class CommandLineApplication {
 
 	private void start() {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+		//noinspection InfiniteLoopStatement
 		while (true) {
 			if (!isFlowRunning()) {
 				displayAvailableFlows(reader);

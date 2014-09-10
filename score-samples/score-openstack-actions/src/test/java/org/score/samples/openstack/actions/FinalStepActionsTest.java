@@ -16,7 +16,7 @@ public class FinalStepActionsTest {
 		Map<String, String> actionResult = finalStepActions.successStepAction();
 		assertNotNull("Return map should not be null", actionResult);
 		String response = actionResult.get(RESPONSE_KEY);
-		assertEquals("Response should be success", SUCCESS_KEY, response);
+		assertEquals("Response should be success", SUCCESS, response);
 	}
 
 	@Test (timeout = DEFAULT_TIMEOUT)
@@ -25,6 +25,6 @@ public class FinalStepActionsTest {
 		Map<String, String> actionResult = finalStepActions.failureStepAction();
 		assertNotNull("Return map should not be null", actionResult);
 		String response = actionResult.get(RESPONSE_KEY);
-		assertEquals("Response should be failure", FAILURE_KEY, response);
+		assertEquals("Response should be failure", FAILURE, response);
 	}
 }

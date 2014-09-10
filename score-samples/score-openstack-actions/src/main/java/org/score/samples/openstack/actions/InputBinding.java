@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @author Bonczidai Levente
  */
 @SuppressWarnings("unused")
-public class InputBinding implements Serializable{ //todo private constructors?
+public class InputBinding implements Serializable{
 	private String description;
 	private boolean required;
 	private boolean hasDefaultValue;
@@ -97,12 +97,6 @@ public class InputBinding implements Serializable{ //todo private constructors?
 		result = 31 * result + (value != null ? value.hashCode() : 0);
 		result = 31 * result + (sourceKey != null ? sourceKey.hashCode() : 0);
 		return result;
-	}
-
-	public static class InputBindingException extends Exception { //todo no static class inside
-		public InputBindingException(String message) {
-			super(message);
-		}
 	}
 
 }

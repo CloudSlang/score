@@ -9,6 +9,7 @@ import com.hp.oo.sdk.content.annotations.Param;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,8 +33,11 @@ public class OpenstackUtils {
 	private static final String ACCESS_KEY = "access";
 	public static final String SERVERS_KEY = "servers";
 	public static final String RETURN_CODE = "returnCode";
-	public static final String SUCCESS = "0";
-	public static final String FAILED = "1";
+	public static final String SUCCESS_CODE = "0";
+	public static final String FAILED_CODE = "1";
+	public static final String RESPONSE_KEY = "response";
+	public static final String SUCCESS_RESPONSE = "success";
+	public static final String FAILURE_RESPONSE = "failure";
 
 
 
@@ -90,16 +94,16 @@ public class OpenstackUtils {
 			}
 		}
 		if(returnMap.containsKey(RETURN_RESULT_KEY)) {
-			returnMap.put(RETURN_CODE, SUCCESS);
+			returnMap.put(RETURN_CODE, SUCCESS_CODE);
 			return returnMap;
 		}
 
 		returnMap.put(RETURN_RESULT_KEY, "");
-		returnMap.put(RETURN_CODE, FAILED);
+		returnMap.put(RETURN_CODE, FAILED_CODE);
 		return returnMap;
 	}
 	@SuppressWarnings("unused")
-	public Map<String, String> parseAuthentication(@Param("jsonAuthenticationResponse") String jsonAuthenticationResponse) { //todo jsonutils
+	public Map<String, String> parseAuthentication(@Param("jsonAuthenticationResponse") String jsonAuthenticationResponse) { 
 		Map<String, String> returnMap = new HashMap<>();
 		JsonElement parsedResult = new JsonParser().parse(jsonAuthenticationResponse);
 		JsonObject parsedObject = parsedResult.getAsJsonObject();
@@ -117,12 +121,45 @@ public class OpenstackUtils {
 		returnMap.put("parsedToken", resultToken);
 		returnMap.put(RETURN_RESULT_KEY, "Parsing successful. Results put in the Execution Context");
 		if (!(StringUtils.isEmpty(resultToken) && StringUtils.isEmpty(resultTenant))) {
-			returnMap.put(RETURN_CODE, SUCCESS);
+			returnMap.put(RETURN_CODE, SUCCESS_CODE);
 		}
 		else{
-			returnMap.put(RETURN_CODE, FAILED);
+			returnMap.put(RETURN_CODE, FAILED_CODE);
 		}
 		return returnMap;
 
+	}
+	@SuppressWarnings("unused")
+	public Map<String, String> getMultiInstanceResponse(@Param("branchResults") List<Map<String,Serializable>> branchResults){
+		Boolean failure = false;
+		Map<String, String> returnMap = new HashMap<>();
+//		//@SuppressWarnings("unchecked") List<Map<String, Serializable>> branchResults =  (List<Map<String, Serializable>>) executionContext.get("branchContexts");
+		//@SuppressWarnings("unchecked") List<Map<String, Serializable>> branchResults =  (List<Map<String, Serializable>>) branchContexts;
+//
+		for(Map<String, Serializable> currentBranchContext : branchResults){
+			if(StringUtils.equals(currentBranchContext.get(RESPONSE_KEY).toString(), FAILURE_RESPONSE)){
+				failure = true;
+			}
+		}
+		if(failure){
+			returnMap.put(RESPONSE_KEY, FAILURE_RESPONSE);
+		} else {
+			returnMap.put(RESPONSE_KEY, SUCCESS_RESPONSE);
+		}
+		return returnMap;
+	}
+
+	@SuppressWarnings("unused")
+	public void splitServersIntoBranchContexts(Map<String, Serializable> executionContext, String serverNamesList){
+		String[] serverNames = StringUtils.split(serverNamesList, ',');
+
+		List<Map<String, Serializable>> branchContexts = new ArrayList<>();
+		for(String currentServerName : serverNames){
+			Map<String, Serializable> currentBranchContext = new HashMap<>();
+			currentBranchContext.putAll(executionContext);
+			currentBranchContext.put("serverName", currentServerName);
+			branchContexts.add(currentBranchContext);
+		}
+		executionContext.put("branchContexts", (Serializable) branchContexts);
 	}
 }

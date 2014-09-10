@@ -15,7 +15,7 @@ import java.util.List;
 
 import static org.score.samples.openstack.OpenstackCommons.*;
 import static org.score.samples.openstack.actions.FinalStepActions.RESPONSE_KEY;
-import static org.score.samples.openstack.actions.FinalStepActions.SUCCESS_KEY;
+import static org.score.samples.openstack.actions.FinalStepActions.SUCCESS;
 
 
 /**
@@ -86,7 +86,7 @@ public class OpenStackHealthCheckFlow {
 	private void createCreateServerSubflow(ExecutionPlanBuilder builder, Long createServerSplitId, Long createServerJoinId, Long validateServerSplitId, Long prepareSendEmailId) {
 		//create server subflow
 		List<NavigationMatcher<Serializable>> navigationMatchers = new ArrayList<>(2);
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, RESPONSE_KEY, SUCCESS_KEY, validateServerSplitId));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, RESPONSE_KEY, SUCCESS, validateServerSplitId));
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, prepareSendEmailId));
 		CreateServerFlow createServerFlow = new CreateServerFlow();
 		TriggeringProperties triggeringProperties = createServerFlow.createServerFlow();
@@ -108,7 +108,7 @@ public class OpenStackHealthCheckFlow {
 			inputKeys.add(inputBinding.getSourceKey());
 		}
 		navigationMatchers = new ArrayList<>(2);
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, RESPONSE_KEY, SUCCESS_KEY, deleteServerSplitId));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, RESPONSE_KEY, SUCCESS, deleteServerSplitId));
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, prepareSendEmailId));
 		builder.addSubflow(validateServerSplitId, validateServerJoinId, triggeringProperties, inputKeys, navigationMatchers);
 
@@ -125,7 +125,7 @@ public class OpenStackHealthCheckFlow {
 			inputKeys.add(inputBinding.getSourceKey());
 		}
 		navigationMatchers = new ArrayList<>(2);
-		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, RESPONSE_KEY, SUCCESS_KEY, successId));
+		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, RESPONSE_KEY, SUCCESS, successId));
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, prepareSendEmailId));
 		builder.addSubflow(deleteServerSplitId, deleteServerJoinId, triggeringProperties, inputKeys, navigationMatchers);
 	}

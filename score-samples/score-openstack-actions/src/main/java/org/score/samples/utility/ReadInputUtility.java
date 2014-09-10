@@ -23,7 +23,7 @@ public class ReadInputUtility {
 		}
 		return intInput;
 	}
-
+	@SuppressWarnings("unused")
 	public static String readStepInput(BufferedReader reader, String stepInputName) {
 		return readInput(reader, "<INPUT> " + stepInputName);
 	}
