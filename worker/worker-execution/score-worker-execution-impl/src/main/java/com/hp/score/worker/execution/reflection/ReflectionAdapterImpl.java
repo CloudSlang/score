@@ -1,12 +1,11 @@
 package com.hp.score.worker.execution.reflection;
 
-import com.hp.score.api.execution.ExecutionParametersConsts;
-import com.hp.score.worker.execution.services.SessionDataService;
-import com.hp.score.facade.entities.Execution;
-import com.hp.oo.internal.sdk.execution.ExecutionConstants;
-import com.hp.score.exceptions.FlowExecutionException;
 import com.hp.score.api.ControlActionMetadata;
+import com.hp.score.api.execution.ExecutionParametersConsts;
+import com.hp.score.exceptions.FlowExecutionException;
+import com.hp.score.facade.entities.Execution;
 import com.hp.score.lang.SystemContext;
+import com.hp.score.worker.execution.services.SessionDataService;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
@@ -139,7 +138,7 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
     private Long getExecutionIdFromActionData(Map<String, ?> actionData) {
         SystemContext systemContext = (SystemContext)actionData.get(ExecutionParametersConsts.SYSTEM_CONTEXT);
         if(systemContext != null)
-            return (Long)systemContext.get(ExecutionConstants.EXECUTION_ID_CONTEXT);
+            return systemContext.getExecutionId();
         else
             return null;
     }

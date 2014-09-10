@@ -9,9 +9,6 @@
 	<!--<integration:channel id="eventChannel"/>
 	<integration:channel id="eventChannelAfterEnricher"/>
 
-	<integration:gateway service-interface="com.hp.oo.execution.gateways.EventGateway"
-			default-request-channel="eventChannel"/>
-
 	<integration:header-enricher input-channel="eventChannel" output-channel="eventChannelAfterEnricher">
 		<integration:header name="entityId" expression="'EventId:'+payload.id"/>
 	</integration:header-enricher>-->
@@ -22,9 +19,6 @@
 	<!--<integration:filter input-channel="eventChannelAfterEnricher" output-channel="eventChannelAfterFilter"-->
 			<!--ref="filterBean" method="logFilterAccept"/>-->
 
-	<!--<bean id="filterBean" class="com.hp.oo.execution.services.ExecutionEventLogFilter"/>-->
-
-	<!--<bean id="executionEventAggregatorHolder" class="com.hp.oo.execution.ExecutionEventAggregatorHolder"/>-->
 
 	<!-- aggregate events after filter -->
 	<!--<integration:service-activator input-channel="eventChannelAfterFilter" ref="executionEventAggregatorHolder"-->

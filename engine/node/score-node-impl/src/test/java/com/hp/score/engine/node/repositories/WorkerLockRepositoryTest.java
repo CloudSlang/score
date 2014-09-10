@@ -3,7 +3,6 @@ package com.hp.score.engine.node.repositories;
 import com.hp.score.api.nodes.WorkerStatus;
 import com.hp.score.engine.node.entities.WorkerLock;
 import com.hp.score.engine.node.entities.WorkerNode;
-//import com.hp.oo.enginefacade.Worker;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

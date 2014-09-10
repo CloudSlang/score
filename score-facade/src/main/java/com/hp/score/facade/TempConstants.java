@@ -3,7 +3,6 @@ package com.hp.score.facade;
 /**
  * Created by peerme on 03/09/2014.
  */
-//TODO - remove!!
 public class TempConstants {
 
     // the actually entry in the queue that the worker should run. like the name of the worker itself that

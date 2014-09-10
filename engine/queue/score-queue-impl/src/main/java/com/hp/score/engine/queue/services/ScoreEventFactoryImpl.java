@@ -1,11 +1,11 @@
 package com.hp.score.engine.queue.services;
 
 import com.hp.score.api.execution.ExecutionParametersConsts;
-import com.hp.score.facade.services.RunningExecutionPlanService;
-import com.hp.score.facade.entities.Execution;
-import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.score.events.EventConstants;
 import com.hp.score.events.ScoreEvent;
+import com.hp.score.facade.entities.Execution;
+import com.hp.score.facade.services.RunningExecutionPlanService;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
@@ -30,9 +30,9 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 	private Serializable createFinishedEventData(Execution execution) {
 		Map<String, Serializable> eventData = new HashMap<>();
 		eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, execution.getSystemContext());
-		eventData.put(ExecutionConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
+		eventData.put(EventConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
 		eventData.put(EventConstants.EXECUTION_CONTEXT, (Serializable) execution.getContexts());
-		eventData.put(EventConstants.IS_BRANCH, execution.isBranch());
+		eventData.put(EventConstants.IS_BRANCH, !StringUtils.isEmpty(execution.getSystemContext().getBranchId()));
 		return (Serializable) eventData;
 	}
 
@@ -45,8 +45,8 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 	private Serializable createBranchFailureEventData(Execution execution) {
 		Map<String, Serializable> eventData = new HashMap<>();
 		eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, execution.getSystemContext());
-		eventData.put(ExecutionConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
-		eventData.put(EventConstants.BRANCH_ID, execution.getBranchId());
+		eventData.put(EventConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
+		eventData.put(EventConstants.BRANCH_ID, execution.getSystemContext().getBranchId());
 		return (Serializable) eventData;
 	}
 
@@ -59,8 +59,8 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 	private Serializable createFailureEventData(Execution execution) {
 		Map<String, Serializable> eventData = new HashMap<>();
 		eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, execution.getSystemContext());
-		eventData.put(ExecutionConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
-		eventData.put(EventConstants.BRANCH_ID, execution.getBranchId());
+		eventData.put(EventConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
+		eventData.put(EventConstants.BRANCH_ID, execution.getSystemContext().getBranchId());
 		eventData.put(ExecutionParametersConsts.RUNNING_EXECUTION_PLAN_ID, execution.getRunningExecutionPlanId());
 		return (Serializable) eventData;
 	}
@@ -83,8 +83,8 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 
 		Map<String, Serializable> eventData = new HashMap<>();
 		eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, execution.getSystemContext());
-		eventData.put(ExecutionConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
-		eventData.put(EventConstants.BRANCH_ID, execution.getBranchId());
+		eventData.put(EventConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
+		eventData.put(EventConstants.BRANCH_ID, execution.getSystemContext().getBranchId());
 		eventData.put(EventConstants.FLOW_UUID, flowUuid);
 		eventData.put(EventConstants.PAUSE_ID, pauseId);
 		return (Serializable) eventData;

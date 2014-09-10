@@ -1,13 +1,12 @@
 package com.hp.score.orchestrator.services;
 
 import ch.lambdaj.function.convert.Converter;
+import com.hp.score.api.EndBranchDataContainer;
 import com.hp.score.engine.queue.entities.ExecutionMessage;
 import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.score.engine.queue.services.QueueDispatcherService;
-import com.hp.score.api.EndBranchDataContainer;
-import com.hp.score.facade.execution.ExecutionStatus;
 import com.hp.score.facade.entities.Execution;
-import com.hp.oo.internal.sdk.execution.ExecutionConstants;
+import com.hp.score.facade.execution.ExecutionStatus;
 import com.hp.score.orchestrator.entities.BranchContexts;
 import com.hp.score.orchestrator.entities.FinishedBranch;
 import com.hp.score.orchestrator.entities.SplitMessage;
@@ -63,8 +62,8 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     private final Converter<Execution, FinishedBranch> executionToFinishedBranch = new Converter<Execution, FinishedBranch>() {
         @Override
         public FinishedBranch convert(Execution execution) {
-            boolean isBranchCancelled = ExecutionStatus.CANCELED.equals(execution.getSystemContext().get(ExecutionConstants.FLOW_TERMINATION_TYPE));
-            return new FinishedBranch(execution.getExecutionId().toString(), execution.getBranchId(), execution.getSplitId(), execution.getError(), new BranchContexts(isBranchCancelled, execution.getContexts(), execution.getSystemContext()));
+            boolean isBranchCancelled = ExecutionStatus.CANCELED.equals(execution.getSystemContext().getFlowTerminationType());
+            return new FinishedBranch(execution.getExecutionId().toString(), execution.getSystemContext().getBranchId(), execution.getSystemContext().getSplitId(), execution.getSystemContext().getStepErrorKey(), new BranchContexts(isBranchCancelled, execution.getContexts(), execution.getSystemContext()));
         }
     };
 
@@ -114,11 +113,11 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
         for (Execution execution : executions) {
             if (logger.isDebugEnabled())
-                logger.debug("finishing branch " + execution.getBranchId() + " for execution " + execution.getExecutionId());
+                logger.debug("finishing branch " + execution.getSystemContext().getBranchId() + " for execution " + execution.getExecutionId());
         }
 
         // get the split id's for a batch query
-        List<String> splitIds = extract(executions, on(Execution.class).getSplitId());
+        List<String> splitIds = extract(executions, on(Execution.class).getSystemContext().getSplitId());
 
         // fetch all suspended executions
         List<SuspendedExecution> suspendedExecutions = suspendedExecutionsRepository.findBySplitIdIn(splitIds);
@@ -163,7 +162,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
     private Long findExecutionId(List<Execution> executions, String splitId) {
         for (Execution execution : executions) {
-            if (execution.getSplitId().equals(splitId)) {
+            if (execution.getSystemContext().getSplitId().equals(splitId)) {
                 return execution.getExecutionId();
             }
         }
@@ -236,11 +235,11 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         }
 
         // 2. insert all of the branches into the parent execution
-        exec.putFinishedChildBranchesData(finishedContexts);
+        exec.getSystemContext().setFinishedChildBranchesData(finishedContexts);
 
         //mark cancelled on parent
         if (wasExecutionCancelled) {
-            exec.getSystemContext().put(ExecutionConstants.FLOW_TERMINATION_TYPE, ExecutionStatus.CANCELED);
+            exec.getSystemContext().setFlowTerminationType(ExecutionStatus.CANCELED);
         }
 
         return exec;

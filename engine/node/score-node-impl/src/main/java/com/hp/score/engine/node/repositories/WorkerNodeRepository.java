@@ -2,7 +2,6 @@ package com.hp.score.engine.node.repositories;
 
 import com.hp.score.api.nodes.WorkerStatus;
 import com.hp.score.engine.node.entities.WorkerNode;
-//import com.hp.oo.enginefacade.Worker;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

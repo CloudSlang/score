@@ -110,7 +110,7 @@ public class QueueListenerImpl implements QueueListener {
 	 * It will return true for executions of parallel, multi-instance, sub-flows and non blocking
 	 */
 	private boolean isBranch(Execution execution) {
-		return execution != null && execution.isBranch();
+		return execution != null && !StringUtils.isEmpty(execution.getSystemContext().getBranchId());
 	}
 
 	private Execution extractExecution(ExecutionMessage executionMessage) {

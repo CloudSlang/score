@@ -1,17 +1,16 @@
 package com.hp.score.worker.execution.services;
 
-import com.hp.score.events.EventConstants;
-import com.hp.score.facade.TempConstants;
-import com.hp.score.facade.entities.RunningExecutionPlan;
-import com.hp.score.facade.execution.ExecutionStatus;
-import com.hp.score.facade.execution.ExecutionSummary;
-import com.hp.score.facade.execution.PauseReason;
-import com.hp.score.facade.entities.Execution;
-import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.score.api.ControlActionMetadata;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ExecutionStep;
 import com.hp.score.events.EventBus;
+import com.hp.score.events.EventConstants;
+import com.hp.score.facade.TempConstants;
+import com.hp.score.facade.entities.Execution;
+import com.hp.score.facade.entities.RunningExecutionPlan;
+import com.hp.score.facade.execution.ExecutionStatus;
+import com.hp.score.facade.execution.ExecutionSummary;
+import com.hp.score.facade.execution.PauseReason;
 import com.hp.score.orchestrator.services.CancelExecutionService;
 import com.hp.score.orchestrator.services.PauseResumeService;
 import com.hp.score.worker.execution.reflection.ReflectionAdapter;
@@ -32,7 +31,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.mockito.Matchers.any;
@@ -137,7 +135,7 @@ public class ExecutionServiceTest {
 		exe.getSystemContext().setBranchId(branch_id);
 		exe.getSystemContext().put(EventConstants.FLOW_UUID, "flow_uuid");
 		//for events
-		exe.getSystemContext().put(ExecutionConstants.EXECUTION_ID_CONTEXT, executionId);
+		exe.getSystemContext().setExecutionId(executionId);
 		return exe;
 	}
 
@@ -204,7 +202,7 @@ public class ExecutionServiceTest {
 		executionService.executeStep(exe, executionStep);
 
 		Assert.assertEquals(0, exe.getPosition().longValue()); //position is still 0
-		Assert.assertTrue(exe.getSystemContext().containsKey(ExecutionConstants.EXECUTION_STEP_ERROR_KEY)); //there is error in context
+		Assert.assertTrue(exe.getSystemContext().hasStepErrorKey()); //there is error in context
 	}
 
 	@Test
@@ -219,7 +217,7 @@ public class ExecutionServiceTest {
 		executionService.navigate(exe, executionStep);
 
 		Assert.assertEquals(null, exe.getPosition()); //position was changed to NULL due to exception
-		Assert.assertTrue(exe.getSystemContext().containsKey(ExecutionConstants.EXECUTION_STEP_ERROR_KEY)); //there is error in context
+		Assert.assertTrue(exe.getSystemContext().hasStepErrorKey()); //there is error in context
 	}
 
 	@Test
@@ -230,7 +228,7 @@ public class ExecutionServiceTest {
 		exe.getSystemContext().put(TempConstants.ACTUALLY_OPERATION_GROUP, "Real_Group");
 		exe.getSystemContext().put(TempConstants.MUST_GO_TO_QUEUE, true);
 		//for events
-		exe.getSystemContext().put(ExecutionConstants.EXECUTION_ID_CONTEXT, "stam");
+		exe.getSystemContext().setExecutionId(123L);
 
 		executionService.postExecutionSettings(exe);
 

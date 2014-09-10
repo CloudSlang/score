@@ -43,7 +43,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(OutboundBufferImpl.class, "outBuffer");
 		put(RetryTemplate.class, null);
 		put(SimpleExecutionRunnableFactory.class, null);
-		put(WorkerManagerMBean.class, "com.hp.oo.execution.services.WorkerManagerMBean");
+		put(WorkerManagerMBean.class, "com.hp.score.worker.management.services.WorkerManagerMBean");
 		put(WorkerRecoveryManagerImpl.class, null);
 		put(ReflectionAdapterImpl.class, null);
         put(SessionDataServiceImpl.class, "sessionDataService");

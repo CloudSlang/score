@@ -115,34 +115,19 @@ public class SplitJoinServiceTest {
         splitJoinService.split(null);
     }
 
-    // *******************************
-    // * SplitJoinService.endBranch() *
-    // *******************************
-    @Test
-    public void persistBranchToDbEndBranchTest() {
-        String splitId = UUID.randomUUID().toString();
-        Execution execution = Mockito.mock(Execution.class);
-        Mockito.when(execution.getSplitId()).thenReturn(splitId);
-        Mockito.when(execution.getPosition()).thenReturn(null);
-        Mockito.when(execution.getSystemContext()).thenReturn(new SystemContext());
-
-        Mockito.when(suspendedExecutionsRepository.findBySplitIdIn(Arrays.asList(splitId))).thenReturn(Arrays.asList(createSuspendedExecution(splitId, 2)));
-
-        splitJoinService.endBranch(Arrays.asList(execution));
-
-        Mockito.verify(finishedBranchRepository).save((FinishedBranch) any());
-    }
-
     @Test
     public void missingSuspendedExecutionEndBranchTest() {
         String splitId1 = UUID.randomUUID().toString();
         String splitId2 = UUID.randomUUID().toString();
         Execution branch1 = Mockito.mock(Execution.class);
         Execution branch2 = Mockito.mock(Execution.class);
-        Mockito.when(branch1.getSplitId()).thenReturn(splitId1);
-        Mockito.when(branch2.getSplitId()).thenReturn(splitId2);
-        Mockito.when(branch1.getSystemContext()).thenReturn(new SystemContext());
-        Mockito.when(branch2.getSystemContext()).thenReturn(new SystemContext());
+        SystemContext systemContext1 = Mockito.mock(SystemContext.class);
+        SystemContext systemContext2 = Mockito.mock(SystemContext.class);
+        Mockito.when(branch1.getSystemContext()).thenReturn(systemContext1);
+        Mockito.when(branch2.getSystemContext()).thenReturn(systemContext2);
+        Mockito.when(systemContext1.getSplitId()).thenReturn(splitId1);
+        Mockito.when(systemContext2.getSplitId()).thenReturn(splitId2);
+
         Mockito.when(branch1.getPosition()).thenReturn(null);
         Mockito.when(branch2.getPosition()).thenReturn(null);
 

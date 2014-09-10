@@ -8,8 +8,8 @@
     <integration:channel id="event_Channel"/>
     <integration:channel id="rejectedMessages"/>
 
-    <integration:gateway service-interface="com.hp.oo.execution.gateways.EventGateway"
-                         default-request-channel="event_Channel"/>
+    <!--<integration:gateway service-interface="com.hp.oo.execution.gateways.EventGateway"-->
+                         <!--default-request-channel="event_Channel"/>-->
 
 
 	<bean id="filterTest" class="com.hp.score.worker.management.services.ExecutionEventLogFilterServiceTest"/>
@@ -24,7 +24,5 @@
 
 	<integration:filter input-channel="event_Channel" output-channel="event_ChannelAfterFilter"
 			 ref="filter_bean" method="logFilterAccept" discard-channel="rejectedMessages"/>
-
-	<!--<bean id="filter_bean" class="com.hp.oo.execution.services.ExecutionEventLogFilter"/>-->
 
 </beans>

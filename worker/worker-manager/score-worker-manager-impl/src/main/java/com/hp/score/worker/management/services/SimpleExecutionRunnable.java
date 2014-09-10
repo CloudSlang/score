@@ -1,20 +1,18 @@
 package com.hp.score.worker.management.services;
 
 import com.hp.score.engine.node.entities.WorkerNode;
-import com.hp.score.facade.TempConstants;
-import com.hp.score.worker.execution.services.ExecutionService;
 import com.hp.score.engine.queue.entities.ExecStatus;
 import com.hp.score.engine.queue.entities.ExecutionMessage;
 import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.score.engine.queue.entities.Payload;
 import com.hp.score.engine.queue.services.QueueStateIdGeneratorService;
+import com.hp.score.facade.TempConstants;
 import com.hp.score.facade.entities.Execution;
-import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.score.orchestrator.entities.SplitMessage;
-
+import com.hp.score.worker.execution.services.ExecutionService;
+import com.hp.score.worker.management.WorkerConfigurationService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import com.hp.score.worker.management.WorkerConfigurationService;
 
 import java.io.IOException;
 import java.util.List;
@@ -278,7 +276,7 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private String getSplitId(List<Execution> newExecutions) {
         if (newExecutions != null && newExecutions.size() > 0) {
-            return newExecutions.get(0).getSplitId();
+            return newExecutions.get(0).getSystemContext().getSplitId();
         }
 		throw new RuntimeException("Split executions list is null or empty!!!");
     }

@@ -1,6 +1,5 @@
 package com.hp.score.engine.queue.entities;
 
-//import com.hp.oo.sdk.content.plugin.StepSerializableSessionObject;
 import junit.framework.Assert;
 import org.junit.Test;
 

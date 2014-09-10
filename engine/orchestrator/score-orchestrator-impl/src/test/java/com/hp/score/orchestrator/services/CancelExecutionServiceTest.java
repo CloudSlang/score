@@ -2,9 +2,8 @@ package com.hp.score.orchestrator.services;
 
 import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.score.engine.queue.services.QueueDispatcherService;
-import com.hp.score.facade.execution.ExecutionStatus;
 import com.hp.score.facade.entities.Execution;
-import com.hp.oo.internal.sdk.execution.ExecutionConstants;
+import com.hp.score.facade.execution.ExecutionStatus;
 import com.hp.score.orchestrator.entities.ExecutionState;
 import org.junit.Before;
 import org.junit.Test;
@@ -68,7 +67,7 @@ public class CancelExecutionServiceTest {
         when(executionSerializationUtil.objFromBytes(any(byte[].class))).thenReturn(pausedExecutionObj);
         checkValidRequestCancel(ExecutionStatus.PAUSED, ExecutionStatus.PENDING_CANCEL);
         assertThat(pausedExecutionObj.getPosition()).isNull();
-        assertThat(pausedExecutionObj.getSystemContext().get(ExecutionConstants.FLOW_TERMINATION_TYPE)).isEqualTo(ExecutionStatus.CANCELED);
+        assertThat(pausedExecutionObj.getSystemContext().getFlowTerminationType()).isEqualTo(ExecutionStatus.CANCELED);
 
         // Cancel
         checkValidRequestCancel(ExecutionStatus.CANCELED, ExecutionStatus.CANCELED);
@@ -124,7 +123,7 @@ public class CancelExecutionServiceTest {
         // Branch should be canceled
         assertThat(branch1.getStatus()).as("Wrong status after cancelling the branch").isEqualTo(ExecutionStatus.PENDING_CANCEL);
         assertThat(pausedExecutionObj.getPosition()).isNull();
-        assertThat(pausedExecutionObj.getSystemContext().get(ExecutionConstants.FLOW_TERMINATION_TYPE)).isEqualTo(ExecutionStatus.CANCELED);
+        assertThat(pausedExecutionObj.getSystemContext().getFlowTerminationType()).isEqualTo(ExecutionStatus.CANCELED);
     }
 
     @Test

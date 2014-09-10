@@ -57,8 +57,7 @@ public class ScoreDatabaseContext {
 		emf.setJpaProperties(jpaProperties());
         emf.setJpaVendorAdapter(jpaVendorAdapter());
         emf.setPersistenceProviderClass(HibernatePersistence.class);
-        //todo Meshi: remove scanning of oo package once we move all the entities to score package
-        emf.setPackagesToScan("com.hp.score","com.hp.oo");
+        emf.setPackagesToScan("com.hp.score");
         return emf;
     }
 

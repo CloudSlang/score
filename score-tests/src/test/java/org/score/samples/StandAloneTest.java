@@ -1,7 +1,6 @@
 package org.score.samples;
 
 import com.google.common.collect.Sets;
-import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.score.api.ControlActionMetadata;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ExecutionStep;
@@ -75,7 +74,7 @@ public class StandAloneTest {
         long executionId = score.trigger(triggeringProperties);
 
         waitForAllEventsToArrive(1);
-        long finishEventExecutionId = (Long)((Map)eventQueue.get(0).getData()).get(ExecutionConstants.EXECUTION_ID_CONTEXT);
+        long finishEventExecutionId = (Long)((Map)eventQueue.get(0).getData()).get(EventConstants.EXECUTION_ID_CONTEXT);
         Assert.assertNotNull(finishEventExecutionId);
         Assert.assertEquals(executionId, finishEventExecutionId);
     }

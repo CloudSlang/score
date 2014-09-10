@@ -1,6 +1,8 @@
 package com.hp.score.orchestrator.services;
 
-import com.hp.score.facade.services.RunningExecutionPlanService;
+import com.hp.score.api.ExecutionPlan;
+import com.hp.score.api.TriggeringProperties;
+import com.hp.score.engine.data.IdentityGenerator;
 import com.hp.score.engine.node.entities.WorkerNode;
 import com.hp.score.engine.queue.entities.ExecStatus;
 import com.hp.score.engine.queue.entities.ExecutionMessage;
@@ -8,14 +10,10 @@ import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.score.engine.queue.entities.Payload;
 import com.hp.score.engine.queue.services.QueueDispatcherService;
 import com.hp.score.facade.entities.Execution;
-import com.hp.oo.internal.sdk.execution.ExecutionConstants;
-import com.hp.score.api.ExecutionPlan;
-import com.hp.score.api.TriggeringProperties;
-import com.hp.score.engine.data.IdentityGenerator;
+import com.hp.score.facade.services.RunningExecutionPlanService;
 import com.hp.score.lang.SystemContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +50,7 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
     public Long trigger(Long executionId, TriggeringProperties triggeringProperties) {
         SystemContext scoreSystemContext = new SystemContext(triggeringProperties.getRuntimeValues());
         Long runningExecutionPlanId = saveRunningExecutionPlans(triggeringProperties.getExecutionPlan(), triggeringProperties.getDependencies(), scoreSystemContext);
-        scoreSystemContext.put(ExecutionConstants.EXECUTION_ID_CONTEXT, executionId);
+        scoreSystemContext.setExecutionId(executionId);
         Execution execution = new Execution(executionId, runningExecutionPlanId, triggeringProperties.getStartStep(), triggeringProperties.getContext(), scoreSystemContext);
 
         // create execution record in ExecutionSummary table
@@ -83,8 +81,7 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
         runningPlansIds.put(executionPlan.getFlowUuid(), runningPlanId);
         beginStepsIds.put(executionPlan.getFlowUuid(), executionPlan.getBeginStep());
 
-        systemContext.put(ExecutionConstants.RUNNING_PLANS_MAP, (Serializable) runningPlansIds);
-        systemContext.put(ExecutionConstants.BEGIN_STEPS_MAP, (Serializable) beginStepsIds);
+        systemContext.setSubFlowsData(runningPlansIds, beginStepsIds);
 
         return runningPlanId;
     }

@@ -1,6 +1,5 @@
 package com.hp.score.engine.node.entities;
 
-import com.hp.oo.internal.sdk.execution.ExecutionConstants;
 import com.hp.score.api.nodes.WorkerStatus;
 import com.hp.score.engine.data.AbstractIdentifiable;
 import com.hp.score.facade.TempConstants;

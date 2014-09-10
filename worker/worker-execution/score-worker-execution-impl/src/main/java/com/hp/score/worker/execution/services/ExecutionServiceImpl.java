@@ -1,5 +1,26 @@
 package com.hp.score.worker.execution.services;
 
+import com.hp.score.api.ExecutionStep;
+import com.hp.score.api.StartBranchDataContainer;
+import com.hp.score.api.execution.ExecutionParametersConsts;
+import com.hp.score.events.EventBus;
+import com.hp.score.events.EventConstants;
+import com.hp.score.events.ScoreEvent;
+import com.hp.score.facade.TempConstants;
+import com.hp.score.facade.entities.Execution;
+import com.hp.score.facade.entities.RunningExecutionPlan;
+import com.hp.score.facade.execution.ExecutionStatus;
+import com.hp.score.facade.execution.ExecutionSummary;
+import com.hp.score.facade.execution.PauseReason;
+import com.hp.score.lang.SystemContext;
+import com.hp.score.orchestrator.services.PauseResumeService;
+import com.hp.score.worker.execution.reflection.ReflectionAdapter;
+import com.hp.score.worker.management.WorkerConfigurationService;
+import com.hp.score.worker.management.services.dbsupport.WorkerDbSupportService;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -7,29 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import com.hp.score.api.execution.ExecutionParametersConsts;
-import com.hp.score.facade.TempConstants;
-import com.hp.score.worker.execution.reflection.ReflectionAdapter;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import com.hp.score.worker.management.WorkerConfigurationService;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.hp.score.facade.entities.RunningExecutionPlan;
-import com.hp.score.facade.execution.ExecutionStatus;
-import com.hp.score.facade.execution.ExecutionSummary;
-import com.hp.score.facade.execution.PauseReason;
-import com.hp.score.worker.management.services.dbsupport.WorkerDbSupportService;
-import com.hp.score.facade.entities.Execution;
-import com.hp.oo.internal.sdk.execution.ExecutionConstants;
-import com.hp.score.orchestrator.services.PauseResumeService;
-import com.hp.score.api.ExecutionStep;
-import com.hp.score.api.StartBranchDataContainer;
-import com.hp.score.events.EventBus;
-import com.hp.score.events.EventConstants;
-import com.hp.score.events.ScoreEvent;
-import com.hp.score.lang.SystemContext;
 
 /**
  * @author Dima Rassin
@@ -90,8 +88,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 throw ex; //for recovery purposes, in case thread was in wait on stepLog and was interrupted
             }
 			logger.error("Error during execution: ", ex);
-			execution.getSystemContext().put(ExecutionConstants.EXECUTION_STEP_ERROR_KEY, ex.getMessage()); // this is done only fo reporting
-			execution.getSystemContext().put(ExecutionConstants.FLOW_TERMINATION_TYPE, ExecutionStatus.SYSTEM_FAILURE);
+			execution.getSystemContext().setStepErrorKey(ex.getMessage()); // this is done only fo reporting
+			execution.getSystemContext().setFlowTerminationType(ExecutionStatus.SYSTEM_FAILURE);
 			execution.setPosition(null); // this ends the flow!!!
 			return execution;
 		}
@@ -132,9 +130,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	}
 
 	private void failFlowIfSplitStepFailed(Execution execution) {
-		if(execution.getSystemContext().containsKey(ExecutionConstants.EXECUTION_STEP_ERROR_KEY)) {
-			String exception = (String)execution.getSystemContext().get(ExecutionConstants.EXECUTION_STEP_ERROR_KEY);
-			execution.getSystemContext().put(ExecutionConstants.FLOW_TERMINATION_TYPE, ExecutionStatus.SYSTEM_FAILURE);
+		if(execution.getSystemContext().hasStepErrorKey()) {
+			String exception = execution.getSystemContext().getStepErrorKey();
+			execution.getSystemContext().setFlowTerminationType(ExecutionStatus.SYSTEM_FAILURE);
 			execution.setPosition(null); // this ends the flow!!!
 			try {
 				createErrorEvent(exception, "Error occurred during split step ", EventConstants.SCORE_STEP_SPLIT_ERROR, execution.getSystemContext());
@@ -152,8 +150,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
 			StartBranchDataContainer from = newBranches.get(i);
 			Execution to = new Execution(executionId, from.getExecutionPlanId(), from.getStartPosition(), from.getContexts(), from.getSystemContext());
 
-			to.putSplitId(splitId);
-			to.putBranchId(splitId + ":" + (i + 1));
+			to.getSystemContext().setSplitId(splitId);
+			to.getSystemContext().setBranchId(splitId + ":" + (i + 1));
 			newExecutions.add(to);
 		}
 		return newExecutions;
@@ -168,13 +166,13 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	protected boolean handleCancelledFlow(Execution execution) {
 		boolean executionIsCancelled = workerConfigurationService.isExecutionCancelled(execution.getExecutionId()); // in this case - just check if need to cancel. It will set as cancelled later on QueueEventListener
 		// Another scenario of getting canceled - it was cancelled from the SplitJoinService (the configuration can still be not updated). Defect #:22060
-		if(ExecutionStatus.CANCELED.equals(execution.getSystemContext().get(ExecutionConstants.FLOW_TERMINATION_TYPE))) {
+		if(ExecutionStatus.CANCELED.equals(execution.getSystemContext().getFlowTerminationType())) {
 			executionIsCancelled = true;
 		}
 		if(executionIsCancelled) {
 			// NOTE: an execution can be cancelled directly from CancelExecutionService, if it's currently paused.
 			// Thus, if you change the code here, please check CancelExecutionService as well.
-			execution.getSystemContext().put(ExecutionConstants.FLOW_TERMINATION_TYPE, ExecutionStatus.CANCELED);
+			execution.getSystemContext().setFlowTerminationType(ExecutionStatus.CANCELED);
 			execution.setPosition(null);
 			return true;
 		}
@@ -229,7 +227,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	}
 
 	private void addPauseEvent(SystemContext systemContext) {
-		// TODO : add pause reason??
 		HashMap<String, Serializable> eventData = new HashMap<>();
 		eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, new HashMap<>(systemContext));
 		ScoreEvent eventWrapper = new ScoreEvent(EventConstants.SCORE_PAUSED_EVENT, eventData);
@@ -314,7 +311,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
 	private static void handleStepExecutionException(Execution execution, RuntimeException ex) {
 		logger.error("Error occurred during operation execution.  Execution id: " + execution.getExecutionId(), ex);
-		execution.getSystemContext().put(ExecutionConstants.EXECUTION_STEP_ERROR_KEY, ex.getMessage());
+		execution.getSystemContext().setStepErrorKey(ex.getMessage());
 	}
 
 	private Map<String, Object> prepareStepData(Execution execution, ExecutionStep currStep) {
@@ -354,8 +351,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
 			// If Exception occurs in navigation (almost impossible since now we always have Flow Exception Step) we can not continue since we don't know which step is the next step...
 			// terminating...
 			logger.error("Error occurred during navigation execution. Execution id: " + execution.getExecutionId(), navEx);
-			execution.getSystemContext().put(ExecutionConstants.EXECUTION_STEP_ERROR_KEY, navEx.getMessage()); // this is done only fo reporting
-			execution.getSystemContext().put(ExecutionConstants.FLOW_TERMINATION_TYPE, ExecutionStatus.SYSTEM_FAILURE);
+			execution.getSystemContext().setStepErrorKey(navEx.getMessage()); // this is done only fo reporting
+			execution.getSystemContext().setFlowTerminationType(ExecutionStatus.SYSTEM_FAILURE);
 			execution.setPosition(null); // this ends the flow!!!
 			try {
 				createErrorEvent(navEx.getMessage(), "Error occurred during navigation execution ", EventConstants.SCORE_STEP_NAV_ERROR, execution.getSystemContext());

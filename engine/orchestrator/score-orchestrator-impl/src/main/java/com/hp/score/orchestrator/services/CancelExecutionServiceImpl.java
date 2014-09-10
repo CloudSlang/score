@@ -3,9 +3,8 @@ package com.hp.score.orchestrator.services;
 import com.hp.score.engine.queue.entities.ExecStatus;
 import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
 import com.hp.score.engine.queue.services.QueueDispatcherService;
-import com.hp.score.facade.execution.ExecutionStatus;
 import com.hp.score.facade.entities.Execution;
-import com.hp.oo.internal.sdk.execution.ExecutionConstants;
+import com.hp.score.facade.execution.ExecutionStatus;
 import com.hp.score.orchestrator.entities.ExecutionState;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,7 +106,7 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
             logger.error("Run Object is null. Execution Id = " + executionStateToCancel.getExecutionId() + "; Branch Id = " + executionStateToCancel.getBranchId());
             return;
         }
-        executionObj.getSystemContext().put(ExecutionConstants.FLOW_TERMINATION_TYPE, ExecutionStatus.CANCELED);
+        executionObj.getSystemContext().setFlowTerminationType(ExecutionStatus.CANCELED);
         executionObj.setPosition(null);
 
         // just in case - we shouldn't need it, because the Execution is back to the queue as "Terminated"
