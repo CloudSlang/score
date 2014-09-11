@@ -1,4 +1,4 @@
-package org.score.samples;
+package com.hp.score.samples;
 
 import com.google.common.collect.Sets;
 import com.hp.score.api.ControlActionMetadata;
@@ -16,7 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.hp.score.samples.controlactions.BranchActions;
-import org.score.samples.controlactions.SessionDataActions;
+import com.hp.score.samples.controlactions.SessionDataActions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -284,7 +284,7 @@ public class StandAloneTest {
         ExecutionStep executionPutDataStep = createPutDataOnSessionStep(0L, 1L);
         executionPlan.addStep(executionPutDataStep);
 
-//        ExecutionStep sleepDataStep = createExecutionStep(1L, "org.score.samples.controlactions.SessionDataActions", "sleepAction", new HashMap<String, Serializable>());
+//        ExecutionStep sleepDataStep = createExecutionStep(1L, "com.hp.score.samples.controlactions.SessionDataActions", "sleepAction", new HashMap<String, Serializable>());
 //        addNavigationToExecutionStep(2L, navigationActionClassName, simpleNavigationMethodName, sleepDataStep);
 //        executionPlan.addStep(sleepDataStep);
 
@@ -294,11 +294,11 @@ public class StandAloneTest {
     }
 
     private static ExecutionStep createGetDataFromSessionStep(Long stepId) {
-        return createExecutionStep(stepId, "org.score.samples.controlactions.SessionDataActions", "getObject", new HashMap<String, Serializable>());
+        return createExecutionStep(stepId, "com.hp.score.samples.controlactions.SessionDataActions", "getObject", new HashMap<String, Serializable>());
     }
 
     private static ExecutionStep createPutDataOnSessionStep(Long stepId, Long nextStepId) {
-        ExecutionStep executionPutDataStep = createExecutionStep(stepId, "org.score.samples.controlactions.SessionDataActions", "putObject", new HashMap<String, Serializable>());
+        ExecutionStep executionPutDataStep = createExecutionStep(stepId, "com.hp.score.samples.controlactions.SessionDataActions", "putObject", new HashMap<String, Serializable>());
         if(nextStepId != null)
             addNavigationToExecutionStep(nextStepId, navigationActionClassName, simpleNavigationMethodName, executionPutDataStep);
         return executionPutDataStep;

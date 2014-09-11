@@ -1,4 +1,4 @@
-package org.score.samples.controlactions;
+package com.hp.score.samples.controlactions;
 
 import com.hp.oo.sdk.content.plugin.GlobalSessionObject;
 import com.hp.oo.sdk.content.plugin.SessionResource;
