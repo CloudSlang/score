@@ -94,7 +94,7 @@ public class OpenstackUtils {
 	 * @param executionContext executionContext object populated by score
 	 */
 	@SuppressWarnings("unused")
-	public void getMultiInstanceResponse(Map<String, Serializable> executionContext) {
+	public void joinBranchResponses(Map<String, Serializable> executionContext) {
 		Boolean failure = false;
 		@SuppressWarnings("unchecked")
 		List<Map<String, Serializable>> branchResults = (List<Map<String, Serializable>>) executionContext.get(BRANCH_RESULTS_KEY);

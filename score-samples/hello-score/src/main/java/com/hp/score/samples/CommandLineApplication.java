@@ -62,6 +62,7 @@ public class CommandLineApplication {
 		registerFlow("validate_server_open_stack", "Validate server exists in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".ValidateServerExistsFlow", "validateServerExistsFlow", "getInputBindings");
 		registerFlow("health_check_open_stack", "OpenStack health check", OPENSTACK_FLOWS_PACKAGE + ".OpenStackHealthCheckFlow", "openStackHealthCheckFlow", "getInputBindings");
 		registerFlow("health_multi_instance_servers_open_stack", "Create Multi Instance Servers in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".CreateMultiInstanceServersFlow", "createMultiInstanceServersFlow", "getInputBindings");
+		registerFlow("parallel_flow_example", "Parallel flow example", OPENSTACK_FLOWS_PACKAGE + ".ParallelFlow", "createParallelFlow", "getInputBindings");
 	}
 
 	public void registerFlow(String identifier, String description, String className, String triggeringPropertiesMethodName, String inputBindingsMethodName) {

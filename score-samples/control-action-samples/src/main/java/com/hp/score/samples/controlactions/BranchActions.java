@@ -50,7 +50,7 @@ public class BranchActions {
             executionContext.putAll(branchContext);
         }
     }
-	public void joinMultiInstance(ExecutionRuntimeServices executionRuntimeServices, Map<String, Serializable> executionContext){
+	public void joinBranches(ExecutionRuntimeServices executionRuntimeServices, Map<String, Serializable> executionContext){
 		List<EndBranchDataContainer> branches = executionRuntimeServices.getFinishedChildBranchesData();
 		List<Map<String, Serializable>> branchResults = new ArrayList<>();
 
@@ -72,6 +72,13 @@ public class BranchActions {
 		@SuppressWarnings("unchecked") List<Map<String, Serializable>> branchContexts =  (List<Map<String, Serializable>>) executionContext.get(BRANCH_CONTEXTS);
 		for(Map<String, Serializable> currentBranchContext : branchContexts){
 			executionRuntimeServices.addBranch(stepPosition, executionPlanId, currentBranchContext);
+		}
+	}
+	public void parallelSplitWithContext(ExecutionRuntimeServices executionRuntimeServices, Long stepPosition, List<String> parallelExecutionPlanIds, Map<String, Serializable> executionContext){
+
+		@SuppressWarnings("unchecked") List<Map<String, Serializable>> branchContexts =  (List<Map<String, Serializable>>) executionContext.get(BRANCH_CONTEXTS);
+		for(int i = 0; i < parallelExecutionPlanIds.size(); ++i){
+			executionRuntimeServices.addBranch(stepPosition, parallelExecutionPlanIds.get(i), branchContexts.get(i));
 		}
 	}
 

@@ -38,7 +38,7 @@ public class ExecutionPlanBuilder {
 	public static final String PARALLEL_SPLIT_WITH_CONTEXT_METHOD = "parallelSplitWithContext";
 	public static final String NEXT_STEP_ID_KEY = "nextStepId";
 	public static final String JOIN_METHOD = "join";
-	public static final String MULTI_INSTANCE_JOIN_METHOD = "joinMultiInstance";
+	public static final String MULTI_INSTANCE_JOIN_METHOD = "joinBranches";
 	public static final String OOACTION_RUNNER_CLASS = "com.hp.score.samples.openstack.actions.OOActionRunner";
 	public static final String RUN_METHOD_NAME = "run";
 	public static final String OOACTION_NAVIGATOR_CLASS = "com.hp.score.samples.openstack.actions.ActionNavigator";
@@ -276,6 +276,35 @@ public class ExecutionPlanBuilder {
 
 		ExecutionStep executionSplitStep = new ExecutionStep(splitStepId);
 		executionSplitStep.setAction(new ControlActionMetadata(BRANCH_ACTIONS_CLASS, MULTI_INSTANCE_SPLIT_METHOD));
+		executionSplitStep.setActionData(actionData);
+		executionSplitStep.setSplitStep(true);
+
+		executionSplitStep.setNavigation(new ControlActionMetadata(NAVIGATION_ACTIONS_CLASS, SIMPLE_NAVIGATION_METHOD));
+		Map<String, Serializable> navigationData = new HashMap<>();
+		navigationData.put(NEXT_STEP_ID_KEY, joinStepId);
+		executionSplitStep.setNavigationData(navigationData);
+		executionPlan.addStep(executionSplitStep);
+
+		ExecutionStep executionJoinStep = new ExecutionStep(joinStepId);
+		executionJoinStep.setAction(new ControlActionMetadata(BRANCH_ACTIONS_CLASS, MULTI_INSTANCE_JOIN_METHOD));
+
+		actionData = new HashMap<>();
+		executionJoinStep.setActionData(actionData);
+
+		setOONavigation(executionJoinStep, navigationMatchers);
+
+		executionPlan.addStep(executionJoinStep);
+
+		return executionSplitStep.getExecStepId();
+	}
+	@SuppressWarnings("unused")
+	public Long addParallel(Long splitStepId, Long joinStepId, List<String> flowUuids, List<NavigationMatcher<Serializable>> navigationMatchers){
+		Map<String, Serializable> actionData = new HashMap<>();
+		actionData.put(BranchActions.STEP_POSITION, 0L);
+		actionData.put(BranchActions.PARALLEL_EXECUTION_PLAN_IDS, (Serializable) flowUuids);
+
+		ExecutionStep executionSplitStep = new ExecutionStep(splitStepId);
+		executionSplitStep.setAction(new ControlActionMetadata(BRANCH_ACTIONS_CLASS, PARALLEL_SPLIT_WITH_CONTEXT_METHOD));
 		executionSplitStep.setActionData(actionData);
 		executionSplitStep.setSplitStep(true);
 

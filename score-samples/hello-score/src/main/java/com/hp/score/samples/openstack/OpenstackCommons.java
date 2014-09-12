@@ -43,7 +43,7 @@ public class OpenstackCommons {
 	public static final String FAILURE_STEP_ACTION_METHOD = "failureStepAction";
 	public static final String HTTP_CLIENT_ACTION_METHOD = "execute";
 	public static final String PARSE_AUTHENTICATION_METHOD = "parseAuthentication";
-	public static final String GET_MULTI_INSTANCE_RESPONSE_METHOD = "getMultiInstanceResponse";
+	public static final String GET_MULTI_INSTANCE_RESPONSE_METHOD = "joinBranchResponses";
 	public static final String MERGE_METHOD = "merge";
 	public static final String VALIDATE_SERVER_RESULT_METHOD = "validateServerResult";
 	public static final String SPLIT_SERVERS_INTO_BRANCH_CONTEXTS_METHOD = "splitServersIntoBranchContexts";
