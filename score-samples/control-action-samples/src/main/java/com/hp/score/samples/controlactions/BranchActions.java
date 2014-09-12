@@ -20,6 +20,7 @@ public class BranchActions {
     public static final String EXECUTION_PLAN_ID = "executionPlanId";
 	public static final String BRANCH_RESULTS = "branchResults";
 	public static final String BRANCH_CONTEXTS = "branchContexts";
+	public static final String PARALLEL_EXECUTION_PLAN_IDS = "parallelExecutionPlanIds";
 
     public void split(ExecutionRuntimeServices executionRuntimeServices, Long stepPosition, String executionPlanId){
         executionRuntimeServices.addBranch(stepPosition, executionPlanId, new HashMap<String, Serializable>());

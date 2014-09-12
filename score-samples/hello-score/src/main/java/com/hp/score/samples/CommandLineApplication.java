@@ -155,10 +155,10 @@ public class CommandLineApplication {
 			boolean validValueEntered = false;
 			while (!validValueEntered) {
 				if (inputBinding.hasDefaultValue()) {
-					input = readPredefinedInput(reader, inputBinding.getDescription(), inputBinding.getValue());
+					input = readPredefinedInput(reader, inputBinding.getDescription(), inputBinding.getValue()).trim();
 					validValueEntered = true;
 				} else {
-					input = readInput(reader, inputBinding.getDescription());
+					input = readInput(reader, inputBinding.getDescription()).trim();
 					validValueEntered = !input.isEmpty();
 				}
 			}

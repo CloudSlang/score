@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
  * @author lesant
  */
 
-public class OOActionNavigatorTest {
+public class ActionNavigatorTest {
 	public static final String ACTION_PARAMETER_1_KEY = "actionParameter1";
 	private static final String ACTION_PARAMETER1_VALUE = "methodParameter1Value";
 	private static final String ACTION_PARAMETER2_VALUE = "methodParameter2Value";
@@ -54,21 +54,21 @@ public class OOActionNavigatorTest {
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.NOT_EQUAL, "response", "success", 2L));
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, 2L));
 
-		OOActionNavigator navigator = new OOActionNavigator();
-		Long result = navigator.navigate(actualExecutionContext, navigationMatchers, executionRuntimeServicesMock);
-		assertEquals("navigate() should return 1L",(Object) result, 1L);
+		ActionNavigator navigator = new ActionNavigator();
+		Long result = navigator.navigateWithMatchers(actualExecutionContext, navigationMatchers, executionRuntimeServicesMock);
+		assertEquals("navigateWithMatchers() should return 1L",(Object) result, 1L);
 
 		navigationMatchers = new ArrayList<>();
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.NOT_EQUAL, "response", "fail", 2L));
-		result = navigator.navigate(actualExecutionContext, navigationMatchers, executionRuntimeServicesMock);
-		assertEquals("navigate() should return 2L",(Object) result, 2L);
+		result = navigator.navigateWithMatchers(actualExecutionContext, navigationMatchers, executionRuntimeServicesMock);
+		assertEquals("navigateWithMatchers() should return 2L",(Object) result, 2L);
 
 		verify(executionRuntimeServicesMock, times(2)).getEvents();
 
 		navigationMatchers = new ArrayList<>();
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, "response", "fail", 3L));
-		result = navigator.navigate(actualExecutionContext, navigationMatchers, executionRuntimeServicesMock);
-		assertEquals("navigate() should return 3L",(Object) result, 3L);
+		result = navigator.navigateWithMatchers(actualExecutionContext, navigationMatchers, executionRuntimeServicesMock);
+		assertEquals("navigateWithMatchers() should return 3L",(Object) result, 3L);
 
 		verify(executionRuntimeServicesMock, times(3)).getEvents();
 
@@ -87,8 +87,8 @@ public class OOActionNavigatorTest {
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.NOT_EQUAL, "result", "200", 1L));
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, 2L));
 
-		OOActionNavigator navigator = new OOActionNavigator();
-		assertEquals("navigate() should return null", navigator.navigate(actualExecutionContext, navigationMatchers, executionRuntimeServicesMock), null);
+		ActionNavigator navigator = new ActionNavigator();
+		assertEquals("navigateWithMatchers() should return null", navigator.navigateWithMatchers(actualExecutionContext, navigationMatchers, executionRuntimeServicesMock), null);
 
 		verify(executionRuntimeServicesMock).getEvents();
 
@@ -103,8 +103,8 @@ public class OOActionNavigatorTest {
 		when(executionRuntimeServicesMock.getEvents()).thenReturn(events);
 		Map<String, Serializable> actualExecutionContext = prepareActualExecutionContext();
 
-		OOActionNavigator navigator = new OOActionNavigator();
-		assertEquals("navigate() should return null", navigator.navigate(actualExecutionContext, null, executionRuntimeServicesMock), null);
+		ActionNavigator navigator = new ActionNavigator();
+		assertEquals("navigateWithMatchers() should return null", navigator.navigateWithMatchers(actualExecutionContext, null, executionRuntimeServicesMock), null);
 
 		verify(executionRuntimeServicesMock).getEvents();
 

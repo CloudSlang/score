@@ -16,11 +16,11 @@ import java.util.Map;
  * @author lesant
  */
 @SuppressWarnings("unused")
-public class OOActionNavigator {
-	private final static Logger logger = Logger.getLogger(OOActionNavigator.class);
+public class ActionNavigator {
+	private final static Logger logger = Logger.getLogger(ActionNavigator.class);
 	public final static String FAILURE_EVENT_KEY = "failureEvent";
-	public <T extends Comparable> Long navigate(Map<String, Serializable> executionContext, List<NavigationMatcher<Serializable>> navigationMatchers, ExecutionRuntimeServices executionRuntimeServices) {
-		logger.info("navigate method invocation");
+	public <T extends Comparable> Long navigateWithMatchers(Map<String, Serializable> executionContext, List<NavigationMatcher<Serializable>> navigationMatchers, ExecutionRuntimeServices executionRuntimeServices) {
+		logger.info("navigateWithMatchers method invocation");
 		ArrayDeque<ScoreEvent> events = executionRuntimeServices.getEvents();
 		if (events != null) {
 			for (ScoreEvent scoreEvent : events) {

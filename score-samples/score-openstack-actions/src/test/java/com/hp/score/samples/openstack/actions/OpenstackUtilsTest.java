@@ -2,6 +2,8 @@ package com.hp.score.samples.openstack.actions;
 
 import org.junit.Test;
 
+import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,9 +29,11 @@ public class OpenstackUtilsTest {
 	public void testGetAuthentication(){
 
 		OpenstackUtils utils = new OpenstackUtils();
-		Map<String, String> returnMap = utils.parseAuthentication(CREATE_SERVER_RESPONSE_MOCK);
-		assertEquals("Token not computed as expected.", EXPECTED_TOKEN, returnMap.get("parsedToken"));
-		assertEquals("Tenant not computed as expected.", EXPECTED_TENANT, returnMap.get("parsedTenant"));
+		Map<String, Serializable> executionContext = new HashMap<>();
+		executionContext.put("jsonAuthenticationResponse", CREATE_SERVER_RESPONSE_MOCK);
+		utils.parseAuthentication(executionContext);
+		assertEquals("Token not computed as expected.", EXPECTED_TOKEN, executionContext.get("parsedToken"));
+		assertEquals("Tenant not computed as expected.", EXPECTED_TENANT, executionContext.get("parsedTenant"));
 	}
 	@Test(timeout = DEFAULT_TIMEOUT)
 	public void testGetServerList(){

@@ -53,9 +53,8 @@ public class CreateMultiInstanceServersFlow {
 		@SuppressWarnings("unchecked") List<InputBinding> bindings = mergeInputsWithoutDuplicates(
 				new CreateServerFlow().getInputBindings());
 
-		bindings.remove(InputBindingFactory.createInputBinding(SERVER_NAME_MESSAGE, SERVER_NAME_KEY, true));
+		bindings.remove(InputBindingFactory.createInputBinding(OpenstackCommons.SERVER_NAME_MESSAGE, OpenstackCommons.SERVER_NAME_KEY, true));
 		bindings.add(InputBindingFactory.createInputBinding(SERVER_NAMES_LIST_MESSAGE, SERVER_NAMES_LIST_KEY, true));
-
 
 		return bindings;
 	}
@@ -64,7 +63,7 @@ public class CreateMultiInstanceServersFlow {
 	public TriggeringProperties createMultiInstanceServersFlow(){
 		ExecutionPlanBuilder builder = new ExecutionPlanBuilder();
 
-		Long singleStepId = 0L;
+		Long splitContextsStepId = 0L;
 		Long createServerJoinId = 1L;
 		Long createServerSplitId = 2L;
 		Long getMultiInstanceResponseStepId = 3L;
@@ -78,24 +77,25 @@ public class CreateMultiInstanceServersFlow {
 		List<NavigationMatcher<Serializable>> navigationMatchers = new ArrayList<>();
 
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, getMultiInstanceResponseStepId));
-		builder.addStep(singleStepId, OPENSTACK_UTILS_CLASS, SPLIT_SERVERS_INTO_BRANCH_CONTEXTS_METHOD, createServerSplitId);
+		builder.addStep(splitContextsStepId, OPENSTACK_UTILS_CLASS, SPLIT_SERVERS_INTO_BRANCH_CONTEXTS_METHOD, createServerSplitId);
 		builder.addMultiInstance(createServerSplitId, createServerJoinId, createServerFlowUuid, navigationMatchers);
 
 		navigationMatchers = new ArrayList<>();
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, RESPONSE_KEY, SUCCESS_RESPONSE, successStepId));
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, failureStepId));
 
-		builder.addOOActionStep(getMultiInstanceResponseStepId, OPENSTACK_UTILS_CLASS, GET_MULTI_INSTANCE_RESPONSE_METHOD, null, navigationMatchers);
+		builder.addStep(getMultiInstanceResponseStepId, OPENSTACK_UTILS_CLASS, GET_MULTI_INSTANCE_RESPONSE_METHOD, navigationMatchers);
+
 		createSuccessStep(builder, successStepId);
 		createFailureStep(builder, failureStepId);
 
-		ExecutionPlan parallelFlow = builder.getExecutionPlan();
-		parallelFlow.setSubflowsUUIDs(Sets.newHashSet(createServerFlowUuid));
+		ExecutionPlan multiInstanceFlow = builder.getExecutionPlan();
+		multiInstanceFlow.setSubflowsUUIDs(Sets.newHashSet(createServerFlowUuid));
 		Map<String, ExecutionPlan> dependencies = new HashMap<>();
 		dependencies.put(createServerFlowUuid, createServerExecutionPlan);
 		Map<String, Serializable> getRuntimeValues = new HashMap<>();
 
-		return TriggeringProperties.create(parallelFlow).
+		return TriggeringProperties.create(multiInstanceFlow).
 				setDependencies(dependencies).setRuntimeValues(getRuntimeValues).setStartStep(0L);
 	}
 

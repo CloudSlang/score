@@ -5,18 +5,18 @@ package com.hp.score.samples.openstack.actions;
  *
  * @author lesant
  */
-@SuppressWarnings("unused") //todo implement all types
+@SuppressWarnings("unused")
 public enum MatchType {
-    CONTAINS,
-    EXACT,
-    NOT_EXACT,
-    ALL_WORDS,
-    AT_LEAST_ONE,
-	NONE,
-    ONE,
-    BEGINS_WITH,
-    ENDS_WITH,
-    ALWAYS_MATCH,
+//    CONTAINS,
+//    EXACT,
+//    NOT_EXACT,
+//    ALL_WORDS,
+//    AT_LEAST_ONE,
+//	  NONE,
+//    ONE,
+//    BEGINS_WITH,
+//    ENDS_WITH,
+//    ALWAYS_MATCH,
     EQUAL,
     NOT_EQUAL,
     COMPARE_GREATER,

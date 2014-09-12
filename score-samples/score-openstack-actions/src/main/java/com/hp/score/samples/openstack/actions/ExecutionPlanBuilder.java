@@ -35,13 +35,14 @@ public class ExecutionPlanBuilder {
 	public static final String NAVIGATION_ACTIONS_CLASS = "com.hp.score.samples.controlactions.NavigationActions";
 	public static final String SIMPLE_NAVIGATION_METHOD = "simpleNavigation";
 	public static final String MULTI_INSTANCE_SPLIT_METHOD = "multiInstanceWithContext";
+	public static final String PARALLEL_SPLIT_WITH_CONTEXT_METHOD = "parallelSplitWithContext";
 	public static final String NEXT_STEP_ID_KEY = "nextStepId";
 	public static final String JOIN_METHOD = "join";
 	public static final String MULTI_INSTANCE_JOIN_METHOD = "joinMultiInstance";
 	public static final String OOACTION_RUNNER_CLASS = "com.hp.score.samples.openstack.actions.OOActionRunner";
 	public static final String RUN_METHOD_NAME = "run";
-	public static final String OOACTION_NAVIGATOR_CLASS = "com.hp.score.samples.openstack.actions.OOActionNavigator";
-	public static final String NAVIGATE_METHOD_NAME = "navigate";
+	public static final String OOACTION_NAVIGATOR_CLASS = "com.hp.score.samples.openstack.actions.ActionNavigator";
+	public static final String NAVIGATE_METHOD_NAME = "navigateWithMatchers";
 	public static final String FLOW_UUID_PROPERTY = "flowUuid"; //property name in Execution Plan class
 
 
@@ -188,6 +189,28 @@ public class ExecutionPlanBuilder {
 		Map<String, Object> navigationData = new HashMap<>(2);
 		navigationData.put(NEXT_STEP_ID_KEY, nextStepId);
 
+		step.setNavigationData(navigationData);
+
+		step.setSplitStep(false);
+
+		executionPlan.addStep(step);
+
+		return step.getExecStepId();
+	}
+	public Long addStep(
+			Long stepId, String classPath, String methodName, List<NavigationMatcher<Serializable>> navigationMatchers) {
+		ExecutionStep step = new ExecutionStep(stepId);
+
+		step.setAction(new ControlActionMetadata(classPath, methodName));
+		Map<String, Serializable> actionData = new HashMap<>(3);
+
+		actionData.put(ACTION_METHOD_KEY, methodName);
+
+		step.setActionData(actionData);
+
+		step.setNavigation(new ControlActionMetadata(OOACTION_NAVIGATOR_CLASS, NAVIGATE_METHOD_NAME));
+		Map<String, Object> navigationData = new HashMap<>(1);
+		navigationData.put(NAVIGATION_MATCHERS_KEY, navigationMatchers);
 		step.setNavigationData(navigationData);
 
 		step.setSplitStep(false);

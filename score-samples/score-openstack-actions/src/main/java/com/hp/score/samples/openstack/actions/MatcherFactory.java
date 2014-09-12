@@ -2,6 +2,7 @@ package com.hp.score.samples.openstack.actions;
 
 import org.apache.commons.lang.Validate;
 import org.hamcrest.Matcher;
+
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.anything;

@@ -97,7 +97,7 @@ public class ListServersFlow {
 	private void createDisplayStep(ExecutionPlanBuilder builder, Long stepId, Long nextStepId) {
 		List<NavigationMatcher<Serializable>>  navigationMatchers = new ArrayList<>(1);
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, nextStepId));
-		builder.addOOActionStep(stepId, OPENSTACK_UTILS_CLASS, GET_SERVER_NAMES_METHOD, null, navigationMatchers);
+		builder.addStep(stepId, OPENSTACK_UTILS_CLASS, GET_SERVER_NAMES_METHOD, navigationMatchers);
 	}
 
 	private void createParseAuthenticationStep(ExecutionPlanBuilder builder, Long stepId, Long successStepId, Long failureStepId) {
@@ -106,7 +106,7 @@ public class ListServersFlow {
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.EQUAL, RETURN_CODE, SUCCESS_CODE, successStepId));
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, failureStepId));
 
-		builder.addOOActionStep(stepId, OPENSTACK_UTILS_CLASS, PARSE_AUTHENTICATION_METHOD, null, navigationMatchers);
+		builder.addStep(stepId, OPENSTACK_UTILS_CLASS, PARSE_AUTHENTICATION_METHOD, navigationMatchers);
 	}
 
 }
