@@ -332,12 +332,6 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.springframework.integration</groupId>
-				<artifactId>spring-integration-core</artifactId>
-				<version>2.2.6.RELEASE</version>
-			</dependency>
-
-			<dependency>
 				<groupId>org.springframework.data</groupId>
 				<artifactId>spring-data-jpa</artifactId>
 				<version>1.4.2.RELEASE</version>
@@ -487,11 +481,6 @@
 				<version>2.0.5</version>
 			</dependency>
 
-			<dependency>
-				<groupId>${project.groupId}</groupId>
-				<artifactId>engine-facade</artifactId>
-				<version>${project.version}</version>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
