@@ -1,5 +1,20 @@
 package com.hp.score.samples;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 import com.hp.score.api.Score;
 import com.hp.score.api.TriggeringProperties;
 import com.hp.score.events.EventBus;
@@ -9,21 +24,6 @@ import com.hp.score.events.ScoreEventListener;
 import com.hp.score.samples.openstack.actions.InputBinding;
 import com.hp.score.samples.openstack.actions.OOActionRunner;
 import com.hp.score.samples.utility.ReflectionUtility;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import static com.hp.score.samples.openstack.OpenstackCommons.prepareExecutionContext;
 import static com.hp.score.samples.openstack.OpenstackCommons.readInput;
@@ -36,22 +36,20 @@ import static com.hp.score.samples.utility.ReadInputUtility.readIntegerInput;
  * @author Bonczidai Levente
  */
 public class CommandLineApplication {
-	public static final String OPENSTACK_FLOWS_PACKAGE = "com.hp.score.samples.openstack";
 
-	private List<FlowMetadata> predefinedFlows;
-	private Integer triggeringStatus; //1-running flow, 0-ready for trigger
+	public static final String OPENSTACK_FLOWS_PACKAGE = "com.hp.score.samples.openstack";
 	private static final String ALLEGRO_BANNER_PATH = "/allegro_banner.txt";
 
 	@Autowired
 	private Score score;
-
 	@Autowired
 	private EventBus eventBus;
+	private List<FlowMetadata> predefinedFlows;
+	private volatile int triggeringStatus; //1-running flow, 0-ready for trigger
 
 	public CommandLineApplication() {
 		predefinedFlows = new ArrayList<>();
 		registerPredefinedExecutionPlans();
-		triggeringStatus = 0;
 	}
 
 	private void registerPredefinedExecutionPlans() {
@@ -83,35 +81,34 @@ public class CommandLineApplication {
 	}
 
 	private static String loadBanner(String relativePath) {
-		InputStream inputStream = CommandLineApplication.class.getResourceAsStream(relativePath);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 		StringBuilder bannerBuilder = new StringBuilder();
-		String line;
-		try {
-			while ((line = reader.readLine()) != null) {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(CommandLineApplication.class.getResourceAsStream(relativePath)))) {
+			String line;
+			while((line = reader.readLine()) != null) {
 				bannerBuilder.append(line);
 				bannerBuilder.append("\n");
 			}
-			reader.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch(IOException ex) {
+			ex.printStackTrace();
 		}
 		return bannerBuilder.toString();
 	}
 
 	private void start() {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-		//noinspection InfiniteLoopStatement
-		while (true) {
-			if (!isFlowRunning()) {
-				displayAvailableFlows(reader);
-			} else {
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+			while(true) {
+				if(!isFlowRunning()) {
+					displayAvailableFlows(reader);
+				} else {
+					try {
+						Thread.sleep(100);
+					} catch(InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 			}
+		} catch(IOException ex) {
+			ex.printStackTrace();
 		}
 	}
 
@@ -150,7 +147,7 @@ public class CommandLineApplication {
 		score.trigger(triggeringProperties);
 	}
 
-	private void manageBindings(List<InputBinding> bindings, BufferedReader reader) {
+	private static void manageBindings(List<InputBinding> bindings, BufferedReader reader) {
 		for (InputBinding inputBinding : bindings) {
 			String input = null;
 			boolean validValueEntered = false;
@@ -164,13 +161,13 @@ public class CommandLineApplication {
 				}
 			}
 			//if input is empty use the default value already set, otherwise use input
-			if (!input.isEmpty()) {
+			if (!(input==null || input.isEmpty())) {
 				inputBinding.setValue(input);
 			}
 		}
 	}
 
-	private List<InputBinding> prepareInputBindings(String className, String methodName) throws Exception {
+	private static List<InputBinding> prepareInputBindings(String className, String methodName) throws Exception {
 		Object returnValue = ReflectionUtility.invokeMethodByName(className, methodName);
 		try {
 			@SuppressWarnings("unchecked")
@@ -182,7 +179,7 @@ public class CommandLineApplication {
 		}
 	}
 
-	private TriggeringProperties prepareTriggeringProperties(String className, String methodName, List<InputBinding> bindings) throws Exception {
+	private static TriggeringProperties prepareTriggeringProperties(String className, String methodName, List<InputBinding> bindings) throws Exception {
 		Object returnValue = ReflectionUtility.invokeMethodByName(className, methodName);
 		if (returnValue instanceof TriggeringProperties) {
 			TriggeringProperties triggeringProperties = (TriggeringProperties) returnValue;
@@ -192,9 +189,8 @@ public class CommandLineApplication {
 			context.putAll(prepareExecutionContext(bindings));
 			triggeringProperties.setContext(context);
 			return triggeringProperties;
-		} else {
-			throw new Exception("Exception occurred during TriggeringProperties extraction");
 		}
+		throw new Exception("Exception occurred during TriggeringProperties extraction");
 	}
 
 	private static CommandLineApplication loadApp() {
@@ -246,7 +242,7 @@ public class CommandLineApplication {
 		}, handlerTypes);
 	}
 
-	private void setTriggeringStatus(Integer status) {
+	private void setTriggeringStatus(int status) {
 		triggeringStatus = status;
 	}
 
@@ -296,4 +292,5 @@ public class CommandLineApplication {
 			return inputBindingsMethodName;
 		}
 	}
+
 }

@@ -53,7 +53,6 @@ public class ContextMerger {
 	public static final String SERVERS_KEY = "servers";
 	private static final String FLOW_DESCRIPTION = "flowDescription";
 	public static final String USERNAME_KEY = "username";
-	public static final String PASSWORD_KEY = "password";
 	public static final String IMAGE_REFERENCE_KEY = "imgRef";
 	public static final String CONTENT_TYPE_KEY = "contentType";
 	public static final String IMAGE_REF_KEY = "imageRef";
