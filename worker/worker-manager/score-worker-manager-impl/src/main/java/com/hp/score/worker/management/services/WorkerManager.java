@@ -35,8 +35,10 @@ import static ch.lambdaj.Lambda.on;
  * Time: 11:02
  */
 public class WorkerManager implements ApplicationListener, EndExecutionCallback, WorkerRecoveryListener {
-	private final Logger logger = Logger.getLogger(this.getClass());
+
 	private static final int KEEP_ALIVE_FAIL_LIMIT = 5;
+	private static final String DOTNET_PATH = System.getenv("WINDIR") + "/Microsoft.NET/Framework";
+	private static final Logger logger = Logger.getLogger(WorkerManager.class);
 
 	@Resource
 	private String workerUuid;
@@ -179,28 +181,27 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 		}).start();
 	}
 
-    private void doShutdown() {
-    		endOfInit = false;
-            initStarted = false;
-    		workerConfigurationService.setEnabled(false);
-    		workerNodeService.down(workerUuid);
-    		up = false;
-    		logger.info("The worker is down");
-    	}
+	private void doShutdown() {
+		endOfInit = false;
+		initStarted = false;
+		workerConfigurationService.setEnabled(false);
+		workerNodeService.down(workerUuid);
+		up = false;
+		logger.info("The worker is down");
+	}
 
-	protected String resolveDotNetVersion() {
-		File dotNetHome = new File(System.getenv("WINDIR") + "/Microsoft.NET/Framework");
-		if (dotNetHome.isDirectory()) {
+	protected static String resolveDotNetVersion() {
+		File dotNetHome = new File(DOTNET_PATH);
+		if(dotNetHome.isDirectory()) {
 			File[] versionFolders = dotNetHome.listFiles(new FileFilter() {
+
 				@Override
 				public boolean accept(File file) {
 					return file.isDirectory() && file.getName().startsWith("v");
 				}
 			});
-
-			if (!ArrayUtils.isEmpty(versionFolders)) {
+			if(!ArrayUtils.isEmpty(versionFolders)) {
 				String maxVersion = max(versionFolders, on(File.class).getName()).substring(1);
-
 				return maxVersion.substring(0, 1) + ".x";
 			}
 		}
