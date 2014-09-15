@@ -143,7 +143,7 @@ public class CommandLineApplication {
 		List<InputBinding> bindings = prepareInputBindings(className, inputBindingMethodName);
 		manageBindings(bindings, reader);
 		TriggeringProperties triggeringProperties = prepareTriggeringProperties(className, triggeringPropertiesMethodName, bindings);
-		setTriggeringStatus(1);
+		triggeringStatus = 1;
 		score.trigger(triggeringProperties);
 	}
 
@@ -237,13 +237,9 @@ public class CommandLineApplication {
 			@Override
 			public void onEvent(ScoreEvent event) {
 				logListenerEvent(event, false);
-				setTriggeringStatus(0);
+				triggeringStatus = 0;
 			}
 		}, handlerTypes);
-	}
-
-	private void setTriggeringStatus(int status) {
-		triggeringStatus = status;
 	}
 
 	private void logListenerEvent(ScoreEvent event, boolean displayData) {
