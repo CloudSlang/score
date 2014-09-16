@@ -75,7 +75,6 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	}
 
 	private AbstractBeanDefinition createRootBeanDefinition(){
-		// todo should be returned some reasonable bean. Currently jus an Object is returned
 		return BeanDefinitionBuilder.genericBeanDefinition(Object.class).getBeanDefinition();
 	}
 

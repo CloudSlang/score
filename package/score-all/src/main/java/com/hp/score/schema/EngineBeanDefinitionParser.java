@@ -22,6 +22,7 @@ import com.hp.score.orchestrator.services.ExecutionSerializationUtil;
 import com.hp.score.orchestrator.services.OrchestratorDispatcherServiceImpl;
 import com.hp.score.orchestrator.services.RunningExecutionPlanServiceImpl;
 import com.hp.score.orchestrator.services.SplitJoinServiceImpl;
+import com.hp.score.orchestrator.services.StubPauseResumeServiceImpl;
 import com.hp.score.orchestrator.services.WorkerDbSupportServiceImpl;
 import com.hp.score.engine.partitions.services.PartitionCallback;
 import com.hp.score.engine.partitions.services.PartitionServiceImpl;
@@ -144,6 +145,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
     private void registerSpecialBeans(Element element, ParserContext parserContext) {
         registerMessageDigestPasswordEncoder(element.getAttribute("messageDigestAlgorithm"), parserContext);
         registerPartitionTemplates(parserContext);
+        registerPauseResume(element,parserContext);
     }
 
 	private void registerMessageDigestPasswordEncoder(String algorithm, ParserContext parserContext) {
@@ -154,6 +156,13 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 				.addConstructorArgValue(algorithm)
 				.register();
 	}
+
+    private void registerPauseResume(Element element, ParserContext parserContext){
+        String registerPauseResumeService = element.getAttribute("registerPauseResumeService");
+        if(!registerPauseResumeService.equals(Boolean.FALSE.toString())){
+            new BeanRegistrator(parserContext).CLASS(StubPauseResumeServiceImpl.class).register();
+        }
+    }
 
 	private void registerPartitionTemplates(ParserContext parserContext) {
 		//registerPartitionTemplate("OO_EXECUTION_EVENTS", 4, 1000000, -1, parserContext,ExecutionEventsCallback);

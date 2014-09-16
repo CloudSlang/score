@@ -1,4 +1,4 @@
-package com.hp.score.samples.stubs;
+package com.hp.score.orchestrator.services;
 
 import com.hp.score.facade.execution.ExecutionSummary;
 import com.hp.score.facade.execution.PauseReason;
@@ -20,8 +20,6 @@ import java.util.Set;
  * we plan to have it implemented in the future
  * until it done, no pause and resume is possible in score
  */
-
-//TODO - move it to orchestartion impl, with option to change the context, remove stub project
 public class StubPauseResumeServiceImpl implements PauseResumeService {
 
     @Override

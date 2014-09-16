@@ -12,7 +12,6 @@
     <modules>
         <module>hello-score</module>
         <module>control-action-samples</module>
-        <module>stub-services</module>
         <module>score-openstack-actions</module>
     </modules>
 
