@@ -44,12 +44,6 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>stub-services</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>score-openstack-actions</artifactId>
             <version>${project.version}</version>
         </dependency>
