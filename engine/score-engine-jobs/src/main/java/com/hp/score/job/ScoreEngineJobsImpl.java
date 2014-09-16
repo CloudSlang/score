@@ -1,6 +1,5 @@
 package com.hp.score.job;
 
-import com.hp.score.engine.queue.services.CounterNames;
 import com.hp.score.engine.queue.services.cleaner.QueueCleanerService;
 import com.hp.score.engine.queue.services.recovery.ExecutionRecoveryService;
 import com.hp.score.engine.versioning.services.VersionService;
@@ -114,7 +113,7 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
     public void recoveryVersionJob(){
         logger.debug("increment MSG_RECOVERY_VERSION Version");
 
-        versionService.incrementVersion(CounterNames.MSG_RECOVERY_VERSION.name());
+        versionService.incrementVersion(VersionService.MSG_RECOVERY_VERSION_COUNTER_NAME);
     }
 
     /**

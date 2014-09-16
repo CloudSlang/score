@@ -4,7 +4,6 @@ import com.hp.score.api.nodes.WorkerStatus;
 import com.hp.score.engine.node.entities.WorkerNode;
 import com.hp.score.engine.node.services.WorkerLockService;
 import com.hp.score.engine.node.services.WorkerNodeService;
-import com.hp.score.engine.queue.services.CounterNames;
 import com.hp.score.engine.queue.services.ExecutionQueueService;
 import com.hp.score.engine.versioning.services.VersionService;
 import org.junit.Before;
@@ -61,7 +60,7 @@ public class WorkerRecoveryServiceTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(versionService.getCurrentVersion(CounterNames.MSG_RECOVERY_VERSION.name())).thenReturn(0L);
+        when(versionService.getCurrentVersion(VersionService.MSG_RECOVERY_VERSION_COUNTER_NAME)).thenReturn(0L);
     }
 
     @Test

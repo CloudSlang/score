@@ -5,7 +5,6 @@ package com.hp.score.engine.queue.services;
  * User: Amit Levin
  * Date: 07/08/13
  */
-//TODO - why its not in the worker??
 public interface QueueStateIdGeneratorService {
 
     public Long generateStateId();

@@ -67,7 +67,7 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 		if (stateMessages.size() > 0)
 			executionQueueRepository.insertExecutionStates(stateMessages);
 
-		long msgVersion = versionService.getCurrentVersion(CounterNames.MSG_RECOVERY_VERSION.name());
+		long msgVersion = versionService.getCurrentVersion(VersionService.MSG_RECOVERY_VERSION_COUNTER_NAME);
 		executionQueueRepository.insertExecutionQueue(messages, msgVersion);
 		if (logger.isDebugEnabled()) logger.debug("Persistency done in " + (System.currentTimeMillis() - t) + " ms");
 

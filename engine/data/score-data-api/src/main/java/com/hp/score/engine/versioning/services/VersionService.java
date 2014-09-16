@@ -8,6 +8,8 @@ package com.hp.score.engine.versioning.services;
  */
 public interface VersionService {
 
+    public static final String MSG_RECOVERY_VERSION_COUNTER_NAME = "MSG_RECOVERY_VERSION";
+
     public long getCurrentVersion(String counterName);
 
 

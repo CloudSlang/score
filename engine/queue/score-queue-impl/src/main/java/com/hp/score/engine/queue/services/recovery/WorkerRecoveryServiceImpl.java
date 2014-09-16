@@ -5,7 +5,6 @@ import com.hp.score.engine.node.entities.WorkerNode;
 import com.hp.score.engine.node.services.LoginListener;
 import com.hp.score.engine.node.services.WorkerLockService;
 import com.hp.score.engine.node.services.WorkerNodeService;
-import com.hp.score.engine.queue.services.CounterNames;
 import com.hp.score.engine.queue.services.ExecutionQueueService;
 import com.hp.score.engine.versioning.services.VersionService;
 import org.apache.log4j.Logger;
@@ -102,7 +101,7 @@ public class WorkerRecoveryServiceImpl implements WorkerRecoveryService, LoginLi
     private int getMessagesWithoutAck(int maxSize, String workerUuid) {
         if (logger.isDebugEnabled()) logger.debug("Getting messages count without ack for worker: " + workerUuid);
 
-        long systemVersion = versionService.getCurrentVersion(CounterNames.MSG_RECOVERY_VERSION.name());
+        long systemVersion = versionService.getCurrentVersion(VersionService.MSG_RECOVERY_VERSION_COUNTER_NAME);
         long minVersionAllowed = Math.max( systemVersion - maxAllowedGap , 0);
         int result = executionQueueService.countMessagesWithoutAckForWorker(maxSize, minVersionAllowed, workerUuid);
 
