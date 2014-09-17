@@ -13,8 +13,20 @@ import java.util.List;
  */
 public interface WorkerNodeService {
 
+    /**
+     * Update the Worker Node entity with the current ack version for the keep alive mechanism
+     * @param uuid worker's unique identifier
+     * @return yje worker's recovery version (WRV)
+     */
 	String keepAlive(String uuid);
 
+    /**
+     * Create a new worker
+     * @param uuid  worker's unique identifier
+     * @param password
+     * @param hostName  worker's host
+     * @param installDir worker's installation directory
+     */
 	void create(String uuid, String password, String hostName, String installDir);
 
 	void delete(String uuid);

@@ -124,7 +124,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
         String repositoriesContextPath = "META-INF/spring/score/context/scoreRepositoryContext.xml";
 
         String ignoreEngineJobs = element.getAttribute("ignoreEngineJobs");
-        if(!StringUtils.isBlank(ignoreEngineJobs) && ignoreEngineJobs.equals(Boolean.TRUE.toString())){
+        if(StringUtils.isNotBlank(ignoreEngineJobs) && ignoreEngineJobs.equals(Boolean.TRUE.toString())){
             new XmlBeanDefinitionReader(beanDefinitionRegistry).loadBeanDefinitions(repositoriesContextPath);
         }
         else{
