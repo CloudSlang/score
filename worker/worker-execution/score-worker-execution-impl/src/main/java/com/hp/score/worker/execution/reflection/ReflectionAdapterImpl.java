@@ -1,11 +1,12 @@
 package com.hp.score.worker.execution.reflection;
 
-import com.hp.score.api.ControlActionMetadata;
-import com.hp.score.api.execution.ExecutionParametersConsts;
-import com.hp.score.exceptions.FlowExecutionException;
-import com.hp.score.facade.entities.Execution;
-import com.hp.score.lang.SystemContext;
-import com.hp.score.worker.execution.services.SessionDataHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
@@ -15,12 +16,11 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.hp.score.api.ControlActionMetadata;
+import com.hp.score.api.execution.ExecutionParametersConsts;
+import com.hp.score.exceptions.FlowExecutionException;
+import com.hp.score.lang.SystemContext;
+import com.hp.score.worker.execution.services.SessionDataHandler;
 
 /**
  * @author kravtsov
@@ -30,12 +30,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationContextAware {
 
-    @Autowired
-    private SessionDataHandler sessionDataHandler;
-
 	private static final Logger logger = Logger.getLogger(ReflectionAdapterImpl.class);
-	private static final String CONTEXT_PARAM_NAME = "executionContext";
 
+	@Autowired
+	private SessionDataHandler sessionDataHandler;
 	private ApplicationContext applicationContext;
 	private Map<String, Object> cacheBeans = new ConcurrentHashMap<>();
 	private Map<String, Method> cacheMethods = new ConcurrentHashMap<>();
@@ -50,12 +48,10 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 			Object actionBean = getActionBean(actionMetadata);
 			Method actionMethod = getActionMethod(actionMetadata);
 			Object[] arguments = buildParametersArray(actionMethod, actionData);
-			if(logger.isTraceEnabled())
-                logger.trace("Invoking...");
+			if(logger.isTraceEnabled()) logger.trace("Invoking...");
 			Object result = actionMethod.invoke(actionBean, arguments);
-            clearStateAfterInvocation(actionData);
-            if(logger.isDebugEnabled())
-                logger.debug("Control action [" + actionMetadata.getClassName() + '.' + actionMetadata.getMethodName() + "] done");
+			clearStateAfterInvocation(actionData);
+			if(logger.isDebugEnabled()) logger.debug("Control action [" + actionMetadata.getClassName() + '.' + actionMetadata.getMethodName() + "] done");
 			return result;
 		} catch(IllegalArgumentException ex) {
 			String message = "Failed to run the action! Wrong arguments were passed to class: " + actionMetadata.getClassName() + ", method: " + actionMetadata.getMethodName() +
@@ -70,11 +66,11 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 		}
 	}
 
-    private void clearStateAfterInvocation(Map<String, ?> actionData) {
-        sessionDataHandler.setSessionDataInactive(getExecutionIdFromActionData(actionData));
-    }
+	private void clearStateAfterInvocation(Map<String, ?> actionData) {
+		sessionDataHandler.setSessionDataInactive(getExecutionIdFromActionData(actionData));
+	}
 
-    private Object getActionBean(ControlActionMetadata actionMetadata) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+	private Object getActionBean(ControlActionMetadata actionMetadata) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 		Object bean = cacheBeans.get(actionMetadata.getClassName());
 		if(bean == null) {
 			if(logger.isTraceEnabled()) logger.trace(actionMetadata.getClassName() + " wasn't found in the beans cache");
@@ -113,7 +109,7 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 		return actionMethod;
 	}
 
-    private Object[] buildParametersArray(Method actionMethod, Map<String, ?> actionData) {
+	private Object[] buildParametersArray(Method actionMethod, Map<String, ?> actionData) {
 		String actionFullName = actionMethod.getDeclaringClass().getName() + "." + actionMethod.getName();
 		String[] paramNames = cacheParamNames.get(actionFullName);
 		if(paramNames == null) {
@@ -122,36 +118,29 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 		}
 		List<Object> args = new ArrayList<>(paramNames.length);
 		for(String paramName : paramNames) {
-			if(CONTEXT_PARAM_NAME.equals(paramName)) { //todo Avi- why not use execution context ??
-				Execution execution = (Execution)actionData.get(ExecutionParametersConsts.EXECUTION);
-				args.add(execution != null ? execution.getContexts() : null);
+			if(ExecutionParametersConsts.NON_SERIALIZABLE_EXECUTION_DATA.equals(paramName)) {
+				// todo: Meshi change to runtime services once we can
+				Long executionId = getExecutionIdFromActionData(actionData);
+				Map<String, Object> nonSerializableExecutionData = sessionDataHandler.getNonSerializableExecutionData(executionId);
+				args.add(nonSerializableExecutionData);
+				// If the control action requires non-serializable session data, we add it to the arguments array
+				// and set the session data as active, so that it won't be cleared
+				sessionDataHandler.setSessionDataActive(executionId);
 				continue;
 			}
-            if(ExecutionParametersConsts.NON_SERIALIZABLE_EXECUTION_DATA.equals(paramName)) {
-                //todo: Meshi change to runtime services once we can
-                Long executionId = getExecutionIdFromActionData(actionData);
-                Map<String, Object> nonSerializableExecutionData = sessionDataHandler.getNonSerializableExecutionData(executionId);
-                args.add(nonSerializableExecutionData);
-                // If the control action requires non-serializable session data, we add it to the arguments array
-                // and set the session data as active, so that it won't be cleared
-                sessionDataHandler.setSessionDataActive(getExecutionIdFromActionData(actionData));
-                continue;
-            }
 			Object param = actionData.get(paramName);
 			args.add(param);
 		}
 		return args.toArray(new Object[args.size()]);
 	}
 
-    private Long getExecutionIdFromActionData(Map<String, ?> actionData) {
-        SystemContext systemContext = (SystemContext)actionData.get(ExecutionParametersConsts.SYSTEM_CONTEXT);
-        if(systemContext != null)
-            return systemContext.getExecutionId();
-        else
-            return null;
-    }
+	private static Long getExecutionIdFromActionData(Map<String, ?> actionData) {
+		SystemContext systemContext = (SystemContext)actionData.get(ExecutionParametersConsts.SYSTEM_CONTEXT);
+		if(systemContext != null) return systemContext.getExecutionId();
+		return null;
+	}
 
-    @Override
+	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
 	}
