@@ -122,13 +122,13 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 		}
 		List<Object> args = new ArrayList<>(paramNames.length);
 		for(String paramName : paramNames) {
-			if(CONTEXT_PARAM_NAME.equals(paramName)) { //todo - why not use execution context ??
+			if(CONTEXT_PARAM_NAME.equals(paramName)) { //todo Avi- why not use execution context ??
 				Execution execution = (Execution)actionData.get(ExecutionParametersConsts.EXECUTION);
 				args.add(execution != null ? execution.getContexts() : null);
 				continue;
 			}
             if(ExecutionParametersConsts.NON_SERIALIZABLE_EXECUTION_DATA.equals(paramName)) {
-                //todo: change to runtime services once we can
+                //todo: Meshi change to runtime services once we can
                 Long executionId = getExecutionIdFromActionData(actionData);
                 Map<String, Object> nonSerializableExecutionData = sessionDataHandler.getNonSerializableExecutionData(executionId);
                 args.add(nonSerializableExecutionData);

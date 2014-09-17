@@ -123,7 +123,7 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService {
 	@Override
 	@Transactional
 	public void down(String uuid) {
-		// TODO amit levin - logout
+		// TODO Eliya amit levin - logout
 	}
 
 	@Override

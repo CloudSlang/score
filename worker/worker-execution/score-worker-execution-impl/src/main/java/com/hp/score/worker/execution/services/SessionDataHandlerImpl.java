@@ -82,7 +82,7 @@ public class SessionDataHandlerImpl implements SessionDataHandler {
      */
     class SessionDataHolder {
         private Long executionId;
-        //todo: check if we can change the Object to SessionResource
+        //todo Orit: check if we can change the Object to SessionResource
         private Map<String, Object> sessionData;
         private long timeStamp;
 
