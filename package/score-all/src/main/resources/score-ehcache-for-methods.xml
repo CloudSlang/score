@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd"
+    updateCheck="false" monitoring="autodetect" dynamicConfig="true"
+    name="scoreCacheManager">
+
+    <defaultCache
+        maxEntriesLocalHeap="100000"
+        eternal="false"
+        timeToIdleSeconds="300"
+        timeToLiveSeconds="600"
+        overflowToDisk="false"
+        diskPersistent="false"
+        memoryStoreEvictionPolicy="LRU"
+        />
+
+    <!--For embedded deployment-->
+    <cache
+        name="running_execution_plans"
+        eternal="false"
+        maxEntriesLocalHeap="1000"
+        timeToIdleSeconds="300"
+        timeToLiveSeconds="600"
+        overflowToDisk="false"
+        diskPersistent="false"
+        memoryStoreEvictionPolicy="LRU"
+        />
+
+    <cache
+        name="recovery_version"
+        eternal="false"
+        overflowToDisk="false"
+        maxElementsInMemory="1"
+        maxEntriesLocalHeap="1"
+        timeToLiveSeconds="6"
+        diskPersistent="false"
+        memoryStoreEvictionPolicy="LRU"
+        />
+
+</ehcache>
