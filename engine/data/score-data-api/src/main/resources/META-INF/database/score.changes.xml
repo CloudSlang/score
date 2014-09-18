@@ -292,9 +292,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
                 <constraints nullable="false" unique="true" />
             </column>
         </createTable>
-        <addForeignKeyConstraint constraintName="FK_OO_WORKER_LOCKS" baseTableName="OO_WORKER_LOCKS"
-                                 baseColumnNames="UUID" referencedTableName="OO_WORKER_NODES"
-                                 referencedColumnNames="UUID" />
     </changeSet>
 
 </databaseChangeLog>
