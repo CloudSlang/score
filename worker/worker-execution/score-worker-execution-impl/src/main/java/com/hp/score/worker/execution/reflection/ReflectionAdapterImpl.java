@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.hp.score.lang.ExecutionRuntimeServices;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
@@ -119,7 +120,6 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 		List<Object> args = new ArrayList<>(paramNames.length);
 		for(String paramName : paramNames) {
 			if(ExecutionParametersConsts.NON_SERIALIZABLE_EXECUTION_DATA.equals(paramName)) {
-				// todo: Meshi change to runtime services once we can
 				Long executionId = getExecutionIdFromActionData(actionData);
 				Map<String, Object> nonSerializableExecutionData = sessionDataHandler.getNonSerializableExecutionData(executionId);
 				args.add(nonSerializableExecutionData);
@@ -135,8 +135,8 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 	}
 
 	private static Long getExecutionIdFromActionData(Map<String, ?> actionData) {
-		SystemContext systemContext = (SystemContext)actionData.get(ExecutionParametersConsts.SYSTEM_CONTEXT);
-		if(systemContext != null) return systemContext.getExecutionId();
+        ExecutionRuntimeServices executionRuntimeServices = (ExecutionRuntimeServices)actionData.get(ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES);
+		if(executionRuntimeServices != null) return executionRuntimeServices.getExecutionId();
 		return null;
 	}
 
