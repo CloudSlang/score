@@ -50,7 +50,6 @@ import static org.mockito.Mockito.reset;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-// todo Avi this test uses real classes instead of mocks - should be fixed
 public class QueueCleanerServiceTest {
 
 	@Autowired

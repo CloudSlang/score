@@ -43,8 +43,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.anyString;
 
-
-
 /**
  * Created by IntelliJ IDEA.
  * User: Amit Levin
@@ -52,7 +50,6 @@ import static org.mockito.Mockito.anyString;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-// todo Avi this test uses real classes instead of mocks - should be fixed
 public class ExecutionQueueServiceTest {
 
 	@Autowired
