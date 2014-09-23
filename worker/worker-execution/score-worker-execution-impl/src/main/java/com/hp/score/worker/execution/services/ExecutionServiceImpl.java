@@ -396,7 +396,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
 		data.putAll(execution.getContexts());
 		data.put(ExecutionParametersConsts.SYSTEM_CONTEXT, execution.getSystemContext());
 		data.put(ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES, execution.getSystemContext());
-		data.put(ExecutionParametersConsts.SERIALIZABLE_SESSION_CONTEXT, execution.getSerializableSessionContext());
 		data.put(ExecutionParametersConsts.EXECUTION, execution);
 		data.put(ExecutionParametersConsts.EXECUTION_CONTEXT, execution.getContexts());
 		data.put(ExecutionParametersConsts.RUNNING_EXECUTION_PLAN_ID, execution.getRunningExecutionPlanId());

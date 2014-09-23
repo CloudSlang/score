@@ -20,14 +20,10 @@ public class Execution implements Serializable {
 
     protected Map<String, Serializable> contexts;
     protected SystemContext systemContext = new SystemContext();
-    //This context is an internal action context for sharing serializable data between actions on the same execution
-    //TODO  Orit- remove - should be part of contexts!!
-    protected Map<String, Serializable> serializableSessionContext;
 
     public Execution() {
         this.mustGoToQueue = false;
         this.contexts = new HashMap<>();
-        this.serializableSessionContext = new HashMap<>();
     }
 
     public Execution(Long executionId, Long runningExecutionPlanId, Long position, Map<String, ? extends Serializable> contexts, Map<String, Serializable> systemContext) {
@@ -86,10 +82,6 @@ public class Execution implements Serializable {
 
     public SystemContext getSystemContext() {
         return systemContext;
-    }
-
-    public Map<String, Serializable> getSerializableSessionContext() {
-        return serializableSessionContext;
     }
 
     @Override
