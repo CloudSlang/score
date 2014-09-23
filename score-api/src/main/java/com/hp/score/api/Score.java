@@ -10,12 +10,36 @@ import java.util.Map;
  */
 public interface Score {
 
+    /**
+     * Trigger a flow by score & return the execution ID
+     *
+     * @param triggeringProperties object holding all the properties needed for the trigger
+     * @return the execution ID
+     */
     public Long trigger(TriggeringProperties triggeringProperties);
 
+    /**
+     * Requests Score to pause the given execution. Only executions in status RUNNING can be paused.
+     *
+     * @param executionId the ID of the execution
+     * @return true if the request was completed successfully or false if the execution does not exist or
+     * is not in status RUNNING
+     */
     public boolean pauseExecution(Long executionId);
 
+    /**
+     * Requests Score to resume the given execution
+     *
+     * @param executionId   - the execution to resume
+     * @param context  - the execution context values to run with
+     * @param runtimeValues- values to add to the runtime values
+     */
     public void resumeExecution(Long executionId, Map<String, Serializable> context, Map<String, Serializable> runtimeValues);
 
+    /**
+     * Trigger execution cancellation - sets the given execution with status PENDING_CANCEL
+     * @param executionId - the execution to cancel
+     */
     public void cancelExecution(Long executionId);
 
 }

@@ -16,17 +16,23 @@ import java.util.Set;
  * Time: 15:34
  */
 public interface PauseResumeService {
+
     /**
      * Pauses execution with type PENDING_PAUSE
      *
-     * @param executionId of the execution
+     * @param executionId id of the execution
+     * @param branchId id of the branch of the execution we want to pause
+     * @param reason the pause reason
+     * @return paused execution id but in case the execution is already paused then return null
      */
     Long pauseExecution(Long executionId, String branchId, PauseReason reason);
 
     /**
      * Resumes execution and puts it back to execution queue
      *
-     * @param executionId of the execution
+     * @param executionId id of the paused execution we want to resume
+     * @param branchId id of the branch of the execution we want to resume
+     * @param map the values to run with
      */
     void resumeExecution(Long executionId, String branchId, Map<String, Serializable> map);
 
@@ -36,19 +42,23 @@ public interface PauseResumeService {
      * @param executionId - execution id
      * @param branchId    - branch id if it is parallel lane
      * @param execution   - object to persist
-     * @return boolean -  true if write was successful
+     * @return the pause reason of the paused execution
      */
     PauseReason writeExecutionObject(Long executionId, String branchId, Execution execution);
 
     /**
      * Returns list of strings: each one of form: executionId:branchId
      *
-     * @return list of execution
+     * @return list of execution & branch ids of all the paused branches
      */
     Set<String> readAllPausedExecutionBranchIds();
 
     /**
      * Returns the execution if its status is Paused*. Otherwise returns null.
+     *
+     * @param executionId id of the execution
+     * @param branchId id of the branch
+     * @return  the execution if its status is Paused*. Otherwise returns null.
      */
     ExecutionSummary readPausedExecution(Long executionId, String branchId);
 
