@@ -168,9 +168,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         <addUniqueConstraint tableName="OO_FINISHED_BRANCHES" columnNames="BRANCH_ID, SPLIT_ID"
             constraintName="OO_FINISHED_BRANCHES_UC" />
 
-        <addForeignKeyConstraint constraintName="FK_OO_FINISHED_BRANCHES" baseTableName="OO_FINISHED_BRANCHES"
-            baseColumnNames="SUSPENDED_EXECUTION_ID" referencedTableName="OO_SUSPENDED_EXECUTIONS"
-            referencedColumnNames="ID" />
     </changeSet>
 
     <changeSet id="create OO_PARTITION_GROUPS table" author="engine">
