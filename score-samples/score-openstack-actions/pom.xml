@@ -64,7 +64,7 @@
 
         <dependency>
             <groupId>com.hp.score.content</groupId>
-            <artifactId>score-http-client-actions</artifactId>
+            <artifactId>score-http-client</artifactId>
         </dependency>
 
         <dependency>
