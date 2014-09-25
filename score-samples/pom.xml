@@ -38,8 +38,8 @@
 
             <dependency>
                 <groupId>com.hp.score.content</groupId>
-                <artifactId>score-http-client-actions</artifactId>
-                <version>0.1.21</version>
+                <artifactId>score-http-client</artifactId>
+                <version>0.1.22</version>
             </dependency>
 
             <dependency>
