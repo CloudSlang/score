@@ -1,11 +1,9 @@
 package com.hp.score.api;
 
-import java.io.Serializable;
-import java.util.Map;
-
 /**
  * Created by peerme on 23/07/2014.
  */
+//TODO: Add Javadoc
 @Deprecated
 public interface ScoreDeprecated {
 

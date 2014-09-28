@@ -6,6 +6,8 @@ package com.hp.score.worker.management.services;
  * Date: 8/7/14
  * Time: 2:26 PM
  */
+//TODO: Add Javadoc
+//TODO: move module to the api module
 public interface SynchronizationManager {
 
     void startRecovery();

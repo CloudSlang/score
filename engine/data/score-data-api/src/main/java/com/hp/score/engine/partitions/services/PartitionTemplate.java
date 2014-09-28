@@ -7,6 +7,7 @@ import java.util.List;
  *
  * @author Dima Rassin
  */
+//TODO: Add Javadoc
 public interface PartitionTemplate {
 	String activeTable();
 	String previousTable();

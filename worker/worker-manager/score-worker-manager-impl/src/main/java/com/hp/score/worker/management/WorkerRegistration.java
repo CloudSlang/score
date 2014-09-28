@@ -18,6 +18,7 @@ import com.hp.score.engine.node.services.WorkerNodeService;
  * @since 15/07/2014
  * @version $Id$
  */
+//TODO: Add Javadoc
 public class WorkerRegistration {
 
 	private static final Logger log = Logger.getLogger(WorkerRegistration.class);

@@ -5,6 +5,8 @@ package com.hp.score.job;
  * Date: 13/08/14
  * Time: 10:35
  */
+//TODO: Add Javadoc
+//TODO: Do we want to move to api module?
 public interface ScoreEngineJobs {
 
     void cleanQueueJob();

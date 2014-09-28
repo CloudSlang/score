@@ -8,6 +8,7 @@ import java.util.List;
  *
  * @author Dima Rassin
  */
+//TODO: Add Javadoc
 public interface OrchestratorDispatcherService {
 	void dispatch(List<? extends Serializable> messages, String bulkNumber, String wrv, String workerUuid);
 }

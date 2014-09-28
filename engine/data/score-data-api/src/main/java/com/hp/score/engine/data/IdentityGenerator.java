@@ -1,6 +1,5 @@
 package com.hp.score.engine.data;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -9,6 +8,7 @@ import java.util.List;
  * Date: 4/29/13
  * Time: 10:05 AM
  */
+//TODO: Add Javadoc
 public interface IdentityGenerator {
 
     Long next();

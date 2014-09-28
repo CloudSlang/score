@@ -5,6 +5,7 @@ package com.hp.score.engine.queue.services;
  * User: Amit Levin
  * Date: 07/08/13
  */
+//TODO: Add Javadoc
 public interface QueueStateIdGeneratorService {
 
     public Long generateStateId();

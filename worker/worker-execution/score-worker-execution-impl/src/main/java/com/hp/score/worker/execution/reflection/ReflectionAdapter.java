@@ -10,6 +10,8 @@ import java.util.Map;
  * Date: 09/11/11
  * Time: 11:49
  */
+//TODO: Add Javadoc
+//TODO: move to api module
 public interface ReflectionAdapter {
     public Object executeControlAction(ControlActionMetadata actionMetadata, Map<String, ?> actionData);
 }

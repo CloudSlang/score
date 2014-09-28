@@ -7,6 +7,7 @@ import java.util.Set;
  * User: Amit Levin
  * Date: 14/10/13
  */
+//TODO: Add Javadoc
 public interface QueueCleanerService {
 
     Set<Long> getFinishedExecStateIds();

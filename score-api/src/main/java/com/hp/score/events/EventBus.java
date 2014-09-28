@@ -7,6 +7,7 @@ import java.util.Set;
  * Date: 09/01/14
  * Time: 12:06
  */
+//TODO: Add Javadoc
 public interface EventBus {
 
 	void subscribe(ScoreEventListener eventHandler, Set<String> eventTypes);

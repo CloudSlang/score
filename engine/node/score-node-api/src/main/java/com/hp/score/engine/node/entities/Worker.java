@@ -8,6 +8,7 @@ import java.util.List;
  * User: Amit Levin
  * Date: 08/11/2O12
  */
+//TODO: Add Javadoc
 public interface Worker {
 
 	String getUuid();

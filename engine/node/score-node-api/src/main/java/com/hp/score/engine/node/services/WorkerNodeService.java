@@ -11,12 +11,13 @@ import java.util.List;
  * User: Amit Levin
  * Date: 08/11/12
  */
+//TODO: Add Javadoc
 public interface WorkerNodeService {
 
     /**
      * Update the Worker Node entity with the current ack version for the keep alive mechanism
      * @param uuid worker's unique identifier
-     * @return yje worker's recovery version (WRV)
+     * @return the worker's recovery version (WRV)
      */
 	String keepAlive(String uuid);
 

@@ -7,6 +7,7 @@ package com.hp.score.worker.management;
  * @version $Id$
  * Used by Score for pause/cancel runs & stay in the worker
  */
+//TODO: Add Javadoc
 public interface WorkerConfigurationService {
 
 	public boolean isExecutionCancelled(Long executionId);

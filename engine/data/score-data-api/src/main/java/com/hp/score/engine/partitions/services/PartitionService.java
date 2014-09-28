@@ -7,6 +7,7 @@ import com.hp.score.engine.partitions.entities.PartitionGroup;
  *
  * @author Dima Rassin
  */
+//TODO: Add Javadoc
 public interface PartitionService {
     void createPartitionGroup(String groupName, int groupSize, long timeThreshold, long sizeThreshold);
     void updatePartitionGroup(String groupName, int groupSize, long timeThreshold, long sizeThreshold);
