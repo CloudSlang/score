@@ -8,7 +8,6 @@ import com.hp.score.events.ScoreEvent;
  * Date: 30/07/2014
  */
 //TODO: Add Javadoc
-//TODO: move to api module
 public interface ScoreEventFactory {
 
 	public ScoreEvent createFinishedEvent(Execution execution);

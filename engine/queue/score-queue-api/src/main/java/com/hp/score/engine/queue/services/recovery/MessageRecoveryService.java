@@ -11,7 +11,6 @@ import java.util.List;
  * Time: 13:20
  */
 //TODO: Add Javadoc
-//TODO: move to api module
 public interface MessageRecoveryService {
 
     boolean recoverMessagesBulk(String workerName, int defaultPoolSize);

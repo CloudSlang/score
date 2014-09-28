@@ -6,7 +6,6 @@ package com.hp.score.engine.queue.services.recovery;
  * Date: 8/6/14
  * Time: 9:12 AM
  */
-//TODO: move to api module
 public interface WorkerRecoveryService {
 
     /**

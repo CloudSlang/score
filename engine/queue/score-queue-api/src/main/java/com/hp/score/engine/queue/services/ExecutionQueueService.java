@@ -13,7 +13,6 @@ import java.util.Map;
  * Date: 10/09/12
  */
 //TODO: Add Javadoc
-//TODO: move to api module
 public interface ExecutionQueueService {
 
 	void enqueue(List<ExecutionMessage> messages);
