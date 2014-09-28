@@ -11,7 +11,6 @@ import java.util.Map;
  * Time: 11:49
  */
 //TODO: Add Javadoc
-//TODO: move to api module
 public interface ReflectionAdapter {
     public Object executeControlAction(ControlActionMetadata actionMetadata, Map<String, ?> actionData);
 }
