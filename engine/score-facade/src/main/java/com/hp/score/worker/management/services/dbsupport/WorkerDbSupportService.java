@@ -7,7 +7,11 @@ import com.hp.score.facade.entities.RunningExecutionPlan;
  * Date: 03/07/12
  * Time: 08:39
  */
-//TODO: Add Javadoc
 public interface WorkerDbSupportService {
+    /**
+     *
+     * @param id of the running execution plan
+     * @return the running execution plan of the given id
+     */
     RunningExecutionPlan readExecutionPlanById(Long id);
 }
