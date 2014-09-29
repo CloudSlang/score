@@ -89,8 +89,6 @@ public class OpenstackCommons {
 	public static final String RESPONSE_KEY = "response";
 	public static final String SUCCESS_RESPONSE = "success";
 
-
-
 	public static void createPrepareGetServerIdStep(ExecutionPlanBuilder builder, Long stepId, Long nextStepId){
 		List<InputBinding> inputs  = new ArrayList<>(1);
 
