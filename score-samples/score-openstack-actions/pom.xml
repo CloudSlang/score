@@ -58,8 +58,8 @@
         </dependency>
 
 		<dependency>
-			<groupId>com.hp.oo.sdk</groupId>
-			<artifactId>score-sdk</artifactId>
+			<groupId>com.hp.score.sdk</groupId>
+			<artifactId>score-content-sdk</artifactId>
 		</dependency>
 
         <dependency>
