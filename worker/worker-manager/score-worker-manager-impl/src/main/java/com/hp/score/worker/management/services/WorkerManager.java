@@ -185,7 +185,6 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 		endOfInit = false;
 		initStarted = false;
 		workerConfigurationService.setEnabled(false);
-		workerNodeService.down(workerUuid);
 		up = false;
 		logger.info("The worker is down");
 	}
