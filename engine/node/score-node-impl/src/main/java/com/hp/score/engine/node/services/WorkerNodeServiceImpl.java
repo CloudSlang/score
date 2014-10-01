@@ -7,10 +7,8 @@ import java.util.Date;
 import java.util.List;
 
 import com.hp.score.api.nodes.WorkerStatus;
-import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,8 +30,6 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService {
 	private static final String MSG_RECOVERY_VERSION_NAME = "MSG_RECOVERY_VERSION";
 	private static final Logger logger = Logger.getLogger(WorkerNodeServiceImpl.class);
 
-	@Autowired
-	private MessageDigestPasswordEncoder passwordEncoder;
 	@Autowired
 	private WorkerNodeRepository workerNodeRepository;
 	@Autowired
@@ -68,22 +64,10 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService {
 		worker.setActive(false);
 		worker.setInstallPath(installDir);
 		worker.setStatus(WorkerStatus.FAILED);
-		password = passwordEncoder.encodePassword(password, uuid);
 		worker.setPassword(password);
 		worker.setGroups(Arrays.asList(WorkerNode.DEFAULT_WORKER_GROUPS));
 		workerNodeRepository.save(worker);
 		workerLockService.create(uuid);
-	}
-
-	@Override
-	@Transactional
-	public void delete(String uuid) {
-		WorkerNode worker = workerNodeRepository.findByUuid(uuid);
-		if(worker == null) {
-			throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
-		}
-		workerNodeRepository.delete(worker);
-		workerLockService.delete(uuid);
 	}
 
 	@Override
@@ -118,20 +102,6 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService {
 			}
 		}
 		return wrv;
-	}
-
-	@Override
-	@Transactional
-	public void down(String uuid) {
-		// TODO Eliya amit levin - logout
-	}
-
-	@Override
-	@Transactional
-	public void changePassword(String uuid, String password) {
-		WorkerNode worker = readByUUID(uuid);
-		password = passwordEncoder.encodePassword(password, uuid);
-		worker.setPassword(password);
 	}
 
 	@Override
@@ -210,13 +180,6 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService {
 
 	@Override
 	@Transactional
-	public void updateDescription(String uuid, String description) {
-		WorkerNode worker = readByUUID(uuid);
-		worker.setDescription(description);
-	}
-
-	@Override
-	@Transactional
 	public void updateStatus(String uuid, WorkerStatus status) {
 		WorkerNode worker = workerNodeRepository.findByUuid(uuid);
 		if(worker == null) {
@@ -260,40 +223,6 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<WorkerNode> readWorkersByGroup(String groupName, boolean onlyForActiveWorkers) {
-		List<WorkerNode> workers = workerNodeRepository.findByGroupsAndDeleted(groupName, false);
-		if(onlyForActiveWorkers) {
-			List<WorkerNode> activeWorkers = new ArrayList<>(workers.size());
-			for(WorkerNode worker : workers) {
-				if(worker.isActive()) {
-					activeWorkers.add(worker);
-				}
-			}
-			return activeWorkers;
-		}
-		return workers;
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public Multimap<String, String> readGroupWorkersMap(boolean onlyForActiveWorkers) {
-		Multimap<String, String> result = ArrayListMultimap.create();
-		List<WorkerNode> workers;
-		if(onlyForActiveWorkers) {
-			workers = workerNodeRepository.findByActiveAndDeleted(true, false);
-		} else {
-			workers = workerNodeRepository.findAll();
-		}
-		for(WorkerNode worker : workers) {
-			for(String groupName : worker.getGroups()) {
-				result.put(groupName, worker.getUuid());
-			}
-		}
-		return result;
-	}
-
-	@Override
-	@Transactional(readOnly = true)
 	public Multimap<String, String> readGroupWorkersMapActiveAndRunning() {
 		Multimap<String, String> result = ArrayListMultimap.create();
 		List<WorkerNode> workers;
@@ -329,14 +258,6 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService {
 	@Transactional(readOnly = true)
 	public List<String> readWorkerGroups(List<String> groups) {
 		return workerNodeRepository.findGroups(groups);
-	}
-
-	@Override
-	@Transactional
-	public void lock(String uuid) {
-		Validate.notEmpty(uuid, "Worker UUID is null or empty");
-		workerNodeRepository.lockByUuid(uuid);
-		workerNodeRepository.flush();
 	}
 
 	@Override

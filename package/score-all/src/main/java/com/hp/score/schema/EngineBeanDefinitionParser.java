@@ -48,7 +48,6 @@ import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
-import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
 import org.w3c.dom.Element;
 
 import java.util.HashMap;
@@ -143,19 +142,9 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	}
 
     private void registerSpecialBeans(Element element, ParserContext parserContext) {
-        registerMessageDigestPasswordEncoder(element.getAttribute("messageDigestAlgorithm"), parserContext);
         registerPartitionTemplates(parserContext);
         registerPauseResume(element,parserContext);
     }
-
-	private void registerMessageDigestPasswordEncoder(String algorithm, ParserContext parserContext) {
-		if (algorithm == null || algorithm.isEmpty()) algorithm = "sha-256";
-
-		new BeanRegistrator(parserContext)
-				.CLASS(MessageDigestPasswordEncoder.class)
-				.addConstructorArgValue(algorithm)
-				.register();
-	}
 
     private void registerPauseResume(Element element, ParserContext parserContext){
         String registerPauseResumeService = element.getAttribute("registerPauseResumeService");
@@ -165,7 +154,6 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
     }
 
 	private void registerPartitionTemplates(ParserContext parserContext) {
-		//registerPartitionTemplate("OO_EXECUTION_EVENTS", 4, 1000000, -1, parserContext,ExecutionEventsCallback);
 		registerPartitionTemplate("OO_EXECUTION_STATES", 2, 50000, -1, parserContext,ExecutionStatesCallback.class);
 	}
 

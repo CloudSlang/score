@@ -24,13 +24,11 @@ public interface WorkerNodeService {
     /**
      * Create a new worker
      * @param uuid  worker's unique identifier
-     * @param password
+     * @param password worker's password
      * @param hostName  worker's host
      * @param installDir worker's installation directory
      */
 	void create(String uuid, String password, String hostName, String installDir);
-
-	void delete(String uuid);
 
     void updateWorkerToDeleted(String uuid);
 
@@ -38,9 +36,6 @@ public interface WorkerNodeService {
 
 	String up(String uuid);
 
-	void down(String uuid);
-
-	void changePassword(String uuid, String password);
    // find not deleted worker by uuid
 	WorkerNode readByUUID(String uuid);
 
@@ -59,8 +54,6 @@ public interface WorkerNodeService {
 
 	void updateEnvironmentParams(String uuid, String os, String jvm, String dotNetVersion);
 
-	void updateDescription(String uuid, String description);
-
 	void updateStatus(String uuid, WorkerStatus status);
 
     void updateStatusInSeparateTransaction(String uuid, WorkerStatus status);
@@ -71,10 +64,6 @@ public interface WorkerNodeService {
 
 	void updateWorkerGroups(String uuid, String... groupNames);
 
-	List<WorkerNode> readWorkersByGroup(String groupName, boolean onlyForActiveWorkers);
-
-	Multimap<String, String> readGroupWorkersMap(boolean onlyForActiveWorkers);
-
 	Multimap<String, String> readGroupWorkersMapActiveAndRunning();
 
 	void addGroupToWorker(String workerUuid, String group);
@@ -82,8 +71,6 @@ public interface WorkerNodeService {
 	void removeGroupFromWorker(String workerUuid, String group);
 
 	List<String> readWorkerGroups(List<String> groups);
-
-	void lock(String uuid);
 
     void updateBulkNumber(String workerUuid, String bulkNumber);
 

@@ -3,7 +3,7 @@
     <parent>
         <artifactId>score-samples</artifactId>
         <groupId>com.hp.score</groupId>
-        <version>0.1.217-SNAPSHOT</version>
+        <version>0.1.218-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -58,8 +58,8 @@
         </dependency>
 
 		<dependency>
-			<groupId>com.hp.oo.sdk</groupId>
-			<artifactId>score-sdk</artifactId>
+			<groupId>com.hp.score.sdk</groupId>
+			<artifactId>score-content-sdk</artifactId>
 		</dependency>
 
         <dependency>

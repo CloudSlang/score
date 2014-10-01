@@ -13,6 +13,7 @@
         <module>hello-score</module>
         <module>control-action-samples</module>
         <module>score-openstack-actions</module>
+        <module>score-demo</module>
     </modules>
 
     <dependencyManagement>

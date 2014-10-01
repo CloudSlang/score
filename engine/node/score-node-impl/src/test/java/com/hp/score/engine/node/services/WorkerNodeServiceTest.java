@@ -1,6 +1,5 @@
 package com.hp.score.engine.node.services;
 
-import com.google.common.collect.Multimap;
 import com.hp.score.api.nodes.WorkerStatus;
 import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
 import com.hp.score.engine.node.entities.WorkerNode;
@@ -26,7 +25,6 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
@@ -37,7 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -53,8 +50,9 @@ import static org.mockito.Mockito.when;
  * Date: 15/11/12
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
-@Transactional @TransactionConfiguration(defaultRollback=true)
+@ContextConfiguration(classes = WorkerNodeServiceTest.Configurator.class)
+@Transactional
+@TransactionConfiguration(defaultRollback=true)
 //TODO Eliya- this test depend on repo - should mock it!
 public class WorkerNodeServiceTest {
 	private static final boolean SHOW_SQL = false;
@@ -103,19 +101,6 @@ public class WorkerNodeServiceTest {
         verify(workerLockService).create("H3");
 		WorkerNode worker = workerNodeService.readByUUID("H3");
 		Assert.assertNotNull(worker);
-		workerNodeService.delete("H3");
-        verify(workerLockService).delete("H3");
-	}
-
-	@Test(expected = IllegalStateException.class)
-	public void deleteNode() throws Exception {
-		workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
-        verify(workerLockService).create("H3");
-		WorkerNode worker = workerNodeService.readByUUID("H3");
-		Assert.assertNotNull(worker);
-		workerNodeService.delete("H3");
-        verify(workerLockService).delete("H3");
-		workerNodeService.readByUUID("H3");
 	}
 
 	@Test
@@ -126,8 +111,6 @@ public class WorkerNodeServiceTest {
 		workerNodeService.up("H3");
 		worker = workerNodeService.readByUUID("H3");
 		Assert.assertEquals(WorkerStatus.RUNNING, worker.getStatus());
-
-		workerNodeService.delete("H3");
 	}
 
 	@Test
@@ -150,7 +133,6 @@ public class WorkerNodeServiceTest {
         workerNodeService.updateWorkerToDeleted("H3");
         workers = workerNodeService.readAllNotDeletedWorkers();
         Assert.assertEquals(2, workers.size());
-        workerNodeService.delete("H3");
     }
 
     @Test
@@ -164,7 +146,6 @@ public class WorkerNodeServiceTest {
         Assert.assertEquals(WorkerStatus.IN_RECOVERY, worker.getStatus());
         Assert.assertEquals(false, worker.isActive());
         Assert.assertEquals(true, worker.isDeleted());
-        workerNodeService.delete("H3");
     }
 
 
@@ -198,8 +179,6 @@ public class WorkerNodeServiceTest {
         Assert.assertEquals(2, workers.size());
         Assert.assertFalse(workers.contains("H3"));
 
-		workerNodeService.delete("H3");
-
 	}
 
 	@Test
@@ -225,7 +204,6 @@ public class WorkerNodeServiceTest {
 		workers = workerNodeService.readWorkersByActivation(false);
 		Assert.assertEquals(3, workers.size());
 
-		workerNodeService.delete("H3");
 	}
 
 	@Test
@@ -237,20 +215,6 @@ public class WorkerNodeServiceTest {
 		Assert.assertEquals("7.0", worker.getJvm());
 		Assert.assertEquals("4", worker.getDotNetVersion());
 
-		workerNodeService.delete("H3");
-	}
-
-	@Test
-	public void updateDescription() throws Exception {
-		workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
-		WorkerNode worker = workerNodeService.readByUUID("H3");
-		Assert.assertEquals("H3", worker.getDescription());
-
-		workerNodeService.updateDescription("H3", "My worker");
-		worker = workerNodeService.readByUUID("H3");
-		Assert.assertEquals("My worker", worker.getDescription());
-
-		workerNodeService.delete("H3");
 	}
 
 	@Test
@@ -262,8 +226,6 @@ public class WorkerNodeServiceTest {
 		workerNodeService.updateStatus("H3",WorkerStatus.RUNNING);
 		worker = workerNodeService.readByUUID("H3");
 		Assert.assertEquals(WorkerStatus.RUNNING, worker.getStatus());
-
-		workerNodeService.delete("H3");
 	}
 
     @Test
@@ -274,8 +236,6 @@ public class WorkerNodeServiceTest {
 
         WorkerNode worker = workerNodeService.readByUUID("H3");
         Assert.assertEquals("123", worker.getBulkNumber());
-
-        workerNodeService.delete("H3");
     }
 
 	@Test
@@ -292,53 +252,6 @@ public class WorkerNodeServiceTest {
 		workerNodeService.updateWorkerGroups("H3");
 		WorkerNode workerNode = workerNodeService.readByUUID("H3");
 		Assert.assertTrue(workerNode.getGroups().isEmpty());
-	}
-
-	@Test
-	public void readWorkersByGroup() {
-
-		workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
-		workerNodeService.updateWorkerGroups("H3", "group 1", "group 2");
-		workerNodeService.updateWorkerGroups("H1", "group 1");
-
-		// H3 active, H1 deactive
-		workerNodeService.activate("H3");
-		List<WorkerNode> workers = workerNodeService.readWorkersByGroup("group 1", true);
-		Assert.assertEquals(1, workers.size());
-		workers = workerNodeService.readWorkersByGroup("group 2", true);
-		Assert.assertEquals(1, workers.size());
-		
-		// test active and deactive groups.
-		workers = workerNodeService.readWorkersByGroup("group 1", false);
-		Assert.assertEquals(2, workers.size());
-		workers = workerNodeService.readWorkersByGroup("group 2", false);
-		Assert.assertEquals(1, workers.size());
-	}
-
-	@Test
-	public void readGroupWorkersMap() throws Exception {
-
-		workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
-		workerNodeService.updateWorkerGroups("H3", "group 1", "group 2");
-		workerNodeService.updateWorkerGroups("H1", "group 1");
-
-		// H3 active, H1 deactive
-		workerNodeService.activate("H3");
-		Multimap<String, String> groupWorkersMap = workerNodeService.readGroupWorkersMap(true);
-		Collection<String> workerNames = groupWorkersMap.get("group 1");
-		Assert.assertEquals(1, workerNames.size());
-		workerNames = groupWorkersMap.get("group 2");
-		Assert.assertEquals(1, workerNames.size());
-
-
-		groupWorkersMap = workerNodeService.readGroupWorkersMap(false);
-		workerNames = groupWorkersMap.get("group 1");
-		Assert.assertEquals(2, workerNames.size());
-		workerNames = groupWorkersMap.get("group 2");
-		Assert.assertEquals(1, workerNames.size());
-
-
-		workerNodeService.delete("H3");
 	}
 
 	@Test
@@ -440,10 +353,5 @@ public class WorkerNodeServiceTest {
         WorkerLockService workerLockService() {
             return mock(WorkerLockService.class);
         }
-
-		@Bean
-		MessageDigestPasswordEncoder encoder(){
-			return new MessageDigestPasswordEncoder("sha-256");
-		}
 	}
 }

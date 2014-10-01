@@ -31,7 +31,7 @@ import static org.mockito.Mockito.verify;
  * Time: 09:18
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
+@ContextConfiguration(classes = WorkerManagerTest.Configurator.class)
 public class WorkerManagerTest {
 
 	@Autowired
@@ -66,7 +66,7 @@ public class WorkerManagerTest {
 
 	@Test
 	public void testResolveDotnetVersion() {
-		String version = workerManager.resolveDotNetVersion();
+		String version = WorkerManager.resolveDotNetVersion();
 		System.out.println("Dotnet version is: " + version);
 		assertThat(version).isNotEmpty();
 	}
@@ -120,7 +120,6 @@ public class WorkerManagerTest {
 		reset(workerNodeService);
 
 		workerManager.onApplicationEvent(mock(ContextClosedEvent.class));
-		verify(workerNodeService).down(CREDENTIAL_UUID);
 		assertThat(workerManager.isUp()).isFalse();
 	}
 
