@@ -5,7 +5,7 @@ package com.hp.score.worker.management.services;
  *
  * @author Dima Rassin
  */
-//TODO: Add Javadoc
+//TODO: Natasha/Evgeny Add Javadoc
 public interface WorkerRecoveryManager {
 	void doRecovery();
 	boolean isInRecovery();

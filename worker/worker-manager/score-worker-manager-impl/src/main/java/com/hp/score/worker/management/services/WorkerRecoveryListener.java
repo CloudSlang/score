@@ -5,8 +5,8 @@ package com.hp.score.worker.management.services;
  *
  * @author Dima Rassin
  */
-//TODO: Add Javadoc
-//TODO: move module to the api module
+//TODO: Natasha/Evgeny Add Javadoc
+//TODO: Natasha/Evgeny move module to the api module
 public interface WorkerRecoveryListener {
 	void doRecovery();
 }
