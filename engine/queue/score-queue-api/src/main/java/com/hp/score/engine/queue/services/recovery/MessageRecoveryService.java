@@ -10,7 +10,7 @@ import java.util.List;
  * Date: 22/07/14
  * Time: 13:20
  */
-//TODO: Add Javadoc
+//TODO: Natasha/Evgeny Add Javadoc
 public interface MessageRecoveryService {
 
     boolean recoverMessagesBulk(String workerName, int defaultPoolSize);
