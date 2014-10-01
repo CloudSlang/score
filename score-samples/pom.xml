@@ -3,7 +3,7 @@
     <parent>
         <artifactId>score-parent</artifactId>
         <groupId>com.hp.score</groupId>
-        <version>0.1.217-SNAPSHOT</version>
+        <version>0.1.218-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -13,7 +13,7 @@
         <module>hello-score</module>
         <module>control-action-samples</module>
         <module>score-openstack-actions</module>
-        <module>score-demo</module>
+        <module>score-webapp</module>
     </modules>
 
     <dependencyManagement>
@@ -29,18 +29,6 @@
                 <groupId>commons-httpclient</groupId>
                 <artifactId>commons-httpclient</artifactId>
                 <version>3.1</version>
-            </dependency>
-
-			<dependency>
-				<groupId>com.hp.oo.sdk</groupId>
-				<artifactId>score-sdk</artifactId>
-				<version>1.2</version>
-			</dependency>
-
-            <dependency>
-                <groupId>com.hp.score.content</groupId>
-                <artifactId>score-http-client</artifactId>
-                <version>0.1.22</version>
             </dependency>
 
             <dependency>

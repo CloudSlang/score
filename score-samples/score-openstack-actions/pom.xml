@@ -60,11 +60,13 @@
 		<dependency>
 			<groupId>com.hp.score.sdk</groupId>
 			<artifactId>score-content-sdk</artifactId>
+			<version>1.4</version>
 		</dependency>
 
         <dependency>
             <groupId>com.hp.score.content</groupId>
             <artifactId>score-http-client</artifactId>
+            <version>0.1.25</version>
         </dependency>
 
         <dependency>
