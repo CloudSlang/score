@@ -5,7 +5,7 @@ package com.hp.score.engine.queue.services.recovery;
  * User: Amit Levin
  * Date: 20/11/12
  */
-//TODO: Add Javadoc
+//TODO: Natasha/Evgeny Add Javadoc
 public interface ExecutionRecoveryService {
 	public void doRecovery();
 }
