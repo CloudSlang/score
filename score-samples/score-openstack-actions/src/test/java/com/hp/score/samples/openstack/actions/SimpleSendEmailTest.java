@@ -26,24 +26,24 @@ public class SimpleSendEmailTest {
 		Map<String, String> returnResult = simpleSendEmail.execute(null, "25", "xjavatestx@gmail.com", "xjavatestx@gmail.com", "subject", "body");
 		assertEquals("Result not as expected", "1", returnResult.get("returnCode"));
 
-		returnResult = simpleSendEmail.execute("smtp-americas.hp.com", "", "xjavatestx@gmail.com", "xjavatestx@gmail.com", "subject", "body");
+		returnResult = simpleSendEmail.execute("16.77.58.188", "", "xjavatestx@gmail.com", "xjavatestx@gmail.com", "subject", "body");
 		assertEquals("Result not as expected", "1", returnResult.get("returnCode"));
 
-		returnResult = simpleSendEmail.execute("smtp-americas.hp.com", "25", "xjavatestx@gmail.com", "xjavatestx@gmail.com", "subject", "body");
+		returnResult = simpleSendEmail.execute("16.77.58.188", "25", "xjavatestx@gmail.com", "xjavatestx@gmail.com", "subject", "body");
 		assertEquals("Result not as expected", "0", returnResult.get("returnCode"));
 
-		returnResult = simpleSendEmail.execute("smtp-americas.hp.com", "25", "xjavatestx@gmail.com", "xjavatestx@gmail.com", "", "");
+		returnResult = simpleSendEmail.execute("16.77.58.188", "25", "xjavatestx@gmail.com", "xjavatestx@gmail.com", "", "");
 		assertEquals("Result not as expected", "0", returnResult.get("returnCode"));
 
-		returnResult = simpleSendEmail.execute("smtp-americas.hp.com", "25", "xjavatestx@gmail.com", "xjavatestx@gmail.com", "", null);
+		returnResult = simpleSendEmail.execute("16.77.58.188", "25", "xjavatestx@gmail.com", "xjavatestx@gmail.com", "", null);
 		assertEquals("Result not as expected", "1", returnResult.get("returnCode"));
 
-		returnResult = simpleSendEmail.execute("smtp-americas.hp.com", "25", "", "xjavatestx@gmail.com", "", null);
+		returnResult = simpleSendEmail.execute("16.77.58.188", "25", "", "xjavatestx@gmail.com", "", null);
 		assertEquals("Result not as expected", "1", returnResult.get("returnCode"));
 
-		returnResult = simpleSendEmail.execute("smtp-americas.hp.com", "25", "malformedEmail", "xjavatestx@gmail.com", "", null);
+		returnResult = simpleSendEmail.execute("16.77.58.188", "25", "malformedEmail", "xjavatestx@gmail.com", "", null);
 		assertEquals("Result not as expected", "1", returnResult.get("returnCode"));
-		returnResult = simpleSendEmail.execute("smtp-americas.hp.com", "25", "wrong@Email.com", "xjavatestx@gmail.com", "", null);
+		returnResult = simpleSendEmail.execute("16.77.58.188", "25", "wrong@Email.com", "xjavatestx@gmail.com", "", null);
 		assertEquals("Result not as expected", "1", returnResult.get("returnCode"));
 	}
 }
