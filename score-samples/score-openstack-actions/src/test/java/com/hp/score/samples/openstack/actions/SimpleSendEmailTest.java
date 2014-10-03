@@ -1,6 +1,8 @@
 package com.hp.score.samples.openstack.actions;
 
 
+import org.junit.Test;
+
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -16,7 +18,7 @@ public class SimpleSendEmailTest {
 	private static final long DEFAULT_TIMEOUT = 5000;
 
 
-	//@Test(timeout = DEFAULT_TIMEOUT) //TODO - refactor test
+	@Test(timeout = DEFAULT_TIMEOUT)
 	public void testExecuteWithMissingInputs(){
 
 		//SimpleSendEmail simpleSendEmail = new SimpleSendEmail();

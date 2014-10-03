@@ -19,11 +19,6 @@ import java.util.Map;
 import static com.hp.score.samples.openstack.OpenstackCommons.GET_MULTI_INSTANCE_RESPONSE_METHOD;
 import static com.hp.score.samples.openstack.OpenstackCommons.OPENSTACK_UTILS_CLASS;
 import static com.hp.score.samples.openstack.OpenstackCommons.RESPONSE_KEY;
-import static com.hp.score.samples.openstack.OpenstackCommons.SERVER_NAMES_LIST_KEY;
-import static com.hp.score.samples.openstack.OpenstackCommons.SERVER_NAMES_LIST_MESSAGE;
-import static com.hp.score.samples.openstack.OpenstackCommons.SERVER_NAME_KEY;
-import static com.hp.score.samples.openstack.OpenstackCommons.SERVER_NAME_MESSAGE;
-import static com.hp.score.samples.openstack.OpenstackCommons.SPLIT_SERVERS_INTO_BRANCH_CONTEXTS_METHOD;
 import static com.hp.score.samples.openstack.OpenstackCommons.SUCCESS_RESPONSE;
 import static com.hp.score.samples.openstack.OpenstackCommons.createFailureStep;
 import static com.hp.score.samples.openstack.OpenstackCommons.createSuccessStep;
@@ -35,6 +30,7 @@ import static com.hp.score.samples.openstack.OpenstackCommons.mergeInputsWithout
  * @author lesant
  */
 
+@SuppressWarnings("unused")
 public class ParallelFlow {
 	public static final String OPENSTACK_FLOWS_PACKAGE = "com.hp.score.samples.openstack.ParallelFlow";
 	private static final String PARALLEL_SPLIT_CONTEXTS_METHOD = "parallelSplitContexts";
@@ -61,7 +57,7 @@ public class ParallelFlow {
 
 		return bindings;
 	}
-
+	@SuppressWarnings("unused")
 	public TriggeringProperties createParallelFlow() {
 		ExecutionPlanBuilder builder = new ExecutionPlanBuilder();
 
@@ -139,7 +135,7 @@ public class ParallelFlow {
 		navigationMatchers.add(new NavigationMatcher<Serializable>(MatchType.DEFAULT, failureId));
 		builder.addOOActionStep(sendEmailId, OpenstackCommons.SEND_EMAIL_CLASS, OpenstackCommons.SEND_EMAIL_METHOD, null, navigationMatchers);
 	}
-
+	@SuppressWarnings("unused")
 	public void parallelSplitContexts (Map<String, Serializable> executionContext) {
 		List<Map<String, Serializable>> branchContexts = new ArrayList<>();
 		branchContexts.add(executionContext);

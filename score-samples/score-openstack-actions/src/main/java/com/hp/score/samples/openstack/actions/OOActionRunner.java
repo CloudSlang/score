@@ -44,7 +44,7 @@ public class OOActionRunner {
 	 * and its parameters are serializable.
 	 *
 	 * @param executionContext executionContext object populated by score
-     * @param nonSerializableExecutionData
+     * @param nonSerializableExecutionData map containing nonserializable data
 	 * @param executionRuntimeServices executionRuntimeServices object populated by score
 	 * @param className full path of the actual action class
 	 * @param methodName method name of the actual action
@@ -202,6 +202,7 @@ public class OOActionRunner {
             serializableSessionMapValue = new HashMap<String, Serializable>();
             context.put(ExecutionParametersConsts.SERIALIZABLE_SESSION_CONTEXT, serializableSessionMapValue);
         }
+		@SuppressWarnings("unchecked")
         Serializable serializableSessionContextObject = ((Map<String, Serializable>)serializableSessionMapValue).get(key);
         if (serializableSessionContextObject == null) {
             serializableSessionContextObject = new SerializableSessionObject();
@@ -237,6 +238,7 @@ public class OOActionRunner {
 	 * @param parameterNames   list of parameter names to be retrieved
 	 * @return parameters from the execution context represented as Object list
 	 */
+	@SuppressWarnings("unused")
 	private Object[] getParametersFromExecutionContext(Map<String, Serializable> executionContext, String[] parameterNames) {
 		parameters = new HashMap<>();
 		int nrParameters = parameterNames.length;

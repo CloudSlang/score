@@ -20,8 +20,6 @@ import static com.hp.score.samples.openstack.OpenstackCommons.OPENSTACK_UTILS_CL
 import static com.hp.score.samples.openstack.OpenstackCommons.GET_MULTI_INSTANCE_RESPONSE_METHOD;
 import static com.hp.score.samples.openstack.OpenstackCommons.SERVER_NAMES_LIST_MESSAGE;
 import static com.hp.score.samples.openstack.OpenstackCommons.SERVER_NAMES_LIST_KEY;
-import static com.hp.score.samples.openstack.OpenstackCommons.SERVER_NAME_KEY;
-import static com.hp.score.samples.openstack.OpenstackCommons.SERVER_NAME_MESSAGE;
 
 import static com.hp.score.samples.openstack.OpenstackCommons.SPLIT_SERVERS_INTO_BRANCH_CONTEXTS_METHOD;
 import static com.hp.score.samples.openstack.OpenstackCommons.createFailureStep;
