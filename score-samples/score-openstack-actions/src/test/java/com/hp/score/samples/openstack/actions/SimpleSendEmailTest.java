@@ -45,5 +45,6 @@ public class SimpleSendEmailTest {
 		assertEquals("Result not as expected", "1", returnResult.get("returnCode"));
 		returnResult = simpleSendEmail.execute("16.77.58.188", "25", "wrong@Email.com", "xjavatestx@gmail.com", "", null);
 		assertEquals("Result not as expected", "1", returnResult.get("returnCode"));
+
 	}
 }
