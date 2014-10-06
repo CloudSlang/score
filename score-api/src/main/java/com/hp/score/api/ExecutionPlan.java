@@ -31,12 +31,22 @@ public class ExecutionPlan implements Serializable {
     //Holds the list of it's direct subflows UUIDs
     protected Set<String> subflowsUUIDs = new HashSet<>();
 
+    protected Set<String> sysAccPaths = new HashSet<>();
+
     public Set<String> getSubflowsUUIDs() {
         return subflowsUUIDs;
     }
 
     public void setSubflowsUUIDs(Set<String> subflowsUUIDs) {
         this.subflowsUUIDs = subflowsUUIDs;
+    }
+
+    public Set<String> getSysAccPaths() {
+        return sysAccPaths;
+    }
+
+    public void setSysAccPaths(Set<String> sysAccPaths) {
+        this.sysAccPaths = sysAccPaths;
     }
 
     public String getLanguage() {
@@ -126,6 +136,7 @@ public class ExecutionPlan implements Serializable {
         equalsBuilder.append(this.getName(), other.getName());
         equalsBuilder.append(this.getLanguage(), other.getLanguage());
         equalsBuilder.append(this.getSubflowsUUIDs(), other.getSubflowsUUIDs());
+        equalsBuilder.append(this.getSysAccPaths(), other.getSysAccPaths());
         equalsBuilder.append(this.getSteps(), other.getSteps());
 
         return equalsBuilder.isEquals();
@@ -140,6 +151,7 @@ public class ExecutionPlan implements Serializable {
         hashCodeBuilder.append(this.getName());
         hashCodeBuilder.append(this.getLanguage());
         hashCodeBuilder.append(this.getSubflowsUUIDs());
+        hashCodeBuilder.append(this.getSysAccPaths());
         hashCodeBuilder.append(this.getSteps());
 
         return new HashCodeBuilder().toHashCode();
