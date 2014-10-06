@@ -5,7 +5,6 @@ package com.hp.score.job;
  * Date: 13/08/14
  * Time: 10:35
  */
-//TODO: Add Javadoc
 public interface ScoreEngineJobs {
 
     /**

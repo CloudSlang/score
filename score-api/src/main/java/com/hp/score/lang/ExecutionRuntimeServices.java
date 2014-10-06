@@ -27,7 +27,8 @@ public class ExecutionRuntimeServices implements Serializable {
 	private static final long serialVersionUID = 2557429503280678353L;
 
 	protected static final String EXECUTION_PAUSED = "EXECUTION_PAUSED";
-	private static final String BRANCH_DATA = "BRANCH_DATA";
+
+    private static final String BRANCH_DATA = "BRANCH_DATA";
 
 	protected static final String SCORE_EVENTS_QUEUE = "SCORE_EVENTS_QUEUE";
 
@@ -53,89 +54,171 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public ExecutionRuntimeServices(){}
 
+    /**
+     * copy constructor that clean the NEW_SPLIT_ID & BRANCH_ID keys
+     * @param executionRuntimeServices
+     */
     public ExecutionRuntimeServices(ExecutionRuntimeServices executionRuntimeServices){
         contextMap.putAll(executionRuntimeServices.contextMap);
         contextMap.remove(NEW_SPLIT_ID);
         contextMap.remove(BRANCH_ID);
     }
 
+    /**
+     *  setter for the finished child brunches data
+     * @param data  - list of EndBranchDataContainer
+     */
     public void setFinishedChildBranchesData(ArrayList<EndBranchDataContainer> data){
         Validate.isTrue(!contextMap.containsKey(FINISHED_CHILD_BRANCHES_DATA), "not allowed to overwrite finished branches data");
         contextMap.put(FINISHED_CHILD_BRANCHES_DATA, data);
     }
 
+    /**
+     * put all the data relevant for sub flows: map of runningPlanIds and list of BeginStepIds
+     * @param runningPlansIds  - map of flowUUID to runningPlanId
+     * @param beginStepsIds   -  map of flowUUID to beginStepId
+     */
     public void setSubFlowsData(Map<String, Long> runningPlansIds,Map<String, Long> beginStepsIds ) {
         contextMap.put(RUNNING_PLANS_MAP, (Serializable) runningPlansIds);
         contextMap.put(BEGIN_STEPS_MAP, (Serializable) beginStepsIds);
     }
 
+    /**
+     *
+     * @param subFlowUuid - the required sub flow UUID
+     * @return  the id of the runningPlan of the given flow
+     */
     public Long getSubFlowRunningExecutionPlan(String subFlowUuid){
         return ((Map<String, Long>) contextMap.get(RUNNING_PLANS_MAP)).get(subFlowUuid);
     }
 
+    /**
+     *
+     * @param subFlowUuid - the required sub flow UUID
+     * @return the begin step of the given flow
+     */
     public Long getSubFlowBeginStep(String subFlowUuid){
         return ((Map<String, Long>) contextMap.get(BEGIN_STEPS_MAP)).get(subFlowUuid);
     }
 
+    /**
+     *
+     * @return the brunchId of the current execution
+     */
     public String getBranchId(){
         return getFromMap(BRANCH_ID);
     }
 
+    /**
+     * setter for the brunch id of the current Execution
+     * @param brunchId
+     */
     public void setBranchId(String brunchId) {
         Validate.isTrue(StringUtils.isEmpty(getBranchId()), "not allowed to overwrite branch id");
         contextMap.put(BRANCH_ID, brunchId);
     }
 
+    /**
+     *
+     * @return the flow termination type : one of ExecutionStatus values
+     */
     public ExecutionStatus getFlowTerminationType(){
         return getFromMap(FLOW_TERMINATION_TYPE);
     }
 
+    /**
+     * set the flow termination type
+     * @param flowTerminationType - from ExecutionStatus
+     */
     public void setFlowTerminationType(ExecutionStatus flowTerminationType) {
         contextMap.put(FLOW_TERMINATION_TYPE, flowTerminationType);
     }
 
+    /**
+     *
+     * @return the error key of the step
+     */
     public String getStepErrorKey(){
         return getFromMap(EXECUTION_STEP_ERROR_KEY);
     }
 
+    /**
+     * set the step error key
+     * @param stepErrorKey
+     */
     public void setStepErrorKey(String stepErrorKey) {
         contextMap.put(EXECUTION_STEP_ERROR_KEY, stepErrorKey);
     }
 
+    /**
+     *
+     * @return  true if there is step error
+     */
     public boolean hasStepErrorKey(){
         return contextMap.containsKey(EXECUTION_STEP_ERROR_KEY);
     }
 
+    /**
+     * clean step error key
+     * @return the values cleaned
+     */
     public String removeStepErrorKey(){
         return (String)removeFromMap(EXECUTION_STEP_ERROR_KEY);
     }
 
+    /**
+     *
+     * @return the execution id
+     */
     public Long getExecutionId(){
         return getFromMap(EXECUTION_ID_CONTEXT);
     }
 
+    /**
+     * set the execution id - should be called only once in score triggering!
+     * @param executionId
+     */
     public void setExecutionId(Long executionId) {
         contextMap.put(EXECUTION_ID_CONTEXT, executionId);
     }
 
+    /**
+     *
+     * @return the split id
+     */
     public String getSplitId(){
         return getFromMap(NEW_SPLIT_ID);
     }
 
+    /**
+     * set teh split id
+     * @param splitId
+     */
     public void setSplitId(String splitId) {
         Validate.isTrue(StringUtils.isEmpty(getSplitId()), "not allowed to overwrite split id");
         contextMap.put(NEW_SPLIT_ID, splitId);
     }
 
-
+    /**
+     * used for asking score to pause your run
+     */
     public void pause() {
 		contextMap.put(EXECUTION_PAUSED, Boolean.TRUE);
 	}
 
+    /**
+     *
+     * @return  true if the execution should be paused
+     */
 	public boolean isPaused() {
 		return contextMap.containsKey(EXECUTION_PAUSED) && contextMap.get(EXECUTION_PAUSED).equals(Boolean.TRUE);
 	}
 
+    /**
+     *  add event - for score to fire
+     * @param eventType  - string which is the key you can listen to
+     * @param eventData  - the event data
+     */
 	public void addEvent(String eventType, Serializable eventData) {
 		@SuppressWarnings("unchecked")
 		Queue<ScoreEvent> eventsQueue = getFromMap(SCORE_EVENTS_QUEUE);
@@ -146,14 +229,26 @@ public class ExecutionRuntimeServices implements Serializable {
 		eventsQueue.add(new ScoreEvent(eventType, eventData));
 	}
 
+    /**
+     *
+     * @return all the added events
+     */
 	public ArrayDeque<ScoreEvent> getEvents() {
 		return getFromMap(SCORE_EVENTS_QUEUE);
 	}
 
+    /**
+     *  means we dont have worker with the required group
+     * @param groupName - the name of the missing group
+     */
 	public void setNoWorkerInGroup(String groupName) {
 		contextMap.put(NO_WORKERS_IN_GROUP, groupName);
 	}
 
+    /**
+     *
+     * @return the missing group name
+     */
 	public String getNoWorkerInGroupName() {
 		return getFromMap(NO_WORKERS_IN_GROUP);
 	}
@@ -170,6 +265,12 @@ public class ExecutionRuntimeServices implements Serializable {
 		return null;
 	}
 
+    /**
+     * add brunch - means you want to split your execution
+     * @param startPosition  - the position in the execution plan the new brunch will point to
+     * @param flowUuid - the flow uuid
+     * @param context - the context of the created brunch
+     */
     public void addBranch(Long startPosition, String flowUuid, Map<String, Serializable> context){
         Map<String, Long> runningPlansIds = getFromMap(RUNNING_PLANS_MAP);
         Long runningPlanId = runningPlansIds.get(flowUuid);
