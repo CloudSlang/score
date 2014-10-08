@@ -2,6 +2,7 @@ package com.hp.score.samples.openstack.actions;
 
 
 import com.hp.oo.sdk.content.annotations.Param;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.mail.Message;
 import javax.mail.Session;
@@ -29,34 +30,57 @@ public class SimpleSendEmail {
 	final public Map<String, String> execute(
             @Param("host") String host, @Param("port") String port, @Param("from") String from,
             @Param("to") String to, @Param("subject") String subject, @Param("body") String body){
+
 		Map<String, String> returnResult = new HashMap<>();
-		Session session;
-		try {
+		if(validateInputs(host, port, from, to, subject, body)) {
 
-			Properties props = System.getProperties();
+			Session session;
+			try {
 
-			props.put("mail.smtp.starttls.enable", "true");
-			props.put("mail.smtp.host", host);
-			props.put("mail.smtp.port", port);
+				Properties props = System.getProperties();
 
-			session = Session.getDefaultInstance(props);
+				props.put("mail.smtp.starttls.enable", "true");
+				props.put("mail.smtp.host", host);
+				props.put("mail.smtp.port", port);
 
-			MimeMessage message = new MimeMessage(session);
-			message.setFrom(new InternetAddress(from));
-			message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
-			message.setSubject(subject);
-			message.setText(body);
+				session = Session.getDefaultInstance(props);
 
-			Transport.send(message);
+				MimeMessage message = new MimeMessage(session);
+				message.setFrom(new InternetAddress(from));
+				message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+				message.setSubject(subject);
+				message.setText(body);
 
-			returnResult.put(RETURN_CODE, SUCCESS);
+				Transport.send(message);
 
-		} catch (Exception e) {
+				returnResult.put(RETURN_CODE, SUCCESS);
+
+			} catch (Exception e) {
+				returnResult.put(RETURN_CODE, FAILED);
+			}
+		}
+		else{
 			returnResult.put(RETURN_CODE, FAILED);
 		}
 
 		return returnResult;
 
+	}
+	private Boolean validateInputs(String host, String port, String from, String to, String subject, String body){
+		if(host == null || port == null || from == null || to == null || subject == null || body == null){
+			return false;
+		}
+
+		if(StringUtils.isBlank(host) ||  StringUtils.isBlank(port) || StringUtils.isBlank(from) || StringUtils.isBlank(to))
+		{
+			return false;
+
+		}
+		if(!StringUtils.contains(from, '@') || !StringUtils.contains(to, '@')){
+			return false;
+		}
+
+		return true;
 	}
 }
 
