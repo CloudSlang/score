@@ -8,7 +8,7 @@ import java.util.List;
  *
  * @author Dima Rassin
  */
-//TODO: Add Javadoc
+//TODO: Add Javadoc Eliya
 public interface Message extends Serializable{
 	String getId();
 	int getWeight();

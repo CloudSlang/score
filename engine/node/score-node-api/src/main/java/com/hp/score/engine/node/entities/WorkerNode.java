@@ -34,7 +34,6 @@ import java.util.Objects;
 @Table(name = "OO_WORKER_NODES")
 @DynamicUpdate(value=true)
 @SelectBeforeUpdate(value=true)
-//TODO: remove interface
 public class WorkerNode extends AbstractIdentifiable implements Worker {
 	public static final String[] DEFAULT_WORKER_GROUPS = {TempConstants.DEFAULT_GROUP};
 

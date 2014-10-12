@@ -40,26 +40,7 @@ public final class RunningExecutionPlanServiceImpl implements RunningExecutionPl
         return runningExecutionPlanRepository.findOne(id);
     }
 
-    @Override
-    @Transactional
-    public Long saveExecutionPlan(RunningExecutionPlan runningExecutionPlan) {
-        runningExecutionPlanRepository.save(runningExecutionPlan);
-        return runningExecutionPlan.getId();
-    }
 
-    @Override
-    @Transactional
-    public byte[] getZippedExecutionPlan(Long id) {
-        return runningExecutionPlanRepository.getZippedExecutionPlan(id);
-    }
-
-    @Override
-    @Transactional
-    public List<RunningExecutionPlan> readByFlowId(String flowUuid) {
-        if (StringUtils.isEmpty(flowUuid))
-            throw new IllegalArgumentException("Flow UUID is null or empty");
-        return runningExecutionPlanRepository.findByUuidCached(flowUuid);
-    }
 
     @Override
     @Transactional
@@ -89,6 +70,12 @@ public final class RunningExecutionPlanServiceImpl implements RunningExecutionPl
             throw new RuntimeException("runningExecutionPlan is null");
 
         return runningExecutionPlan.getFlowUUID();
+    }
+
+    private List<RunningExecutionPlan> readByFlowId(String flowUuid) {
+        if (StringUtils.isEmpty(flowUuid))
+            throw new IllegalArgumentException("Flow UUID is null or empty");
+        return runningExecutionPlanRepository.findByUuidCached(flowUuid);
     }
 
     private Long createNewRunningExecutionPlan(ExecutionPlan executionPlan) {
