@@ -16,6 +16,10 @@
         <module>score-webapp</module>
     </modules>
 
+    <properties>
+        <maven-shade-plugin.version>2.3</maven-shade-plugin.version>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
 
@@ -102,15 +106,23 @@
                 <artifactId>spring-test</artifactId>
                 <version>4.0.0.RELEASE</version>
             </dependency>
+
             <dependency>
                 <groupId>org.powermock</groupId>
                 <artifactId>powermock-module-junit4</artifactId>
                 <version>1.5.6</version>
             </dependency>
+
             <dependency>
                 <groupId>org.powermock</groupId>
                 <artifactId>powermock-api-mockito</artifactId>
                 <version>1.5.5</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>1.14</version>
             </dependency>
 
         </dependencies>

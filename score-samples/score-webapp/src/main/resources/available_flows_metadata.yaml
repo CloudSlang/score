@@ -1,0 +1,42 @@
+flows:
+    - identifier: display_message
+      description: Simple display message flow
+      className: com.hp.score.samples.DisplayMessageFlow
+      triggeringPropertiesMethodName: displayMessageFlow
+      inputBindingsMethodName: getInputBindings
+
+    - identifier: create_server_open_stack
+      description: Create server in OpenStack
+      className: com.hp.score.samples.openstack.CreateServerFlow
+      triggeringPropertiesMethodName: createServerFlow
+      inputBindingsMethodName: getInputBindings
+
+    - identifier: list_servers_open_stack
+      description: List servers in OpenStack
+      className: com.hp.score.samples.openstack.ListServersFlow
+      triggeringPropertiesMethodName: listServersFlow
+      inputBindingsMethodName: getInputBindings
+
+    - identifier: delete_server_open_stack
+      description: Delete server in OpenStack
+      className: com.hp.score.samples.openstack.DeleteServerFlow
+      triggeringPropertiesMethodName: deleteServerFlow
+      inputBindingsMethodName: getInputBindings
+
+    - identifier: validate_server_open_stack
+      description: Validate server exists in OpenStack
+      className: com.hp.score.samples.openstack.ValidateServerExistsFlow
+      triggeringPropertiesMethodName: validateServerExistsFlow
+      inputBindingsMethodName: getInputBindings
+
+    - identifier: health_check_open_stack
+      description: OpenStack health check
+      className: com.hp.score.samples.openstack.OpenStackHealthCheckFlow
+      triggeringPropertiesMethodName: openStackHealthCheckFlow
+      inputBindingsMethodName: getInputBindings
+
+    - identifier: health_multi_instance_servers_open_stack
+      description: Create Multi Instance Servers in OpenStack
+      className: com.hp.score.samples.openstack.CreateMultiInstanceServersFlow
+      triggeringPropertiesMethodName: createMultiInstanceServersFlow
+      inputBindingsMethodName: getInputBindings

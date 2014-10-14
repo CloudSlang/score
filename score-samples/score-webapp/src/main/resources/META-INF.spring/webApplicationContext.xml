@@ -14,7 +14,7 @@
 
     <score:worker uuid="-1"/>
 
-    <bean class="com.hp.score.web.ScoreService" />
+    <bean class="com.hp.score.web.ScoreHelper" />
 
     <bean id="scoreCacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
         <property name="cacheManager">

@@ -1,7 +1,0 @@
-display_message,Simple display message flow,com.hp.score.samples.DisplayMessageFlow,displayMessageFlow,getInputBindings
-create_server_open_stack,Create server in OpenStack,com.hp.score.samples.openstack.CreateServerFlow,createServerFlow,getInputBindings
-list_servers_open_stack,List servers in OpenStack,com.hp.score.samples.openstack.ListServersFlow,listServersFlow,getInputBindings
-delete_server_open_stack,Delete server in OpenStack,com.hp.score.samples.openstack.DeleteServerFlow,deleteServerFlow,getInputBindings
-validate_server_open_stack,Validate server exists in OpenStack,com.hp.score.samples.openstack.ValidateServerExistsFlow,validateServerExistsFlow,getInputBindings
-health_check_open_stack,OpenStack health check,com.hp.score.samples.openstack.OpenStackHealthCheckFlow,openStackHealthCheckFlow,getInputBindings
-health_multi_instance_servers_open_stack,Create Multi Instance Servers in OpenStack,com.hp.score.samples.openstack.CreateMultiInstanceServersFlow,createMultiInstanceServersFlow,getInputBindings

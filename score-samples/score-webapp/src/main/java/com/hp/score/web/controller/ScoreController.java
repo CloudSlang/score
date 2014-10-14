@@ -1,13 +1,15 @@
 package com.hp.score.web.controller;
 
+import com.google.gson.*;
 import com.hp.score.samples.FlowMetadata;
 import com.hp.score.samples.openstack.actions.InputBinding;
-import com.hp.score.web.ScoreService;
+import com.hp.score.web.ScoreHelper;
 
+import com.mysema.commons.lang.Assert;
+import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -19,167 +21,123 @@ import java.util.List;
  */
 @RestController
 public class ScoreController {
-	private static String EXCEPTION_HTML_RESULT = "An exception occurred during the execution";
+    private static final Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE).create();
+    private static final Logger logger = Logger.getLogger(ScoreController.class);
 
-	private boolean flowRunning = false;
-	private boolean newExecution = false;
-	private String flowTextOutput = "";
-	private ScoreService scoreService;
+    private static final String IDENTIFIER_KEY = "identifier";
+    private static final String API_KEY = "api";
+    private static final String ROOT_KEY = "score";
+    private static final String LIST_KEY = "list";
+    private static final String INFO_KEY = "info";
+    private static final String TRIGGER_KEY = "trigger";
+    private static final String NAME_KEY = "name";
+    private static final String DESCRIPTION_KEY = "description";
+    private static final String FLOWS_KEY = "flows";
+    private static final String REQUIRED_KEY = "required";
+    private static final String INPUTS_KEY = "inputs";
+    private static final String EXECUTION_ID_KEY = "execution id";
+    private static final String VALUE_KEY = "value";
 
-	@RequestMapping("/score")
+    private ScoreHelper scoreHelper;
+
+	@RequestMapping(value = "/" + ROOT_KEY + "/" + API_KEY, method= RequestMethod.GET)
 	public ResponseEntity<String> options() {
-		String options =
-				"Available API calls:<BR>"
-						+ "<BR>/list"
-						+ "<BR>/run/*";
-		return new ResponseEntity<>(options, null, HttpStatus.OK);
+        JsonArray apiList = new JsonArray();
+        apiList.add(new JsonPrimitive("/" + LIST_KEY));
+        apiList.add(new JsonPrimitive("/" + INFO_KEY + "/{" + IDENTIFIER_KEY + "}"));
+        apiList.add(new JsonPrimitive("/" + TRIGGER_KEY +"/{" + IDENTIFIER_KEY + "}"));
+
+        JsonObject api = new JsonObject();
+        api.add(API_KEY, apiList);
+
+		return new ResponseEntity<>(gson.toJson(api), null, HttpStatus.OK);
 	}
 
-	@RequestMapping("/score/list")
+	@RequestMapping(value = "/" + ROOT_KEY + "/" + LIST_KEY, method= RequestMethod.GET)
 	public ResponseEntity<String> listFlows() {
-		String options =
-				"Usage: /score/run/{flow_identifier}<BR><BR>"
-				+ "Available flows:<BR>"
-				+ "<table>"
-				+ "<tr><th>Flow description</th><th>Flow identifier</th></tr>";
-		List<FlowMetadata> predefinedFlowIdentifiers = scoreService.getPredefinedFlowIdentifiers();
-		for (FlowMetadata flowMetadata : predefinedFlowIdentifiers) {
-			options += "<tr><td>" + flowMetadata.getDescription() + "</td><td>" + flowMetadata.getIdentifier() + "</td>" +
-					"<td><a href=\"/score/run/" + flowMetadata.getIdentifier() + "\">run flow</a></td></tr>";
-		}
-		options += "</table>";
-		return new ResponseEntity<>(options, null, HttpStatus.OK);
+        JsonArray flowsArray = new JsonArray();
+        List<FlowMetadata> predefinedFlowsMetadata = scoreHelper.getPredefinedFlowsMetadata();
+        for (FlowMetadata flowMetadata : predefinedFlowsMetadata) {
+            JsonObject flowData = new JsonObject();
+            flowData.addProperty(IDENTIFIER_KEY, flowMetadata.getIdentifier());
+            flowData.addProperty(DESCRIPTION_KEY, flowMetadata.getDescription());
+            flowsArray.add(flowData);
+        }
+
+        JsonObject flows = new JsonObject();
+        flows.add(FLOWS_KEY, flowsArray);
+
+		return new ResponseEntity<>(gson.toJson(flows), null, HttpStatus.OK);
 	}
 
-	@RequestMapping(value = "/score/run/*")
-	public ResponseEntity<String> runFlows(HttpServletRequest request) {
-		//get flow identifier from url
-		String uri = request.getRequestURI();
-		String identifier = uri.split("/")[3];
+    @RequestMapping(value = "/" + ROOT_KEY + "/" + INFO_KEY + "/{" + IDENTIFIER_KEY + "}", method= RequestMethod.GET)
+    public ResponseEntity<String> getFlowInputs(HttpServletRequest request, @PathVariable String identifier) {
+        JsonObject flowInfo = new JsonObject();
+        HttpStatus httpStatus = HttpStatus.OK;
+        try {
+            flowInfo.addProperty(IDENTIFIER_KEY, identifier);
+            JsonArray inputArray = new JsonArray();
+            List<InputBinding> bindings = scoreHelper.getInputBindingsByIdentifier(identifier);
+            for (InputBinding inputBinding : bindings) {
+                JsonObject input = new JsonObject();
+                input.addProperty(NAME_KEY, inputBinding.getSourceKey());
+                if (inputBinding.hasDefaultValue()) {
+                    input.addProperty(VALUE_KEY, inputBinding.getValue());
+                }
+                input.addProperty(REQUIRED_KEY, inputBinding.isRequired());
+                inputArray.add(input);
+            }
+            flowInfo.add(INPUTS_KEY, inputArray);
+        } catch (Exception e) {
+            e.printStackTrace();
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(gson.toJson(flowInfo), null, httpStatus);
+    }
 
-		String inputForm;
-		//get inputBindings
-		try {
-			List<InputBinding> bindings = scoreService.getInputBindingsByIdentifier(identifier);
-			//generate input form
-			inputForm = generateFlowInputsForm(bindings, identifier);
-			newExecution = true;
-		} catch (Exception e) {
-			e.printStackTrace();
-			inputForm = EXCEPTION_HTML_RESULT;
-		}
-		return new ResponseEntity<>(inputForm, null, HttpStatus.OK);
+	@RequestMapping(value= "/" + ROOT_KEY + "/" + TRIGGER_KEY + "/{" + IDENTIFIER_KEY + "}", method= RequestMethod.POST)
+	public ResponseEntity<String> triggerFlows(@PathVariable String identifier, @RequestBody String inputsAsJson) {
+        JsonObject triggerInfo = new JsonObject();
+        HttpStatus httpStatus = HttpStatus.OK;
+        try {
+            List<InputBinding> bindings = fetchInputsFromJson(inputsAsJson, identifier);
+            long executionId = scoreHelper.triggerWithBindings(identifier, bindings);
+            triggerInfo.addProperty(EXECUTION_ID_KEY, executionId);
+        }
+        catch(Exception ex) {
+            triggerInfo.addProperty(EXECUTION_ID_KEY, -1);
+            httpStatus = HttpStatus.BAD_REQUEST;
+            logger.error(ex);
+        }
+        return new ResponseEntity<>(gson.toJson(triggerInfo), null, httpStatus);
 	}
 
-	@RequestMapping("/score/trigger")
-	public ResponseEntity<String> triggerFlows(HttpServletRequest request) {
-		String response;
-		HttpStatus httpStatus = HttpStatus.OK;
-		try {
-			if (!flowRunning && newExecution) {
-				boolean requiredInputsMissing = false;
-				String identifier = request.getParameter("identifier");
-				//get the parameters from url
-				List<InputBinding> inputBindings = scoreService.getInputBindingsByIdentifier(identifier);
-				for (InputBinding inputBinding : inputBindings) {
-					String parameter = request.getParameter(inputBinding.getSourceKey());
-					if (parameter.isEmpty()) {
-						requiredInputsMissing = true;
-					}
-					inputBinding.setValue(parameter);
-				}
-				if (requiredInputsMissing) {
-					response = generateRequiredInputsRedirection(identifier);
-					httpStatus = HttpStatus.BAD_REQUEST;
-				} else {
-					//this method also sets the flow running status
-					scoreService.triggerWithBindings(identifier, inputBindings);
-					newExecution = false;
-					response =  generateTriggerPage(flowRunning, flowTextOutput);
-				}
-			} else {
-				response =  generateTriggerPage(flowRunning, flowTextOutput);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			response = EXCEPTION_HTML_RESULT;
-			httpStatus = HttpStatus.BAD_REQUEST;
-		}
-		return new ResponseEntity<>(response, null, httpStatus);
-	}
+    private List<InputBinding> fetchInputsFromJson(String inputsAsJson, String identifier) throws Exception {
+        JsonParser jsonParser = new JsonParser();
+        JsonObject bodyAsJson = jsonParser.parse(inputsAsJson).getAsJsonObject();
+        JsonElement inputs = bodyAsJson.get(INPUTS_KEY);
+        JsonArray inputArray = inputs.getAsJsonArray();
+        List<InputBinding> bindings = scoreHelper.getInputBindingsByIdentifier(identifier);
 
-	public void setFlowRunning(boolean flowRunning) {
-		if (flowRunning) {
-			flowTextOutput = "";
-		}
-		this.flowRunning = flowRunning;
-	}
+        for (JsonElement input : inputArray) {
+            String sourceKey = input.getAsJsonObject().get(NAME_KEY).getAsString();
+            String value = input.getAsJsonObject().get(VALUE_KEY).getAsString();
 
-	public void addTextOutput(String message) {
-		flowTextOutput += "<BR>" + message;
-	}
+            int inputCount = 0;
+            for (InputBinding inputBinding : bindings) {
+                if (inputBinding.getSourceKey().equals(sourceKey)) {
+                    ++inputCount;
+                    inputBinding.setValue(value);
+                }
+            }
 
-	public void setScoreService(ScoreService scoreService) {
-		this.scoreService = scoreService;
-	}
+            Assert.isTrue(inputCount == 1, "Expected number of inputs with the given name is 1 but actual number is " + inputCount);
+        }
 
-	private String generateRequiredInputsRedirection(String identifier) {
-		return
-		"<!DOCTYPE html>\n" +
-		"<html>\n" +
-		"    <head>\n" +
-		"        <meta http-equiv=\"refresh\" content=\"2;url=/score/run/" + identifier + "\">\n" +
-		"    </head>\n" +
-		"<body>\n" +
-		"Please provide all the required inputs!\n" +
-		"</body>\n" +
-		"</html>";
-	}
+        return bindings;
+    }
 
-	private String generateFlowInputsForm(List<InputBinding> bindings, String identifier){
-		String inputsPage =
-				"<!DOCTYPE html>\n" +
-				"<html>\n" +
-				"<body>\n" +
-				"\n" +
-				"<form name=\"input\" action=\"/score/trigger\" method=\"get\">\n" +
-				"<input type=\"hidden\" name=\"identifier\" value=\"" + identifier + "\">\n";
-		for (InputBinding inputBinding : bindings) {
-			String defaultValue = "";
-			if (inputBinding.hasDefaultValue()) {
-				defaultValue = inputBinding.getValue();
-			}
-			String required = "";
-			if (inputBinding.isRequired()) {
-				required = "required input";
-			}
-			inputsPage += inputBinding.getDescription() + ": <input type=\"text\" name=\"" + inputBinding.getSourceKey() + "\" value=\"" + defaultValue + "\"> &nbsp&nbsp" + required +"<br>\n";
-		}
-		inputsPage +=
-				"<input type=\"submit\" value=\"Submit\">\n" +
-				"</form>\n" +
-				"\n" +
-				"</body>\n" +
-				"</html>";
-		return inputsPage;
-	}
-
-	private String generateTriggerPage(boolean withAutoRefresh, String flowTextOutput){
-		String refreshMetaTag = "        <meta http-equiv=\"refresh\" content=\"2\" />\n";
-		String response =
-				"<!DOCTYPE html>\n" +
-				"<html>\n" +
-				"    <head>\n";
-		if (withAutoRefresh) {
-			response += refreshMetaTag;
-		}
-		response +=
-				"    </head>\n"
-				+ "<body>\n"
-				+ "Flow events:<BR>"
-				+ flowTextOutput
-				+		"</body>\n"
-				+				"</html>";
-		return response;
-	}
+    public void setScoreHelper(ScoreHelper scoreHelper) {
+        this.scoreHelper = scoreHelper;
+    }
 }

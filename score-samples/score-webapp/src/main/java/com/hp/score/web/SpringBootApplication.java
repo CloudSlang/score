@@ -6,15 +6,17 @@ import com.hp.score.events.ScoreEventListener;
 import com.hp.score.samples.openstack.actions.OOActionRunner;
 import com.hp.score.web.controller.ScoreController;
 
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.apache.log4j.Logger;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
+import org.springframework.boot.autoconfigure.velocity.VelocityAutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,114 +26,87 @@ import java.util.Set;
  * @author Bonczidai Levente
  */
 @Configuration
-@EnableAutoConfiguration
+@EnableAutoConfiguration(exclude={
+        LiquibaseAutoConfiguration.class,
+        VelocityAutoConfiguration.class})
 @ComponentScan
 public class SpringBootApplication {
-	public static final String SPRING_WEB_APPLICATION_CONTEXT_XML_PATH = "META-INF.spring/webApplicationContext.xml";
-	private ScoreService scoreService;
+    public static final String SPRING_WEB_APPLICATION_CONTEXT_XML_PATH = "META-INF.spring/webApplicationContext.xml";
+    private static final Logger logger = Logger.getLogger(SpringBootApplication.class);
+    private ScoreHelper scoreHelper;
 
-	public static void main(String[] args) {
-		ApplicationContext springBootContext;
-		ApplicationContext scoreContext;
-		try {
-			// load spring boot context
-			springBootContext = SpringApplication.run(SpringBootApplication.class, args);
-			SpringBootApplication springBootApplication = getBeanFromContext(springBootContext, SpringBootApplication.class);
-			ScoreController scoreController = getBeanFromContext(springBootContext, ScoreController.class);
-			printBeans(springBootContext, "SpringBoot context");
+    public static void main(String[] args) {
+        ApplicationContext springBootContext;
+        ApplicationContext scoreContext;
+        try {
+            // load spring boot context
+            springBootContext = SpringApplication.run(SpringBootApplication.class, args);
+            SpringBootApplication springBootApplication = springBootContext.getBean(SpringBootApplication.class);
+            ScoreController scoreController = springBootContext.getBean(ScoreController.class);
 
-			//load score context
-			scoreContext = loadScoreContext();
-			springBootApplication.scoreService = getBeanFromContext(scoreContext, ScoreService.class);
-			springBootApplication.scoreService.setScoreController(scoreController);
-			scoreController.setScoreService(springBootApplication.scoreService);
-			springBootApplication.registerEventListeners(springBootApplication.scoreService);
-			printBeans(scoreContext, "Score context");
-		} catch (Exception | ClassFormatError ex) {
-			ex.printStackTrace();
-		}
-	}
+            //load score context
+            scoreContext = new ClassPathXmlApplicationContext(SPRING_WEB_APPLICATION_CONTEXT_XML_PATH);
+            springBootApplication.scoreHelper = scoreContext.getBean(ScoreHelper.class);
+            scoreController.setScoreHelper(springBootApplication.scoreHelper);
+            springBootApplication.registerEventListeners(springBootApplication.scoreHelper);
+        } catch (Exception | ClassFormatError ex) {
+            logger.error(ex);
+        }
+    }
 
-	private static <T> T getBeanFromContext(ApplicationContext context, Class<T> beanClass) throws NoSuchBeanDefinitionException{
-		return context.getBean(beanClass);
-	}
+    private void registerEventListeners(ScoreHelper scoreHelper) {
+        registerOOActionRunnerEventListener(scoreHelper);
+        registerExceptionEventListener(scoreHelper);
+        registerScoreEventListener(scoreHelper);
+    }
 
-	private static ApplicationContext loadScoreContext() {
-		return new ClassPathXmlApplicationContext(SPRING_WEB_APPLICATION_CONTEXT_XML_PATH);
-	}
+    private void registerOOActionRunnerEventListener(ScoreHelper scoreHelper) {
+        Set<String> handlerTypes = new HashSet<>(1);
+        handlerTypes.add(OOActionRunner.ACTION_RUNTIME_EVENT_TYPE);
+        scoreHelper.subscribe(new ScoreEventListener() {
+            @Override
+            public void onEvent(ScoreEvent event) {
+                handleEvent(event, true);
+            }
+        }, handlerTypes);
+    }
 
-	private static void printBeans(ApplicationContext ctx, String contextName) {
-		System.out.println("Beans from " + contextName + ":");
-		String[] beanNames = ctx.getBeanDefinitionNames();
-		Arrays.sort(beanNames);
-		for (String beanName : beanNames) {
-			System.out.println(beanName);
-		}
-	}
+    private void registerExceptionEventListener(ScoreHelper scoreHelper) {
+        Set<String> handlerTypes = new HashSet<>(1);
+        handlerTypes.add(OOActionRunner.ACTION_EXCEPTION_EVENT_TYPE);
+        scoreHelper.subscribe(new ScoreEventListener() {
+            @Override
+            public void onEvent(ScoreEvent event) {
+                handleEvent(event, true);
+            }
+        }, handlerTypes);
+    }
 
-	private void registerEventListeners(ScoreService scoreService) {
-		registerOOActionRunnerEventListener(scoreService);
-		registerExceptionEventListener(scoreService);
-		registerScoreEventListener(scoreService);
-	}
+    private void registerScoreEventListener(final ScoreHelper scoreHelper) {
+        Set<String> handlerTypes = new HashSet<>(3);
+        handlerTypes.add(EventConstants.SCORE_FINISHED_EVENT);
+        handlerTypes.add(EventConstants.SCORE_ERROR_EVENT);
+        handlerTypes.add(EventConstants.SCORE_FAILURE_EVENT);
+        scoreHelper.subscribe(new ScoreEventListener() {
+            @Override
+            public void onEvent(ScoreEvent event) {
+                handleEvent(event, false);
+            }
+        }, handlerTypes);
+    }
 
-	private void registerOOActionRunnerEventListener(ScoreService scoreService) {
-		Set<String> handlerTypes = new HashSet<>();
-		handlerTypes.add(OOActionRunner.ACTION_RUNTIME_EVENT_TYPE);
-		scoreService.subscribe(new ScoreEventListener() {
-			@Override
-			public void onEvent(ScoreEvent event) {
-				handleEvent(event, true);
-			}
-		}, handlerTypes);
-	}
+    private void handleEvent(ScoreEvent event, boolean displayData) {
+        String eventString = getEventAsString(event, displayData);
+        logger.info(eventString);
+    }
 
-	private void registerExceptionEventListener(ScoreService scoreService) {
-		Set<String> handlerTypes = new HashSet<>();
-		handlerTypes.add(OOActionRunner.ACTION_EXCEPTION_EVENT_TYPE);
-		scoreService.subscribe(new ScoreEventListener() {
-			@Override
-			public void onEvent(ScoreEvent event) {
-				handleEvent(event, true);
-			}
-		}, handlerTypes);
-	}
-
-	private void registerScoreEventListener(final ScoreService scoreService) {
-		Set<String> handlerTypes = new HashSet<>();
-		handlerTypes.add(EventConstants.SCORE_FINISHED_EVENT);
-		handlerTypes.add(EventConstants.SCORE_ERROR_EVENT);
-		handlerTypes.add(EventConstants.SCORE_FAILURE_EVENT);
-		scoreService.subscribe(new ScoreEventListener() {
-			@Override
-			public void onEvent(ScoreEvent event) {
-				handleEvent(event, false);
-				scoreService.setFlowRunning(false);
-			}
-		}, handlerTypes);
-	}
-
-	private void handleEvent(ScoreEvent event, boolean displayData) {
-		String eventString = getEventAsString(event, displayData);
-		printToConsole(eventString);
-		addToHtmlOutput(eventString);
-	}
-
-	private void printToConsole(String message) {
-		System.out.println(message);
-	}
-
-	private void addToHtmlOutput(String message) {
-		scoreService.addTextOutput(message);
-	}
-
-	private String getEventAsString(ScoreEvent event, boolean displayData) {
-		String message;
-		if (displayData) {
-			message = "Event " + event.getEventType() + " occurred: " + event.getData();
-		} else {
-			message = "Event " + event.getEventType() + " occurred";
-		}
-		return message;
-	}
+    private String getEventAsString(ScoreEvent event, boolean displayData) {
+        String message;
+        if (displayData) {
+            message = "Event " + event.getEventType() + " occurred: " + event.getData();
+        } else {
+            message = "Event " + event.getEventType() + " occurred";
+        }
+        return message;
+    }
 }
