@@ -14,6 +14,7 @@
         <module>control-action-samples</module>
         <module>score-openstack-actions</module>
         <module>score-webapp</module>
+        <module>score-docker-actions</module>
     </modules>
 
     <properties>
@@ -124,6 +125,12 @@
                 <artifactId>snakeyaml</artifactId>
                 <version>1.14</version>
             </dependency>
+            <dependency>
+                <groupId>jcifs</groupId>
+                <artifactId>jcifs</artifactId>
+                <version>1.3.17</version>
+            </dependency>
+
 
         </dependencies>
     </dependencyManagement>
