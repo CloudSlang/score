@@ -44,7 +44,7 @@ public class ScoreHelper {
     public long triggerWithBindings(String identifier, List<InputBinding> bindings) {
         long executionId = -1;
         try {
-            executionId =  score.trigger(getTriggeringPropertiesByIdentifier(identifier, bindings));
+            executionId = score.trigger(getTriggeringPropertiesByIdentifier(identifier, bindings));
         } catch (Exception ex) {
             logger.error(ex);
         }
@@ -60,30 +60,30 @@ public class ScoreHelper {
     }
 
     @SuppressWarnings("unchecked")
-    public List<InputBinding> getInputBindingsByIdentifier(String identifier) throws Exception {
-        FlowMetadata flowMetadata = getFlowMetadataByIdentifier(identifier, predefinedFlows);
-        Object returnValue = ReflectionUtility.invokeMethodByName(flowMetadata.getClassName(), flowMetadata.getInputBindingsMethodName());
+    public List<InputBinding> getInputBindingsByIdentifierOrName(String identifier) throws Exception {
+        FlowMetadata flowMetadata = getFlowMetadataByIdentifierOrName(identifier, predefinedFlows);
         List<InputBinding> bindings;
+        Object returnValue = ReflectionUtility.invokeMethodByName(flowMetadata.getClassName(), flowMetadata.getInputBindingsMethodName());
         try {
             bindings = (List<InputBinding>) returnValue;
         } catch (Exception ex) {
-            bindings  = new ArrayList<>();
             logger.error(ex);
+            bindings = new ArrayList<>();
         }
         return bindings;
     }
 
-    private FlowMetadata getFlowMetadataByIdentifier(String identifier, List<FlowMetadata> flowMetadataList) {
+    private FlowMetadata getFlowMetadataByIdentifierOrName(String identifier, List<FlowMetadata> flowMetadataList) throws Exception {
         for (FlowMetadata metadata : flowMetadataList) {
-            if (metadata.getIdentifier().equals(identifier)) {
+            if (metadata.getIdentifier().equals(identifier) || metadata.getName().equals(identifier)) {
                 return metadata;
             }
         }
-        return null;
+        throw new Exception("Flow \"" + identifier + "\" not found");
     }
 
     private TriggeringProperties getTriggeringPropertiesByIdentifier(String identifier, List<InputBinding> bindings) throws Exception {
-        FlowMetadata flowMetadata = getFlowMetadataByIdentifier(identifier, predefinedFlows);
+        FlowMetadata flowMetadata = getFlowMetadataByIdentifierOrName(identifier, predefinedFlows);
         Object returnValue = ReflectionUtility.invokeMethodByName(flowMetadata.getClassName(), flowMetadata.getTriggeringPropertiesMethodName());
         if (returnValue instanceof TriggeringProperties) {
             TriggeringProperties triggeringProperties = (TriggeringProperties) returnValue;

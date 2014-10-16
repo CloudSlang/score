@@ -1,27 +1,31 @@
 package com.hp.score.samples;
 
+import com.mysema.commons.lang.Assert;
+
 /**
  * Date: 9/9/2014
  *
  * @author Bonczidai Levente
  */
 public class FlowMetadata {
-	private String identifier;
-	private String description;
-	private String className;
-	private String triggeringPropertiesMethodName;
-	private String inputBindingsMethodName;
+    private String identifier;
+    private String name;
+    private String description;
+    private String className;
+    private String triggeringPropertiesMethodName;
+    private String inputBindingsMethodName;
 
     public FlowMetadata() {
     }
 
-    public FlowMetadata(String identifier, String description, String className, String triggeringPropertiesMethodName, String inputBindingsMethodName) {
-		this.identifier = identifier;
-		this.description = description;
-		this.className = className;
-		this.triggeringPropertiesMethodName = triggeringPropertiesMethodName;
-		this.inputBindingsMethodName = inputBindingsMethodName;
-	}
+    public FlowMetadata(String identifier, String name, String description, String className, String triggeringPropertiesMethodName, String inputBindingsMethodName) {
+        this.identifier = identifier;
+        this.name = name;
+        this.description = description;
+        this.className = className;
+        this.triggeringPropertiesMethodName = triggeringPropertiesMethodName;
+        this.inputBindingsMethodName = inputBindingsMethodName;
+    }
 
     public String getIdentifier() {
         return identifier;
@@ -29,6 +33,14 @@ public class FlowMetadata {
 
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {
@@ -67,6 +79,7 @@ public class FlowMetadata {
     public String toString() {
         return "FlowMetadata{" +
                 "identifier='" + identifier + '\'' +
+                ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", className='" + className + '\'' +
                 ", triggeringPropertiesMethodName='" + triggeringPropertiesMethodName + '\'' +
@@ -81,16 +94,18 @@ public class FlowMetadata {
 
         FlowMetadata that = (FlowMetadata) o;
 
-        return !((className != null ? !className.equals(that.className) : that.className != null)
-                || (description != null ? !description.equals(that.description) : that.description != null)
-                || (identifier != null ? !identifier.equals(that.identifier) : that.identifier != null)
-                || (inputBindingsMethodName != null ? !inputBindingsMethodName.equals(that.inputBindingsMethodName) : that.inputBindingsMethodName != null)
-                || (triggeringPropertiesMethodName != null ? !triggeringPropertiesMethodName.equals(that.triggeringPropertiesMethodName) : that.triggeringPropertiesMethodName != null));
+        return !(className != null ? !className.equals(that.className) : that.className != null)
+                && !(description != null ? !description.equals(that.description) : that.description != null)
+                && !(identifier != null ? !identifier.equals(that.identifier) : that.identifier != null)
+                && !(inputBindingsMethodName != null ? !inputBindingsMethodName.equals(that.inputBindingsMethodName) : that.inputBindingsMethodName != null)
+                && !(name != null ? !name.equals(that.name) : that.name != null)
+                && !(triggeringPropertiesMethodName != null ? !triggeringPropertiesMethodName.equals(that.triggeringPropertiesMethodName) : that.triggeringPropertiesMethodName != null);
     }
 
     @Override
     public int hashCode() {
         int result = identifier != null ? identifier.hashCode() : 0;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
         result = 31 * result + (className != null ? className.hashCode() : 0);
         result = 31 * result + (triggeringPropertiesMethodName != null ? triggeringPropertiesMethodName.hashCode() : 0);

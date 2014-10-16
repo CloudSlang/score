@@ -53,18 +53,34 @@ public class CommandLineApplication {
 	}
 
 	private void registerPredefinedExecutionPlans() {
-		registerFlow("display_message", "Simple display message flow", "com.hp.score.samples.DisplayMessageFlow", "displayMessageFlow", "getInputBindings");
-		registerFlow("create_server_open_stack", "Create server in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".CreateServerFlow", "createServerFlow", "getInputBindings");
-		registerFlow("list_servers_open_stack", "List servers in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".ListServersFlow", "listServersFlow", "getInputBindings");
-		registerFlow("delete_server_open_stack", "Delete server in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".DeleteServerFlow", "deleteServerFlow", "getInputBindings");
-		registerFlow("validate_server_open_stack", "Validate server exists in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".ValidateServerExistsFlow", "validateServerExistsFlow", "getInputBindings");
-		registerFlow("health_check_open_stack", "OpenStack health check", OPENSTACK_FLOWS_PACKAGE + ".OpenStackHealthCheckFlow", "openStackHealthCheckFlow", "getInputBindings");
-		registerFlow("health_multi_instance_servers_open_stack", "Create Multi Instance Servers in OpenStack", OPENSTACK_FLOWS_PACKAGE + ".CreateMultiInstanceServersFlow", "createMultiInstanceServersFlow", "getInputBindings");
-		registerFlow("parallel_flow_example", "Parallel flow example", OPENSTACK_FLOWS_PACKAGE + ".ParallelFlow", "createParallelFlow", "getInputBindings");
+		registerFlow("display_message", "Simple display message flow", "Flow that display a message from a user with a given status.",
+                "com.hp.score.samples.DisplayMessageFlow", "displayMessageFlow", "getInputBindings");
+		registerFlow("create_server_open_stack", "Create server in OpenStack", "Flow that creates a server in OpenStack.",
+                OPENSTACK_FLOWS_PACKAGE + ".CreateServerFlow", "createServerFlow", "getInputBindings");
+		registerFlow("list_servers_open_stack", "List servers in OpenStack", "Flow that lists the available servers in OpenStack.",
+                OPENSTACK_FLOWS_PACKAGE + ".ListServersFlow", "listServersFlow", "getInputBindings");
+		registerFlow("delete_server_open_stack", "Delete server in OpenStack", "Flow that deletes a server with a given name in OpenStack.",
+                OPENSTACK_FLOWS_PACKAGE + ".DeleteServerFlow", "deleteServerFlow", "getInputBindings");
+		registerFlow("validate_server_open_stack", "Validate server exists in OpenStack", "Flow that validates that a server with a  given name exists in OpenStack. " +
+                "If the server exists then the flow finishes with a success step, otherwise with failure step.", OPENSTACK_FLOWS_PACKAGE +
+                ".ValidateServerExistsFlow", "validateServerExistsFlow", "getInputBindings");
+		registerFlow("health_check_open_stack", "OpenStack health check", "Flow that checks that the OpenStack environment" +
+                " is healthy by creating a server, validating and deleting it. " +
+                "If everything went as expected the flow finished with a success step, otherwise sends an email " +
+                "to the specified address with the cause of the failure and it finishes with a failure step.", OPENSTACK_FLOWS_PACKAGE + ".OpenStackHealthCheckFlow", "openStackHealthCheckFlow", "getInputBindings");
+		registerFlow("health_multi_instance_servers_open_stack", "Create Multi Instance Servers in OpenStack",
+                "Flow that creates a given number of servers on OpenStack depending on how many server names are given as an input. " +
+                "It executes in parallel and it finishes with a success step only if all servers were successfully created, " +
+                "otherwise it will finish with a  failure step.", OPENSTACK_FLOWS_PACKAGE + ".CreateMultiInstanceServersFlow",
+                "createMultiInstanceServersFlow", "getInputBindings");
+		registerFlow("parallel_flow_example", "Parallel flow example", "Flow made to demonstrate parallel execution in Score. " +
+                "It creates a new server in OpenStack and sends an email notifying this action. " +
+                "It finishes with a success step only if both subflows finish with success, " +
+                "otherwise it finishes with a failure step.", OPENSTACK_FLOWS_PACKAGE + ".ParallelFlow", "createParallelFlow", "getInputBindings");
 	}
 
-	public void registerFlow(String identifier, String description, String className, String triggeringPropertiesMethodName, String inputBindingsMethodName) {
-		FlowMetadata flowMetadata = new FlowMetadata(identifier, description, className, triggeringPropertiesMethodName, inputBindingsMethodName);
+	public void registerFlow(String identifier,String name, String description, String className, String triggeringPropertiesMethodName, String inputBindingsMethodName) {
+		FlowMetadata flowMetadata = new FlowMetadata(identifier, name, description, className, triggeringPropertiesMethodName, inputBindingsMethodName);
 		predefinedFlows.add(flowMetadata);
 	}
 
@@ -134,7 +150,7 @@ public class CommandLineApplication {
 	private int listPredefinedFlows(BufferedReader reader) {
 		System.out.println("Available flows");
 		for (FlowMetadata flowMetadata : predefinedFlows) {
-			System.out.println(predefinedFlows.indexOf(flowMetadata) + " - " + flowMetadata.getDescription());
+			System.out.println(predefinedFlows.indexOf(flowMetadata) + " - " + flowMetadata.getName());
 		}
 		return readIntegerInput(reader, "Insert the flow number");
 	}
