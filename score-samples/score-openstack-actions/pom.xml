@@ -120,13 +120,13 @@
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito</artifactId>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                 <groupId>org.samba.jcifs</groupId>
+                  <artifactId>jcifs</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
-        <dependency>
-            <groupId>jcifs</groupId>
-            <artifactId>jcifs</artifactId>
-        </dependency>
-
-
-    </dependencies>
+        </dependencies>
 
 </project>
