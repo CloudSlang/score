@@ -8,14 +8,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>score-openstack-actions</artifactId>
-    <repositories>
-        <repository>
-            <id>java.net-Public</id>
-            <name>Maven Java Net Snapshots and Releases</name>
-            <url>https://maven.java.net/content/groups/public/</url>
-            <updatePolicy>never</updatePolicy>
-        </repository>
-    </repositories>
+
     <dependencies>
 
         <dependency>
