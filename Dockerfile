@@ -7,6 +7,8 @@ FROM java:7
 
 MAINTAINER Bonczidai Levente
 
+RUN apt-get update
+
 RUN apt-get install maven -y
 
 ADD * /app/
