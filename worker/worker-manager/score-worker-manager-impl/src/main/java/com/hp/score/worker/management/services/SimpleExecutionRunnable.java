@@ -243,20 +243,24 @@ public class SimpleExecutionRunnable implements Runnable {
 
         //take care of worker group id
         String workerGroupId = nextStepExecution.getGroupName();
-        if (workerGroupId == null) {
-            workerGroupId = WorkerNode.DEFAULT_WORKER_GROUPS[0];
-        }
+
         Object useStayInTheWorkerObj = nextStepExecution.getSystemContext().get(TempConstants.USE_STAY_IN_THE_WORKER);
         nextStepExecution.getSystemContext().remove(TempConstants.USE_STAY_IN_THE_WORKER);
         boolean useStayInTheWorker = (useStayInTheWorkerObj != null) && (useStayInTheWorkerObj.equals(Boolean.TRUE));
 
-        boolean isSameWorker = workerConfigurationService.isMemberOf(workerGroupId) ||
-                (workerUUID != null && workerGroupId.endsWith(workerUUID));
+        boolean isSameWorker = workerGroupId == null ||
+                              (workerGroupId != null && workerConfigurationService.isMemberOf(workerGroupId)) ||
+                             (workerGroupId != null && workerUUID != null && workerGroupId.endsWith(workerUUID));
+
+        if (workerGroupId == null) {
+            workerGroupId = WorkerNode.DEFAULT_WORKER_GROUPS[0];
+        }
 
         if (isSameWorker && useStayInTheWorker) {
             Long id = queueStateIdGeneratorService.generateStateId();
             // stay in the same worker in te next step
             return new ExecutionMessage(id,
+                    executionMessage.getWorkerId(),
                     executionMessage.getWorkerId(),
                     workerGroupId,
                     executionMessage.getMsgId(),
