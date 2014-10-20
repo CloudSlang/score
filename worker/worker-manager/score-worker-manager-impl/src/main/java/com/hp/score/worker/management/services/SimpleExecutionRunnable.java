@@ -261,7 +261,6 @@ public class SimpleExecutionRunnable implements Runnable {
             // stay in the same worker in te next step
             return new ExecutionMessage(id,
                     executionMessage.getWorkerId(),
-                    executionMessage.getWorkerId(),
                     workerGroupId,
                     executionMessage.getMsgId(),
                     ExecStatus.IN_PROGRESS,
