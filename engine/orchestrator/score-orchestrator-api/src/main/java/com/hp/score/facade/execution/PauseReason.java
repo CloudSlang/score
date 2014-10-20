@@ -9,7 +9,7 @@ package com.hp.score.facade.execution;
 public enum PauseReason {
     USER_PAUSED,
     INPUT_REQUIRED,
-    SELECT_TRANSITION,
+    INPUT_REQUIRED_MANUAL_OP,
     DISPLAY,
     GATED_TRANSITION,
     HAND_OFF,
