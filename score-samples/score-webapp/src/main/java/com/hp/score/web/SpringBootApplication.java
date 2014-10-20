@@ -5,9 +5,9 @@ import com.hp.score.events.ScoreEvent;
 import com.hp.score.events.ScoreEventListener;
 import com.hp.score.samples.openstack.actions.OOActionRunner;
 import com.hp.score.web.controller.ScoreController;
+import com.hp.score.web.services.ScoreServices;
 
 import org.apache.log4j.Logger;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -29,11 +29,11 @@ import java.util.Set;
 @EnableAutoConfiguration(exclude={
         LiquibaseAutoConfiguration.class,
         VelocityAutoConfiguration.class})
-@ComponentScan
+@ComponentScan({"com.hp.score.web.controller","com.hp.score.web.services"})
 public class SpringBootApplication {
     public static final String SPRING_WEB_APPLICATION_CONTEXT_XML_PATH = "META-INF.spring/webApplicationContext.xml";
     private static final Logger logger = Logger.getLogger(SpringBootApplication.class);
-    private ScoreHelper scoreHelper;
+    private ScoreServices scoreServices;
 
     public static void main(String[] args) {
         ApplicationContext springBootContext;
@@ -46,24 +46,24 @@ public class SpringBootApplication {
 
             //load score context
             scoreContext = new ClassPathXmlApplicationContext(SPRING_WEB_APPLICATION_CONTEXT_XML_PATH);
-            springBootApplication.scoreHelper = scoreContext.getBean(ScoreHelper.class);
-            scoreController.setScoreHelper(springBootApplication.scoreHelper);
-            springBootApplication.registerEventListeners(springBootApplication.scoreHelper);
+            springBootApplication.scoreServices = scoreContext.getBean(ScoreServices.class);
+            scoreController.setScoreServices(springBootApplication.scoreServices);
+            springBootApplication.registerEventListeners(springBootApplication.scoreServices);
         } catch (Exception | ClassFormatError ex) {
             logger.error(ex);
         }
     }
 
-    private void registerEventListeners(ScoreHelper scoreHelper) {
-        registerOOActionRunnerEventListener(scoreHelper);
-        registerExceptionEventListener(scoreHelper);
-        registerScoreEventListener(scoreHelper);
+    private void registerEventListeners(ScoreServices scoreServices) {
+        registerOOActionRunnerEventListener(scoreServices);
+        registerExceptionEventListener(scoreServices);
+        registerScoreEventListener(scoreServices);
     }
 
-    private void registerOOActionRunnerEventListener(ScoreHelper scoreHelper) {
+    private void registerOOActionRunnerEventListener(ScoreServices scoreServices) {
         Set<String> handlerTypes = new HashSet<>(1);
         handlerTypes.add(OOActionRunner.ACTION_RUNTIME_EVENT_TYPE);
-        scoreHelper.subscribe(new ScoreEventListener() {
+        scoreServices.subscribe(new ScoreEventListener() {
             @Override
             public void onEvent(ScoreEvent event) {
                 handleEvent(event, true);
@@ -71,10 +71,10 @@ public class SpringBootApplication {
         }, handlerTypes);
     }
 
-    private void registerExceptionEventListener(ScoreHelper scoreHelper) {
+    private void registerExceptionEventListener(ScoreServices scoreServices) {
         Set<String> handlerTypes = new HashSet<>(1);
         handlerTypes.add(OOActionRunner.ACTION_EXCEPTION_EVENT_TYPE);
-        scoreHelper.subscribe(new ScoreEventListener() {
+        scoreServices.subscribe(new ScoreEventListener() {
             @Override
             public void onEvent(ScoreEvent event) {
                 handleEvent(event, true);
@@ -82,12 +82,12 @@ public class SpringBootApplication {
         }, handlerTypes);
     }
 
-    private void registerScoreEventListener(final ScoreHelper scoreHelper) {
+    private void registerScoreEventListener(final ScoreServices scoreServices) {
         Set<String> handlerTypes = new HashSet<>(3);
         handlerTypes.add(EventConstants.SCORE_FINISHED_EVENT);
         handlerTypes.add(EventConstants.SCORE_ERROR_EVENT);
         handlerTypes.add(EventConstants.SCORE_FAILURE_EVENT);
-        scoreHelper.subscribe(new ScoreEventListener() {
+        scoreServices.subscribe(new ScoreEventListener() {
             @Override
             public void onEvent(ScoreEvent event) {
                 handleEvent(event, false);

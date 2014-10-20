@@ -3,7 +3,7 @@ package com.hp.score.web.controller;
 import com.google.gson.*;
 import com.hp.score.samples.FlowMetadata;
 import com.hp.score.samples.openstack.actions.InputBinding;
-import com.hp.score.web.ScoreHelper;
+import com.hp.score.web.services.ScoreServices;
 import com.mysema.commons.lang.Assert;
 
 import org.apache.log4j.Logger;
@@ -43,7 +43,7 @@ public class ScoreController {
     private static final String TRIGGER_URI_IDENTIFIER = "/" + V1 + "/" + TRIGGER_KEY + "/{" + IDENTIFIER_KEY + "}";
     private static final String TRIGGER_URI_NAME = "/" + V1 + "/" + TRIGGER_KEY + "/{" + NAME_KEY + "}";
 
-    private ScoreHelper scoreHelper;
+    private ScoreServices scoreServices;
 
 	@RequestMapping(value = API_URI, method= RequestMethod.GET)
 	public ResponseEntity<String> getAvailableAPICalls() {
@@ -63,7 +63,7 @@ public class ScoreController {
 	@RequestMapping(value = LIST_URI, method= RequestMethod.GET)
 	public ResponseEntity<String> listFlows() {
         JsonArray flowsArray = new JsonArray();
-        List<FlowMetadata> predefinedFlowsMetadata = scoreHelper.getPredefinedFlowsMetadata();
+        List<FlowMetadata> predefinedFlowsMetadata = scoreServices.getPredefinedFlowsMetadata();
         for (FlowMetadata flowMetadata : predefinedFlowsMetadata) {
             JsonObject flowData = new JsonObject();
             flowData.addProperty(IDENTIFIER_KEY, flowMetadata.getIdentifier());
@@ -85,7 +85,7 @@ public class ScoreController {
         HttpStatus httpStatus = HttpStatus.OK;
         try {
             JsonArray inputArray = new JsonArray();
-            List<InputBinding> bindings = scoreHelper.getInputBindingsByIdentifierOrName(identifier);
+            List<InputBinding> bindings = scoreServices.getInputBindingsByIdentifierOrName(identifier);
             for (InputBinding inputBinding : bindings) {
                 JsonObject input = new JsonObject();
                 input.addProperty(NAME_KEY, inputBinding.getSourceKey());
@@ -110,7 +110,7 @@ public class ScoreController {
         HttpStatus httpStatus = HttpStatus.OK;
         try {
             List<InputBinding> bindings = fetchInputsFromJson(inputsAsJson, identifier);
-            long executionId = scoreHelper.triggerWithBindings(identifier, bindings);
+            long executionId = scoreServices.triggerWithBindings(identifier, bindings);
             triggerInfo.addProperty(EXECUTION_ID_KEY, executionId);
         }
         catch(Exception ex) {
@@ -126,7 +126,7 @@ public class ScoreController {
         JsonObject bodyAsJson = jsonParser.parse(inputsAsJson).getAsJsonObject();
         JsonElement inputs = bodyAsJson.get(INPUTS_KEY);
         JsonArray inputArray = inputs.getAsJsonArray();
-        List<InputBinding> bindings = scoreHelper.getInputBindingsByIdentifierOrName(identifier);
+        List<InputBinding> bindings = scoreServices.getInputBindingsByIdentifierOrName(identifier);
 
         for (JsonElement input : inputArray) {
             String sourceKey = input.getAsJsonObject().get(NAME_KEY).getAsString();
@@ -146,7 +146,7 @@ public class ScoreController {
         return bindings;
     }
 
-    public void setScoreHelper(ScoreHelper scoreHelper) {
-        this.scoreHelper = scoreHelper;
+    public void setScoreServices(ScoreServices scoreServices) {
+        this.scoreServices = scoreServices;
     }
 }

@@ -1,4 +1,4 @@
-package com.hp.score.web;
+package com.hp.score.web.services;
 
 import com.hp.score.api.Score;
 import com.hp.score.api.TriggeringProperties;
@@ -7,11 +7,11 @@ import com.hp.score.events.ScoreEventListener;
 import com.hp.score.samples.FlowMetadata;
 import com.hp.score.samples.openstack.actions.InputBinding;
 import com.hp.score.samples.utility.ReflectionUtility;
+import com.hp.score.web.FlowMetadataContainer;
+import com.hp.score.web.SpringBootApplication;
 
 import org.apache.log4j.Logger;
-
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -29,7 +29,7 @@ import static com.hp.score.samples.openstack.OpenstackCommons.prepareExecutionCo
  *
  * @author Bonczidai Levente
  */
-public class ScoreHelper {
+public final class ScoreServices {
     @Autowired
     private Score score;
 
@@ -37,7 +37,7 @@ public class ScoreHelper {
     private EventBus eventBus;
 
     private static final String AVAILABLE_FLOWS_PATH = "/available_flows_metadata.yaml";
-    private final static Logger logger = Logger.getLogger(ScoreHelper.class);
+    private final static Logger logger = Logger.getLogger(ScoreServices.class);
 
     private static final List<FlowMetadata> predefinedFlows = loadPredefinedFlowsMetadata();
 
