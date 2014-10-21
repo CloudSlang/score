@@ -10,5 +10,23 @@
 
     <artifactId>score-docker-actions</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hp.score.sdk</groupId>
+            <artifactId>score-content-sdk</artifactId>
+            <version>1.4</version>
+        </dependency>
+
+
+    </dependencies>
+
 
 </project>
