@@ -1,6 +1,6 @@
 ############################################################
 # Dockerfile to build score container images
-# Based on Ubuntu with preinstalled java
+# Based on Ubuntu with pre-installed java
 ############################################################
 
 FROM java:7
@@ -21,4 +21,4 @@ EXPOSE  8080
 
 WORKDIR /score-samples/score-webapp/target/
 
-CMD ["java","-jar","score-webapp-0.1.221-SNAPSHOT.jar"]
+CMD ["java","-jar","score-webapp-0.1.222-SNAPSHOT.jar"]
