@@ -41,10 +41,10 @@ public final class ScoreServices {
 
     private static final List<FlowMetadata> predefinedFlows = loadPredefinedFlowsMetadata();
 
-    public long triggerWithBindings(String identifier, List<InputBinding> bindings) {
+    public long triggerWithBindings(String identifierOrName, List<InputBinding> bindings) {
         long executionId = -1;
         try {
-            executionId = score.trigger(getTriggeringPropertiesByIdentifier(identifier, bindings));
+            executionId = score.trigger(getTriggeringPropertiesByIdentifierOrName(identifierOrName, bindings));
         } catch (Exception ex) {
             logger.error(ex);
         }
@@ -82,7 +82,7 @@ public final class ScoreServices {
         throw new Exception("Flow \"" + identifier + "\" not found");
     }
 
-    private TriggeringProperties getTriggeringPropertiesByIdentifier(String identifier, List<InputBinding> bindings) throws Exception {
+    private TriggeringProperties getTriggeringPropertiesByIdentifierOrName(String identifier, List<InputBinding> bindings) throws Exception {
         FlowMetadata flowMetadata = getFlowMetadataByIdentifierOrName(identifier, predefinedFlows);
         Object returnValue = ReflectionUtility.invokeMethodByName(flowMetadata.getClassName(), flowMetadata.getTriggeringPropertiesMethodName());
         if (returnValue instanceof TriggeringProperties) {

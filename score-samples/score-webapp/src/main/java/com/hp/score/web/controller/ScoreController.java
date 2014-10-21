@@ -26,7 +26,7 @@ public class ScoreController {
     private static final String IDENTIFIER_KEY = "identifier";
     private static final String API_KEY = "api";
     private static final String LIST_KEY = "list";
-    private static final String TRIGGER_KEY = "trigger";
+    private static final String RUN_KEY = "runs";
     private static final String NAME_KEY = "name";
     private static final String DESCRIPTION_KEY = "description";
     private static final String FLOWS_KEY = "flows";
@@ -37,11 +37,10 @@ public class ScoreController {
     private static final String V1 = "v1";
 
     private static final String API_URI = "/" + V1 + "/" + API_KEY;
-    private static final String LIST_URI = "/" + V1 + "/" + LIST_KEY;
-    private static final String INPUTS_URI_WITH_IDENTIFIER = "/" + V1 + "/" + INPUTS_KEY + "/{" + IDENTIFIER_KEY + "}";
-    private static final String INPUTS_URI_WITH_NAME = "/" + V1 + "/" + INPUTS_KEY + "/{" + NAME_KEY + "}";
-    private static final String TRIGGER_URI_IDENTIFIER = "/" + V1 + "/" + TRIGGER_KEY + "/{" + IDENTIFIER_KEY + "}";
-    private static final String TRIGGER_URI_NAME = "/" + V1 + "/" + TRIGGER_KEY + "/{" + NAME_KEY + "}";
+    private static final String LIST_URI = "/" + V1 + "/" + FLOWS_KEY + "/" + LIST_KEY;
+    private static final String INPUTS_URI_WITH_IDENTIFIER = "/" + V1 + "/" + FLOWS_KEY + "/{" + IDENTIFIER_KEY + "}" + "/" + INPUTS_KEY;
+    private static final String INPUTS_URI_WITH_NAME ="/" + V1 + "/" + FLOWS_KEY + "/{" + NAME_KEY + "}" + "/" + INPUTS_KEY;
+    private static final String RUN_URI_IDENTIFIER = "/" + V1 + "/" + RUN_KEY;
 
     private ScoreServices scoreServices;
 
@@ -51,8 +50,7 @@ public class ScoreController {
         apiList.add(new JsonPrimitive(LIST_URI));
         apiList.add(new JsonPrimitive(INPUTS_URI_WITH_IDENTIFIER));
         apiList.add(new JsonPrimitive(INPUTS_URI_WITH_NAME));
-        apiList.add(new JsonPrimitive(TRIGGER_URI_IDENTIFIER));
-        apiList.add(new JsonPrimitive(TRIGGER_URI_NAME));
+        apiList.add(new JsonPrimitive(RUN_URI_IDENTIFIER));
 
         JsonObject api = new JsonObject();
         api.add(API_KEY, apiList);
@@ -103,14 +101,14 @@ public class ScoreController {
         return new ResponseEntity<>(gson.toJson(flowInfo), null, httpStatus);
     }
 
-	@RequestMapping(value= TRIGGER_URI_IDENTIFIER, method= RequestMethod.POST)
-	public ResponseEntity<String> triggerFlow(@PathVariable String identifier, @RequestBody String inputsAsJson) {
-        // identifier can mean either the flow identifier or the flow name depends on request
+	@RequestMapping(value= RUN_URI_IDENTIFIER, method= RequestMethod.POST)
+	public ResponseEntity<String> createFlowRun(@RequestBody String inputsAsJson) {
         JsonObject triggerInfo = new JsonObject();
         HttpStatus httpStatus = HttpStatus.OK;
         try {
-            List<InputBinding> bindings = fetchInputsFromJson(inputsAsJson, identifier);
-            long executionId = scoreServices.triggerWithBindings(identifier, bindings);
+            String identifierOrName = fetchIdentifierOrNameFromJson(inputsAsJson);
+            List<InputBinding> bindings = fetchInputsFromJson(inputsAsJson, identifierOrName);
+            long executionId = scoreServices.triggerWithBindings(identifierOrName, bindings);
             triggerInfo.addProperty(EXECUTION_ID_KEY, executionId);
         }
         catch(Exception ex) {
@@ -121,6 +119,20 @@ public class ScoreController {
         return new ResponseEntity<>(gson.toJson(triggerInfo), null, httpStatus);
 	}
 
+    private String fetchIdentifierOrNameFromJson(String inputsAsJson) throws Exception {
+        JsonParser jsonParser = new JsonParser();
+        JsonObject bodyAsJson = jsonParser.parse(inputsAsJson).getAsJsonObject();
+        if (bodyAsJson.has(IDENTIFIER_KEY)) {
+            return bodyAsJson.get(IDENTIFIER_KEY).getAsString();
+        } else {
+            if (bodyAsJson.has(NAME_KEY)) {
+                return bodyAsJson.get(NAME_KEY).getAsString();
+            } else {
+                throw new Exception("Identifier / name not found in Json body");
+            }
+        }
+    }
+
     private List<InputBinding> fetchInputsFromJson(String inputsAsJson, String identifier) throws Exception {
         JsonParser jsonParser = new JsonParser();
         JsonObject bodyAsJson = jsonParser.parse(inputsAsJson).getAsJsonObject();
@@ -129,8 +141,9 @@ public class ScoreController {
         List<InputBinding> bindings = scoreServices.getInputBindingsByIdentifierOrName(identifier);
 
         for (JsonElement input : inputArray) {
-            String sourceKey = input.getAsJsonObject().get(NAME_KEY).getAsString();
-            String value = input.getAsJsonObject().get(VALUE_KEY).getAsString();
+            JsonObject inputAsJsonObject = input.getAsJsonObject();
+            String sourceKey = inputAsJsonObject.entrySet().iterator().next().getKey();
+            String value = inputAsJsonObject.get(sourceKey).getAsString();
 
             int inputCount = 0;
             for (InputBinding inputBinding : bindings) {
