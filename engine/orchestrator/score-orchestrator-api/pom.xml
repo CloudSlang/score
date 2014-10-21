@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.hp.score</groupId>
 		<artifactId>orchestrator</artifactId>
-		<version>0.1.221</version>
+		<version>0.1.222-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>score-orchestrator-api</artifactId>
