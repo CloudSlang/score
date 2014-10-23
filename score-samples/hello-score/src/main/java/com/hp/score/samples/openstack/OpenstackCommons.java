@@ -61,7 +61,7 @@ public class OpenstackCommons {
 	public static final String HOST_KEY = "host";
 	public static final String DEFAULT_IDENTITY_PORT = "5000";
 	public static final String DEFAULT_COMPUTE_PORT = "8774";
-	public static final String DEFAULT_IMAGE_REF = "063c3c8c-8b88-436f-a5bf-dfefdd1c9d1f";
+	public static final String DEFAULT_IMAGE_REF = "9ccd0528-8dba-47f4-ab83-c99b9d94bec1";
 	public static final String USERNAME_KEY = "username";
 	public static final String PASSWORD_KEY = "password";
 	public static final String PARSED_TOKEN_KEY = "parsedToken";
