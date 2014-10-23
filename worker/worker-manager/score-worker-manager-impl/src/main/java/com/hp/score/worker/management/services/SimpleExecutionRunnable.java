@@ -80,7 +80,16 @@ public class SimpleExecutionRunnable implements Runnable {
         Thread.currentThread().setName(origThreadName + "_" + executionId);
 
         try {
-            Execution execution = converter.extractExecution(executionMessage.getPayload());
+            Execution execution;
+            //If we got here because of te shortcut we have the object
+            if(executionMessage.getExecutionObject() != null){
+                execution = executionMessage.getExecutionObject();
+
+            }
+            //If we got here form DB - we need to extract the object from bytes
+            else {
+                execution = converter.extractExecution(executionMessage.getPayload());
+            }
 
             //Check which logic to trigger - regular execution or split
             if (executionService.isSplitStep(execution)) {
@@ -88,8 +97,7 @@ public class SimpleExecutionRunnable implements Runnable {
             } else {
                 executeRegularStep(execution);
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             logger.error("Error during execution!!!", ex);
             //set status FAILED
             executionMessage.setStatus(ExecStatus.FAILED);
@@ -99,8 +107,7 @@ public class SimpleExecutionRunnable implements Runnable {
             } catch (InterruptedException e) {
                 logger.warn("Thread was interrupted! Exiting the execution... ", ex);
             }
-        }
-        finally {
+        } finally {
             if (logger.isDebugEnabled()) {
                 logger.debug("Worker has finished to work on execution: " + executionId);
             }
@@ -118,87 +125,229 @@ public class SimpleExecutionRunnable implements Runnable {
         Execution nextStepExecution;
         Long startTime = System.currentTimeMillis();
 
-        try {
-            do {
+        do {
+            try{
                 //Actually execute the step and get the execution object of the next step
                 nextStepExecution = executionService.execute(execution);
             }
-            while (shouldContinue(nextStepExecution, startTime));
+            catch (InterruptedException ex) {
+                logger.warn("Thread was interrupted! Exiting the execution... ", ex);
+                return; //Exit! The thread was interrupted by shutDown of the executor and was during Sleep or await() or any other method that supports InterruptedException
+            }
         }
-        catch (InterruptedException ex){
-            logger.warn("Thread was interrupted! Exiting the execution... ", ex);
-            return; //Exit! The thread was interrupted by shutDown of the executor and was during Sleep or await() or any other method that supports InterruptedException
-        }
+        while (!shouldStop(nextStepExecution, startTime));
+    }
 
-        if(isInterrupted()){
-            logger.warn("Thread was interrupted! Exiting the execution... ");
-            return; //Exit! The thread was interrupted by shutDown of the executor
-        }
+    private boolean shouldStop(Execution nextStepExecution, Long startTime) {
+        //We should stop if
+        //1. Thread was interrupted
+        //2. execution was paused
+        //3. we should stop and go to queue
+        //4. The execution is terminating
+        //5. The nextStepExecution is a splitStep
+        //6. Running too long
 
-        //set current step to finished
-        executionMessage.setStatus(ExecStatus.FINISHED);
-        executionMessage.incMsgSeqId();
-        executionMessage.setPayload(null);
+        //The order is important!!!
 
-        //execution was paused - send the FINISHED message - but don't send the PENDING for next step
-        if (nextStepExecution == null) {
+        return isInterrupted() ||
+                isExecutionPaused(nextStepExecution) ||
+                isExecutionTerminating(nextStepExecution) ||
+                isSplitStep(nextStepExecution) ||
+                shouldChangeWorkerGroup(nextStepExecution) ||
+                isRecoveryCheckpoint(nextStepExecution) ||
+                isRunningTooLong(startTime, nextStepExecution);
+    }
+
+    //If execution was paused it sends the current step with status FINISHED and that is all...
+    private boolean isExecutionPaused(Execution nextStepExecution) {
+        //If execution was paused
+        if(nextStepExecution == null){
+            //set current step to finished
+            executionMessage.setStatus(ExecStatus.FINISHED);
+            executionMessage.incMsgSeqId();
+            executionMessage.setPayload(null);
+            //execution was paused - send only the FINISHED message!
             try {
                 outBuffer.put(executionMessage);
             } catch (InterruptedException e) {
                 logger.warn("Thread was interrupted! Exiting the execution... ", e);
-                //noinspection UnnecessaryReturnStatement
-                return; //Exit! The thread was interrupted by shutDown of the executor
             }
+            return true;
         }
         else {
-            ExecutionMessage[] executionMessagesToSend = createMessagesToSend(executionMessage, nextStepExecution);
+            return false;
+        }
+    }
 
-            // for finished status, we don't need the payload.
-            // but for terminated we need the payload
+    private boolean isRecoveryCheckpoint(Execution nextStepExecution) {
+        //Here we check if we need to go to queue to persist - we can do it with shortcut to InBuffer!!!!!!!!
+        if (nextStepExecution.getSystemContext().containsKey(TempConstants.IS_RECOVERY_CHECKPOINT)) {
+            //clean key
+            nextStepExecution.getSystemContext().remove(TempConstants.IS_RECOVERY_CHECKPOINT);
+
+            //set current step to finished
+            executionMessage.setStatus(ExecStatus.FINISHED);
+            executionMessage.incMsgSeqId();
+            executionMessage.setPayload(null);
+
+
+            ExecutionMessage inProgressMessage = createInProgressExecutionMessage(nextStepExecution);
+            ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage, inProgressMessage}; //for the outBuffer
+
+            ExecutionMessage inProgressMessageForInBuffer = (ExecutionMessage) inProgressMessage.clone();
+            inProgressMessageForInBuffer.setPayload(null); //we do not need the payload for the inBuffer shortcut
+
+            try {
+                //The order is important!!!!!
+                outBuffer.put(executionMessagesToSend);
+                inBuffer.addExecutionMessage(inProgressMessageForInBuffer);
+            } catch (InterruptedException e) {
+                logger.warn("Thread was interrupted! Exiting the execution... ", e);
+                return true; //exiting... in shutdown...
+            }
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    private boolean isSplitStep(Execution nextStepExecution){
+        if(executionService.isSplitStep(nextStepExecution)){
+            //set current step to finished
+            executionMessage.setStatus(ExecStatus.FINISHED);
+            executionMessage.incMsgSeqId();
+            executionMessage.setPayload(null);
+
+            ExecutionMessage pendingMessage = createPendingExecutionMessage(nextStepExecution);
+            ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage, pendingMessage};//Messages that we will send to OutBuffer
             try {
                 outBuffer.put(executionMessagesToSend);
             } catch (InterruptedException e) {
                 logger.warn("Thread was interrupted! Exiting the execution... ", e);
-                return; //Exit! The thread was interrupted by shutDown of the executor
+                return true;
             }
-
-            // check if a new step was created for stay in the worker
-            if (executionMessagesToSend.length == 2 && executionMessagesToSend[1].getStatus() == ExecStatus.IN_PROGRESS) {
-                ExecutionMessage inProgressMessage = (ExecutionMessage) executionMessagesToSend[1].clone();
-                inBuffer.addExecutionMessage(inProgressMessage);
-            }
+            return true;
+        }
+        else {
+            return false;
         }
     }
 
-    private boolean shouldContinue(Execution nextStepExecution, Long startTime){
+    private boolean shouldChangeWorkerGroup(Execution nextStepExecution) {
+        //Here we check if we can continue to run in current thread - depends on the group
+        if (nextStepExecution.getSystemContext().containsKey(TempConstants.SHOULD_CHECK_GROUP)) {
+            //take care of worker group id
+            String groupName = nextStepExecution.getGroupName();
 
-        //We should continue to run the next step without exiting in following cases:
-        //1. Thread was not interrupted
-        //2. nextStepExecution is not null
-        //3. nextStepExecution should not go to queue
-        //4. The execution is not terminating
-        //5. The nextStepExecution is not a splitStep
-        //6. Not running too long
+            //clean key
+            nextStepExecution.getSystemContext().remove(TempConstants.SHOULD_CHECK_GROUP);
 
-        return  !isInterrupted() &&
-                nextStepExecution != null &&
-                !nextStepExecution.isMustGoToQueue() &&
-                !isExecutionTerminating(nextStepExecution) &&
-                !executionService.isSplitStep(nextStepExecution) &&
-                !isRunningTooLong(startTime);
+            boolean canRunInThisWorker = groupName== null || workerConfigurationService.isMemberOf(groupName) ||
+                    (workerUUID != null && groupName.endsWith(workerUUID));
+
+            if(!canRunInThisWorker){
+                //set current step to finished
+                executionMessage.setStatus(ExecStatus.FINISHED);
+                executionMessage.incMsgSeqId();
+                executionMessage.setPayload(null);
+
+                ExecutionMessage pendingMessage = createPendingExecutionMessage(nextStepExecution);
+                ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage, pendingMessage};//Messages that we will send to OutBuffer
+                try {
+                    outBuffer.put(executionMessagesToSend);
+                } catch (InterruptedException e) {
+                    logger.warn("Thread was interrupted! Exiting the execution... ", e);
+                    return true;
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isInterrupted() {
         return Thread.currentThread().isInterrupted();
     }
 
-    private boolean isRunningTooLong(Long startTime){
+    private boolean isRunningTooLong(Long startTime, Execution nextStepExecution) {
         Long currentTime = System.currentTimeMillis();
 
-        //Return true if running more than 3 seconds.
-        //We want to exit after 3 seconds from this thread in order to prevent starvation of other tasks.
-        return (currentTime - startTime) > 3000;
+        //Return true if running more than 60 seconds.
+        //We want to exit after 60 seconds from this thread in order to prevent starvation of other tasks.
+        if ((currentTime - startTime) > 60 * 1000) {
+            //set current step to finished
+            executionMessage.setStatus(ExecStatus.FINISHED);
+            executionMessage.incMsgSeqId();
+            executionMessage.setPayload(null);
+
+            ExecutionMessage inProgressMessage = createInProgressExecutionMessage(nextStepExecution);
+            ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage, inProgressMessage}; //for the outBuffer
+
+            ExecutionMessage inProgressMessageForInBuffer = (ExecutionMessage) inProgressMessage.clone();
+            inProgressMessageForInBuffer.setPayload(null); //we do not need the payload for the inBuffer shortcut
+
+            try {
+                //The order is important!!!!!
+                outBuffer.put(executionMessagesToSend);
+                inBuffer.addExecutionMessage(inProgressMessageForInBuffer);
+            } catch (InterruptedException e) {
+                logger.warn("Thread was interrupted! Exiting the execution... ", e);
+                return true; //exiting... in shutdown...
+            }
+            return true;
+
+        } else {
+            return false;
+        }
     }
+
+    // Creates termination execution message, base on current execution message
+    private ExecutionMessage createTerminatedExecutionMessage(Execution nextStepExecution) {
+        Payload payload = converter.createPayload(nextStepExecution); //we need the payload
+        ExecutionMessage finalMessage = (ExecutionMessage) executionMessage.clone();
+        finalMessage.setStatus(ExecStatus.TERMINATED); //in queue it is checked and finish flow is called
+        finalMessage.incMsgSeqId();
+        finalMessage.setPayload(payload);
+        return finalMessage;
+    }
+
+    // Creates pending execution message for the next step, base on current execution message
+    private ExecutionMessage createPendingExecutionMessage(Execution nextStepExecution) {
+        //take care of worker group
+        String groupName = nextStepExecution.getGroupName();
+        if (groupName == null) {
+            groupName = WorkerNode.DEFAULT_WORKER_GROUPS[0];
+        }
+        return new ExecutionMessage(ExecutionMessage.EMPTY_EXEC_STATE_ID,
+                ExecutionMessage.EMPTY_WORKER,
+                groupName,
+                executionMessage.getMsgId(),
+                ExecStatus.PENDING,
+                converter.createPayload(nextStepExecution),
+                0).setWorkerKey(executionMessage.getWorkerKey());
+    }
+
+    // Creates InProgress execution message for the next step, base on current execution message - used for short cut!
+    private ExecutionMessage createInProgressExecutionMessage(Execution nextStepExecution) {
+        //take care of worker group
+        String groupName = nextStepExecution.getGroupName();
+        if (groupName == null) {
+            groupName = WorkerNode.DEFAULT_WORKER_GROUPS[0];
+        }
+
+        Long id = queueStateIdGeneratorService.generateStateId();
+        // stay in the same worker in the next step
+        return new ExecutionMessage(id,
+                executionMessage.getWorkerId(),
+                groupName,
+                executionMessage.getMsgId(),
+                ExecStatus.IN_PROGRESS,
+                nextStepExecution,
+                converter.createPayload(nextStepExecution),
+                0).setWorkerKey(executionMessage.getWorkerKey());
+    }
+
 
     private void executeSplitStep(Execution execution) {
         //If execution is paused or cancelled it will return false
@@ -217,70 +366,34 @@ public class SimpleExecutionRunnable implements Runnable {
         }
     }
 
-    private boolean isExecutionTerminating(Execution execution) {
-        return execution.getPosition() == null;
-    }
+    private boolean isExecutionTerminating(Execution nextStepExecution) {
+        if(nextStepExecution.getPosition() == null) {
+            //set current step to finished
+            executionMessage.setStatus(ExecStatus.FINISHED);
+            executionMessage.incMsgSeqId();
+            executionMessage.setPayload(null);
 
-    // Prepares executionMessage from previous executionMessage and new Execution object
-    private ExecutionMessage[] createMessagesToSend(ExecutionMessage executionMessage, Execution nextStepExecution) throws IOException {
-        //Flow is finished - does not matter if successfully or not
-        if (isExecutionTerminating(nextStepExecution)) {
-            Payload payload = converter.createPayload(nextStepExecution);
-            ExecutionMessage finalMessage = (ExecutionMessage) executionMessage.clone();
-            finalMessage.setStatus(ExecStatus.TERMINATED);//in queue it is checked and finish flow is called
-            finalMessage.incMsgSeqId();
-            finalMessage.setPayload(payload);
-            return new ExecutionMessage[]{executionMessage, finalMessage};
+            //Flow is finished - does not matter if successfully or not
+            ExecutionMessage terminationMessage = createTerminatedExecutionMessage(nextStepExecution);
+            ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage, terminationMessage}; //Messages that we will send to OutBuffer
+
+            try {
+                outBuffer.put(executionMessagesToSend);
+            } catch (InterruptedException e) {
+                logger.warn("Thread was interrupted! Exiting the execution... ", e);
+                return true;
+            }
+            return true;
         }
-
-        ExecutionMessage nextExecutionMessage = prepareNextStepExecutionMessage(executionMessage, nextStepExecution);
-
-        return new ExecutionMessage[]{executionMessage, nextExecutionMessage};
-    }
-
-    // Prepares executionMessage from previous executionMessage and new Execution object
-    private ExecutionMessage prepareNextStepExecutionMessage(ExecutionMessage executionMessage, Execution nextStepExecution) throws IOException {
-
-        //take care of worker group id
-        String workerGroupId = nextStepExecution.getGroupName();
-
-        Object useStayInTheWorkerObj = nextStepExecution.getSystemContext().get(TempConstants.USE_STAY_IN_THE_WORKER);
-        nextStepExecution.getSystemContext().remove(TempConstants.USE_STAY_IN_THE_WORKER);
-        boolean useStayInTheWorker = (useStayInTheWorkerObj != null) && (useStayInTheWorkerObj.equals(Boolean.TRUE));
-
-        boolean isSameWorker = workerGroupId == null ||
-                              (workerGroupId != null && workerConfigurationService.isMemberOf(workerGroupId)) ||
-                             (workerGroupId != null && workerUUID != null && workerGroupId.endsWith(workerUUID));
-
-        if (workerGroupId == null) {
-            workerGroupId = WorkerNode.DEFAULT_WORKER_GROUPS[0];
+        else {
+            return false;
         }
-
-        if (isSameWorker && useStayInTheWorker) {
-            Long id = queueStateIdGeneratorService.generateStateId();
-            // stay in the same worker in te next step
-            return new ExecutionMessage(id,
-                    executionMessage.getWorkerId(),
-                    workerGroupId,
-                    executionMessage.getMsgId(),
-                    ExecStatus.IN_PROGRESS,
-                    converter.createPayload(nextStepExecution),
-                    0).setWorkerKey(executionMessage.getWorkerKey());
-        }
-		// need to move to anther worker
-		return new ExecutionMessage(ExecutionMessage.EMPTY_EXEC_STATE_ID,
-		        ExecutionMessage.EMPTY_WORKER,
-		        workerGroupId,
-		        executionMessage.getMsgId(),
-		        ExecStatus.PENDING,
-		        converter.createPayload(nextStepExecution),
-		        0).setWorkerKey(executionMessage.getWorkerKey());
     }
 
     private String getSplitId(List<Execution> newExecutions) {
         if (newExecutions != null && newExecutions.size() > 0) {
             return newExecutions.get(0).getSystemContext().getSplitId();
         }
-		throw new RuntimeException("Split executions list is null or empty!!!");
+        throw new RuntimeException("Split executions list is null or empty!!!");
     }
 }

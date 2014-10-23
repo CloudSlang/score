@@ -84,7 +84,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 			return execution;
 		}
         catch(Exception ex) {
-            if(ex instanceof InterruptedException){
+            if(ex instanceof InterruptedException){ //todo - throw from EventBuffer InterruptException and not cover it under RuntimeException!!!!
                 throw ex; //for recovery purposes, in case thread was in wait on stepLog and was interrupted
             }
 			logger.error("Error during execution: ", ex);
@@ -383,13 +383,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
 				execution.setGroupName(null);
 			}
 		}
-		// Decide Whether should go to jms or perform an internal agent recursion
-		Boolean mustGoToQueue = (Boolean)execution.getSystemContext().get(TempConstants.MUST_GO_TO_QUEUE);
-		mustGoToQueue = (mustGoToQueue == null) ? Boolean.FALSE : mustGoToQueue;
-		// execution.mustGoToQueue is the value checked upon return
-		execution.setMustGoToQueue(mustGoToQueue);
-		// reset the flag in the context
-		execution.getSystemContext().put(TempConstants.MUST_GO_TO_QUEUE, Boolean.FALSE);
 	}
 
 	private static void addContextData(Map<String, Object> data, Execution execution) {

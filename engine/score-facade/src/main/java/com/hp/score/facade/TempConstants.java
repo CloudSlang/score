@@ -14,13 +14,11 @@ public class TempConstants {
     // For external workers optimization in PreOp
     public static final String CONTENT_EXECUTION_STEP = "content_step";
 
-    // For whether the current step needs to go out to the outbuffer after execution, will be reset after use !
-    // 1. going to queue means this step will be persisted to the db and therefor recoverable in case of broker failure
-    // 2. will use the stay in the queue mechanism, meaning the next step will go directly to the in-buffer
-    public static final String MUST_GO_TO_QUEUE = "MUST_GO_TO_QUEUE";
+    //This flag is set if the current execution step is important and must be persisted
+    public static final String IS_RECOVERY_CHECKPOINT = "IS_RECOVERY_CHECKPOINT";
 
-    // For whether the next step needs to go out to the queue after execution and also go-to the in-buffer.
-    public static final String USE_STAY_IN_THE_WORKER = "USE_STAY_IN_THE_WORKER";
+    // This flag is set if the current execution step needs to go through group resolving
+    public static final String SHOULD_CHECK_GROUP = "SHOULD_CHECK_GROUP";
 
     // For the studio debugger events
     public static final String DEBUGGER_MODE = "DEBUGGER_MODE";

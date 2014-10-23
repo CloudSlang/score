@@ -9,13 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -41,7 +39,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
     @Autowired
    	private SynchronizationManager syncManager;
 
-	private Queue<Message> buffer = new LinkedList<>();
+	private List<Message> buffer = new ArrayList<>();
 
 	private int currentWeight;
 
@@ -62,6 +60,11 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         try{
             syncManager.startPutMessages();
 
+            //We need to check if the current thread was interrupted while waiting for the lock (ExecutionThread or InBufferThread in ackMessages)
+            if(Thread.currentThread().isInterrupted()){
+                throw new InterruptedException("Thread was interrupted while waiting on the lock! Exiting...");
+            }
+
             while (currentWeight >= maxBufferWeight){
                 logger.warn("Outbound buffer is full. Waiting...");
                 syncManager.waitForDrain();
@@ -72,10 +75,8 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
             Message message = messages.length==1? messages[0]: new CompoundMessage(messages);
 
             //put message into the buffer
-            if (!buffer.offer(message)){
-                logger.error("Failed to put message into the outgoing buffer");
-                throw new RuntimeException("Failed to put message into the outgoing buffer");
-            }
+            buffer.add(message);
+
             currentWeight += message.getWeight();
 			if (logger.isTraceEnabled()) logger.trace(message.getClass().getSimpleName() + " added to the buffer. " + getStatus());
 		} catch (InterruptedException ex) {
@@ -88,7 +89,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 
 	@Override
 	public void drain() {
-		Queue<Message> bufferToDrain;
+		List<Message> bufferToDrain;
 		try{
             syncManager.startDrain();
 			while (buffer.isEmpty()){
@@ -101,7 +102,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 			if (logger.isDebugEnabled()) logger.debug("buffer is going to be drained. " + getStatus());
 
 			bufferToDrain = buffer;
-			buffer = new LinkedList<>();
+			buffer = new ArrayList<>();
 			currentWeight = 0;
 		} catch (InterruptedException e) {
 			logger.warn("Drain outgoing buffer was interrupted while waiting for messages on the buffer");
@@ -113,8 +114,8 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 		drainInternal(bufferToDrain);
 	}
 
-	private void drainInternal(Collection<Message> bufferToDrain){
-		List<Message> bulk = new LinkedList<>();
+	private void drainInternal(List<Message> bufferToDrain){
+		List<Message> bulk = new ArrayList<>();
 		int bulkWeight = 0;
 		Map<String,AtomicInteger> logMap = new HashMap<>();
 		try {
@@ -148,9 +149,9 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 		}
 	}
 
-	private List<Message> optimize(Collection<Message> messages){
+	private List<Message> optimize(List<Message> messages){
 		long t = System.currentTimeMillis();
-		List<Message> result = new LinkedList<>();
+		List<Message> result = new ArrayList<>();
 
 		Group<Message> groups = group(messages, by(on(Message.class).getId()));
 		for (Group<Message> group :groups.subgroups()){
@@ -246,5 +247,4 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         if(maxMemory  < 2*GB) return 30000;
         return 60000;
     }
-
 }

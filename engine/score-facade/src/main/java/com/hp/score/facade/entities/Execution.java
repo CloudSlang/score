@@ -16,13 +16,11 @@ public class Execution implements Serializable {
     private Long runningExecutionPlanId;
     private Long position;
     private String groupName;
-    private boolean mustGoToQueue;
 
     protected Map<String, Serializable> contexts;
     protected SystemContext systemContext = new SystemContext();
 
     public Execution() {
-        this.mustGoToQueue = false;
         this.contexts = new HashMap<>();
     }
 
@@ -43,14 +41,6 @@ public class Execution implements Serializable {
         }
     }
 
-    public boolean isMustGoToQueue() {
-        return mustGoToQueue;
-    }
-
-    public void setMustGoToQueue(boolean mustGoToQueue) {
-        this.mustGoToQueue = mustGoToQueue;
-    }
-
     public String getGroupName() {
         return groupName;
     }
@@ -67,6 +57,10 @@ public class Execution implements Serializable {
         return runningExecutionPlanId;
     }
 
+    public void setRunningExecutionPlanId(Long runningExecutionPlanId){
+        this.runningExecutionPlanId = runningExecutionPlanId;
+    }
+
     public Long getPosition() {
         return position;
     }
@@ -78,6 +72,10 @@ public class Execution implements Serializable {
 
     public Map<String, Serializable> getContexts() {
         return contexts;
+    }
+
+    public void setContexts(Map<String, Serializable> contexts) {
+        this.contexts = contexts;
     }
 
     public SystemContext getSystemContext() {

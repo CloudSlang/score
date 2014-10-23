@@ -25,6 +25,7 @@ import java.util.List;
  */
 public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Runnable{
 
+    @SuppressWarnings("FieldCanBeLocal")
     private final long MEMORY_THRESHOLD = 50000000; // 50 Mega byte
 
 	private final Logger logger = Logger.getLogger(this.getClass());
@@ -41,7 +42,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
 	@Autowired(required = false)
 	@Qualifier("coolDownPollingMillis")
-	private Integer coolDownPollingMillis = 300;
+	private Integer coolDownPollingMillis = 200;
 
 	private Thread fillBufferThread = new Thread(this);
 
@@ -66,11 +67,12 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     @PostConstruct
     private void init(){
         capacity = Integer.getInteger("worker.inbuffer.capacity",capacity);
-        coolDownPollingMillis = Integer.getInteger("worker.inbuffer.coolDownPollingMillis",capacity);
+        coolDownPollingMillis = Integer.getInteger("worker.inbuffer.coolDownPollingMillis",coolDownPollingMillis);
         logger.info("InBuffer capacity is set to :" + capacity + ", coolDownPollingMillis is set to :"+ coolDownPollingMillis);
     }
 
 
+    @SuppressWarnings("ConstantConditions")
     private void fillBufferPeriodically() {
         long pollCounter = 0;
         while (!inShutdown) {
@@ -87,6 +89,13 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
                 }
                 else {
                     syncManager.startGetMessages(); //we must lock recovery lock before poll - otherwise we will get duplications
+
+                    //We need to check if the current thread was interrupted while waiting for the lock (InBufferThread) and RESET its interrupted flag!
+                    if(Thread.interrupted()){
+                        logger.info("Thread was interrupted while waiting on the lock in fillBufferPeriodically()!");
+                        continue;
+                    }
+
                     if (needToPoll()) {
                         int messagesToGet = capacity - workerManager.getInBufferSize();
 
@@ -101,7 +110,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
                             //we must acknowledge the messages that we took from the queue
                             ackMessages(newMessages);
                             for(ExecutionMessage msg :newMessages){
-                                addExecutionMessage(msg);
+                                addExecutionMessageInner(msg);
                             }
 
                             syncManager.finishGetMessages(); //release all locks before going to sleep!!!
@@ -147,6 +156,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
         ExecutionMessage cloned;
         for (ExecutionMessage message : newMessages) {
             // create a unique id for this lane in this specific worker to be used in out buffer optimization
+            //logger.error("ACK FOR MESSAGE: " + message.getMsgId() + " : " + message.getExecStateId());
             message.setWorkerKey(message.getMsgId() + " : " + message.getExecStateId());
             cloned = (ExecutionMessage) message.clone();
             cloned.setStatus(ExecStatus.IN_PROGRESS);
@@ -158,7 +168,17 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     }
 
 
-    public void addExecutionMessage(ExecutionMessage msg) {
+    public void addExecutionMessage(ExecutionMessage msg) throws InterruptedException {
+        syncManager.startGetMessages(); //this is a public method that can push new executions from outside - from execution threads
+        //We need to check if the current execution thread was interrupted while waiting for the lock
+        if(Thread.currentThread().isInterrupted()){
+            throw new InterruptedException("Thread was interrupted while waiting on the lock in fillBufferPeriodically()!");
+        }
+        addExecutionMessageInner(msg);
+        syncManager.finishGetMessages();
+    }
+
+    private void addExecutionMessageInner(ExecutionMessage msg) {
         SimpleExecutionRunnable simpleExecutionRunnable = simpleExecutionRunnableFactory.getObject();
         simpleExecutionRunnable.setExecutionMessage(msg);
         Long executionId = null;

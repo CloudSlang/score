@@ -221,15 +221,12 @@ public class ExecutionServiceTest {
 		Execution exe = new Execution(1111111L,0L, 0L, new HashMap<String,String>(), null);
 
 		exe.getSystemContext().put(TempConstants.ACTUALLY_OPERATION_GROUP, "Real_Group");
-		exe.getSystemContext().put(TempConstants.MUST_GO_TO_QUEUE, true);
 		//for events
 		exe.getSystemContext().setExecutionId(123L);
 
 		executionService.postExecutionSettings(exe);
 
 		Assert.assertEquals("Real_Group", exe.getGroupName());
-		Assert.assertEquals(true, exe.isMustGoToQueue());
-		Assert.assertEquals(false, exe.getSystemContext().get(TempConstants.MUST_GO_TO_QUEUE));
 	}
 
 	@Configuration

@@ -1,10 +1,11 @@
 package com.hp.score.engine.queue.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hp.score.engine.node.entities.WorkerNode;
+import com.hp.score.facade.entities.Execution;
 import com.hp.score.orchestrator.entities.Message;
 import org.apache.commons.lang.builder.EqualsBuilder;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -33,6 +34,8 @@ public class ExecutionMessage implements Message, Cloneable {
     private Date createDate;
 
 	private transient String workerKey;
+
+    private transient Execution executionObject;
 
 	public ExecutionMessage() {
 		execStateId = EMPTY_EXEC_STATE_ID;
@@ -89,8 +92,34 @@ public class ExecutionMessage implements Message, Cloneable {
 		this.msgSeqId = msgSeqId;
 	}
 
+    public ExecutionMessage(long execStateId,
+                            String workerId,
+                            String workerGroup,
+                            String msgId,
+                            ExecStatus status,
+                            Execution executionObject,
+                            Payload payload,
+                            int msgSeqId) {
+        this.execStateId = execStateId;
+        this.workerId = workerId;
+        this.workerGroup = workerGroup;
+        this.msgId = msgId;
+        this.status = status;
+        this.executionObject = executionObject;
+        this.payload = payload;
+        this.msgSeqId = msgSeqId;
+    }
+
+    public Execution getExecutionObject() {
+        return executionObject;
+    }
+
+    public void setExecutionObject(Execution executionObject) {
+        this.executionObject = executionObject;
+    }
+
     public Date getCreateDate() {
-       return createDate;
+        return createDate;
     }
 
     public void setCreateDate(Date createDate) {
@@ -179,16 +208,50 @@ public class ExecutionMessage implements Message, Cloneable {
 
 	@Override
 	public List<Message> shrink(List<Message> messages) {
-		if (messages.size() > 2 && messages.get(0) instanceof ExecutionMessage) {
-			if (((ExecutionMessage)messages.get(0)).getStatus().equals(ExecStatus.IN_PROGRESS)) {
-				return Arrays.asList(messages.get(1), messages.get(messages.size()-1));
-			} else {
-				return Arrays.asList(messages.get(0), messages.get(messages.size()-1));
+        if (messages.size() > 2) {
+            ExecutionMessage firstMessage  = (ExecutionMessage) messages.get(0);
+            ExecutionMessage secondMessage = (ExecutionMessage) messages.get(1);
+            ExecutionMessage lastMessage = (ExecutionMessage) messages.get(messages.size()-1);
+
+            if (firstMessage.getStatus().equals(ExecStatus.IN_PROGRESS)) {
+//                if(logger.isDebugEnabled())
+//                    logger.debug("Shrinking... Keeping second and last from messages: \n" + messagesToString(messages));
+				return Arrays.asList((Message)secondMessage, lastMessage);
+			}
+            else {
+//                if(logger.isDebugEnabled())
+//                    logger.debug("Shrinking... Keeping first and last from messages: \n" + messagesToString(messages));
+				return Arrays.asList((Message)firstMessage, lastMessage);
 			}
 		} else {
 			return messages;
 		}
 	}
+
+    private String messagesToString(List<Message> messages){
+        StringBuilder str = new StringBuilder();
+
+        for(Message m : messages){
+            str.append(m.toString()).append("\n");
+        }
+
+       return str.toString();
+    }
+
+    @Override
+    public String toString(){
+        StringBuilder str = new StringBuilder();
+
+        boolean isAck = this.getExecutionObject() == null;
+
+        str.append(" ExecutionId:").append(this.msgId).
+        append(" ExecStateId:").append(this.execStateId).
+        append(" Status:").append(this.status).
+        append(" WorkerKey:").append(this.getId()).
+                append(" IsAck:").append(isAck);
+
+        return str.toString();
+    }
 
 	@SuppressWarnings("CloneDoesntDeclareCloneNotSupportedException")
 	@Override
