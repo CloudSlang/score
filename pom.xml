@@ -3,7 +3,7 @@
 
 	<groupId>com.hp.score</groupId>
 	<artifactId>score-parent</artifactId>
-	<version>0.1.222-SNAPSHOT</version>
+	<version>0.1.222</version>
 	<packaging>pom</packaging>
 
 	<scm>
