@@ -11,7 +11,6 @@ import org.apache.log4j.Logger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
-import org.springframework.boot.autoconfigure.velocity.VelocityAutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -26,9 +25,7 @@ import java.util.Set;
  * @author Bonczidai Levente
  */
 @Configuration
-@EnableAutoConfiguration(exclude={
-        LiquibaseAutoConfiguration.class,
-        VelocityAutoConfiguration.class})
+@EnableAutoConfiguration(exclude={LiquibaseAutoConfiguration.class})
 @ComponentScan({"com.hp.score.web.controller","com.hp.score.web.services"})
 public class SpringBootApplication {
     public static final String SPRING_WEB_APPLICATION_CONTEXT_XML_PATH = "META-INF.spring/webApplicationContext.xml";

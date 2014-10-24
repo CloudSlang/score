@@ -15,8 +15,8 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Import dependency management from Spring Boot -->
             <dependency>
-                <!-- Import dependency management from Spring Boot -->
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>1.1.7.RELEASE</version>
@@ -34,10 +34,6 @@
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-starter-logging</artifactId>
                 </exclusion>
                 <exclusion>
@@ -48,26 +44,15 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jetty</artifactId>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jpa</artifactId>
+            <version>1.6.1.RELEASE</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
             <version>${spring.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-jpa</artifactId>
-            <version>1.6.1.RELEASE</version>
         </dependency>
         <!-- end of spring dependencies -->
 
@@ -77,10 +62,17 @@
             <version>1.0.0.GA</version>
         </dependency>
 
+        <!-- Add score dependency -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>hello-score</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax</groupId>
+                    <artifactId>javaee-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
