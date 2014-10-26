@@ -44,6 +44,8 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private WorkerConfigurationService workerConfigurationService;
 
+    private boolean isRecoveryDisabled; //System property - whether the executions are recoverable in case of restart/failure.
+
     public SimpleExecutionRunnable(ExecutionService executionService,
                                    OutboundBuffer outBuffer,
                                    InBuffer inBuffer,
@@ -61,6 +63,8 @@ public class SimpleExecutionRunnable implements Runnable {
         this.queueStateIdGeneratorService = queueStateIdGeneratorService;
         this.workerUUID = workerUUID;
         this.workerConfigurationService = workerConfigurationService;
+
+        this.isRecoveryDisabled = Boolean.getBoolean("is.recovery.disabled");
     }
 
     public ExecutionMessage getExecutionMessage() {
@@ -181,7 +185,7 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private boolean isRecoveryCheckpoint(Execution nextStepExecution) {
         //Here we check if we need to go to queue to persist - we can do it with shortcut to InBuffer!!!!!!!!
-        if (nextStepExecution.getSystemContext().containsKey(TempConstants.IS_RECOVERY_CHECKPOINT)) {
+        if (!isRecoveryDisabled && nextStepExecution.getSystemContext().containsKey(TempConstants.IS_RECOVERY_CHECKPOINT)) {
             //clean key
             nextStepExecution.getSystemContext().remove(TempConstants.IS_RECOVERY_CHECKPOINT);
 
