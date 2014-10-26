@@ -1,19 +1,7 @@
 package com.hp.score.schema;
 
-import com.hp.score.engine.node.services.WorkerNodeService;
-import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
-import com.hp.score.engine.queue.services.QueueDispatcherService;
-import com.hp.score.engine.queue.services.QueueStateIdGeneratorService;
-import com.hp.score.engine.queue.services.ScoreEventFactory;
-import com.hp.score.worker.management.services.WorkerManager;
-import com.hp.score.worker.management.services.dbsupport.WorkerDbSupportService;
-import com.hp.score.orchestrator.services.CancelExecutionService;
-import com.hp.score.orchestrator.services.OrchestratorDispatcherService;
-import com.hp.score.orchestrator.services.PauseResumeService;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import com.hp.score.worker.management.WorkerConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,12 +10,21 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.mockito.Mockito.mock;
+import com.hp.score.engine.node.services.WorkerNodeService;
+import com.hp.score.engine.queue.entities.ExecutionMessageConverter;
+import com.hp.score.engine.queue.services.QueueDispatcherService;
+import com.hp.score.engine.queue.services.QueueStateIdGeneratorService;
+import com.hp.score.engine.queue.services.ScoreEventFactory;
+import com.hp.score.orchestrator.services.CancelExecutionService;
+import com.hp.score.orchestrator.services.OrchestratorDispatcherService;
+import com.hp.score.orchestrator.services.PauseResumeService;
+import com.hp.score.worker.management.services.WorkerManager;
+import com.hp.score.worker.management.services.dbsupport.WorkerDbSupportService;
 
+import static org.mockito.Mockito.mock;
 
 /**
  * Date: 1/21/14
- *
  * @author Dima Rassin
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -69,11 +66,6 @@ public class WorkerTest {
         }
 
 		@Bean
-		WorkerConfigurationService workerConfigurationService(){
-			return mock(WorkerConfigurationService.class);
-		}
-
-		@Bean
 		WorkerDbSupportService workerDbSupportService(){
 			return mock(WorkerDbSupportService.class);
 		}
@@ -98,4 +90,5 @@ public class WorkerTest {
 			return mock(QueueStateIdGeneratorService.class);
 		}
 	}
+
 }

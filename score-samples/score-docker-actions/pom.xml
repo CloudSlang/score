@@ -22,7 +22,6 @@
         <dependency>
             <groupId>com.hp.score.sdk</groupId>
             <artifactId>score-content-sdk</artifactId>
-            <version>1.4</version>
         </dependency>
 
 

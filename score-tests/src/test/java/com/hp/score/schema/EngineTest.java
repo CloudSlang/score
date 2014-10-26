@@ -1,20 +1,12 @@
 package com.hp.score.schema;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hp.score.api.ExecutionPlan;
-import com.hp.score.api.ExecutionStep;
-import com.hp.score.api.Score;
-import com.hp.score.api.TriggeringProperties;
-import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
-import com.hp.score.engine.node.services.WorkerLockService;
-import com.hp.score.engine.node.services.WorkerNodeService;
-import com.hp.score.engine.queue.entities.ExecutionMessage;
-import com.hp.score.engine.queue.services.QueueDispatcherService;
-import com.hp.score.engine.queue.services.recovery.MessageRecoveryService;
-import com.hp.score.events.EventBus;
-import com.hp.score.orchestrator.services.PauseResumeService;
-import com.hp.score.orchestrator.services.WorkerDbSupportServiceImpl;
-import liquibase.integration.spring.SpringLiquibase;
+import java.util.Date;
+import java.util.List;
+import java.util.Properties;
+
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
+
 import org.hibernate.ejb.HibernatePersistence;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,18 +30,23 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
+import com.hp.score.api.ExecutionPlan;
+import com.hp.score.api.ExecutionStep;
+import com.hp.score.api.Score;
+import com.hp.score.api.TriggeringProperties;
+import com.hp.score.engine.data.SimpleHiloIdentifierGenerator;
+import com.hp.score.engine.node.services.WorkerNodeService;
+import com.hp.score.engine.queue.entities.ExecutionMessage;
+import com.hp.score.engine.queue.services.QueueDispatcherService;
+import com.hp.score.events.EventBus;
+
+import liquibase.integration.spring.SpringLiquibase;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
  * Date: 1/21/14
- *
  * @author Dima Rassin
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -157,35 +154,11 @@ public class EngineTest {
             return new TransactionTemplate(transactionManager);
         }
 
-        @Bean
-            // required by executionInterruptsService
-        ObjectMapper objectMapper() {
-            return new ObjectMapper();
-        }
-
-        @Bean
-        PauseResumeService pauseResumeService() {
-            return mock(PauseResumeService.class);
-        }
-
-        @Bean
-        WorkerDbSupportServiceImpl workerDbSupportService() {
-            return  new WorkerDbSupportServiceImpl();
-        }
-
-        @Bean
-        WorkerLockService workerLockService() {
-            return mock(WorkerLockService.class);
-        }
-
-        @Bean
-        MessageRecoveryService messageRecoveryService(){
-            return mock(MessageRecoveryService.class);
-        }
-
 		@Bean
 		EventBus eventBus() {
 			return mock(EventBus.class);
 		}
+
 	}
+
 }
