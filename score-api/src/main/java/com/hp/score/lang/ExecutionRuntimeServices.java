@@ -49,6 +49,8 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String FLOW_TERMINATION_TYPE = "FLOW_TERMINATION_TYPE";
 
+//    private static final String REQUESTED_EXECUTION_PLAN_ID = "REQUESTED_EXECUTION_PLAN_ID";
+
     protected Map<String, Serializable> contextMap = new HashMap<>();
 
     public ExecutionRuntimeServices(){}
@@ -132,6 +134,16 @@ public class ExecutionRuntimeServices implements Serializable {
     public void setFlowTerminationType(ExecutionStatus flowTerminationType) {
         contextMap.put(FLOW_TERMINATION_TYPE, flowTerminationType);
     }
+
+//    public void requestToChangeExecutionPlan(Long runningExecutionPlanId) {
+//        contextMap.put(REQUESTED_EXECUTION_PLAN_ID, runningExecutionPlanId);
+//    }
+//
+//    public Long handleRequestForChangingExecutionPlan(){
+//        Long requestedExecutionPlanId = getFromMap(REQUESTED_EXECUTION_PLAN_ID);
+//        contextMap.put(REQUESTED_EXECUTION_PLAN_ID, null);
+//        return requestedExecutionPlanId;
+//    }
 
     /**
      *
