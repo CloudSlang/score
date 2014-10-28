@@ -1,4 +1,4 @@
-package com.hp.score.web;
+package com.hp.score.samples;
 
 import com.hp.score.samples.FlowMetadata;
 

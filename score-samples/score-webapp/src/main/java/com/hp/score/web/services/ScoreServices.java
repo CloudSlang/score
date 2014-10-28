@@ -5,20 +5,13 @@ import com.hp.score.api.TriggeringProperties;
 import com.hp.score.events.EventBus;
 import com.hp.score.events.ScoreEventListener;
 import com.hp.score.samples.FlowMetadata;
+import com.hp.score.samples.FlowMetadataLoader;
 import com.hp.score.samples.openstack.actions.InputBinding;
 import com.hp.score.samples.utility.ReflectionUtility;
-import com.hp.score.web.FlowMetadataContainer;
-import com.hp.score.web.SpringBootApplication;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.yaml.snakeyaml.TypeDescription;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.*;
 
@@ -36,10 +29,11 @@ public final class ScoreServices {
     @Autowired
     private EventBus eventBus;
 
-    private static final String AVAILABLE_FLOWS_PATH = "/available_flows_metadata.yaml";
     private final static Logger logger = Logger.getLogger(ScoreServices.class);
+    private final static String AVAILABLE_FLOWS_PATH = "/available_flows_metadata.yaml";
 
-    private static final List<FlowMetadata> predefinedFlows = loadPredefinedFlowsMetadata();
+    private static final List<FlowMetadata> predefinedFlows =
+            FlowMetadataLoader.loadPredefinedFlowsMetadata(AVAILABLE_FLOWS_PATH);
 
     public long triggerWithBindings(String identifierOrName, List<InputBinding> bindings) {
         long executionId = -1;
@@ -96,33 +90,5 @@ public final class ScoreServices {
         } else {
             throw new Exception("Exception occurred during TriggeringProperties extraction");
         }
-    }
-
-    private static List<FlowMetadata> loadPredefinedFlowsMetadata() {
-        List<FlowMetadata> predefinedFlows = new ArrayList<>();
-
-        try {
-            InputStream inputStream = SpringBootApplication.class.getResourceAsStream(AVAILABLE_FLOWS_PATH);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String line;
-            String document = "";
-            while ((line = reader.readLine()) != null) {
-                document += line;
-                document += "\n";
-            }
-            reader.close();
-
-            Constructor constructor = new Constructor(FlowMetadataContainer.class);
-            TypeDescription flowDescription = new TypeDescription(FlowMetadataContainer.class);
-            flowDescription.putListPropertyType("flows", FlowMetadata.class);
-            constructor.addTypeDescription(flowDescription);
-            Yaml yaml = new Yaml(constructor);
-            Object flowAsObject = yaml.load(document);
-            predefinedFlows = ((FlowMetadataContainer) flowAsObject).getFlows();
-        } catch (Exception ex) {
-            logger.info(ex);
-        }
-
-        return predefinedFlows;
     }
 }
