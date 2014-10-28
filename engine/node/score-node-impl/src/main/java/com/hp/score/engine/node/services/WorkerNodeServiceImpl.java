@@ -1,22 +1,21 @@
 package com.hp.score.engine.node.services;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.hp.score.api.nodes.WorkerStatus;
+import com.hp.score.engine.node.entities.WorkerNode;
+import com.hp.score.engine.node.repositories.WorkerNodeRepository;
+import com.hp.score.engine.versioning.services.VersionService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.hp.score.engine.node.entities.WorkerNode;
-import com.hp.score.engine.node.repositories.WorkerNodeRepository;
-import com.hp.score.engine.versioning.services.VersionService;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Amit Levin
@@ -84,7 +83,7 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService {
 	@Override
 	@Transactional
 	public List<WorkerNode> readAllNotDeletedWorkers() {
-		return workerNodeRepository.findByDeleted(false);
+		return workerNodeRepository.findByDeletedOrderByIdAsc(false);
 	}
 
 	@Override

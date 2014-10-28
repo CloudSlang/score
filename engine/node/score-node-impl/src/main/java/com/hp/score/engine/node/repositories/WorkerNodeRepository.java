@@ -20,7 +20,7 @@ public interface WorkerNodeRepository extends JpaRepository<WorkerNode,Long> {
 
     List<WorkerNode> findByActiveAndDeleted(boolean active, boolean deleted);
 
-    List<WorkerNode> findByDeleted(boolean deleted);
+    List<WorkerNode> findByDeletedOrderByIdAsc(boolean deleted);
 
 	List<WorkerNode> findByActiveAndStatusAndDeleted(boolean isActive, WorkerStatus status, boolean deleted);
 
