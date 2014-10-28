@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+
+            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" >
+        <property name="url" value="#{systemProperties['DB_URL']?: 'jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1;MVCC=TRUE;LOCK_TIMEOUT=5000'}" />
+        <property name="driverClassName" value="#{systemProperties['DB_DRIVER'] ?: 'org.h2.Driver'}" />
+        <property name="username" value="#{systemProperties['DB_USER'] ?: 'sa'}" />
+        <property name="password" value="#{systemProperties['DB_PASS'] ?: 'sa'}" />
+    </bean>
+
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+          p:jpaProperties-ref="hibernateProperties"
+          p:dataSource-ref="dataSource"
+          p:persistenceProviderClass="org.hibernate.ejb.HibernatePersistence"
+          p:packagesToScan="com.hp.score"
+          depends-on="liquibase,scoreHiloFactoryBean">
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"
+                  p:showSql="false"
+                  p:generateDdl="true"
+                    />
+        </property>
+    </bean>
+
+    <util:properties id="hibernateProperties">
+        <prop key="hibernate.show_sql">false</prop>
+        <prop key="hibernate.format_sql">true</prop>
+        <prop key="hibernate.hbm2ddl.auto">validate</prop>
+        <prop key="hibernate.dialect_resolvers">com.hp.score.engine.dialects.ScoreDialectResolver</prop>
+        <prop key="hibernate.cache.use_second_level_cache">false</prop>
+    </util:properties>
+
+    <bean id="liquibase" class="liquibase.integration.spring.SpringLiquibase"
+          p:dataSource-ref="dataSource"
+          p:changeLog="classpath:/META-INF/database/score.changes.xml"/>
+
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"
+          p:entityManagerFactory-ref="entityManagerFactory" />
+
+    <bean id="transactionTemplate"
+          class="org.springframework.transaction.support.TransactionTemplate"
+          p:transactionManager-ref="transactionManager" />
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate" p:dataSource-ref="dataSource"/>
+
+</beans>

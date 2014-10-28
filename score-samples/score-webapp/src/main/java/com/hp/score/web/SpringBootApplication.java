@@ -28,7 +28,9 @@ import java.util.Set;
 @EnableAutoConfiguration(exclude={LiquibaseAutoConfiguration.class})
 @ComponentScan({"com.hp.score.web.controller","com.hp.score.web.services"})
 public class SpringBootApplication {
-    public static final String SPRING_WEB_APPLICATION_CONTEXT_XML_PATH = "META-INF.spring/webApplicationContext.xml";
+
+    public static final String WEB_APP_CONTEXTS_XML = "webappContexts.xml";
+
     private static final Logger logger = Logger.getLogger(SpringBootApplication.class);
     private ScoreServices scoreServices;
 
@@ -42,7 +44,7 @@ public class SpringBootApplication {
             ScoreController scoreController = springBootContext.getBean(ScoreController.class);
 
             //load score context
-            scoreContext = new ClassPathXmlApplicationContext(SPRING_WEB_APPLICATION_CONTEXT_XML_PATH);
+            scoreContext = new ClassPathXmlApplicationContext(WEB_APP_CONTEXTS_XML);
             springBootApplication.scoreServices = scoreContext.getBean(ScoreServices.class);
             scoreController.setScoreServices(springBootApplication.scoreServices);
             springBootApplication.registerEventListeners(springBootApplication.scoreServices);
