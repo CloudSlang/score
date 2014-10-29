@@ -27,6 +27,7 @@ import com.hp.score.samples.openstack.actions.MatchType;
 import com.hp.score.samples.openstack.actions.NavigationMatcher;
 
 import java.io.BufferedReader;
+import java.io.Console;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -57,6 +58,7 @@ public class OpenstackCommons {
 	public static final String SEND_EMAIL_CLASS = "com.hp.score.samples.openstack.actions.SimpleSendEmail";
 	public static final String HTTP_CLIENT_ACTION_CLASS = "com.hp.score.content.httpclient.HttpClientAction";
 	public static final String STRING_OCCURRENCE_COUNTER_CLASS = "com.hp.score.samples.openstack.actions.StringOccurrenceCounter";
+    public static final String SSH_CLASS = "com.hp.score.samples.docker.actions.SSHAction";
 	public static final String SUCCESS_STEP_ACTION_METHOD = "successStepAction";
 	public static final String FAILURE_STEP_ACTION_METHOD = "failureStepAction";
 	public static final String HTTP_CLIENT_ACTION_METHOD = "execute";
@@ -82,11 +84,13 @@ public class OpenstackCommons {
 	public static final String DEFAULT_IMAGE_REF = "9ccd0528-8dba-47f4-ab83-c99b9d94bec1";
 	public static final String USERNAME_KEY = "username";
 	public static final String PASSWORD_KEY = "password";
+    public static final String CONNECTION_IP_KEY = "connectionIP";
 	public static final String PARSED_TOKEN_KEY = "parsedToken";
 	public static final String TOKEN_KEY = "token";
 	public static final String TENANT_KEY = "tenant";
 	public static final String HEADERS_KEY = "headers";
 	public static final String PORT_KEY = "port";
+    public static final String COMMAND_KEY = "command";
 	public static final String RETURN_RESULT_KEY = "returnResult";
 	public static final String PARSED_TENANT_KEY = "parsedTenant";
 	public static final String SERVER_NAMES_LIST_KEY = "serverNamesList";
@@ -175,7 +179,28 @@ public class OpenstackCommons {
 
 	public static String readInput(BufferedReader reader, String inputName) {
 		System.out.print(inputName + ": ");
-		return readLine(reader);
+		return readLine(reader); //todo spring read password
+		 //third party hide password
+		//utilities for command line
+	}
+	public static String readObfuscatedInput(BufferedReader reader, String inputName){
+
+		Console console = null;
+
+		try{
+			console = System.console();
+			if (console != null) {
+				char[] pwd = console.readPassword(inputName + ": ");
+				String fromCharArray = new String(pwd);
+				return fromCharArray;
+			}
+			else{
+				return readInput(reader, inputName);
+			}
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}
+		return null;
 	}
 
 	public static String readPredefinedInput(BufferedReader reader, String inputName, String defaultValue) {

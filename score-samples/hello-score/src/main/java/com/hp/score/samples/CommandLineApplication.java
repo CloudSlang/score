@@ -43,8 +43,10 @@ import com.hp.score.samples.openstack.actions.InputBinding;
 import com.hp.score.samples.openstack.actions.OOActionRunner;
 import com.hp.score.samples.utility.ReflectionUtility;
 
+import static com.hp.score.samples.openstack.OpenstackCommons.PASSWORD_KEY;
 import static com.hp.score.samples.openstack.OpenstackCommons.prepareExecutionContext;
 import static com.hp.score.samples.openstack.OpenstackCommons.readInput;
+import static com.hp.score.samples.openstack.OpenstackCommons.readObfuscatedInput;
 import static com.hp.score.samples.openstack.OpenstackCommons.readPredefinedInput;
 import static com.hp.score.samples.utility.ReadInputUtility.readIntegerInput;
 
@@ -154,25 +156,30 @@ public class CommandLineApplication {
         score.trigger(triggeringProperties);
     }
 
-    private static void manageBindings(List<InputBinding> bindings, BufferedReader reader) {
-        for (InputBinding inputBinding : bindings) {
-            String input = null;
-            boolean validValueEntered = false;
-            while (!validValueEntered) {
-                if (inputBinding.hasDefaultValue()) {
-                    input = readPredefinedInput(reader, inputBinding.getDescription(), inputBinding.getValue()).trim();
-                    validValueEntered = true;
-                } else {
-                    input = readInput(reader, inputBinding.getDescription()).trim();
-                    validValueEntered = !input.isEmpty();
-                }
-            }
-            //if input is empty use the default value already set, otherwise use input
-            if (!(input==null || input.isEmpty())) {
-                inputBinding.setValue(input);
-            }
-        }
-    }
+	private static void manageBindings(List<InputBinding> bindings, BufferedReader reader) {
+		for (InputBinding inputBinding : bindings) {
+			String input = null;
+			boolean validValueEntered = false;
+			while (!validValueEntered) {
+				if (inputBinding.hasDefaultValue()) {
+					input = readPredefinedInput(reader, inputBinding.getDescription(), inputBinding.getValue()).trim();
+					validValueEntered = true;
+				} else {
+					if(inputBinding.getSourceKey().equals(PASSWORD_KEY)){
+						input = readObfuscatedInput(reader, inputBinding.getDescription().trim());
+
+					}else {
+						input = readInput(reader, inputBinding.getDescription()).trim();
+					}
+					validValueEntered = !input.isEmpty();
+				}
+			}
+			//if input is empty use the default value already set, otherwise use input
+			if (!(input==null || input.isEmpty())) {
+				inputBinding.setValue(input);
+			}
+		}
+	}
 
     private static List<InputBinding> prepareInputBindings(String className, String methodName) throws Exception {
         Object returnValue = ReflectionUtility.invokeMethodByName(className, methodName);
