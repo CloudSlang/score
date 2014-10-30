@@ -113,7 +113,9 @@ public class POCControlActions {
         }
         //todo: hook
 
-        runEnv.putReturnValues(new ReturnValues(returnValue, null));
+        ReturnValues returnValues = new ReturnValues(returnValue, null);
+        runEnv.putReturnValues(returnValues);
+        printReturnValues(returnValues);
 
     }
 
@@ -136,7 +138,9 @@ public class POCControlActions {
 
         //todo: hook
 
-        runEnv.putReturnValues(new ReturnValues(operationReturnOutputs, answer));
+        ReturnValues returnValues = new ReturnValues(operationReturnOutputs, answer);
+        runEnv.putReturnValues(returnValues);
+        printReturnValues(returnValues);
     }
 
     public void finishTask(@Param("runEnv") RunEnvironment runEnv,
@@ -161,7 +165,9 @@ public class POCControlActions {
         Long position = calculateNextPosition(operationReturnValues.getAnswer(), taskNavigationValues);
         runEnv.putNextStepPosition(position);
         if (position == null) {
-            runEnv.putReturnValues(new ReturnValues(new HashMap<String, String>(), operationReturnValues.getAnswer()));
+            ReturnValues returnValues = new ReturnValues(new HashMap<String, String>(), operationReturnValues.getAnswer());
+            runEnv.putReturnValues(returnValues);
+            printReturnValues(returnValues);
         }
         System.out.println("next position: " + position);
 
@@ -179,11 +185,22 @@ public class POCControlActions {
             for (Map.Entry<String, Serializable> output : taskOutputs.entrySet()) {
                 String outputKey = output.getKey();
                 Serializable outputValue = output.getValue();
+                String outputRetValue = null;
                 if (outputValue != null) {
-                    // TODO: missing - evaluate script
-                    String outputRetValue = operationResultContext.get(outputValue);
-                    tempContext.put(outputKey, outputRetValue);
+                    if (outputValue instanceof String) {
+                        // assigning from another param
+                        String paramName = (String) outputValue;
+                        // TODO: missing - evaluate script
+                        outputRetValue = operationResultContext.get(paramName);
+                        if (outputRetValue == null)
+                            outputRetValue = paramName;
+                    } else {
+                        tempContext.put(outputKey, outputValue);
+                    }
+                } else {
+                    outputRetValue = operationResultContext.get(outputKey);
                 }
+                tempContext.put(outputKey, outputRetValue);
             }
         }
         return tempContext;
@@ -221,8 +238,14 @@ public class POCControlActions {
 
     private void printMap(Map<String, Serializable> map, String label) {
         if (MapUtils.isEmpty(map)) return;
-//        MapUtils.debugPrint(System.out, label, map);
-//        System.out.println("---------------------");
+        MapUtils.debugPrint(System.out, label, map);
+        System.out.println("---------------------");
+    }
+
+    private void printReturnValues(ReturnValues returnValues){
+        if(returnValues == null) return;
+        MapUtils.debugPrint(System.out, "Return Values", returnValues.getOutputs());
+        System.out.println("Answer: " + returnValues.getAnswer());
     }
 
     private void updateCallArguments(RunEnvironment runEnvironment, Map<String, Serializable> newContext) {
@@ -263,14 +286,20 @@ public class POCControlActions {
             for (Map.Entry<String, Serializable> output : outputs.entrySet()) {
                 String outputKey = output.getKey();
                 Serializable outputValue = output.getValue();
+                String outputRetValue = null;
                 if (outputValue != null) {
-                    // TODO: missing - evaluate script
-                    String outputRetValue = retValue.get(getRetValueKey((String) outputValue));
-                    tempContext.put(outputKey, outputRetValue);
+                    if (outputValue instanceof String) {
+                        // assigning from another param
+                        String paramName = (String) outputValue;
+                        // TODO: missing - evaluate script
+                        outputRetValue = retValue.get(getRetValueKey(paramName));
+                        if (outputRetValue == null)
+                            outputRetValue = paramName;
+                    }
                 } else {
-                    //from inputs
-                    tempContext.put(outputKey, (String) context.get(outputKey));
+                    outputRetValue = (String)context.get(outputKey);
                 }
+                tempContext.put(outputKey, outputRetValue);
             }
         }
         return tempContext;

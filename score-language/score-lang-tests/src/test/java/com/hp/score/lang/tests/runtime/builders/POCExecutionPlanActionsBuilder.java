@@ -116,7 +116,7 @@ public class POCExecutionPlanActionsBuilder {
         Map<String, Serializable> actionData = new HashMap<>();
         HashMap<String, Serializable> taskPublishValues = createTaskPublishValues();
         actionData.put("taskPublishValues", taskPublishValues);
-        HashMap<String, Long> taskNavigationValues = createSecondTaskNavigationValues();
+        HashMap<String, Long> taskNavigationValues = createFirstTaskNavigationValues();
         actionData.put("taskNavigationValues", taskNavigationValues);
         ExecutionStep finishTask = createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "finishTask", ++index, actionData);
         finishTask.setNavigationData(null);
@@ -151,7 +151,7 @@ public class POCExecutionPlanActionsBuilder {
     private HashMap<String, Serializable> createOperationInputs() {
         LinkedHashMap<String, Serializable> operationInputs = new LinkedHashMap<>();
         operationInputs.put("user", "first_name");
-        operationInputs.put("string", "user");
+        operationInputs.put("string", "first_name");
         return operationInputs;
     }
 
@@ -176,7 +176,7 @@ public class POCExecutionPlanActionsBuilder {
         return taskPublishValues;
     }
 
-    private HashMap<String,Long> createSecondTaskNavigationValues() {
+    private HashMap<String,Long> createFirstTaskNavigationValues() {
         LinkedHashMap<String, Long> navigationValues = new LinkedHashMap<>();
         navigationValues.put("SUCCESS", index + 1);
         navigationValues.put("FAIL", null);
