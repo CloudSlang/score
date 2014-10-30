@@ -57,114 +57,108 @@ public class POCExecutionPlanActionsBuilder {
         executionPlan = new ExecutionPlan();
         executionPlan.setFlowUuid("childFlow");
         executionPlan.setBeginStep(1L);
-        executionPlan.addStep(createFlowPreActionStep());
+        executionPlan.addStep(createFlowStartStep());
         addFirstStep();
-        addSecondStep();
-        executionPlan.addStep(createFlowPostActionStep());
+        executionPlan.addStep(createFlowEndStep());
     }
 
     private void addFirstStep() {
-        executionPlan.addStep(createPreOperationStep());
-        executionPlan.addStep(createPreActionStep());
-        executionPlan.addStep(createActionStep(LangActions.class.getName(), "parseUrl"));
-        executionPlan.addStep(createPostActionStep());
-        executionPlan.addStep(createPostOperationStep());
-    }
-
-    private void addSecondStep() {
-        executionPlan.addStep(createPreOperationStep());
-        executionPlan.addStep(createPreActionStep());
-        executionPlan.addStep(createActionStep(LangActions.class.getName(), "parseUrl"));
-        executionPlan.addStep(createPostActionStep());
-        executionPlan.addStep(createPostOperationStep());
+        executionPlan.addStep(createBeginTaskStep());
+        executionPlan.addStep(createStartStep());
+        executionPlan.addStep(createActionStep(LangActions.class.getName(), "printAndReturnDur"));
+        executionPlan.addStep(createEndStep());
+        executionPlan.addStep(createFirstFinishTaskStep());
     }
 
     public ExecutionPlan getExecutionPlan(){
         return executionPlan;
     }
 
-    private ExecutionStep createFlowPreActionStep() {
+    private ExecutionStep createFlowStartStep() {
         Map<String, Serializable> actionData = new HashMap<>();
         HashMap<String, Serializable> flowInputs = createFlowInputs();
         actionData.put("operationInputs", flowInputs);
-        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "preAction", ++index, actionData);
+        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "start", ++index, actionData);
     }
 
-    private ExecutionStep createPreOperationStep(){
+    private ExecutionStep createBeginTaskStep(){
         Map<String, Serializable> actionData = new HashMap<>();
-        HashMap<String, Serializable> taskInputs = createPreOperationTaskInputs();
+        HashMap<String, Serializable> taskInputs = createBeginTaskTaskInputs();
         actionData.put("taskInputs", taskInputs);
-        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "preOperation", ++index, actionData);
+        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "beginTask", ++index, actionData);
     }
 
-    private ExecutionStep createPreActionStep() {
+    private ExecutionStep createStartStep() {
         Map<String, Serializable> actionData = new HashMap<>();
         HashMap<String, Serializable> operationInputs = createOperationInputs();
         actionData.put("operationInputs", operationInputs);
-        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "preAction", ++index, actionData);
+        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "start", ++index, actionData);
     }
 
     private ExecutionStep createActionStep(String actionClassName, String actionMethodName) {
         Map<String, Serializable> actionData = new HashMap<>();
-        //put the actual action class name and method name
         actionData.put(ACTION_CLASS_KEY, actionClassName);
         actionData.put(ACTION_METHOD_KEY, actionMethodName);
         actionData.put("actionType", ActionType.JAVA);
         return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "doAction", ++index, actionData);
     }
 
-    private ExecutionStep createPostActionStep() {
+    private ExecutionStep createEndStep() {
         Map<String, Serializable> actionData = new HashMap<>();
         HashMap<String, Serializable> operationOutputs = createOperationOutputs();
         actionData.put("operationOutputs", operationOutputs);
         HashMap<String, Serializable> operationAnswers = createOperationAnswers();
         actionData.put("operationAnswers", operationAnswers);
-        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "postAction", ++index, actionData);
+        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "end", ++index, actionData);
     }
 
-    private ExecutionStep createPostOperationStep(){
+    private ExecutionStep createFirstFinishTaskStep(){
         Map<String, Serializable> actionData = new HashMap<>();
         HashMap<String, Serializable> taskPublishValues = createTaskPublishValues();
         actionData.put("taskPublishValues", taskPublishValues);
-        HashMap<String, Long> taskNavigationValues = createTaskNavigationValues();
+        HashMap<String, Long> taskNavigationValues = createSecondTaskNavigationValues();
         actionData.put("taskNavigationValues", taskNavigationValues);
-        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "postOperation", ++index, actionData);
+        ExecutionStep finishTask = createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "finishTask", ++index, actionData);
+        finishTask.setNavigationData(null);
+        return finishTask;
     }
 
-    private ExecutionStep createFlowPostActionStep() {
+    private ExecutionStep createFlowEndStep() {
         Map<String, Serializable> actionData = new HashMap<>();
         HashMap<String, Serializable> flowOutputs = createFlowOutputs();
         actionData.put("operationOutputs", flowOutputs);
         HashMap<String, Serializable> flowAnswers = createFlowAnswers();
         actionData.put("operationAnswers", flowAnswers);
-        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "postAction", null, actionData);
+        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "end", null, actionData);
     }
 
-    private HashMap<String,Serializable> createPreOperationTaskInputs() {
-        LinkedHashMap<String, Serializable> flowInputs = new LinkedHashMap<>();
-        flowInputs.put("task_host", "hello");
-        flowInputs.put("nova_port", null);
-        return flowInputs;
+    private HashMap<String,Serializable> createBeginTaskTaskInputs() {
+        LinkedHashMap<String, Serializable> taskInputs = new LinkedHashMap<>();
+        taskInputs.put("first_name", null);
+        taskInputs.put("mail_server", null);
+        taskInputs.put("admin_user", null);
+        return taskInputs;
     }
 
     private HashMap<String, Serializable> createFlowInputs() {
         LinkedHashMap<String, Serializable> flowInputs = new LinkedHashMap<>();
-        flowInputs.put("nova_host", "host1");
-        flowInputs.put("nova_port", "1234");
+        flowInputs.put("first_name", "emp_first_name");
+        flowInputs.put("mail_server", null);
+        flowInputs.put("admin_user", null);
         return flowInputs;
     }
 
     private HashMap<String, Serializable> createOperationInputs() {
         LinkedHashMap<String, Serializable> operationInputs = new LinkedHashMap<>();
-        operationInputs.put("host", "$task_host");
-        operationInputs.put("port", "7777");
+        operationInputs.put("user", "first_name");
+        operationInputs.put("string", "user");
         return operationInputs;
     }
 
     private HashMap<String, Serializable> createOperationOutputs(){
         LinkedHashMap<String, Serializable> operationOutputs = new LinkedHashMap<>();
-        operationOutputs.put("host", null);
-        operationOutputs.put("myUrl", "retVal[url]");
+        operationOutputs.put("user", null);
+        operationOutputs.put("duration", "retVal[dur]");
         return operationOutputs;
     }
 
@@ -177,21 +171,22 @@ public class POCExecutionPlanActionsBuilder {
 
     private HashMap<String, Serializable> createTaskPublishValues() {
         LinkedHashMap<String, Serializable> taskPublishValues = new LinkedHashMap<>();
-        taskPublishValues.put("host", null);
-        taskPublishValues.put("task_url", "$url");
+        taskPublishValues.put("user", null);
+        taskPublishValues.put("duration", null);
         return taskPublishValues;
     }
 
-    private HashMap<String,Long> createTaskNavigationValues() {
+    private HashMap<String,Long> createSecondTaskNavigationValues() {
         LinkedHashMap<String, Long> navigationValues = new LinkedHashMap<>();
-        navigationValues.put("SUCCESS", null);
+        navigationValues.put("SUCCESS", index + 1);
         navigationValues.put("FAIL", null);
         return navigationValues;
     }
 
     private HashMap<String, Serializable> createFlowOutputs() {
         LinkedHashMap<String, Serializable> flowOutputs = new LinkedHashMap<>();
-        flowOutputs.put("flow_url", "$task_url");
+        flowOutputs.put("user", null);
+        flowOutputs.put("duration", null);
         return flowOutputs;
     }
 

@@ -29,11 +29,17 @@ import com.hp.score.lang.ExecutionRuntimeServices;
 public class Navigations {
 
     public Long navigate(String subFlowId,
-                                @Param("runEnv") RunEnvironment runEnv,
-                                ExecutionRuntimeServices executionRuntimeServices,
-                                Long RUNNING_EXECUTION_PLAN_ID,
-                                Long nextStepId){
-        if(subFlowId != null){
+                         @Param("runEnv") RunEnvironment runEnv,
+                         ExecutionRuntimeServices executionRuntimeServices,
+                         Long RUNNING_EXECUTION_PLAN_ID,
+                         Long nextStepId) {
+
+        Long nextStepPosition = runEnv.removeNextStepPosition();
+        if (nextStepPosition != null) {
+            return nextStepPosition;
+        }
+
+        if (subFlowId != null) {
             ParentFlowStack stack = runEnv.getParentFlowStack();
             stack.pushParentFlowData(new ParentFlowData(RUNNING_EXECUTION_PLAN_ID, nextStepId));
 

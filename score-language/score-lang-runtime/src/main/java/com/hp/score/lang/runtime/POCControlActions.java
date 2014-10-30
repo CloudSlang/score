@@ -27,12 +27,7 @@ import org.apache.commons.collections.MapUtils;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: stoneo
@@ -41,32 +36,56 @@ import java.util.Map;
  */
 public class POCControlActions {
 
-    private final String OPERATION_ANSWER = "OPERATION_ANSWER";
+    private static int path = 0;
+    private int PATH_SIZE = 100;
 
-    public void preOperation(@Param("taskInputs") LinkedHashMap<String, Serializable> taskInputs,
-                             @Param("runEnv") RunEnvironment runEnv,
-                             Map<String, Serializable> actionData) {
-
-        Map<String, Serializable> operationContext = createBindInputsTempContext(runEnv, taskInputs);
-
-        //todo: hook
-
-        updateCurrentContextAndPushParentToStack(runEnv, operationContext);
-    }
-
-    public void preAction(@Param("operationInputs") LinkedHashMap<String, Serializable> operationInputs,
+    public void beginTask(@Param("taskInputs") LinkedHashMap<String, Serializable> taskInputs,
                           @Param("runEnv") RunEnvironment runEnv,
                           Map<String, Serializable> actionData) {
 
-        resolveGroups();
+        System.out.println("================================");
+        System.out.println("path: " + ++path + " - beginTask");
+        System.out.println("================================");
 
-        Map<String, Serializable> actionContext = createBindInputsTempContext(runEnv, operationInputs);
-        //todo: clone action context before updating
-        runEnv.getCurrentContext().putAll(actionContext);
+        runEnv.removeCallArguments();
+        runEnv.removeReturnValues();
+
+        Map<String, Serializable> flowContext = runEnv.getStack().popContext();
+
+        Map<String, Serializable> operationArguments = createBindInputsMap(flowContext, taskInputs);
 
         //todo: hook
 
-        updateCurrentContextAndPushParentToStack(runEnv, actionContext);
+        updateCallArgumentsAndPushContextToStack(runEnv, flowContext, operationArguments);
+    }
+
+    public void start(@Param("operationInputs") LinkedHashMap<String, Serializable> operationInputs,
+                      @Param("runEnv") RunEnvironment runEnv,
+                      HashMap<String, Serializable> userInputs,
+                      Map<String, Serializable> actionData) {
+
+        path *= PATH_SIZE;
+        System.out.println("================================");
+        System.out.println("path: " + path + " - start");
+        System.out.println("================================");
+        Map<String, Serializable> operationContext = new HashMap<>();
+
+        resolveGroups();
+
+        Map<String, Serializable> callArguments = runEnv.removeCallArguments();
+        callArguments.putAll(userInputs);
+
+        Map<String, Serializable> actionArguments = createBindInputsMap(callArguments, operationInputs);
+
+        //todo: clone action context before updating
+        operationContext.putAll(actionArguments);
+
+        //done with the user inputs, don't want it to be available in next start steps..
+        userInputs.clear();
+
+        //todo: hook
+
+        updateCallArgumentsAndPushContextToStack(runEnv, operationContext, actionArguments);
 
     }
 
@@ -75,12 +94,16 @@ public class POCControlActions {
                          ActionType actionType,
                          @Param("className") String className,
                          @Param("methodName") String methodName,
-                          Map<String, Serializable> actionData) {
+                         Map<String, Serializable> actionData) {
 
+        System.out.println("================================");
+        System.out.println("doAction");
+        System.out.println("================================");
         Map<String, String> returnValue = new HashMap<>();
-        switch (actionType){
+        Map<String, Serializable> callArguments = runEnv.removeCallArguments();
+        switch (actionType) {
             case JAVA:
-                returnValue = runAction(runEnv.getCurrentContext(), nonSerializableExecutionData, className, methodName);
+                returnValue = runAction(callArguments, nonSerializableExecutionData, className, methodName);
                 break;
             case PYTHON:
                 returnValue = new HashMap<>();
@@ -90,46 +113,59 @@ public class POCControlActions {
         }
         //todo: hook
 
-        ReturnContext ret= new ReturnContext(returnValue, null);
+        runEnv.putReturnValues(new ReturnValues(returnValue, null));
 
-        updateCurrentContext(runEnv, returnValue);
     }
 
-    public void postAction(@Param("runEnv") RunEnvironment runEnv,
-                                @Param("operationOutputs") LinkedHashMap<String, Serializable> operationOutputs,
-                                @Param("operationAnswers") LinkedHashMap<String, Serializable> operationAnswers,
-                                Map<String, Serializable> actionData) {
+    public void end(@Param("runEnv") RunEnvironment runEnv,
+                    @Param("operationOutputs") LinkedHashMap<String, Serializable> operationOutputs,
+                    @Param("operationAnswers") LinkedHashMap<String, Serializable> operationAnswers,
+                    Map<String, Serializable> actionData) {
 
 
-        //todo: do we need to bind outputs with the operation context or action context?
-        Map<String, Serializable> actionResultContext = runEnv.getCurrentContext();
+        System.out.println("================================");
+        System.out.println("path: " + path + " - end");
+        System.out.println("================================");
+        path /= PATH_SIZE;
         Map<String, Serializable> operationContext = runEnv.getStack().popContext();
-        
-        Map<String, Serializable> operationResultContext = createOperationBindOutputsContext(operationContext, actionResultContext, operationOutputs);
+        ReturnValues actionReturnValues = runEnv.removeReturnValues();
 
-        String answer = resolveOperationAnswer(actionResultContext, operationAnswers, runEnv);
-        runEnv.setAnswer(answer);
-//        operationResultContext.put(OPERATION_ANSWER, answer);
+        String answer = resolveOperationAnswer(actionReturnValues.getOutputs(), operationAnswers, actionReturnValues.getAnswer());
+
+        Map<String, String> operationReturnOutputs = createOperationBindOutputsContext(operationContext, actionReturnValues.getOutputs(), operationOutputs);
 
         //todo: hook
 
-        updateCurrentContext(runEnv, operationResultContext);
+        runEnv.putReturnValues(new ReturnValues(operationReturnOutputs, answer));
     }
 
-    public void postOperation(@Param("runEnv") RunEnvironment runEnv,
-                              @Param("taskPublishValues") LinkedHashMap<String, Serializable> taskPublishValues,
-                              LinkedHashMap<String, Long> taskNavigationValues,
-                              Map<String, Serializable> actionData) {
+    public void finishTask(@Param("runEnv") RunEnvironment runEnv,
+                           @Param("taskPublishValues") LinkedHashMap<String, Serializable> taskPublishValues,
+                           LinkedHashMap<String, Long> taskNavigationValues,
+                           Map<String, Serializable> actionData) {
 
-        Map<String, Serializable> publishValues = createBindOutputsContext(runEnv.getCurrentContext(), taskPublishValues);
-
-        //todo: hook
-
-        Long position = calculateNextPosition(runEnv.getAnswer(), taskNavigationValues);
+        System.out.println("================================");
+        System.out.println("path: " + path + " - finishTask");
+        System.out.println("================================");
 
         Map<String, Serializable> flowContext = runEnv.getStack().popContext();
+
+        ReturnValues operationReturnValues = runEnv.removeReturnValues();
+
+        Map<String, Serializable> publishValues = createBindOutputsContext(operationReturnValues.getOutputs(), taskPublishValues);
         flowContext.putAll(publishValues);
-        updateCurrentContext(runEnv, flowContext);
+        printMap(flowContext, "flowContext");
+
+        //todo: hook
+
+        Long position = calculateNextPosition(operationReturnValues.getAnswer(), taskNavigationValues);
+        runEnv.putNextStepPosition(position);
+        if (position == null) {
+            runEnv.putReturnValues(new ReturnValues(new HashMap<String, String>(), operationReturnValues.getAnswer()));
+        }
+        System.out.println("next position: " + position);
+
+        runEnv.getStack().pushContext(flowContext);
     }
 
     private Long calculateNextPosition(String answer, LinkedHashMap<String, Long> taskNavigationValues) {
@@ -137,7 +173,7 @@ public class POCControlActions {
         return taskNavigationValues.get(answer);
     }
 
-    private Map<String, Serializable> createBindOutputsContext(Map<String, Serializable> operationResultContext, LinkedHashMap<String, Serializable> taskOutputs) {
+    private Map<String, Serializable> createBindOutputsContext(Map<String, String> operationResultContext, LinkedHashMap<String, Serializable> taskOutputs) {
         Map<String, Serializable> tempContext = new LinkedHashMap<>();
         if (taskOutputs != null) {
             for (Map.Entry<String, Serializable> output : taskOutputs.entrySet()) {
@@ -145,7 +181,7 @@ public class POCControlActions {
                 Serializable outputValue = output.getValue();
                 if (outputValue != null) {
                     // TODO: missing - evaluate script
-                    String outputRetValue = (String)operationResultContext.get(outputValue);
+                    String outputRetValue = operationResultContext.get(outputValue);
                     tempContext.put(outputKey, outputRetValue);
                 }
             }
@@ -153,59 +189,62 @@ public class POCControlActions {
         return tempContext;
     }
 
-    private Map<String, Serializable> createBindInputsTempContext(RunEnvironment runEnv, Map<String, Serializable> inputs) {
-        Map<String, Serializable> currentContext = runEnv.getCurrentContext();
+    private Map<String, Serializable> createBindInputsMap(Map<String, Serializable> callArguments, Map<String, Serializable> inputs) {
         Map<String, Serializable> tempContext = new LinkedHashMap<>();
-        if (inputs != null) {
-            for (Map.Entry<String, Serializable> input : inputs.entrySet()) {
-                String inputKey = input.getKey();
-                Serializable value = input.getValue();
-                if (value != null){
-                    if(value instanceof String && ((String) value).indexOf("$") == 0){
-                        // assigning from another param
-                        String paramName = ((String) value).substring(1);
-                        tempContext.put(inputKey, currentContext.get(paramName));
-                    } else {
-                        tempContext.put(inputKey, value);
-                    }
+        if (MapUtils.isEmpty(inputs)) return tempContext;
+        for (Map.Entry<String, Serializable> input : inputs.entrySet()) {
+            String inputKey = input.getKey();
+            Serializable value = input.getValue();
+            if (value != null) {
+                if (value instanceof String) {
+                    // assigning from another param
+                    String paramName = (String) value;
+                    Serializable callArgument = callArguments.get(paramName);
+                    tempContext.put(inputKey, callArgument == null ? value : callArgument);
                 } else {
-                    tempContext.put(inputKey, currentContext.get(inputKey));
+                    tempContext.put(inputKey, value);
                 }
+            } else {
+                tempContext.put(inputKey, callArguments.get(inputKey));
             }
         }
         return tempContext;
     }
 
-    private void updateCurrentContextAndPushParentToStack(RunEnvironment runEnvironment, Map<String, ? extends Serializable> newContext) {
+    private void updateCallArgumentsAndPushContextToStack(RunEnvironment runEnvironment, Map<String, Serializable> currentContext, Map<String, Serializable> callArguments) {
+        printMap(currentContext, "currentContext");
+        printMap(callArguments, "callArguments");
         ContextStack contextStack = runEnvironment.getStack();
-        Map<String, Serializable> currentContext = runEnvironment.getCurrentContext();
         contextStack.pushContext(currentContext);
-        updateCurrentContext(runEnvironment, newContext);
-
+        updateCallArguments(runEnvironment, callArguments);
     }
 
-    private void updateCurrentContext(RunEnvironment runEnvironment, Map<String, ? extends Serializable> newContext) {
+    private void printMap(Map<String, Serializable> map, String label) {
+        if (MapUtils.isEmpty(map)) return;
+//        MapUtils.debugPrint(System.out, label, map);
+//        System.out.println("---------------------");
+    }
+
+    private void updateCallArguments(RunEnvironment runEnvironment, Map<String, Serializable> newContext) {
         //TODO: put a deep clone of the new context
-        runEnvironment.setCurrentContext(newContext);
+        runEnvironment.putCallArguments(newContext);
     }
 
     private void resolveGroups() {
     }
 
-    private String resolveOperationAnswer(Map<String, Serializable> retValue, LinkedHashMap<String, Serializable> possibleAnswers, RunEnvironment runEnv) {
-        String answer = runEnv.getAnswer();
-        if(answer != null){
+    private String resolveOperationAnswer(Map<String, String> retValue, LinkedHashMap<String, Serializable> possibleAnswers, String answer) {
+        if (answer != null) {
             return answer;
         }
-        if(MapUtils.isNotEmpty(possibleAnswers)){
+        if (MapUtils.isNotEmpty(possibleAnswers)) {
             Iterator iter = possibleAnswers.entrySet().iterator();
-            while (iter.hasNext()){
-                Map.Entry answerEntry = (Map.Entry)iter.next();
+            while (iter.hasNext()) {
+                Map.Entry answerEntry = (Map.Entry) iter.next();
                 Object value = answerEntry.getValue();
-                if(value == null){
+                if (value == null) {
 
-                }
-                else if(eval(value, retValue))
+                } else if (eval(value, retValue))
                     return answerEntry.getKey().toString();
             }
             throw new RuntimeException("No answer");
@@ -213,33 +252,33 @@ public class POCControlActions {
         return "SUCCESS";
     }
 
-    private boolean eval(Object expression, Map<String, Serializable> retValue) {
+    private boolean eval(Object expression, Map<String, String> retValue) {
         //todo: resolve expression
         return true;
     }
 
-    private Map<String, Serializable> createOperationBindOutputsContext(Map<String, Serializable> context, Map<String, Serializable> retValue, Map<String, Serializable> outputs) {
-        Map<String, Serializable> tempContext = new LinkedHashMap<>();
+    private Map<String, String> createOperationBindOutputsContext(Map<String, Serializable> context, Map<String, String> retValue, Map<String, Serializable> outputs) {
+        Map<String, String> tempContext = new LinkedHashMap<>();
         if (outputs != null) {
             for (Map.Entry<String, Serializable> output : outputs.entrySet()) {
                 String outputKey = output.getKey();
                 Serializable outputValue = output.getValue();
                 if (outputValue != null) {
                     // TODO: missing - evaluate script
-                    String outputRetValue = (String)retValue.get(getRetValueKey((String)outputValue));
+                    String outputRetValue = retValue.get(getRetValueKey((String) outputValue));
                     tempContext.put(outputKey, outputRetValue);
                 } else {
                     //from inputs
-                    tempContext.put(outputKey, context.get(outputKey));
+                    tempContext.put(outputKey, (String) context.get(outputKey));
                 }
             }
         }
         return tempContext;
     }
 
-    private String getRetValueKey(String outputValue){
+    private String getRetValueKey(String outputValue) {
         //todo: temp solution. currently removing the prefix of retVal[ and suffix of ]
-        return outputValue.substring(7, outputValue.length()-1);
+        return outputValue.substring(7, outputValue.length() - 1);
     }
 
     private Map<String, String> runAction(Map<String, Serializable> currentContext,
@@ -261,7 +300,7 @@ public class POCControlActions {
         Method actionMethod = getMethodByName(className, methodName);
         Class actionClass = Class.forName(className);
         Object returnObject = actionMethod.invoke(actionClass.newInstance(), parameters);
-        Map<String, String> returnMap = (Map<String, String>) returnObject;
+        @SuppressWarnings("unchecked") Map<String, String> returnMap = (Map<String, String>) returnObject;
         if (returnMap == null) {
             throw new Exception("Action method did not return Map<String,String>");
         } else {
@@ -269,7 +308,7 @@ public class POCControlActions {
         }
     }
 
-    private Object[] extractMethodData(Map<String, Serializable> currentContext, Map<String, Object> nonSerializableExecutionData, String className, String methodName)  {
+    private Object[] extractMethodData(Map<String, Serializable> currentContext, Map<String, Object> nonSerializableExecutionData, String className, String methodName) {
 
         //get the Method object
         Method actionMethod;
@@ -288,14 +327,6 @@ public class POCControlActions {
         return resolveActionArguments(actionMethod, currentContext, nonSerializableExecutionData);
     }
 
-    /**
-     * Extracts the actual method of the action's class
-     *
-     * @param className
-     * @param methodName method name of the actual action
-     * @return actual method represented by Method object
-     * @throws ClassNotFoundException
-     */
     private Method getMethodByName(String className, String methodName) throws ClassNotFoundException {
         Class actionClass = Class.forName(className);
         Method[] methods = actionClass.getDeclaredMethods();
@@ -345,15 +376,15 @@ public class POCControlActions {
     private void handleSerializableSessionContextArgument(Map<String, Serializable> context, List<Object> args, Param annotation) {
         String key = annotation.value();
         Serializable serializableSessionMapValue = context.get(ExecutionParametersConsts.SERIALIZABLE_SESSION_CONTEXT);
-        if (serializableSessionMapValue == null){
+        if (serializableSessionMapValue == null) {
             serializableSessionMapValue = new HashMap<String, Serializable>();
             context.put(ExecutionParametersConsts.SERIALIZABLE_SESSION_CONTEXT, serializableSessionMapValue);
         }
-        Serializable serializableSessionContextObject = ((Map<String, Serializable>)serializableSessionMapValue).get(key);
+        @SuppressWarnings("unchecked") Serializable serializableSessionContextObject = ((Map<String, Serializable>) serializableSessionMapValue).get(key);
         if (serializableSessionContextObject == null) {
             serializableSessionContextObject = new SerializableSessionObject();
             //noinspection unchecked
-            ((Map<String, Serializable>)serializableSessionMapValue).put(key, serializableSessionContextObject);
+            ((Map<String, Serializable>) serializableSessionMapValue).put(key, serializableSessionContextObject);
         }
         args.add(serializableSessionContextObject);
     }

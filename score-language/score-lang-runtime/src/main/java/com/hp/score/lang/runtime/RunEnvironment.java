@@ -19,7 +19,7 @@
 package com.hp.score.lang.runtime;
 
 import java.io.Serializable;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -29,9 +29,11 @@ import java.util.Map;
  */
 public class RunEnvironment implements Serializable{
 
-    private LinkedHashMap<String, Serializable> currentContext;
+    private HashMap<String, Serializable> callArguments;
 
-    private String answer;
+    private ReturnValues returnValues;
+
+    private Long nextStepPosition;
 
     // stack holding the contexts of the parent scopes
     private ContextStack contextStack;
@@ -42,15 +44,9 @@ public class RunEnvironment implements Serializable{
 //    LinkedHashMap<String, Serializable> systemProperties;
 
     public RunEnvironment() {
-        currentContext = new LinkedHashMap<>();
         contextStack = new ContextStack();
         parentFlowStack = new ParentFlowStack();
-
-    }
-
-    public RunEnvironment(Map<String, Serializable> values) {
-        this();
-        currentContext.putAll(values);
+        callArguments = new HashMap<>();
     }
 
     public ContextStack getStack(){
@@ -61,20 +57,34 @@ public class RunEnvironment implements Serializable{
         return parentFlowStack;
     }
 
-    public Map<String, Serializable> getCurrentContext(){
-        return currentContext;
+    public Map<String, Serializable> removeCallArguments() {
+        Map<String, Serializable> callArgumentsValues = callArguments;
+        callArguments = new HashMap<>();
+        return callArgumentsValues;
     }
 
-    public void setCurrentContext(Map<String, ? extends Serializable> context) {
-        currentContext = new LinkedHashMap<>();
-        currentContext.putAll(context);
+    public void putCallArguments(Map<String, Serializable> callArguments) {
+        this.callArguments.putAll(callArguments);
     }
 
-    public String getAnswer() {
-        return answer;
+    public ReturnValues removeReturnValues() {
+        ReturnValues values = returnValues;
+        returnValues = null;
+        return values;
     }
 
-    public void setAnswer(String answer) {
-        this.answer = answer;
+    public void putReturnValues(ReturnValues returnValues) {
+//        MapUtils.debugPrint(System.out, "returnValues", returnValues.getOutputs());
+        this.returnValues = returnValues;
+    }
+
+    public Long removeNextStepPosition() {
+        Long nextStep = nextStepPosition;
+        nextStepPosition = null;
+        return nextStep;
+    }
+
+    public void putNextStepPosition(Long nextStepPosition) {
+        this.nextStepPosition = nextStepPosition;
     }
 }

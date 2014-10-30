@@ -37,4 +37,16 @@ public class LangActions {
         returnValue.put("url", url);
         return returnValue;
     }
+
+    public Map<String, String> print(@Param("string")String string){
+        System.out.println(string);
+        return new HashMap<>();
+    }
+
+    public Map<String, String> printAndReturnDur(@Param("string")String string){
+        System.out.println(string);
+        HashMap<String, String> outputs = new HashMap<>();
+        outputs.put("dur", "120 ms");
+        return outputs;
+    }
 }
