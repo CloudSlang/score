@@ -95,8 +95,12 @@ public class QueueListenerImpl implements QueueListener {
 	public void onTerminated(List<ExecutionMessage> messages) {
 		ScoreEvent[] scoreEvents = handleTerminatedMessages(messages);
 		if (scoreEvents.length > 0) {
-			eventBus.dispatch(scoreEvents);
-		}
+            try {
+                eventBus.dispatch(scoreEvents);
+            } catch (InterruptedException e) {
+                logger.error("Thread is interrupted. Ignoring... ", e);
+            }
+        }
 	}
 
 	private ScoreEvent[] handleTerminatedMessages(List<ExecutionMessage> messages) {
@@ -145,8 +149,12 @@ public class QueueListenerImpl implements QueueListener {
 		deleteExecutionStateObjects(messages);
 		ScoreEvent[] events = createFailureEvents(messages);
 		if (events.length > 0) {
-			eventBus.dispatch(events);
-		}
+            try {
+                eventBus.dispatch(events);
+            } catch (InterruptedException e) {
+                logger.error("Thread is interrupted. Ignoring... ", e);
+            }
+        }
 	}
 
 	private Long pauseExecution(Execution execution) {

@@ -86,7 +86,7 @@ public class QueueListenerImplTest {
 	}
 
 	@Test
-	public void testOnTerminatedWhenNoMessages() {
+	public void testOnTerminatedWhenNoMessages() throws InterruptedException {
 		List<ExecutionMessage> messages = new ArrayList<>();
 		queueListener.onTerminated(messages);
 
@@ -94,7 +94,7 @@ public class QueueListenerImplTest {
 	}
 
 	@Test
-	public void testEventsThrownForOnTerminated() {
+	public void testEventsThrownForOnTerminated() throws InterruptedException {
 		List<ExecutionMessage> messages = new ArrayList<>();
 		messages.add(createExecutionMessage());
 		messages.add(createExecutionMessage());
@@ -156,14 +156,14 @@ public class QueueListenerImplTest {
 	}
 
 	@Test
-	public void testOnFailedWhenNoMessages() {
+	public void testOnFailedWhenNoMessages() throws InterruptedException {
 		List<ExecutionMessage> messages = new ArrayList<>();
 		queueListener.onFailed(messages);
 		verify(eventBus, never()).dispatch();
 	}
 
 	@Test
-	public void testOnFailedSendsEvents() {
+	public void testOnFailedSendsEvents() throws InterruptedException {
 		List<ExecutionMessage> messages = new ArrayList<>();
 		Execution execution1 = createBranchExecution();
 		Execution execution2 = new Execution();

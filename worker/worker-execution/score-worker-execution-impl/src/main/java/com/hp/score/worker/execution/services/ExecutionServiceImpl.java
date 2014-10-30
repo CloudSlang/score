@@ -69,7 +69,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	private EventBus eventBus;
 
 	@Override
-	public Execution execute(Execution execution) throws InterruptedException{
+	public Execution execute(Execution execution) throws InterruptedException {
 		try {
 			// handle flow cancellation
 			if(handleCancelledFlow(execution)) {
@@ -101,21 +101,21 @@ public final class ExecutionServiceImpl implements ExecutionService {
 			}
 			return execution;
 		}
+        catch(InterruptedException ex) {
+            throw ex;
+        }
         catch(Exception ex) {
-            if(ex instanceof InterruptedException){ //todo - throw from EventBuffer InterruptException and not cover it under RuntimeException!!!!
-                throw ex; //for recovery purposes, in case thread was in wait on stepLog and was interrupted
-            }
-			logger.error("Error during execution: ", ex);
-			execution.getSystemContext().setStepErrorKey(ex.getMessage()); // this is done only fo reporting
-			execution.getSystemContext().setFlowTerminationType(ExecutionStatus.SYSTEM_FAILURE);
-			execution.setPosition(null); // this ends the flow!!!
-			return execution;
-		}
-	}
+            logger.error("Error during execution: ", ex);
+            execution.getSystemContext().setStepErrorKey(ex.getMessage()); // this is done only fo reporting
+            execution.getSystemContext().setFlowTerminationType(ExecutionStatus.SYSTEM_FAILURE);
+            execution.setPosition(null); // this ends the flow!!!
+            return execution;
+        }
+    }
 
 	@Override
 	// returns null in case the split was not done - flow is paused or cancelled
-	public List<Execution> executeSplit(Execution execution) {
+	public List<Execution> executeSplit(Execution execution) throws InterruptedException {
 		try {
 			ExecutionStep currStep = loadExecutionStep(execution);
 			// Check if this execution was paused
@@ -147,7 +147,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 		}
 	}
 
-	private void failFlowIfSplitStepFailed(Execution execution) {
+	private void failFlowIfSplitStepFailed(Execution execution) throws InterruptedException {
 		if(execution.getSystemContext().hasStepErrorKey()) {
 			String exception = execution.getSystemContext().getStepErrorKey();
 			execution.getSystemContext().setFlowTerminationType(ExecutionStatus.SYSTEM_FAILURE);
@@ -198,7 +198,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	}
 
 	// check if the execution should be Paused, and pause it if needed
-	protected boolean handlePausedFlow(Execution execution) {
+	protected boolean handlePausedFlow(Execution execution) throws InterruptedException {
 		String branchId = execution.getSystemContext().getBranchId();
 		PauseReason reason = findPauseReason(execution.getExecutionId(), branchId);
 		if(reason != null) { // need to pause the execution
@@ -209,7 +209,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	}
 
 	// no need to check if paused - because this is called after the step, when the Pause flag exists in the context
-	private boolean handlePausedFlowAfterStep(Execution execution) {
+	private boolean handlePausedFlowAfterStep(Execution execution) throws InterruptedException {
 		String branchId = execution.getSystemContext().getBranchId();
 		PauseReason reason = null;
 		ExecutionSummary execSummary = pauseService.readPausedExecution(execution.getExecutionId(), branchId);
@@ -223,7 +223,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 		return false;
 	}
 
-	private void pauseFlow(PauseReason reason, Execution execution) {
+	private void pauseFlow(PauseReason reason, Execution execution) throws InterruptedException {
 		SystemContext systemContext = execution.getSystemContext();
 		Long executionId = execution.getExecutionId();
 		String branchId = systemContext.getBranchId();
@@ -244,7 +244,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 		}
 	}
 
-	private void addPauseEvent(SystemContext systemContext) {
+	private void addPauseEvent(SystemContext systemContext) throws InterruptedException {
 		HashMap<String, Serializable> eventData = new HashMap<>();
 		eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, new HashMap<>(systemContext));
 		ScoreEvent eventWrapper = new ScoreEvent(EventConstants.SCORE_PAUSED_EVENT, eventData);
@@ -282,7 +282,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 		return isDebuggerMode;
 	}
 
-	private void dumpBusEvents(Execution execution) {
+	private void dumpBusEvents(Execution execution) throws InterruptedException {
 		ArrayDeque<ScoreEvent> eventsQueue = execution.getSystemContext().getEvents();
 		if(eventsQueue == null) {
 			return;
@@ -343,7 +343,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 		return stepData;
 	}
 
-	private void createErrorEvent(String ex, String logMessage, String errorType, SystemContext systemContext) {
+	private void createErrorEvent(String ex, String logMessage, String errorType, SystemContext systemContext) throws InterruptedException {
 		HashMap<String, Serializable> eventData = new HashMap<>();
 		eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, new HashMap<>(systemContext));
 		eventData.put(EventConstants.SCORE_ERROR_MSG, ex);
@@ -353,7 +353,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 		eventBus.dispatch(eventWrapper);
 	}
 
-	protected void navigate(Execution execution, ExecutionStep currStep) {
+	protected void navigate(Execution execution, ExecutionStep currStep) throws InterruptedException {
 		Long position;
 		try {
 			if(currStep.getNavigation() != null) {

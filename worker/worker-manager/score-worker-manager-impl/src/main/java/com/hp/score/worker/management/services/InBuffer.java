@@ -43,8 +43,7 @@ import java.util.List;
  */
 public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Runnable{
 
-    @SuppressWarnings("FieldCanBeLocal")
-    private final long MEMORY_THRESHOLD = 50000000; // 50 Mega byte
+    private final static long MEMORY_THRESHOLD = 50000000; // 50 Mega byte
 
 	private final Logger logger = Logger.getLogger(this.getClass());
 
@@ -90,7 +89,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     }
 
 
-    @SuppressWarnings("ConstantConditions")
+
     private void fillBufferPeriodically() {
         long pollCounter = 0;
         while (!inShutdown) {

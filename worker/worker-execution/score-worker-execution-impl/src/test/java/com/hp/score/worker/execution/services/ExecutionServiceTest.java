@@ -90,7 +90,7 @@ public class ExecutionServiceTest {
 	}
 
 	@Test
-	public void handlePausedFlow_NotPausedExecutionTest() {
+	public void handlePausedFlow_NotPausedExecutionTest() throws InterruptedException {
 		Execution exe = new Execution(111L,0L, 0L, new HashMap<String,String>(), null);
 		exe.getSystemContext().setBranchId("branch_id");
 		exe.getSystemContext().put(EventConstants.FLOW_UUID, "flow_uuid");
@@ -102,7 +102,7 @@ public class ExecutionServiceTest {
 	}
 
 	@Test
-	public void handlePausedFlow_UserPausedTest() {
+	public void handlePausedFlow_UserPausedTest() throws InterruptedException {
 		final Long executionId = 111L;
 		final String branch_id = null;
 
@@ -122,7 +122,7 @@ public class ExecutionServiceTest {
 
 	@Test
 	// branch is running, and parent is paused by the user -> branch should be paused
-	public void handlePausedFlow_UserPausedParentTest() {
+	public void handlePausedFlow_UserPausedParentTest() throws InterruptedException {
 		final Long executionId = 111L;
 		final String branch_id = "branch_id";
 
@@ -220,7 +220,7 @@ public class ExecutionServiceTest {
 	}
 
 	@Test
-	public void executeNavigationTest() {
+	public void executeNavigationTest() throws InterruptedException {
 		//Test no exception is thrown - all is caught inside
 		ExecutionStep executionStep = new ExecutionStep(EXECUTION_STEP_1_ID);
 		executionStep.setNavigation(new ControlActionMetadata("class", "method"));

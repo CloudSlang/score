@@ -119,7 +119,11 @@ public class SimpleExecutionRunnable implements Runnable {
             } else {
                 executeRegularStep(execution);
             }
-        } catch (Exception ex) {
+        }
+        catch (InterruptedException interruptedException){
+            logger.error("Execution thread is interrupted!!! Exiting...", interruptedException);
+        }
+        catch (Exception ex) {
             logger.error("Error during execution!!!", ex);
             //set status FAILED
             executionMessage.setStatus(ExecStatus.FAILED);
@@ -143,19 +147,13 @@ public class SimpleExecutionRunnable implements Runnable {
         }
     }
 
-    private void executeRegularStep(Execution execution) throws IOException {
+    private void executeRegularStep(Execution execution) throws InterruptedException {
         Execution nextStepExecution;
         Long startTime = System.currentTimeMillis();
 
         do {
-            try{
-                //Actually execute the step and get the execution object of the next step
-                nextStepExecution = executionService.execute(execution);
-            }
-            catch (InterruptedException ex) {
-                logger.warn("Thread was interrupted! Exiting the execution... ", ex);
-                return; //Exit! The thread was interrupted by shutDown of the executor and was during Sleep or await() or any other method that supports InterruptedException
-            }
+            //Actually execute the step and get the execution object of the next step
+            nextStepExecution = executionService.execute(execution);
         }
         while (!shouldStop(nextStepExecution, startTime));
     }
@@ -216,7 +214,7 @@ public class SimpleExecutionRunnable implements Runnable {
             ExecutionMessage inProgressMessage = createInProgressExecutionMessage(nextStepExecution);
             ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage, inProgressMessage}; //for the outBuffer
 
-            ExecutionMessage inProgressMessageForInBuffer = (ExecutionMessage) inProgressMessage.clone();
+            ExecutionMessage inProgressMessageForInBuffer = (ExecutionMessage) inProgressMessage.clone(); //todo - think about removing the shortcut and stay in the thread!
             inProgressMessageForInBuffer.setPayload(null); //we do not need the payload for the inBuffer shortcut
 
             try {
@@ -266,7 +264,7 @@ public class SimpleExecutionRunnable implements Runnable {
             nextStepExecution.getSystemContext().remove(TempConstants.SHOULD_CHECK_GROUP);
 
             boolean canRunInThisWorker = groupName== null || workerConfigurationService.isMemberOf(groupName) ||
-                    (workerUUID != null && groupName.endsWith(workerUUID));
+                    (workerUUID != null && groupName.endsWith(workerUUID)); //todo - do method for sticky
 
             if(!canRunInThisWorker){
                 //set current step to finished
@@ -303,7 +301,7 @@ public class SimpleExecutionRunnable implements Runnable {
             executionMessage.incMsgSeqId();
             executionMessage.setPayload(null);
 
-            ExecutionMessage inProgressMessage = createInProgressExecutionMessage(nextStepExecution);
+            ExecutionMessage inProgressMessage = createInProgressExecutionMessage(nextStepExecution); //todo - maybe create without object and only for the InBuffer set the object
             ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage, inProgressMessage}; //for the outBuffer
 
             ExecutionMessage inProgressMessageForInBuffer = (ExecutionMessage) inProgressMessage.clone();
@@ -371,7 +369,7 @@ public class SimpleExecutionRunnable implements Runnable {
     }
 
 
-    private void executeSplitStep(Execution execution) {
+    private void executeSplitStep(Execution execution) throws InterruptedException {
         //If execution is paused or cancelled it will return false
         List<Execution> newExecutions = executionService.executeSplit(execution);
 

@@ -44,5 +44,5 @@ public interface EventBus {
      * dispatch the given events, means according to their types relevant handlers will be called
      * @param eventWrappers one or more score event to dispatch
      */
-	void dispatch(ScoreEvent... eventWrappers);
+	void dispatch(ScoreEvent... eventWrappers) throws InterruptedException;
 }

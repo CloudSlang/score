@@ -30,6 +30,6 @@ public interface ScoreEventListener {
      * handler of score event, this method will be called on score event
      * @param event - the event that dispatched
      */
-	void onEvent(ScoreEvent event);
+	void onEvent(ScoreEvent event) throws InterruptedException ;
 
 }

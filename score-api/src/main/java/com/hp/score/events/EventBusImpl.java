@@ -39,13 +39,13 @@ public class EventBusImpl implements EventBus {
 		handlers.remove(eventListener);
 	}
 
-	public void dispatch(ScoreEvent... events) {
-		for (ScoreEventListener eventHandler : handlers.keySet()) {
-			Set<String> eventTypes = handlers.get(eventHandler);
-			for (ScoreEvent eventWrapper : events) {
-				if (eventTypes.contains(eventWrapper.getEventType())) {
-					eventHandler.onEvent(eventWrapper);
-				}
+    public void dispatch(ScoreEvent... events)  throws InterruptedException {
+        for (ScoreEventListener eventHandler : handlers.keySet()) {
+            Set<String> eventTypes = handlers.get(eventHandler);
+            for (ScoreEvent eventWrapper : events) {
+                if (eventTypes.contains(eventWrapper.getEventType())) {
+                    eventHandler.onEvent(eventWrapper);
+                }
 			}
 		}
 	}
