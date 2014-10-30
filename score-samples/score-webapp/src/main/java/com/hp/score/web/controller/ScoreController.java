@@ -18,10 +18,10 @@
 */
 package com.hp.score.web.controller;
 
-import com.google.gson.*;
 import com.hp.score.samples.FlowMetadata;
 import com.hp.score.samples.openstack.actions.InputBinding;
 import com.hp.score.web.services.ScoreServices;
+import com.google.gson.*;
 import com.mysema.commons.lang.Assert;
 
 import org.apache.log4j.Logger;
@@ -30,6 +30,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import javassist.NotFoundException;
 
 /**
  * Date: 8/29/2014
@@ -43,22 +44,20 @@ public class ScoreController {
 
     private static final String IDENTIFIER_KEY = "identifier";
     private static final String API_KEY = "api";
-    private static final String LIST_KEY = "list";
     private static final String RUN_KEY = "runs";
     private static final String NAME_KEY = "name";
     private static final String DESCRIPTION_KEY = "description";
     private static final String FLOWS_KEY = "flows";
     private static final String REQUIRED_KEY = "required";
     private static final String INPUTS_KEY = "inputs";
-    private static final String EXECUTION_ID_KEY = "execution id";
     private static final String VALUE_KEY = "value";
     private static final String V1 = "v1";
+    private static final String SCORE_PREFIX = "score";
 
-    private static final String API_URI = "/" + V1 + "/" + API_KEY;
-    private static final String LIST_URI = "/" + V1 + "/" + FLOWS_KEY + "/" + LIST_KEY;
-    private static final String INPUTS_URI_WITH_IDENTIFIER = "/" + V1 + "/" + FLOWS_KEY + "/{" + IDENTIFIER_KEY + "}" + "/" + INPUTS_KEY;
-    private static final String INPUTS_URI_WITH_NAME ="/" + V1 + "/" + FLOWS_KEY + "/{" + NAME_KEY + "}" + "/" + INPUTS_KEY;
-    private static final String RUN_URI_IDENTIFIER = "/" + V1 + "/" + RUN_KEY;
+    private static final String API_URI = "/" + SCORE_PREFIX + "/" + V1 + "/" + API_KEY;
+    private static final String LIST_URI = "/" + SCORE_PREFIX + "/" + V1 + "/" + FLOWS_KEY;
+    private static final String INPUTS_URI_WITH_IDENTIFIER = "/" + SCORE_PREFIX + "/" + V1 + "/" + FLOWS_KEY + "/{" + IDENTIFIER_KEY + "}" + "/" + INPUTS_KEY;
+    private static final String RUN_URI_IDENTIFIER = "/" + SCORE_PREFIX + "/" + V1 + "/" + RUN_KEY;
 
     private ScoreServices scoreServices;
 
@@ -67,13 +66,9 @@ public class ScoreController {
         JsonArray apiList = new JsonArray();
         apiList.add(new JsonPrimitive(LIST_URI));
         apiList.add(new JsonPrimitive(INPUTS_URI_WITH_IDENTIFIER));
-        apiList.add(new JsonPrimitive(INPUTS_URI_WITH_NAME));
         apiList.add(new JsonPrimitive(RUN_URI_IDENTIFIER));
 
-        JsonObject api = new JsonObject();
-        api.add(API_KEY, apiList);
-
-		return new ResponseEntity<>(gson.toJson(api), null, HttpStatus.OK);
+		return new ResponseEntity<>(gson.toJson(apiList), null, HttpStatus.OK);
 	}
 
 	@RequestMapping(value = LIST_URI, method= RequestMethod.GET)
@@ -88,20 +83,16 @@ public class ScoreController {
             flowsArray.add(flowData);
         }
 
-        JsonObject flows = new JsonObject();
-        flows.add(FLOWS_KEY, flowsArray);
-
-		return new ResponseEntity<>(gson.toJson(flows), null, HttpStatus.OK);
+		return new ResponseEntity<>(gson.toJson(flowsArray), null, HttpStatus.OK);
 	}
 
     @RequestMapping(value = INPUTS_URI_WITH_IDENTIFIER, method= RequestMethod.GET)
     public ResponseEntity<String> getFlowInputs(@PathVariable String identifier) {
-        // identifier can mean either the flow identifier or the flow name depends on request
-        JsonObject flowInfo = new JsonObject();
         HttpStatus httpStatus = HttpStatus.OK;
+        JsonArray inputArray = new JsonArray();
+        String responseBody = "";
         try {
-            JsonArray inputArray = new JsonArray();
-            List<InputBinding> bindings = scoreServices.getInputBindingsByIdentifierOrName(identifier);
+            List<InputBinding> bindings = scoreServices.getInputBindingsByIdentifier(identifier);
             for (InputBinding inputBinding : bindings) {
                 JsonObject input = new JsonObject();
                 input.addProperty(NAME_KEY, inputBinding.getSourceKey());
@@ -110,44 +101,44 @@ public class ScoreController {
                 }
                 input.addProperty(REQUIRED_KEY, inputBinding.isRequired());
                 inputArray.add(input);
+                responseBody = gson.toJson(inputArray);
             }
-            flowInfo.add(INPUTS_KEY, inputArray);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (NotFoundException nfex) {
+            logger.error(nfex.getMessage());
+            httpStatus = HttpStatus.NOT_FOUND;
+        } catch (Exception ex) {
+            logger.error(ex.getMessage());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
-        return new ResponseEntity<>(gson.toJson(flowInfo), null, httpStatus);
+        return new ResponseEntity<>(responseBody, null, httpStatus);
     }
 
 	@RequestMapping(value= RUN_URI_IDENTIFIER, method= RequestMethod.POST)
-	public ResponseEntity<String> createFlowRun(@RequestBody String inputsAsJson) {
-        JsonObject triggerInfo = new JsonObject();
+	public ResponseEntity<String> runFlow(@RequestBody String inputsAsJson) {
+        String responseBody = "";
         HttpStatus httpStatus = HttpStatus.OK;
         try {
-            String identifierOrName = fetchIdentifierOrNameFromJson(inputsAsJson);
-            List<InputBinding> bindings = fetchInputsFromJson(inputsAsJson, identifierOrName);
-            long executionId = scoreServices.triggerWithBindings(identifierOrName, bindings);
-            triggerInfo.addProperty(EXECUTION_ID_KEY, executionId);
-        }
-        catch(Exception ex) {
-            triggerInfo.addProperty(EXECUTION_ID_KEY, -1);
+            String identifier = fetchIdentifierFromJson(inputsAsJson);
+            List<InputBinding> bindings = fetchInputsFromJson(inputsAsJson, identifier);
+            long executionId = scoreServices.triggerWithBindings(identifier, bindings);
+            responseBody = String.valueOf(executionId);
+        } catch (NotFoundException nfex) {
+            logger.error(nfex.getMessage());
+            httpStatus = HttpStatus.NOT_FOUND;
+        } catch(Exception ex) {
+            logger.error(ex.getMessage());
             httpStatus = HttpStatus.BAD_REQUEST;
-            logger.error(ex);
         }
-        return new ResponseEntity<>(gson.toJson(triggerInfo), null, httpStatus);
+        return new ResponseEntity<>(responseBody, null, httpStatus);
 	}
 
-    private String fetchIdentifierOrNameFromJson(String inputsAsJson) throws Exception {
+    private String fetchIdentifierFromJson(String inputsAsJson) throws Exception {
         JsonParser jsonParser = new JsonParser();
         JsonObject bodyAsJson = jsonParser.parse(inputsAsJson).getAsJsonObject();
         if (bodyAsJson.has(IDENTIFIER_KEY)) {
             return bodyAsJson.get(IDENTIFIER_KEY).getAsString();
         } else {
-            if (bodyAsJson.has(NAME_KEY)) {
-                return bodyAsJson.get(NAME_KEY).getAsString();
-            } else {
-                throw new Exception("Identifier / name not found in Json body");
-            }
+            throw new Exception("Identifier not found in Json body");
         }
     }
 
@@ -156,7 +147,7 @@ public class ScoreController {
         JsonObject bodyAsJson = jsonParser.parse(inputsAsJson).getAsJsonObject();
         JsonElement inputs = bodyAsJson.get(INPUTS_KEY);
         JsonArray inputArray = inputs.getAsJsonArray();
-        List<InputBinding> bindings = scoreServices.getInputBindingsByIdentifierOrName(identifier);
+        List<InputBinding> bindings = scoreServices.getInputBindingsByIdentifier(identifier);
 
         for (JsonElement input : inputArray) {
             JsonObject inputAsJsonObject = input.getAsJsonObject();

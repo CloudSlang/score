@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
 import java.util.*;
+import javassist.NotFoundException;
 
 import static com.hp.score.samples.openstack.OpenstackCommons.prepareExecutionContext;
 
@@ -53,10 +54,10 @@ public final class ScoreServices {
     private static final List<FlowMetadata> predefinedFlows =
             FlowMetadataLoader.loadPredefinedFlowsMetadata(AVAILABLE_FLOWS_PATH);
 
-    public long triggerWithBindings(String identifierOrName, List<InputBinding> bindings) {
+    public long triggerWithBindings(String identifier, List<InputBinding> bindings) {
         long executionId = -1;
         try {
-            executionId = score.trigger(getTriggeringPropertiesByIdentifierOrName(identifierOrName, bindings));
+            executionId = score.trigger(getTriggeringPropertiesByIdentifier(identifier, bindings));
         } catch (Exception ex) {
             logger.error(ex);
         }
@@ -72,8 +73,8 @@ public final class ScoreServices {
     }
 
     @SuppressWarnings("unchecked")
-    public List<InputBinding> getInputBindingsByIdentifierOrName(String identifier) throws Exception {
-        FlowMetadata flowMetadata = getFlowMetadataByIdentifierOrName(identifier, predefinedFlows);
+    public List<InputBinding> getInputBindingsByIdentifier(String identifier) throws Exception {
+        FlowMetadata flowMetadata = getFlowMetadataByIdentifier(identifier, predefinedFlows);
         List<InputBinding> bindings;
         Object returnValue = ReflectionUtility.invokeMethodByName(flowMetadata.getClassName(), flowMetadata.getInputBindingsMethodName());
         try {
@@ -85,17 +86,17 @@ public final class ScoreServices {
         return bindings;
     }
 
-    private FlowMetadata getFlowMetadataByIdentifierOrName(String identifier, List<FlowMetadata> flowMetadataList) throws Exception {
+    private FlowMetadata getFlowMetadataByIdentifier(String identifier, List<FlowMetadata> flowMetadataList) throws NotFoundException {
         for (FlowMetadata metadata : flowMetadataList) {
-            if (metadata.getIdentifier().equals(identifier) || metadata.getName().equals(identifier)) {
+            if (metadata.getIdentifier().equals(identifier)) {
                 return metadata;
             }
         }
-        throw new Exception("Flow \"" + identifier + "\" not found");
+        throw new NotFoundException("Flow \"" + identifier + "\" not found");
     }
 
-    private TriggeringProperties getTriggeringPropertiesByIdentifierOrName(String identifier, List<InputBinding> bindings) throws Exception {
-        FlowMetadata flowMetadata = getFlowMetadataByIdentifierOrName(identifier, predefinedFlows);
+    private TriggeringProperties getTriggeringPropertiesByIdentifier(String identifier, List<InputBinding> bindings) throws Exception {
+        FlowMetadata flowMetadata = getFlowMetadataByIdentifier(identifier, predefinedFlows);
         Object returnValue = ReflectionUtility.invokeMethodByName(flowMetadata.getClassName(), flowMetadata.getTriggeringPropertiesMethodName());
         if (returnValue instanceof TriggeringProperties) {
             TriggeringProperties triggeringProperties = (TriggeringProperties) returnValue;
