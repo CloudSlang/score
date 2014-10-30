@@ -20,7 +20,7 @@
     -->
     <groupId>com.hp.score</groupId>
     <artifactId>score-parent</artifactId>
-    <version>0.1.225</version>
+    <version>0.1.226-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>com.hp.score:score-parent</name>
     <description>A Java based orchestration engine</description>
