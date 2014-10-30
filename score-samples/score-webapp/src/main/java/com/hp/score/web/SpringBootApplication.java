@@ -47,7 +47,7 @@ import java.util.Set;
 @ComponentScan({"com.hp.score.web.controller","com.hp.score.web.services"})
 public class SpringBootApplication {
 
-    public static final String WEB_APP_CONTEXTS_XML = "webappContexts.xml";
+    public static final String WEB_APP_CONTEXTS_XML = "META-INF.spring/webappContexts.xml";
 
     private static final Logger logger = Logger.getLogger(SpringBootApplication.class);
     private ScoreServices scoreServices;

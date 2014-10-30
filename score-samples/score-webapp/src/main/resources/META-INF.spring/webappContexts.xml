@@ -4,7 +4,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
                            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <import resource="META-INF.spring/dataSourceContext.xml"/>
-    <import resource="META-INF.spring/webApplicationContext.xml"/>
+    <import resource="dataSourceContext.xml"/>
+    <import resource="webApplicationContext.xml"/>
 
 </beans>
