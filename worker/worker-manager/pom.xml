@@ -21,7 +21,7 @@
 	<parent>
 		<artifactId>worker</artifactId>
 		<groupId>com.hp.score</groupId>
-		<version>10.20.3.1-SNAPSHOT</version>
+		<version>10.20.3.1</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
