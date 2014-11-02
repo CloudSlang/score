@@ -21,7 +21,7 @@
 	<parent>
 		<groupId>com.hp.score</groupId>
 		<artifactId>worker-manager</artifactId>
-		<version>0.1.226</version>
+		<version>0.1.227-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
