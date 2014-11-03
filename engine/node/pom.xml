@@ -22,7 +22,7 @@
 	<parent>
 		<groupId>com.hp.score</groupId>
 		<artifactId>engine</artifactId>
-		<version>0.1.227-SNAPSHOT</version>
+		<version>0.1.228-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>node</artifactId>
