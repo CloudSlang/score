@@ -391,11 +391,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	protected static void postExecutionSettings(Execution execution) {
 		// Decide on Group
 		String group = (String)execution.getSystemContext().get(TempConstants.ACTUALLY_OPERATION_GROUP);
-		if(StringUtils.isEmpty(group) || TempConstants.DEFAULT_GROUP.equals(group)) {
-			execution.setGroupName(null);
-		} else {
-			execution.setGroupName(group);
-		}
+
+		execution.setGroupName(group);
+
 		if(isDebuggerMode(execution.getSystemContext())) {
 			if(!StringUtils.isEmpty(group) && useDefaultGroup(execution)) {
 				execution.setGroupName(null);
