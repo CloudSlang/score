@@ -400,11 +400,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
 			}
 		}
         //if there is a request to change the running execution plan id, we update the execution to the new execution plan ID
-//        ExecutionRuntimeServices executionRuntimeServices = execution.getSystemContext();
-//        Long requestForChangingExecutionPlan = executionRuntimeServices.handleRequestForChangingExecutionPlan();
-//        if (requestForChangingExecutionPlan != null) {
-//            execution.setRunningExecutionPlanId(requestForChangingExecutionPlan);
-//        }
+        Long requestForChangingExecutionPlan = execution.getSystemContext().pullRequestForChangingExecutionPlan();
+        if (requestForChangingExecutionPlan != null) {
+            execution.setRunningExecutionPlanId(requestForChangingExecutionPlan);
+        }
 	}
 
 	private static void addContextData(Map<String, Object> data, Execution execution) {

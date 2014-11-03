@@ -67,7 +67,7 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String FLOW_TERMINATION_TYPE = "FLOW_TERMINATION_TYPE";
 
-//    private static final String REQUESTED_EXECUTION_PLAN_ID = "REQUESTED_EXECUTION_PLAN_ID";
+    private static final String REQUESTED_EXECUTION_PLAN_ID = "REQUESTED_EXECUTION_PLAN_ID";
 
     protected Map<String, Serializable> contextMap = new HashMap<>();
 
@@ -153,15 +153,25 @@ public class ExecutionRuntimeServices implements Serializable {
         contextMap.put(FLOW_TERMINATION_TYPE, flowTerminationType);
     }
 
-//    public void requestToChangeExecutionPlan(Long runningExecutionPlanId) {
-//        contextMap.put(REQUESTED_EXECUTION_PLAN_ID, runningExecutionPlanId);
-//    }
-//
-//    public Long handleRequestForChangingExecutionPlan(){
-//        Long requestedExecutionPlanId = getFromMap(REQUESTED_EXECUTION_PLAN_ID);
-//        contextMap.put(REQUESTED_EXECUTION_PLAN_ID, null);
-//        return requestedExecutionPlanId;
-//    }
+    /**
+     * Request the engine to change the running execution plan to a new one
+     * The engine will deal with the request after finishing to execute the curretn step
+     * @param runningExecutionPlanId the new running execution plan id
+     */
+    public void requestToChangeExecutionPlan(Long runningExecutionPlanId) {
+        contextMap.put(REQUESTED_EXECUTION_PLAN_ID, runningExecutionPlanId);
+    }
+
+    /**
+     * This method should be used by score engine once it finishes executing a step, and checks
+     * if the running execution plan should be changed
+     * @return the id of the requested running execution plan
+     */
+    public Long pullRequestForChangingExecutionPlan(){
+        Long requestedExecutionPlanId = getFromMap(REQUESTED_EXECUTION_PLAN_ID);
+        contextMap.put(REQUESTED_EXECUTION_PLAN_ID, null);
+        return requestedExecutionPlanId;
+    }
 
     /**
      *
