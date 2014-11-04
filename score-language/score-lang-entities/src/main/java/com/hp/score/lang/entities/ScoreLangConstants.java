@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
 */
-package com.hp.score.lang.runtime;
+package com.hp.score.lang.entities;
 
 /**
  * User: stoneo
@@ -27,7 +27,12 @@ public class ScoreLangConstants {
 
     public static final String RUN_ENV = "runEnv";
 //    public static final String CONTEXT_STACK = "contextStack";
+
+    //todo: move to score-lang-entities
     public static final String ACTION_CLASS_KEY = "className";
     public static final String ACTION_METHOD_KEY = "methodName";
+    public static final String INPUT_LIST_KEY = "inputList";
+    public static final String USER_OUTPUTS_KEY = "userOutputs";
+    public static final String PYTHON_SCRIPT_KEY = "pythonScript";
 
 }

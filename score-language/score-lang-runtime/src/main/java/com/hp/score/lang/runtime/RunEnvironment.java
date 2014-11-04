@@ -74,7 +74,6 @@ public class RunEnvironment implements Serializable{
     }
 
     public void putReturnValues(ReturnValues returnValues) {
-//        MapUtils.debugPrint(System.out, "returnValues", returnValues.getOutputs());
         this.returnValues = returnValues;
     }
 

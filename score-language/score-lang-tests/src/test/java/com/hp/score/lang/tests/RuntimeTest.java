@@ -27,12 +27,13 @@ import com.hp.score.events.EventConstants;
 import com.hp.score.events.ScoreEvent;
 import com.hp.score.events.ScoreEventListener;
 import com.hp.score.lang.runtime.RunEnvironment;
-import com.hp.score.lang.runtime.ScoreLangConstants;
+import com.hp.score.lang.entities.ScoreLangConstants;
 import com.hp.score.lang.tests.runtime.builders.POCExecutionPlanActionsBuilder;
 import com.hp.score.lang.tests.runtime.builders.POCParentExecutionPlanActionsBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.python.util.PythonInterpreter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -50,8 +51,8 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Time: 08:36
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath:META-INF/spring/pocContext.xml")
-public class RuntimePOC {
+@ContextConfiguration({"classpath:META-INF/spring/pocContext.xml", "classpath:META-INF/spring/langRuntimeContext.xml"})
+public class RuntimeTest {
 
     @Autowired
     private Score score;
@@ -74,6 +75,8 @@ public class RuntimePOC {
 
         //Trigger ExecutionPlan
         Map<String, Serializable> executionContext = createExecutionContext();
+        addUserInputs(executionContext);
+
         TriggeringProperties triggeringProperties = TriggeringProperties
                 .create(executionPlan)
                 .setContext(executionContext);

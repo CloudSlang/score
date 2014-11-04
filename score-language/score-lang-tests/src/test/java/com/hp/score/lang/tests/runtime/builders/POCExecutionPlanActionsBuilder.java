@@ -21,9 +21,12 @@ package com.hp.score.lang.tests.runtime.builders;
 import com.hp.score.api.ControlActionMetadata;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ExecutionStep;
-import com.hp.score.lang.runtime.ActionType;
-import com.hp.score.lang.runtime.Navigations;
-import com.hp.score.lang.runtime.POCControlActions;
+import com.hp.score.lang.entities.ActionType;
+import com.hp.score.lang.entities.ScoreLangConstants;
+import com.hp.score.lang.runtime.navigations.Navigations;
+import com.hp.score.lang.runtime.steps.ActionSteps;
+import com.hp.score.lang.runtime.steps.OperationSteps;
+import com.hp.score.lang.runtime.steps.TaskSteps;
 import com.hp.score.lang.tests.runtime.actions.LangActions;
 
 import java.io.Serializable;
@@ -38,9 +41,6 @@ import java.util.Map;
  */
 public class POCExecutionPlanActionsBuilder {
 
-    public static final String CONTROL_ACTION_CLASS_NAME = POCControlActions.class.getName();
-    public static final String ACTION_CLASS_KEY = "className";
-    public static final String ACTION_METHOD_KEY = "methodName";
     public static final String NEXT_STEP_ID_KEY = "nextStepId";
     public static final String NAVIGATION_ACTIONS_CLASS = Navigations.class.getName();
     public static final String SIMPLE_NAVIGATION_METHOD = "navigate";
@@ -49,11 +49,11 @@ public class POCExecutionPlanActionsBuilder {
 
     private Long index = 1L;
 
-    public POCExecutionPlanActionsBuilder(){
+    public POCExecutionPlanActionsBuilder() {
         createExecutionPlan();
     }
 
-    private void createExecutionPlan(){
+    private void createExecutionPlan() {
         executionPlan = new ExecutionPlan();
         executionPlan.setFlowUuid("childFlow");
         executionPlan.setBeginStep(1L);
@@ -70,7 +70,7 @@ public class POCExecutionPlanActionsBuilder {
         executionPlan.addStep(createFirstFinishTaskStep());
     }
 
-    public ExecutionPlan getExecutionPlan(){
+    public ExecutionPlan getExecutionPlan() {
         return executionPlan;
     }
 
@@ -78,29 +78,29 @@ public class POCExecutionPlanActionsBuilder {
         Map<String, Serializable> actionData = new HashMap<>();
         HashMap<String, Serializable> flowInputs = createFlowInputs();
         actionData.put("operationInputs", flowInputs);
-        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "start", ++index, actionData);
+        return createGeneralStep(index, OperationSteps.class.getName(), "start", ++index, actionData);
     }
 
-    private ExecutionStep createBeginTaskStep(){
+    private ExecutionStep createBeginTaskStep() {
         Map<String, Serializable> actionData = new HashMap<>();
         HashMap<String, Serializable> taskInputs = createBeginTaskTaskInputs();
         actionData.put("taskInputs", taskInputs);
-        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "beginTask", ++index, actionData);
+        return createGeneralStep(index, TaskSteps.class.getName(), "beginTask", ++index, actionData);
     }
 
     private ExecutionStep createStartStep() {
         Map<String, Serializable> actionData = new HashMap<>();
         HashMap<String, Serializable> operationInputs = createOperationInputs();
         actionData.put("operationInputs", operationInputs);
-        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "start", ++index, actionData);
+        return createGeneralStep(index, OperationSteps.class.getName(), "start", ++index, actionData);
     }
 
     private ExecutionStep createActionStep(String actionClassName, String actionMethodName) {
         Map<String, Serializable> actionData = new HashMap<>();
-        actionData.put(ACTION_CLASS_KEY, actionClassName);
-        actionData.put(ACTION_METHOD_KEY, actionMethodName);
+        actionData.put(ScoreLangConstants.ACTION_CLASS_KEY, actionClassName);
+        actionData.put(ScoreLangConstants.ACTION_METHOD_KEY, actionMethodName);
         actionData.put("actionType", ActionType.JAVA);
-        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "doAction", ++index, actionData);
+        return createGeneralStep(index, ActionSteps.class.getName(), "doAction", ++index, actionData);
     }
 
     private ExecutionStep createEndStep() {
@@ -109,16 +109,16 @@ public class POCExecutionPlanActionsBuilder {
         actionData.put("operationOutputs", operationOutputs);
         HashMap<String, Serializable> operationAnswers = createOperationAnswers();
         actionData.put("operationAnswers", operationAnswers);
-        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "end", ++index, actionData);
+        return createGeneralStep(index, OperationSteps.class.getName(), "end", ++index, actionData);
     }
 
-    private ExecutionStep createFirstFinishTaskStep(){
+    private ExecutionStep createFirstFinishTaskStep() {
         Map<String, Serializable> actionData = new HashMap<>();
         HashMap<String, Serializable> taskPublishValues = createTaskPublishValues();
         actionData.put("taskPublishValues", taskPublishValues);
         HashMap<String, Long> taskNavigationValues = createFirstTaskNavigationValues();
         actionData.put("taskNavigationValues", taskNavigationValues);
-        ExecutionStep finishTask = createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "finishTask", ++index, actionData);
+        ExecutionStep finishTask = createGeneralStep(index, TaskSteps.class.getName(), "finishTask", ++index, actionData);
         finishTask.setNavigationData(null);
         return finishTask;
     }
@@ -129,10 +129,10 @@ public class POCExecutionPlanActionsBuilder {
         actionData.put("operationOutputs", flowOutputs);
         HashMap<String, Serializable> flowAnswers = createFlowAnswers();
         actionData.put("operationAnswers", flowAnswers);
-        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "end", null, actionData);
+        return createGeneralStep(index, OperationSteps.class.getName(), "end", null, actionData);
     }
 
-    private HashMap<String,Serializable> createBeginTaskTaskInputs() {
+    private HashMap<String, Serializable> createBeginTaskTaskInputs() {
         LinkedHashMap<String, Serializable> taskInputs = new LinkedHashMap<>();
         taskInputs.put("first_name", null);
         taskInputs.put("mail_server", null);
@@ -155,14 +155,14 @@ public class POCExecutionPlanActionsBuilder {
         return operationInputs;
     }
 
-    private HashMap<String, Serializable> createOperationOutputs(){
+    private HashMap<String, Serializable> createOperationOutputs() {
         LinkedHashMap<String, Serializable> operationOutputs = new LinkedHashMap<>();
         operationOutputs.put("user", null);
         operationOutputs.put("duration", "retVal[dur]");
         return operationOutputs;
     }
 
-    private HashMap<String,Serializable> createOperationAnswers() {
+    private HashMap<String, Serializable> createOperationAnswers() {
         LinkedHashMap<String, Serializable> operationAnswers = new LinkedHashMap<>();
         operationAnswers.put("SUCCESS", "retVal[isTrue]");
         operationAnswers.put("FAIL", "retVal[isFalse]");
@@ -176,7 +176,7 @@ public class POCExecutionPlanActionsBuilder {
         return taskPublishValues;
     }
 
-    private HashMap<String,Long> createFirstTaskNavigationValues() {
+    private HashMap<String, Long> createFirstTaskNavigationValues() {
         LinkedHashMap<String, Long> navigationValues = new LinkedHashMap<>();
         navigationValues.put("SUCCESS", index + 1);
         navigationValues.put("FAIL", null);

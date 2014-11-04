@@ -168,9 +168,7 @@ public class ExecutionRuntimeServices implements Serializable {
      * @return the id of the requested running execution plan
      */
     public Long pullRequestForChangingExecutionPlan(){
-        Long requestedExecutionPlanId = getFromMap(REQUESTED_EXECUTION_PLAN_ID);
-        contextMap.put(REQUESTED_EXECUTION_PLAN_ID, null);
-        return requestedExecutionPlanId;
+        return removeFromMap(REQUESTED_EXECUTION_PLAN_ID);
     }
 
     /**

@@ -21,9 +21,12 @@ package com.hp.score.lang.tests.runtime.builders;
 import com.hp.score.api.ControlActionMetadata;
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ExecutionStep;
-import com.hp.score.lang.runtime.ActionType;
-import com.hp.score.lang.runtime.Navigations;
-import com.hp.score.lang.runtime.POCControlActions;
+import com.hp.score.lang.entities.ActionType;
+import com.hp.score.lang.entities.ScoreLangConstants;
+import com.hp.score.lang.runtime.navigations.Navigations;
+import com.hp.score.lang.runtime.steps.ActionSteps;
+import com.hp.score.lang.runtime.steps.OperationSteps;
+import com.hp.score.lang.runtime.steps.TaskSteps;
 import com.hp.score.lang.tests.runtime.actions.LangActions;
 
 import java.io.Serializable;
@@ -38,13 +41,9 @@ import java.util.Map;
  */
 public class POCParentExecutionPlanActionsBuilder {
 
-    public static final String CONTROL_ACTION_CLASS_NAME = POCControlActions.class.getName();
     public static final String NEXT_STEP_ID_KEY = "nextStepId";
     public static final String NAVIGATION_ACTIONS_CLASS = Navigations.class.getName();
     public static final String SIMPLE_NAVIGATION_METHOD = "navigate";
-
-    public static final String ACTION_CLASS_KEY = "className";
-    public static final String ACTION_METHOD_KEY = "methodName";
 
     ExecutionPlan executionPlan;
 
@@ -79,17 +78,17 @@ public class POCParentExecutionPlanActionsBuilder {
         actionData.put("taskPublishValues", taskPublishValues);
         HashMap<String, Long> taskNavigationValues = createSecondTaskNavigationValues();
         actionData.put("taskNavigationValues", taskNavigationValues);
-        ExecutionStep finishTask = createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "finishTask", ++index, actionData);
+        ExecutionStep finishTask = createGeneralStep(index, TaskSteps.class.getName(), "finishTask", ++index, actionData);
         finishTask.setNavigationData(null);
         return finishTask;
     }
 
     private ExecutionStep createSecondEndStep() {
         Map<String, Serializable> actionData = new HashMap<>();
-        actionData.put("operationOutputs", new HashMap<>());
+        actionData.put("operationOutputs", new LinkedHashMap<>());
         HashMap<String, Serializable> operationAnswers = createOperationAnswers();
         actionData.put("operationAnswers", operationAnswers);
-        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "end", ++index, actionData);
+        return createGeneralStep(index, OperationSteps.class.getName(), "end", ++index, actionData);
     }
 
     private HashMap<String, Serializable> createOperationAnswers() {
@@ -102,17 +101,17 @@ public class POCParentExecutionPlanActionsBuilder {
     private ExecutionStep createActionStep(String className, String methodName) {
         Map<String, Serializable> actionData = new HashMap<>();
         //put the actual action class name and method name
-        actionData.put(ACTION_CLASS_KEY, className);
-        actionData.put(ACTION_METHOD_KEY, methodName);
+        actionData.put(ScoreLangConstants.ACTION_CLASS_KEY, className);
+        actionData.put(ScoreLangConstants.ACTION_METHOD_KEY, methodName);
         actionData.put("actionType", ActionType.JAVA);
-        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "doAction", ++index, actionData);
+        return createGeneralStep(index, ActionSteps.class.getName(), "doAction", ++index, actionData);
     }
 
     private ExecutionStep createSecondStartStep() {
         Map<String, Serializable> actionData = new HashMap<>();
         HashMap<String, Serializable> operationInputs = createOperationInputs();
         actionData.put("operationInputs", operationInputs);
-        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "start", ++index, actionData);
+        return createGeneralStep(index, OperationSteps.class.getName(), "start", ++index, actionData);
     }
 
     private HashMap<String, Serializable> createOperationInputs() {
@@ -129,7 +128,7 @@ public class POCParentExecutionPlanActionsBuilder {
         Map<String, Serializable> actionData = new HashMap<>();
         HashMap<String, Serializable> taskInputs = createSecondBeginTaskTaskInputs();
         actionData.put("taskInputs", taskInputs);
-        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "beginTask", ++index, actionData);
+        return createGeneralStep(index, TaskSteps.class.getName(), "beginTask", ++index, actionData);
     }
 
     private HashMap<String, Serializable> createSecondBeginTaskTaskInputs() {
@@ -149,7 +148,7 @@ public class POCParentExecutionPlanActionsBuilder {
         Map<String, Serializable> actionData = new HashMap<>();
         HashMap<String, Serializable> flowInputs = createFlowInputs();
         actionData.put("operationInputs", flowInputs);
-        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "start", ++index, actionData);
+        return createGeneralStep(index, OperationSteps.class.getName(), "start", ++index, actionData);
     }
 
     private ExecutionStep createFirstBeginTaskStep() {
@@ -157,7 +156,7 @@ public class POCParentExecutionPlanActionsBuilder {
         HashMap<String, Serializable> taskInputs = createFirstBeginTaskTaskInputs();
         actionData.put("taskInputs", taskInputs);
 
-        ExecutionStep beginTaskStep = createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "beginTask", ++index, actionData);
+        ExecutionStep beginTaskStep = createGeneralStep(index, TaskSteps.class.getName(), "beginTask", ++index, actionData);
         HashMap<String, Object> navigationData = new HashMap<>(new HashMap<>(beginTaskStep.getNavigationData()));
         navigationData.put("subFlowId", "childFlow");
         beginTaskStep.setNavigationData(navigationData);
@@ -171,7 +170,7 @@ public class POCParentExecutionPlanActionsBuilder {
         actionData.put("taskPublishValues", taskPublishValues);
         HashMap<String, Long> taskNavigationValues = createFirstTaskNavigationValues();
         actionData.put("taskNavigationValues", taskNavigationValues);
-        ExecutionStep finishTask = createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "finishTask", ++index, actionData);
+        ExecutionStep finishTask = createGeneralStep(index, TaskSteps.class.getName(), "finishTask", ++index, actionData);
         finishTask.setNavigationData(null);
         return finishTask;
     }
@@ -182,7 +181,7 @@ public class POCParentExecutionPlanActionsBuilder {
         actionData.put("operationOutputs", flowOutputs);
         HashMap<String, Serializable> flowAnswers = createFlowAnswers();
         actionData.put("operationAnswers", flowAnswers);
-        return createGeneralStep(index, CONTROL_ACTION_CLASS_NAME, "end", null, actionData);
+        return createGeneralStep(index, OperationSteps.class.getName(), "end", null, actionData);
     }
 
     private HashMap<String, Serializable> createFirstBeginTaskTaskInputs() {

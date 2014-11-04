@@ -16,10 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
 */
-package com.hp.score.lang.runtime;
+package com.hp.score.lang.runtime.navigations;
 
 import com.hp.oo.sdk.content.annotations.Param;
 import com.hp.score.lang.ExecutionRuntimeServices;
+import com.hp.score.lang.runtime.ParentFlowData;
+import com.hp.score.lang.runtime.ParentFlowStack;
+import com.hp.score.lang.runtime.RunEnvironment;
 
 /**
  * User: stoneo
@@ -44,13 +47,13 @@ public class Navigations {
             stack.pushParentFlowData(new ParentFlowData(RUNNING_EXECUTION_PLAN_ID, nextStepId));
 
             Long subFlowRunningExecutionPlanId = executionRuntimeServices.getSubFlowRunningExecutionPlan(subFlowId);
-//            executionRuntimeServices.requestToChangeExecutionPlan(subFlowRunningExecutionPlanId);
+            executionRuntimeServices.requestToChangeExecutionPlan(subFlowRunningExecutionPlanId);
             return executionRuntimeServices.getSubFlowBeginStep(subFlowId);
         }
 
         if (nextStepId == null && !runEnv.getParentFlowStack().isEmpty()) {
             ParentFlowData parentFlowData = runEnv.getParentFlowStack().popParentFlowData();
-//            executionRuntimeServices.requestToChangeExecutionPlan(parentFlowData.getRunningExecutionPlanId());
+            executionRuntimeServices.requestToChangeExecutionPlan(parentFlowData.getRunningExecutionPlanId());
             return parentFlowData.getPosition();
         }
 
