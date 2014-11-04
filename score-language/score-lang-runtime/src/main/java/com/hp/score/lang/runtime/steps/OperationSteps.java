@@ -4,6 +4,7 @@ import com.hp.oo.sdk.content.annotations.Param;
 import com.hp.score.lang.runtime.ReturnValues;
 import com.hp.score.lang.runtime.RunEnvironment;
 import org.apache.commons.collections.MapUtils;
+import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import java.util.Map;
  * Time: 10:24
  */
 //todo: decide on a name that is suitable for both flow & operation
+@Component
 public class OperationSteps extends AbstractSteps {
 
     public void start(@Param("operationInputs") LinkedHashMap<String, Serializable> operationInputs,

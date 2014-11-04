@@ -3,6 +3,7 @@ package com.hp.score.lang.runtime.steps;
 import com.hp.oo.sdk.content.annotations.Param;
 import com.hp.score.lang.runtime.ReturnValues;
 import com.hp.score.lang.runtime.RunEnvironment;
+import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import java.util.Map;
  * Date: 02/11/2014
  * Time: 10:23
  */
+@Component
 public class TaskSteps extends AbstractSteps {
 
     public void beginTask(@Param("taskInputs") LinkedHashMap<String, Serializable> taskInputs,

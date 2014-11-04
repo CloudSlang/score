@@ -23,6 +23,12 @@ import com.hp.score.lang.runtime.ReturnValues;
 import com.hp.score.lang.runtime.RunEnvironment;
 import com.hp.score.lang.runtime.steps.ActionSteps;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.python.util.PythonInterpreter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.Serializable;
 import java.util.*;
@@ -37,10 +43,14 @@ import static org.junit.Assert.assertEquals;
  *
  * @author Bonczidai Levente
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = ActionInvokerTest.Config.class)
 public class ActionInvokerTest {
 
     private static final long DEFAULT_TIMEOUT = 10000;
-    private static final ActionSteps actionInvoker = new ActionSteps();
+
+    @Autowired
+    private ActionSteps actionInvoker;
 
     @Test(timeout = DEFAULT_TIMEOUT)
     public void doActionJavaTest() {
@@ -133,5 +143,19 @@ public class ActionInvokerTest {
         returnValues.put("name", name);
         returnValues.put("role", role);
         return returnValues;
+    }
+
+    static class Config{
+
+        @Bean
+        public ActionSteps actionSteps(){
+            return new ActionSteps();
+        }
+
+        @Bean
+        public PythonInterpreter pythonInterpreter(){
+            return new PythonInterpreter();
+        }
+
     }
 }

@@ -11,6 +11,8 @@ import com.hp.score.lang.runtime.RunEnvironment;
 import org.apache.log4j.Logger;
 import org.python.core.PyStringMap;
 import org.python.util.PythonInterpreter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -24,11 +26,13 @@ import static com.hp.score.lang.entities.ScoreLangConstants.*;
  * Date: 02/11/2014
  * Time: 10:25
  */
+@Component
 public class ActionSteps extends AbstractSteps{
 
     private static final Logger logger = Logger.getLogger(ActionSteps.class);
 
-    private static final PythonInterpreter interpreter = new PythonInterpreter();
+    @Autowired
+    private PythonInterpreter interpreter;
 
     public void doAction(@Param("runEnv") RunEnvironment runEnv,
                          @Param("nonSerializableExecutionData") Map<String, Object> nonSerializableExecutionData,

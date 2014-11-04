@@ -33,7 +33,6 @@ import com.hp.score.lang.tests.runtime.builders.POCParentExecutionPlanActionsBui
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.python.util.PythonInterpreter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -51,7 +50,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Time: 08:36
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({"classpath:META-INF/spring/pocContext.xml", "classpath:META-INF/spring/langRuntimeContext.xml"})
+@ContextConfiguration("classpath:META-INF/spring/systemTestsContext.xml")
 public class RuntimeTest {
 
     @Autowired
