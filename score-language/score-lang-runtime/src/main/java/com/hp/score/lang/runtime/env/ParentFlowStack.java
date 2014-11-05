@@ -16,32 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
 */
-package com.hp.score.lang.runtime;
+package com.hp.score.lang.runtime.env;
 
 import java.io.Serializable;
+import java.util.Stack;
 
 /**
  * User: stoneo
  * Date: 22/10/2014
- * Time: 15:38
+ * Time: 15:37
  */
-public class ParentFlowData implements Serializable{
+public class ParentFlowStack implements Serializable{
 
-    private final Long runningExecutionPlanId;
+    private Stack<ParentFlowData> stack = new Stack<>();
 
-    private final Long position;
-
-
-    public ParentFlowData(Long runningExecutionPlanId, Long position) {
-        this.runningExecutionPlanId = runningExecutionPlanId;
-        this.position = position;
+    public void pushParentFlowData(ParentFlowData newContext){
+        stack.push(newContext);
     }
 
-    public Long getRunningExecutionPlanId() {
-        return runningExecutionPlanId;
+    public ParentFlowData popParentFlowData(){
+        if(stack.empty())
+            return null;
+        return stack.pop();
     }
 
-    public Long getPosition() {
-        return position;
+    public boolean isEmpty(){
+        return stack.isEmpty();
     }
 }

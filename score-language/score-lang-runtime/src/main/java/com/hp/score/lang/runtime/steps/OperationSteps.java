@@ -2,8 +2,8 @@ package com.hp.score.lang.runtime.steps;
 
 import com.hp.oo.sdk.content.annotations.Param;
 import com.hp.score.lang.entities.ScoreLangConstants;
-import com.hp.score.lang.runtime.ReturnValues;
-import com.hp.score.lang.runtime.RunEnvironment;
+import com.hp.score.lang.runtime.env.ReturnValues;
+import com.hp.score.lang.runtime.env.RunEnvironment;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +22,7 @@ import java.util.Map;
 @Component
 public class OperationSteps extends AbstractSteps {
 
-
+    public final String ANSWER_SUCCESS = "SUCCESS";
 
     public void start(@Param(ScoreLangConstants.OPERATION_INPUTS_KEY) LinkedHashMap<String, Serializable> operationInputs,
                       @Param(ScoreLangConstants.RUN_ENV) RunEnvironment runEnv,
@@ -91,7 +91,7 @@ public class OperationSteps extends AbstractSteps {
             }
             throw new RuntimeException("No answer");
         }
-        return "SUCCESS";
+        return ANSWER_SUCCESS;
     }
 
     private boolean eval(Object expression, Map<String, String> retValue) {

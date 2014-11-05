@@ -1,8 +1,8 @@
 package com.hp.score.lang.runtime.steps;
 
-import com.hp.score.lang.runtime.ContextStack;
-import com.hp.score.lang.runtime.ReturnValues;
-import com.hp.score.lang.runtime.RunEnvironment;
+import com.hp.score.lang.runtime.env.ContextStack;
+import com.hp.score.lang.runtime.env.ReturnValues;
+import com.hp.score.lang.runtime.env.RunEnvironment;
 import org.apache.commons.collections.MapUtils;
 
 import java.io.Serializable;

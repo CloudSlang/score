@@ -19,8 +19,8 @@
 package com.hp.score.lang.tests.runtime;
 
 import com.hp.oo.sdk.content.annotations.Param;
-import com.hp.score.lang.runtime.ReturnValues;
-import com.hp.score.lang.runtime.RunEnvironment;
+import com.hp.score.lang.runtime.env.ReturnValues;
+import com.hp.score.lang.runtime.env.RunEnvironment;
 import com.hp.score.lang.runtime.steps.ActionSteps;
 import org.junit.Test;
 import org.junit.runner.RunWith;

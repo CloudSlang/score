@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
 */
-package com.hp.score.lang.runtime;
+package com.hp.score.lang.runtime.env;
 
 import java.io.Serializable;
 import java.util.HashMap;

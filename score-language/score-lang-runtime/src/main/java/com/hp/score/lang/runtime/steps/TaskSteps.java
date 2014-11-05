@@ -2,8 +2,8 @@ package com.hp.score.lang.runtime.steps;
 
 import com.hp.oo.sdk.content.annotations.Param;
 import com.hp.score.lang.entities.ScoreLangConstants;
-import com.hp.score.lang.runtime.ReturnValues;
-import com.hp.score.lang.runtime.RunEnvironment;
+import com.hp.score.lang.runtime.env.ReturnValues;
+import com.hp.score.lang.runtime.env.RunEnvironment;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
