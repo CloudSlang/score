@@ -18,13 +18,21 @@ public class InputsTransformer implements Transformer<List<Object>, List<Input>>
     public List<Input> transform(List<Object> rawData) {
         List<Input> result = new ArrayList<>();
         for (Object rawInput : rawData) {
+            //- some_input
+            //this is our default behavior that if the user specifies only a key, the key is also the ref we look for
             if (rawInput instanceof String) {
                 result.add(new Input((String) rawInput, (String) rawInput));
             } else if (rawInput instanceof Map) {
                 Map.Entry entry = (Map.Entry) ((Map) rawInput).entrySet().iterator().next();
+                // - some_input: some_expression
+                // the value of the input is an expression we need to evaluate at runtime
                 if (entry.getValue() instanceof String){
                     result.add(new Input((String) entry.getKey(), (String) entry.getValue()));
                 }
+                // - some_inputs:
+                //      property1: value1
+                //      property2: value2
+                // this is the verbose way of defining inputs with all of the properties available
                 else if (entry.getValue() instanceof Map) {
                     result.add(new Input((String) entry.getKey(), (String) entry.getKey()));
                 }
