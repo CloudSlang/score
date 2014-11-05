@@ -1,4 +1,4 @@
-package com.hp.score.lang.runtime;
+package com.hp.score.lang.runtime.configuration;
 
 import org.python.util.PythonInterpreter;
 import org.springframework.context.annotation.Bean;

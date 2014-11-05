@@ -22,9 +22,9 @@ import com.hp.oo.sdk.content.annotations.Param;
 import com.hp.score.api.execution.ExecutionParametersConsts;
 import com.hp.score.lang.ExecutionRuntimeServices;
 import com.hp.score.lang.entities.ScoreLangConstants;
-import com.hp.score.lang.runtime.ParentFlowData;
-import com.hp.score.lang.runtime.ParentFlowStack;
-import com.hp.score.lang.runtime.RunEnvironment;
+import com.hp.score.lang.runtime.env.ParentFlowData;
+import com.hp.score.lang.runtime.env.ParentFlowStack;
+import com.hp.score.lang.runtime.env.RunEnvironment;
 
 /**
  * User: stoneo

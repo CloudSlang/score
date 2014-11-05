@@ -4,7 +4,7 @@
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.hp.com/schema/score http://www.hp.com/schema/score/score.xsd">
 
-    <bean class="com.hp.score.lang.runtime.SlangRuntimeSpringConfig"/>
+    <bean class="com.hp.score.lang.runtime.configuration.SlangRuntimeSpringConfig"/>
 
     <score:engine />
 
