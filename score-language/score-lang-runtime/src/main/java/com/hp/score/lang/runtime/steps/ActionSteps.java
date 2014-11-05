@@ -213,17 +213,11 @@ public class ActionSteps extends AbstractSteps {
             Map.Entry pairs = (Map.Entry) varsIterator.next();
             String key = (String) pairs.getKey();
             String value = (String) pairs.getValue();
-            value = evaluateExpression(interpreter, value);
             interpreter.set(key, value);
             varsIterator.remove();
         }
 
         interpreter.exec(script);
-    }
-
-    private String evaluateExpression(PythonInterpreter interpreter, String value) {
-        if (value.startsWith("-> ")) value = interpreter.eval(value.replace("-> ", "")).toString();
-        return value;
     }
 
     private void cleanInterpreter(PythonInterpreter interpreter) {

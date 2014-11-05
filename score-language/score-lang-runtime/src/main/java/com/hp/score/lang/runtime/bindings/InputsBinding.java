@@ -23,10 +23,12 @@ import com.hp.score.lang.entities.bindings.Input;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
+import javax.script.*;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Component
 public final class InputsBinding {
@@ -57,7 +59,17 @@ public final class InputsBinding {
     }
 
     private Serializable evalExpr(String expr,Map<String,Serializable> context) {
-        return null;//todo
+        ScriptEngine engine = new ScriptEngineManager().getEngineByName("python");//todo - improve perf
+        ScriptContext scriptContext = new SimpleScriptContext();
+        for(Map.Entry<String,Serializable> entry:context.entrySet()){
+            scriptContext.setAttribute(entry.getKey(),entry.getValue(),ScriptContext.ENGINE_SCOPE);
+        }
+        try {
+            return (Serializable) engine.eval(expr,scriptContext);
+        } catch (ScriptException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

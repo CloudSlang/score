@@ -52,6 +52,17 @@ public class InputsBindingTest {
         Assert.assertEquals("yyy", result.get("input2"));
     }
 
+    @Test
+    public void testInputRef() throws Exception {
+        Map<String,Serializable> context = new HashMap<>();
+        context.put("inputX","xxx");
+        List<Input> inputs = Lists.newArrayList(new Input("input1","inputX"));
+        Map<String,Serializable> result = inputsBinding.bindInputs(context,inputs);
+        Assert.assertFalse(result.isEmpty());
+        Assert.assertTrue(result.containsKey("input1"));
+        Assert.assertEquals("xxx", result.get("input1"));
+    }
+
     private Input createDefaultValueInput(Serializable value){
         return new Input("input1",null,value,false,false);
     }
