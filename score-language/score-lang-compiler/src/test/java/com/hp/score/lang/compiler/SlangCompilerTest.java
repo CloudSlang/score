@@ -23,41 +23,28 @@ package com.hp.score.lang.compiler;
  */
 import com.hp.score.api.ExecutionPlan;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.File;
 import java.net.URL;
 
-
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = SpringConfiguration.class)
 public class SlangCompilerTest {
 
-//    @Test
-//    public void testCompile() throws Exception {
-//
-//        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringConfiguration.class);
-//
-//        Compiler compiler = context.getBean("compiler", Compiler.class);
-//
-//        List<File> classPath = Arrays.asList(
-//                new File("/media/windows-share/order_vm_flow.yml"),
-//                new File("/media/windows-share/operations.yml")
-//        );
-//
-//        compiler.compile(new File("/media/windows-share/create_vm_flow.yml"), classPath);
-//
-//    }
+    @Autowired
+    private SlangCompiler compiler;
 
     @Test
     public void testOpCompile() throws Exception {
-
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringConfiguration.class);
-
-        SlangCompiler compiler = context.getBean(SlangCompiler.class);
-
         URL resource = getClass().getResource("/operation.yaml");
         ExecutionPlan executionPlan = compiler.compile(new File(resource.toURI()), null);
         System.out.println(executionPlan.getName());
-
-
     }
+
+
 }

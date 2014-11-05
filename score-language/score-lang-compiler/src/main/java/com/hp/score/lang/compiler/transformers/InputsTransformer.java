@@ -90,7 +90,7 @@ public class InputsTransformer implements Transformer<List<Object>, List<Input>>
 
     @Override
     public List<Scope> getScopes() {
-        return Arrays.asList(Scope.BEFORE_OPERATION);
+        return Arrays.asList(Scope.BEFORE_OPERATION, Scope.BEFORE_TASK);
     }
 
     @Override

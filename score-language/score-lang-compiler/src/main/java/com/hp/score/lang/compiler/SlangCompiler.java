@@ -196,30 +196,6 @@ public class SlangCompiler {
         return new DoAction(actionData);
     }
 
-    private Map<String, Object> runTransformers(Map<String, Object> rawData, Scope... relevantScopes) {
-        Map<String, Object> transformedData = new HashMap<>();
-
-        Iterator it = rawData.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pairs = (Map.Entry) it.next();
-            boolean wasTransformed = false;
-            for (Transformer transformer : transformers) {
-                if (CollectionUtils.containsAny(transformer.getScopes(), Arrays.asList(relevantScopes))) {
-                    String key = pairs.getKey().toString();
-                    if (shouldApplyTransformer(transformer, key)) {
-                        Object value = transformer.transform(rawData.get(key));
-                        transformedData.put(key, value);
-                        wasTransformed = true;
-                    }
-                }
-            }
-            it.remove();
-
-            if (!wasTransformed) throw new RuntimeException("no transformer was found for: " + pairs.getKey());
-        }
-        return transformedData;
-    }
-
     private ExecutionPlan compileFlow(Map<String, Object> flowRawData, Map<String, ExecutionPlan> dependencies) {
         ExecutionPlan executionPlan = compileOperation(flowRawData, dependencies);
         executionPlan.setName((String) flowRawData.remove(SlangTextualKeys.FLOW_NAME_KEY));

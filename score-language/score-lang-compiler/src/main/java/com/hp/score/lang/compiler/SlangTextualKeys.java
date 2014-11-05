@@ -33,6 +33,6 @@ public interface SlangTextualKeys {
 
     String OUTPUTS_KEY = "outputs";
 
-    String ANSWERS_KEY = "answer";
+    String ANSWERS_KEY = "answers";
 
 }

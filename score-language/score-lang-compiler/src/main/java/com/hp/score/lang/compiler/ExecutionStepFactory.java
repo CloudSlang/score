@@ -22,6 +22,7 @@ import com.hp.score.api.ControlActionMetadata;
 import com.hp.score.api.ExecutionStep;
 import com.hp.score.lang.entities.ActionType;
 import com.hp.score.lang.entities.ScoreLangConstants;
+import org.apache.commons.lang.Validate;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
@@ -43,6 +44,7 @@ public class ExecutionStepFactory {
 
 
     public ExecutionStep createStartStep(Long index, Map<String, Serializable> preOpData) {
+        Validate.notNull(preOpData);
         Map<String, Serializable> actionData = new HashMap<>();
         actionData.put(ScoreLangConstants.OPERATION_INPUTS_KEY, preOpData.get(SlangTextualKeys.INPUTS_KEY));
         actionData.put(ScoreLangConstants.HOOKS, "TBD"); //todo add implementation for user custom hooks
@@ -50,12 +52,14 @@ public class ExecutionStepFactory {
     }
 
     public ExecutionStep createActionStep(Long index, Map<String, Serializable> actionData) {
+        Validate.notNull(actionData);
         ActionType actionType = actionData.get(ScoreLangConstants.ACTION_CLASS_KEY) != null ? ActionType.JAVA : ActionType.PYTHON;
-        actionData.put("actionType", actionType);
+        actionData.put(ScoreLangConstants.ACTION_TYPE, actionType);
         return createGeneralStep(index, ACTION_STEPS_CLASS, "doAction", ++index, actionData);
     }
 
     public ExecutionStep createEndStep(Long index, Map<String, Serializable> postOpData) {
+        Validate.notNull(postOpData);
         Map<String, Serializable> actionData = new HashMap<>();
         actionData.put(ScoreLangConstants.OPERATION_OUTPUTS_KEY, postOpData.get(SlangTextualKeys.OUTPUTS_KEY));
         actionData.put(ScoreLangConstants.OPERATION_ANSWERS_KEY, postOpData.get(SlangTextualKeys.ANSWERS_KEY));
@@ -64,7 +68,7 @@ public class ExecutionStepFactory {
     }
 
 
-    public ExecutionStep createGeneralStep(
+    private ExecutionStep createGeneralStep(
             Long stepId,
             String actionClassName,
             String actionMethodName,
