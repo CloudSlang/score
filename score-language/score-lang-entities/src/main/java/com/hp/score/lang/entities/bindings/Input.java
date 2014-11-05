@@ -1,4 +1,4 @@
-package com.hp.score.lang.entities;
+package com.hp.score.lang.entities.bindings;
 /*
  * Licensed to Hewlett-Packard Development Company, L.P. under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +18,8 @@ package com.hp.score.lang.entities;
  * under the License.
 */
 
+import java.io.Serializable;
+
 /*
  * Created by orius123 on 05/11/14.
  */
@@ -25,7 +27,7 @@ public class Input {
 
     private final String name;
 
-    private final String defaultValue;
+    private final Serializable defaultValue;
 
     private final String expression ;
 
@@ -33,15 +35,15 @@ public class Input {
 
     private final boolean required;
 
-    public Input(String name) {
+    public Input(String name,String expression) {
         this.name = name;
         this.defaultValue = null;
-        this.expression = null;
+        this.expression = expression;
         this.encrypted = false ;
         this.required = true ;
     }
 
-    public Input(String name, String defaultValue,String expression,boolean encrypted,boolean required) {
+    public Input(String name,String expression,Serializable defaultValue,boolean encrypted,boolean required) {
         this.name = name;
         this.defaultValue = defaultValue;
         this.expression = expression;
@@ -53,7 +55,7 @@ public class Input {
         return name;
     }
 
-    public String getDefaultValue() {
+    public Serializable getDefaultValue() {
         return defaultValue;
     }
 

@@ -23,7 +23,7 @@ package com.hp.score.lang.compiler.transformers;
  */
 import com.hp.score.lang.compiler.Scope;
 import com.hp.score.lang.compiler.Transformer;
-import com.hp.score.lang.entities.Input;
+import com.hp.score.lang.entities.bindings.Input;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
@@ -76,16 +76,16 @@ public class InputsTransformer implements Transformer<List<Object>, List<Input>>
         boolean required = prop.containsKey(REQUIRED_KEY) && ((boolean)prop.get(REQUIRED_KEY));
         boolean encrypted = prop.containsKey(ENCRYPTED_KEY) && ((boolean)prop.get(ENCRYPTED_KEY));
         String expression = prop.containsValue(EXPRESSION_KEY) ? ((String)prop.get(ENCRYPTED_KEY)) : null;
-        String defaultValue = prop.containsValue(DEFAULT_KEY) ? ((String)prop.get(DEFAULT_KEY)) : null;
-        return new Input(entry.getKey(),defaultValue,expression,encrypted,required);
+        Serializable defaultValue = prop.containsValue(DEFAULT_KEY) ? (prop.get(DEFAULT_KEY)) : null;
+        return new Input(entry.getKey(),expression,defaultValue,encrypted,required);
     }
 
     private Input createExpressionInput(Map.Entry<String, String> entry) {
-        return new Input(entry.getKey(),null,entry.getValue(),false,true);
+        return new Input(entry.getKey(),entry.getValue());
     }
 
     private Input createRefInput(String rawInput) {
-       return new Input(rawInput);//make it use the exp
+       return new Input(rawInput,rawInput);
     }
 
     @Override

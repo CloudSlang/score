@@ -19,6 +19,45 @@ package com.hp.score.lang.runtime.bindings;
  * under the License.
 */
 
-public class InputsBinding {
+import com.hp.score.lang.entities.bindings.Input;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Component;
+
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Component
+public final class InputsBinding {
+
+    public Map<String,Serializable> bindInputs(Map<String,Serializable> context,
+                           List<Input> inputs){
+        Map<String,Serializable> resultContext = new HashMap<>();
+        for(Input input:inputs){
+            bindInput(input,context,resultContext);
+        }
+        return resultContext;
+    }
+
+    private void bindInput(Input input, Map<String,Serializable> context,Map<String,Serializable> resultContext) {
+        Serializable value = null;
+        if(input.getDefaultValue() != null){
+            value = input.getDefaultValue();
+        }
+        if(StringUtils.isNotEmpty(input.getExpression())){
+            String expr = input.getExpression();
+            value = evalExpr(expr, context);
+        }
+        if(input.isRequired() && value == null) {
+            throw new RuntimeException("Input with name :"+input.getName() + " is Required, but value is empty");
+        }
+
+        resultContext.put(input.getName(),value);
+    }
+
+    private Serializable evalExpr(String expr,Map<String,Serializable> context) {
+        return null;//todo
+    }
 
 }
