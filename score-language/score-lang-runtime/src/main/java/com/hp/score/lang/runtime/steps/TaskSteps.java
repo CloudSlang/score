@@ -1,6 +1,7 @@
 package com.hp.score.lang.runtime.steps;
 
 import com.hp.oo.sdk.content.annotations.Param;
+import com.hp.score.lang.entities.ScoreLangConstants;
 import com.hp.score.lang.runtime.ReturnValues;
 import com.hp.score.lang.runtime.RunEnvironment;
 import org.springframework.stereotype.Component;
@@ -19,8 +20,7 @@ import java.util.Map;
 public class TaskSteps extends AbstractSteps {
 
     public void beginTask(@Param("taskInputs") LinkedHashMap<String, Serializable> taskInputs,
-                          @Param("runEnv") RunEnvironment runEnv,
-                          Map<String, Serializable> actionData) {
+                          @Param(ScoreLangConstants.RUN_ENV) RunEnvironment runEnv) {
 
         System.out.println("===========");
         System.out.println(" beginTask ");
@@ -38,10 +38,9 @@ public class TaskSteps extends AbstractSteps {
         updateCallArgumentsAndPushContextToStack(runEnv, flowContext, operationArguments);
     }
 
-    public void finishTask(@Param("runEnv") RunEnvironment runEnv,
+    public void finishTask(@Param(ScoreLangConstants.RUN_ENV) RunEnvironment runEnv,
                            @Param("taskPublishValues") LinkedHashMap<String, Serializable> taskPublishValues,
-                           @Param("taskNavigationValues") LinkedHashMap<String, Long> taskNavigationValues,
-                           Map<String, Serializable> actionData) {
+                           @Param("taskNavigationValues") LinkedHashMap<String, Long> taskNavigationValues) {
 
         System.out.println("============");
         System.out.println(" finishTask ");

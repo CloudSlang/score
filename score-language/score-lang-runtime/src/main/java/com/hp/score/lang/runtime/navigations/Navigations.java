@@ -19,7 +19,9 @@
 package com.hp.score.lang.runtime.navigations;
 
 import com.hp.oo.sdk.content.annotations.Param;
+import com.hp.score.api.execution.ExecutionParametersConsts;
 import com.hp.score.lang.ExecutionRuntimeServices;
+import com.hp.score.lang.entities.ScoreLangConstants;
 import com.hp.score.lang.runtime.ParentFlowData;
 import com.hp.score.lang.runtime.ParentFlowStack;
 import com.hp.score.lang.runtime.RunEnvironment;
@@ -32,10 +34,10 @@ import com.hp.score.lang.runtime.RunEnvironment;
 public class Navigations {
 
     public Long navigate(String subFlowId,
-                         @Param("runEnv") RunEnvironment runEnv,
                          ExecutionRuntimeServices executionRuntimeServices,
-                         Long RUNNING_EXECUTION_PLAN_ID,
-                         Long nextStepId) {
+                         @Param(ScoreLangConstants.RUN_ENV) RunEnvironment runEnv,
+                         @Param(ExecutionParametersConsts.RUNNING_EXECUTION_PLAN_ID) Long RUNNING_EXECUTION_PLAN_ID,
+                         @Param(ScoreLangConstants.NEXT_STEP_ID_KEY) Long nextStepId) {
 
         Long nextStepPosition = runEnv.removeNextStepPosition();
         if (nextStepPosition != null) {

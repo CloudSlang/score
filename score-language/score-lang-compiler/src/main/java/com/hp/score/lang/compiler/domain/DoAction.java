@@ -1,3 +1,4 @@
+package com.hp.score.lang.compiler.domain;
 /*
  * Licensed to Hewlett-Packard Development Company, L.P. under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,32 +17,22 @@
  * specific language governing permissions and limitations
  * under the License.
 */
-package com.hp.score.lang.entities;
 
-/**
- * User: stoneo
- * Date: 07/10/2014
- * Time: 12:52
+/*
+ * Created by orius123 on 05/11/14.
  */
-public interface ScoreLangConstants {
+import java.io.Serializable;
+import java.util.Map;
 
-    String RUN_ENV = "runEnv";
-    String HOOKS = "hooks";
-    //action scope
-    String ACTION_CLASS_KEY = "className";
+public class DoAction {
 
-    String ACTION_METHOD_KEY = "methodName";
-    String PYTHON_SCRIPT_KEY = "pythonScript";
-    //navigation
-    String NEXT_STEP_ID_KEY = "nextStepId";
+    private final Map<String, Serializable> actionData;
 
-    //operation scope
-    String OPERATION_INPUTS_KEY = "operationInputs";
-    String USER_INPUTS_KEY = "userInputs";
-    String OPERATION_OUTPUTS_KEY = "operationOutputs";
-    String OPERATION_ANSWERS_KEY = "operationAnswers";
+    public DoAction(Map<String, Serializable> actionData) {
+        this.actionData = actionData;
+    }
 
-    //task scope
-
-
+    public Map<String, Serializable> getActionData() {
+        return actionData;
+    }
 }

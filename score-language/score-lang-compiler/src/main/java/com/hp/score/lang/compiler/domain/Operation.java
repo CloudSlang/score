@@ -1,4 +1,4 @@
-package com.hp.score.lang.compiler;
+package com.hp.score.lang.compiler.domain;
 /*
  * Licensed to Hewlett-Packard Development Company, L.P. under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,10 +21,30 @@ package com.hp.score.lang.compiler;
 /*
  * Created by orius123 on 05/11/14.
  */
-public enum Scope {
-    BEFORE_TASK,
-    AFTER_TASK,
-    BEFORE_OPERATION,
-    AFTER_OPERATION,
-    ACTION
+import java.io.Serializable;
+import java.util.Map;
+
+public class Operation {
+
+    private final Map<String, Serializable> preOpActionData;
+    private final Map<String, Serializable> postOpActionData;
+    private final DoAction doAction;
+
+    public Operation(Map<String, Serializable> preOpActionData, Map<String, Serializable> postOpActionData, DoAction doAction) {
+        this.preOpActionData = preOpActionData;
+        this.postOpActionData = postOpActionData;
+        this.doAction = doAction;
+    }
+
+    public Map<String, Serializable> getPreOpActionData() {
+        return preOpActionData;
+    }
+
+    public Map<String, Serializable> getPostOpActionData() {
+        return postOpActionData;
+    }
+
+    public DoAction getDoAction() {
+        return doAction;
+    }
 }

@@ -1,3 +1,4 @@
+package com.hp.score.lang.compiler;
 /*
  * Licensed to Hewlett-Packard Development Company, L.P. under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,32 +17,22 @@
  * specific language governing permissions and limitations
  * under the License.
 */
-package com.hp.score.lang.entities;
 
-/**
- * User: stoneo
- * Date: 07/10/2014
- * Time: 12:52
+/*
+ * Created by orius123 on 05/11/14.
  */
-public interface ScoreLangConstants {
+public interface SlangTextualKeys {
 
-    String RUN_ENV = "runEnv";
-    String HOOKS = "hooks";
-    //action scope
-    String ACTION_CLASS_KEY = "className";
+    String FLOW_NAME_KEY = "name";
 
-    String ACTION_METHOD_KEY = "methodName";
-    String PYTHON_SCRIPT_KEY = "pythonScript";
-    //navigation
-    String NEXT_STEP_ID_KEY = "nextStepId";
+    String OPERATIONS_KEY = "operations";
 
-    //operation scope
-    String OPERATION_INPUTS_KEY = "operationInputs";
-    String USER_INPUTS_KEY = "userInputs";
-    String OPERATION_OUTPUTS_KEY = "operationOutputs";
-    String OPERATION_ANSWERS_KEY = "operationAnswers";
+    String ACTION_KEY = "action";
 
-    //task scope
+    String INPUTS_KEY = "inputs";
 
+    String OUTPUTS_KEY = "outputs";
+
+    String ANSWERS_KEY = "answer";
 
 }

@@ -1,6 +1,7 @@
 package com.hp.score.lang.runtime.steps;
 
 import com.hp.oo.sdk.content.annotations.Param;
+import com.hp.score.lang.entities.ScoreLangConstants;
 import com.hp.score.lang.runtime.ReturnValues;
 import com.hp.score.lang.runtime.RunEnvironment;
 import org.apache.commons.collections.MapUtils;
@@ -21,10 +22,11 @@ import java.util.Map;
 @Component
 public class OperationSteps extends AbstractSteps {
 
-    public void start(@Param("operationInputs") LinkedHashMap<String, Serializable> operationInputs,
-                      @Param("runEnv") RunEnvironment runEnv,
-                      @Param("userInputs") HashMap<String, Serializable> userInputs,
-                      Map<String, Serializable> actionData) {
+
+
+    public void start(@Param(ScoreLangConstants.OPERATION_INPUTS_KEY) LinkedHashMap<String, Serializable> operationInputs,
+                      @Param(ScoreLangConstants.RUN_ENV) RunEnvironment runEnv,
+                      @Param(ScoreLangConstants.USER_INPUTS_KEY) HashMap<String, Serializable> userInputs) {
 
         System.out.println("=======");
         System.out.println(" start ");
@@ -50,10 +52,9 @@ public class OperationSteps extends AbstractSteps {
 
     }
 
-    public void end(@Param("runEnv") RunEnvironment runEnv,
-                    @Param("operationOutputs") LinkedHashMap<String, Serializable> operationOutputs,
-                    @Param("operationAnswers") LinkedHashMap<String, Serializable> operationAnswers,
-                    Map<String, Serializable> actionData) {
+    public void end(@Param(ScoreLangConstants.RUN_ENV) RunEnvironment runEnv,
+                    @Param(ScoreLangConstants.OPERATION_OUTPUTS_KEY) LinkedHashMap<String, Serializable> operationOutputs,
+                    @Param(ScoreLangConstants.OPERATION_ANSWERS_KEY) LinkedHashMap<String, Serializable> operationAnswers) {
 
 
         System.out.println("=====");

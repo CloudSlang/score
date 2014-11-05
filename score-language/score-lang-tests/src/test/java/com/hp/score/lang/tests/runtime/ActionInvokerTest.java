@@ -31,11 +31,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.hp.score.lang.entities.ActionType.JAVA;
 import static com.hp.score.lang.entities.ActionType.PYTHON;
-import static com.hp.score.lang.entities.ScoreLangConstants.*;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -63,8 +63,6 @@ public class ActionInvokerTest {
 
         Map<String, Object> nonSerializableExecutionData = new HashMap<>();
 
-        Map<String, Serializable> actionData = new HashMap<>();
-
         //invoke doAction
         actionInvoker.doAction(
                 runEnv,
@@ -72,7 +70,7 @@ public class ActionInvokerTest {
                 JAVA,
                 ActionInvokerTest.class.getName(),
                 "doJavaAction",
-                actionData);
+                null);
 
         //construct expected outputs
         Map<String, String> expectedOutputs = new HashMap<>();
@@ -93,39 +91,31 @@ public class ActionInvokerTest {
         RunEnvironment runEnv = new RunEnvironment();
         Map<String, Serializable> initialCallArguments = new HashMap<>();
         initialCallArguments.put("host", "localhost");
-        initialCallArguments.put("port", "-> 8080 if True else 8081");
+        initialCallArguments.put("port", "8080");
         runEnv.putCallArguments(initialCallArguments);
 
         Map<String, Object> nonSerializableExecutionData = new HashMap<>();
-
-        Map<String, Serializable> actionData = new HashMap<>();
 
         String userPythonScript = "import os\n" +
                 "print host\n" +
                 "print port\n" +
                 "os.system(\"ping -c 1 \" + host)\n" +
                 "url = 'http://' + host + ':' + str(port)\n" +
+                "url2 = url + '/oo'\n" +
+                "another = 'just a string'\n" +
+//                we can also change..
+                "port = 8081\n" +
                 "print url";
-        actionData.put(PYTHON_SCRIPT_KEY, userPythonScript);
-
-        List<String> inputList = new ArrayList<>();
-        inputList.add("host");
-        inputList.add("port");
-        actionData.put(INPUT_LIST_KEY, (Serializable) inputList);
-
-        Map<String, String> userOutputs = new LinkedHashMap<>();
-        userOutputs.put("url", "-> 'http://' + host + ':' + str(port) + '/oo'");
-        userOutputs.put("url2", "-> url");
-        userOutputs.put("another", "just a string");
-        actionData.put(USER_OUTPUTS_KEY, (Serializable) userOutputs);
 
         //invoke doAction
-        actionInvoker.doAction(runEnv, nonSerializableExecutionData, PYTHON, "", "", actionData);
+        actionInvoker.doAction(runEnv, nonSerializableExecutionData, PYTHON, "", "", userPythonScript);
 
         //construct expected outputs
         Map<String, String> expectedOutputs = new HashMap<>();
-        expectedOutputs.put("url", "http://localhost:8080/oo");
-        expectedOutputs.put("url2", "http://localhost:8080");
+        expectedOutputs.put("host", "localhost");
+        expectedOutputs.put("port", "8081");
+        expectedOutputs.put("url", "http://localhost:8080");
+        expectedOutputs.put("url2", "http://localhost:8080/oo");
         expectedOutputs.put("another", "just a string");
 
         //extract actual outputs
@@ -145,15 +135,15 @@ public class ActionInvokerTest {
         return returnValues;
     }
 
-    static class Config{
+    static class Config {
 
         @Bean
-        public ActionSteps actionSteps(){
+        public ActionSteps actionSteps() {
             return new ActionSteps();
         }
 
         @Bean
-        public PythonInterpreter pythonInterpreter(){
+        public PythonInterpreter pythonInterpreter() {
             return new PythonInterpreter();
         }
 

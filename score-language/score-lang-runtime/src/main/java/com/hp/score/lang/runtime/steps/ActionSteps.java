@@ -8,7 +8,10 @@ import com.hp.score.lang.entities.ActionType;
 import com.hp.score.lang.entities.ScoreLangConstants;
 import com.hp.score.lang.runtime.ReturnValues;
 import com.hp.score.lang.runtime.RunEnvironment;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.python.core.PyModule;
+import org.python.core.PyObject;
 import org.python.core.PyStringMap;
 import org.python.util.PythonInterpreter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,27 +22,25 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import static com.hp.score.lang.entities.ScoreLangConstants.*;
-
 /**
  * User: stoneo
  * Date: 02/11/2014
  * Time: 10:25
  */
 @Component
-public class ActionSteps extends AbstractSteps{
+public class ActionSteps extends AbstractSteps {
 
     private static final Logger logger = Logger.getLogger(ActionSteps.class);
 
     @Autowired
     private PythonInterpreter interpreter;
 
-    public void doAction(@Param("runEnv") RunEnvironment runEnv,
-                         @Param("nonSerializableExecutionData") Map<String, Object> nonSerializableExecutionData,
+    public void doAction(@Param(ScoreLangConstants.RUN_ENV) RunEnvironment runEnv,
+                         @Param(ExecutionParametersConsts.NON_SERIALIZABLE_EXECUTION_DATA) Map<String, Object> nonSerializableExecutionData,
                          ActionType actionType,
                          @Param(ScoreLangConstants.ACTION_CLASS_KEY) String className,
                          @Param(ScoreLangConstants.ACTION_METHOD_KEY) String methodName,
-                         Map<String, Serializable> actionData) {
+                         @Param(ScoreLangConstants.PYTHON_SCRIPT_KEY) String pythonScript) {
 
         System.out.println("================================");
         System.out.println("doAction");
@@ -53,7 +54,7 @@ public class ActionSteps extends AbstractSteps{
                     returnValue = runJavaAction(callArguments, nonSerializableExecutionData, className, methodName);
                     break;
                 case PYTHON:
-                    returnValue = prepareAndRunPythonAction(callArguments, actionData);
+                    returnValue = prepareAndRunPythonAction(callArguments, pythonScript);
                     break;
                 default:
                     break;
@@ -177,52 +178,33 @@ public class ActionSteps extends AbstractSteps{
 
     @SuppressWarnings("unchecked")
     private Map<String, String> prepareAndRunPythonAction(
-            Map<String, Serializable> currentContext,
-            Map<String, Serializable> actionData) throws Exception {
+            Map<String, Serializable> callArguments,
+            String pythonScript) throws Exception {
 
-        //actionData contains the info about inputs and outputs
-        List<String> inputList;
-        if (actionData.containsKey(INPUT_LIST_KEY)) {
-            inputList = (List<String>) actionData.get(INPUT_LIST_KEY);
-        } else {
-            inputList = new ArrayList<>();
-        }
-        Map<String, String> userOutputs;
-        if (actionData.containsKey(USER_OUTPUTS_KEY)) {
-            userOutputs = (Map<String, String>) actionData.get(USER_OUTPUTS_KEY);
-        } else {
-            userOutputs = new LinkedHashMap<>();
-        }
-
-        if (actionData.containsKey(PYTHON_SCRIPT_KEY)) {
-            return runPythonAction(currentContext, (String) actionData.get(PYTHON_SCRIPT_KEY), inputList, userOutputs);
+        if (StringUtils.isNotBlank(pythonScript)) {
+            return runPythonAction(callArguments, pythonScript);
         }
 
         throw new Exception("Python script not found in action data");
     }
 
     //we need this method to be synchronized so we will ot have multiple scripts run in parallel on the same context
-    private synchronized Map<String, String> runPythonAction(Map<String, Serializable> currentContext,
-                                                             String script,
-                                                             List<String> inputList,
-                                                             Map<String, String> userOutputs) {
+    private synchronized Map<String, String> runPythonAction(Map<String, Serializable> callArguments,
+                                                             String script) {
 
-        Map<String, Serializable> userVars = extractPythonMethodData(currentContext, inputList);
-        executePythonScript(interpreter, script, userVars);
-        ReturnValues returnValues = extractPythonOutputs(interpreter, userOutputs);
-        cleanInterpreter(interpreter);
-        return returnValues.getOutputs();
-    }
-
-    // TODO remove this comment
-    // do we need to check the following cases too?
-    //handleNonSerializableSessionContextArgument and handleSerializableSessionContextArgument
-    private Map<String, Serializable> extractPythonMethodData(Map<String, Serializable> currentContext, List<String> inputList) {
-        Map<String, Serializable> inputMap = new LinkedHashMap<>();
-        for (String inputKey : inputList) {
-            inputMap.put(inputKey, currentContext.get(inputKey));
+        executePythonScript(interpreter, script, callArguments);
+        Iterator<PyObject> localsIterator = interpreter.getLocals().asIterable().iterator();
+        HashMap<String, String> returnValue = new HashMap<>();
+        while (localsIterator.hasNext()) {
+            String key = localsIterator.next().asString();
+            PyObject value = interpreter.get(key);
+            if ((key.startsWith("__") && key.endsWith("__")) || value instanceof PyModule) {
+                continue;
+            }
+            returnValue.put(key, value.toString());
         }
-        return inputMap;
+        cleanInterpreter(interpreter);
+        return returnValue;
     }
 
     private void executePythonScript(PythonInterpreter interpreter, String script, Map<String, Serializable> userVars) {
@@ -242,20 +224,6 @@ public class ActionSteps extends AbstractSteps{
     private String evaluateExpression(PythonInterpreter interpreter, String value) {
         if (value.startsWith("-> ")) value = interpreter.eval(value.replace("-> ", "")).toString();
         return value;
-    }
-
-    private ReturnValues extractPythonOutputs(PythonInterpreter interpreter, Map<String, String> userOutputs) {
-        Map<String, String> evaluatedOutputs = new LinkedHashMap<>();
-        Iterator outputsIterator = userOutputs.entrySet().iterator();
-        while (outputsIterator.hasNext()) {
-            Map.Entry pairs = (Map.Entry) outputsIterator.next();
-            String key = (String) pairs.getKey();
-            String value = (String) pairs.getValue();
-            value = evaluateExpression(interpreter, value);
-            evaluatedOutputs.put(key, value);
-            outputsIterator.remove();
-        }
-        return new ReturnValues(evaluatedOutputs, null);
     }
 
     private void cleanInterpreter(PythonInterpreter interpreter) {
