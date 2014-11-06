@@ -21,17 +21,19 @@ package com.hp.score.lang.runtime.bindings;
 
 import com.hp.score.lang.entities.bindings.Input;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.script.*;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Component
 public final class InputsBinding {
+
+    @Autowired
+    ScriptEvaluator scriptEvaluator;
 
     public Map<String,Serializable> bindInputs(Map<String,Serializable> context,
                            List<Input> inputs){
@@ -49,7 +51,7 @@ public final class InputsBinding {
         }
         if(StringUtils.isNotEmpty(input.getExpression())){
             String expr = input.getExpression();
-            value = evalExpr(expr, context);
+            value = scriptEvaluator.evalExpr(expr, context);
         }
         if(input.isRequired() && value == null) {
             throw new RuntimeException("Input with name :"+input.getName() + " is Required, but value is empty");
@@ -58,18 +60,5 @@ public final class InputsBinding {
         resultContext.put(input.getName(),value);
     }
 
-    private Serializable evalExpr(String expr,Map<String,Serializable> context) {
-        ScriptEngine engine = new ScriptEngineManager().getEngineByName("python");//todo - improve perf
-        ScriptContext scriptContext = new SimpleScriptContext();
-        for(Map.Entry<String,Serializable> entry:context.entrySet()){
-            scriptContext.setAttribute(entry.getKey(),entry.getValue(),ScriptContext.ENGINE_SCOPE);
-        }
-        try {
-            return (Serializable) engine.eval(expr,scriptContext);
-        } catch (ScriptException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
 }

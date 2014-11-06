@@ -3,18 +3,25 @@ package com.hp.score.lang.runtime.bindings;
 import com.hp.score.lang.entities.bindings.Input;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.python.google.common.collect.Lists;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
-
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration
 public class InputsBindingTest {
 
-    InputsBinding inputsBinding = new InputsBinding();
+    @Autowired
+    private InputsBinding inputsBinding;
 
     @Test
     public void testEmptyBindInputs() throws Exception {
@@ -65,5 +72,19 @@ public class InputsBindingTest {
 
     private Input createDefaultValueInput(Serializable value){
         return new Input("input1",null,value,false,false);
+    }
+
+    @Configuration
+    static class Config{
+
+        @Bean
+        public InputsBinding inputsBinding(){
+            return new InputsBinding();
+        }
+
+        @Bean
+        public ScriptEvaluator scriptEvaluator(){
+            return new ScriptEvaluator();
+        }
     }
 }
