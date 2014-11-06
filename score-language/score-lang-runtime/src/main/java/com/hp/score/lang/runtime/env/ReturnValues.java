@@ -8,18 +8,18 @@ public class ReturnValues implements Serializable{
 
     private final HashMap<String, String> outputs;
 
-    private final String answer;
+    private final String result;
 
-    public ReturnValues(Map<String, String> outputs, String answer) {
+    public ReturnValues(Map<String, String> outputs, String result) {
         this.outputs = new HashMap<>(outputs);
-        this.answer = answer;
+        this.result = result;
     }
 
     public Map<String, String> getOutputs() {
         return outputs;
     }
 
-    public String getAnswer() {
-        return answer;
+    public String getResult() {
+        return result;
     }
 }

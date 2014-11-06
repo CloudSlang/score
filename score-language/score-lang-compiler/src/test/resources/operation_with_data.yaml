@@ -29,7 +29,7 @@ operations:
       outputs:
         - output1: input1
         - output2: input2
-      answers:
-        SUCCESS: retVal[] != '123456'
-        #this test should be very lucky to fail
-        FAIL: retVal[] == '123456'
+      results:
+        - SUCCESS: retVal[] != '123456'
+          #this test should be very lucky to fail
+        - FAIL: retVal[] == '123456'

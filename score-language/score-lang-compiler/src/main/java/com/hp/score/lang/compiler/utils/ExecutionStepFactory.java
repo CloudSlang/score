@@ -63,7 +63,7 @@ public class ExecutionStepFactory {
         Validate.notNull(postOpData);
         Map<String, Serializable> actionData = new HashMap<>();
         actionData.put(ScoreLangConstants.OPERATION_OUTPUTS_KEY, postOpData.get(SlangTextualKeys.OUTPUTS_KEY));
-        actionData.put(ScoreLangConstants.OPERATION_ANSWERS_KEY, postOpData.get(SlangTextualKeys.ANSWERS_KEY));
+        actionData.put(ScoreLangConstants.OPERATION_RESULTS_KEY, postOpData.get(SlangTextualKeys.RESULT_KEY));
         actionData.put(ScoreLangConstants.HOOKS, "TBD"); //todo add implementation for user custom hooks
         return createGeneralStep(index, OPERATION_STEPS_CLASS, "end", null, actionData);
     }

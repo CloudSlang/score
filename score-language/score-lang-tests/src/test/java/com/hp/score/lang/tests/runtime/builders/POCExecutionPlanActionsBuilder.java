@@ -107,8 +107,8 @@ public class POCExecutionPlanActionsBuilder {
         Map<String, Serializable> actionData = new HashMap<>();
         HashMap<String, Serializable> operationOutputs = createOperationOutputs();
         actionData.put("operationOutputs", operationOutputs);
-        HashMap<String, Serializable> operationAnswers = createOperationAnswers();
-        actionData.put("operationAnswers", operationAnswers);
+        HashMap<String, Serializable> operationResults = createOperationResults();
+        actionData.put("operationResults", operationResults);
         return createGeneralStep(index, OperationSteps.class.getName(), "end", ++index, actionData);
     }
 
@@ -127,8 +127,8 @@ public class POCExecutionPlanActionsBuilder {
         Map<String, Serializable> actionData = new HashMap<>();
         HashMap<String, Serializable> flowOutputs = createFlowOutputs();
         actionData.put("operationOutputs", flowOutputs);
-        HashMap<String, Serializable> flowAnswers = createFlowAnswers();
-        actionData.put("operationAnswers", flowAnswers);
+        HashMap<String, Serializable> flowResults = createFlowResults();
+        actionData.put("operationResults", flowResults);
         return createGeneralStep(index, OperationSteps.class.getName(), "end", null, actionData);
     }
 
@@ -162,11 +162,11 @@ public class POCExecutionPlanActionsBuilder {
         return operationOutputs;
     }
 
-    private HashMap<String, Serializable> createOperationAnswers() {
-        LinkedHashMap<String, Serializable> operationAnswers = new LinkedHashMap<>();
-        operationAnswers.put("SUCCESS", "retVal[isTrue]");
-        operationAnswers.put("FAIL", "retVal[isFalse]");
-        return operationAnswers;
+    private HashMap<String, Serializable> createOperationResults() {
+        LinkedHashMap<String, Serializable> operationResults = new LinkedHashMap<>();
+        operationResults.put(ScoreLangConstants.SUCCESS_RESULT, "retVal[isTrue]");
+        operationResults.put(ScoreLangConstants.FAILURE_RESULT, "retVal[isFalse]");
+        return operationResults;
     }
 
     private HashMap<String, Serializable> createTaskPublishValues() {
@@ -178,8 +178,8 @@ public class POCExecutionPlanActionsBuilder {
 
     private HashMap<String, Long> createFirstTaskNavigationValues() {
         LinkedHashMap<String, Long> navigationValues = new LinkedHashMap<>();
-        navigationValues.put("SUCCESS", index + 1);
-        navigationValues.put("FAIL", null);
+        navigationValues.put(ScoreLangConstants.SUCCESS_RESULT, index + 1);
+        navigationValues.put(ScoreLangConstants.FAILURE_RESULT, null);
         return navigationValues;
     }
 
@@ -190,12 +190,12 @@ public class POCExecutionPlanActionsBuilder {
         return flowOutputs;
     }
 
-    private HashMap<String, Serializable> createFlowAnswers() {
-        LinkedHashMap<String, Serializable> flowAnswers = new LinkedHashMap<>();
-        //todo: how do I resolve the flow answer?
-        flowAnswers.put("SUCCESS", null);
-        flowAnswers.put("FAIL", null);
-        return flowAnswers;
+    private HashMap<String, Serializable> createFlowResults() {
+        LinkedHashMap<String, Serializable> flowResults = new LinkedHashMap<>();
+        //todo: how do I resolve the flow result?
+        flowResults.put(ScoreLangConstants.SUCCESS_RESULT, null);
+        flowResults.put(ScoreLangConstants.FAILURE_RESULT, null);
+        return flowResults;
     }
 
     public ExecutionStep createGeneralStep(

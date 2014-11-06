@@ -3,6 +3,7 @@ package com.hp.score.lang.tests.runtime.bindings;
 import com.hp.score.lang.entities.bindings.Input;
 import com.hp.score.lang.runtime.bindings.InputsBinding;
 import com.hp.score.lang.runtime.bindings.ScriptEvaluator;
+import com.hp.score.lang.runtime.configuration.SlangRuntimeSpringConfig;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,6 +11,7 @@ import org.python.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -77,6 +79,7 @@ public class InputsBindingTest {
     }
 
     @Configuration
+    @Import(SlangRuntimeSpringConfig.class)
     static class Config{
 
         @Bean

@@ -40,7 +40,7 @@ public interface ScoreLangConstants {
     String OPERATION_INPUTS_KEY = "operationInputs";
     String USER_INPUTS_KEY = "userInputs";
     String OPERATION_OUTPUTS_KEY = "operationOutputs";
-    String OPERATION_ANSWERS_KEY = "operationAnswers";
+    String OPERATION_RESULTS_KEY = "operationResults";
 
     //task scope
 
@@ -51,5 +51,9 @@ public interface ScoreLangConstants {
 	String EVENT_INPUT_END = "EVENT_INPUT_END";
 	String EVENT_OUTPUT_START = "EVENT_OUTPUT_START";
 	String EVENT_OUTPUT_END = "EVENT_OUPUT_END";
+
+    // results
+    String SUCCESS_RESULT = "SUCCESS";
+    String FAILURE_RESULT = "FAILURE";
 
 }

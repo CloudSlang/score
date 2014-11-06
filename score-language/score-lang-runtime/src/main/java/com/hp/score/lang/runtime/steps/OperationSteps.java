@@ -2,19 +2,18 @@ package com.hp.score.lang.runtime.steps;
 
 import com.hp.oo.sdk.content.annotations.Param;
 import com.hp.score.lang.ExecutionRuntimeServices;
+import com.hp.score.lang.entities.bindings.Result;
+import com.hp.score.lang.runtime.bindings.ResultsBinding;
 import com.hp.score.lang.runtime.env.ReturnValues;
 import com.hp.score.lang.runtime.env.RunEnvironment;
-
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Map;
 
 import static com.hp.score.lang.entities.ScoreLangConstants.*;
@@ -30,7 +29,8 @@ import static com.hp.score.api.execution.ExecutionParametersConsts.*;
 @Component
 public class OperationSteps extends AbstractSteps {
 
-    public final String ANSWER_SUCCESS = "SUCCESS";
+    @Autowired
+    private ResultsBinding resultsBinding;
 
     public void start(@Param(OPERATION_INPUTS_KEY) LinkedHashMap<String, Serializable> operationInputs,
                       @Param(RUN_ENV) RunEnvironment runEnv,
@@ -61,9 +61,16 @@ public class OperationSteps extends AbstractSteps {
 
     }
 
+    /**
+     * This method is executed by the end execution step of an operation/flow
+     *
+     * @param runEnv the run environment object
+     * @param operationOutputs the operation outputs data
+     * @param operationResults the operation results data
+     */
     public void end(@Param(RUN_ENV) RunEnvironment runEnv,
                     @Param(OPERATION_OUTPUTS_KEY) LinkedHashMap<String, Serializable> operationOutputs,
-                    @Param(OPERATION_ANSWERS_KEY) LinkedHashMap<String, Serializable> operationAnswers,
+                    @Param(OPERATION_RESULTS_KEY) LinkedList<Result> operationResults,
                     @Param(EXECUTION_RUNTIME_SERVICES) ExecutionRuntimeServices executionRuntimeServices) {
 
         System.out.println("=====");
@@ -71,14 +78,19 @@ public class OperationSteps extends AbstractSteps {
         System.out.println("=====");
         Map<String, Serializable> operationContext = runEnv.getStack().popContext();
         ReturnValues actionReturnValues = runEnv.removeReturnValues();
-		fireEvent(executionRuntimeServices, EVENT_OUTPUT_START, "Output binding started", "path", Pair.of("operationOutputs", operationOutputs), Pair.of("operationAnswers", operationAnswers), Pair.of("actionReturnValues", actionReturnValues));
-        String answer = actionReturnValues.getAnswer() != null ? actionReturnValues.getAnswer() : resolveOperationAnswer(actionReturnValues.getOutputs(), operationAnswers);
+		fireEvent(executionRuntimeServices, EVENT_OUTPUT_START, "Output binding started", "path", Pair.of("operationOutputs", operationOutputs), Pair.of("operationResults", operationResults), Pair.of("actionReturnValues", actionReturnValues));
+
+        // Resolving the result of the operation/flow
+        String result = actionReturnValues.getResult();
+        if(result == null) {
+            result = resultsBinding.resolveResult(actionReturnValues.getOutputs(), operationResults);
+        }
 
         Map<String, String> operationReturnOutputs = createOperationBindOutputsContext(operationContext, actionReturnValues.getOutputs(), operationOutputs);
 
         //todo: hook
 
-        ReturnValues returnValues = new ReturnValues(operationReturnOutputs, answer);
+        ReturnValues returnValues = new ReturnValues(operationReturnOutputs, result);
         runEnv.putReturnValues(returnValues);
         fireEvent(executionRuntimeServices, EVENT_OUTPUT_END, "Output binding finished", "path", Pair.of(RETURN_VALUES, returnValues));
         printReturnValues(returnValues);
@@ -87,28 +99,9 @@ public class OperationSteps extends AbstractSteps {
     private void resolveGroups() {
     }
 
-    private String resolveOperationAnswer(Map<String, String> retValue, LinkedHashMap<String, Serializable> possibleAnswers) {
-        if (MapUtils.isNotEmpty(possibleAnswers)) {
-            Iterator iter = possibleAnswers.entrySet().iterator();
-            while (iter.hasNext()) {
-                Map.Entry answerEntry = (Map.Entry) iter.next();
-                Object value = answerEntry.getValue();
-                if (value == null) {
-
-                } else if (eval(value, retValue))
-                    return answerEntry.getKey().toString();
-            }
-            throw new RuntimeException("No answer");
-        }
-        return ANSWER_SUCCESS;
-    }
-
-    private boolean eval(Object expression, Map<String, String> retValue) {
-        //todo: resolve expression
-        return true;
-    }
-
-    private Map<String, String> createOperationBindOutputsContext(Map<String, Serializable> context, Map<String, String> retValue, Map<String, Serializable> outputs) {
+    private Map<String, String> createOperationBindOutputsContext(Map<String, Serializable> context,
+                                                                  Map<String, String> retValue,
+                                                                  Map<String, Serializable> outputs) {
         Map<String, String> tempContext = new LinkedHashMap<>();
         if (outputs != null) {
             for (Map.Entry<String, Serializable> output : outputs.entrySet()) {

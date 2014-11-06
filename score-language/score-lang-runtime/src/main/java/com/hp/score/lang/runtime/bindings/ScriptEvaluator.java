@@ -17,11 +17,11 @@ package com.hp.score.lang.runtime.bindings;/*
  * under the License.
 */
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.script.SimpleScriptContext;
 import java.io.Serializable;
@@ -35,14 +35,16 @@ import java.util.Map;
 @Component
 public class ScriptEvaluator {
 
-    public Serializable evalExpr(String expr, Map<String,Serializable> context) {
-        ScriptEngine engine = new ScriptEngineManager().getEngineByName("python");//todo - improve perf
+    @Autowired
+    private ScriptEngine engine;
+
+    public Serializable evalExpr(String expr, Map<String, ? extends Serializable> context) {
         ScriptContext scriptContext = new SimpleScriptContext();
-        for(Map.Entry<String,Serializable> entry:context.entrySet()){
-            scriptContext.setAttribute(entry.getKey(),entry.getValue(),ScriptContext.ENGINE_SCOPE);
+        for(Map.Entry<String, ? extends Serializable> entry:context.entrySet()){
+            scriptContext.setAttribute(entry.getKey(), entry.getValue(), ScriptContext.ENGINE_SCOPE);
         }
         try {
-            return (Serializable) engine.eval(expr,scriptContext);
+            return (Serializable)engine.eval(expr,scriptContext);
         } catch (ScriptException e) {
             e.printStackTrace();
         }

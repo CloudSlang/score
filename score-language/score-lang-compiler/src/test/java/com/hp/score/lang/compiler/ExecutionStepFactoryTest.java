@@ -67,14 +67,14 @@ public class ExecutionStepFactoryTest {
     }
 
     @Test
-    public void testCreateEndStepPutAnswersUnderTheRightKey() throws Exception {
+    public void testCreateEndStepPutResultsUnderTheRightKey() throws Exception {
         String placeHolder = "place_holder";
         ExecutionStepFactory factory = new ExecutionStepFactory();
         HashMap<String, Serializable> postOpData = new HashMap<>();
-        postOpData.put(SlangTextualKeys.ANSWERS_KEY, placeHolder);
+        postOpData.put(SlangTextualKeys.RESULT_KEY, placeHolder);
         ExecutionStep endStep = factory.createEndStep(1L, postOpData);
-        Assert.assertNotNull("answers key is null", endStep.getActionData().get(ScoreLangConstants.OPERATION_ANSWERS_KEY));
-        Assert.assertEquals("answers are not set under their key", placeHolder, endStep.getActionData().get(ScoreLangConstants.OPERATION_ANSWERS_KEY));
+        Assert.assertNotNull("results key is null", endStep.getActionData().get(ScoreLangConstants.OPERATION_RESULTS_KEY));
+        Assert.assertEquals("results are not set under their key", placeHolder, endStep.getActionData().get(ScoreLangConstants.OPERATION_RESULTS_KEY));
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -1,4 +1,4 @@
-package com.hp.score.lang.compiler;
+package com.hp.score.lang.entities.bindings;
 /*
  * Licensed to Hewlett-Packard Development Company, L.P. under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,21 +18,30 @@ package com.hp.score.lang.compiler;
  * under the License.
 */
 
-/*
- * Created by orius123 on 05/11/14.
+import java.io.Serializable;
+
+/**
+ * User: stoneo
+ * Date: 06/11/2014
+ * Time: 09:47
  */
-public interface SlangTextualKeys {
+public class Result implements Serializable{
 
-    String FLOW_NAME_KEY = "name";
+    private final String name;
 
-    String OPERATIONS_KEY = "operations";
+    private final String expression ;
 
-    String ACTION_KEY = "action";
 
-    String INPUTS_KEY = "inputs";
+    public Result(String name, String expression) {
+        this.name = name;
+        this.expression = expression;
+    }
 
-    String OUTPUTS_KEY = "outputs";
+    public String getName() {
+        return name;
+    }
 
-    String RESULT_KEY = "results";
-
+    public String getExpression() {
+        return expression;
+    }
 }

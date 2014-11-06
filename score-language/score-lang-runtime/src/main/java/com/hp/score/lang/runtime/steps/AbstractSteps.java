@@ -66,7 +66,7 @@ public abstract class AbstractSteps {
     protected void printReturnValues(ReturnValues returnValues) {
 //        if (returnValues == null) return;
 //        MapUtils.debugPrint(System.out, "Return Values", returnValues.getOutputs());
-//        System.out.println("Answer: " + returnValues.getAnswer());
+//        System.out.println("Result: " + returnValues.getResult());
     }
 
 	@SafeVarargs

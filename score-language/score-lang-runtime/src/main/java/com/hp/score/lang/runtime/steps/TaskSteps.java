@@ -68,9 +68,9 @@ public class TaskSteps extends AbstractSteps {
 
         //todo: hook
 
-        Long nextPosition = calculateNextPosition(operationReturnValues.getAnswer(), taskNavigationValues);
+        Long nextPosition = calculateNextPosition(operationReturnValues.getResult(), taskNavigationValues);
         runEnv.putNextStepPosition(nextPosition);
-        ReturnValues returnValues = new ReturnValues(new HashMap<String, String>(), operationReturnValues.getAnswer());
+        ReturnValues returnValues = new ReturnValues(new HashMap<String, String>(), operationReturnValues.getResult());
         runEnv.putReturnValues(returnValues);
         fireEvent(executionRuntimeServices, EVENT_OUTPUT_END, "Output binding finished", "path", Pair.of(RETURN_VALUES, returnValues), Pair.of("nextPosition", nextPosition));
         printReturnValues(returnValues);
@@ -106,9 +106,9 @@ public class TaskSteps extends AbstractSteps {
         return tempContext;
     }
 
-    private Long calculateNextPosition(String answer, LinkedHashMap<String, Long> taskNavigationValues) {
+    private Long calculateNextPosition(String result, LinkedHashMap<String, Long> taskNavigationValues) {
         //todo: implement
-        return taskNavigationValues.get(answer);
+        return taskNavigationValues.get(result);
     }
 
 }

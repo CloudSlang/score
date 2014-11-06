@@ -70,10 +70,10 @@ public class SlangCompilerTest {
 
         ExecutionStep endStep = executionPlan.getStep(3L);
         Object outputs = endStep.getActionData().get(ScoreLangConstants.OPERATION_OUTPUTS_KEY);
-        Object answers = endStep.getActionData().get(ScoreLangConstants.OPERATION_ANSWERS_KEY);
+        Object results = endStep.getActionData().get(ScoreLangConstants.OPERATION_RESULTS_KEY);
 
-        Assert.assertNotNull("outputs doesn't exist", outputs);
-        Assert.assertNotNull("answers doesn't exist", answers);
+        Assert.assertNotNull("outputs don't exist", outputs);
+        Assert.assertNotNull("results don't exist", results);
 
     }
 
