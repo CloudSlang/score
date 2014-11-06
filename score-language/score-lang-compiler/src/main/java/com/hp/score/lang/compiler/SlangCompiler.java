@@ -27,7 +27,10 @@ import com.hp.score.api.ExecutionPlan;
 import com.hp.score.lang.compiler.domain.DoAction;
 import com.hp.score.lang.compiler.domain.Operation;
 import com.hp.score.lang.compiler.domain.SlangFile;
-import org.apache.commons.collections.CollectionUtils;
+import com.hp.score.lang.compiler.transformers.Transformer;
+import com.hp.score.lang.compiler.utils.ExecutionStepFactory;
+import com.hp.score.lang.compiler.utils.NamespaceBuilder;
+import com.hp.score.lang.compiler.utils.YamlParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

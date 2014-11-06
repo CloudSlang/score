@@ -24,6 +24,7 @@ package com.hp.score.lang.compiler;
 
 import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ExecutionStep;
+import com.hp.score.lang.compiler.configuration.SpringConfiguration;
 import com.hp.score.lang.entities.ScoreLangConstants;
 import com.hp.score.lang.entities.bindings.Input;
 import junit.framework.Assert;

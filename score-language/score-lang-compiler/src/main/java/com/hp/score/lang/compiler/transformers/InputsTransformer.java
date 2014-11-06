@@ -22,7 +22,6 @@ package com.hp.score.lang.compiler.transformers;
  * Created by orius123 on 05/11/14.
  */
 import com.hp.score.lang.compiler.Scope;
-import com.hp.score.lang.compiler.Transformer;
 import com.hp.score.lang.entities.bindings.Input;
 import org.springframework.stereotype.Component;
 

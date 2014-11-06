@@ -1,4 +1,4 @@
-package com.hp.score.lang.compiler;
+package com.hp.score.lang.compiler.transformers;
 /*
  * Licensed to Hewlett-Packard Development Company, L.P. under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,21 +21,18 @@ package com.hp.score.lang.compiler;
 /*
  * Created by orius123 on 05/11/14.
  */
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.introspector.BeanAccess;
+import com.hp.score.lang.compiler.Scope;
 
-@Configuration
-@ComponentScan("com.hp.score.lang.compiler")
-public class SpringConfiguration {
+import java.util.List;
 
-    @Bean
-    public Yaml yaml(){
-        Yaml yaml = new Yaml();
-        yaml.setBeanAccess(BeanAccess.FIELD);
-        return yaml;
-    }
+public interface Transformer<F, T> {
+
+    T transform(F rawData);
+
+    List<Scope> getScopes();
+
+    String keyToTransform();
+
+    String keyToRegister();
 
 }

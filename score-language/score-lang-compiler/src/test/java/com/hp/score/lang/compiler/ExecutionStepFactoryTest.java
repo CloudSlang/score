@@ -1,14 +1,13 @@
 package com.hp.score.lang.compiler;
 
 import com.hp.score.api.ExecutionStep;
+import com.hp.score.lang.compiler.utils.ExecutionStepFactory;
 import com.hp.score.lang.entities.ScoreLangConstants;
 import junit.framework.Assert;
 import org.junit.Test;
 
 import java.io.Serializable;
 import java.util.HashMap;
-
-import static org.junit.Assert.*;
 
 public class ExecutionStepFactoryTest {
 

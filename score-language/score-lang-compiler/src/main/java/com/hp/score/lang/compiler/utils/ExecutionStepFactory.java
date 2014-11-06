@@ -1,4 +1,4 @@
-package com.hp.score.lang.compiler;
+package com.hp.score.lang.compiler.utils;
 /*
  * Licensed to Hewlett-Packard Development Company, L.P. under one
  * or more contributor license agreements.  See the NOTICE file
@@ -20,6 +20,7 @@ package com.hp.score.lang.compiler;
 
 import com.hp.score.api.ControlActionMetadata;
 import com.hp.score.api.ExecutionStep;
+import com.hp.score.lang.compiler.SlangTextualKeys;
 import com.hp.score.lang.entities.ActionType;
 import com.hp.score.lang.entities.ScoreLangConstants;
 import org.apache.commons.lang.Validate;
