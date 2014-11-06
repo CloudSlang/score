@@ -138,7 +138,12 @@ public class RuntimeTest {
                 .setDependencies(dependencies);
         registerHandlers();
         score.trigger(triggeringProperties);
-        Assert.assertEquals(EventConstants.SCORE_FINISHED_EVENT, queue.take().getEventType());
+        ScoreEvent event;
+        do {
+        	event = queue.take();
+        	System.out.println("Event recieved: " + event);
+        } while(!EventConstants.SCORE_FINISHED_EVENT.equals(event.getEventType()));
+        Assert.assertEquals(EventConstants.SCORE_FINISHED_EVENT, event.getEventType());
     }
 
     private void addUserInputs(Map<String, Serializable> executionContext) {

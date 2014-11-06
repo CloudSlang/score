@@ -8,7 +8,9 @@ import com.hp.score.lang.ExecutionRuntimeServices;
 import com.hp.score.lang.entities.ActionType;
 import com.hp.score.lang.runtime.env.ReturnValues;
 import com.hp.score.lang.runtime.env.RunEnvironment;
+
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 import org.python.core.PyModule;
 import org.python.core.PyObject;
@@ -52,7 +54,7 @@ public class ActionSteps extends AbstractSteps {
         System.out.println("================================");
         Map<String, String> returnValue = new HashMap<>();
         Map<String, Serializable> callArguments = runEnv.removeCallArguments();
-        fireEvent(executionRuntimeServices, EVENT_ACTION_START, "Preparing to run action " + actionType, "path", Arrays.asList(CALL_ARGUMENTS), Arrays.asList((Serializable)callArguments));
+        fireEvent(executionRuntimeServices, EVENT_ACTION_START, "Preparing to run action " + actionType, "path", Pair.of(CALL_ARGUMENTS, (Serializable)callArguments));
         try {
             switch (actionType) {
                 case JAVA:
@@ -65,7 +67,7 @@ public class ActionSteps extends AbstractSteps {
                     break;
             }
         } catch (Exception ex) {
-        	fireEvent(executionRuntimeServices, EVENT_ACTION_ERROR, ex.getMessage(), "path", Arrays.asList(CALL_ARGUMENTS, EXCEPTION), Arrays.asList((Serializable)callArguments, ex));
+        	fireEvent(executionRuntimeServices, EVENT_ACTION_ERROR, ex.getMessage(), "path", Pair.of(EXCEPTION, ex));
             logger.error(ex.getMessage());
         }
 
@@ -73,7 +75,7 @@ public class ActionSteps extends AbstractSteps {
 
         ReturnValues returnValues = new ReturnValues(returnValue, null);
         runEnv.putReturnValues(returnValues);
-        fireEvent(executionRuntimeServices, EVENT_ACTION_END, "Action performed", "path", Arrays.asList(RETURN_VALUES), Arrays.asList((Serializable)returnValues));
+        fireEvent(executionRuntimeServices, EVENT_ACTION_END, "Action performed", "path", Pair.of(RETURN_VALUES, returnValues));
         printReturnValues(returnValues);
 
     }

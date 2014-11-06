@@ -7,13 +7,13 @@ import com.hp.score.lang.runtime.env.RunEnvironment;
 import com.hp.score.lang.runtime.events.LanguageEventData;
 
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import static com.hp.score.lang.entities.ScoreLangConstants.*;
 import static com.hp.score.lang.runtime.events.LanguageEventData.*;
@@ -21,7 +21,7 @@ import static com.hp.score.lang.runtime.events.LanguageEventData.*;
 public abstract class AbstractSteps {
 
     protected Map<String, Serializable> createBindInputsMap(Map<String, Serializable> callArguments, Map<String, Serializable> inputs, ExecutionRuntimeServices executionRuntimeServices) {
-    	fireEvent(executionRuntimeServices, EVENT_INPUT_START, "Start binding inputs", "path", Arrays.asList(CALL_ARGUMENTS, INPUTS), Arrays.asList((Serializable)callArguments, (Serializable)inputs));
+    	fireEvent(executionRuntimeServices, EVENT_INPUT_START, "Start binding inputs", "path", Pair.of(CALL_ARGUMENTS, (Serializable)callArguments), Pair.of(INPUTS, (Serializable)inputs));
         Map<String, Serializable> tempContext = new LinkedHashMap<>();
         if (MapUtils.isEmpty(inputs)) return tempContext;
         for (Map.Entry<String, Serializable> input : inputs.entrySet()) {
@@ -40,7 +40,7 @@ public abstract class AbstractSteps {
                 tempContext.put(inputKey, callArguments.get(inputKey));
             }
         }
-        fireEvent(executionRuntimeServices, EVENT_INPUT_END, "Input binding finished", "path", Arrays.asList(BOUND_INPUTS), Arrays.asList((Serializable)tempContext));
+        fireEvent(executionRuntimeServices, EVENT_INPUT_END, "Input binding finished", "path", Pair.of(BOUND_INPUTS, (Serializable)tempContext));
         return tempContext;
     }
 
@@ -69,18 +69,16 @@ public abstract class AbstractSteps {
 //        System.out.println("Answer: " + returnValues.getAnswer());
     }
 
-	protected static void fireEvent(ExecutionRuntimeServices runtimeServices, String type, String description, String path, List<String> fields, List<Serializable> values) {
+	@SafeVarargs
+	protected static void fireEvent(ExecutionRuntimeServices runtimeServices, String type, String description, String path, Map.Entry<String, ? extends Serializable>... fields) {
 		LanguageEventData eventData = new LanguageEventData();
 		eventData.setEventType(type);
 		eventData.setDescription(description);
 		eventData.setTimeStamp(new Date());
 		eventData.setExecutionId(runtimeServices.getExecutionId());
 		eventData.put(LanguageEventData.PATH, path);
-		int i = 0;
-		for(String field : fields) {
-			Serializable value = values.get(i);
-			eventData.put(field, value);
-			i++;
+		for(Entry<String, ? extends Serializable> field : fields) {
+			eventData.put(field.getKey(), field.getValue());
 		}
 		runtimeServices.addEvent(type, eventData);
 	}

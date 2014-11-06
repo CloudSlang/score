@@ -4,6 +4,8 @@ import com.hp.oo.sdk.content.annotations.Param;
 import com.hp.score.lang.ExecutionRuntimeServices;
 import com.hp.score.lang.runtime.env.ReturnValues;
 import com.hp.score.lang.runtime.env.RunEnvironment;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
@@ -59,7 +61,7 @@ public class TaskSteps extends AbstractSteps {
         ReturnValues operationReturnValues = runEnv.removeReturnValues();
 		List<String> eventFields = Arrays.asList("taskPublishValues", "taskNavigationValues", "operationReturnValues");
 		List<Serializable> eventValues = Arrays.asList(taskPublishValues, taskNavigationValues, operationReturnValues);
-		fireEvent(executionRuntimeServices, EVENT_OUTPUT_START, "Output binding started", "path", eventFields, eventValues);
+		fireEvent(executionRuntimeServices, EVENT_OUTPUT_START, "Output binding started", "path", Pair.of("taskPublishValues", taskPublishValues), Pair.of("taskNavigationValues", taskNavigationValues), Pair.of("operationReturnValues", operationReturnValues));
         Map<String, Serializable> publishValues = createBindOutputsContext(operationReturnValues.getOutputs(), taskPublishValues);
         flowContext.putAll(publishValues);
         printMap(flowContext, "flowContext");
@@ -70,7 +72,7 @@ public class TaskSteps extends AbstractSteps {
         runEnv.putNextStepPosition(nextPosition);
         ReturnValues returnValues = new ReturnValues(new HashMap<String, String>(), operationReturnValues.getAnswer());
         runEnv.putReturnValues(returnValues);
-        fireEvent(executionRuntimeServices, EVENT_OUTPUT_END, "Output binding finished", "path", Arrays.asList(RETURN_VALUES, "nextPosition"), Arrays.asList(returnValues, nextPosition));
+        fireEvent(executionRuntimeServices, EVENT_OUTPUT_END, "Output binding finished", "path", Pair.of(RETURN_VALUES, returnValues), Pair.of("nextPosition", nextPosition));
         printReturnValues(returnValues);
         System.out.println("next position: " + nextPosition);
 
