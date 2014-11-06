@@ -32,7 +32,7 @@ public interface ScoreLangConstants {
     String ACTION_TYPE = "actionType";
 
     String ACTION_METHOD_KEY = "methodName";
-    String PYTHON_SCRIPT_KEY = "pythonScript";
+    String PYTHON_SCRIPT_KEY = "python_script";
     //navigation
     String NEXT_STEP_ID_KEY = "nextStepId";
 

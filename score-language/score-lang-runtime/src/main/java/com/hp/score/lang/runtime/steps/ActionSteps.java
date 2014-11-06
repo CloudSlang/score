@@ -40,7 +40,7 @@ public class ActionSteps extends AbstractSteps {
                          ActionType actionType,
                          @Param(ScoreLangConstants.ACTION_CLASS_KEY) String className,
                          @Param(ScoreLangConstants.ACTION_METHOD_KEY) String methodName,
-                         @Param(ScoreLangConstants.PYTHON_SCRIPT_KEY) String pythonScript) {
+                         @Param(ScoreLangConstants.PYTHON_SCRIPT_KEY) String python_script) {
 
         System.out.println("================================");
         System.out.println("doAction");
@@ -54,7 +54,7 @@ public class ActionSteps extends AbstractSteps {
                     returnValue = runJavaAction(callArguments, nonSerializableExecutionData, className, methodName);
                     break;
                 case PYTHON:
-                    returnValue = prepareAndRunPythonAction(callArguments, pythonScript);
+                    returnValue = prepareAndRunPythonAction(callArguments, python_script);
                     break;
                 default:
                     break;

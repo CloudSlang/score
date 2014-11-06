@@ -21,16 +21,21 @@ package com.hp.score.lang.compiler;
 /*
  * Created by orius123 on 05/11/14.
  */
+
 import com.hp.score.api.ExecutionPlan;
+import com.hp.score.api.ExecutionStep;
+import com.hp.score.lang.entities.ScoreLangConstants;
+import com.hp.score.lang.entities.bindings.Input;
+import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.File;
 import java.net.URL;
+import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = SpringConfiguration.class)
@@ -40,10 +45,35 @@ public class SlangCompilerTest {
     private SlangCompiler compiler;
 
     @Test
-    public void testOpCompile() throws Exception {
+    public void testOpCompileBasic() throws Exception {
         URL resource = getClass().getResource("/operation.yaml");
         ExecutionPlan executionPlan = compiler.compile(new File(resource.toURI()), null);
-        System.out.println(executionPlan.getName());
+        Assert.assertNotNull("execution plan is null", executionPlan);
+        Assert.assertEquals("there is a different number of steps than expected", 3, executionPlan.getSteps().size());
+    }
+
+    @Test
+    public void testOpCompileWithData() throws Exception {
+        URL resource = getClass().getResource("/operation_with_data.yaml");
+        ExecutionPlan executionPlan = compiler.compile(new File(resource.toURI()), null);
+
+        ExecutionStep startStep = executionPlan.getStep(1L);
+        @SuppressWarnings("unchecked") List<Input> inputs = (List<Input>) startStep.getActionData().get(ScoreLangConstants.OPERATION_INPUTS_KEY);
+        Assert.assertNotNull("inputs doesn't exist", inputs);
+        Assert.assertEquals("there is a different number of inputs than expected", 6, inputs.size());
+
+        ExecutionStep actionStep = executionPlan.getStep(2L);
+        String script = (String) actionStep.getActionData().get(ScoreLangConstants.PYTHON_SCRIPT_KEY);
+        Assert.assertNotNull("script doesn't exist", script);
+        Assert.assertTrue("script is different than expected", script.startsWith("# this is python amigos!!"));
+
+        ExecutionStep endStep = executionPlan.getStep(3L);
+        Object outputs = endStep.getActionData().get(ScoreLangConstants.OPERATION_OUTPUTS_KEY);
+        Object answers = endStep.getActionData().get(ScoreLangConstants.OPERATION_ANSWERS_KEY);
+
+        Assert.assertNotNull("outputs doesn't exist", outputs);
+        Assert.assertNotNull("answers doesn't exist", answers);
+
     }
 
 
