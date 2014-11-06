@@ -36,22 +36,19 @@ public class ResultsTransformer implements Transformer<List<Object>, List<Result
     @Override
     public List<Result> transform(List<Object> rawData) {
         List<Result> results = new ArrayList<>();
-//        for (Object rawResult : rawData) {
-//            if (rawResult instanceof String) {
-//                results.add(createNoExpressionInput((String) rawResult));
-//            } else if (rawResult instanceof Map) {
-//                Map.Entry entry = (Map.Entry) ((Map) rawResult).entrySet().iterator().next();
-//                // - some_input: some_expression
-//                // the value of the input is an expression we need to evaluate at runtime
-//                if (entry.getValue() instanceof String) {
-//                    results.add(createExpressionInput(entry));
-//                }
-//            }
-//        }
-//
-//        List<Result> data = new ArrayList<>();
-//        List<String> rawDataList = (List<String>) rawData;
-//        return data;
+        for (Object rawResult : rawData) {
+            if (rawResult instanceof String) {
+                //- some_result
+                results.add(createNoExpressionResult((String) rawResult));
+            } else if (rawResult instanceof Map) {
+                Map.Entry entry = (Map.Entry) ((Map) rawResult).entrySet().iterator().next();
+                // - some_result: some_expression
+                // the value of the result is an expression we need to evaluate at runtime
+                if (entry.getValue() instanceof String) {
+                    results.add(createExpressionResult(entry));
+                }
+            }
+        }
         return results;
     }
 
@@ -70,11 +67,11 @@ public class ResultsTransformer implements Transformer<List<Object>, List<Result
         return null;
     }
 
-    private Result createNoExpressionInput(String rawResult) {
+    private Result createNoExpressionResult(String rawResult) {
         return new Result(rawResult, null);
     }
 
-    private Result createExpressionInput(Map.Entry<String, String> resultEntry) {
+    private Result createExpressionResult(Map.Entry<String, String> resultEntry) {
         return new Result(resultEntry.getKey(), resultEntry.getValue());
     }
 }

@@ -30,6 +30,6 @@ operations:
         - output1: input1
         - output2: input2
       results:
-        - SUCCESS: retVal[] != '123456'
+        - SUCCESS: 1 != 123456
           #this test should be very lucky to fail
-        - FAIL: retVal[] == '123456'
+        - FAILURE: 1 == 123456

@@ -23,6 +23,7 @@ import com.hp.score.api.ExecutionPlan;
 import com.hp.score.api.ExecutionStep;
 import com.hp.score.lang.entities.ActionType;
 import com.hp.score.lang.entities.ScoreLangConstants;
+import com.hp.score.lang.entities.bindings.Result;
 import com.hp.score.lang.runtime.navigations.Navigations;
 import com.hp.score.lang.runtime.steps.ActionSteps;
 import com.hp.score.lang.runtime.steps.OperationSteps;
@@ -32,6 +33,7 @@ import com.hp.score.lang.tests.runtime.actions.LangActions;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 /**
@@ -86,15 +88,15 @@ public class POCParentExecutionPlanActionsBuilder {
     private ExecutionStep createSecondEndStep() {
         Map<String, Serializable> actionData = new HashMap<>();
         actionData.put("operationOutputs", new LinkedHashMap<>());
-        HashMap<String, Serializable> operationResults = createOperationResults();
+        LinkedList<Result> operationResults = createOperationResults();
         actionData.put("operationResults", operationResults);
         return createGeneralStep(index, OperationSteps.class.getName(), "end", ++index, actionData);
     }
 
-    private HashMap<String, Serializable> createOperationResults() {
-        LinkedHashMap<String, Serializable> operationResults = new LinkedHashMap<>();
-        operationResults.put(ScoreLangConstants.SUCCESS_RESULT, "retVal[isTrue]");
-        operationResults.put(ScoreLangConstants.FAILURE_RESULT, "retVal[isFalse]");
+    private LinkedList<Result> createOperationResults() {
+        LinkedList<Result> operationResults = new LinkedList<>();
+        operationResults.add(new Result(ScoreLangConstants.SUCCESS_RESULT, "1==1"));
+        operationResults.add(new Result(ScoreLangConstants.FAILURE_RESULT, "1==2"));
         return operationResults;
     }
 
@@ -179,7 +181,7 @@ public class POCParentExecutionPlanActionsBuilder {
         Map<String, Serializable> actionData = new HashMap<>();
         HashMap<String, Serializable> flowOutputs = createFlowOutputs();
         actionData.put("operationOutputs", flowOutputs);
-        HashMap<String, Serializable> flowResults = createFlowResults();
+        LinkedList<Result> flowResults = createFlowResults();
         actionData.put("operationResults", flowResults);
         return createGeneralStep(index, OperationSteps.class.getName(), "end", null, actionData);
     }
@@ -227,11 +229,10 @@ public class POCParentExecutionPlanActionsBuilder {
         return flowOutputs;
     }
 
-    private HashMap<String, Serializable> createFlowResults() {
-        LinkedHashMap<String, Serializable> flowResults = new LinkedHashMap<>();
-        //todo: how do I resolve the flow result?
-        flowResults.put(ScoreLangConstants.SUCCESS_RESULT, "retVal[isTrue]");
-        flowResults.put(ScoreLangConstants.FAILURE_RESULT, "retVal[isFalse]");
+    private LinkedList<Result> createFlowResults() {
+        LinkedList<Result> flowResults = new LinkedList<>();
+        flowResults.add(new Result(ScoreLangConstants.SUCCESS_RESULT, null));
+        flowResults.add(new Result(ScoreLangConstants.FAILURE_RESULT, null));
         return flowResults;
     }
 
