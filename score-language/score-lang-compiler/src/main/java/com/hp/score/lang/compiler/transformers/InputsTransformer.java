@@ -21,7 +21,7 @@ package com.hp.score.lang.compiler.transformers;
 /*
  * Created by orius123 on 05/11/14.
  */
-import com.hp.score.lang.compiler.Scope;
+
 import com.hp.score.lang.entities.bindings.Input;
 import org.springframework.stereotype.Component;
 
@@ -50,12 +50,12 @@ public class InputsTransformer implements Transformer<List<Object>, List<Input>>
             //- some_input
             //this is our default behavior that if the user specifies only a key, the key is also the ref we look for
             if (rawInput instanceof String) {
-                result.add(createRefInput((String)rawInput));
+                result.add(createRefInput((String) rawInput));
             } else if (rawInput instanceof Map) {
                 Map.Entry entry = (Map.Entry) ((Map) rawInput).entrySet().iterator().next();
                 // - some_input: some_expression
                 // the value of the input is an expression we need to evaluate at runtime
-                if (entry.getValue() instanceof String){
+                if (entry.getValue() instanceof String) {
                     result.add(createExpressionInput(entry));
                 }
                 // - some_inputs:
@@ -70,21 +70,21 @@ public class InputsTransformer implements Transformer<List<Object>, List<Input>>
         return result;
     }
 
-    private Input createPropInput(Map.Entry<String,Map<String,Serializable>> entry) {
-        Map<String,Serializable> prop = entry.getValue();
-        boolean required = prop.containsKey(REQUIRED_KEY) && ((boolean)prop.get(REQUIRED_KEY));
-        boolean encrypted = prop.containsKey(ENCRYPTED_KEY) && ((boolean)prop.get(ENCRYPTED_KEY));
-        String expression = prop.containsValue(EXPRESSION_KEY) ? ((String)prop.get(ENCRYPTED_KEY)) : null;
+    private Input createPropInput(Map.Entry<String, Map<String, Serializable>> entry) {
+        Map<String, Serializable> prop = entry.getValue();
+        boolean required = prop.containsKey(REQUIRED_KEY) && ((boolean) prop.get(REQUIRED_KEY));
+        boolean encrypted = prop.containsKey(ENCRYPTED_KEY) && ((boolean) prop.get(ENCRYPTED_KEY));
+        String expression = prop.containsValue(EXPRESSION_KEY) ? ((String) prop.get(ENCRYPTED_KEY)) : null;
         Serializable defaultValue = prop.containsValue(DEFAULT_KEY) ? (prop.get(DEFAULT_KEY)) : null;
-        return new Input(entry.getKey(),expression,defaultValue,encrypted,required);
+        return new Input(entry.getKey(), expression, defaultValue, encrypted, required);
     }
 
     private Input createExpressionInput(Map.Entry<String, String> entry) {
-        return new Input(entry.getKey(),entry.getValue());
+        return new Input(entry.getKey(), entry.getValue());
     }
 
     private Input createRefInput(String rawInput) {
-       return new Input(rawInput,rawInput);
+        return new Input(rawInput, rawInput);
     }
 
     @Override

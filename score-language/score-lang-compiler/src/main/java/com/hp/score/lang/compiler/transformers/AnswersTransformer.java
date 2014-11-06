@@ -21,7 +21,7 @@ package com.hp.score.lang.compiler.transformers;
 /*
  * Created by orius123 on 05/11/14.
  */
-import com.hp.score.lang.compiler.Scope;
+
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -37,7 +37,7 @@ public class AnswersTransformer implements Transformer<Object, LinkedHashMap<Str
             LinkedHashMap<String, Object> data = new LinkedHashMap<>();
             List<String> rawDataList = (List<String>) rawData;
             return data;
-         }
+        }
         if (rawData instanceof LinkedHashMap) {
             LinkedHashMap<String, Object> data = (LinkedHashMap<String, Object>) rawData;
             return data;

@@ -136,7 +136,7 @@ public class SlangCompiler {
                 wasTransformed = true;
             }
 
-            List<Transformer> preOpTransformers = Lambda.filter(having(on(Transformer.class).getScopes().contains(Scope.BEFORE_OPERATION)), transformers);
+            List<Transformer> preOpTransformers = Lambda.filter(having(on(Transformer.class).getScopes().contains(Transformer.Scope.BEFORE_OPERATION)), transformers);
             for (Transformer transformer : preOpTransformers) {
                 if (shouldApplyTransformer(transformer, key)) {
                     Object value = transformer.transform(operationRawData.get(key));
@@ -145,7 +145,7 @@ public class SlangCompiler {
                 }
             }
 
-            List<Transformer> postOpTransformers = Lambda.filter(having(on(Transformer.class).getScopes().contains(Scope.AFTER_OPERATION)), transformers);
+            List<Transformer> postOpTransformers = Lambda.filter(having(on(Transformer.class).getScopes().contains(Transformer.Scope.AFTER_OPERATION)), transformers);
             for (Transformer transformer : postOpTransformers) {
                 if (shouldApplyTransformer(transformer, key)) {
                     Object value = transformer.transform(operationRawData.get(key));
@@ -184,7 +184,7 @@ public class SlangCompiler {
             Map.Entry pairs = (Map.Entry) it.next();
             boolean wasTransformed = false;
             String key = pairs.getKey().toString();
-            List<Transformer> actionTransformers = Lambda.filter(having(on(Transformer.class).getScopes().contains(Scope.ACTION)), transformers);
+            List<Transformer> actionTransformers = Lambda.filter(having(on(Transformer.class).getScopes().contains(Transformer.Scope.ACTION)), transformers);
             for (Transformer transformer : actionTransformers) {
                 if (shouldApplyTransformer(transformer, key)) {
                     Object value = transformer.transform(actionRawData.get(key));
