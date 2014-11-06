@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
 */
-package com.hp.score.lang.tests.runtime;
+package com.hp.score.lang.tests.runtime.steps;
 
 import com.hp.oo.sdk.content.annotations.Param;
 import com.hp.score.lang.runtime.env.ReturnValues;

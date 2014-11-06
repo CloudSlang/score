@@ -1,6 +1,8 @@
-package com.hp.score.lang.runtime.bindings;
+package com.hp.score.lang.tests.runtime.bindings;
 
 import com.hp.score.lang.entities.bindings.Input;
+import com.hp.score.lang.runtime.bindings.InputsBinding;
+import com.hp.score.lang.runtime.bindings.ScriptEvaluator;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
