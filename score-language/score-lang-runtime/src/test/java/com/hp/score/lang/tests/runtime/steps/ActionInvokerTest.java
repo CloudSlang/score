@@ -19,6 +19,7 @@
 package com.hp.score.lang.tests.runtime.steps;
 
 import com.hp.oo.sdk.content.annotations.Param;
+import com.hp.score.lang.ExecutionRuntimeServices;
 import com.hp.score.lang.runtime.env.ReturnValues;
 import com.hp.score.lang.runtime.env.RunEnvironment;
 import com.hp.score.lang.runtime.steps.ActionSteps;
@@ -36,7 +37,10 @@ import java.util.Map;
 
 import static com.hp.score.lang.entities.ActionType.JAVA;
 import static com.hp.score.lang.entities.ActionType.PYTHON;
+import static com.hp.score.lang.entities.ScoreLangConstants.*;
+
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 /**
  * Date: 10/31/2014
@@ -51,6 +55,7 @@ public class ActionInvokerTest {
 
     @Autowired
     private ActionSteps actionInvoker;
+	ExecutionRuntimeServices executionRuntimeServicesMock = mock(ExecutionRuntimeServices.class);
 
     @Test(timeout = DEFAULT_TIMEOUT)
     public void doActionJavaTest() {
@@ -64,13 +69,7 @@ public class ActionInvokerTest {
         Map<String, Object> nonSerializableExecutionData = new HashMap<>();
 
         //invoke doAction
-        actionInvoker.doAction(
-                runEnv,
-                nonSerializableExecutionData,
-                JAVA,
-                ActionInvokerTest.class.getName(),
-                "doJavaAction",
-                null);
+		actionInvoker.doAction(runEnv, nonSerializableExecutionData, JAVA, ActionInvokerTest.class.getName(), "doJavaAction", executionRuntimeServicesMock, null);
 
         //construct expected outputs
         Map<String, String> expectedOutputs = new HashMap<>();
@@ -108,7 +107,7 @@ public class ActionInvokerTest {
                 "print url";
 
         //invoke doAction
-        actionInvoker.doAction(runEnv, nonSerializableExecutionData, PYTHON, "", "", userPythonScript);
+        actionInvoker.doAction(runEnv, nonSerializableExecutionData, PYTHON, "", "", executionRuntimeServicesMock, userPythonScript);
 
         //construct expected outputs
         Map<String, String> expectedOutputs = new HashMap<>();

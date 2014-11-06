@@ -4,8 +4,8 @@ import com.hp.oo.sdk.content.annotations.Param;
 import com.hp.oo.sdk.content.plugin.GlobalSessionObject;
 import com.hp.oo.sdk.content.plugin.SerializableSessionObject;
 import com.hp.score.api.execution.ExecutionParametersConsts;
+import com.hp.score.lang.ExecutionRuntimeServices;
 import com.hp.score.lang.entities.ActionType;
-import com.hp.score.lang.entities.ScoreLangConstants;
 import com.hp.score.lang.runtime.env.ReturnValues;
 import com.hp.score.lang.runtime.env.RunEnvironment;
 import org.apache.commons.lang.StringUtils;
@@ -22,6 +22,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import static com.hp.score.lang.entities.ScoreLangConstants.*;
+import static com.hp.score.lang.runtime.events.LanguageEventData.*;
+import static com.hp.score.api.execution.ExecutionParametersConsts.*;
+
 /**
  * User: stoneo
  * Date: 02/11/2014
@@ -35,19 +39,20 @@ public class ActionSteps extends AbstractSteps {
     @Autowired
     private PythonInterpreter interpreter;
 
-    public void doAction(@Param(ScoreLangConstants.RUN_ENV) RunEnvironment runEnv,
+    public void doAction(@Param(RUN_ENV) RunEnvironment runEnv,
                          @Param(ExecutionParametersConsts.NON_SERIALIZABLE_EXECUTION_DATA) Map<String, Object> nonSerializableExecutionData,
                          ActionType actionType,
-                         @Param(ScoreLangConstants.ACTION_CLASS_KEY) String className,
-                         @Param(ScoreLangConstants.ACTION_METHOD_KEY) String methodName,
-                         @Param(ScoreLangConstants.PYTHON_SCRIPT_KEY) String python_script) {
+                         @Param(ACTION_CLASS_KEY) String className,
+                         @Param(ACTION_METHOD_KEY) String methodName,
+                         @Param(EXECUTION_RUNTIME_SERVICES) ExecutionRuntimeServices executionRuntimeServices,
+                         @Param(PYTHON_SCRIPT_KEY) String python_script) {
 
         System.out.println("================================");
         System.out.println("doAction");
         System.out.println("================================");
         Map<String, String> returnValue = new HashMap<>();
         Map<String, Serializable> callArguments = runEnv.removeCallArguments();
-
+        fireEvent(executionRuntimeServices, EVENT_ACTION_START, "Preparing to run action " + actionType, "path", Arrays.asList(CALL_ARGUMENTS), Arrays.asList((Serializable)callArguments));
         try {
             switch (actionType) {
                 case JAVA:
@@ -60,6 +65,7 @@ public class ActionSteps extends AbstractSteps {
                     break;
             }
         } catch (Exception ex) {
+        	fireEvent(executionRuntimeServices, EVENT_ACTION_ERROR, ex.getMessage(), "path", Arrays.asList(CALL_ARGUMENTS, EXCEPTION), Arrays.asList((Serializable)callArguments, ex));
             logger.error(ex.getMessage());
         }
 
@@ -67,6 +73,7 @@ public class ActionSteps extends AbstractSteps {
 
         ReturnValues returnValues = new ReturnValues(returnValue, null);
         runEnv.putReturnValues(returnValues);
+        fireEvent(executionRuntimeServices, EVENT_ACTION_END, "Action performed", "path", Arrays.asList(RETURN_VALUES), Arrays.asList((Serializable)returnValues));
         printReturnValues(returnValues);
 
     }
@@ -109,9 +116,8 @@ public class ActionSteps extends AbstractSteps {
         @SuppressWarnings("unchecked") Map<String, String> returnMap = (Map<String, String>) returnObject;
         if (returnMap == null) {
             throw new Exception("Action method did not return Map<String,String>");
-        } else {
-            return returnMap;
         }
+		return returnMap;
     }
 
     private Method getMethodByName(String className, String methodName) throws ClassNotFoundException {

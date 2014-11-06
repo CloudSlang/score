@@ -1,17 +1,23 @@
 package com.hp.score.lang.runtime.steps;
 
 import com.hp.oo.sdk.content.annotations.Param;
-import com.hp.score.lang.entities.ScoreLangConstants;
+import com.hp.score.lang.ExecutionRuntimeServices;
 import com.hp.score.lang.runtime.env.ReturnValues;
 import com.hp.score.lang.runtime.env.RunEnvironment;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+
+import static com.hp.score.lang.entities.ScoreLangConstants.*;
+import static com.hp.score.lang.runtime.events.LanguageEventData.*;
+import static com.hp.score.api.execution.ExecutionParametersConsts.*;
 
 /**
  * User: stoneo
@@ -24,9 +30,10 @@ public class OperationSteps extends AbstractSteps {
 
     public final String ANSWER_SUCCESS = "SUCCESS";
 
-    public void start(@Param(ScoreLangConstants.OPERATION_INPUTS_KEY) LinkedHashMap<String, Serializable> operationInputs,
-                      @Param(ScoreLangConstants.RUN_ENV) RunEnvironment runEnv,
-                      @Param(ScoreLangConstants.USER_INPUTS_KEY) HashMap<String, Serializable> userInputs) {
+    public void start(@Param(OPERATION_INPUTS_KEY) LinkedHashMap<String, Serializable> operationInputs,
+                      @Param(RUN_ENV) RunEnvironment runEnv,
+                      @Param(USER_INPUTS_KEY) HashMap<String, Serializable> userInputs,
+                      @Param(EXECUTION_RUNTIME_SERVICES) ExecutionRuntimeServices executionRuntimeServices) {
 
         System.out.println("=======");
         System.out.println(" start ");
@@ -38,7 +45,7 @@ public class OperationSteps extends AbstractSteps {
         Map<String, Serializable> callArguments = runEnv.removeCallArguments();
         callArguments.putAll(userInputs);
 
-        Map<String, Serializable> actionArguments = createBindInputsMap(callArguments, operationInputs);
+        Map<String, Serializable> actionArguments = createBindInputsMap(callArguments, operationInputs, executionRuntimeServices);
 
         //todo: clone action context before updating
         operationContext.putAll(actionArguments);
@@ -52,18 +59,19 @@ public class OperationSteps extends AbstractSteps {
 
     }
 
-    public void end(@Param(ScoreLangConstants.RUN_ENV) RunEnvironment runEnv,
-                    @Param(ScoreLangConstants.OPERATION_OUTPUTS_KEY) LinkedHashMap<String, Serializable> operationOutputs,
-                    @Param(ScoreLangConstants.OPERATION_ANSWERS_KEY) LinkedHashMap<String, Serializable> operationAnswers) {
-
+    public void end(@Param(RUN_ENV) RunEnvironment runEnv,
+                    @Param(OPERATION_OUTPUTS_KEY) LinkedHashMap<String, Serializable> operationOutputs,
+                    @Param(OPERATION_ANSWERS_KEY) LinkedHashMap<String, Serializable> operationAnswers,
+                    @Param(EXECUTION_RUNTIME_SERVICES) ExecutionRuntimeServices executionRuntimeServices) {
 
         System.out.println("=====");
         System.out.println(" end ");
         System.out.println("=====");
         Map<String, Serializable> operationContext = runEnv.getStack().popContext();
         ReturnValues actionReturnValues = runEnv.removeReturnValues();
-
-
+		List<String> eventFields = Arrays.asList("operationOutputs", "operationAnswers", "actionReturnValues");
+		List<Serializable> eventValues = Arrays.asList(operationOutputs, operationAnswers, actionReturnValues);
+		fireEvent(executionRuntimeServices, EVENT_OUTPUT_START, "Output binding started", "path", eventFields, eventValues);
         String answer = actionReturnValues.getAnswer() != null ? actionReturnValues.getAnswer() : resolveOperationAnswer(actionReturnValues.getOutputs(), operationAnswers);
 
         Map<String, String> operationReturnOutputs = createOperationBindOutputsContext(operationContext, actionReturnValues.getOutputs(), operationOutputs);
@@ -72,6 +80,7 @@ public class OperationSteps extends AbstractSteps {
 
         ReturnValues returnValues = new ReturnValues(operationReturnOutputs, answer);
         runEnv.putReturnValues(returnValues);
+        fireEvent(executionRuntimeServices, EVENT_OUTPUT_END, "Output binding finished", "path", Arrays.asList(RETURN_VALUES), Arrays.asList((Serializable)returnValues));
         printReturnValues(returnValues);
     }
 
@@ -128,4 +137,5 @@ public class OperationSteps extends AbstractSteps {
         //todo: temp solution. currently removing the prefix of retVal[ and suffix of ]
         return outputValue.substring(7, outputValue.length() - 1);
     }
+
 }

@@ -44,6 +44,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import static com.hp.score.lang.entities.ScoreLangConstants.*;
+
 /**
  * User: stoneo
  * Date: 06/10/2014
@@ -82,7 +84,12 @@ public class RuntimeTest {
         score.trigger(triggeringProperties);
 
         registerHandlers();
-        Assert.assertEquals(EventConstants.SCORE_FINISHED_EVENT, queue.take().getEventType());
+        ScoreEvent event;
+        do {
+        	event = queue.take();
+        	System.out.println("Event recieved: " + event);
+        } while(!EventConstants.SCORE_FINISHED_EVENT.equals(event.getEventType()));
+        Assert.assertEquals(EventConstants.SCORE_FINISHED_EVENT, event.getEventType());
     }
 
     private void registerHandlers() {
@@ -90,6 +97,13 @@ public class RuntimeTest {
         handlerTypes.add(EventConstants.SCORE_FINISHED_EVENT);
         handlerTypes.add(EventConstants.SCORE_ERROR_EVENT);
         handlerTypes.add(EventConstants.SCORE_FAILURE_EVENT);
+        handlerTypes.add(EVENT_ACTION_START);
+        handlerTypes.add(EVENT_ACTION_END);
+        handlerTypes.add(EVENT_ACTION_ERROR);
+        handlerTypes.add(EVENT_INPUT_START);
+        handlerTypes.add(EVENT_INPUT_END);
+        handlerTypes.add(EVENT_OUTPUT_START);
+        handlerTypes.add(EVENT_OUTPUT_END);
         eventBus.subscribe(new ScoreEventListener() {
             @Override
             public void onEvent(ScoreEvent event) {
@@ -122,8 +136,8 @@ public class RuntimeTest {
                 .create(parentExecutionPlan)
                 .setContext(executionContext)
                 .setDependencies(dependencies);
-        score.trigger(triggeringProperties);
         registerHandlers();
+        score.trigger(triggeringProperties);
         Assert.assertEquals(EventConstants.SCORE_FINISHED_EVENT, queue.take().getEventType());
     }
 
