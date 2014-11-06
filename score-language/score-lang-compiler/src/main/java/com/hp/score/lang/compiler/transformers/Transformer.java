@@ -21,7 +21,6 @@ package com.hp.score.lang.compiler.transformers;
 /*
  * Created by orius123 on 05/11/14.
  */
-import com.hp.score.lang.compiler.Scope;
 
 import java.util.List;
 
@@ -34,5 +33,13 @@ public interface Transformer<F, T> {
     String keyToTransform();
 
     String keyToRegister();
+
+    enum Scope {
+        BEFORE_TASK,
+        AFTER_TASK,
+        BEFORE_OPERATION,
+        AFTER_OPERATION,
+        ACTION
+    }
 
 }
