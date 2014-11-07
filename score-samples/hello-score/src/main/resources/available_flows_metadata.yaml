@@ -66,3 +66,15 @@ flows:
       className: com.hp.score.samples.openstack.ParallelFlow
       triggeringPropertiesMethodName: createParallelFlow
       inputBindingsMethodName: getInputBindings
+
+    - identifier: SSH_flow_example
+      name: SSH flow example
+      description: >
+        Flow made to demonstrate the SSH action in Score.
+        It requires a connection Ip, username, password and command.
+        If authentication is successful it executes the command on that machine (if command is valid).
+        If there was any problem while trying to connect or execute the command it finishes
+        with a failure step, otherwise it finishes with success step.
+      className: com.hp.score.samples.docker.SSHFlow
+      triggeringPropertiesMethodName: createSSHFlow
+      inputBindingsMethodName: getInputBindings

@@ -73,6 +73,7 @@ public class SSHAction {
         try {
             sesConnection = jschSSHChannel.getSession(strUserName,
                     strConnectionIP, intConnectionPort);
+            sesConnection.setConfig("StrictHostKeyChecking", "no");
             sesConnection.setPassword(strPassword);
             sesConnection.connect(intTimeOut);
             return true;
@@ -112,7 +113,7 @@ public class SSHAction {
     }
 
     private Boolean validateInputs(String username, String password, String connectionIP, String port, String command) {
-          return !StringUtils.isBlank(username) && !StringUtils.isBlank(password) && !StringUtils.isBlank(connectionIP) && !StringUtils.isBlank(port)
+        return !StringUtils.isBlank(username) && !StringUtils.isBlank(password) && !StringUtils.isBlank(connectionIP) && !StringUtils.isBlank(port)
                 && !StringUtils.isBlank(command);
     }
 }
