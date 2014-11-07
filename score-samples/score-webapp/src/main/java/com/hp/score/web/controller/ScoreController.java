@@ -20,6 +20,7 @@ package com.hp.score.web.controller;
 
 import com.hp.score.samples.FlowMetadata;
 import com.hp.score.samples.openstack.actions.InputBinding;
+import com.hp.score.web.NotFoundException;
 import com.hp.score.web.services.ScoreServices;
 import com.google.gson.*;
 import com.mysema.commons.lang.Assert;
@@ -30,7 +31,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import javassist.NotFoundException;
+
 
 /**
  * Date: 8/29/2014

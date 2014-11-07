@@ -27,12 +27,13 @@ import com.hp.score.samples.FlowMetadataLoader;
 import com.hp.score.samples.openstack.actions.InputBinding;
 import com.hp.score.samples.utility.ReflectionUtility;
 
+import com.hp.score.web.NotFoundException;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
 import java.util.*;
-import javassist.NotFoundException;
+
 
 import static com.hp.score.samples.openstack.OpenstackCommons.prepareExecutionContext;
 
