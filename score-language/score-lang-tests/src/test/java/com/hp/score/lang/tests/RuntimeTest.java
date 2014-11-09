@@ -61,7 +61,7 @@ public class RuntimeTest {
     @Autowired
     private EventBus eventBus;
 
-    private LinkedBlockingQueue<ScoreEvent> queue = new LinkedBlockingQueue<>();
+    LinkedBlockingQueue<ScoreEvent> queue = new LinkedBlockingQueue<>();
 
     public static final String USER_INPUTS = "userInputs";
 
@@ -73,7 +73,6 @@ public class RuntimeTest {
         //Compile Flow -> ExecutionPlan
         POCExecutionPlanActionsBuilder builder = new POCExecutionPlanActionsBuilder();
         ExecutionPlan executionPlan = builder.getExecutionPlan();
-
         //Trigger ExecutionPlan
         Map<String, Serializable> executionContext = createExecutionContext();
         addUserInputs(executionContext);
@@ -81,9 +80,8 @@ public class RuntimeTest {
         TriggeringProperties triggeringProperties = TriggeringProperties
                 .create(executionPlan)
                 .setContext(executionContext);
-        score.trigger(triggeringProperties);
-
         registerHandlers();
+        score.trigger(triggeringProperties);
         ScoreEvent event;
         do {
         	event = queue.take();
@@ -126,7 +124,6 @@ public class RuntimeTest {
 
         POCParentExecutionPlanActionsBuilder parentBuilder = new POCParentExecutionPlanActionsBuilder();
         ExecutionPlan parentExecutionPlan = parentBuilder.getExecutionPlan();
-
         //Trigger ExecutionPlan
         Map<String, Serializable> executionContext = createExecutionContext();
         addUserInputs(executionContext);

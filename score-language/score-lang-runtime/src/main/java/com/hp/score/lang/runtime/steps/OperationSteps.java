@@ -6,6 +6,7 @@ import com.hp.score.lang.entities.bindings.Result;
 import com.hp.score.lang.runtime.bindings.ResultsBinding;
 import com.hp.score.lang.runtime.env.ReturnValues;
 import com.hp.score.lang.runtime.env.RunEnvironment;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,6 +41,7 @@ public class OperationSteps extends AbstractSteps {
         System.out.println("=======");
         System.out.println(" start ");
         System.out.println("=======");
+        runEnv.getExecutionPath().down();
         Map<String, Serializable> operationContext = new HashMap<>();
 
         resolveGroups();
@@ -47,7 +49,7 @@ public class OperationSteps extends AbstractSteps {
         Map<String, Serializable> callArguments = runEnv.removeCallArguments();
         callArguments.putAll(userInputs);
 
-        Map<String, Serializable> actionArguments = createBindInputsMap(callArguments, operationInputs, executionRuntimeServices);
+        Map<String, Serializable> actionArguments = createBindInputsMap(callArguments, operationInputs, executionRuntimeServices, runEnv);
 
         //todo: clone action context before updating
         operationContext.putAll(actionArguments);
@@ -79,7 +81,7 @@ public class OperationSteps extends AbstractSteps {
         System.out.println("=====");
         Map<String, Serializable> operationContext = runEnv.getStack().popContext();
         ReturnValues actionReturnValues = runEnv.removeReturnValues();
-		fireEvent(executionRuntimeServices, EVENT_OUTPUT_START, "Output binding started", "path", Pair.of("operationOutputs", operationOutputs), Pair.of("operationResults", operationResults), Pair.of("actionReturnValues", actionReturnValues));
+		fireEvent(executionRuntimeServices, runEnv, EVENT_OUTPUT_START, "Output binding started", Pair.of("operationOutputs", operationOutputs), Pair.of("operationResults", operationResults), Pair.of("actionReturnValues", actionReturnValues));
 
         // Resolving the result of the operation/flow
         String result = actionReturnValues.getResult();
@@ -93,7 +95,8 @@ public class OperationSteps extends AbstractSteps {
 
         ReturnValues returnValues = new ReturnValues(operationReturnOutputs, result);
         runEnv.putReturnValues(returnValues);
-        fireEvent(executionRuntimeServices, EVENT_OUTPUT_END, "Output binding finished", "path", Pair.of(RETURN_VALUES, returnValues));
+        fireEvent(executionRuntimeServices, runEnv, EVENT_OUTPUT_END, "Output binding finished", Pair.of(RETURN_VALUES, returnValues));
+        runEnv.getExecutionPath().up();
         printReturnValues(returnValues);
     }
 
@@ -128,8 +131,9 @@ public class OperationSteps extends AbstractSteps {
     }
 
     private String getRetValueKey(String outputValue) {
+    	return outputValue;
         //todo: temp solution. currently removing the prefix of retVal[ and suffix of ]
-        return outputValue.substring(7, outputValue.length() - 1);
+//        return outputValue.substring(7, outputValue.length() - 1);
     }
 
 }

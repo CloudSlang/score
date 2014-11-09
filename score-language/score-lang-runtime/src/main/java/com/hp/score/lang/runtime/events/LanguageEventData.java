@@ -61,7 +61,7 @@ public class LanguageEventData extends HashMap<String, Serializable> {
 	}
 
 	public void setExecutionId(Long executionId) {
-		put(BOUND_INPUTS, executionId);
+		put(EXECUTIONID, executionId);
 	}
 
 	public String getPath() {

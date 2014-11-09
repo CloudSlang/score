@@ -54,7 +54,7 @@ public class ActionSteps extends AbstractSteps {
         System.out.println("================================");
         Map<String, String> returnValue = new HashMap<>();
         Map<String, Serializable> callArguments = runEnv.removeCallArguments();
-        fireEvent(executionRuntimeServices, EVENT_ACTION_START, "Preparing to run action " + actionType, "path", Pair.of(CALL_ARGUMENTS, (Serializable)callArguments));
+        fireEvent(executionRuntimeServices, runEnv, EVENT_ACTION_START, "Preparing to run action " + actionType, Pair.of(CALL_ARGUMENTS, (Serializable)callArguments));
         try {
             switch (actionType) {
                 case JAVA:
@@ -67,7 +67,7 @@ public class ActionSteps extends AbstractSteps {
                     break;
             }
         } catch (Exception ex) {
-        	fireEvent(executionRuntimeServices, EVENT_ACTION_ERROR, ex.getMessage(), "path", Pair.of(EXCEPTION, ex));
+        	fireEvent(executionRuntimeServices, runEnv, EVENT_ACTION_ERROR, ex.getMessage(), Pair.of(EXCEPTION, ex));
             logger.error(ex.getMessage());
         }
 
@@ -75,7 +75,7 @@ public class ActionSteps extends AbstractSteps {
 
         ReturnValues returnValues = new ReturnValues(returnValue, null);
         runEnv.putReturnValues(returnValues);
-        fireEvent(executionRuntimeServices, EVENT_ACTION_END, "Action performed", "path", Pair.of(RETURN_VALUES, returnValues));
+        fireEvent(executionRuntimeServices, runEnv, EVENT_ACTION_END, "Action performed", Pair.of(RETURN_VALUES, returnValues));
         printReturnValues(returnValues);
 
     }

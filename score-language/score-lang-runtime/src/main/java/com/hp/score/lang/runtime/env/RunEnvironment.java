@@ -40,13 +40,14 @@ public class RunEnvironment implements Serializable{
 
     // stack of the parent flows data (fo the sub-flow use-case)
     private ParentFlowStack parentFlowStack;
-
+    private ExecutionPath executionPath;
 //    LinkedHashMap<String, Serializable> systemProperties;
 
-    public RunEnvironment() {
+	public RunEnvironment() {
         contextStack = new ContextStack();
         parentFlowStack = new ParentFlowStack();
         callArguments = new HashMap<>();
+        executionPath = new ExecutionPath();
     }
 
     public ContextStack getStack(){
@@ -86,4 +87,9 @@ public class RunEnvironment implements Serializable{
     public void putNextStepPosition(Long nextStepPosition) {
         this.nextStepPosition = nextStepPosition;
     }
+
+	public ExecutionPath getExecutionPath() {
+		return this.executionPath;
+	}
+
 }

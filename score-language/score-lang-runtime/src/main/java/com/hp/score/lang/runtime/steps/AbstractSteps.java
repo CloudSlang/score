@@ -20,8 +20,8 @@ import static com.hp.score.lang.runtime.events.LanguageEventData.*;
 
 public abstract class AbstractSteps {
 
-    protected Map<String, Serializable> createBindInputsMap(Map<String, Serializable> callArguments, Map<String, Serializable> inputs, ExecutionRuntimeServices executionRuntimeServices) {
-    	fireEvent(executionRuntimeServices, EVENT_INPUT_START, "Start binding inputs", "path", Pair.of(CALL_ARGUMENTS, (Serializable)callArguments), Pair.of(INPUTS, (Serializable)inputs));
+    protected Map<String, Serializable> createBindInputsMap(Map<String, Serializable> callArguments, Map<String, Serializable> inputs, ExecutionRuntimeServices executionRuntimeServices, RunEnvironment runEnv) {
+    	fireEvent(executionRuntimeServices, runEnv, EVENT_INPUT_START, "Start binding inputs", Pair.of(CALL_ARGUMENTS, (Serializable)callArguments), Pair.of(INPUTS, (Serializable)inputs));
         Map<String, Serializable> tempContext = new LinkedHashMap<>();
         if (MapUtils.isEmpty(inputs)) return tempContext;
         for (Map.Entry<String, Serializable> input : inputs.entrySet()) {
@@ -40,7 +40,7 @@ public abstract class AbstractSteps {
                 tempContext.put(inputKey, callArguments.get(inputKey));
             }
         }
-        fireEvent(executionRuntimeServices, EVENT_INPUT_END, "Input binding finished", "path", Pair.of(BOUND_INPUTS, (Serializable)tempContext));
+        fireEvent(executionRuntimeServices, runEnv, EVENT_INPUT_END, "Input binding finished", Pair.of(BOUND_INPUTS, (Serializable)tempContext));
         return tempContext;
     }
 
@@ -70,13 +70,13 @@ public abstract class AbstractSteps {
     }
 
 	@SafeVarargs
-	protected static void fireEvent(ExecutionRuntimeServices runtimeServices, String type, String description, String path, Map.Entry<String, ? extends Serializable>... fields) {
+	protected static void fireEvent(ExecutionRuntimeServices runtimeServices, RunEnvironment runEnvironment, String type, String description, Map.Entry<String, ? extends Serializable>... fields) {
 		LanguageEventData eventData = new LanguageEventData();
 		eventData.setEventType(type);
 		eventData.setDescription(description);
 		eventData.setTimeStamp(new Date());
 		eventData.setExecutionId(runtimeServices.getExecutionId());
-		eventData.put(LanguageEventData.PATH, path);
+		eventData.put(LanguageEventData.PATH, runEnvironment.getExecutionPath().getCurrentPath());
 		for(Entry<String, ? extends Serializable> field : fields) {
 			eventData.put(field.getKey(), field.getValue());
 		}

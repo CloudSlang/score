@@ -34,13 +34,13 @@ public class TaskSteps extends AbstractSteps {
         System.out.println("===========");
         System.out.println(" beginTask ");
         System.out.println("===========");
-
+        runEnv.getExecutionPath().forward();
         runEnv.removeCallArguments();
         runEnv.removeReturnValues();
 
         Map<String, Serializable> flowContext = runEnv.getStack().popContext();
 
-        Map<String, Serializable> operationArguments = createBindInputsMap(flowContext, taskInputs, executionRuntimeServices);
+        Map<String, Serializable> operationArguments = createBindInputsMap(flowContext, taskInputs, executionRuntimeServices, runEnv);
 
         //todo: hook
 
@@ -61,7 +61,7 @@ public class TaskSteps extends AbstractSteps {
         ReturnValues operationReturnValues = runEnv.removeReturnValues();
 		List<String> eventFields = Arrays.asList("taskPublishValues", "taskNavigationValues", "operationReturnValues");
 		List<Serializable> eventValues = Arrays.asList(taskPublishValues, taskNavigationValues, operationReturnValues);
-		fireEvent(executionRuntimeServices, EVENT_OUTPUT_START, "Output binding started", "path", Pair.of("taskPublishValues", taskPublishValues), Pair.of("taskNavigationValues", taskNavigationValues), Pair.of("operationReturnValues", operationReturnValues));
+		fireEvent(executionRuntimeServices, runEnv, EVENT_OUTPUT_START, "Output binding started", Pair.of("taskPublishValues", taskPublishValues), Pair.of("taskNavigationValues", taskNavigationValues), Pair.of("operationReturnValues", operationReturnValues));
         Map<String, Serializable> publishValues = createBindOutputsContext(operationReturnValues.getOutputs(), taskPublishValues);
         flowContext.putAll(publishValues);
         printMap(flowContext, "flowContext");
@@ -72,7 +72,7 @@ public class TaskSteps extends AbstractSteps {
         runEnv.putNextStepPosition(nextPosition);
         ReturnValues returnValues = new ReturnValues(new HashMap<String, String>(), operationReturnValues.getResult());
         runEnv.putReturnValues(returnValues);
-        fireEvent(executionRuntimeServices, EVENT_OUTPUT_END, "Output binding finished", "path", Pair.of(RETURN_VALUES, returnValues), Pair.of("nextPosition", nextPosition));
+        fireEvent(executionRuntimeServices, runEnv, EVENT_OUTPUT_END, "Output binding finished", Pair.of(RETURN_VALUES, returnValues), Pair.of("nextPosition", nextPosition));
         printReturnValues(returnValues);
         System.out.println("next position: " + nextPosition);
 
