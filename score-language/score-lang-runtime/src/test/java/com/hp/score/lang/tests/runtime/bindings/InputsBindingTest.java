@@ -1,5 +1,24 @@
 package com.hp.score.lang.tests.runtime.bindings;
 
+/*
+ * Licensed to Hewlett-Packard Development Company, L.P. under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+*/
+
 import com.hp.score.lang.entities.bindings.Input;
 import com.hp.score.lang.runtime.bindings.InputsBinding;
 import com.hp.score.lang.runtime.bindings.ScriptEvaluator;
@@ -72,6 +91,44 @@ public class InputsBindingTest {
         Assert.assertFalse(result.isEmpty());
         Assert.assertTrue(result.containsKey("input1"));
         Assert.assertEquals("xxx", result.get("input1"));
+    }
+
+    @Test
+    public void testInputScriptEval() throws Exception {
+        Map<String,Serializable> context = new HashMap<>();
+        context.put("valX",5);
+        Input scriptInput = new Input("input1","3 + valX");
+        List<Input> inputs = Lists.newArrayList(scriptInput);
+        Map<String,Serializable> result = inputsBinding.bindInputs(context,inputs);
+        Assert.assertFalse(result.isEmpty());
+        Assert.assertTrue(result.containsKey("input1"));
+        Assert.assertEquals(8, result.get("input1"));
+    }
+
+    @Test
+    public void testInputScriptEval2() throws Exception {
+        Map<String,Serializable> context = new HashMap<>();
+        context.put("valB","b");
+        context.put("valC","c");
+        Input scriptInput = new Input("input1"," 'a' + valB + valC");
+        List<Input> inputs = Lists.newArrayList(scriptInput);
+        Map<String,Serializable> result = inputsBinding.bindInputs(context,inputs);
+        Assert.assertFalse(result.isEmpty());
+        Assert.assertTrue(result.containsKey("input1"));
+        Assert.assertEquals("abc", result.get("input1"));
+    }
+
+    @Test
+    public void testDefaultValueVsEmptyRef() throws Exception {
+        Map<String,Serializable> context = new HashMap<>();
+
+        Input refInput = new Input("input1","NotExistent","val",false,false);
+        List<Input> inputs = Lists.newArrayList(refInput);
+
+        Map<String,Serializable> result = inputsBinding.bindInputs(context,inputs);
+        Assert.assertFalse(result.isEmpty());
+        Assert.assertTrue(result.containsKey("input1"));
+        Assert.assertEquals("val", result.get("input1"));
     }
 
     private Input createDefaultValueInput(Serializable value){

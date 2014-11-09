@@ -45,19 +45,33 @@ public final class InputsBinding {
     }
 
     private void bindInput(Input input, Map<String,Serializable> context,Map<String,Serializable> resultContext) {
+        String inputName = input.getName();
+        Serializable value = resolveValue(inputName, input, context);
+
+        if(input.isRequired() && value == null) {
+            throw new RuntimeException("Input with name :"+ inputName + " is Required, but value is empty");
+        }
+
+        resultContext.put(inputName,value);
+    }
+
+    private Serializable resolveValue(String inputName, Input input, Map<String, Serializable> context) {
         Serializable value = null;
-        if(input.getDefaultValue() != null){
+
+        if(context.containsKey(inputName)){
+            value = context.get(inputName);
+        }
+
+        if(value == null && input.getDefaultValue() != null){
             value = input.getDefaultValue();
         }
-        if(StringUtils.isNotEmpty(input.getExpression())){
+
+        if(value == null && StringUtils.isNotEmpty(input.getExpression())){
             String expr = input.getExpression();
             value = scriptEvaluator.evalExpr(expr, context);
         }
-        if(input.isRequired() && value == null) {
-            throw new RuntimeException("Input with name :"+input.getName() + " is Required, but value is empty");
-        }
 
-        resultContext.put(input.getName(),value);
+        return value;
     }
 
 

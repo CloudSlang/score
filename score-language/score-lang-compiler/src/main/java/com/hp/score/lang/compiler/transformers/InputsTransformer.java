@@ -22,7 +22,9 @@ package com.hp.score.lang.compiler.transformers;
  * Created by orius123 on 05/11/14.
  */
 
+import com.hp.score.lang.compiler.SlangTextualKeys;
 import com.hp.score.lang.entities.bindings.Input;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
@@ -34,14 +36,6 @@ import java.util.Map;
 
 @Component
 public class InputsTransformer implements Transformer<List<Object>, List<Input>> {
-
-    private static final String DEFAULT_KEY = "default";
-
-    private static final String EXPRESSION_KEY = "expression";
-
-    private static final String REQUIRED_KEY = "required";
-
-    private static final String ENCRYPTED_KEY = "encrypted";
 
     @Override
     public List<Input> transform(List<Object> rawData) {
@@ -72,15 +66,39 @@ public class InputsTransformer implements Transformer<List<Object>, List<Input>>
 
     private Input createPropInput(Map.Entry<String, Map<String, Serializable>> entry) {
         Map<String, Serializable> prop = entry.getValue();
-        boolean required = prop.containsKey(REQUIRED_KEY) && ((boolean) prop.get(REQUIRED_KEY));
-        boolean encrypted = prop.containsKey(ENCRYPTED_KEY) && ((boolean) prop.get(ENCRYPTED_KEY));
-        String expression = prop.containsValue(EXPRESSION_KEY) ? ((String) prop.get(ENCRYPTED_KEY)) : null;
-        Serializable defaultValue = prop.containsValue(DEFAULT_KEY) ? (prop.get(DEFAULT_KEY)) : null;
-        return new Input(entry.getKey(), expression, defaultValue, encrypted, required);
+        boolean required = prop.containsKey(SlangTextualKeys.REQUIRED_KEY) && ((boolean) prop.get(SlangTextualKeys.REQUIRED_KEY));
+        boolean encrypted = prop.containsKey(SlangTextualKeys.ENCRYPTED_KEY) && ((boolean) prop.get(SlangTextualKeys.ENCRYPTED_KEY));
+
+        Serializable valueProp = prop.containsKey(SlangTextualKeys.DEFAULT_KEY) ? (prop.get(SlangTextualKeys.DEFAULT_KEY)) : null;
+
+        return createPropInput(entry.getKey(), required, encrypted, valueProp);
+    }
+
+    private Input createPropInput(String inputName, boolean required,boolean encrypted, Serializable value){
+        String expression = null;
+        Serializable defaultValue = null;
+        if(isExpression(value)){
+            expression = extractExpression((String)value);
+        }
+        else if(value != null){
+            defaultValue = value;
+        }
+        else{
+            expression = inputName ;
+        }
+        return new Input(inputName, expression, defaultValue, encrypted, required);
+    }
+
+    private String extractExpression(String defaultProp) {
+        return StringUtils.removeStart(defaultProp,SlangTextualKeys.EXPRESSION_PREFIX_KEY);
+    }
+
+    private boolean isExpression(Serializable defaultValue) {
+        return (defaultValue instanceof String) && StringUtils.startsWith((String)defaultValue,SlangTextualKeys.EXPRESSION_PREFIX_KEY);
     }
 
     private Input createExpressionInput(Map.Entry<String, String> entry) {
-        return new Input(entry.getKey(), entry.getValue());
+        return createPropInput(entry.getKey() , true, false, entry.getValue());
     }
 
     private Input createRefInput(String rawInput) {

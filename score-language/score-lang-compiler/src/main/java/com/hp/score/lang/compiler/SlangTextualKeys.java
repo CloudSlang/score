@@ -44,4 +44,11 @@ public interface SlangTextualKeys {
     String DO_KEY = "do";
     String PUBLISH_KEY = "publish";
     String NAVIGATION_KEY = "navigate";
+
+    //inputs
+    public static final String DEFAULT_KEY = "default";
+    public static final String EXPRESSION_PREFIX_KEY = "->";
+    public static final String REQUIRED_KEY = "required";
+    public static final String ENCRYPTED_KEY = "encrypted";
+
 }
