@@ -22,7 +22,7 @@
 
 	<groupId>com.hp.score</groupId>
 	<artifactId>score-tests</artifactId>
-	<version>0.1.228</version>
+	<version>0.1.229-SNAPSHOT</version>
 
 
 	<distributionManagement>
