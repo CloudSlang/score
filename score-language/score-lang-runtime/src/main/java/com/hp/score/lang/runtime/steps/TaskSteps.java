@@ -2,9 +2,9 @@ package com.hp.score.lang.runtime.steps;
 
 import com.hp.oo.sdk.content.annotations.Param;
 import com.hp.score.lang.ExecutionRuntimeServices;
+import com.hp.score.lang.entities.ScoreLangConstants;
 import com.hp.score.lang.runtime.env.ReturnValues;
 import com.hp.score.lang.runtime.env.RunEnvironment;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 import static com.hp.score.lang.entities.ScoreLangConstants.*;
-import static com.hp.score.lang.runtime.events.LanguageEventData.*;
-import static com.hp.score.api.execution.ExecutionParametersConsts.*;
+import static com.hp.score.lang.runtime.events.LanguageEventData.RETURN_VALUES;
+import static com.hp.score.api.execution.ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES;
 
 /**
  * User: stoneo
@@ -27,7 +27,7 @@ import static com.hp.score.api.execution.ExecutionParametersConsts.*;
 @Component
 public class TaskSteps extends AbstractSteps {
 
-    public void beginTask(@Param("taskInputs") LinkedHashMap<String, Serializable> taskInputs,
+    public void beginTask(@Param(ScoreLangConstants.TASK_INPUTS_KEY) LinkedHashMap<String, Serializable> taskInputs,
                           @Param(RUN_ENV) RunEnvironment runEnv,
                           @Param(EXECUTION_RUNTIME_SERVICES) ExecutionRuntimeServices executionRuntimeServices) {
 
@@ -48,8 +48,8 @@ public class TaskSteps extends AbstractSteps {
     }
 
     public void finishTask(@Param(RUN_ENV) RunEnvironment runEnv,
-                           @Param("taskPublishValues") LinkedHashMap<String, Serializable> taskPublishValues,
-                           @Param("taskNavigationValues") LinkedHashMap<String, Long> taskNavigationValues,
+                           @Param(ScoreLangConstants.TASK_PUBLISH_KEY) LinkedHashMap<String, Serializable> taskPublishValues,
+                           @Param(ScoreLangConstants.TASK_NAVIGATION_KEY) LinkedHashMap<String, Long> taskNavigationValues,
                            @Param(EXECUTION_RUNTIME_SERVICES) ExecutionRuntimeServices executionRuntimeServices) {
 
         System.out.println("============");

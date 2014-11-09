@@ -22,37 +22,32 @@ package com.hp.score.lang.compiler.transformers;
  * Created by orius123 on 05/11/14.
  */
 
-import com.hp.score.lang.entities.bindings.Result;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 @Component
-public class ResultsTransformer implements Transformer<List<Object>, List<Result>> {
+public class NavigateTransformer implements Transformer<List<Map<String, String>>, LinkedHashMap<String, String>> {
 
     @Override
-    public List<Result> transform(List<Object> rawData) {
-        List<Result> results = new ArrayList<>();
-        for (Object rawResult : rawData) {
-            if (rawResult instanceof String) {
-                //- some_result
-                results.add(createNoExpressionResult((String) rawResult));
-            } else if (rawResult instanceof Map) {
-                @SuppressWarnings("unchecked") Map.Entry<String, String> entry = ((Map<String, String>) rawResult).entrySet().iterator().next();
-                // - some_result: some_expression
-                // the value of the result is an expression we need to evaluate at runtime
-                results.add(createExpressionResult(entry));
-            }
+    public LinkedHashMap<String, String> transform(List<Map<String, String>> rawData) {
+        LinkedHashMap<String, String> navigationData = new LinkedHashMap<>();
+        //todo currently we support only string navigation
+        for (Map<String, String> rawNavigation : rawData) {
+            Map.Entry<String, String> entry = rawNavigation.entrySet().iterator().next();
+            // - SUCCESS: some_task
+            // the value of the navigation is the step to go to
+            navigationData.put(entry.getKey(), entry.getValue());
         }
-        return results;
+        return navigationData;
     }
 
     @Override
     public List<Scope> getScopes() {
-        return Arrays.asList(Scope.AFTER_OPERATION);
+        return Arrays.asList(Scope.AFTER_TASK);
     }
 
     @Override
@@ -63,14 +58,6 @@ public class ResultsTransformer implements Transformer<List<Object>, List<Result
     @Override
     public String keyToRegister() {
         return null;
-    }
-
-    private Result createNoExpressionResult(String rawResult) {
-        return new Result(rawResult, null);
-    }
-
-    private Result createExpressionResult(Map.Entry<String, String> resultEntry) {
-        return new Result(resultEntry.getKey(), resultEntry.getValue());
     }
 }
 

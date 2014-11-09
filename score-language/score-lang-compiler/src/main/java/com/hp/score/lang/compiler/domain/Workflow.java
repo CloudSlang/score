@@ -1,5 +1,4 @@
-package com.hp.score.lang.compiler.domain;
-/*
+package com.hp.score.lang.compiler.domain;/*
  * Licensed to Hewlett-Packard Development Company, L.P. under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,40 +17,20 @@ package com.hp.score.lang.compiler.domain;
  * under the License.
 */
 
-/*
- * Created by orius123 on 05/11/14.
- */
 import java.util.List;
-import java.util.Map;
 
-public class SlangFile {
+/*
+ * Created by orius123 on 06/11/14.
+ */
+public class Workflow {
 
-    private List<Map<String, String>> imports;
-    private Map<String, Object> flow;
-    private List<Map> operations;
-    private String namespace;
+    private final List<Task> tasks;
 
-    public String getNamespace() {
-        return namespace;
+    public Workflow(List<Task> tasks) {
+        this.tasks = tasks;
     }
 
-    public Map<String, Object> getFlow() {
-        return flow;
-    }
-
-    public List getImports() {
-        return imports;
-    }
-
-    public List<Map> getOperations() {
-        return operations;
-    }
-
-    public Type getType(){
-        return flow != null ? Type.FLOW : Type.OPERATIONS;
-    }
-
-    public enum Type {
-        FLOW, OPERATIONS
+    public List<Task> getTasks() {
+        return tasks;
     }
 }

@@ -43,6 +43,10 @@ public interface ScoreLangConstants {
     String OPERATION_RESULTS_KEY = "operationResults";
 
     //task scope
+    String TASK_INPUTS_KEY = "taskInputs";
+    String TASK_PUBLISH_KEY = "taskPublishValues";
+    String TASK_NAVIGATION_KEY = "taskNavigationValues";
+    String REF_ID = "subFlowId";
 
 	String EVENT_ACTION_START = "EVENT_ACTION_START";
 	String EVENT_ACTION_END = "EVENT_ACTION_END";

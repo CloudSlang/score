@@ -40,13 +40,13 @@ import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = SpringConfiguration.class)
-public class SlangCompilerTest {
+public class CompileOperationTest {
 
     @Autowired
     private SlangCompiler compiler;
 
     @Test
-    public void testOpCompileBasic() throws Exception {
+    public void testCompileOperationBasic() throws Exception {
         URL resource = getClass().getResource("/operation.yaml");
         ExecutionPlan executionPlan = compiler.compile(new File(resource.toURI()), null);
         Assert.assertNotNull("execution plan is null", executionPlan);
@@ -54,7 +54,7 @@ public class SlangCompilerTest {
     }
 
     @Test
-    public void testOpCompileWithData() throws Exception {
+    public void testCompileOperationWithData() throws Exception {
         URL resource = getClass().getResource("/operation_with_data.yaml");
         ExecutionPlan executionPlan = compiler.compile(new File(resource.toURI()), null);
 

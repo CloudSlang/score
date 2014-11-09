@@ -23,16 +23,25 @@ package com.hp.score.lang.compiler;
  */
 public interface SlangTextualKeys {
 
-    String FLOW_NAME_KEY = "name";
-
+    //file
     String OPERATIONS_KEY = "operations";
 
-    String ACTION_KEY = "action";
-
+    //executable
+    String RESULT_KEY = "results";
     String INPUTS_KEY = "inputs";
-
     String OUTPUTS_KEY = "outputs";
 
-    String RESULT_KEY = "results";
+    //flow
+    String FLOW_NAME_KEY = "name";
+    String WORKFLOW_KEY = "workflow";
 
+    //action
+
+    //operation
+    String ACTION_KEY = "action";
+
+    //task
+    String DO_KEY = "do";
+    String PUBLISH_KEY = "publish";
+    String NAVIGATION_KEY = "navigate";
 }

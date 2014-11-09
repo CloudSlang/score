@@ -67,7 +67,7 @@ public class OperationSteps extends AbstractSteps {
      * @param runEnv the run environment object
      * @param operationOutputs the operation outputs data
      * @param operationResults the operation results data
-     * @param executionRuntimeServices
+     * @param executionRuntimeServices services supplied by score engine for handling the execution
      */
     public void end(@Param(RUN_ENV) RunEnvironment runEnv,
                     @Param(OPERATION_OUTPUTS_KEY) LinkedHashMap<String, Serializable> operationOutputs,

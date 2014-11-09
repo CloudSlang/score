@@ -1,4 +1,4 @@
-package com.hp.score.lang.compiler.domain;
+package com.hp.score.lang.compiler.transformers;
 /*
  * Licensed to Hewlett-Packard Development Company, L.P. under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,37 +21,35 @@ package com.hp.score.lang.compiler.domain;
 /*
  * Created by orius123 on 05/11/14.
  */
+
+import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
-public class SlangFile {
+@Component
+public class PublishTransformer implements Transformer<List<Object>, String> {
 
-    private List<Map<String, String>> imports;
-    private Map<String, Object> flow;
-    private List<Map> operations;
-    private String namespace;
 
-    public String getNamespace() {
-        return namespace;
+    @Override
+    public String transform(List<Object> rawData) {
+        return "hi";
     }
 
-    public Map<String, Object> getFlow() {
-        return flow;
+    @Override
+    public List<Scope> getScopes() {
+        return Arrays.asList(Scope.AFTER_TASK);
     }
 
-    public List getImports() {
-        return imports;
+    @Override
+    public String keyToTransform() {
+        return null;
     }
 
-    public List<Map> getOperations() {
-        return operations;
+    @Override
+    public String keyToRegister() {
+        return null;
     }
 
-    public Type getType(){
-        return flow != null ? Type.FLOW : Type.OPERATIONS;
-    }
 
-    public enum Type {
-        FLOW, OPERATIONS
-    }
 }

@@ -21,37 +21,27 @@ package com.hp.score.lang.compiler.domain;
 /*
  * Created by orius123 on 05/11/14.
  */
-import java.util.List;
+
+import java.io.Serializable;
 import java.util.Map;
 
-public class SlangFile {
+public abstract class Executable {
 
-    private List<Map<String, String>> imports;
-    private Map<String, Object> flow;
-    private List<Map> operations;
-    private String namespace;
+    protected final Map<String, Serializable> preExecActionData;
+    protected final Map<String, Serializable> postExecActionData;
 
-    public String getNamespace() {
-        return namespace;
+    protected Executable(Map<String, Serializable> preExecActionData, Map<String, Serializable> postExecActionData) {
+        this.preExecActionData = preExecActionData;
+        this.postExecActionData = postExecActionData;
     }
 
-    public Map<String, Object> getFlow() {
-        return flow;
+    public Map<String, Serializable> getPreExecActionData() {
+        return preExecActionData;
     }
 
-    public List getImports() {
-        return imports;
+    public Map<String, Serializable> getPostExecActionData() {
+        return postExecActionData;
     }
 
-    public List<Map> getOperations() {
-        return operations;
-    }
 
-    public Type getType(){
-        return flow != null ? Type.FLOW : Type.OPERATIONS;
-    }
-
-    public enum Type {
-        FLOW, OPERATIONS
-    }
 }

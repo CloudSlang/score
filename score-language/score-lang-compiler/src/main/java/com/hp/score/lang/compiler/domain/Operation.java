@@ -1,5 +1,4 @@
-package com.hp.score.lang.compiler.domain;
-/*
+package com.hp.score.lang.compiler.domain;/*
  * Licensed to Hewlett-Packard Development Company, L.P. under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,30 +17,20 @@ package com.hp.score.lang.compiler.domain;
  * under the License.
 */
 
-/*
- * Created by orius123 on 05/11/14.
- */
 import java.io.Serializable;
 import java.util.Map;
 
-public class Operation {
+/*
+ * Created by orius123 on 09/11/14.
+ */
+public class Operation extends Executable {
 
-    private final Map<String, Serializable> preOpActionData;
-    private final Map<String, Serializable> postOpActionData;
     private final DoAction doAction;
 
+
     public Operation(Map<String, Serializable> preOpActionData, Map<String, Serializable> postOpActionData, DoAction doAction) {
-        this.preOpActionData = preOpActionData;
-        this.postOpActionData = postOpActionData;
+        super(preOpActionData, postOpActionData);
         this.doAction = doAction;
-    }
-
-    public Map<String, Serializable> getPreOpActionData() {
-        return preOpActionData;
-    }
-
-    public Map<String, Serializable> getPostOpActionData() {
-        return postOpActionData;
     }
 
     public DoAction getDoAction() {
