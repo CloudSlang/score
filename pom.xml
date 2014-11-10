@@ -607,6 +607,5 @@
         <module>score-tests</module>
         <module>score-api</module>
         <module>score-samples</module>
-        <module>score-language</module>
     </modules>
 </project>
