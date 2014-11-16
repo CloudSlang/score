@@ -1,21 +1,10 @@
 /*
- * Licensed to Hewlett-Packard Development Company, L.P. under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
-*/
+ * Licensed to Hewlett-Packard Development Company, L.P. under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may
+ * obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the
+ * License.
+ */
 package com.hp.score.worker.execution.reflection;
 
 import java.lang.reflect.InvocationTargetException;
@@ -25,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.hp.score.lang.ExecutionRuntimeServices;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
@@ -38,7 +26,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import com.hp.score.api.ControlActionMetadata;
 import com.hp.score.api.execution.ExecutionParametersConsts;
 import com.hp.score.exceptions.FlowExecutionException;
-import com.hp.score.lang.SystemContext;
+import com.hp.score.lang.ExecutionRuntimeServices;
 import com.hp.score.worker.execution.services.SessionDataHandler;
 
 /**
@@ -75,7 +63,7 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 		} catch(IllegalArgumentException ex) {
 			String message = "Failed to run the action! Wrong arguments were passed to class: " + actionMetadata.getClassName() + ", method: " + actionMetadata.getMethodName() +
 				", reason: " + ex.getMessage();
-			throw new FlowExecutionException(message);
+			throw new FlowExecutionException(message, ex);
 		} catch(InvocationTargetException ex) {
 			String message = ex.getTargetException() == null ? ex.getMessage() : ex.getTargetException().getMessage();
 			logger.error(getExceptionMessage(actionMetadata) + ", reason: " + message, ex);
@@ -153,7 +141,7 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 	}
 
 	private static Long getExecutionIdFromActionData(Map<String, ?> actionData) {
-        ExecutionRuntimeServices executionRuntimeServices = (ExecutionRuntimeServices)actionData.get(ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES);
+		ExecutionRuntimeServices executionRuntimeServices = (ExecutionRuntimeServices)actionData.get(ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES);
 		if(executionRuntimeServices != null) return executionRuntimeServices.getExecutionId();
 		return null;
 	}
