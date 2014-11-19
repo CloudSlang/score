@@ -21,7 +21,7 @@
 	<parent>
 		<groupId>org.eclipse.score</groupId>
 		<artifactId>package</artifactId>
-		<version>0.1.232</version>
+		<version>0.1.233-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
