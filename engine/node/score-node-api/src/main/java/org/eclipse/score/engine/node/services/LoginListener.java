@@ -20,7 +20,7 @@ package org.eclipse.score.engine.node.services;
 
 /**
  * Created by IntelliJ IDEA.
- * User: Amit Levin
+ * User:
  * Date: 21/11/12
  */
 //TODO: Add Javadoc  Eliya

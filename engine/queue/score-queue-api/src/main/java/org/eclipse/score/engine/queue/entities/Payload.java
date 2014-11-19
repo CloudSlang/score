@@ -24,7 +24,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import java.io.Serializable;
 
 /**
- * User: Amit Levin
+ * User:
  * Date: 10/09/12
  * Time: 09:39
  */

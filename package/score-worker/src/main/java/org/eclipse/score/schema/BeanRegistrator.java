@@ -26,7 +26,7 @@ import org.springframework.util.StringUtils;
 /**
  * Date: 1/28/14
  *
- * @author Dima Rassin
+ * @author
  */
 public class BeanRegistrator{
 	private ParserContext parserContext;

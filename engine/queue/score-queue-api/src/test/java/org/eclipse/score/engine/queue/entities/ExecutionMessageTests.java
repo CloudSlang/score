@@ -30,7 +30,7 @@ import static org.fest.assertions.Assertions.assertThat;
 /**
  * Date: 12/15/13
  *
- * @author Dima Rassin
+ * @author
  */
 public class ExecutionMessageTests {
 	ExecutionMessage messages = new ExecutionMessage();

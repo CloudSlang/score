@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * User: Amit Levin
+ * User:
  * Date: 20/11/12
  */
 final public class ExecutionRecoveryServiceImpl implements ExecutionRecoveryService {

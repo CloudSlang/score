@@ -23,7 +23,7 @@ import java.io.Serializable;
 /**
  * Date: 12/23/13
  *
- * @author Dima Rassin
+ * @author
  */
 public interface Identifiable extends Serializable {
 	/**

@@ -35,7 +35,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * User: maromg
+ * User:
  * Date: 01/06/2014
  */
 @RunWith(SpringJUnit4ClassRunner.class)

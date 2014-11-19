@@ -23,7 +23,7 @@ import org.eclipse.score.engine.queue.entities.ExecutionMessage;
 import java.util.List;
 
 /**
- * User: Amit Levin
+ * User:
  * Date: 19/09/12
  * Time: 15:08
  */

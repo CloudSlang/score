@@ -34,7 +34,7 @@ import java.util.Map;
 /**
  * Date: 4/27/12
  *
- * @author Dima Rassin
+ * @author
  */
 @SuppressWarnings("unused")
 public class PartitionTemplateImpl implements PartitionTemplate, BeanNameAware {

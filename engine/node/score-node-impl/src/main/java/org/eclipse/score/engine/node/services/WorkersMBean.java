@@ -32,7 +32,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 
 /**
- * User: Dima rassin
+ * User:
  * Date: 2/9/13
  */
 @ManagedResource(description = "Worker Nodes Managing API")

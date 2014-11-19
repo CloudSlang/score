@@ -63,7 +63,7 @@ import static org.mockito.Mockito.anyString;
 
 /**
  * Created by IntelliJ IDEA.
- * User: Amit Levin
+ * User:
  * Date: 21/11/12
  */
 @RunWith(SpringJUnit4ClassRunner.class)

@@ -20,7 +20,7 @@ package org.eclipse.score.events;
 
 /**
  * Created with IntelliJ IDEA.
- * User: Amit Levin
+ * User:
  * Date: 09/01/14
  * To change this template use File | Settings | File Templates.
  */

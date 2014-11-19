@@ -39,7 +39,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * User: Amit Levin
+ * User:
  * Date: 19/09/12
  * Time: 15:14
  */

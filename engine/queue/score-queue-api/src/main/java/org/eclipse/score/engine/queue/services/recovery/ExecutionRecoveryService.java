@@ -20,7 +20,7 @@ package org.eclipse.score.engine.queue.services.recovery;
 
 /**
  * Created by IntelliJ IDEA.
- * User: Amit Levin
+ * User:
  * Date: 20/11/12
  */
 //TODO: Natasha/Evgeny Add Javadoc

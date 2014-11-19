@@ -23,7 +23,7 @@ import org.eclipse.score.engine.partitions.entities.PartitionGroup;
 /**
  * Date: 4/22/12
  *
- * @author Dima Rassin
+ * @author
  */
 //TODO: Add Javadoc
 public interface PartitionService {

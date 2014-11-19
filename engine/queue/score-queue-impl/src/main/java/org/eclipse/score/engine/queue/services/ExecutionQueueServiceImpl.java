@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * User: Amit Levin
+ * User:
  * Date: 20/09/12
  * Time: 18:09
  */

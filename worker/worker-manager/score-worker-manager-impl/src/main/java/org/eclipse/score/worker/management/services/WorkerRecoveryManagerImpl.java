@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * Date: 6/11/13
  *
- * @author Dima Rassin
+ * @author
  */
 public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager {
 

@@ -23,7 +23,7 @@ import org.eclipse.score.api.nodes.WorkerStatus;
 import java.util.List;
 
 /**
- * User: Amit Levin
+ * User:
  * Date: 08/11/2O12
  */
 //TODO: Add Javadoc Eliya

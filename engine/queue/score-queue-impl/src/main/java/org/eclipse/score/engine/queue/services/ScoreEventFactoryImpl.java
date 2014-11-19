@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * User: maromg
+ * User:
  * Date: 03/08/2014
  */
 public class ScoreEventFactoryImpl implements ScoreEventFactory {

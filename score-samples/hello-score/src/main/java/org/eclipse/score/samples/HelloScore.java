@@ -39,7 +39,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * User: maromg
+ * User:
  * Date: 22/06/2014
  */
 public class HelloScore {

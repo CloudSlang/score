@@ -74,7 +74,7 @@ import java.util.Map;
 /**
  * Date: 1/21/14
  *
- * @author Dima Rassin
+ * @author
  */
 @SuppressWarnings("unused")
 public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {

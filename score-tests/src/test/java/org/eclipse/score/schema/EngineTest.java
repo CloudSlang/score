@@ -65,7 +65,7 @@ import static org.mockito.Mockito.mock;
 
 /**
  * Date: 1/21/14
- * @author Dima Rassin
+ * @author
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = EngineTest.Context.class)

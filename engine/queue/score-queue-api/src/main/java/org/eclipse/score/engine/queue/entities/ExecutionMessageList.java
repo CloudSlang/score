@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * User: Dima Rassin
+ * User:
  * Date: 11/26/12
  */
 public class ExecutionMessageList {

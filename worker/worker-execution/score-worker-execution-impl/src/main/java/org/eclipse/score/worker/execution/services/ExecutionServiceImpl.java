@@ -48,7 +48,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * @author Dima Rassin
+ * @author
  * @author Avi Moradi
  * @since 08/01/2011
  * @version $Id$

@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * Date: 12/3/13
  *
- * @author Dima Rassin
+ * @author
  */
 //TODO: Add Javadoc Eliya
 public interface Message extends Serializable{

@@ -36,7 +36,7 @@ import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
- * User: Amit Levin
+ * User:
  * Date: 19/11/12
  */
 final public class ExecutionAssignerServiceImpl implements ExecutionAssignerService {

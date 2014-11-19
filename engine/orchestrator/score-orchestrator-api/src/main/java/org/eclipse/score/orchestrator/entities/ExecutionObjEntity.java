@@ -26,7 +26,7 @@ import javax.persistence.Lob;
 
 /**
  * Created by IntelliJ IDEA.
- * User: Amit Levin
+ * User:
  * Date: 28/11/13
  */
 @Embeddable

@@ -50,7 +50,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * User: maromg
+ * User:
  * Date: 29/05/2014
  */
 @RunWith(SpringJUnit4ClassRunner.class)

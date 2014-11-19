@@ -21,7 +21,7 @@ package org.eclipse.score.engine.queue.repositories.callbacks;
 /**
  * Date: 4/20/13
  *
- * @author Dima Rassin
+ * @author
  */
 public class ExecutionStatesCallback  extends AbstractCallback{
 

@@ -19,7 +19,7 @@
 package org.eclipse.score.engine.partitions.services;
 
 /**
- * User: Dima rassin
+ * User:
  * Date: 4/17/13
  */
 //TODO: Add Javadoc

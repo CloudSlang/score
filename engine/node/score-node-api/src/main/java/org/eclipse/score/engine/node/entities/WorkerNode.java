@@ -45,7 +45,7 @@ import java.util.Objects;
 
 /**
  * Created by IntelliJ IDEA.
- * User: Amit Levin
+ * User:
  * Date: 08/11/2O12
  */
 @Entity

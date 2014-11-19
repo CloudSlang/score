@@ -22,7 +22,7 @@ import org.eclipse.score.facade.entities.Execution;
 import org.eclipse.score.events.ScoreEvent;
 
 /**
- * User: maromg
+ * User:
  * Date: 30/07/2014
  */
 //TODO: Add Javadoc

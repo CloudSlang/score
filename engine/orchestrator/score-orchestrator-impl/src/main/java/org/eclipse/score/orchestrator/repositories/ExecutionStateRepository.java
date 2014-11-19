@@ -27,7 +27,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 /**
- * User: maromg
+ * User:
  * Date: 12/05/2014
  */
 public interface ExecutionStateRepository extends JpaRepository<ExecutionState, String> {

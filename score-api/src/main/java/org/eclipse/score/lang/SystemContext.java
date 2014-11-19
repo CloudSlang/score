@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * User: maromg
+ * User:
  * Date: 10/06/2014
  */
 public class SystemContext extends ExecutionRuntimeServices implements Map<String, Serializable> {

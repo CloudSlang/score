@@ -26,7 +26,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import javax.sql.DataSource;
 
 /**
- * User: maromg
+ * User:
  * Date: 07/07/2014
  */
 public class ScoreDefaultDatasourceContext {

@@ -22,7 +22,7 @@ import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
- * User: Amit Levin
+ * User:
  * Date: 14/10/13
  */
 //TODO: Add Javadoc

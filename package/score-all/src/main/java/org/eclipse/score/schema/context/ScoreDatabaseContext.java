@@ -35,7 +35,7 @@ import javax.sql.DataSource;
 import java.util.Properties;
 
 /**
- * User: maromg
+ * User:
  * Date: 01/07/2014
  *
  * This context is used for the case when score does not receive any outside beans related

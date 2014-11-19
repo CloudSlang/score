@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * User: Amit Levin
+ * User:
  * Date: 10/09/12
  * Time: 11:11
  */

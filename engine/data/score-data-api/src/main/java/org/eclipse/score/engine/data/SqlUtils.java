@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * Contains common SQL Utils.
  *
- * User: Eyal Roth
+ * User:
  * Date: 03/12/13
  */
 public class SqlUtils {

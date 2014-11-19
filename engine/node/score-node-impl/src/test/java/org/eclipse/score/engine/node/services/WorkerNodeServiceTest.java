@@ -64,7 +64,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * Created by IntelliJ IDEA.
- * User: Amit Levin
+ * User:
  * Date: 15/11/12
  */
 @RunWith(SpringJUnit4ClassRunner.class)

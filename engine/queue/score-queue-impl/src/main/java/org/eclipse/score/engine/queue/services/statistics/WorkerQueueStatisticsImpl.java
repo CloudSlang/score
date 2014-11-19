@@ -25,7 +25,7 @@ import org.eclipse.score.engine.queue.services.QueueListener;
 import java.util.List;
 
 /**
- * User: Amit Levin
+ * User:
  * Date: 10/09/12
  * Time: 09:57
  */

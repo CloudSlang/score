@@ -19,7 +19,7 @@
 package org.eclipse.score.engine.queue.entities;
 
 /**
- * User: Amit Levin
+ * User:
  * Date: 10/09/12
  */
 public enum ExecStatus {

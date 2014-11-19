@@ -24,7 +24,7 @@ import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
- * User: Amit Levin
+ * User:
  * Date: 19/11/12
  */
 //TODO: Add Javadoc

@@ -24,7 +24,7 @@ import org.apache.log4j.Logger;
 /**
  * Date: 6/10/13
  *
- * @author Dima Rassin
+ * @author
  */
 public class RetryTemplate {
 	private final Logger logger = Logger.getLogger(getClass());

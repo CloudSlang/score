@@ -50,7 +50,7 @@ import java.util.UUID;
 import static org.fest.assertions.Assertions.assertThat;
 
 /**
- * User: maromg
+ * User:
  * Date: 21/05/2014
  */
 @RunWith(SpringJUnit4ClassRunner.class)

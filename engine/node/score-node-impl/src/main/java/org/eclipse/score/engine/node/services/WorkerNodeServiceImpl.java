@@ -36,7 +36,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @author Amit Levin
+ * @author
  * @author Avi Moradi
  * @since 11/11/2012
  * @version $Id$

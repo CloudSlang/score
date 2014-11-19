@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  * Date: 8/1/11
  *
- * @author Dima Rassin
+ * @author
  */
 
 public class ExecutionStep implements Serializable {

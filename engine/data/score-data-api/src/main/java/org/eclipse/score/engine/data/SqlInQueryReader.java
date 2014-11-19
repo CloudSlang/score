@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * User: maromg
+ * User:
  * Date: 18/07/13
  *
  * This class is used for executing queries that contain In clauses.

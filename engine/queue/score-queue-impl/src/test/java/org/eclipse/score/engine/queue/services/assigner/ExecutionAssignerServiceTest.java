@@ -48,7 +48,7 @@ import static org.mockito.Matchers.any;
 
 /**
  * Created by IntelliJ IDEA.
- * User: Amit Levin
+ * User:
  * Date: 26/11/12
  */
 @RunWith(SpringJUnit4ClassRunner.class)

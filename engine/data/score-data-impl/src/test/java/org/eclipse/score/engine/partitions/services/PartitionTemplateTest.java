@@ -38,7 +38,7 @@ import static org.mockito.Mockito.when;
 /**
  * Date: 4/23/12
  *
- * @author Dima Rassin
+ * @author
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration

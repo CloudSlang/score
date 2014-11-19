@@ -21,7 +21,7 @@ package org.eclipse.score.samples.controlactions;
 import org.eclipse.score.lang.ExecutionRuntimeServices;
 
 /**
- * User: maromg
+ * User:
  * Date: 22/06/2014
  * <p/>
  * A simple control action that prints "Hello score" to the system out, and sends an event on it.

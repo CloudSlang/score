@@ -35,7 +35,7 @@ import javax.persistence.UniqueConstraint;
 import java.util.Arrays;
 
 /**
- * User: maromg
+ * User:
  * Date: 12/05/2014
  */
 @Entity

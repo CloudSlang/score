@@ -21,7 +21,7 @@ package org.eclipse.score.events;
 import java.util.Set;
 
 /**
- * User: Amit Levin
+ * User:
  * Date: 09/01/14
  * Time: 12:06
  */

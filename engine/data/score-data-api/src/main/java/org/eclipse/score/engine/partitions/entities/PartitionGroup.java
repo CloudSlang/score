@@ -29,7 +29,7 @@ import javax.persistence.Table;
 /**
  * Date: 4/23/12
  *
- * @author Dima Rassin
+ * @author
  */
 @Entity
 @Table(name = "OO_PARTITION_GROUPS")

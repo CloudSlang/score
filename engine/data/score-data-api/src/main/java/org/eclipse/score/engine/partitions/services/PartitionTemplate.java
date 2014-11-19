@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * Date: 4/27/12
  *
- * @author Dima Rassin
+ * @author
  */
 //TODO: Add Javadoc
 public interface PartitionTemplate {

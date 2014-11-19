@@ -30,7 +30,7 @@ import javax.annotation.Resource;
 
 /**
  * Created by IntelliJ IDEA.
- * User: Amit Levin
+ * User:
  * Date: 19/12/12
  */
 public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecutionRunnable> {

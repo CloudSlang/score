@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Date: 4/20/13
  *
- * @author Dima Rassin
+ * @author
  */
 abstract class AbstractCallback implements PartitionCallback {
 	private final Logger logger = Logger.getLogger(getClass());

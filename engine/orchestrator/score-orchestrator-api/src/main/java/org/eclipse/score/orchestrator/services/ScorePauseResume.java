@@ -22,7 +22,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 /**
- * User: maromg
+ * User:
  * Date: 29/05/2014
  */
 interface ScorePauseResume {

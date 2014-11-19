@@ -19,7 +19,7 @@
 package org.eclipse.score.events;
 
 /**
- * User: maromg
+ * User:
  * Date: 20/07/2014
  */
 public class EventConstants {

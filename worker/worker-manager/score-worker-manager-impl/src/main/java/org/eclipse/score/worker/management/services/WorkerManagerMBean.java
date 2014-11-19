@@ -23,7 +23,7 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
 /**
- * User: Dima Rassin
+ * User:
  * Date: 1/14/13
  */
 @ManagedResource(description = "Worker Manager Management API")

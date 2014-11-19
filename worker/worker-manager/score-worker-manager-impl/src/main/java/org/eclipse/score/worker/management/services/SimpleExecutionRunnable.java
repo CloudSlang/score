@@ -36,7 +36,7 @@ import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
- * User: Amit Levin
+ * User:
  * Date: 19/12/12
  */
 public class SimpleExecutionRunnable implements Runnable {

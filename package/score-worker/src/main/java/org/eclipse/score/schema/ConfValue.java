@@ -25,7 +25,7 @@ import org.w3c.dom.Element;
 /**
 * Date: 2/4/14
 *
-* @author Dima Rassin
+* @author
 */
 class ConfValue {
 	private String name;

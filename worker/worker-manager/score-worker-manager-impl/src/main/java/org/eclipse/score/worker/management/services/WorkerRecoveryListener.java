@@ -21,7 +21,7 @@ package org.eclipse.score.worker.management.services;
 /**
  * Date: 6/11/13
  *
- * @author Dima Rassin
+ * @author
  */
 //TODO: Natasha/Evgeny Add Javadoc
 //TODO: Natasha/Evgeny move module to the api module

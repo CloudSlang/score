@@ -28,7 +28,7 @@ import java.util.Map;
 /**
  * Date: 1/20/14
  *
- * @author Dima Rassin
+ * @author
  */
 @SuppressWarnings("unused")
 public class ScoreNamespaceHandler extends NamespaceHandlerSupport {

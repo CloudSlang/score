@@ -21,7 +21,7 @@ package org.eclipse.score.events;
 import java.io.Serializable;
 
 /**
- * User: maromg
+ * User:
  * Date: 10/06/2014
  */
 public class ScoreEvent implements Serializable {

@@ -34,7 +34,7 @@ import java.util.List;
 
 
 /**
- * User: Amit Levin
+ * User:
  * Date: 10/09/12
  * Time: 11:01
  */
