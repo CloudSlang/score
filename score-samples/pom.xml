@@ -21,7 +21,7 @@
     <parent>
         <artifactId>score-parent</artifactId>
         <groupId>org.eclipse.score</groupId>
-        <version>0.1.232-SNAPSHOT</version>
+        <version>0.1.232</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
