@@ -9,7 +9,7 @@
 
     <import resource="helloScoreContext.xml" />
 
-    <bean class="com.hp.score.samples.CommandLineApplication" />
+    <bean class="org.eclipse.score.samples.CommandLineApplication" />
 
     <bean id="scoreCacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
         <property name="cacheManager">

@@ -3,9 +3,9 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:cache="http://www.springframework.org/schema/cache"
        xmlns:p="http://www.springframework.org/schema/p"
-       xmlns:score="http://www.hp.com/schema/score" xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:score="http://www.eclipse.org/schema/score" xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-        http://www.hp.com/schema/score http://www.hp.com/schema/score/score.xsd
+        http://www.eclipse.org/schema/score http://www.eclipse.org/schema/score/score.xsd
         http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
     <cache:annotation-driven cache-manager="scoreCacheManager"/>
@@ -16,7 +16,7 @@
 
     <score:worker uuid="-1"/>
 
-    <bean class="com.hp.score.web.services.ScoreServices" />
+    <bean class="org.eclipse.score.web.services.ScoreServices" />
 
     <bean id="scoreCacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
         <property name="cacheManager">

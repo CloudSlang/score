@@ -15,7 +15,7 @@ http://www.springframework.org/schema/tx http://www.springframework.org/schema/t
           p:jpaProperties-ref="test-hibernateProperties"
           p:dataSource-ref="dataSource"
           p:persistenceProviderClass="org.hibernate.ejb.HibernatePersistence"
-          p:packagesToScan="com.hp.score.engine.node"
+          p:packagesToScan="org.eclipse.score.engine.node"
           depends-on="liquibase,scoreHiloFactoryBean">
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"
@@ -25,13 +25,13 @@ http://www.springframework.org/schema/tx http://www.springframework.org/schema/t
         </property>
     </bean>
 
-    <bean id="scoreHiloFactoryBean" class="com.hp.score.engine.data.HiloFactoryBean" depends-on="liquibase"/>
+    <bean id="scoreHiloFactoryBean" class="org.eclipse.score.engine.data.HiloFactoryBean" depends-on="liquibase"/>
 
     <util:properties id="test-hibernateProperties">
         <prop key="hibernate.show_sql">false</prop>
         <prop key="hibernate.format_sql">true</prop>
         <prop key="hibernate.hbm2ddl.auto">validate</prop>
-        <prop key="hibernate.dialect_resolvers">com.hp.score.engine.dialects.ScoreDialectResolver</prop>
+        <prop key="hibernate.dialect_resolvers">org.eclipse.score.engine.dialects.ScoreDialectResolver</prop>
         <prop key="hibernate.cache.use_second_level_cache">false</prop>
     </util:properties>
 

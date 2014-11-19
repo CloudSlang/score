@@ -18,7 +18,7 @@
           p:jpaProperties-ref="hibernateProperties"
           p:dataSource-ref="dataSource"
           p:persistenceProviderClass="org.hibernate.ejb.HibernatePersistence"
-          p:packagesToScan="com.hp.score"
+          p:packagesToScan="org.eclipse.score"
           depends-on="liquibase,scoreHiloFactoryBean">
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"
@@ -32,7 +32,7 @@
         <prop key="hibernate.show_sql">false</prop>
         <prop key="hibernate.format_sql">true</prop>
         <prop key="hibernate.hbm2ddl.auto">validate</prop>
-        <prop key="hibernate.dialect_resolvers">com.hp.score.engine.dialects.ScoreDialectResolver</prop>
+        <prop key="hibernate.dialect_resolvers">org.eclipse.score.engine.dialects.ScoreDialectResolver</prop>
         <prop key="hibernate.cache.use_second_level_cache">false</prop>
     </util:properties>
 

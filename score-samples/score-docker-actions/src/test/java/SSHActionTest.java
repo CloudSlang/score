@@ -1,4 +1,4 @@
-import com.hp.score.samples.docker.actions.SSHAction;
+import org.eclipse.score.samples.docker.actions.SSHAction;
 import com.jcraft.jsch.Session;
 import org.junit.Test;
 import org.junit.runner.RunWith;

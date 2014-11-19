@@ -19,7 +19,7 @@
         under the License.
     -->
 	<parent>
-		<groupId>com.hp.score</groupId>
+		<groupId>org.eclipse.score</groupId>
 		<artifactId>score-parent</artifactId>
 		<version>0.1.230-SNAPSHOT</version>
 	</parent>
@@ -39,13 +39,13 @@
 			</dependency>
 
 			<dependency>
-				<groupId>com.hp.score</groupId>
+				<groupId>org.eclipse.score</groupId>
 				<artifactId>score-worker-execution-api</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>com.hp.score</groupId>
+				<groupId>org.eclipse.score</groupId>
 				<artifactId>score-worker-manager-api</artifactId>
 				<version>${project.version}</version>
 			</dependency>

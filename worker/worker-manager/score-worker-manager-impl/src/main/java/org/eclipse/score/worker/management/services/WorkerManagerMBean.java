@@ -1,0 +1,62 @@
+/*
+ * Licensed to Hewlett-Packard Development Company, L.P. under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+*/
+package org.eclipse.score.worker.management.services;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jmx.export.annotation.ManagedAttribute;
+import org.springframework.jmx.export.annotation.ManagedResource;
+
+/**
+ * User: Dima Rassin
+ * Date: 1/14/13
+ */
+@ManagedResource(description = "Worker Manager Management API")
+public class WorkerManagerMBean {
+
+	@Autowired
+	private WorkerManager workerManager;
+
+	@Autowired
+	private OutboundBuffer outBuffer;
+
+	@ManagedAttribute(description = "Current In-Buffer Size")
+	public int getInBufferSize(){
+		return workerManager.getInBufferSize();
+	}
+
+	@ManagedAttribute(description = "Current Out-Buffer Size")
+	public int getOutBufferSize(){
+		return outBuffer.getSize();
+	}
+
+    @ManagedAttribute(description = "Out-Buffer Capacity")
+    public int getOutBufferCapacity(){
+        return outBuffer.getCapacity();
+    }
+
+	@ManagedAttribute(description = "Worker UUID")
+	public String getWorkerUuid(){
+		return workerManager.getWorkerUuid();
+	}
+
+	@ManagedAttribute(description = "Running Tasks Count")
+	public int getRunningTasksCount(){
+		return workerManager.getRunningTasksCount();
+	}
+}

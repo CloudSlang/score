@@ -1,4 +1,4 @@
-package com.hp.score.samples.docker.actions;
+package org.eclipse.score.samples.docker.actions;
 
 import com.hp.oo.sdk.content.annotations.Param;
 import com.jcraft.jsch.*;

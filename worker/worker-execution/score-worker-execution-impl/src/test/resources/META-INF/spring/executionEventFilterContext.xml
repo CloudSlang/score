@@ -8,7 +8,7 @@
     <integration:channel id="event_Channel"/>
     <integration:channel id="rejectedMessages"/>
 
-	<bean id="filterTest" class="com.hp.score.worker.management.services.ExecutionEventLogFilterServiceTest"/>
+	<bean id="filterTest" class="org.eclipse.score.worker.management.services.ExecutionEventLogFilterServiceTest"/>
 
 	<!-- put the response in the success List -->
     <integration:service-activator input-channel="event_ChannelAfterFilter" ref="filterTest" method="updateSuccessFilterList"/>

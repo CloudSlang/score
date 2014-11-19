@@ -1,1 +1,1 @@
-http\://www.hp.com/schema/score=com.hp.score.schema.ScoreNamespaceHandler
+http\://www.eclipse.org/schema/score=org.eclipse.score.schema.ScoreNamespaceHandler

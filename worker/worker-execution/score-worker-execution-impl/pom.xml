@@ -19,7 +19,7 @@
         under the License.
     -->
     <parent>
-        <groupId>com.hp.score</groupId>
+        <groupId>org.eclipse.score</groupId>
         <artifactId>worker-execution</artifactId>
         <version>0.1.230-SNAPSHOT</version>
     </parent>
