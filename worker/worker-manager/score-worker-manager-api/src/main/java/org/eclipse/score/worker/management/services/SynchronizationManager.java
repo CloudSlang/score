@@ -23,9 +23,9 @@ package org.eclipse.score.worker.management.services;
  * User: kravtsov
  * Date: 8/7/14
  * Time: 2:26 PM
+ *
+ * This manager is responsible to synchronize all workers activities: drain/poll/recovery
  */
-//TODO: Natasha/Evgeny Add Javadoc
-//TODO: Natasha/Evgeny move module to the api module
 public interface SynchronizationManager {
 
     void startRecovery();

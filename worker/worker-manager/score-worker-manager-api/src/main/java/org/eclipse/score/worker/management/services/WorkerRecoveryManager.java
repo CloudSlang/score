@@ -21,9 +21,9 @@ package org.eclipse.score.worker.management.services;
 /**
  * Date: 6/13/13
  *
- * @author
+ * Manages the worker internal recovery.
+ * Holds the current WRV (worker recovery version) as known to worker.
  */
-//TODO: Natasha/Evgeny Add Javadoc
 public interface WorkerRecoveryManager {
 	void doRecovery();
 	boolean isInRecovery();

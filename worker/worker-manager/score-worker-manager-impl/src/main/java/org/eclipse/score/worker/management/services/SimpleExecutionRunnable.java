@@ -213,7 +213,7 @@ public class SimpleExecutionRunnable implements Runnable {
             ExecutionMessage inProgressMessage = createInProgressExecutionMessage(nextStepExecution);
             ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage, inProgressMessage}; //for the outBuffer
 
-            ExecutionMessage inProgressMessageForInBuffer = (ExecutionMessage) inProgressMessage.clone(); //todo - think about removing the shortcut and stay in the thread!
+            ExecutionMessage inProgressMessageForInBuffer = (ExecutionMessage) inProgressMessage.clone();
             inProgressMessageForInBuffer.setPayload(null); //we do not need the payload for the inBuffer shortcut
 
             try {
@@ -262,8 +262,9 @@ public class SimpleExecutionRunnable implements Runnable {
             //clean key
             nextStepExecution.getSystemContext().remove(TempConstants.SHOULD_CHECK_GROUP);
 
-            boolean canRunInThisWorker = groupName== null || workerConfigurationService.isMemberOf(groupName) ||
-                    (workerUUID != null && groupName.endsWith(workerUUID)); //todo - do method for sticky
+            boolean canRunInThisWorker = groupName== null || //does not really matter on what worker to run
+                                         workerConfigurationService.isMemberOf(groupName) || //this worker is member of the group
+                                         isStickyToThisWorker(groupName); //next step should run in this worker because of "sticky worker" feature
 
             if(!canRunInThisWorker){
                 //set current step to finished
@@ -285,6 +286,10 @@ public class SimpleExecutionRunnable implements Runnable {
         return false;
     }
 
+    private boolean isStickyToThisWorker(String groupName){
+        return (workerUUID != null && groupName.endsWith(workerUUID));
+    }
+
     private boolean isInterrupted() {
         return Thread.currentThread().isInterrupted();
     }
@@ -300,7 +305,7 @@ public class SimpleExecutionRunnable implements Runnable {
             executionMessage.incMsgSeqId();
             executionMessage.setPayload(null);
 
-            ExecutionMessage inProgressMessage = createInProgressExecutionMessage(nextStepExecution); //todo - maybe create without object and only for the InBuffer set the object
+            ExecutionMessage inProgressMessage = createInProgressExecutionMessage(nextStepExecution);
             ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage, inProgressMessage}; //for the outBuffer
 
             ExecutionMessage inProgressMessageForInBuffer = (ExecutionMessage) inProgressMessage.clone();

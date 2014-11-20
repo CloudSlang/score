@@ -23,7 +23,10 @@ package org.eclipse.score.engine.queue.services.recovery;
  * User:
  * Date: 20/11/12
  */
-//TODO: Natasha/Evgeny Add Javadoc
+
+/**
+ * Recovery service that is responsible to do recovery to execution messages of non responsive workers.
+ */
 public interface ExecutionRecoveryService {
 	public void doRecovery();
 }

@@ -28,7 +28,10 @@ import java.util.List;
  * Date: 22/07/14
  * Time: 13:20
  */
-//TODO: Natasha/Evgeny Add Javadoc
+
+/**
+ * Recovers queue messages.
+ */
 public interface MessageRecoveryService {
 
     boolean recoverMessagesBulk(String workerName, int defaultPoolSize);

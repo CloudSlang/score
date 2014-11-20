@@ -72,7 +72,7 @@ public final class OrchestratorDispatcherServiceImpl implements OrchestratorDisp
         }
         //This is done in order to make sure that we are not getting messages from worker that was already recovered and does not know about it yet
         else if(!currentWRV.equals(wrv)){
-            logger.warn("Orchestrator got messages from worker with wrong WRV:" + wrv + " Current WRV is: " + currentWRV +  ". Discarding...");
+            logger.warn("Orchestrator got messages from worker: " + workerUuid + " with wrong WRV:" + wrv + " Current WRV is: " + currentWRV +  ". Discarding...");
         }
         else {
             dispatch(messages);
