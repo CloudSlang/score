@@ -22,7 +22,7 @@
 	<parent>
 		<groupId>org.eclipse.score</groupId>
 		<artifactId>engine</artifactId>
-		<version>0.1.235</version>
+		<version>0.1.236-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>data</artifactId>
