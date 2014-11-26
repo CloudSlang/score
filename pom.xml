@@ -20,7 +20,7 @@
     -->
     <groupId>org.eclipse.score</groupId>
     <artifactId>score-parent</artifactId>
-    <version>0.1.234-SNAPSHOT</version>
+    <version>0.1.234</version>
     <packaging>pom</packaging>
     <name>org.eclipse.score:score-parent</name>
     <description>A Java based orchestration engine</description>
