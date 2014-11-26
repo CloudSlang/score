@@ -22,7 +22,7 @@
 
 	<groupId>org.eclipse.score</groupId>
 	<artifactId>score-tests</artifactId>
-	<version>0.1.233-SNAPSHOT</version>
+	<version>0.1.233</version>
 
 
 	<distributionManagement>

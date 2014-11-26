@@ -21,7 +21,7 @@
 	<parent>
 		<groupId>org.eclipse.score</groupId>
 		<artifactId>worker-manager</artifactId>
-		<version>0.1.233-SNAPSHOT</version>
+		<version>0.1.233</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
