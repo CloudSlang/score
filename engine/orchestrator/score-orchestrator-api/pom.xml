@@ -23,7 +23,7 @@
 	<parent>
 		<groupId>org.eclipse.score</groupId>
 		<artifactId>orchestrator</artifactId>
-		<version>0.1.234</version>
+		<version>0.1.235-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>score-orchestrator-api</artifactId>
