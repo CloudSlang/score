@@ -22,7 +22,7 @@
 	<parent>
 		<groupId>org.eclipse.score</groupId>
 		<artifactId>queue</artifactId>
-		<version>0.1.235-SNAPSHOT</version>
+		<version>0.1.235</version>
 	</parent>
 
 	<artifactId>score-queue-api</artifactId>
