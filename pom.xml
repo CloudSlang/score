@@ -24,6 +24,10 @@
         <name>The Apache License, Version 2.0</name>
         <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
       </license>
+      <license>
+        <name>The Eclipse Public License - v 1.0</name>
+        <url>http://www.eclipse.org/legal/epl-v10.html</url>
+      </license>
     </licenses>
 
     <scm>
