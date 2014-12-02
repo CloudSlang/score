@@ -16,7 +16,7 @@
 
 	<groupId>org.eclipse.score</groupId>
 	<artifactId>score-tests</artifactId>
-	<version>0.1.237-SNAPSHOT</version>
+	<version>0.1.239-SNAPSHOT</version>
 
 
 	<distributionManagement>
@@ -37,7 +37,7 @@
         <dependency>
             <groupId>com.hp.score.sdk</groupId>
             <artifactId>score-content-sdk</artifactId>
-            <version>1.4</version>
+            <version>1.5</version>
         </dependency>
 
 		<dependency>
@@ -62,7 +62,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
-			<version>4.0.0.RELEASE</version>
+			<version>4.0.8.RELEASE</version>
 		</dependency>
 
 		<dependency>

@@ -13,13 +13,14 @@
  *******************************************************************************/
 package org.eclipse.score.orchestrator.services;
 
+import org.apache.log4j.Logger;
 import org.eclipse.score.engine.queue.entities.ExecStatus;
 import org.eclipse.score.engine.queue.entities.ExecutionMessageConverter;
 import org.eclipse.score.engine.queue.services.QueueDispatcherService;
 import org.eclipse.score.facade.entities.Execution;
+import org.eclipse.score.facade.execution.ExecutionActionResult;
 import org.eclipse.score.facade.execution.ExecutionStatus;
 import org.eclipse.score.orchestrator.entities.ExecutionState;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,7 +53,7 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
 
     @Override
     @Transactional
-    public boolean requestCancelExecution(Long executionId) {
+    public ExecutionActionResult requestCancelExecution(Long executionId) {
         if (logger.isDebugEnabled()) {
             logger.debug("Cancelling Execution Id: " + executionId);
         }
@@ -65,13 +66,13 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
         if (executionStateToCancel == null) {
             String errMsg = "Failed to cancel execution. Execution id: " + executionId + ".";
             logger.error(errMsg);
-            return false;
+            return ExecutionActionResult.FAILED_NOT_FOUND;
         }
 
         ExecutionStatus status = executionStateToCancel.getStatus();
 
         if (status.equals(ExecutionStatus.CANCELED) || status.equals(ExecutionStatus.PENDING_CANCEL)) {
-            return true;
+            return ExecutionActionResult.SUCCESS;
         }
 
         // it's possible to cancel only running or paused executions.
@@ -80,16 +81,14 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
         if (status.equals(ExecutionStatus.RUNNING)) {
             executionStateToCancel.setStatus(ExecutionStatus.PENDING_CANCEL);
         } else if (status.equals(ExecutionStatus.PAUSED)) {
-
             cancelPausedRun(executionStateToCancel);
-
         } else {
             String errMsg = "Failed to cancel execution. Execution id: " + executionId + ". Execution is in status: " + executionStateToCancel.getStatus().name();
             logger.error(errMsg);
-            return false;
+            return ExecutionActionResult.getExecutionActionResult(status);
         }
 
-        return true;
+        return ExecutionActionResult.SUCCESS;
     }
 
     // Cancel paused run according to its branches state

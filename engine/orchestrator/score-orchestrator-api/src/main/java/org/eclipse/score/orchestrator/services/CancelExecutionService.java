@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.score.orchestrator.services;
 
+import org.eclipse.score.facade.execution.ExecutionActionResult;
+
 import java.util.List;
 
 /**
@@ -28,7 +30,7 @@ public interface CancelExecutionService {
      * @param executionId - the execution to cancel
      *
      */
-    boolean requestCancelExecution(Long executionId);
+    ExecutionActionResult requestCancelExecution(Long executionId);
 
     /**
      * Returns list of executions that are were cancelled (the status is either CANCELED or PENDING_CANCEL)

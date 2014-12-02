@@ -15,14 +15,14 @@
     <parent>
         <artifactId>score-samples</artifactId>
         <groupId>org.eclipse.score</groupId>
-        <version>0.1.237-SNAPSHOT</version>
+        <version>0.1.239-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>score-webapp</artifactId>
 
     <properties>
-        <spring.version>4.0.7.RELEASE</spring.version>
+        <spring.version>4.0.8.RELEASE</spring.version>
     </properties>
 
     <dependencyManagement>
@@ -31,7 +31,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>1.1.7.RELEASE</version>
+                <version>1.1.9.RELEASE</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

@@ -15,7 +15,7 @@
     <parent>
         <artifactId>score-samples</artifactId>
         <groupId>org.eclipse.score</groupId>
-        <version>0.1.237-SNAPSHOT</version>
+        <version>0.1.239-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
