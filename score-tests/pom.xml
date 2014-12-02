@@ -37,7 +37,7 @@
         <dependency>
             <groupId>com.hp.score.sdk</groupId>
             <artifactId>score-content-sdk</artifactId>
-            <version>1.4</version>
+            <version>1.5</version>
         </dependency>
 
 		<dependency>
