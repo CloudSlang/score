@@ -15,7 +15,7 @@
     <parent>
         <artifactId>score-samples</artifactId>
         <groupId>org.eclipse.score</groupId>
-        <version>0.1.238-SNAPSHOT</version>
+        <version>0.1.238</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
