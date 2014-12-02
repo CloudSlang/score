@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.score.orchestrator.services;
 
+import org.eclipse.score.facade.execution.ExecutionActionException;
+import org.eclipse.score.facade.execution.ExecutionActionResult;
 import org.eclipse.score.facade.execution.ExecutionStatus;
 import org.eclipse.score.facade.entities.Execution;
 import org.eclipse.score.orchestrator.entities.ExecutionState;
@@ -123,7 +125,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
     private ExecutionState findByExecutionIdAndBranchId(Long executionId, String branchId) {
         ExecutionState executionState = executionStateRepository.findByExecutionIdAndBranchId(executionId, branchId);
         if (executionState == null) {
-            throw new RuntimeException("Could not find execution state. executionId:  " + executionId + ", branchId: " + branchId);
+            throw new ExecutionActionException("Could not find execution state. executionId:  " + executionId + ", branchId: " + branchId, ExecutionActionResult.FAILED_NOT_FOUND);
         }
         return executionState;
     }

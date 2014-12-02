@@ -16,6 +16,7 @@ package org.eclipse.score.orchestrator.services;
 import org.eclipse.score.engine.queue.entities.ExecutionMessageConverter;
 import org.eclipse.score.engine.queue.services.QueueDispatcherService;
 import org.eclipse.score.facade.entities.Execution;
+import org.eclipse.score.facade.execution.ExecutionActionResult;
 import org.eclipse.score.facade.execution.ExecutionStatus;
 import org.eclipse.score.orchestrator.entities.ExecutionState;
 import org.junit.Before;
@@ -70,7 +71,7 @@ public class CancelExecutionServiceTest {
     public void testValidRequestCancel() {
 
         // Running
-        checkValidRequestCancel(ExecutionStatus.RUNNING, ExecutionStatus.PENDING_CANCEL);
+        checkValidRequestCancel(ExecutionStatus.RUNNING, ExecutionStatus.PENDING_CANCEL, ExecutionActionResult.SUCCESS);
 
 
         Map<String, String> contexts = new HashMap<>();
@@ -78,22 +79,22 @@ public class CancelExecutionServiceTest {
         // Paused
         Execution pausedExecutionObj = new Execution(1L, 1L, contexts);
         when(executionSerializationUtil.objFromBytes(any(byte[].class))).thenReturn(pausedExecutionObj);
-        checkValidRequestCancel(ExecutionStatus.PAUSED, ExecutionStatus.PENDING_CANCEL);
+        checkValidRequestCancel(ExecutionStatus.PAUSED, ExecutionStatus.PENDING_CANCEL, ExecutionActionResult.SUCCESS);
         assertThat(pausedExecutionObj.getPosition()).isNull();
         assertThat(pausedExecutionObj.getSystemContext().getFlowTerminationType()).isEqualTo(ExecutionStatus.CANCELED);
 
         // Cancel
-        checkValidRequestCancel(ExecutionStatus.CANCELED, ExecutionStatus.CANCELED);
+        checkValidRequestCancel(ExecutionStatus.CANCELED, ExecutionStatus.CANCELED, ExecutionActionResult.SUCCESS);
     }
 
-    private void checkValidRequestCancel(ExecutionStatus origStatus, ExecutionStatus expStatusAfterCancellation) {
+    private void checkValidRequestCancel(ExecutionStatus origStatus, ExecutionStatus expStatusAfterCancellation, ExecutionActionResult expectedResult) {
         Long executionId = 111L;
         ExecutionState ex1 = createRun(executionId, origStatus);
         when(executionStateService.readByExecutionIdAndBranchId(executionId, EMPTY_BRANCH)).thenReturn(ex1);
-        boolean result = service.requestCancelExecution(executionId);
+        ExecutionActionResult result = service.requestCancelExecution(executionId);
 
         // Validation - Status should be updated by the service
-        assertThat(result).isTrue();
+        assertThat(result).isEqualTo(expectedResult);
         assertThat(ex1.getStatus()).as("Wrong status after cancelling the execution").isEqualTo(expStatusAfterCancellation);
     }
 
@@ -127,10 +128,10 @@ public class CancelExecutionServiceTest {
         when(executionSerializationUtil.objFromBytes(any(byte[].class))).thenReturn(pausedExecutionObj);
         when(executionStateService.readByExecutionId(executionId)).thenReturn(Arrays.asList(parent, branch1));
 
-        boolean result = service.requestCancelExecution(executionId);
+        ExecutionActionResult result = service.requestCancelExecution(executionId);
 
         // Validation - Parent status should be Pending-cancel
-        assertThat(result).isTrue();
+        assertThat(result).isEqualTo(ExecutionActionResult.SUCCESS);
         assertThat(parent.getStatus()).as("Wrong status after cancelling the execution").isEqualTo(ExecutionStatus.PENDING_CANCEL);
 
         // Branch should be canceled
@@ -141,23 +142,20 @@ public class CancelExecutionServiceTest {
 
     @Test
     public void testInvalidRequestCancel() {
-
-        ExecutionStatus[] invalidStatusesForCancel = {ExecutionStatus.COMPLETED, ExecutionStatus.PENDING_PAUSE, ExecutionStatus.SYSTEM_FAILURE};
-
-        for (ExecutionStatus status : invalidStatusesForCancel) {
-            checkInvalidRequestCancel(status);
-        }
+        checkInvalidRequestCancel(ExecutionStatus.COMPLETED, ExecutionActionResult.FAILED_ALREADY_COMPLETED);
+        checkInvalidRequestCancel(ExecutionStatus.PENDING_PAUSE, ExecutionActionResult.FAILED_PENDING_PAUSE);
+        checkInvalidRequestCancel(ExecutionStatus.SYSTEM_FAILURE, ExecutionActionResult.FAILED_SYSTEM_FAILURE);
     }
 
-    private void checkInvalidRequestCancel(ExecutionStatus executionStatus) {
+    private void checkInvalidRequestCancel(ExecutionStatus executionStatus, ExecutionActionResult expectedResponse) {
         Long executionId = 111L;
         ExecutionState ex1 = createRun(executionId, executionStatus);
 
         when(executionStateService.readByExecutionIdAndBranchId(executionId, EMPTY_BRANCH)).thenReturn(ex1);
-        boolean result = service.requestCancelExecution(executionId);
+        ExecutionActionResult result = service.requestCancelExecution(executionId);
 
         // Validation - Status should be updated by the service
-        assertThat(result).isFalse();
+        assertThat(result).isEqualTo(expectedResponse);
         assertThat(ex1.getStatus()).as("Execution status shouldn't change").isEqualTo(executionStatus);
     }
 
@@ -165,9 +163,9 @@ public class CancelExecutionServiceTest {
     public void testNotExistExecution() {
         Long executionId = 123L;
         when(executionStateService.readByExecutionIdAndBranchId(executionId, EMPTY_BRANCH)).thenReturn(null);
-        boolean result = service.requestCancelExecution(executionId);
+        ExecutionActionResult result = service.requestCancelExecution(executionId);
 
-        assertThat(result).isFalse();
+        assertThat(result).isEqualTo(ExecutionActionResult.FAILED_NOT_FOUND);
     }
 
     /////////////// isCancelledExecution ///////////////
