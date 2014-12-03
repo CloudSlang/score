@@ -48,7 +48,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <spring.version>4.0.0.RELEASE</spring.version>
-        <hibernate.version>4.2.16.Final</hibernate.version>
+        <hibernate.version>4.1.4.Final</hibernate.version>
         <querydsl.version>3.2.4</querydsl.version>
         
         <gpg.skip>true</gpg.skip>
