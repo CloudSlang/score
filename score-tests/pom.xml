@@ -16,7 +16,7 @@
 
 	<groupId>org.eclipse.score</groupId>
 	<artifactId>score-tests</artifactId>
-	<version>0.1.240</version>
+	<version>0.1.241-SNAPSHOT</version>
 
 
 	<distributionManagement>
