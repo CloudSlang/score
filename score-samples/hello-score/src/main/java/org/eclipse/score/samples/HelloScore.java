@@ -47,7 +47,6 @@ public class HelloScore {
 
     private final static Logger logger = Logger.getLogger(HelloScore.class);
     private ApplicationContext context;
-    private Long executionID;
     private final Object lock = new Object();
 
     public static void main(String[] args) {
@@ -66,7 +65,7 @@ public class HelloScore {
 
     private void start() {
         ExecutionPlan executionPlan = createExecutionPlan();
-        executionID = score.trigger(TriggeringProperties.create(executionPlan));
+        score.trigger(TriggeringProperties.create(executionPlan));
         waitForExecutionToFinish();
         closeContext();
     }
@@ -106,7 +105,7 @@ public class HelloScore {
     }
 
     private void registerEventListener() {
-        Set<String> handlerTypes = new HashSet();
+        Set<String> handlerTypes = new HashSet<>();
         handlerTypes.add(EventConstants.SCORE_FINISHED_EVENT);
         handlerTypes.add(EventConstants.SCORE_FAILURE_EVENT);
         eventBus.subscribe(new ScoreEventListener() {
