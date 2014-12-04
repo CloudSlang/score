@@ -85,12 +85,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>cglib</groupId>
-			<artifactId>cglib</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
 		</dependency>
@@ -122,10 +116,5 @@
 			<artifactId>mockito-all</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>rome</groupId>
-			<artifactId>rome</artifactId>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 </project>

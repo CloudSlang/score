@@ -155,12 +155,6 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.hp.score.sdk</groupId>
-                <artifactId>score-content-sdk</artifactId>
-                <version>1.5</version>
-            </dependency>
-
-            <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
                 <version>1.2.17</version>
@@ -192,12 +186,6 @@
             </dependency>
 
             <dependency>
-                <groupId>commons-pool</groupId>
-                <artifactId>commons-pool</artifactId>
-                <version>1.6</version>
-            </dependency>
-
-            <dependency>
                 <groupId>commons-dbcp</groupId>
                 <artifactId>commons-dbcp</artifactId>
                 <version>1.4</version>
@@ -213,28 +201,6 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>15.0</version>
-            </dependency>
-
-            <dependency>
-                <groupId>cglib</groupId>
-                <artifactId>cglib</artifactId>
-                <version>2.2.2</version>
-            </dependency>
-
-            <dependency>
-                <groupId>net.sf.dozer</groupId>
-                <artifactId>dozer</artifactId>
-                <version>5.3.2</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <!-- spring artifacts -->
@@ -360,17 +326,11 @@
                 <artifactId>jackson-annotations</artifactId>
                 <version>2.2.2</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>2.2.2</version>
-            </dependency>
-
-            <dependency>
-                <groupId>rome</groupId>
-                <artifactId>rome</artifactId>
-                <version>1.0</version>
             </dependency>
 
             <dependency>

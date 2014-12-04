@@ -51,6 +51,11 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>score-facade</artifactId>
 		</dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
 		<!-- test artifacts -->
 
 		<dependency>
@@ -91,12 +96,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>cglib</groupId>
-			<artifactId>cglib</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
 		</dependency>
@@ -120,12 +119,6 @@
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>rome</groupId>
-			<artifactId>rome</artifactId>
-			<scope>test</scope>
 		</dependency>
 
 		<dependency>

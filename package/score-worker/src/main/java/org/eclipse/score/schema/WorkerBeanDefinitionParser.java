@@ -82,7 +82,6 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		registerBeans(parserContext);
 		registerSpecialBeans(element, parserContext);
 		registerConfiguration(DomUtils.getChildElementByTagName(element, "configuration"), parserContext);
-		registerSpringIntegration(parserContext);
 		registerScheduler(DomUtils.getChildElementByTagName(element, "scheduler"), parserContext);
 		return createRootBeanDefinition();
 	}
@@ -114,11 +113,6 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		if(!"false".equalsIgnoreCase(element.getAttribute("register"))) {
 			new BeanRegistrator(parserContext).CLASS(WorkerRegistration.class).register();
 		}
-	}
-
-	private void registerSpringIntegration(ParserContext parserContext) {
-		new XmlBeanDefinitionReader(parserContext.getRegistry())
-				.loadBeanDefinitions("META-INF/spring/score/context/scoreIntegrationContext.xml");
 	}
 
 	private void registerConfiguration(Element configurationElement, ParserContext parserContext) {

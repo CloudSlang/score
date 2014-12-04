@@ -13,8 +13,6 @@
  *******************************************************************************/
 package org.eclipse.score.samples.controlactions;
 
-import com.hp.oo.sdk.content.plugin.GlobalSessionObject;
-import com.hp.oo.sdk.content.plugin.SessionResource;
 import org.eclipse.score.lang.ExecutionRuntimeServices;
 
 import java.util.Map;
@@ -34,20 +32,17 @@ public class SessionDataActions {
 
     public void putObject(ExecutionRuntimeServices executionRuntimeServices, Map<String, Object> nonSerializableExecutionData){
 
-        Object sessionObject = nonSerializableExecutionData.get(TEST_KEY);
-        String value = sessionObject == null ? null : (String)((GlobalSessionObject)sessionObject).get();
+        String sessionObject = (String) nonSerializableExecutionData.get(TEST_KEY);
+        String value = sessionObject == null ? null : sessionObject;
         executionRuntimeServices.addEvent(SESSION_BEFORE_PUT_DATA_EVENT, value);
         if (sessionObject == null) {
-            sessionObject = new GlobalSessionObject<String>();
-            ((GlobalSessionObject)sessionObject).setResource(new SampleSessionResource(TEST_VALUE));
-            nonSerializableExecutionData.put(TEST_KEY, sessionObject);
+            nonSerializableExecutionData.put(TEST_KEY, TEST_VALUE);
         }
     }
 
     public void getObject(ExecutionRuntimeServices executionRuntimeServices, Map<String, Object> nonSerializableExecutionData){
-
-        Object sessionObject = nonSerializableExecutionData.get(TEST_KEY);
-        String value = sessionObject == null ? null : (String)((GlobalSessionObject)sessionObject).get();
+        String sessionObject = (String) nonSerializableExecutionData.get(TEST_KEY);
+        String value = sessionObject == null ? null : sessionObject;
         executionRuntimeServices.addEvent(SESSION_GET_DATA_EVENT, value);
     }
 
@@ -59,24 +54,5 @@ public class SessionDataActions {
             e.printStackTrace();
         }
     }
-
-    private static class SampleSessionResource extends SessionResource<String> {
-        private String value;
-
-        public SampleSessionResource(String value) {
-            this.value = value;
-        }
-
-        @Override
-        public String get() {
-            return value;
-        }
-
-        @Override
-        public void release() {
-            value = null;
-        }
-    }
-
 }
 
