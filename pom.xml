@@ -48,7 +48,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <spring.version>4.0.8.RELEASE</spring.version>
-        <hibernate.version>4.1.4.Final</hibernate.version>
+        <hibernate.version>4.2.16.Final</hibernate.version>
         <querydsl.version>3.2.4</querydsl.version>
         
         <gpg.skip>true</gpg.skip>
@@ -262,7 +262,7 @@
             <dependency>
                 <groupId>org.springframework.data</groupId>
                 <artifactId>spring-data-jpa</artifactId>
-                <version>1.4.2.RELEASE</version>
+                <version>1.7.1.RELEASE</version>
                 <exclusions>
                     <exclusion>
                         <groupId>junit</groupId>

@@ -16,7 +16,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
           p:jpaProperties-ref="hibernateProperties"
           p:dataSource-ref="dataSource"
           p:persistenceProviderClass="org.hibernate.ejb.HibernatePersistence"
-          p:packagesToScan="org.eclipse.score.orchestrator"
+          p:packagesToScan="org.eclipse.score"
           depends-on="hiloFactoryBean">
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"
