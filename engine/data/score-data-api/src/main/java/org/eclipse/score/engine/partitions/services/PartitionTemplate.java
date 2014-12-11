@@ -19,11 +19,40 @@ import java.util.List;
  * Date: 4/27/12
  *
  * @author
+ *
+ * Trmplate class for handling partiotiond tables
+ *
  */
-//TODO: Add Javadoc
 public interface PartitionTemplate {
+
+    /**
+     *
+     * return the currently active table
+     *
+     * @return a String of the table name
+     */
 	String activeTable();
+
+    /**
+     *
+     * return the previous active table
+     *
+     * @return s String of the previous active table name
+     */
 	String previousTable();
+
+    /**
+     *
+     * returns a List of the reserved tables for the group
+     *
+     * @return a List of the reserved tables for the group
+     */
 	List<String> reversedTables();
+
+    /**
+     * 
+     * rolls to the next partition
+     *
+     */
 	void onRolling();
 }
