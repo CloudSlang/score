@@ -18,9 +18,16 @@ package org.eclipse.score.worker.management.services;
  * User: kravtsov
  * Date: 21/11/12
  * Time: 14:14
+ *
+ * A callback that is called when an execution ends running in the worker
+ *
  */
-//TODO: Add Javadoc
-//TODO: move module to the api module
 public interface EndExecutionCallback {
+
+    /**
+     * The callback to call when ending the execution
+     *
+     * @param executionId the executionId of the execution.
+     */
     void endExecution(Long executionId);
 }
