@@ -21,15 +21,43 @@ import java.util.List;
  * User:
  * Date: 19/09/12
  * Time: 15:08
+ *
+ * A listener interface for score queue events.
+ *
  */
-//TODO: Add Javadoc
 public interface QueueListener {
 
+    /**
+     *
+     * A callback that will be called when messages are inserted to the queue
+     *
+     * @param messages the messages that are inserted to the queue
+     * @param queueSize  the size of the inserted messages
+     */
 	void onEnqueue(List<ExecutionMessage> messages,int queueSize);
 
+    /**
+     *
+     * A callback that will be called when messages are polled from the queue
+     *
+     * @param messages the messages that are polled from the queue
+     * @param queueSize the size of the polled messages
+     */
 	void onPoll(List<ExecutionMessage> messages,int queueSize);
 
+    /**
+     *
+     * A callback that will be called when messages are in status of terminated
+     *
+     * @param messages the terminated messages
+     */
 	void onTerminated(List<ExecutionMessage> messages);
 
+    /**
+     *
+     * A callback that will be called when messages are in status of failed
+     *
+     * @param messages the failed messages
+     */
 	void onFailed(List<ExecutionMessage> messages);
 }
