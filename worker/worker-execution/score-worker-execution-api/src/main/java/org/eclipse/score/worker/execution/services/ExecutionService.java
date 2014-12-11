@@ -21,10 +21,32 @@ import java.util.List;
  * Date: 8/1/11
  *
  * @author
+ *
+ * Responsible for handling the execution
+ *
  */
 //TODO: Add Javadoc
 public interface ExecutionService {
+
+    /**
+     *
+     * Execute the given execution
+     *
+     * @param execution the {@link org.eclipse.score.facade.entities.Execution} to execute
+     * @return the {@link org.eclipse.score.facade.entities.Execution} after executing
+     * @throws InterruptedException
+     */
 	Execution execute(Execution execution) throws InterruptedException;
-    List<Execution> executeSplit(Execution execution) throws InterruptedException; //returns null in case this execution is paused or cancelled and the split was not done
+
+    /**
+     *
+     * Handles execution of split step
+     *
+     * @param execution the split {@link org.eclipse.score.facade.entities.Execution} to execute
+     * @return the List of {@link org.eclipse.score.facade.entities.Execution} that the split returns
+     * returns null in case this execution is paused or cancelled and the split was not done
+     * @throws InterruptedException
+     */
+    List<Execution> executeSplit(Execution execution) throws InterruptedException;
     boolean isSplitStep(Execution execution);
 }
