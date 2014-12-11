@@ -19,11 +19,24 @@ import java.util.Set;
  * Created by IntelliJ IDEA.
  * User:
  * Date: 14/10/13
+ *
+ * A service that is responsible for cleaning the queue tables
  */
-//TODO: Add Javadoc
 public interface QueueCleanerService {
 
+    /**
+     *
+     * get a set of ids of finished executions
+     *
+     * @return Set of ids of finished executions
+     */
     Set<Long> getFinishedExecStateIds();
 
+    /**
+     *
+     * clean queues data for the given ids
+     *
+     * @param ids the ids to clean data for
+     */
     void cleanFinishedSteps(Set<Long> ids);
 }
