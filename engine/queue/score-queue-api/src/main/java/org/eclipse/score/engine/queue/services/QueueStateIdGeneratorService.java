@@ -17,9 +17,17 @@ package org.eclipse.score.engine.queue.services;
  * Created by IntelliJ IDEA.
  * User:
  * Date: 07/08/13
+ *
+ * Service that generates DB unique ids for the queue
+ *
  */
-//TODO: Add Javadoc
 public interface QueueStateIdGeneratorService {
 
+    /**
+     *
+     * generates a unique DB id for the queue consumers
+     *
+     * @return Long of a unique DB id
+     */
     public Long generateStateId();
 }
