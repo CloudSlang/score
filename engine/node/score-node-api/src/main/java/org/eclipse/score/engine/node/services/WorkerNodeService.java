@@ -49,11 +49,24 @@ public interface WorkerNodeService {
 
 	String up(String uuid);
 
-   // find not deleted worker by uuid
+    /**
+     *
+     * find not deleted worker by uuid
+     *
+     * @param uuid the uuid of the worker to find
+     * @return a {@link org.eclipse.score.engine.node.entities.WorkerNode} of the requested worker
+     */
 	WorkerNode readByUUID(String uuid);
 
-    // is not relating to IS_DELETED property
+    /**
+     *
+     * find worker without relating to the IS_DELETED property
+     *
+     * @param uuid the uuid of the worker to find
+     * @return a {@link org.eclipse.score.engine.node.entities.WorkerNode} of the requested worker
+     */
     WorkerNode findByUuid(String uuid);
+
 
 	List<WorkerNode> readAllWorkers();
 
@@ -61,8 +74,20 @@ public interface WorkerNodeService {
 
 	List<WorkerNode> readWorkersByActivation(boolean isActive);
 
+    /**
+     *
+     * activates a worker
+     *
+     * @param uuid the uuid of the worker to activate
+     */
 	void activate(String uuid);
 
+    /**
+     *
+     * deactivate a worker
+     *
+     * @param uuid the uuid of the worker to deactivate
+     */
 	void deactivate(String uuid);
 
 	void updateEnvironmentParams(String uuid, String os, String jvm, String dotNetVersion);
