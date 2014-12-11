@@ -21,7 +21,6 @@ import java.util.List;
  * User:
  * Date: 08/11/2O12
  */
-//TODO: should be replaced with a class
 public interface Worker {
 
 	String getUuid();
