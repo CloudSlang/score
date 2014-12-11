@@ -16,8 +16,17 @@ package org.eclipse.score.engine.partitions.services;
 /**
  * User:
  * Date: 4/17/13
+ *
+ * A callback that is called when rolling a partition
+ *
  */
-//TODO: Add Javadoc
 public interface PartitionCallback {
+
+    /**
+     * the callback to call when rolling the partition
+     *
+     * @param previousTable the table the was used before the rolling
+     * @param activeTable the current table, after the rolling
+     */
 	void doCallback(String previousTable, String activeTable);
 }
