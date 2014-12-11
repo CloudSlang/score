@@ -22,8 +22,19 @@ import java.util.Map;
  * User: kravtsov
  * Date: 09/11/11
  * Time: 11:49
+ *
+ * An adapter that handles executing control actions in reflection
+ *
  */
-//TODO: Add Javadoc
 public interface ReflectionAdapter {
+
+    /**
+     *
+     * Handle execution a control action in reflection
+     *
+     * @param actionMetadata the control action metadata
+     * @param actionData the data to pass to the control action
+     * @return tan Object of the invocation result
+     */
     public Object executeControlAction(ControlActionMetadata actionMetadata, Map<String, ?> actionData);
 }
