@@ -17,11 +17,22 @@ package org.eclipse.score.engine.node.services;
  * Created by IntelliJ IDEA.
  * User:
  * Date: 21/11/12
+ *
+ * a listener that is called when a worker wakes up
  */
-//TODO: Add Javadoc  Eliya
 public interface LoginListener {
 
+    /**
+     * callback that is called before sending keep alive
+     *
+     * @param uuid the uuid of the waking worker
+     */
 	public void preLogin(String uuid);
-	
+
+    /**
+     * callback that is called after sending keep alive
+     *
+     * @param uuid the uuid of the waking worker
+     */
 	public void postLogin(String uuid);
 }
