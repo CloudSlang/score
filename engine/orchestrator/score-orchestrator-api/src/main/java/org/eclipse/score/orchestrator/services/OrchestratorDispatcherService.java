@@ -19,9 +19,19 @@ import java.util.List;
 /**
  * Date: 12/1/13
  *
- * @author
+ * Responsible for handling dispatching of messages from the queue consumer
+ *
  */
-//TODO: Add Javadoc Meir
 public interface OrchestratorDispatcherService {
+
+    /**
+     *
+     * Dispatch messges to the queue from the consumer
+     *
+     * @param messages the messages to dispatch
+     * @param bulkNumber an identifier of the dispatch bulk, needed for recovery
+     * @param wrv the worker recovery version, needed for recovery
+     * @param workerUuid the id of the dispatching worker
+     */
 	void dispatch(List<? extends Serializable> messages, String bulkNumber, String wrv, String workerUuid);
 }
