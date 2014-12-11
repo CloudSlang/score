@@ -21,9 +21,18 @@ import java.util.List;
  * Created by IntelliJ IDEA.
  * User:
  * Date: 19/11/12
+ *
+ * Responsible for assigning messages to workers while considering the workers groups
  */
-//TODO: Add Javadoc
 public interface ExecutionAssignerService {
 
+    /**
+     *
+     * assigns a list of {@link org.eclipse.score.engine.queue.entities.ExecutionMessage} to
+     * workers
+     *
+     * @param messages List of {@link org.eclipse.score.engine.queue.entities.ExecutionMessage} to assign
+     * @return List of assigned {@link org.eclipse.score.engine.queue.entities.ExecutionMessage}
+     */
     List<ExecutionMessage> assignWorkers(List<ExecutionMessage> messages);
 }
