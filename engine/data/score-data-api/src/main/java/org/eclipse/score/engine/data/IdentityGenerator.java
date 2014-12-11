@@ -20,11 +20,24 @@ import java.util.List;
  * User: froelica
  * Date: 4/29/13
  * Time: 10:05 AM
+ *
+ * This service is responsible for generating ids that are unique in the DB level.
+ *
  */
-//TODO: Add Javadoc Eliya
 public interface IdentityGenerator {
 
+    /**
+     * returns the next id available.
+     *
+     * @return a {@link java.lang.Long} of the next available id.
+     */
     Long next();
 
+    /**
+     * return a bulk of a given size of ids
+     *
+     * @param bulkSize the amount of ids ro return
+     * @return a {@link java.util.List<java.lang.Long>} of ids.
+     */
     List<Long> bulk(int bulkSize);
 }
