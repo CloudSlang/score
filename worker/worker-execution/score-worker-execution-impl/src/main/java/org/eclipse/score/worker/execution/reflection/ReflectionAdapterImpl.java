@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
-import org.eclipse.score.lang.ExecutionRuntimeServices;
+import org.openscore.lang.ExecutionRuntimeServices;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -27,9 +27,9 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 
-import org.eclipse.score.api.ControlActionMetadata;
-import org.eclipse.score.api.execution.ExecutionParametersConsts;
-import org.eclipse.score.exceptions.FlowExecutionException;
+import org.openscore.api.ControlActionMetadata;
+import org.openscore.api.execution.ExecutionParametersConsts;
+import org.openscore.exceptions.FlowExecutionException;
 import org.eclipse.score.worker.execution.services.SessionDataHandler;
 
 /**

@@ -12,7 +12,7 @@ package org.openscore.orchestrator.services;
 
 import org.openscore.facade.entities.RunningExecutionPlan;
 import org.openscore.facade.services.RunningExecutionPlanService;
-import org.eclipse.score.api.ExecutionPlan;
+import org.openscore.api.ExecutionPlan;
 import org.openscore.orchestrator.repositories.RunningExecutionPlanRepository;
 import junit.framework.Assert;
 import org.junit.Before;

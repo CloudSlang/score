@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.events;
+package org.openscore.events;
 
 import java.util.Map;
 import java.util.Set;

@@ -10,7 +10,7 @@
 
 package org.openscore.facade.entities;
 
-import org.eclipse.score.lang.SystemContext;
+import org.openscore.lang.SystemContext;
 
 import java.io.Serializable;
 import java.util.HashMap;

@@ -10,7 +10,7 @@
 
 package org.openscore.facade.entities;
 
-import org.eclipse.score.api.ExecutionPlan;
+import org.openscore.api.ExecutionPlan;
 import org.openscore.engine.data.AbstractIdentifiable;
 import org.apache.commons.lang.SerializationUtils;
 import org.hibernate.annotations.Cache;

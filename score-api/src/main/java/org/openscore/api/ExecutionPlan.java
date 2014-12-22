@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.api;
+package org.openscore.api;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;

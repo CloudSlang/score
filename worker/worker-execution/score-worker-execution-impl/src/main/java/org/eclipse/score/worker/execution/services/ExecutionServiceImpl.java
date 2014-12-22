@@ -10,19 +10,19 @@
 
 package org.eclipse.score.worker.execution.services;
 
-import org.eclipse.score.api.ExecutionStep;
-import org.eclipse.score.api.StartBranchDataContainer;
-import org.eclipse.score.api.execution.ExecutionParametersConsts;
-import org.eclipse.score.events.EventBus;
-import org.eclipse.score.events.EventConstants;
-import org.eclipse.score.events.ScoreEvent;
+import org.openscore.api.ExecutionStep;
+import org.openscore.api.StartBranchDataContainer;
+import org.openscore.api.execution.ExecutionParametersConsts;
+import org.openscore.events.EventBus;
+import org.openscore.events.EventConstants;
+import org.openscore.events.ScoreEvent;
 import org.openscore.facade.TempConstants;
 import org.openscore.facade.entities.Execution;
 import org.openscore.facade.entities.RunningExecutionPlan;
-import org.eclipse.score.facade.execution.ExecutionStatus;
+import org.openscore.facade.execution.ExecutionStatus;
 import org.openscore.facade.execution.ExecutionSummary;
 import org.openscore.facade.execution.PauseReason;
-import org.eclipse.score.lang.SystemContext;
+import org.openscore.lang.SystemContext;
 import org.openscore.orchestrator.services.PauseResumeService;
 import org.eclipse.score.worker.execution.reflection.ReflectionAdapter;
 import org.eclipse.score.worker.management.WorkerConfigurationService;

@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.api;
+package org.openscore.api;
 
 import java.io.Serializable;
 import java.util.HashMap;

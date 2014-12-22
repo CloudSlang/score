@@ -8,9 +8,9 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.api;
+package org.openscore.api;
 
-import org.eclipse.score.lang.SystemContext;
+import org.openscore.lang.SystemContext;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;

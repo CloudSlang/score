@@ -10,7 +10,7 @@
 
 package org.openscore.engine.node.entities;
 
-import org.eclipse.score.api.nodes.WorkerStatus;
+import org.openscore.api.nodes.WorkerStatus;
 
 import java.util.List;
 

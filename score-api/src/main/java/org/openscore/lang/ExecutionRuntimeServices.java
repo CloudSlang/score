@@ -8,12 +8,12 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.lang;
+package org.openscore.lang;
 
-import org.eclipse.score.api.EndBranchDataContainer;
-import org.eclipse.score.events.ScoreEvent;
-import org.eclipse.score.api.StartBranchDataContainer;
-import org.eclipse.score.facade.execution.ExecutionStatus;
+import org.openscore.api.EndBranchDataContainer;
+import org.openscore.events.ScoreEvent;
+import org.openscore.api.StartBranchDataContainer;
+import org.openscore.facade.execution.ExecutionStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.EqualsBuilder;

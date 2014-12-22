@@ -10,7 +10,7 @@
 
 package org.openscore.schema;
 
-import org.eclipse.score.events.EventBusImpl;
+import org.openscore.events.EventBusImpl;
 import org.eclipse.score.worker.execution.reflection.ReflectionAdapterImpl;
 import org.eclipse.score.worker.execution.services.ExecutionServiceImpl;
 import org.eclipse.score.worker.execution.services.SessionDataHandlerImpl;

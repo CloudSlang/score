@@ -10,7 +10,7 @@
 
 package org.eclipse.score.worker.execution.reflection;
 
-import org.eclipse.score.api.ControlActionMetadata;
+import org.openscore.api.ControlActionMetadata;
 
 import java.util.Map;
 

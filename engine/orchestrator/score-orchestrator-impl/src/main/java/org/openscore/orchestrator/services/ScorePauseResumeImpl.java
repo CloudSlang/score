@@ -10,12 +10,9 @@
 
 package org.openscore.orchestrator.services;
 
-import org.eclipse.score.facade.execution.ExecutionStatus;
+import org.openscore.facade.execution.ExecutionStatus;
 import org.openscore.facade.execution.PauseReason;
 import org.openscore.orchestrator.entities.ExecutionState;
-import org.openscore.orchestrator.services.ExecutionStateService;
-import org.openscore.orchestrator.services.PauseResumeService;
-import org.openscore.orchestrator.services.ScorePauseResume;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;

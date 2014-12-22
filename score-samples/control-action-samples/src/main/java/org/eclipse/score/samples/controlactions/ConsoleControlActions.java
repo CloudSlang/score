@@ -10,7 +10,7 @@
 
 package org.eclipse.score.samples.controlactions;
 
-import org.eclipse.score.lang.ExecutionRuntimeServices;
+import org.openscore.lang.ExecutionRuntimeServices;
 
 /**
  * User:

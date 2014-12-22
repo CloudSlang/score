@@ -10,7 +10,7 @@
 
 package org.openscore.orchestrator.services;
 
-import org.eclipse.score.api.TriggeringProperties;
+import org.openscore.api.TriggeringProperties;
 
 /**
  * User: wahnonm

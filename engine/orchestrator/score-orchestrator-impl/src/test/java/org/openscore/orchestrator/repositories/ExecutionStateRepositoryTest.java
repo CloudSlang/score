@@ -10,7 +10,7 @@
 
 package org.openscore.orchestrator.repositories;
 
-import org.eclipse.score.facade.execution.ExecutionStatus;
+import org.openscore.facade.execution.ExecutionStatus;
 import org.openscore.engine.data.SimpleHiloIdentifierGenerator;
 import org.openscore.orchestrator.entities.ExecutionState;
 import liquibase.integration.spring.SpringLiquibase;
@@ -18,7 +18,6 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.hibernate.ejb.HibernatePersistence;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openscore.orchestrator.repositories.ExecutionStateRepository;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

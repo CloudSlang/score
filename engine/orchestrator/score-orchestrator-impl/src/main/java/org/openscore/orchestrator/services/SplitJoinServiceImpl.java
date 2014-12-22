@@ -11,12 +11,12 @@
 package org.openscore.orchestrator.services;
 
 import ch.lambdaj.function.convert.Converter;
-import org.eclipse.score.api.EndBranchDataContainer;
+import org.openscore.api.EndBranchDataContainer;
 import org.openscore.engine.queue.entities.ExecutionMessage;
 import org.openscore.engine.queue.entities.ExecutionMessageConverter;
 import org.openscore.engine.queue.services.QueueDispatcherService;
 import org.openscore.facade.entities.Execution;
-import org.eclipse.score.facade.execution.ExecutionStatus;
+import org.openscore.facade.execution.ExecutionStatus;
 import org.openscore.orchestrator.entities.BranchContexts;
 import org.openscore.orchestrator.entities.FinishedBranch;
 import org.openscore.orchestrator.entities.SplitMessage;

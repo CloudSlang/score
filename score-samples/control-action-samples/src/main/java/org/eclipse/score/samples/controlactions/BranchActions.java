@@ -10,8 +10,8 @@
 
 package org.eclipse.score.samples.controlactions;
 
-import org.eclipse.score.api.EndBranchDataContainer;
-import org.eclipse.score.lang.ExecutionRuntimeServices;
+import org.openscore.api.EndBranchDataContainer;
+import org.openscore.lang.ExecutionRuntimeServices;
 
 import java.io.Serializable;
 import java.util.ArrayList;

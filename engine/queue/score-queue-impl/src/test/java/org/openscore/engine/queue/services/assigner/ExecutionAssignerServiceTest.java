@@ -19,7 +19,7 @@ import org.openscore.engine.queue.entities.ExecutionMessageConverter;
 import org.openscore.engine.queue.entities.Payload;
 import org.openscore.engine.queue.services.ExecutionQueueService;
 import org.openscore.facade.entities.Execution;
-import org.eclipse.score.lang.SystemContext;
+import org.openscore.lang.SystemContext;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;

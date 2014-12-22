@@ -8,20 +8,11 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.events;
+package org.openscore.api.nodes;
 
 /**
- * Created with IntelliJ IDEA.
- * User:
- * Date: 09/01/14
- * To change this template use File | Settings | File Templates.
+ * Created by peerme on 02/09/2014.
  */
-public interface ScoreEventListener {
-
-    /**
-     * handler of score event, this method will be called on score event
-     * @param event - the event that dispatched
-     */
-	void onEvent(ScoreEvent event) throws InterruptedException ;
-
+public enum WorkerStatus {
+    RUNNING, FAILED, IN_RECOVERY, RECOVERED
 }

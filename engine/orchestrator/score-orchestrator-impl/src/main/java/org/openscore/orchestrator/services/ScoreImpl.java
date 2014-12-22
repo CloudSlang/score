@@ -10,11 +10,8 @@
 
 package org.openscore.orchestrator.services;
 
-import org.eclipse.score.api.Score;
-import org.eclipse.score.api.TriggeringProperties;
-import org.openscore.orchestrator.services.CancelExecutionService;
-import org.openscore.orchestrator.services.ScorePauseResume;
-import org.openscore.orchestrator.services.ScoreTriggering;
+import org.openscore.api.Score;
+import org.openscore.api.TriggeringProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;

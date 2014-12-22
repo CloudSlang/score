@@ -10,8 +10,8 @@
 
 package org.openscore.orchestrator.services;
 
-import org.eclipse.score.api.ExecutionPlan;
-import org.eclipse.score.api.TriggeringProperties;
+import org.openscore.api.ExecutionPlan;
+import org.openscore.api.TriggeringProperties;
 import org.openscore.engine.data.IdentityGenerator;
 import org.openscore.engine.node.entities.WorkerNode;
 import org.openscore.engine.queue.entities.ExecStatus;
@@ -21,7 +21,7 @@ import org.openscore.engine.queue.entities.Payload;
 import org.openscore.engine.queue.services.QueueDispatcherService;
 import org.openscore.facade.entities.Execution;
 import org.openscore.facade.services.RunningExecutionPlanService;
-import org.eclipse.score.lang.SystemContext;
+import org.openscore.lang.SystemContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;

@@ -10,12 +10,11 @@
 
 package org.openscore.facade.entities;
 
-import org.eclipse.score.api.ControlActionMetadata;
-import org.eclipse.score.api.ExecutionPlan;
-import org.eclipse.score.api.ExecutionStep;
+import org.openscore.api.ControlActionMetadata;
+import org.openscore.api.ExecutionPlan;
+import org.openscore.api.ExecutionStep;
 import junit.framework.Assert;
 import org.junit.Test;
-import org.openscore.facade.entities.ExecutionPlanCompressUtil;
 
 import java.io.IOException;
 import java.util.HashMap;

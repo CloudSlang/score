@@ -10,10 +10,9 @@
 
 package org.openscore.orchestrator.services;
 
-import org.eclipse.score.api.ScoreDeprecated;
-import org.eclipse.score.api.TriggeringProperties;
+import org.openscore.api.ScoreDeprecated;
+import org.openscore.api.TriggeringProperties;
 import org.openscore.engine.data.IdentityGenerator;
-import org.openscore.orchestrator.services.ScoreTriggering;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**

@@ -40,15 +40,15 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import org.eclipse.score.api.ExecutionPlan;
-import org.eclipse.score.api.ExecutionStep;
-import org.eclipse.score.api.Score;
-import org.eclipse.score.api.TriggeringProperties;
+import org.openscore.api.ExecutionPlan;
+import org.openscore.api.ExecutionStep;
+import org.openscore.api.Score;
+import org.openscore.api.TriggeringProperties;
 import org.openscore.engine.data.SimpleHiloIdentifierGenerator;
 import org.openscore.engine.node.services.WorkerNodeService;
 import org.openscore.engine.queue.entities.ExecutionMessage;
 import org.openscore.engine.queue.services.QueueDispatcherService;
-import org.eclipse.score.events.EventBus;
+import org.openscore.events.EventBus;
 
 import liquibase.integration.spring.SpringLiquibase;
 

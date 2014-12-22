@@ -8,17 +8,29 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.facade.execution;
+package org.openscore.events;
+
+import java.io.Serializable;
 
 /**
- * Created by peerme on 17/08/2014.
+ * User:
+ * Date: 10/06/2014
  */
-public enum ExecutionStatus {
-    RUNNING,
-    COMPLETED,
-    SYSTEM_FAILURE,
-    PAUSED,
-    PENDING_PAUSE,
-    CANCELED,
-    PENDING_CANCEL
+public class ScoreEvent implements Serializable {
+
+	private String eventType;
+	private Serializable data;
+
+	public ScoreEvent(String eventType, Serializable data) {
+		this.eventType = eventType;
+		this.data = data;
+	}
+
+	public String getEventType() {
+		return eventType;
+	}
+
+	public Serializable getData() {
+		return data;
+	}
 }

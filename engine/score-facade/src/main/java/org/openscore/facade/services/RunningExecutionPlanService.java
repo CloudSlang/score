@@ -11,7 +11,7 @@
 package org.openscore.facade.services;
 
 import org.openscore.facade.entities.RunningExecutionPlan;
-import org.eclipse.score.api.ExecutionPlan;
+import org.openscore.api.ExecutionPlan;
 
 /**
  * Created by IntelliJ IDEA.

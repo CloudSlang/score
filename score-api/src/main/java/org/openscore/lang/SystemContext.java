@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.lang;
+package org.openscore.lang;
 
 import java.io.Serializable;
 import java.util.Collection;

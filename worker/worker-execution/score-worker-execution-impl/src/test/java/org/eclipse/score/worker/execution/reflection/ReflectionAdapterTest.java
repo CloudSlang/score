@@ -11,7 +11,7 @@
 package org.eclipse.score.worker.execution.reflection;
 
 import org.eclipse.score.worker.execution.services.SessionDataHandler;
-import org.eclipse.score.api.ControlActionMetadata;
+import org.openscore.api.ControlActionMetadata;
 import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.Test;

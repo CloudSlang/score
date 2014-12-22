@@ -10,7 +10,7 @@
 
 package org.openscore.facade.entities;
 
-import org.eclipse.score.api.ExecutionPlan;
+import org.openscore.api.ExecutionPlan;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedInputStream;

@@ -11,7 +11,6 @@
 package org.openscore.facade.execution;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.score.facade.execution.ExecutionStatus;
 
 import java.io.Serializable;
 import java.util.Date;

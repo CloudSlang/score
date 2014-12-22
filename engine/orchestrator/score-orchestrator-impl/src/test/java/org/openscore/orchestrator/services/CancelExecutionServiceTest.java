@@ -14,7 +14,7 @@ import org.openscore.engine.queue.entities.ExecutionMessageConverter;
 import org.openscore.engine.queue.services.QueueDispatcherService;
 import org.openscore.facade.entities.Execution;
 import org.openscore.facade.execution.ExecutionActionResult;
-import org.eclipse.score.facade.execution.ExecutionStatus;
+import org.openscore.facade.execution.ExecutionStatus;
 import org.openscore.orchestrator.entities.ExecutionState;
 import org.junit.Before;
 import org.junit.Test;

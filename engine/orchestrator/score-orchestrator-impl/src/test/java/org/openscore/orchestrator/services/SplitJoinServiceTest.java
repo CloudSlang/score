@@ -10,7 +10,7 @@
 
 package org.openscore.orchestrator.services;
 
-import org.eclipse.score.api.EndBranchDataContainer;
+import org.openscore.api.EndBranchDataContainer;
 import org.openscore.engine.queue.entities.ExecStatus;
 import org.openscore.engine.queue.entities.ExecutionMessage;
 import org.openscore.engine.queue.entities.ExecutionMessageConverter;
@@ -22,7 +22,7 @@ import org.openscore.orchestrator.entities.SplitMessage;
 import org.openscore.orchestrator.entities.SuspendedExecution;
 import org.openscore.orchestrator.repositories.FinishedBranchRepository;
 import org.openscore.orchestrator.repositories.SuspendedExecutionsRepository;
-import org.eclipse.score.lang.SystemContext;
+import org.openscore.lang.SystemContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

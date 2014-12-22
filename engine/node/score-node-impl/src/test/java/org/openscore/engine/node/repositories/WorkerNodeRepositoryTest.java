@@ -10,7 +10,7 @@
 
 package org.openscore.engine.node.repositories;
 
-import org.eclipse.score.api.nodes.WorkerStatus;
+import org.openscore.api.nodes.WorkerStatus;
 import org.openscore.engine.node.entities.WorkerNode;
 import junit.framework.Assert;
 import org.junit.Before;

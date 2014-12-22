@@ -10,7 +10,7 @@
 
 package org.openscore.orchestrator.entities;
 
-import org.eclipse.score.facade.execution.ExecutionStatus;
+import org.openscore.facade.execution.ExecutionStatus;
 import org.openscore.facade.execution.ExecutionSummary;
 import org.openscore.engine.data.AbstractIdentifiable;
 import org.apache.commons.lang.builder.EqualsBuilder;

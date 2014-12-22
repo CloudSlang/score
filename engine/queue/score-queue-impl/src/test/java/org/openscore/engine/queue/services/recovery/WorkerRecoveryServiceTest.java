@@ -10,14 +10,11 @@
 
 package org.openscore.engine.queue.services.recovery;
 
-import org.eclipse.score.api.nodes.WorkerStatus;
+import org.openscore.api.nodes.WorkerStatus;
 import org.openscore.engine.node.entities.WorkerNode;
 import org.openscore.engine.node.services.WorkerLockService;
 import org.openscore.engine.node.services.WorkerNodeService;
 import org.openscore.engine.queue.services.ExecutionQueueService;
-import org.openscore.engine.queue.services.recovery.MessageRecoveryService;
-import org.openscore.engine.queue.services.recovery.WorkerRecoveryService;
-import org.openscore.engine.queue.services.recovery.WorkerRecoveryServiceImpl;
 import org.openscore.engine.versioning.services.VersionService;
 import org.junit.Before;
 import org.junit.Test;

@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.exceptions;
+package org.openscore.exceptions;
 
 /**
  * Created by IntelliJ IDEA.

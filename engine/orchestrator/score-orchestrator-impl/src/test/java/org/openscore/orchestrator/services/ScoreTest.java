@@ -10,16 +10,14 @@
 
 package org.openscore.orchestrator.services;
 
-import org.eclipse.score.api.ExecutionPlan;
-import org.eclipse.score.api.Score;
-import org.eclipse.score.api.TriggeringProperties;
+import org.openscore.api.ExecutionPlan;
+import org.openscore.api.Score;
+import org.openscore.api.TriggeringProperties;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.openscore.orchestrator.services.ScoreImpl;
-import org.openscore.orchestrator.services.ScoreTriggering;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;

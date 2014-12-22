@@ -10,9 +10,9 @@
 
 package org.openscore.engine.queue.services;
 
-import org.eclipse.score.api.execution.ExecutionParametersConsts;
-import org.eclipse.score.events.EventConstants;
-import org.eclipse.score.events.ScoreEvent;
+import org.openscore.api.execution.ExecutionParametersConsts;
+import org.openscore.events.EventConstants;
+import org.openscore.events.ScoreEvent;
 import org.openscore.facade.entities.Execution;
 import org.openscore.facade.services.RunningExecutionPlanService;
 import org.apache.commons.lang.StringUtils;

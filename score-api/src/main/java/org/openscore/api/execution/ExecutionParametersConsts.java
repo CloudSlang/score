@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.api.execution;
+package org.openscore.api.execution;
 
 /**
  * Created by peerme on 03/09/2014.

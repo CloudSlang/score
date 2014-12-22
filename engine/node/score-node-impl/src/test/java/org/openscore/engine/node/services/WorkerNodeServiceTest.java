@@ -10,7 +10,7 @@
 
 package org.openscore.engine.node.services;
 
-import org.eclipse.score.api.nodes.WorkerStatus;
+import org.openscore.api.nodes.WorkerStatus;
 import org.openscore.engine.data.SimpleHiloIdentifierGenerator;
 import org.openscore.engine.node.entities.WorkerNode;
 import org.openscore.engine.node.repositories.WorkerNodeRepository;

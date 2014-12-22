@@ -11,7 +11,7 @@
 package org.openscore.orchestrator.services;
 
 
-import org.eclipse.score.facade.execution.ExecutionStatus;
+import org.openscore.facade.execution.ExecutionStatus;
 import org.openscore.facade.entities.Execution;
 import org.openscore.orchestrator.entities.ExecutionState;
 import org.openscore.orchestrator.repositories.ExecutionStateRepository;

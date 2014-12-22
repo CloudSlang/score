@@ -1,7 +1,5 @@
 package org.openscore.facade.execution;
 
-import org.eclipse.score.facade.execution.ExecutionStatus;
-
 import java.util.HashMap;
 import java.util.Map;
 

@@ -10,15 +10,15 @@
 
 package org.eclipse.score.worker.execution.services;
 
-import org.eclipse.score.api.ControlActionMetadata;
-import org.eclipse.score.api.ExecutionPlan;
-import org.eclipse.score.api.ExecutionStep;
-import org.eclipse.score.events.EventBus;
-import org.eclipse.score.events.EventConstants;
+import org.openscore.api.ControlActionMetadata;
+import org.openscore.api.ExecutionPlan;
+import org.openscore.api.ExecutionStep;
+import org.openscore.events.EventBus;
+import org.openscore.events.EventConstants;
 import org.openscore.facade.TempConstants;
 import org.openscore.facade.entities.Execution;
 import org.openscore.facade.entities.RunningExecutionPlan;
-import org.eclipse.score.facade.execution.ExecutionStatus;
+import org.openscore.facade.execution.ExecutionStatus;
 import org.openscore.facade.execution.ExecutionSummary;
 import org.openscore.facade.execution.PauseReason;
 import org.openscore.orchestrator.services.CancelExecutionService;

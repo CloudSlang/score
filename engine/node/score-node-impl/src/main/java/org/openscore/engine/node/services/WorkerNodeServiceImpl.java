@@ -12,7 +12,7 @@ package org.openscore.engine.node.services;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import org.eclipse.score.api.nodes.WorkerStatus;
+import org.openscore.api.nodes.WorkerStatus;
 import org.openscore.engine.node.entities.WorkerNode;
 import org.openscore.engine.node.repositories.WorkerNodeRepository;
 import org.openscore.engine.versioning.services.VersionService;
