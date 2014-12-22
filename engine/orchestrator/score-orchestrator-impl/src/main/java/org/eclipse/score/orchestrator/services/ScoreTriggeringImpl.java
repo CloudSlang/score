@@ -13,7 +13,7 @@ package org.eclipse.score.orchestrator.services;
 import org.eclipse.score.api.ExecutionPlan;
 import org.eclipse.score.api.TriggeringProperties;
 import org.openscore.engine.data.IdentityGenerator;
-import org.eclipse.score.engine.node.entities.WorkerNode;
+import org.openscore.engine.node.entities.WorkerNode;
 import org.eclipse.score.engine.queue.entities.ExecStatus;
 import org.eclipse.score.engine.queue.entities.ExecutionMessage;
 import org.eclipse.score.engine.queue.entities.ExecutionMessageConverter;

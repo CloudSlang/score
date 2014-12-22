@@ -10,7 +10,7 @@
 
 package org.eclipse.score.worker.management.services;
 
-import org.eclipse.score.engine.node.entities.WorkerNode;
+import org.openscore.engine.node.entities.WorkerNode;
 import org.eclipse.score.engine.queue.entities.ExecStatus;
 import org.eclipse.score.engine.queue.entities.ExecutionMessage;
 import org.eclipse.score.engine.queue.entities.ExecutionMessageConverter;

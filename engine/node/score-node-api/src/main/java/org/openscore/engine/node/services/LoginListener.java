@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.engine.node.services;
+package org.openscore.engine.node.services;
 
 /**
  * Created by IntelliJ IDEA.

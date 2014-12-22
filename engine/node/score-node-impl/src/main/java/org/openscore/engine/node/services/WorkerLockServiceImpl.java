@@ -8,10 +8,10 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.engine.node.services;
+package org.openscore.engine.node.services;
 
-import org.eclipse.score.engine.node.entities.WorkerLock;
-import org.eclipse.score.engine.node.repositories.WorkerLockRepository;
+import org.openscore.engine.node.entities.WorkerLock;
+import org.openscore.engine.node.repositories.WorkerLockRepository;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Time: 11:27
  */
 //@Service
-public final class WorkerLockServiceImpl implements  WorkerLockService{
+public final class WorkerLockServiceImpl implements WorkerLockService {
 
     private final Logger logger = Logger.getLogger(getClass());
 

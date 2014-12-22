@@ -10,8 +10,8 @@
 
 package org.eclipse.score.orchestrator.services;
 
-import org.eclipse.score.engine.node.services.WorkerLockService;
-import org.eclipse.score.engine.node.services.WorkerNodeService;
+import org.openscore.engine.node.services.WorkerLockService;
+import org.openscore.engine.node.services.WorkerNodeService;
 import org.eclipse.score.engine.queue.entities.ExecutionMessage;
 import org.eclipse.score.engine.queue.services.QueueDispatcherService;
 import org.eclipse.score.orchestrator.entities.SplitMessage;

@@ -10,9 +10,9 @@
 
 package org.eclipse.score.schema;
 
-import org.eclipse.score.engine.node.services.WorkerLockServiceImpl;
-import org.eclipse.score.engine.node.services.WorkerNodeServiceImpl;
-import org.eclipse.score.engine.node.services.WorkersMBean;
+import org.openscore.engine.node.services.WorkerLockServiceImpl;
+import org.openscore.engine.node.services.WorkerNodeServiceImpl;
+import org.openscore.engine.node.services.WorkersMBean;
 import org.eclipse.score.engine.queue.entities.ExecutionMessageConverter;
 import org.eclipse.score.engine.queue.repositories.ExecutionQueueRepositoryImpl;
 import org.eclipse.score.engine.queue.repositories.callbacks.ExecutionStatesCallback;
@@ -104,7 +104,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(DataBaseDetector.class, null);
 		put(ExecutionQueueRepositoryImpl.class, null);
 		put(HiloFactoryBean.class, "scoreHiloFactoryBean");
-		put(WorkersMBean.class, "org.eclipse.score.engine.node.services.WorkersMBean");
+		put(WorkersMBean.class, "WorkersMBean");
 		put(ExecutionStatesCallback.class, "executionStatesCallback");
         put(WorkerDbSupportServiceImpl.class, null);
         put(ScoreDeprecatedImpl.class, null);

@@ -8,16 +8,18 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.engine.node.services;
+package org.openscore.engine.node.services;
 
-import org.eclipse.score.engine.node.entities.WorkerLock;
-import org.eclipse.score.engine.node.repositories.WorkerLockRepository;
+import org.openscore.engine.node.entities.WorkerLock;
+import org.openscore.engine.node.repositories.WorkerLockRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.openscore.engine.node.services.WorkerLockService;
+import org.openscore.engine.node.services.WorkerLockServiceImpl;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;

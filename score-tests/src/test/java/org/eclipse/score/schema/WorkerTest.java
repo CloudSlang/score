@@ -20,7 +20,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import org.eclipse.score.engine.node.services.WorkerNodeService;
+import org.openscore.engine.node.services.WorkerNodeService;
 import org.eclipse.score.engine.queue.entities.ExecutionMessageConverter;
 import org.eclipse.score.engine.queue.services.QueueDispatcherService;
 import org.eclipse.score.engine.queue.services.QueueStateIdGeneratorService;

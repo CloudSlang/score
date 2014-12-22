@@ -8,9 +8,9 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.engine.node.repositories;
+package org.openscore.engine.node.repositories;
 
-import org.eclipse.score.engine.node.entities.WorkerLock;
+import org.openscore.engine.node.entities.WorkerLock;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

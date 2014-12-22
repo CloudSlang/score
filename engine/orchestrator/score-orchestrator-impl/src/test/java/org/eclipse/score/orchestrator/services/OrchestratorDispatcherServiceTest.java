@@ -10,9 +10,9 @@
 
 package org.eclipse.score.orchestrator.services;
 
-import org.eclipse.score.engine.node.entities.WorkerNode;
-import org.eclipse.score.engine.node.services.WorkerLockService;
-import org.eclipse.score.engine.node.services.WorkerNodeService;
+import org.openscore.engine.node.entities.WorkerNode;
+import org.openscore.engine.node.services.WorkerLockService;
+import org.openscore.engine.node.services.WorkerNodeService;
 import org.eclipse.score.engine.queue.entities.ExecutionMessage;
 import org.eclipse.score.orchestrator.entities.Message;
 import org.junit.Before;

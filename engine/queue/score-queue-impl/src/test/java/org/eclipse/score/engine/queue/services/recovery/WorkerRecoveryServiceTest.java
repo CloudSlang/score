@@ -11,9 +11,9 @@
 package org.eclipse.score.engine.queue.services.recovery;
 
 import org.eclipse.score.api.nodes.WorkerStatus;
-import org.eclipse.score.engine.node.entities.WorkerNode;
-import org.eclipse.score.engine.node.services.WorkerLockService;
-import org.eclipse.score.engine.node.services.WorkerNodeService;
+import org.openscore.engine.node.entities.WorkerNode;
+import org.openscore.engine.node.services.WorkerLockService;
+import org.openscore.engine.node.services.WorkerNodeService;
 import org.eclipse.score.engine.queue.services.ExecutionQueueService;
 import org.openscore.engine.versioning.services.VersionService;
 import org.junit.Before;

@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.engine.node.entities;
+package org.openscore.engine.node.entities;
 
 import org.eclipse.score.api.nodes.WorkerStatus;
 

@@ -10,7 +10,7 @@
 
 package org.eclipse.score.engine.queue.services.cleaner;
 
-import org.eclipse.score.engine.node.services.WorkerNodeService;
+import org.openscore.engine.node.services.WorkerNodeService;
 import org.eclipse.score.engine.queue.entities.ExecStatus;
 import org.eclipse.score.engine.queue.entities.ExecutionMessage;
 import org.eclipse.score.engine.queue.entities.ExecutionMessageConverter;

@@ -10,7 +10,7 @@
 
 package org.eclipse.score.worker.management.services;
 
-import org.eclipse.score.engine.node.services.WorkerNodeService;
+import org.openscore.engine.node.services.WorkerNodeService;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;

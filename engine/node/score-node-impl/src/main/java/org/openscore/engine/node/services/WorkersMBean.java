@@ -8,13 +8,14 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.engine.node.services;
+package org.openscore.engine.node.services;
 
 
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import org.openscore.engine.node.services.WorkerNodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;

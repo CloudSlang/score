@@ -19,8 +19,8 @@ import javax.annotation.Resource;
 
 import org.apache.log4j.Logger;
 
-import org.eclipse.score.engine.node.entities.WorkerNode;
-import org.eclipse.score.engine.node.services.WorkerNodeService;
+import org.openscore.engine.node.entities.WorkerNode;
+import org.openscore.engine.node.services.WorkerNodeService;
 
 /**
  * @author stoneo

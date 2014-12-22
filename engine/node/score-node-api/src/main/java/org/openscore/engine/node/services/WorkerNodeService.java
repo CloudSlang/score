@@ -8,11 +8,11 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.engine.node.services;
+package org.openscore.engine.node.services;
 
 import com.google.common.collect.Multimap;
 import org.eclipse.score.api.nodes.WorkerStatus;
-import org.eclipse.score.engine.node.entities.WorkerNode;
+import org.openscore.engine.node.entities.WorkerNode;
 
 import java.util.List;
 
@@ -54,7 +54,7 @@ public interface WorkerNodeService {
      *
      * Reads all of the workers that are not marked with the IS_DELETED flag
      *
-     * @return a List of {@link org.eclipse.score.engine.node.entities.WorkerNode} that are ont marked with
+     * @return a List of {@link org.openscore.engine.node.entities.WorkerNode} that are ont marked with
      * the IS_DELETED flag
      */
     List<WorkerNode> readAllNotDeletedWorkers();
@@ -73,7 +73,7 @@ public interface WorkerNodeService {
      * find not deleted worker by uuid
      *
      * @param uuid the uuid of the worker to find
-     * @return a {@link org.eclipse.score.engine.node.entities.WorkerNode} of the requested worker
+     * @return a {@link org.openscore.engine.node.entities.WorkerNode} of the requested worker
      */
 	WorkerNode readByUUID(String uuid);
 
@@ -82,7 +82,7 @@ public interface WorkerNodeService {
      * find worker without relating to the IS_DELETED property
      *
      * @param uuid the uuid of the worker to find
-     * @return a {@link org.eclipse.score.engine.node.entities.WorkerNode} of the requested worker
+     * @return a {@link org.openscore.engine.node.entities.WorkerNode} of the requested worker
      */
     WorkerNode findByUuid(String uuid);
 
@@ -90,7 +90,7 @@ public interface WorkerNodeService {
      *
      * Reads all of the workers records
      *
-     * @return a List of all existing {@link org.eclipse.score.engine.node.entities.WorkerNode}
+     * @return a List of all existing {@link org.openscore.engine.node.entities.WorkerNode}
      */
 	List<WorkerNode> readAllWorkers();
 
@@ -107,7 +107,7 @@ public interface WorkerNodeService {
      * read all worker that there activation status is as a given status
      *
      * @param isActive the requested activation status.
-     * @return a List of all {@link org.eclipse.score.engine.node.entities.WorkerNode} the their
+     * @return a List of all {@link org.openscore.engine.node.entities.WorkerNode} the their
      * activation status is as the given status
      */
 	List<WorkerNode> readWorkersByActivation(boolean isActive);
