@@ -104,7 +104,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(DataBaseDetector.class, null);
 		put(ExecutionQueueRepositoryImpl.class, null);
 		put(HiloFactoryBean.class, "scoreHiloFactoryBean");
-		put(WorkersMBean.class, "WorkersMBean");
+		put(WorkersMBean.class, "org.openscore.engine.node.services.WorkersMBean");
 		put(ExecutionStatesCallback.class, "executionStatesCallback");
         put(WorkerDbSupportServiceImpl.class, null);
         put(ScoreDeprecatedImpl.class, null);

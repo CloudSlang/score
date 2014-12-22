@@ -27,8 +27,8 @@ public class ScoreNamespaceHandler extends NamespaceHandlerSupport {
 	private final Logger logger = Logger.getLogger(getClass());
 
 	private Map<String,String> parsers = new HashMap<String,String>(){{
-		put("engine", "org.eclipse.score.schema.EngineBeanDefinitionParser");
-		put("worker", "WorkerBeanDefinitionParser");
+		put("engine", "org.openscore.schema.EngineBeanDefinitionParser");
+		put("worker", "org.openscore.schema.WorkerBeanDefinitionParser");
 	}};
 
 	@Override

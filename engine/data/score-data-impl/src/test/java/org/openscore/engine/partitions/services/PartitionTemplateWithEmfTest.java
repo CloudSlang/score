@@ -119,7 +119,7 @@ public class PartitionTemplateWithEmfTest {
 	}
 
 	@Configuration
-	@EnableJpaRepositories("org.eclipse.score.engine.partitions.repositories")
+	@EnableJpaRepositories("org.openscore.engine.partitions.repositories")
 	@EnableTransactionManagement
 	static class Configurator {
 
@@ -157,7 +157,7 @@ public class PartitionTemplateWithEmfTest {
 			LocalContainerEntityManagerFactoryBean fb = new LocalContainerEntityManagerFactoryBean();
 			fb.setDataSource(dataSource());
 			fb.setPersistenceProviderClass(HibernatePersistence.class);
-			fb.setPackagesToScan("org.eclipse.score.engine.partitions");
+			fb.setPackagesToScan("org.openscore.engine.partitions");
 			fb.setJpaVendorAdapter(jpaVendorAdapter);
 			return fb;
 		}

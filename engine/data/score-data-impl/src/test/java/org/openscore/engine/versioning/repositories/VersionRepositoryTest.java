@@ -82,7 +82,7 @@ public class VersionRepositoryTest {
 
 
 	@Configuration
-	@EnableJpaRepositories("org.eclipse.score.engine.versioning.repositories")
+	@EnableJpaRepositories("org.openscore.engine.versioning.repositories")
 	@EnableTransactionManagement
 	static class Configurator {
 		@Bean
@@ -134,7 +134,7 @@ public class VersionRepositoryTest {
 			fb.setJpaProperties(hibernateProperties());
 			fb.setDataSource(dataSource());
 			fb.setPersistenceProviderClass(HibernatePersistence.class);
-			fb.setPackagesToScan("org.eclipse.score.engine.versioning");
+			fb.setPackagesToScan("org.openscore.engine.versioning");
 			fb.setJpaVendorAdapter(jpaVendorAdapter);
 			return fb;
 		}

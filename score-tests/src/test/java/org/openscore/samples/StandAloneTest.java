@@ -64,7 +64,7 @@ public class StandAloneTest {
     private final static Logger logger = Logger.getLogger(StandAloneTest.class);
 
     private final static String simpleNavigationMethodName = "simpleNavigation";
-    private final static String navigationActionClassName = "NavigationActions";
+    private final static String navigationActionClassName = "org.openscore.samples.controlactions.NavigationActions";
 
     @Before
     public void init(){
@@ -229,11 +229,11 @@ public class StandAloneTest {
 
         executionPlan.setBeginStep(0L);
 
-        ExecutionStep executionStep = createExecutionStep(0L, "ConsoleControlActions", "echoHelloScore", new HashMap<String, Serializable>());
+        ExecutionStep executionStep = createExecutionStep(0L, "org.openscore.samples.controlactions.ConsoleControlActions", "echoHelloScore", new HashMap<String, Serializable>());
         addNavigationToExecutionStep(1L, navigationActionClassName, simpleNavigationMethodName, executionStep);
         executionPlan.addStep(executionStep);
 
-        ExecutionStep executionStep2 = createExecutionStep(1L, "ConsoleControlActions", "echoHelloScore", new HashMap<String, Serializable>());
+        ExecutionStep executionStep2 = createExecutionStep(1L, "org.openscore.samples.controlactions.ConsoleControlActions", "echoHelloScore", new HashMap<String, Serializable>());
         executionPlan.addStep(executionStep2);
 
         return executionPlan;
@@ -249,16 +249,16 @@ public class StandAloneTest {
         Map<String, Serializable> actionData = new HashMap<>();
         actionData.put(BranchActions.STEP_POSITION, 1L);
         actionData.put(BranchActions.EXECUTION_PLAN_ID, "1");
-        ExecutionStep executionSplitStep = createExecutionStep(0L, "BranchActions", "split", actionData);
+        ExecutionStep executionSplitStep = createExecutionStep(0L, "org.openscore.samples.controlactions.BranchActions", "split", actionData);
         executionSplitStep.setSplitStep(true);
         addNavigationToExecutionStep(1L, navigationActionClassName, simpleNavigationMethodName, executionSplitStep);
         executionPlan.addStep(executionSplitStep);
 
-        ExecutionStep executionStep2 = createExecutionStep(1L, "BranchActions", "join", new HashMap<String, Serializable>());
+        ExecutionStep executionStep2 = createExecutionStep(1L, "org.openscore.samples.controlactions.BranchActions", "join", new HashMap<String, Serializable>());
         addNavigationToExecutionStep(2L, navigationActionClassName, simpleNavigationMethodName, executionStep2);
         executionPlan.addStep(executionStep2);
 
-        ExecutionStep executionStep3 = createExecutionStep(2L, "ConsoleControlActions", "echoHelloScore", actionData);
+        ExecutionStep executionStep3 = createExecutionStep(2L, "org.openscore.samples.controlactions.ConsoleControlActions", "echoHelloScore", actionData);
         executionPlan.addStep(executionStep3);
 
         return executionPlan;
@@ -274,12 +274,12 @@ public class StandAloneTest {
         Map<String, Serializable> actionData = new HashMap<>();
         actionData.put(BranchActions.STEP_POSITION, 1L);
         actionData.put(BranchActions.EXECUTION_PLAN_ID, "1");
-        ExecutionStep executionSplitStep = createExecutionStep(0L, "BranchActions", "parallelSplit", actionData);
+        ExecutionStep executionSplitStep = createExecutionStep(0L, "org.openscore.samples.controlactions.BranchActions", "parallelSplit", actionData);
         executionSplitStep.setSplitStep(true);
         addNavigationToExecutionStep(1L, navigationActionClassName, simpleNavigationMethodName, executionSplitStep);
         executionPlan.addStep(executionSplitStep);
 
-        ExecutionStep executionStep2 = createExecutionStep(1L, "BranchActions", "join", new HashMap<String, Serializable>());
+        ExecutionStep executionStep2 = createExecutionStep(1L, "org.openscore.samples.controlactions.BranchActions", "join", new HashMap<String, Serializable>());
 
         executionPlan.addStep(executionStep2);
 
@@ -294,7 +294,7 @@ public class StandAloneTest {
         ExecutionStep executionPutDataStep = createPutDataOnSessionStep(0L, 1L);
         executionPlan.addStep(executionPutDataStep);
 
-//        ExecutionStep sleepDataStep = createExecutionStep(1L, "SessionDataActions", "sleepAction", new HashMap<String, Serializable>());
+//        ExecutionStep sleepDataStep = createExecutionStep(1L, "org.openscore.samples.controlactions.SessionDataActions", "sleepAction", new HashMap<String, Serializable>());
 //        addNavigationToExecutionStep(2L, navigationActionClassName, simpleNavigationMethodName, sleepDataStep);
 //        executionPlan.addStep(sleepDataStep);
 
@@ -304,11 +304,11 @@ public class StandAloneTest {
     }
 
     private static ExecutionStep createGetDataFromSessionStep(Long stepId) {
-        return createExecutionStep(stepId, "SessionDataActions", "getObject", new HashMap<String, Serializable>());
+        return createExecutionStep(stepId, "org.openscore.samples.controlactions.SessionDataActions", "getObject", new HashMap<String, Serializable>());
     }
 
     private static ExecutionStep createPutDataOnSessionStep(Long stepId, Long nextStepId) {
-        ExecutionStep executionPutDataStep = createExecutionStep(stepId, "SessionDataActions", "putObject", new HashMap<String, Serializable>());
+        ExecutionStep executionPutDataStep = createExecutionStep(stepId, "org.openscore.samples.controlactions.SessionDataActions", "putObject", new HashMap<String, Serializable>());
         if(nextStepId != null)
             addNavigationToExecutionStep(nextStepId, navigationActionClassName, simpleNavigationMethodName, executionPutDataStep);
         return executionPutDataStep;
@@ -326,12 +326,12 @@ public class StandAloneTest {
         actionData.put(BranchActions.STEP_POSITION, 0L);
         actionData.put(BranchActions.EXECUTION_PLAN_ID, childFlowId);
 
-        ExecutionStep executionSplitStep = createExecutionStep(1L, "BranchActions", "split", actionData);
+        ExecutionStep executionSplitStep = createExecutionStep(1L, "org.openscore.samples.controlactions.BranchActions", "split", actionData);
         executionSplitStep.setSplitStep(true);
         addNavigationToExecutionStep(2L, navigationActionClassName, simpleNavigationMethodName, executionSplitStep);
         executionPlan.addStep(executionSplitStep);
 
-        ExecutionStep executionJoinStep = createExecutionStep(2L, "BranchActions", "join", new HashMap<String, Serializable>());
+        ExecutionStep executionJoinStep = createExecutionStep(2L, "org.openscore.samples.controlactions.BranchActions", "join", new HashMap<String, Serializable>());
         executionPlan.addStep(executionJoinStep);
 
         return executionPlan;

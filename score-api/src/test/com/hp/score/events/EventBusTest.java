@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.events;
+package org.openscore.events;
 
 import org.junit.Before;
 import org.junit.Test;

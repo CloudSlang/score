@@ -168,7 +168,7 @@ public class SuspendedExecutionsRepositoryTest {
 
 
     @Configuration
-    @EnableJpaRepositories("org.eclipse.score.orchestrator")
+    @EnableJpaRepositories("org.openscore.orchestrator")
     @EnableTransactionManagement
     @ImportResource("META-INF/spring/orchestratorEmfContext.xml")
     static class Configurator {

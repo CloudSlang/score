@@ -73,7 +73,7 @@ public class ExecutionStateRepositoryTest {
     }
 
     @Configuration
-    @EnableJpaRepositories("org.eclipse.score")
+    @EnableJpaRepositories("org.openscore")
     static class ExecutionStateRepositoryTestContext {
 
         @Bean
@@ -95,7 +95,7 @@ public class ExecutionStateRepositoryTest {
             fb.setJpaProperties(hibernateProperties());
             fb.setDataSource(dataSource());
             fb.setPersistenceProviderClass(HibernatePersistence.class);
-            fb.setPackagesToScan("org.eclipse.score");
+            fb.setPackagesToScan("org.openscore");
             fb.setJpaVendorAdapter(jpaVendorAdapter);
             return fb;
         }

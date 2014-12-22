@@ -103,7 +103,7 @@ public class WorkerLockRepositoryTest {
 
     @Configuration
     @ImportResource({"classpath:/META-INF/spring/testContext.xml"})
-    @EnableJpaRepositories("org.eclipse.score.engine.node.repositories")
+    @EnableJpaRepositories("org.openscore.engine.node.repositories")
     static class Conf {
 
     }

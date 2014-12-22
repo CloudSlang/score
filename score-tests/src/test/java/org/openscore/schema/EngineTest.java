@@ -149,7 +149,7 @@ public class EngineTest {
             fb.setDataSource(dataSource());
             fb.setJpaProperties(jpaProperties);
             fb.setPersistenceProviderClass(HibernatePersistence.class);
-            fb.setPackagesToScan("org.eclipse.score");
+            fb.setPackagesToScan("org.openscore");
             fb.setJpaVendorAdapter(jpaVendorAdapter);
             return fb;
         }

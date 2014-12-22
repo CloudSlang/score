@@ -285,7 +285,7 @@ public class WorkerNodeServiceTest {
 	}
 
 	@Configuration
-	@EnableJpaRepositories("org.eclipse.score.engine.node.repositories")
+	@EnableJpaRepositories("org.openscore.engine.node.repositories")
 	@EnableTransactionManagement
 	static class Configurator {
 		@Bean
@@ -337,7 +337,7 @@ public class WorkerNodeServiceTest {
 			fb.setJpaProperties(hibernateProperties());
 			fb.setDataSource(dataSource());
 			fb.setPersistenceProviderClass(HibernatePersistence.class);
-			fb.setPackagesToScan("org.eclipse.score.engine.node");
+			fb.setPackagesToScan("org.openscore.engine.node");
 			fb.setJpaVendorAdapter(jpaVendorAdapter);
 			return fb;
 		}

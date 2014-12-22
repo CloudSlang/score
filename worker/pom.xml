@@ -9,7 +9,7 @@
         http://www.apache.org/licenses/LICENSE-2.0
     -->
 	<parent>
-		<groupId>org.eclipse.score</groupId>
+		<groupId>org.openscore</groupId>
 		<artifactId>score-parent</artifactId>
 		<version>0.1.245-SNAPSHOT</version>
 	</parent>
@@ -29,13 +29,13 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.eclipse.score</groupId>
+				<groupId>org.openscore</groupId>
 				<artifactId>score-worker-execution-api</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>org.eclipse.score</groupId>
+				<groupId>org.openscore</groupId>
 				<artifactId>score-worker-manager-api</artifactId>
 				<version>${project.version}</version>
 			</dependency>

@@ -9,7 +9,7 @@
         http://www.apache.org/licenses/LICENSE-2.0
     -->
 	<parent>
-		<groupId>org.eclipse.score</groupId>
+		<groupId>org.openscore</groupId>
 		<artifactId>worker-manager</artifactId>
 		<version>0.1.245-SNAPSHOT</version>
 	</parent>

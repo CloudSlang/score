@@ -10,7 +10,7 @@
     -->
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.eclipse.score</groupId>
+		<groupId>org.openscore</groupId>
 		<artifactId>queue</artifactId>
 		<version>0.1.245-SNAPSHOT</version>
 	</parent>
