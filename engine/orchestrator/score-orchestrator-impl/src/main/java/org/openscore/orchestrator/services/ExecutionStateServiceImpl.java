@@ -13,7 +13,7 @@ package org.openscore.orchestrator.services;
 import org.openscore.facade.execution.ExecutionActionException;
 import org.openscore.facade.execution.ExecutionActionResult;
 import org.eclipse.score.facade.execution.ExecutionStatus;
-import org.eclipse.score.facade.entities.Execution;
+import org.openscore.facade.entities.Execution;
 import org.openscore.orchestrator.entities.ExecutionState;
 import org.openscore.orchestrator.repositories.ExecutionStateRepository;
 import org.apache.commons.lang.StringUtils;

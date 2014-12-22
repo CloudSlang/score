@@ -46,7 +46,7 @@ import org.openscore.engine.data.DataBaseDetector;
 import org.openscore.engine.data.HiloFactoryBean;
 import org.openscore.engine.data.SqlInQueryReader;
 import org.openscore.engine.data.SqlUtils;
-import org.eclipse.score.job.ScoreEngineJobsImpl;
+import org.openscore.job.ScoreEngineJobsImpl;
 import org.eclipse.score.schema.context.ScoreDatabaseContext;
 import org.eclipse.score.schema.context.ScoreDefaultDatasourceContext;
 import org.openscore.orchestrator.services.ExecutionStateServiceImpl;

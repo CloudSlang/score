@@ -10,7 +10,7 @@
 
 package org.openscore.orchestrator.services;
 
-import org.eclipse.score.facade.entities.Execution;
+import org.openscore.facade.entities.Execution;
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedInputStream;

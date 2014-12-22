@@ -8,9 +8,9 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.facade.services;
+package org.openscore.facade.services;
 
-import org.eclipse.score.facade.entities.RunningExecutionPlan;
+import org.openscore.facade.entities.RunningExecutionPlan;
 import org.eclipse.score.api.ExecutionPlan;
 
 /**

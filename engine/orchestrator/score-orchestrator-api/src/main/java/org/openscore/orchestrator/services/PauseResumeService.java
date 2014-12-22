@@ -12,7 +12,7 @@ package org.openscore.orchestrator.services;
 
 import org.openscore.facade.execution.ExecutionSummary;
 import org.openscore.facade.execution.PauseReason;
-import org.eclipse.score.facade.entities.Execution;
+import org.openscore.facade.entities.Execution;
 
 import java.io.Serializable;
 import java.util.List;

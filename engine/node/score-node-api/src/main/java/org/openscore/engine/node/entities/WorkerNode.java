@@ -12,7 +12,7 @@ package org.openscore.engine.node.entities;
 
 import org.eclipse.score.api.nodes.WorkerStatus;
 import org.openscore.engine.data.AbstractIdentifiable;
-import org.eclipse.score.facade.TempConstants;
+import org.openscore.facade.TempConstants;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;

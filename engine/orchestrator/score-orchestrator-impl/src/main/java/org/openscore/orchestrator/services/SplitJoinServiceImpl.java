@@ -15,7 +15,7 @@ import org.eclipse.score.api.EndBranchDataContainer;
 import org.openscore.engine.queue.entities.ExecutionMessage;
 import org.openscore.engine.queue.entities.ExecutionMessageConverter;
 import org.openscore.engine.queue.services.QueueDispatcherService;
-import org.eclipse.score.facade.entities.Execution;
+import org.openscore.facade.entities.Execution;
 import org.eclipse.score.facade.execution.ExecutionStatus;
 import org.openscore.orchestrator.entities.BranchContexts;
 import org.openscore.orchestrator.entities.FinishedBranch;

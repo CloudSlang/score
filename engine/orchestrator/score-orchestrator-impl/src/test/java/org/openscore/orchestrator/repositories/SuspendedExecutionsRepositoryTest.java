@@ -10,12 +10,10 @@
 
 package org.openscore.orchestrator.repositories;
 
-import org.eclipse.score.facade.entities.Execution;
+import org.openscore.facade.entities.Execution;
 import org.openscore.orchestrator.entities.BranchContexts;
 import org.openscore.orchestrator.entities.FinishedBranch;
 import org.openscore.orchestrator.entities.SuspendedExecution;
-import org.openscore.orchestrator.repositories.FinishedBranchRepository;
-import org.openscore.orchestrator.repositories.SuspendedExecutionsRepository;
 import org.openscore.orchestrator.services.ExecutionSerializationUtil;
 import org.openscore.engine.data.DataBaseDetector;
 import org.openscore.engine.data.SqlUtils;

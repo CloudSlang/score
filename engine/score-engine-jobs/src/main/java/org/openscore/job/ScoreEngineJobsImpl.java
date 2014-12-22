@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.job;
+package org.openscore.job;
 
 import org.openscore.engine.queue.services.cleaner.QueueCleanerService;
 import org.openscore.engine.queue.services.recovery.ExecutionRecoveryService;

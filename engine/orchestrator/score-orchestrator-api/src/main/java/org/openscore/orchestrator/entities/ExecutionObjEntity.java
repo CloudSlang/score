@@ -10,7 +10,7 @@
 
 package org.openscore.orchestrator.entities;
 
-import org.eclipse.score.facade.entities.Execution;
+import org.openscore.facade.entities.Execution;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;

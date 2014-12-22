@@ -10,8 +10,8 @@
 
 package org.openscore.orchestrator.services;
 
-import org.eclipse.score.facade.entities.RunningExecutionPlan;
-import org.eclipse.score.facade.services.RunningExecutionPlanService;
+import org.openscore.facade.entities.RunningExecutionPlan;
+import org.openscore.facade.services.RunningExecutionPlanService;
 import org.eclipse.score.api.ExecutionPlan;
 import org.openscore.orchestrator.repositories.RunningExecutionPlanRepository;
 import junit.framework.Assert;
@@ -21,7 +21,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.openscore.orchestrator.services.RunningExecutionPlanServiceImpl;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;

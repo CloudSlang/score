@@ -12,7 +12,7 @@ package org.openscore.orchestrator.services;
 
 
 import org.eclipse.score.facade.execution.ExecutionStatus;
-import org.eclipse.score.facade.entities.Execution;
+import org.openscore.facade.entities.Execution;
 import org.openscore.orchestrator.entities.ExecutionState;
 import org.openscore.orchestrator.repositories.ExecutionStateRepository;
 import org.junit.Rule;
@@ -22,9 +22,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.openscore.orchestrator.services.ExecutionSerializationUtil;
-import org.openscore.orchestrator.services.ExecutionStateService;
-import org.openscore.orchestrator.services.ExecutionStateServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

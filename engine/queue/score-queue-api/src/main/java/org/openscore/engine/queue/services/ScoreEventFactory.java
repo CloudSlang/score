@@ -10,7 +10,7 @@
 
 package org.openscore.engine.queue.services;
 
-import org.eclipse.score.facade.entities.Execution;
+import org.openscore.facade.entities.Execution;
 import org.eclipse.score.events.ScoreEvent;
 
 /**

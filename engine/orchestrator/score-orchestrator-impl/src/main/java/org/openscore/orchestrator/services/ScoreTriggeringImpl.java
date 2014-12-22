@@ -19,8 +19,8 @@ import org.openscore.engine.queue.entities.ExecutionMessage;
 import org.openscore.engine.queue.entities.ExecutionMessageConverter;
 import org.openscore.engine.queue.entities.Payload;
 import org.openscore.engine.queue.services.QueueDispatcherService;
-import org.eclipse.score.facade.entities.Execution;
-import org.eclipse.score.facade.services.RunningExecutionPlanService;
+import org.openscore.facade.entities.Execution;
+import org.openscore.facade.services.RunningExecutionPlanService;
 import org.eclipse.score.lang.SystemContext;
 import org.springframework.beans.factory.annotation.Autowired;
 

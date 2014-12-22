@@ -14,7 +14,7 @@ import org.openscore.engine.queue.entities.ExecutionMessage;
 import org.openscore.engine.queue.entities.ExecutionMessageConverter;
 import org.eclipse.score.events.EventBus;
 import org.eclipse.score.events.ScoreEvent;
-import org.eclipse.score.facade.entities.Execution;
+import org.openscore.facade.entities.Execution;
 import org.openscore.facade.execution.ExecutionSummary;
 import org.openscore.facade.execution.PauseReason;
 import org.openscore.orchestrator.services.ExecutionStateService;

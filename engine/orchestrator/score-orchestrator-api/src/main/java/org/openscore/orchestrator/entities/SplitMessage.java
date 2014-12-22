@@ -10,7 +10,7 @@
 
 package org.openscore.orchestrator.entities;
 
-import org.eclipse.score.facade.entities.Execution;
+import org.openscore.facade.entities.Execution;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.EqualsBuilder;
 

@@ -33,7 +33,7 @@ import org.openscore.engine.queue.entities.ExecutionMessage;
 import org.openscore.engine.queue.entities.ExecutionMessageConverter;
 import org.openscore.engine.queue.entities.Payload;
 import org.openscore.engine.queue.services.QueueStateIdGeneratorService;
-import org.eclipse.score.facade.entities.Execution;
+import org.openscore.facade.entities.Execution;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;

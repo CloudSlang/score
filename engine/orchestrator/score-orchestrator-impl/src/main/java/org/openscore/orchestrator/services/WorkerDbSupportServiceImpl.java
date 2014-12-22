@@ -10,9 +10,9 @@
 
 package org.openscore.orchestrator.services;
 
-import org.eclipse.score.facade.entities.RunningExecutionPlan;
-import org.eclipse.score.facade.services.RunningExecutionPlanService;
-import org.eclipse.score.worker.management.services.dbsupport.WorkerDbSupportService;
+import org.openscore.facade.entities.RunningExecutionPlan;
+import org.openscore.facade.services.RunningExecutionPlanService;
+import org.openscore.worker.management.services.dbsupport.WorkerDbSupportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 

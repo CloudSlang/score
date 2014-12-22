@@ -29,7 +29,7 @@ import org.openscore.orchestrator.services.CancelExecutionService;
 import org.openscore.orchestrator.services.OrchestratorDispatcherService;
 import org.openscore.orchestrator.services.PauseResumeService;
 import org.eclipse.score.worker.management.services.WorkerManager;
-import org.eclipse.score.worker.management.services.dbsupport.WorkerDbSupportService;
+import org.openscore.worker.management.services.dbsupport.WorkerDbSupportService;
 
 import static org.mockito.Mockito.mock;
 

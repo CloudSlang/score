@@ -8,8 +8,8 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.worker.management.services.dbsupport;
-import org.eclipse.score.facade.entities.RunningExecutionPlan;
+package org.openscore.worker.management.services.dbsupport;
+import org.openscore.facade.entities.RunningExecutionPlan;
 
 /**
  * Created by IntelliJ IDEA.

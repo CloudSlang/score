@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.facade.entities;
+package org.openscore.facade.entities;
 
 import org.eclipse.score.api.ExecutionPlan;
 import org.apache.log4j.Logger;

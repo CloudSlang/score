@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.job;
+package org.openscore.job;
 
 /**
  * User: wahnonm

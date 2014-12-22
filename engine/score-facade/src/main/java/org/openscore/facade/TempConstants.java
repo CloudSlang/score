@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.facade;
+package org.openscore.facade;
 
 /**
  * Created by peerme on 03/09/2014.
