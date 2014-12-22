@@ -12,7 +12,7 @@
 	<parent>
 		<groupId>org.openscore</groupId>
 		<artifactId>engine</artifactId>
-		<version>0.1.246-SNAPSHOT</version>
+		<version>0.1.246</version>
 	</parent>
 
 	<artifactId>data</artifactId>
