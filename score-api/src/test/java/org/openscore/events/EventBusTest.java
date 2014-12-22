@@ -22,7 +22,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class EventBusTest {
-    //TODO - FIX THIS!!!!
+
 	private ScoreEventListener eventHandler = Mockito.mock(ScoreEventListener.class);
 
 	private EventBus eventBus = new EventBusImpl();
