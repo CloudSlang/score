@@ -11,7 +11,7 @@
 	<parent>
 		<artifactId>worker</artifactId>
 		<groupId>org.openscore</groupId>
-		<version>0.1.245-SNAPSHOT</version>
+		<version>0.1.245</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
