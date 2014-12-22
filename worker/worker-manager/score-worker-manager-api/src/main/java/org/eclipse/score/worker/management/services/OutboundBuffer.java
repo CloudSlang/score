@@ -10,7 +10,7 @@
 
 package org.eclipse.score.worker.management.services;
 
-import org.eclipse.score.orchestrator.entities.Message;
+import org.openscore.orchestrator.entities.Message;
 
 /**
  * User: zruya

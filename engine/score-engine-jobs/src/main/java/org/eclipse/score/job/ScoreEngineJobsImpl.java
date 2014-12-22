@@ -13,7 +13,7 @@ package org.eclipse.score.job;
 import org.eclipse.score.engine.queue.services.cleaner.QueueCleanerService;
 import org.eclipse.score.engine.queue.services.recovery.ExecutionRecoveryService;
 import org.openscore.engine.versioning.services.VersionService;
-import org.eclipse.score.orchestrator.services.SplitJoinService;
+import org.openscore.orchestrator.services.SplitJoinService;
 import org.openscore.engine.partitions.services.PartitionTemplate;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;

@@ -18,7 +18,7 @@ import org.eclipse.score.engine.queue.entities.Payload;
 import org.eclipse.score.engine.queue.services.QueueStateIdGeneratorService;
 import org.eclipse.score.facade.TempConstants;
 import org.eclipse.score.facade.entities.Execution;
-import org.eclipse.score.orchestrator.entities.SplitMessage;
+import org.openscore.orchestrator.entities.SplitMessage;
 import org.eclipse.score.worker.execution.services.ExecutionService;
 import org.eclipse.score.worker.management.WorkerConfigurationService;
 import org.apache.commons.lang.StringUtils;

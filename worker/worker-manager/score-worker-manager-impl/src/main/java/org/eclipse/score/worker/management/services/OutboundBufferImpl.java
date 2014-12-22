@@ -11,8 +11,8 @@
 package org.eclipse.score.worker.management.services;
 
 import ch.lambdaj.group.Group;
-import org.eclipse.score.orchestrator.entities.Message;
-import org.eclipse.score.orchestrator.services.OrchestratorDispatcherService;
+import org.openscore.orchestrator.entities.Message;
+import org.openscore.orchestrator.services.OrchestratorDispatcherService;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

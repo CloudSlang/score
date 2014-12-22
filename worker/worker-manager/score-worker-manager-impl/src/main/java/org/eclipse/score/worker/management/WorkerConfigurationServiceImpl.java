@@ -17,8 +17,8 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.openscore.engine.node.services.WorkerNodeService;
-import org.eclipse.score.orchestrator.services.CancelExecutionService;
-import org.eclipse.score.orchestrator.services.PauseResumeService;
+import org.openscore.orchestrator.services.CancelExecutionService;
+import org.openscore.orchestrator.services.PauseResumeService;
 
 /**
  * @author kravtsov

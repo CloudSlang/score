@@ -25,9 +25,9 @@ import org.eclipse.score.engine.queue.entities.ExecutionMessageConverter;
 import org.eclipse.score.engine.queue.services.QueueDispatcherService;
 import org.eclipse.score.engine.queue.services.QueueStateIdGeneratorService;
 import org.eclipse.score.engine.queue.services.ScoreEventFactory;
-import org.eclipse.score.orchestrator.services.CancelExecutionService;
-import org.eclipse.score.orchestrator.services.OrchestratorDispatcherService;
-import org.eclipse.score.orchestrator.services.PauseResumeService;
+import org.openscore.orchestrator.services.CancelExecutionService;
+import org.openscore.orchestrator.services.OrchestratorDispatcherService;
+import org.openscore.orchestrator.services.PauseResumeService;
 import org.eclipse.score.worker.management.services.WorkerManager;
 import org.eclipse.score.worker.management.services.dbsupport.WorkerDbSupportService;
 

@@ -10,7 +10,7 @@
 
 package org.eclipse.score.engine.queue.entities;
 
-import org.eclipse.score.orchestrator.entities.Message;
+import org.openscore.orchestrator.entities.Message;
 import org.junit.Test;
 
 import java.util.Arrays;

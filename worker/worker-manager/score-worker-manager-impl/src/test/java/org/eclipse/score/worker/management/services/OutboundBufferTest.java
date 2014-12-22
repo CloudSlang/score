@@ -10,8 +10,8 @@
 
 package org.eclipse.score.worker.management.services;
 
-import org.eclipse.score.orchestrator.entities.Message;
-import org.eclipse.score.orchestrator.services.OrchestratorDispatcherService;
+import org.openscore.orchestrator.entities.Message;
+import org.openscore.orchestrator.services.OrchestratorDispatcherService;
 import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.Before;

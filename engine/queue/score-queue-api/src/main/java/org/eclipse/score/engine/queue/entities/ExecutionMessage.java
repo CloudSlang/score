@@ -14,7 +14,7 @@ package org.eclipse.score.engine.queue.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.openscore.engine.node.entities.WorkerNode;
 import org.eclipse.score.facade.entities.Execution;
-import org.eclipse.score.orchestrator.entities.Message;
+import org.openscore.orchestrator.entities.Message;
 import org.apache.commons.lang.builder.EqualsBuilder;
 
 import java.util.Arrays;
