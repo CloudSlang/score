@@ -11,7 +11,7 @@
 package org.eclipse.score.orchestrator.entities;
 
 import org.eclipse.score.facade.entities.Execution;
-import org.eclipse.score.engine.data.AbstractIdentifiable;
+import org.openscore.engine.data.AbstractIdentifiable;
 
 import javax.persistence.*;
 import java.util.ArrayList;

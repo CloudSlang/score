@@ -15,7 +15,7 @@ import org.eclipse.score.engine.node.entities.WorkerNode;
 import org.eclipse.score.engine.node.services.WorkerLockService;
 import org.eclipse.score.engine.node.services.WorkerNodeService;
 import org.eclipse.score.engine.queue.services.ExecutionQueueService;
-import org.eclipse.score.engine.versioning.services.VersionService;
+import org.openscore.engine.versioning.services.VersionService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

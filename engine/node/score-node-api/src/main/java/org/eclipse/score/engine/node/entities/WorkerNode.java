@@ -11,7 +11,7 @@
 package org.eclipse.score.engine.node.entities;
 
 import org.eclipse.score.api.nodes.WorkerStatus;
-import org.eclipse.score.engine.data.AbstractIdentifiable;
+import org.openscore.engine.data.AbstractIdentifiable;
 import org.eclipse.score.facade.TempConstants;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;

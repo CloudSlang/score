@@ -10,7 +10,7 @@
 
 package org.eclipse.score.engine.queue.services;
 
-import org.eclipse.score.engine.data.IdentityGenerator;
+import org.openscore.engine.data.IdentityGenerator;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;

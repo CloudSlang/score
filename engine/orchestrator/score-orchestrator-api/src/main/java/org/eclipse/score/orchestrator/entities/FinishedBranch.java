@@ -10,7 +10,7 @@
 
 package org.eclipse.score.orchestrator.entities;
 
-import org.eclipse.score.engine.data.AbstractIdentifiable;
+import org.openscore.engine.data.AbstractIdentifiable;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.hibernate.annotations.Immutable;

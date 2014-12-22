@@ -17,7 +17,7 @@ import org.eclipse.score.engine.queue.entities.ExecutionMessageConverter;
 import org.eclipse.score.engine.queue.services.QueueDispatcherService;
 import org.eclipse.score.api.ExecutionPlan;
 import org.eclipse.score.api.TriggeringProperties;
-import org.eclipse.score.engine.data.IdentityGenerator;
+import org.openscore.engine.data.IdentityGenerator;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;

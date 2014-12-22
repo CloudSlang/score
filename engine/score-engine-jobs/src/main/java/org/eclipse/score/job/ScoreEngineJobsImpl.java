@@ -12,9 +12,9 @@ package org.eclipse.score.job;
 
 import org.eclipse.score.engine.queue.services.cleaner.QueueCleanerService;
 import org.eclipse.score.engine.queue.services.recovery.ExecutionRecoveryService;
-import org.eclipse.score.engine.versioning.services.VersionService;
+import org.openscore.engine.versioning.services.VersionService;
 import org.eclipse.score.orchestrator.services.SplitJoinService;
-import org.eclipse.score.engine.partitions.services.PartitionTemplate;
+import org.openscore.engine.partitions.services.PartitionTemplate;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

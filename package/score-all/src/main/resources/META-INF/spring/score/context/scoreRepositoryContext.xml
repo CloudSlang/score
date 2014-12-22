@@ -10,10 +10,10 @@
 
 	<jpa:repositories base-package="org.eclipse.score" query-lookup-strategy="create-if-not-found">
 		<repository:include-filter type="regex" expression="org.eclipse.score.engine.node.repositories.WorkerNodeRepository"/>
-		<repository:include-filter type="regex" expression="org.eclipse.score.engine.versioning.repositories.VersionRepository"/>
+		<repository:include-filter type="regex" expression="org.openscore.engine.versioning.repositories.VersionRepository"/>
 		<repository:include-filter type="regex" expression="org.eclipse.score.orchestrator.repositories.SuspendedExecutionsRepository"/>
 		<repository:include-filter type="regex" expression="org.eclipse.score.orchestrator.repositories.ExecutionInterruptsRepository"/>
-		<repository:include-filter type="regex" expression="org.eclipse.score.engine.partitions.repositories.PartitionGroupRepository"/>
+		<repository:include-filter type="regex" expression="org.openscore.engine.partitions.repositories.PartitionGroupRepository"/>
 		<repository:include-filter type="regex" expression="org.eclipse.score.orchestrator.repositories.RunningExecutionPlanRepository"/>
 		<repository:include-filter type="regex" expression="org.eclipse.score.orchestrator.repositories.FinishedBranchRepository"/>
 		<repository:include-filter type="regex" expression="org.eclipse.score.orchestrator.repositories.ExecutionStateRepository"/>

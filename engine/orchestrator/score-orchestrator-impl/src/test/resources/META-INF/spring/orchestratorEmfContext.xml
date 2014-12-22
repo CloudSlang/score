@@ -10,7 +10,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
        	      p:dataSource-ref="dataSource"
        	      p:changeLog="classpath:/META-INF/database/test-changes.xml"/>
 
-	<bean id="hiloFactoryBean" class="org.eclipse.score.engine.data.HiloFactoryBean" depends-on="liquibase"/>
+	<bean id="hiloFactoryBean" class="org.openscore.engine.data.HiloFactoryBean" depends-on="liquibase"/>
 
     <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
           p:jpaProperties-ref="hibernateProperties"

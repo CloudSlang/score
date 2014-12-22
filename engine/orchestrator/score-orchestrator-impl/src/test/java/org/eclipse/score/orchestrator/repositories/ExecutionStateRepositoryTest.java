@@ -11,7 +11,7 @@
 package org.eclipse.score.orchestrator.repositories;
 
 import org.eclipse.score.facade.execution.ExecutionStatus;
-import org.eclipse.score.engine.data.SimpleHiloIdentifierGenerator;
+import org.openscore.engine.data.SimpleHiloIdentifierGenerator;
 import org.eclipse.score.orchestrator.entities.ExecutionState;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;

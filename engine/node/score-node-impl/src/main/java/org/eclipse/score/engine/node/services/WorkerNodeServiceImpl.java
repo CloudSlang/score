@@ -15,7 +15,7 @@ import com.google.common.collect.Multimap;
 import org.eclipse.score.api.nodes.WorkerStatus;
 import org.eclipse.score.engine.node.entities.WorkerNode;
 import org.eclipse.score.engine.node.repositories.WorkerNodeRepository;
-import org.eclipse.score.engine.versioning.services.VersionService;
+import org.openscore.engine.versioning.services.VersionService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;

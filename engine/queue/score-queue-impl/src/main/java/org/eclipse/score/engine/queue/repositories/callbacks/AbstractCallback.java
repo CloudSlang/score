@@ -10,7 +10,7 @@
 
 package org.eclipse.score.engine.queue.repositories.callbacks;
 
-import org.eclipse.score.engine.partitions.services.PartitionCallback;
+import org.openscore.engine.partitions.services.PartitionCallback;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;

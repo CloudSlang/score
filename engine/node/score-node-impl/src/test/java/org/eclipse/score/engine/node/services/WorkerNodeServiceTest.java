@@ -11,10 +11,10 @@
 package org.eclipse.score.engine.node.services;
 
 import org.eclipse.score.api.nodes.WorkerStatus;
-import org.eclipse.score.engine.data.SimpleHiloIdentifierGenerator;
+import org.openscore.engine.data.SimpleHiloIdentifierGenerator;
 import org.eclipse.score.engine.node.entities.WorkerNode;
 import org.eclipse.score.engine.node.repositories.WorkerNodeRepository;
-import org.eclipse.score.engine.versioning.services.VersionService;
+import org.openscore.engine.versioning.services.VersionService;
 import junit.framework.Assert;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;

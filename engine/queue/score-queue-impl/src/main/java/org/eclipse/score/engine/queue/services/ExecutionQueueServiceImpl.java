@@ -15,7 +15,7 @@ import org.eclipse.score.engine.queue.entities.ExecutionMessage;
 import org.eclipse.score.engine.queue.entities.Payload;
 import org.eclipse.score.engine.queue.repositories.ExecutionQueueRepository;
 import org.eclipse.score.engine.queue.services.assigner.ExecutionAssignerService;
-import org.eclipse.score.engine.versioning.services.VersionService;
+import org.openscore.engine.versioning.services.VersionService;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

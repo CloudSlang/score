@@ -12,7 +12,7 @@ package org.eclipse.score.orchestrator.services;
 
 import org.eclipse.score.api.ScoreDeprecated;
 import org.eclipse.score.api.TriggeringProperties;
-import org.eclipse.score.engine.data.IdentityGenerator;
+import org.openscore.engine.data.IdentityGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**

@@ -10,7 +10,7 @@
 
 package org.eclipse.score.engine.node.entities;
 
-import org.eclipse.score.engine.data.AbstractIdentifiable;
+import org.openscore.engine.data.AbstractIdentifiable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

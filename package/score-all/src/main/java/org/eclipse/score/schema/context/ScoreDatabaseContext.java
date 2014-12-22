@@ -10,7 +10,7 @@
 
 package org.eclipse.score.schema.context;
 
-import org.eclipse.score.engine.data.SimpleHiloIdentifierGenerator;
+import org.openscore.engine.data.SimpleHiloIdentifierGenerator;
 import org.hibernate.ejb.HibernatePersistence;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.DependsOn;
@@ -46,7 +46,7 @@ public class ScoreDatabaseContext {
         props.setProperty("hibernate.cache.use_second_level_cache", Boolean.FALSE.toString());
         props.setProperty("hibernate.order_updates", Boolean.TRUE.toString());
         props.setProperty("hibernate.order_inserts", Boolean.TRUE.toString());
-        props.setProperty("hibernate.dialect_resolvers", "org.eclipse.score.engine.dialects.ScoreDialectResolver");
+        props.setProperty("hibernate.dialect_resolvers", "ScoreDialectResolver");
         return props;
     }
 

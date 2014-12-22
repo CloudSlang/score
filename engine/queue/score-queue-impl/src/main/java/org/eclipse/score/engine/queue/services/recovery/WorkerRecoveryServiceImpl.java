@@ -16,7 +16,7 @@ import org.eclipse.score.engine.node.services.LoginListener;
 import org.eclipse.score.engine.node.services.WorkerLockService;
 import org.eclipse.score.engine.node.services.WorkerNodeService;
 import org.eclipse.score.engine.queue.services.ExecutionQueueService;
-import org.eclipse.score.engine.versioning.services.VersionService;
+import org.openscore.engine.versioning.services.VersionService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
