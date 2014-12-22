@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.samples;
+package org.openscore.samples;
 
 import com.google.common.collect.Sets;
 import org.openscore.api.ControlActionMetadata;
@@ -26,7 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openscore.samples.controlactions.BranchActions;
-import org.eclipse.score.samples.controlactions.SessionDataActions;
+import org.openscore.samples.controlactions.SessionDataActions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -294,7 +294,7 @@ public class StandAloneTest {
         ExecutionStep executionPutDataStep = createPutDataOnSessionStep(0L, 1L);
         executionPlan.addStep(executionPutDataStep);
 
-//        ExecutionStep sleepDataStep = createExecutionStep(1L, "org.eclipse.score.samples.controlactions.SessionDataActions", "sleepAction", new HashMap<String, Serializable>());
+//        ExecutionStep sleepDataStep = createExecutionStep(1L, "SessionDataActions", "sleepAction", new HashMap<String, Serializable>());
 //        addNavigationToExecutionStep(2L, navigationActionClassName, simpleNavigationMethodName, sleepDataStep);
 //        executionPlan.addStep(sleepDataStep);
 
@@ -304,11 +304,11 @@ public class StandAloneTest {
     }
 
     private static ExecutionStep createGetDataFromSessionStep(Long stepId) {
-        return createExecutionStep(stepId, "org.eclipse.score.samples.controlactions.SessionDataActions", "getObject", new HashMap<String, Serializable>());
+        return createExecutionStep(stepId, "SessionDataActions", "getObject", new HashMap<String, Serializable>());
     }
 
     private static ExecutionStep createPutDataOnSessionStep(Long stepId, Long nextStepId) {
-        ExecutionStep executionPutDataStep = createExecutionStep(stepId, "org.eclipse.score.samples.controlactions.SessionDataActions", "putObject", new HashMap<String, Serializable>());
+        ExecutionStep executionPutDataStep = createExecutionStep(stepId, "SessionDataActions", "putObject", new HashMap<String, Serializable>());
         if(nextStepId != null)
             addNavigationToExecutionStep(nextStepId, navigationActionClassName, simpleNavigationMethodName, executionPutDataStep);
         return executionPutDataStep;
