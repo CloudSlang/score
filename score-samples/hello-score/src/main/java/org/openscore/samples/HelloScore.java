@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.samples;
+package org.openscore.samples;
 
 import org.openscore.api.ControlActionMetadata;
 import org.openscore.api.ExecutionPlan;
@@ -85,15 +85,15 @@ public class HelloScore {
         executionPlan.setBeginStep(0L);
 
         ExecutionStep executionStep = new ExecutionStep(0L);
-        executionStep.setAction(new ControlActionMetadata("org.eclipse.score.samples.controlactions.ConsoleControlActions", "echoHelloScore"));
+        executionStep.setAction(new ControlActionMetadata("ConsoleControlActions", "echoHelloScore"));
         executionStep.setActionData(new HashMap<String, Serializable>());
-        executionStep.setNavigation(new ControlActionMetadata("org.eclipse.score.samples.controlactions.NavigationActions", "nextStepNavigation"));
+        executionStep.setNavigation(new ControlActionMetadata("NavigationActions", "nextStepNavigation"));
         executionStep.setNavigationData(new HashMap<String, Serializable>());
 
         executionPlan.addStep(executionStep);
 
         ExecutionStep executionStep2 = new ExecutionStep(1L);
-        executionStep2.setAction(new ControlActionMetadata("org.eclipse.score.samples.controlactions.ConsoleControlActions", "echoHelloScore"));
+        executionStep2.setAction(new ControlActionMetadata("ConsoleControlActions", "echoHelloScore"));
         executionStep2.setActionData(new HashMap<String, Serializable>());
 
         executionPlan.addStep(executionStep2);

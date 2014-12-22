@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.samples.controlactions;
+package org.openscore.samples.controlactions;
 
 /**
  * User: stoneo

@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.samples.controlactions;
+package org.openscore.samples.controlactions;
 
 import org.openscore.api.EndBranchDataContainer;
 import org.openscore.lang.ExecutionRuntimeServices;

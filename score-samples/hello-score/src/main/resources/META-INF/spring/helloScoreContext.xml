@@ -8,6 +8,6 @@
 
     <score:worker uuid="-1"/>
 
-    <bean class="org.eclipse.score.samples.HelloScore"/>
+    <bean class="org.openscore.samples.HelloScore"/>
 
 </beans>
