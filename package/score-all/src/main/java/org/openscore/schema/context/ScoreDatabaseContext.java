@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.schema.context;
+package org.openscore.schema.context;
 
 import org.openscore.engine.data.SimpleHiloIdentifierGenerator;
 import org.hibernate.ejb.HibernatePersistence;

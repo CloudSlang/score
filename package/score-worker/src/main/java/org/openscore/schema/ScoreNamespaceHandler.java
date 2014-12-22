@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.schema;
+package org.openscore.schema;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
@@ -28,7 +28,7 @@ public class ScoreNamespaceHandler extends NamespaceHandlerSupport {
 
 	private Map<String,String> parsers = new HashMap<String,String>(){{
 		put("engine", "org.eclipse.score.schema.EngineBeanDefinitionParser");
-		put("worker", "org.eclipse.score.schema.WorkerBeanDefinitionParser");
+		put("worker", "WorkerBeanDefinitionParser");
 	}};
 
 	@Override

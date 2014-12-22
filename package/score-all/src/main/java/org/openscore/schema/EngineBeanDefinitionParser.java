@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.schema;
+package org.openscore.schema;
 
 import org.openscore.engine.node.services.WorkerLockServiceImpl;
 import org.openscore.engine.node.services.WorkerNodeServiceImpl;
@@ -47,8 +47,8 @@ import org.openscore.engine.data.HiloFactoryBean;
 import org.openscore.engine.data.SqlInQueryReader;
 import org.openscore.engine.data.SqlUtils;
 import org.openscore.job.ScoreEngineJobsImpl;
-import org.eclipse.score.schema.context.ScoreDatabaseContext;
-import org.eclipse.score.schema.context.ScoreDefaultDatasourceContext;
+import org.openscore.schema.context.ScoreDatabaseContext;
+import org.openscore.schema.context.ScoreDefaultDatasourceContext;
 import org.openscore.orchestrator.services.ExecutionStateServiceImpl;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;

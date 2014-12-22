@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.schema;
+package org.openscore.schema;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;

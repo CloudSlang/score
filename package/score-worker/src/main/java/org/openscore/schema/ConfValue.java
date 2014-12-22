@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.schema;
+package org.openscore.schema;
 
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;

@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.eclipse.score.schema;
+package org.openscore.schema;
 
 import org.eclipse.score.events.EventBusImpl;
 import org.eclipse.score.worker.execution.reflection.ReflectionAdapterImpl;
