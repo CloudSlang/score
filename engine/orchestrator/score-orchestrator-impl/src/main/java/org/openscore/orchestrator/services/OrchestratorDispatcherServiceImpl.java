@@ -12,14 +12,12 @@ package org.openscore.orchestrator.services;
 
 import org.openscore.engine.node.services.WorkerLockService;
 import org.openscore.engine.node.services.WorkerNodeService;
-import org.eclipse.score.engine.queue.entities.ExecutionMessage;
-import org.eclipse.score.engine.queue.services.QueueDispatcherService;
+import org.openscore.engine.queue.entities.ExecutionMessage;
+import org.openscore.engine.queue.services.QueueDispatcherService;
 import org.openscore.orchestrator.entities.SplitMessage;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.hamcrest.Matchers;
-import org.openscore.orchestrator.services.OrchestratorDispatcherService;
-import org.openscore.orchestrator.services.SplitJoinService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 

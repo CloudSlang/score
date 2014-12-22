@@ -12,9 +12,9 @@ package org.openscore.orchestrator.services;
 
 import org.eclipse.score.facade.entities.RunningExecutionPlan;
 import org.eclipse.score.facade.services.RunningExecutionPlanService;
-import org.eclipse.score.engine.queue.entities.ExecutionMessage;
-import org.eclipse.score.engine.queue.entities.ExecutionMessageConverter;
-import org.eclipse.score.engine.queue.services.QueueDispatcherService;
+import org.openscore.engine.queue.entities.ExecutionMessage;
+import org.openscore.engine.queue.entities.ExecutionMessageConverter;
+import org.openscore.engine.queue.services.QueueDispatcherService;
 import org.eclipse.score.api.ExecutionPlan;
 import org.eclipse.score.api.TriggeringProperties;
 import org.openscore.engine.data.IdentityGenerator;
@@ -23,9 +23,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.openscore.orchestrator.services.ExecutionStateService;
-import org.openscore.orchestrator.services.ScoreTriggering;
-import org.openscore.orchestrator.services.ScoreTriggeringImpl;
 
 import java.util.HashMap;
 import java.util.Map;

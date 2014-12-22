@@ -11,8 +11,8 @@
 package org.eclipse.score.worker.management.services;
 
 import org.eclipse.score.worker.execution.services.ExecutionService;
-import org.eclipse.score.engine.queue.entities.ExecutionMessageConverter;
-import org.eclipse.score.engine.queue.services.QueueStateIdGeneratorService;
+import org.openscore.engine.queue.entities.ExecutionMessageConverter;
+import org.openscore.engine.queue.services.QueueStateIdGeneratorService;
 
 import org.eclipse.score.worker.management.WorkerConfigurationService;
 import org.springframework.beans.factory.FactoryBean;

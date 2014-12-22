@@ -13,7 +13,8 @@ package org.openscore.orchestrator.services;
 import org.openscore.engine.node.entities.WorkerNode;
 import org.openscore.engine.node.services.WorkerLockService;
 import org.openscore.engine.node.services.WorkerNodeService;
-import org.eclipse.score.engine.queue.entities.ExecutionMessage;
+import org.openscore.engine.queue.entities.ExecutionMessage;
+import org.openscore.engine.queue.services.QueueDispatcherService;
 import org.openscore.orchestrator.entities.Message;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,9 +23,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.openscore.orchestrator.services.OrchestratorDispatcherService;
-import org.openscore.orchestrator.services.OrchestratorDispatcherServiceImpl;
-import org.openscore.orchestrator.services.SplitJoinService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -59,7 +57,7 @@ public class OrchestratorDispatcherServiceTest {
     WorkerLockService workerLockService;
 
     @Mock
-    private org.eclipse.score.engine.queue.services.QueueDispatcherService queueDispatcher;
+    private QueueDispatcherService queueDispatcher;
 
     @Mock
     private SplitJoinService splitJoinService;

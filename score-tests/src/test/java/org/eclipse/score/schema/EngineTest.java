@@ -46,8 +46,8 @@ import org.eclipse.score.api.Score;
 import org.eclipse.score.api.TriggeringProperties;
 import org.openscore.engine.data.SimpleHiloIdentifierGenerator;
 import org.openscore.engine.node.services.WorkerNodeService;
-import org.eclipse.score.engine.queue.entities.ExecutionMessage;
-import org.eclipse.score.engine.queue.services.QueueDispatcherService;
+import org.openscore.engine.queue.entities.ExecutionMessage;
+import org.openscore.engine.queue.services.QueueDispatcherService;
 import org.eclipse.score.events.EventBus;
 
 import liquibase.integration.spring.SpringLiquibase;

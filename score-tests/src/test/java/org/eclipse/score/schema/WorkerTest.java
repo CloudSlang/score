@@ -21,10 +21,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import org.openscore.engine.node.services.WorkerNodeService;
-import org.eclipse.score.engine.queue.entities.ExecutionMessageConverter;
-import org.eclipse.score.engine.queue.services.QueueDispatcherService;
-import org.eclipse.score.engine.queue.services.QueueStateIdGeneratorService;
-import org.eclipse.score.engine.queue.services.ScoreEventFactory;
+import org.openscore.engine.queue.entities.ExecutionMessageConverter;
+import org.openscore.engine.queue.services.QueueDispatcherService;
+import org.openscore.engine.queue.services.QueueStateIdGeneratorService;
+import org.openscore.engine.queue.services.ScoreEventFactory;
 import org.openscore.orchestrator.services.CancelExecutionService;
 import org.openscore.orchestrator.services.OrchestratorDispatcherService;
 import org.openscore.orchestrator.services.PauseResumeService;

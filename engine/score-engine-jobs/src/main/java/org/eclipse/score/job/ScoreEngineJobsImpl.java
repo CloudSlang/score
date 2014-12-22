@@ -10,8 +10,8 @@
 
 package org.eclipse.score.job;
 
-import org.eclipse.score.engine.queue.services.cleaner.QueueCleanerService;
-import org.eclipse.score.engine.queue.services.recovery.ExecutionRecoveryService;
+import org.openscore.engine.queue.services.cleaner.QueueCleanerService;
+import org.openscore.engine.queue.services.recovery.ExecutionRecoveryService;
 import org.openscore.engine.versioning.services.VersionService;
 import org.openscore.orchestrator.services.SplitJoinService;
 import org.openscore.engine.partitions.services.PartitionTemplate;

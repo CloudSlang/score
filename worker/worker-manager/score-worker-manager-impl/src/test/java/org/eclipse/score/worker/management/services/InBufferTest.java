@@ -10,7 +10,7 @@
 
 package org.eclipse.score.worker.management.services;
 
-import org.eclipse.score.engine.queue.services.QueueDispatcherService;
+import org.openscore.engine.queue.services.QueueDispatcherService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -10,9 +10,9 @@
 
 package org.eclipse.score.worker.management.services;
 
-import org.eclipse.score.engine.queue.entities.ExecStatus;
-import org.eclipse.score.engine.queue.entities.ExecutionMessage;
-import org.eclipse.score.engine.queue.services.QueueDispatcherService;
+import org.openscore.engine.queue.entities.ExecStatus;
+import org.openscore.engine.queue.entities.ExecutionMessage;
+import org.openscore.engine.queue.services.QueueDispatcherService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

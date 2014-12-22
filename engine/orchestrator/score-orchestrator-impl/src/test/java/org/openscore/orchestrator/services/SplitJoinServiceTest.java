@@ -11,10 +11,10 @@
 package org.openscore.orchestrator.services;
 
 import org.eclipse.score.api.EndBranchDataContainer;
-import org.eclipse.score.engine.queue.entities.ExecStatus;
-import org.eclipse.score.engine.queue.entities.ExecutionMessage;
-import org.eclipse.score.engine.queue.entities.ExecutionMessageConverter;
-import org.eclipse.score.engine.queue.services.QueueDispatcherService;
+import org.openscore.engine.queue.entities.ExecStatus;
+import org.openscore.engine.queue.entities.ExecutionMessage;
+import org.openscore.engine.queue.entities.ExecutionMessageConverter;
+import org.openscore.engine.queue.services.QueueDispatcherService;
 import org.eclipse.score.facade.entities.Execution;
 import org.openscore.orchestrator.entities.BranchContexts;
 import org.openscore.orchestrator.entities.FinishedBranch;
@@ -32,8 +32,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.openscore.orchestrator.services.SplitJoinService;
-import org.openscore.orchestrator.services.SplitJoinServiceImpl;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;

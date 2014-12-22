@@ -28,11 +28,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import org.eclipse.score.engine.queue.entities.ExecStatus;
-import org.eclipse.score.engine.queue.entities.ExecutionMessage;
-import org.eclipse.score.engine.queue.entities.ExecutionMessageConverter;
-import org.eclipse.score.engine.queue.entities.Payload;
-import org.eclipse.score.engine.queue.services.QueueStateIdGeneratorService;
+import org.openscore.engine.queue.entities.ExecStatus;
+import org.openscore.engine.queue.entities.ExecutionMessage;
+import org.openscore.engine.queue.entities.ExecutionMessageConverter;
+import org.openscore.engine.queue.entities.Payload;
+import org.openscore.engine.queue.services.QueueStateIdGeneratorService;
 import org.eclipse.score.facade.entities.Execution;
 
 import static org.mockito.Matchers.any;
