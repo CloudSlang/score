@@ -10,7 +10,7 @@
     -->
     <groupId>org.openscore</groupId>
     <artifactId>score-parent</artifactId>
-    <version>0.1.247-SNAPSHOT</version>
+    <version>0.1.247</version>
     <packaging>pom</packaging>
     <name>org.openscore:score-parent</name>
     <description>A Java based orchestration engine</description>
