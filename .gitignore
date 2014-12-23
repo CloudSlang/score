@@ -4,6 +4,8 @@
 output/
 build/
 target/
+dist/
+public/
 *.ipr
 *.iml
 .*
