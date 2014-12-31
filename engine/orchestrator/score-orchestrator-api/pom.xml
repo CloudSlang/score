@@ -11,7 +11,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.openscore</groupId>
+		<groupId>io.openscore</groupId>
 		<artifactId>orchestrator</artifactId>
 		<version>0.1.250-SNAPSHOT</version>
 	</parent>

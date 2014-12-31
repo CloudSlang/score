@@ -9,7 +9,7 @@
         http://www.apache.org/licenses/LICENSE-2.0
     -->
 	<parent>
-		<groupId>org.openscore</groupId>
+		<groupId>io.openscore</groupId>
 		<artifactId>package</artifactId>
 		<version>0.1.250-SNAPSHOT</version>
 	</parent>
