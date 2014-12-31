@@ -11,7 +11,7 @@
     <parent>
         <groupId>io.openscore</groupId>
         <artifactId>engine</artifactId>
-        <version>0.1.250-SNAPSHOT</version>
+        <version>0.1.250</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
