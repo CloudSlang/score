@@ -14,7 +14,7 @@
     <packaging>pom</packaging>
     <name>org.openscore:score-parent</name>
     <description>A Java based orchestration engine</description>
-    <url>https://github.com/HPSoftware/score</url>
+    <url>https://github.com/openscore/score</url>
     <licenses>
       <license>
         <name>The Apache License, Version 2.0</name>
@@ -23,9 +23,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:https://github.com/HPSoftware/score.git</connection>
-        <developerConnection>scm:git:git@github.com:HPSoftware/score.git</developerConnection>
-        <url>https://github.com/HPSoftware/score.git</url>
+        <connection>scm:git:https://github.com/openscore/score.git</connection>
+        <developerConnection>scm:git:git@github.com:openscore/score.git</developerConnection>
+        <url>https://github.com/openscore/score.git</url>
         <tag>master</tag>
     </scm>
 
