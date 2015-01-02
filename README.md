@@ -1,4 +1,4 @@
 score
 =====
 
-Simple &amp; scalable orchestration engine.
+Simple &amp; scalable orchestration engine .
