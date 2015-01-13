@@ -11,3 +11,10 @@ it supports different workflows  languages (DSL) by a pluggable compiler approac
 Where adding a new workflow DSL is adding a new Compiler that will translate the DSL(xml, yaml, etc ..) to a generic workflow representation we call ExecutionPlan.
 
 For example of such Compiler and DSL, look at [project slang](https://github.com/openscore/score-language).
+
+#### Building and Testing from Source
+
+score project uses Maven for build and test.
+
+1. ```git clone``` the source code
+2. ```mvn clean install```
