@@ -12,6 +12,7 @@
     <artifactId>score-parent</artifactId>
     <version>0.1.253-SNAPSHOT</version>
     <packaging>pom</packaging>
+    <name>${project.groupId}:${project.artifactId}</name>
     <description>A Java based orchestration engine</description>
     <url>https://github.com/openscore/score</url>
     <licenses>
