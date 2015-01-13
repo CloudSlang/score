@@ -81,7 +81,7 @@ public class CancelExecutionServiceTest {
         assertThat(pausedExecutionObj.getSystemContext().getFlowTerminationType()).isEqualTo(ExecutionStatus.CANCELED);
 
         // Cancel
-        checkValidRequestCancel(ExecutionStatus.CANCELED, ExecutionStatus.CANCELED, ExecutionActionResult.SUCCESS);
+        checkValidRequestCancel(ExecutionStatus.CANCELED, ExecutionStatus.CANCELED, ExecutionActionResult.FAILED_ALREADY_CANCELED_OR_PENDING_CANCELLATION);
     }
 
     private void checkValidRequestCancel(ExecutionStatus origStatus, ExecutionStatus expStatusAfterCancellation, ExecutionActionResult expectedResult) {
