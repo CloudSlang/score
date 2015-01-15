@@ -10,9 +10,9 @@
     -->
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.openscore</groupId>
+		<groupId>io.openscore</groupId>
 		<artifactId>engine</artifactId>
-		<version>0.1.248-SNAPSHOT</version>
+		<version>0.1.255-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>node</artifactId>

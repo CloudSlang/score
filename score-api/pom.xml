@@ -10,8 +10,8 @@
     -->
     <parent>
         <artifactId>score-parent</artifactId>
-        <groupId>org.openscore</groupId>
-        <version>0.1.248-SNAPSHOT</version>
+        <groupId>io.openscore</groupId>
+        <version>0.1.255-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

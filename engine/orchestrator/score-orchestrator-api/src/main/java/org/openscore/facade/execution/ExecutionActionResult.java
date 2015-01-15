@@ -12,7 +12,7 @@ public enum ExecutionActionResult {
     SUCCESS,
     FAILED_ALREADY_PAUSED,
     FAILED_ALREADY_COMPLETED,
-    FAILED_ALREADY_CANCELED,
+    FAILED_ALREADY_CANCELED_OR_PENDING_CANCELLATION,
     FAILED_ALREADY_RUNNING,
     FAILED_NOT_FOUND,
     FAILED_PENDING_PAUSE,
@@ -20,8 +20,8 @@ public enum ExecutionActionResult {
 
     private static final Map<ExecutionStatus, ExecutionActionResult> EXECUTION_STATUS_TO_EXECUTION_ACTION_RESULT = new HashMap<ExecutionStatus, ExecutionActionResult>() {{
         put(ExecutionStatus.COMPLETED, ExecutionActionResult.FAILED_ALREADY_COMPLETED);
-        put(ExecutionStatus.CANCELED, ExecutionActionResult.FAILED_ALREADY_CANCELED);
-        put(ExecutionStatus.PENDING_CANCEL, ExecutionActionResult.FAILED_ALREADY_CANCELED);
+        put(ExecutionStatus.CANCELED, ExecutionActionResult.FAILED_ALREADY_CANCELED_OR_PENDING_CANCELLATION);
+        put(ExecutionStatus.PENDING_CANCEL, ExecutionActionResult.FAILED_ALREADY_CANCELED_OR_PENDING_CANCELLATION);
         put(ExecutionStatus.PAUSED, ExecutionActionResult.FAILED_ALREADY_PAUSED);
         put(ExecutionStatus.PENDING_PAUSE, ExecutionActionResult.FAILED_PENDING_PAUSE);
         put(ExecutionStatus.RUNNING, ExecutionActionResult.FAILED_ALREADY_RUNNING);

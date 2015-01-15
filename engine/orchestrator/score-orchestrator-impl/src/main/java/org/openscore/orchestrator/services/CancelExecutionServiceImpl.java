@@ -69,7 +69,7 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
         ExecutionStatus status = executionStateToCancel.getStatus();
 
         if (status.equals(ExecutionStatus.CANCELED) || status.equals(ExecutionStatus.PENDING_CANCEL)) {
-            return ExecutionActionResult.SUCCESS;
+            return ExecutionActionResult.FAILED_ALREADY_CANCELED_OR_PENDING_CANCELLATION;
         }
 
         // it's possible to cancel only running or paused executions.

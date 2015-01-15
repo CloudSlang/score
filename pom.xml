@@ -8,13 +8,13 @@
         The Apache License is available at
         http://www.apache.org/licenses/LICENSE-2.0
     -->
-    <groupId>org.openscore</groupId>
+    <groupId>io.openscore</groupId>
     <artifactId>score-parent</artifactId>
-    <version>0.1.248-SNAPSHOT</version>
+    <version>0.1.255-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>org.openscore:score-parent</name>
+    <name>${project.groupId}:${project.artifactId}</name>
     <description>A Java based orchestration engine</description>
-    <url>https://github.com/HPSoftware/score</url>
+    <url>https://github.com/openscore/score</url>
     <licenses>
       <license>
         <name>The Apache License, Version 2.0</name>
@@ -23,9 +23,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:https://github.com/HPSoftware/score.git</connection>
-        <developerConnection>scm:git:git@github.com:HPSoftware/score.git</developerConnection>
-        <url>https://github.com/HPSoftware/score.git</url>
+        <connection>scm:git:https://github.com/openscore/score.git</connection>
+        <developerConnection>scm:git:git@github.com:openscore/score.git</developerConnection>
+        <url>https://github.com/openscore/score.git</url>
         <tag>master</tag>
     </scm>
 
@@ -39,7 +39,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <spring.version>4.0.8.RELEASE</spring.version>
+        <spring.version>4.1.4.RELEASE</spring.version>
         <hibernate.version>4.2.16.Final</hibernate.version>
         <querydsl.version>3.2.4</querydsl.version>
         
