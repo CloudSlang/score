@@ -14,13 +14,12 @@ For an example compiler and DSL see the [Slang project](https://github.com/opens
 
 The score project uses Maven to build and test.
 
-###### Pre-Requisite:
+###### Pre-Requisites:
 
 1. maven version >=3.0.3
-
 2. Java JDK version >=7
 
-###### steps:
+###### Steps:
 
 1. ```git clone``` the source code
 2. ```mvn clean install```
