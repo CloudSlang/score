@@ -16,7 +16,7 @@ The score project uses Maven to build and test.
 
 ###### Pre-Requisite:
 
-1. maven version >=3.2.3
+1. maven version >=3.0.3
 
 2. Java >=7
 
