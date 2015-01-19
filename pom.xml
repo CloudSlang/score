@@ -42,20 +42,18 @@
         <spring.version>4.1.4.RELEASE</spring.version>
         <hibernate.version>4.2.16.Final</hibernate.version>
         <querydsl.version>3.2.4</querydsl.version>
-        
-        <gpg.skip>true</gpg.skip>
     </properties>
 
     <distributionManagement>
         <repository>
-            <id>nexus-repository</id>
-            <name>nexus repository</name>
-            <url>http://mydphdb0166.hpswlabs.adapps.hp.com:8081/nexus/content/repositories/releases/</url>
+            <id>ossrh</id>
+            <name>Maven Central staging repository</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
         <snapshotRepository>
-            <id>nexus-snapshot-repository</id>
-            <name>nexus snapshots repository</name>
-            <url>http://mydphdb0166.hpswlabs.adapps.hp.com:8081/nexus/content/repositories/snapshots/</url>
+            <id>ossrh</id>
+            <name>Maven Central snapshots repository</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
@@ -144,6 +142,7 @@
             <timezone>UTC</timezone>
         </contributor>
     </contributors-->
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -563,7 +562,77 @@
             </plugin>
         </plugins>
     </build>
-
+    <profiles>
+      <profile>
+        <id>default-profile</id>
+        <activation>
+          <activeByDefault>true</activeByDefault>
+        </activation>
+        <build>
+          <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-deploy-plugin</artifactId>
+              <version>2.8.1</version>
+            </plugin>
+          </plugins>
+        </build>
+      </profile>
+      <profile>
+        <id>release-internal-profile</id>
+        <build>
+          <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-deploy-plugin</artifactId>
+              <version>2.8.1</version>
+            </plugin>
+          </plugins>
+        </build>
+      </profile>
+      <profile>
+        <id>release-external-profile</id>
+        <build>
+          <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-release-plugin</artifactId>
+              <version>2.5</version>
+            </plugin>		 
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-deploy-plugin</artifactId>
+              <version>2.8.1</version>
+            </plugin>
+            <plugin>
+              <groupId>org.sonatype.plugins</groupId>
+              <artifactId>nexus-staging-maven-plugin</artifactId>
+              <version>1.6.3</version>
+              <extensions>true</extensions>
+              <configuration>
+                <serverId>ossrh</serverId>
+	 		   <nexusUrl>https://oss.sonatype.org</nexusUrl>
+                <autoReleaseAfterClose>true</autoReleaseAfterClose>
+              </configuration>
+            </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-gpg-plugin</artifactId>
+              <version>1.5</version>
+              <executions>
+                <execution>
+                  <id>sign-artifacts</id>
+                  <phase>verify</phase>
+                  <goals>
+                    <goal>sign</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>
+          </plugins>
+        </build>
+      </profile>
+    </profiles>
     <modules>
         <module>engine</module>
         <module>worker</module>
