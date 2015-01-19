@@ -537,30 +537,14 @@
             </plugins>
         </pluginManagement>
 
-        <plugins>
-            <plugin>
-                <artifactId>maven-enforcer-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-source-plugin</artifactId>
-            </plugin>
-            
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.5</version>
-                <executions>
-                  <execution>
-                    <id>sign-artifacts</id>
-                    <phase>verify</phase>
-                    <goals>
-                      <goal>sign</goal>
-                    </goals>
-                  </execution>
-                </executions>
-            </plugin>
-        </plugins>
+      <plugins>
+          <plugin>
+              <artifactId>maven-enforcer-plugin</artifactId>
+          </plugin>
+          <plugin>
+              <artifactId>maven-source-plugin</artifactId>
+          </plugin>
+      </plugins>
     </build>
     <profiles>
       <profile>
@@ -611,7 +595,7 @@
               <extensions>true</extensions>
               <configuration>
                 <serverId>ossrh</serverId>
-	 		   <nexusUrl>https://oss.sonatype.org</nexusUrl>
+                <nexusUrl>https://oss.sonatype.org</nexusUrl>
                 <autoReleaseAfterClose>true</autoReleaseAfterClose>
               </configuration>
             </plugin>
