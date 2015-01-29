@@ -1,5 +1,16 @@
+/*******************************************************************************
+ * (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Apache License v2.0 which accompany this distribution.
+ *
+ * The Apache License is available at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *******************************************************************************/
+
 package org.openscore.worker.management.monitor;
 
+import com.google.common.collect.Maps;
 import org.openscore.worker.management.services.InBuffer;
 import org.openscore.worker.management.services.OutboundBuffer;
 import org.openscore.worker.management.services.WorkerManager;
@@ -8,8 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class WorkerMonitorsImpl implements WorkerMonitors {
     private long monitorStartTime;
@@ -23,7 +34,7 @@ public class WorkerMonitorsImpl implements WorkerMonitors {
     private InBuffer inBuffer;
 
     @Autowired
-    List<WorkerMonitor> monitors;
+    private List<WorkerMonitor> monitors;
 
     @PostConstruct
     public void init() {
@@ -31,31 +42,34 @@ public class WorkerMonitorsImpl implements WorkerMonitors {
     }
 
     @Override
-    public synchronized HashMap<WorkerMonitorInfoEnum, Serializable> getMonitorInfo() {
-        HashMap<WorkerMonitorInfoEnum, Serializable> monitorInfo = new HashMap<>();
+    public synchronized Map<WorkerMonitorInfoEnum, Serializable> getMonitorInfo() {
+        try {
+            Map<WorkerMonitorInfoEnum, Serializable> monitorInfo = Maps.newHashMap();
 
-        Runtime runtime = Runtime.getRuntime();
-        monitorInfo.put(WorkerMonitorInfoEnum.TOTAL_MEMORY, runtime.totalMemory());
-        monitorInfo.put(WorkerMonitorInfoEnum.FREE_MOMORY, runtime.freeMemory());
-        monitorInfo.put(WorkerMonitorInfoEnum.MAX_MOMORY, runtime.maxMemory());
+            Runtime runtime = Runtime.getRuntime();
+            monitorInfo.put(WorkerMonitorInfoEnum.TOTAL_MEMORY, runtime.totalMemory());
+            monitorInfo.put(WorkerMonitorInfoEnum.FREE_MOMORY, runtime.freeMemory());
+            monitorInfo.put(WorkerMonitorInfoEnum.MAX_MOMORY, runtime.maxMemory());
 
-        monitorInfo.put(WorkerMonitorInfoEnum.WROKER_ID, workerManager.getWorkerUuid());
+            monitorInfo.put(WorkerMonitorInfoEnum.WROKER_ID, workerManager.getWorkerUuid());
 
-        monitorInfo.put(WorkerMonitorInfoEnum.EXECUTION_THREADS_AMOUNT, workerManager.getExecutionThreadsCount());
+            monitorInfo.put(WorkerMonitorInfoEnum.EXECUTION_THREADS_AMOUNT, workerManager.getExecutionThreadsCount());
 
-        monitorInfo.put(WorkerMonitorInfoEnum.OUTBUFFER_CAPACITY, outBuffer.getCapacity());
+            monitorInfo.put(WorkerMonitorInfoEnum.OUTBUFFER_CAPACITY, outBuffer.getCapacity());
 
-        monitorInfo.put(WorkerMonitorInfoEnum.INBUFFER_CAPACITY, inBuffer.getCapacity());
+            monitorInfo.put(WorkerMonitorInfoEnum.INBUFFER_CAPACITY, inBuffer.getCapacity());
 
-        for (WorkerMonitor monitor : monitors) {
-            monitor.captureMonitorInfo(monitorInfo);
+            for (WorkerMonitor monitor : monitors) {
+                monitor.captureMonitorInfo(monitorInfo);
+            }
+
+            monitorInfo.put(WorkerMonitorInfoEnum.MONITOR_START_TIME, monitorStartTime);
+            monitorInfo.put(WorkerMonitorInfoEnum.MONITOR_END_TIME, System.currentTimeMillis());
+
+            return monitorInfo;
+        } finally {
+            resetMonitor();
         }
-
-        monitorInfo.put(WorkerMonitorInfoEnum.MONITOR_START_TIME, monitorStartTime);
-        monitorInfo.put(WorkerMonitorInfoEnum.MONITOR_END_TIME, System.currentTimeMillis());
-
-        resetMonitor();
-        return monitorInfo;
     }
 
     private synchronized void resetMonitor() {

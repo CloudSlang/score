@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Apache License v2.0 which accompany this distribution.
+ *
+ * The Apache License is available at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *******************************************************************************/
+
 package org.openscore.worker.management.monitor;
 
 import org.junit.Before;
@@ -18,7 +28,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -28,19 +38,15 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = WorkerMonitorsImplTest.MyTestConfig.class)
 public class WorkerMonitorsImplTest {
-    @InjectMocks
     @Autowired
     private WorkerManager workerManager;
 
-    @InjectMocks
     @Autowired
     private OutboundBuffer outBuffer;
 
-    @InjectMocks
     @Autowired
     private InBuffer inBuffer;
 
-    @InjectMocks
     @Autowired
     private WorkerMonitors workerMonitors;
 
@@ -57,7 +63,7 @@ public class WorkerMonitorsImplTest {
         when(outBuffer.getCapacity()).thenReturn(66);
 
 
-        HashMap<WorkerMonitorInfoEnum, Serializable> monitorInfo = workerMonitors.getMonitorInfo();
+        Map<WorkerMonitorInfoEnum, Serializable> monitorInfo = workerMonitors.getMonitorInfo();
         assertNotNull(monitorInfo.get(WorkerMonitorInfoEnum.TOTAL_MEMORY));
         assertNotNull(monitorInfo.get(WorkerMonitorInfoEnum.FREE_MOMORY));
         assertNotNull(monitorInfo.get(WorkerMonitorInfoEnum.MAX_MOMORY));

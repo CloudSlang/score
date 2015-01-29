@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Apache License v2.0 which accompany this distribution.
+ *
+ * The Apache License is available at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *******************************************************************************/
+
 package org.openscore.worker.management.services;
 
 import org.apache.log4j.Logger;
@@ -10,8 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class WorkerExecutionMonitorServiceImpl implements WorkerExecutionMonitorService{
@@ -30,9 +40,9 @@ public class WorkerExecutionMonitorServiceImpl implements WorkerExecutionMonitor
     public void collectMonitorInformation() {
         logger.info("Collecting Worker Monitors");
         try {
-            HashMap<WorkerMonitorInfoEnum, Serializable> monitorInfo = workerMonitors.getMonitorInfo();
+            Map<WorkerMonitorInfoEnum, Serializable> monitorInfo = workerMonitors.getMonitorInfo();
             logger.info("Sending Worker Monitors Info to central:[" + monitorInfo +"]");
-            ScoreEvent event = new ScoreEvent(EventConstants.WORKER_EXECUTION_MONITOR, monitorInfo);
+            ScoreEvent event = new ScoreEvent(EventConstants.WORKER_EXECUTION_MONITOR, (Serializable) monitorInfo);
             eventBus.dispatch(event);
         } catch (InterruptedException e) {
             logger.error("Failed to dispatch monitor info event", e);
