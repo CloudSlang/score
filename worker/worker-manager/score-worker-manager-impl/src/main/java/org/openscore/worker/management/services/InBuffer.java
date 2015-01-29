@@ -34,10 +34,9 @@ import java.util.List;
  * Time: 08:46
  */
 public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Runnable{
+    private static final Logger logger = Logger.getLogger(InBuffer.class);
 
     private final static long MEMORY_THRESHOLD = 50000000; // 50 Mega byte
-
-	private final Logger logger = Logger.getLogger(this.getClass());
 
 	@Autowired
 	private QueueDispatcherService queueDispatcher;
@@ -228,5 +227,9 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     public void doRecovery() {
         //We must interrupt the inBuffer thread in case it is stuck in await() because the outBuffer is full
         fillBufferThread.interrupt();
+    }
+
+    public int getCapacity() {
+        return capacity;
     }
 }

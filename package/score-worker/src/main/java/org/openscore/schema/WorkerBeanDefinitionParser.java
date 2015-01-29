@@ -16,14 +16,9 @@ import org.openscore.worker.execution.services.ExecutionServiceImpl;
 import org.openscore.worker.execution.services.SessionDataHandlerImpl;
 import org.openscore.worker.management.WorkerConfigurationServiceImpl;
 import org.openscore.worker.management.WorkerRegistration;
-import org.openscore.worker.management.services.InBuffer;
-import org.openscore.worker.management.services.OutboundBufferImpl;
-import org.openscore.worker.management.services.RetryTemplate;
-import org.openscore.worker.management.services.SimpleExecutionRunnableFactory;
-import org.openscore.worker.management.services.SynchronizationManagerImpl;
-import org.openscore.worker.management.services.WorkerManager;
-import org.openscore.worker.management.services.WorkerManagerMBean;
-import org.openscore.worker.management.services.WorkerRecoveryManagerImpl;
+import org.openscore.worker.management.monitor.ScheduledWorkerLoadMonitor;
+import org.openscore.worker.management.monitor.WorkerMonitorsImpl;
+import org.openscore.worker.management.services.*;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
@@ -57,7 +52,12 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(ReflectionAdapterImpl.class, null);
         put(SessionDataHandlerImpl.class, "sessionDataHandler");
 		put(SynchronizationManagerImpl.class, null);
-		put(WorkerConfigurationServiceImpl.class, "workerConfiguration");
+        put(WorkerConfigurationServiceImpl.class, "workerConfiguration");
+
+        //Monitors
+        put(WorkerExecutionMonitorServiceImpl.class, "workerExecutionMonitorService");
+        put(WorkerMonitorsImpl.class, "workerMonitorsImpl");
+        put(ScheduledWorkerLoadMonitor.class, "scheduledWorkerLoadMonitor");
 	}};
 
 	private List<ConfValue> configurationValues = Arrays.asList(
@@ -70,7 +70,9 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 			new ConfValue().NAME("outBufferInterval").DEFAULT(100L),
 			new ConfValue().NAME("keepAliveInterval").DEFAULT(10000L),
 			new ConfValue().NAME("configRefreshInterval").DEFAULT(1000L),
-			new ConfValue().NAME("statisticsInterval").DEFAULT(1000L)
+            new ConfValue().NAME("statisticsInterval").DEFAULT(1000L),
+            new ConfValue().NAME("scheduledWorkerMonitorInterval").DEFAULT(10000L),
+            new ConfValue().NAME("workerMonitorRefreshInterval").DEFAULT(300000L)
 	);
 
 	@Override

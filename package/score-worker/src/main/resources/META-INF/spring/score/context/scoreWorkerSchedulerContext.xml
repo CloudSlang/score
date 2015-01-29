@@ -13,6 +13,8 @@
         <task:scheduled ref="workerConfiguration" method="refresh" fixed-delay="#{configRefreshInterval}"/>
 		<task:scheduled ref="workerManager" method="logStatistics" fixed-rate="#{statisticsInterval}"/>
         <task:scheduled ref="sessionDataHandler" method="sessionTimeOutScheduler" fixed-rate="60000"/>
+        <task:scheduled ref="workerExecutionMonitorService" method="executeScheduledWorkerMonitors" fixed-delay="#{scheduledWorkerMonitorInterval}"/>
+        <task:scheduled ref="workerExecutionMonitorService" method="collectMonitorInformation" fixed-delay="#{workerMonitorRefreshInterval}"/>
 	</task:scheduled-tasks>
 
     <!--Session timeout job-->

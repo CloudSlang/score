@@ -58,7 +58,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 	protected WorkerConfigurationService workerConfigurationService;
 	@Autowired
 	protected WorkerRecoveryManager recoveryManager;
-	private LinkedBlockingQueue<Runnable> inBuffer = new LinkedBlockingQueue<>();
+	private LinkedBlockingQueue<Runnable> inBuffer;
 	@Autowired
 	@Qualifier("numberOfExecutionThreads")
 	private Integer numberOfThreads;
@@ -79,6 +79,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 	private void init() {
 		logger.info("Initialize worker with UUID: " + workerUuid);
 		System.setProperty("worker.uuid", workerUuid); //do not remove!!!
+        inBuffer = new LinkedBlockingQueue<>();
 
 		executorService = new ThreadPoolExecutor(numberOfThreads,
 				numberOfThreads,
@@ -144,11 +145,15 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 		return workerUuid;
 	}
 
-	public int getRunningTasksCount() {
-		return mapOfRunningTasks.size();
-	}
+    public int getRunningTasksCount() {
+        return mapOfRunningTasks.size();
+    }
 
-	@Override
+    public int getExecutionThreadsCount() {
+        return numberOfThreads;
+    }
+
+    @Override
 	public void onApplicationEvent(final ApplicationEvent applicationEvent) {
 		if (applicationEvent instanceof ContextRefreshedEvent && !initStarted) {
 			doStartup();
