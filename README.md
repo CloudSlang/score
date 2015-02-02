@@ -8,7 +8,7 @@ score is a general-purpose orchestration engine which is process-based, embeddab
 
 score is the core engine for running workflows. It supports multiple workflow  languages (DSL) using a pluggable compiler approach. Adding a new workflow DSL requires adding a new compiler that will translate the DSL (written in xml, yaml, etc.) to a generic workflow representation called an ExecutionPlan.
 
-For an example compiler and DSL see the [Slang project](https://github.com/openscore/score-language).
+***For an example compiler and DSL see the*** [Slang project](https://github.com/openscore/score-language).
 
 #### Building and Testing from Source
 
