@@ -11,6 +11,7 @@
 package org.openscore.engine.queue.services;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.time.StopWatch;
 import org.openscore.engine.queue.entities.ExecStatus;
 import org.openscore.engine.queue.entities.ExecutionMessage;
 import org.openscore.engine.queue.entities.Payload;
@@ -56,7 +57,8 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 			return;
 
 		if (logger.isDebugEnabled()) logger.debug("Enqueue " + messages.size() + " messages");
-		long timeTotal = System.currentTimeMillis();
+		StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
 		// assign worker for messages with pending status
 		messages = executionAssignerService.assignWorkers(messages);
 		if (logger.isDebugEnabled()) logger.debug("Messages were assigned successfully");
@@ -75,23 +77,23 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 		}
 
         if (CollectionUtils.isNotEmpty(listeners)) {
-            long t = System.currentTimeMillis();
+            stopWatch.split();
             for (QueueListener listener : listeners) {
                 listener.prePersist(messages);
             }
-            if (logger.isDebugEnabled()) logger.debug("Listeners done in " + (System.currentTimeMillis() - t) + " ms");
+            if (logger.isDebugEnabled()) logger.debug("Listeners done in " + (stopWatch.getSplitTime()) + " ms");
         }
 
-		long t = System.currentTimeMillis();
+		stopWatch.split();
 		if (stateMessages.size() > 0)
 			executionQueueRepository.insertExecutionStates(stateMessages);
 
 		long msgVersion = versionService.getCurrentVersion(VersionService.MSG_RECOVERY_VERSION_COUNTER_NAME);
 		executionQueueRepository.insertExecutionQueue(messages, msgVersion);
-		if (logger.isDebugEnabled()) logger.debug("Persistency done in " + (System.currentTimeMillis() - t) + " ms");
+		if (logger.isDebugEnabled()) logger.debug("Persistency done in " + (stopWatch.getSplitTime()) + " ms");
 
 		if (CollectionUtils.isNotEmpty(listeners)) {
-			t = System.currentTimeMillis();
+			stopWatch.split();
 			List<ExecutionMessage> failedMessages = filter(messages, ExecStatus.FAILED);
 			List<ExecutionMessage> terminatedMessages = filter(messages, ExecStatus.TERMINATED);
 			for (QueueListener listener : listeners) {
@@ -101,9 +103,9 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 				if (terminatedMessages.size() > 0)
 					listener.onTerminated(terminatedMessages);
 			}
-			if (logger.isDebugEnabled()) logger.debug("Listeners done in " + (System.currentTimeMillis() - t) + " ms");
+			if (logger.isDebugEnabled()) logger.debug("Listeners done in " + (stopWatch.getSplitTime()) + " ms");
 		}
-		if (logger.isDebugEnabled()) logger.debug("Enqueue done in " + (System.currentTimeMillis() - timeTotal) + " ms");
+		if (logger.isDebugEnabled()) logger.debug("Enqueue done in " + (stopWatch.getTime()) + " ms");
 	}
 
 	private List<ExecutionMessage> filter(List<ExecutionMessage> messages, ExecStatus status) {
