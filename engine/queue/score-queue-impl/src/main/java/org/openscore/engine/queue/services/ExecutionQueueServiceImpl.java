@@ -10,6 +10,7 @@
 
 package org.openscore.engine.queue.services;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.openscore.engine.queue.entities.ExecStatus;
 import org.openscore.engine.queue.entities.ExecutionMessage;
 import org.openscore.engine.queue.entities.Payload;
@@ -20,7 +21,6 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,6 +73,15 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 				stateMessages.add(msg);
 			}
 		}
+
+        if (CollectionUtils.isNotEmpty(listeners)) {
+            long t = System.currentTimeMillis();
+            for (QueueListener listener : listeners) {
+                listener.prePersist(messages);
+            }
+            if (logger.isDebugEnabled()) logger.debug("Listeners done in " + (System.currentTimeMillis() - t) + " ms");
+        }
+
 		long t = System.currentTimeMillis();
 		if (stateMessages.size() > 0)
 			executionQueueRepository.insertExecutionStates(stateMessages);
@@ -81,7 +90,7 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 		executionQueueRepository.insertExecutionQueue(messages, msgVersion);
 		if (logger.isDebugEnabled()) logger.debug("Persistency done in " + (System.currentTimeMillis() - t) + " ms");
 
-		if (!CollectionUtils.isEmpty(listeners)) {
+		if (CollectionUtils.isNotEmpty(listeners)) {
 			t = System.currentTimeMillis();
 			List<ExecutionMessage> failedMessages = filter(messages, ExecStatus.FAILED);
 			List<ExecutionMessage> terminatedMessages = filter(messages, ExecStatus.TERMINATED);

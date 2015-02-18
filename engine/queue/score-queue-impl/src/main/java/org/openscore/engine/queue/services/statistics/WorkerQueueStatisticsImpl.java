@@ -53,6 +53,10 @@ public class WorkerQueueStatisticsImpl implements WorkerQueueStatistics , QueueL
 		return finishedCounter;
 	}
 
+    @Override
+    public void prePersist(List<ExecutionMessage> messages) {
+    }
+
 	@Override
 	public void onEnqueue(List<ExecutionMessage> messages, int queueSize) {
 		for(ExecutionMessage msg: messages) {

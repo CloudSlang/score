@@ -27,6 +27,15 @@ public interface QueueListener {
     /**
      *
      * A callback that will be called when messages are inserted to the queue
+     * before they are persisted to the DB
+     *
+     * @param messages the messages that are inserted to the queue
+     */
+	void prePersist(List<ExecutionMessage> messages);
+
+    /**
+     *
+     * A callback that will be called when messages are inserted to the queue
      *
      * @param messages the messages that are inserted to the queue
      * @param queueSize  the size of the inserted messages
