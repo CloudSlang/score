@@ -10,7 +10,8 @@
 
 package org.openscore.engine.queue.entities;
 
-import java.io.Serializable;
+import org.openscore.facade.entities.Execution;
+
 import java.util.List;
 
 /**
@@ -19,9 +20,9 @@ import java.util.List;
  * Date: 22/11/12
  * Time: 15:45
  */
-public class MyExecutionForTest implements Serializable {
+public class MyExecutionForTest extends Execution {
 
-        private String executionId;
+        private Long executionId;
         private Long runningExecutionPlanId;
         private Long position;
         private List<String> contextsNames;
@@ -29,7 +30,7 @@ public class MyExecutionForTest implements Serializable {
         public MyExecutionForTest(){
 
         }
-        public  MyExecutionForTest(String executionId, Long runningExecutionPlanId, Long position, List<String> contextsNames) {
+        public  MyExecutionForTest(Long executionId, Long runningExecutionPlanId, Long position, List<String> contextsNames) {
             this.executionId = executionId;
             this.runningExecutionPlanId = runningExecutionPlanId;
             this.position = position;
@@ -44,11 +45,11 @@ public class MyExecutionForTest implements Serializable {
             this.contextsNames = contextsNames;
         }
 
-        public String getExecutionId() {
+        public Long getExecutionId() {
             return executionId;
         }
 
-        public void setExecutionId(String executionId) {
+        public void setExecutionId(Long executionId) {
             this.executionId = executionId;
         }
 
@@ -64,7 +65,4 @@ public class MyExecutionForTest implements Serializable {
             return position;
         }
 
-        public void setPosition(Long position) {
-            this.position = position;
-        }
     }

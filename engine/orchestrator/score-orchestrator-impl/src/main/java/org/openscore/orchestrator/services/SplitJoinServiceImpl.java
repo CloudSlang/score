@@ -238,7 +238,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         boolean wasExecutionCancelled = false;
         ArrayList<EndBranchDataContainer> finishedContexts = new ArrayList<>();
         for (FinishedBranch fb : finishedBranches) {
-            finishedContexts.add(new EndBranchDataContainer(fb.getBranchContexts().getContexts(), fb.getBranchContexts().getSystemContext(), fb.getBranchException()));
+                finishedContexts.add(new EndBranchDataContainer(fb.getBranchContexts().getContexts(), fb.getBranchContexts().getSystemContext(), fb.getBranchException()));
             if (fb.getBranchContexts().isBranchCancelled()) {
                 wasExecutionCancelled = true;
             }

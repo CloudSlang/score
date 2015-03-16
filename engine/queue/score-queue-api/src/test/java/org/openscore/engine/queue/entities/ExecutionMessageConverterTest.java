@@ -30,7 +30,7 @@ public class ExecutionMessageConverterTest {
     public void testConverter() throws IOException {
         List<String> names = new ArrayList<>();
         names.add("lala");
-        MyExecutionForTest execution = new MyExecutionForTest("exe_id", 999L, 0L, names);
+        MyExecutionForTest execution = new MyExecutionForTest(111L, 999L, 0L, names);
 
         Payload payload = converter.createPayload(execution);
 

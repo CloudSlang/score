@@ -23,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -46,17 +45,12 @@ final public class ExecutionAssignerServiceImpl implements ExecutionAssignerServ
 
 
 	private void addErrorMessage(ExecutionMessage message) {
-		try {
-			String group = message.getWorkerGroup();
-			Execution execution = converter.extractExecution(message.getPayload());
-			execution.getSystemContext().setNoWorkerInGroup(group);
+        String group = message.getWorkerGroup();
+        Execution execution = converter.extractExecution(message.getPayload());
+        execution.getSystemContext().setNoWorkerInGroup(group);
 
-			Payload payload = converter.createPayload(execution);
-			message.setPayload(payload);
-
-		} catch (IOException e) {
-			logger.error("Failed to add error message to execution message!", e);
-		}
+        Payload payload = converter.createPayload(execution);
+        message.setPayload(payload);
 	}
 
 

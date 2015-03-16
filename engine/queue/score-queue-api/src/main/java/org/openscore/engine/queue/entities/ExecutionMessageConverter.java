@@ -11,6 +11,9 @@
 package org.openscore.engine.queue.entities;
 
 import org.apache.commons.io.IOUtils;
+import org.openscore.facade.entities.Execution;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -26,15 +29,19 @@ import java.io.ObjectOutputStream;
  * Date: 20/11/12
  * Time: 14:35
  */
+@Component
 public class ExecutionMessageConverter {
+    @Autowired(required = false)
+    private PayloadFactory payloadFactory;
 
-	public <T> T extractExecution(Payload payload) throws IOException {
+	public <T> T extractExecution(Payload payload) {
 		return objFromBytes(payload.getData());
 	}
 
-	public Payload createPayload(Object execution) {
-		byte[] objBytes = objToBytes(execution);
-		return new Payload(true, false, objBytes);
+	public Payload createPayload(Execution execution) {
+        return payloadFactory == null ?
+                new Payload(true, false, objToBytes(execution)) :
+                payloadFactory.createPayload(execution);
 	}
 
 	private <T> T objFromBytes(byte[] bytes) {

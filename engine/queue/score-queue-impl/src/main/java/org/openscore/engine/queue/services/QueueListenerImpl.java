@@ -25,7 +25,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -128,12 +127,7 @@ public class QueueListenerImpl implements QueueListener {
 	}
 
 	private Execution extractExecution(ExecutionMessage executionMessage) {
-		try {
-			return executionMessageConverter.extractExecution(executionMessage.getPayload());
-		} catch (IOException e) {
-			logger.error("Unable to parse payload from execution message");
-			return null;
-		}
+        return executionMessageConverter.extractExecution(executionMessage.getPayload());
 	}
 
 	@Override
