@@ -36,12 +36,14 @@ public class WorkersMBean {
 
     private ObjectMapper mapper;
 
-    @PostConstruct
-    private void initObjectMapper(){
-        mapper = new ObjectMapper();
+    private ObjectMapper objectMapper(){
+        if (mapper == null) {
+            mapper = new ObjectMapper();
 
-        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        }
+        return mapper;
     }
 
 	@ManagedAttribute(description = "Number of active workers")
@@ -56,7 +58,7 @@ public class WorkersMBean {
 
 	@ManagedOperation(description = "Returns a list of all registered workers")
 	public String showWorkers() throws IOException {
-		ObjectWriter objectWriter = mapper.writerWithDefaultPrettyPrinter();
+		ObjectWriter objectWriter = objectMapper().writerWithDefaultPrettyPrinter();
 		return objectWriter.writeValueAsString(workerNodeService.readAllWorkers());
 	}
 

@@ -14,8 +14,11 @@ import org.openscore.api.execution.ExecutionParametersConsts;
 import org.openscore.events.EventConstants;
 import org.openscore.events.ScoreEvent;
 import org.openscore.facade.entities.Execution;
+import org.openscore.facade.execution.ExecutionStatus;
 import org.openscore.facade.services.RunningExecutionPlanService;
 import org.apache.commons.lang.StringUtils;
+import org.openscore.lang.ExecutionRuntimeServices;
+import org.openscore.lang.SystemContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
@@ -39,10 +42,17 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 
 	private Serializable createFinishedEventData(Execution execution) {
 		Map<String, Serializable> eventData = new HashMap<>();
-		eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, execution.getSystemContext());
+        ExecutionRuntimeServices runtimeServices = execution.getSystemContext();
+
+        //if nothing went wrong flow is completed
+        if (runtimeServices.getFlowTerminationType() == null) {
+            runtimeServices.setFlowTerminationType(ExecutionStatus.COMPLETED);
+        }
+
+        eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, runtimeServices);
 		eventData.put(EventConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
 		eventData.put(EventConstants.EXECUTION_CONTEXT, (Serializable) execution.getContexts());
-		eventData.put(EventConstants.IS_BRANCH, !StringUtils.isEmpty(execution.getSystemContext().getBranchId()));
+		eventData.put(EventConstants.IS_BRANCH, !StringUtils.isEmpty(runtimeServices.getBranchId()));
 		return (Serializable) eventData;
 	}
 

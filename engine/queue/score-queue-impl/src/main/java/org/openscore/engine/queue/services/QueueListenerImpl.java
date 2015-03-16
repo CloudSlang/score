@@ -57,6 +57,10 @@ public class QueueListenerImpl implements QueueListener {
 	private PauseResumeService pauseResumeService;
 
 	@Override
+    public void prePersist(List<ExecutionMessage> messages) {
+    }
+
+    @Override
 	public void onEnqueue(List<ExecutionMessage> messages, int queueSize) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Enqueue " + messages.size() + " messages:");
