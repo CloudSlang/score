@@ -38,10 +38,14 @@ public class WorkerExecutionMonitorServiceImpl implements WorkerExecutionMonitor
 
     @Override
     public void collectMonitorInformation() {
-        logger.info("Collecting Worker Monitors");
+        if(logger.isDebugEnabled()) {
+            logger.debug("Collecting Worker Monitors");
+        }
         try {
             Map<WorkerMonitorInfoEnum, Serializable> monitorInfo = workerMonitors.getMonitorInfo();
-            logger.info("Sending Worker Monitors Info to central:[" + monitorInfo +"]");
+            if(logger.isDebugEnabled()) {
+                logger.debug("Sending Worker Monitors Info:[" + monitorInfo +"]");
+            }
             ScoreEvent event = new ScoreEvent(EventConstants.WORKER_EXECUTION_MONITOR, (Serializable) monitorInfo);
             eventBus.dispatch(event);
         } catch (InterruptedException e) {
