@@ -29,19 +29,23 @@ import java.io.ObjectOutputStream;
  * Date: 20/11/12
  * Time: 14:35
  */
-@Component
 public class ExecutionMessageConverter {
+
     @Autowired(required = false)
-    private PayloadFactory payloadFactory;
+    private SensitiveDataHandler sensitiveDataHandler;
 
 	public <T> T extractExecution(Payload payload) {
 		return objFromBytes(payload.getData());
 	}
 
-	public Payload createPayload(Execution execution) {
-        return payloadFactory == null ?
-                new Payload(true, false, objToBytes(execution)) :
-                payloadFactory.createPayload(execution);
+    public Payload createPayload(Execution execution) {
+        return createPayload(execution, false);
+    }
+
+	public Payload createPayload(Execution execution, boolean setContainsSensitiveData) {
+        boolean encrypted = setContainsSensitiveData || (sensitiveDataHandler != null &&
+                sensitiveDataHandler.containsSensitiveData(execution.getSystemContext(), execution.getContexts()));
+        return new Payload(true, encrypted, objToBytes(execution));
 	}
 
 	private <T> T objFromBytes(byte[] bytes) {

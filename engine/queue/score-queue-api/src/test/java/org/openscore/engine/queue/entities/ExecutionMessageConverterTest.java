@@ -10,7 +10,7 @@
 
 package org.openscore.engine.queue.entities;
 
-import junit.framework.Assert;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -36,9 +36,25 @@ public class ExecutionMessageConverterTest {
 
         MyExecutionForTest afterConvert = converter.extractExecution(payload);
 
-        Assert.assertEquals(execution.getPosition(), afterConvert.getPosition());
-        Assert.assertEquals(execution.getExecutionId(), afterConvert.getExecutionId());
-        Assert.assertEquals(execution.getRunningExecutionPlanId(), afterConvert.getRunningExecutionPlanId());
+        assertEquals(execution.getPosition(), afterConvert.getPosition());
+        assertEquals(execution.getExecutionId(), afterConvert.getExecutionId());
+        assertEquals(execution.getRunningExecutionPlanId(), afterConvert.getRunningExecutionPlanId());
+    }
+
+    @Test
+    public void testCreatePayload() {
+        List<String> names = new ArrayList<>();
+        names.add("lala");
+        MyExecutionForTest execution = new MyExecutionForTest(111L, 999L, 0L, names);
+
+        Payload payload = converter.createPayload(execution);
+        assertFalse(payload.isEncrypt());
+
+        payload = converter.createPayload(execution);
+        assertFalse(payload.isEncrypt());
+
+        payload = converter.createPayload(execution, true);
+        assertTrue(payload.isEncrypt());
     }
 
 //    @Test
