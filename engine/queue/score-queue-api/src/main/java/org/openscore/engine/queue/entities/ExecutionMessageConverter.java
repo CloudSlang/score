@@ -11,6 +11,8 @@
 package org.openscore.engine.queue.entities;
 
 import org.apache.commons.io.IOUtils;
+import org.openscore.facade.entities.Execution;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -28,16 +30,27 @@ import java.io.ObjectOutputStream;
  */
 public class ExecutionMessageConverter {
 
-	public <T> T extractExecution(Payload payload) throws IOException {
+    @Autowired(required = false)
+    private SensitiveDataHandler sensitiveDataHandler;
+
+	public <T> T extractExecution(Payload payload) {
 		return objFromBytes(payload.getData());
 	}
 
-	public Payload createPayload(Object execution) {
-		byte[] objBytes = objToBytes(execution);
-		return new Payload(true, false, objBytes);
+    public Payload createPayload(Execution execution) {
+        return createPayload(execution, false);
+    }
+
+	public Payload createPayload(Execution execution, boolean setContainsSensitiveData) {
+        boolean encrypted = setContainsSensitiveData || checkContainsSensitiveData(execution);
+        return new Payload(true, encrypted, objToBytes(execution));
 	}
 
-	private <T> T objFromBytes(byte[] bytes) {
+    private boolean checkContainsSensitiveData(Execution execution) {
+        return sensitiveDataHandler != null && sensitiveDataHandler.containsSensitiveData(execution.getSystemContext(), execution.getContexts());
+    }
+
+    private <T> T objFromBytes(byte[] bytes) {
 		ObjectInputStream ois = null;
 		try {
 			//2 Buffers are added to increase performance
