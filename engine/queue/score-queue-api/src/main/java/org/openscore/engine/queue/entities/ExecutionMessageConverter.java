@@ -13,7 +13,6 @@ package org.openscore.engine.queue.entities;
 import org.apache.commons.io.IOUtils;
 import org.openscore.facade.entities.Execution;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -43,12 +42,15 @@ public class ExecutionMessageConverter {
     }
 
 	public Payload createPayload(Execution execution, boolean setContainsSensitiveData) {
-        boolean encrypted = setContainsSensitiveData || (sensitiveDataHandler != null &&
-                sensitiveDataHandler.containsSensitiveData(execution.getSystemContext(), execution.getContexts()));
+        boolean encrypted = setContainsSensitiveData || checkContainsSensitiveData(execution);
         return new Payload(true, encrypted, objToBytes(execution));
 	}
 
-	private <T> T objFromBytes(byte[] bytes) {
+    private boolean checkContainsSensitiveData(Execution execution) {
+        return sensitiveDataHandler != null && sensitiveDataHandler.containsSensitiveData(execution.getSystemContext(), execution.getContexts());
+    }
+
+    private <T> T objFromBytes(byte[] bytes) {
 		ObjectInputStream ois = null;
 		try {
 			//2 Buffers are added to increase performance
