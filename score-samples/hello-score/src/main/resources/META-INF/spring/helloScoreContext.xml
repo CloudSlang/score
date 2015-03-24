@@ -8,6 +8,6 @@
 
     <score:worker uuid="-1"/>
 
-    <bean class="org.openscore.samples.HelloScore"/>
+    <bean class="io.cloudslang.samples.HelloScore"/>
 
 </beans>

@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.samples;
+package io.cloudslang.samples;
 
 import com.google.common.collect.Sets;
 import io.cloudslang.api.ControlActionMetadata;
@@ -25,8 +25,8 @@ import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openscore.samples.controlactions.BranchActions;
-import org.openscore.samples.controlactions.SessionDataActions;
+import io.cloudslang.samples.controlactions.BranchActions;
+import io.cloudslang.samples.controlactions.SessionDataActions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;

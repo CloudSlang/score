@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.samples;
+package io.cloudslang.samples;
 
 import io.cloudslang.api.ControlActionMetadata;
 import io.cloudslang.api.ExecutionPlan;

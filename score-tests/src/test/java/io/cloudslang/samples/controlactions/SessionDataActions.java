@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.samples.controlactions;
+package io.cloudslang.samples.controlactions;
 
 import io.cloudslang.lang.ExecutionRuntimeServices;
 
