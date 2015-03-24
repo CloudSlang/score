@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.schema;
+package io.cloudslang.schema;
 
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;

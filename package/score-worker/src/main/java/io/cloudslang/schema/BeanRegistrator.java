@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.schema;
+package io.cloudslang.schema;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;

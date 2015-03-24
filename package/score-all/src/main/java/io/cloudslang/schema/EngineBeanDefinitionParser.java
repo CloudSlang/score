@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.schema;
+package io.cloudslang.schema;
 
 import io.cloudslang.engine.node.services.WorkerLockServiceImpl;
 import io.cloudslang.engine.node.services.WorkerNodeServiceImpl;
@@ -47,8 +47,8 @@ import io.cloudslang.engine.data.HiloFactoryBean;
 import io.cloudslang.engine.data.SqlInQueryReader;
 import io.cloudslang.engine.data.SqlUtils;
 import io.cloudslang.job.ScoreEngineJobsImpl;
-import org.openscore.schema.context.ScoreDatabaseContext;
-import org.openscore.schema.context.ScoreDefaultDatasourceContext;
+import io.cloudslang.schema.context.ScoreDatabaseContext;
+import io.cloudslang.schema.context.ScoreDefaultDatasourceContext;
 import io.cloudslang.orchestrator.services.ExecutionStateServiceImpl;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;

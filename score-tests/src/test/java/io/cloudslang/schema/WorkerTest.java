@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.schema;
+package io.cloudslang.schema;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

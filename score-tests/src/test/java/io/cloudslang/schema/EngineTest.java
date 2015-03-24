@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.schema;
+package io.cloudslang.schema;
 
 import java.util.Date;
 import java.util.List;

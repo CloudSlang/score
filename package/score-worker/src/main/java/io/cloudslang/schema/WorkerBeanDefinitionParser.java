@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.schema;
+package io.cloudslang.schema;
 
 import org.openscore.events.EventBusImpl;
 import io.cloudslang.worker.execution.reflection.ReflectionAdapterImpl;

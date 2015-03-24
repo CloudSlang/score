@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.schema.context;
+package io.cloudslang.schema.context;
 
 import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
 import org.hibernate.ejb.HibernatePersistence;
