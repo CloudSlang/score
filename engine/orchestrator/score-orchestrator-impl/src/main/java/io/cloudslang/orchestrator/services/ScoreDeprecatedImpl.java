@@ -10,8 +10,8 @@
 
 package io.cloudslang.orchestrator.services;
 
-import org.openscore.api.ScoreDeprecated;
-import org.openscore.api.TriggeringProperties;
+import io.cloudslang.api.ScoreDeprecated;
+import io.cloudslang.api.TriggeringProperties;
 import io.cloudslang.engine.data.IdentityGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 

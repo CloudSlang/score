@@ -11,7 +11,7 @@
 package io.cloudslang.worker.execution.reflection;
 
 import io.cloudslang.worker.execution.services.SessionDataHandler;
-import org.openscore.api.ControlActionMetadata;
+import io.cloudslang.api.ControlActionMetadata;
 import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.Test;

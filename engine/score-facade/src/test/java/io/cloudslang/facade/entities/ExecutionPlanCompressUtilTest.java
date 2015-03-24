@@ -10,9 +10,9 @@
 
 package io.cloudslang.facade.entities;
 
-import org.openscore.api.ControlActionMetadata;
-import org.openscore.api.ExecutionPlan;
-import org.openscore.api.ExecutionStep;
+import io.cloudslang.api.ControlActionMetadata;
+import io.cloudslang.api.ExecutionPlan;
+import io.cloudslang.api.ExecutionStep;
 import junit.framework.Assert;
 import org.junit.Test;
 

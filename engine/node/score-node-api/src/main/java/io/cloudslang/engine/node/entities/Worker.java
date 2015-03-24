@@ -10,7 +10,7 @@
 
 package io.cloudslang.engine.node.entities;
 
-import org.openscore.api.nodes.WorkerStatus;
+import io.cloudslang.api.nodes.WorkerStatus;
 
 import java.util.List;
 

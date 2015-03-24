@@ -10,7 +10,7 @@
 
 package org.openscore.orchestrator.services;
 
-import org.openscore.api.TriggeringProperties;
+import io.cloudslang.api.TriggeringProperties;
 
 /**
  * User: wahnonm

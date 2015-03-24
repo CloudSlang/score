@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.api;
+package io.cloudslang.api;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;

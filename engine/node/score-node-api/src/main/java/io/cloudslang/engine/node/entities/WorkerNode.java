@@ -10,7 +10,7 @@
 
 package io.cloudslang.engine.node.entities;
 
-import org.openscore.api.nodes.WorkerStatus;
+import io.cloudslang.api.nodes.WorkerStatus;
 import io.cloudslang.engine.data.AbstractIdentifiable;
 import io.cloudslang.facade.TempConstants;
 import org.apache.commons.lang.builder.EqualsBuilder;

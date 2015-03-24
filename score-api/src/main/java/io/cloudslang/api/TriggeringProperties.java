@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.api;
+package io.cloudslang.api;
 
 import java.io.Serializable;
 import java.util.HashMap;

@@ -12,7 +12,7 @@ package io.cloudslang.orchestrator.services;
 
 import io.cloudslang.facade.entities.RunningExecutionPlan;
 import io.cloudslang.facade.services.RunningExecutionPlanService;
-import org.openscore.api.ExecutionPlan;
+import io.cloudslang.api.ExecutionPlan;
 import io.cloudslang.orchestrator.repositories.RunningExecutionPlanRepository;
 import junit.framework.Assert;
 import org.junit.Before;

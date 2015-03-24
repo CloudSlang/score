@@ -10,9 +10,9 @@
 
 package org.openscore.lang;
 
-import org.openscore.api.EndBranchDataContainer;
+import io.cloudslang.api.EndBranchDataContainer;
 import org.openscore.events.ScoreEvent;
-import org.openscore.api.StartBranchDataContainer;
+import io.cloudslang.api.StartBranchDataContainer;
 import io.cloudslang.facade.execution.ExecutionStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;

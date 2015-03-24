@@ -10,7 +10,7 @@
 
 package org.openscore.samples.controlactions;
 
-import org.openscore.api.EndBranchDataContainer;
+import io.cloudslang.api.EndBranchDataContainer;
 import org.openscore.lang.ExecutionRuntimeServices;
 
 import java.io.Serializable;

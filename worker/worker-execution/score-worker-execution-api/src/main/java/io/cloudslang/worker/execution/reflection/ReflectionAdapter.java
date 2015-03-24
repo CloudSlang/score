@@ -10,7 +10,7 @@
 
 package io.cloudslang.worker.execution.reflection;
 
-import org.openscore.api.ControlActionMetadata;
+import io.cloudslang.api.ControlActionMetadata;
 
 import java.util.Map;
 

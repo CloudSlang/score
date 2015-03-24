@@ -10,7 +10,7 @@
 
 package io.cloudslang.facade.entities;
 
-import org.openscore.api.ExecutionPlan;
+import io.cloudslang.api.ExecutionPlan;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedInputStream;

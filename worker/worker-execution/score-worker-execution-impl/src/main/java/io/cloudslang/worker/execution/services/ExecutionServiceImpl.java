@@ -10,9 +10,9 @@
 
 package io.cloudslang.worker.execution.services;
 
-import org.openscore.api.ExecutionStep;
-import org.openscore.api.StartBranchDataContainer;
-import org.openscore.api.execution.ExecutionParametersConsts;
+import io.cloudslang.api.ExecutionStep;
+import io.cloudslang.api.StartBranchDataContainer;
+import io.cloudslang.api.execution.ExecutionParametersConsts;
 import org.openscore.events.EventBus;
 import org.openscore.events.EventConstants;
 import org.openscore.events.ScoreEvent;

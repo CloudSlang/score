@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.api;
+package io.cloudslang.api;
 
 /**
  * Created by peerme on 23/07/2014.

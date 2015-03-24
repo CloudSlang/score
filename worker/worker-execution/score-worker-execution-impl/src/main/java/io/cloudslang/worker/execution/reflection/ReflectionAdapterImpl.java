@@ -27,8 +27,8 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 
-import org.openscore.api.ControlActionMetadata;
-import org.openscore.api.execution.ExecutionParametersConsts;
+import io.cloudslang.api.ControlActionMetadata;
+import io.cloudslang.api.execution.ExecutionParametersConsts;
 import org.openscore.exceptions.FlowExecutionException;
 import io.cloudslang.worker.execution.services.SessionDataHandler;
 

@@ -10,7 +10,7 @@
 
 package io.cloudslang.engine.queue.services;
 
-import org.openscore.api.execution.ExecutionParametersConsts;
+import io.cloudslang.api.execution.ExecutionParametersConsts;
 import org.openscore.events.EventConstants;
 import org.openscore.events.ScoreEvent;
 import io.cloudslang.facade.entities.Execution;

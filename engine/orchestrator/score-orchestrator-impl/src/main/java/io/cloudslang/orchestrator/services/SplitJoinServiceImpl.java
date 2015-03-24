@@ -11,7 +11,7 @@
 package io.cloudslang.orchestrator.services;
 
 import ch.lambdaj.function.convert.Converter;
-import org.openscore.api.EndBranchDataContainer;
+import io.cloudslang.api.EndBranchDataContainer;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;

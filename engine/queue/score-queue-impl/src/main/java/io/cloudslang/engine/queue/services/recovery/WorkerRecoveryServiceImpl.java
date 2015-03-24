@@ -10,7 +10,7 @@
 
 package io.cloudslang.engine.queue.services.recovery;
 
-import org.openscore.api.nodes.WorkerStatus;
+import io.cloudslang.api.nodes.WorkerStatus;
 import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.node.services.LoginListener;
 import io.cloudslang.engine.node.services.WorkerLockService;

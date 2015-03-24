@@ -10,8 +10,8 @@
 
 package io.cloudslang.orchestrator.services;
 
-import org.openscore.api.Score;
-import org.openscore.api.TriggeringProperties;
+import io.cloudslang.api.Score;
+import io.cloudslang.api.TriggeringProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;

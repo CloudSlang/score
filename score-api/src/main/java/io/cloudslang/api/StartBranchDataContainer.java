@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.api;
+package io.cloudslang.api;
 
 import org.openscore.lang.SystemContext;
 import org.apache.commons.lang.Validate;

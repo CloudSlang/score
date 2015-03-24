@@ -10,7 +10,7 @@
 
 package io.cloudslang.facade.entities;
 
-import org.openscore.api.ExecutionPlan;
+import io.cloudslang.api.ExecutionPlan;
 import io.cloudslang.engine.data.AbstractIdentifiable;
 import org.apache.commons.lang.SerializationUtils;
 import org.hibernate.annotations.Cache;

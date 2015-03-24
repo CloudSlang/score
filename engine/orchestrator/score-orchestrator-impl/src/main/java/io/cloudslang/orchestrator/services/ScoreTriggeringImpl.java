@@ -10,8 +10,8 @@
 
 package io.cloudslang.orchestrator.services;
 
-import org.openscore.api.ExecutionPlan;
-import org.openscore.api.TriggeringProperties;
+import io.cloudslang.api.ExecutionPlan;
+import io.cloudslang.api.TriggeringProperties;
 import io.cloudslang.engine.data.IdentityGenerator;
 import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.queue.entities.ExecStatus;

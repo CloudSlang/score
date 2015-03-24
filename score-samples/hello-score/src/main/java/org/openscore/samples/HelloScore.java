@@ -10,11 +10,11 @@
 
 package org.openscore.samples;
 
-import org.openscore.api.ControlActionMetadata;
-import org.openscore.api.ExecutionPlan;
-import org.openscore.api.ExecutionStep;
-import org.openscore.api.Score;
-import org.openscore.api.TriggeringProperties;
+import io.cloudslang.api.ControlActionMetadata;
+import io.cloudslang.api.ExecutionPlan;
+import io.cloudslang.api.ExecutionStep;
+import io.cloudslang.api.Score;
+import io.cloudslang.api.TriggeringProperties;
 import org.openscore.events.EventBus;
 import org.openscore.events.EventConstants;
 import org.openscore.events.ScoreEvent;

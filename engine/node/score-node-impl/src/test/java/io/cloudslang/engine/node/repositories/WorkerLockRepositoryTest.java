@@ -10,7 +10,7 @@
 
 package io.cloudslang.engine.node.repositories;
 
-import org.openscore.api.nodes.WorkerStatus;
+import io.cloudslang.api.nodes.WorkerStatus;
 import io.cloudslang.engine.node.entities.WorkerLock;
 import io.cloudslang.engine.node.entities.WorkerNode;
 import org.junit.Before;

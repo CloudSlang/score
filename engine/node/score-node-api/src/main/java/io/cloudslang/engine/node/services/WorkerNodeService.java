@@ -11,7 +11,7 @@
 package io.cloudslang.engine.node.services;
 
 import com.google.common.collect.Multimap;
-import org.openscore.api.nodes.WorkerStatus;
+import io.cloudslang.api.nodes.WorkerStatus;
 import io.cloudslang.engine.node.entities.WorkerNode;
 
 import java.util.List;

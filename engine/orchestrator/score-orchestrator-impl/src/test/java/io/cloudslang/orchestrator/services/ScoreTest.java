@@ -10,9 +10,9 @@
 
 package io.cloudslang.orchestrator.services;
 
-import org.openscore.api.ExecutionPlan;
-import org.openscore.api.Score;
-import org.openscore.api.TriggeringProperties;
+import io.cloudslang.api.ExecutionPlan;
+import io.cloudslang.api.Score;
+import io.cloudslang.api.TriggeringProperties;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;

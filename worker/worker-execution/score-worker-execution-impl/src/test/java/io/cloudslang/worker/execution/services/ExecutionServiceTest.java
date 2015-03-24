@@ -10,9 +10,9 @@
 
 package io.cloudslang.worker.execution.services;
 
-import org.openscore.api.ControlActionMetadata;
-import org.openscore.api.ExecutionPlan;
-import org.openscore.api.ExecutionStep;
+import io.cloudslang.api.ControlActionMetadata;
+import io.cloudslang.api.ExecutionPlan;
+import io.cloudslang.api.ExecutionStep;
 import org.openscore.events.EventBus;
 import org.openscore.events.EventConstants;
 import io.cloudslang.facade.TempConstants;

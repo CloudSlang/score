@@ -11,7 +11,7 @@
 package io.cloudslang.facade.services;
 
 import io.cloudslang.facade.entities.RunningExecutionPlan;
-import org.openscore.api.ExecutionPlan;
+import io.cloudslang.api.ExecutionPlan;
 
 /**
  * Created by IntelliJ IDEA.
