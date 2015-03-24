@@ -11,8 +11,8 @@
 package org.openscore.worker.management.services;
 
 import ch.lambdaj.group.Group;
-import org.openscore.orchestrator.entities.Message;
-import org.openscore.orchestrator.services.OrchestratorDispatcherService;
+import io.cloudslang.orchestrator.entities.Message;
+import io.cloudslang.orchestrator.services.OrchestratorDispatcherService;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

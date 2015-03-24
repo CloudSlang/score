@@ -25,9 +25,9 @@ import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
 import io.cloudslang.engine.queue.services.ScoreEventFactory;
-import org.openscore.orchestrator.services.CancelExecutionService;
-import org.openscore.orchestrator.services.OrchestratorDispatcherService;
-import org.openscore.orchestrator.services.PauseResumeService;
+import io.cloudslang.orchestrator.services.CancelExecutionService;
+import io.cloudslang.orchestrator.services.OrchestratorDispatcherService;
+import io.cloudslang.orchestrator.services.PauseResumeService;
 import org.openscore.worker.management.services.WorkerManager;
 import org.openscore.worker.management.services.dbsupport.WorkerDbSupportService;
 

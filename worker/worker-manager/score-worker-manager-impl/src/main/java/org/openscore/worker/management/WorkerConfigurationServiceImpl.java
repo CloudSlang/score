@@ -17,8 +17,8 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.cloudslang.engine.node.services.WorkerNodeService;
-import org.openscore.orchestrator.services.CancelExecutionService;
-import org.openscore.orchestrator.services.PauseResumeService;
+import io.cloudslang.orchestrator.services.CancelExecutionService;
+import io.cloudslang.orchestrator.services.PauseResumeService;
 
 /**
  * @author kravtsov

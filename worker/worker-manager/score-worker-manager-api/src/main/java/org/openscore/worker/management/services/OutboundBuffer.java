@@ -10,7 +10,7 @@
 
 package org.openscore.worker.management.services;
 
-import org.openscore.orchestrator.entities.Message;
+import io.cloudslang.orchestrator.entities.Message;
 
 /**
  * User: zruya

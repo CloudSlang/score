@@ -14,7 +14,7 @@ package io.cloudslang.engine.queue.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.facade.entities.Execution;
-import org.openscore.orchestrator.entities.Message;
+import io.cloudslang.orchestrator.entities.Message;
 import org.apache.commons.lang.builder.EqualsBuilder;
 
 import java.util.Arrays;

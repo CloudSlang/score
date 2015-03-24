@@ -18,7 +18,7 @@ import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
 import io.cloudslang.facade.TempConstants;
 import io.cloudslang.facade.entities.Execution;
-import org.openscore.orchestrator.entities.SplitMessage;
+import io.cloudslang.orchestrator.entities.SplitMessage;
 import org.openscore.worker.execution.services.ExecutionService;
 import org.openscore.worker.management.WorkerConfigurationService;
 import org.apache.commons.lang.StringUtils;

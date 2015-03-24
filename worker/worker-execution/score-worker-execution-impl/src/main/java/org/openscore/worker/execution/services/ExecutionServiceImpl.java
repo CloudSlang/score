@@ -23,7 +23,7 @@ import io.cloudslang.facade.execution.ExecutionStatus;
 import io.cloudslang.facade.execution.ExecutionSummary;
 import io.cloudslang.facade.execution.PauseReason;
 import org.openscore.lang.SystemContext;
-import org.openscore.orchestrator.services.PauseResumeService;
+import io.cloudslang.orchestrator.services.PauseResumeService;
 import org.openscore.worker.execution.reflection.ReflectionAdapter;
 import org.openscore.worker.management.WorkerConfigurationService;
 import org.openscore.worker.management.services.dbsupport.WorkerDbSupportService;

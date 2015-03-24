@@ -10,8 +10,8 @@
 
 package org.openscore.worker.management.services;
 
-import org.openscore.orchestrator.entities.Message;
-import org.openscore.orchestrator.services.OrchestratorDispatcherService;
+import io.cloudslang.orchestrator.entities.Message;
+import io.cloudslang.orchestrator.services.OrchestratorDispatcherService;
 import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.Before;
@@ -20,7 +20,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.openscore.worker.management.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

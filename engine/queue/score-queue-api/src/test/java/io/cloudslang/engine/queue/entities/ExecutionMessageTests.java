@@ -10,7 +10,7 @@
 
 package io.cloudslang.engine.queue.entities;
 
-import org.openscore.orchestrator.entities.Message;
+import io.cloudslang.orchestrator.entities.Message;
 import org.junit.Test;
 
 import java.util.Arrays;
