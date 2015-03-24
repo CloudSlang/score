@@ -47,7 +47,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(OutboundBufferImpl.class, "outBuffer");
 		put(RetryTemplate.class, null);
 		put(SimpleExecutionRunnableFactory.class, null);
-		put(WorkerManagerMBean.class, "org.openscore.worker.management.services.WorkerManagerMBean");
+		put(WorkerManagerMBean.class, "io.cloudslang.worker.management.services.WorkerManagerMBean");
 		put(WorkerRecoveryManagerImpl.class, null);
 		put(ReflectionAdapterImpl.class, null);
         put(SessionDataHandlerImpl.class, "sessionDataHandler");

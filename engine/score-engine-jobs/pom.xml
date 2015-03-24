@@ -10,7 +10,7 @@
     -->
     <parent>
         <artifactId>engine</artifactId>
-        <groupId>io.openscore</groupId>
+        <groupId>io.cloudslang</groupId>
         <version>0.1.268-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>

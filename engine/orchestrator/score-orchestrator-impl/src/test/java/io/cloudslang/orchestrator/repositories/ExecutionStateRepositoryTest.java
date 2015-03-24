@@ -95,7 +95,7 @@ public class ExecutionStateRepositoryTest {
             fb.setJpaProperties(hibernateProperties());
             fb.setDataSource(dataSource());
             fb.setPersistenceProviderClass(HibernatePersistence.class);
-            fb.setPackagesToScan("org.openscore");
+            fb.setPackagesToScan("io.cloudslang");
             fb.setJpaVendorAdapter(jpaVendorAdapter);
             return fb;
         }

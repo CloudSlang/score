@@ -8,7 +8,7 @@
 
     <tx:annotation-driven/>
 
-	<jpa:repositories base-package="org.openscore" query-lookup-strategy="create-if-not-found">
+	<jpa:repositories base-package="io.cloudslang" query-lookup-strategy="create-if-not-found">
 		<repository:include-filter type="regex" expression="io.cloudslang.engine.node.repositories.WorkerNodeRepository"/>
 		<repository:include-filter type="regex" expression="io.cloudslang.engine.versioning.repositories.VersionRepository"/>
 		<repository:include-filter type="regex" expression="io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository"/>

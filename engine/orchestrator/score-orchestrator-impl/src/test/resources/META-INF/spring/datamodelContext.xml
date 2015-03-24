@@ -30,7 +30,7 @@ http://www.springframework.org/schema/data/jpa http://www.springframework.org/sc
 	      p:jpaProperties-ref="hibernateProperties"
 	      p:dataSource-ref="dataSource"
 	      p:persistenceProviderClass="org.hibernate.ejb.HibernatePersistence"
-	      p:packagesToScan="org.openscore"
+	      p:packagesToScan="io.cloudslang"
 	      depends-on="liquibase">
 		<property name="jpaVendorAdapter">
 			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"
@@ -58,6 +58,6 @@ http://www.springframework.org/schema/data/jpa http://www.springframework.org/sc
 		<prop key="hibernate.dialect_resolvers">io.cloudslang.engine.data.dialect.ScoreDialectResolver</prop>
 	</util:properties>
 
-	<jpa:repositories base-package="org.openscore" />
+	<jpa:repositories base-package="io.cloudslang" />
 
 </beans>

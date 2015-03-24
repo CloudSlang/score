@@ -27,8 +27,8 @@ public class ScoreNamespaceHandler extends NamespaceHandlerSupport {
 	private final Logger logger = Logger.getLogger(getClass());
 
 	private Map<String,String> parsers = new HashMap<String,String>(){{
-		put("engine", "org.openscore.schema.EngineBeanDefinitionParser");
-		put("worker", "org.openscore.schema.WorkerBeanDefinitionParser");
+		put("engine", "io.cloudslang.schema.EngineBeanDefinitionParser");
+		put("worker", "io.cloudslang.schema.WorkerBeanDefinitionParser");
 	}};
 
 	@Override

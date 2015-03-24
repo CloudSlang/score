@@ -10,7 +10,7 @@
     -->
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>io.openscore</groupId>
+		<groupId>io.cloudslang</groupId>
 		<artifactId>queue</artifactId>
 		<version>0.1.268-SNAPSHOT</version>
 	</parent>

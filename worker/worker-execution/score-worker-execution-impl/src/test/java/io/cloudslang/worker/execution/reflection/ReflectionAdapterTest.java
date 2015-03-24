@@ -44,7 +44,7 @@ public class ReflectionAdapterTest {
 
     @Test
 	public void executeControlActionTest() {
-		ControlActionMetadata metadata = new ControlActionMetadata("org.openscore.worker.execution.reflection.ReflectionAdapterTestHelper", "myMethod_1");
+		ControlActionMetadata metadata = new ControlActionMetadata("io.cloudslang.worker.execution.reflection.ReflectionAdapterTestHelper", "myMethod_1");
 		Map<String, Object> map = new HashMap<>();
 		map.put("parameter_1", "TEST");
 		map.put("parameter_2", 3);
@@ -58,7 +58,7 @@ public class ReflectionAdapterTest {
 
 	@Test
 	public void executeControlActionTest_2() {
-		ControlActionMetadata metadata = new ControlActionMetadata("org.openscore.worker.execution.reflection.ReflectionAdapterTestHelper", "myMethod_2");
+		ControlActionMetadata metadata = new ControlActionMetadata("io.cloudslang.worker.execution.reflection.ReflectionAdapterTestHelper", "myMethod_2");
 		Map<String, Object> map = new HashMap<>();
 		map.put("parameter_1", 5);
 		map.put("parameter_2", 3);
@@ -68,7 +68,7 @@ public class ReflectionAdapterTest {
 
 	@Test
 	public void executeControlActionTest_3() {
-		ControlActionMetadata metadata = new ControlActionMetadata("org.openscore.worker.execution.reflection.ReflectionAdapterTestHelper", "myMethod_3");
+		ControlActionMetadata metadata = new ControlActionMetadata("io.cloudslang.worker.execution.reflection.ReflectionAdapterTestHelper", "myMethod_3");
 		Map<String, Object> actionData = new HashMap<>();
 		actionData.put("parameter_1", 5);
 		actionData.put("parameter_2", 3);
@@ -79,7 +79,7 @@ public class ReflectionAdapterTest {
 
 	@Test
 	public void executeControlActionTest_4() {
-		ControlActionMetadata metadata = new ControlActionMetadata("org.openscore.worker.execution.reflection.ReflectionAdapterTestHelperNoSpring", "myMethod_4");
+		ControlActionMetadata metadata = new ControlActionMetadata("io.cloudslang.worker.execution.reflection.ReflectionAdapterTestHelperNoSpring", "myMethod_4");
 		Map<String, Object> actionData = new HashMap<>();
 		actionData.put("parameter_1", 5);
 		actionData.put("parameter_2", 3);

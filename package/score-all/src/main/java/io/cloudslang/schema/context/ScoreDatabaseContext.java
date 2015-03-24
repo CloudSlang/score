@@ -46,7 +46,7 @@ public class ScoreDatabaseContext {
         props.setProperty("hibernate.cache.use_second_level_cache", Boolean.FALSE.toString());
         props.setProperty("hibernate.order_updates", Boolean.TRUE.toString());
         props.setProperty("hibernate.order_inserts", Boolean.TRUE.toString());
-        props.setProperty("hibernate.dialect_resolvers", "org.openscore.engine.dialects.ScoreDialectResolver");
+        props.setProperty("hibernate.dialect_resolvers", "io.cloudslang.engine.dialects.ScoreDialectResolver");
         return props;
     }
 
@@ -67,7 +67,7 @@ public class ScoreDatabaseContext {
 		emf.setJpaProperties(jpaProperties());
         emf.setJpaVendorAdapter(jpaVendorAdapter());
         emf.setPersistenceProviderClass(HibernatePersistence.class);
-        emf.setPackagesToScan("org.openscore");
+        emf.setPackagesToScan("io.cloudslang");
         return emf;
     }
 
