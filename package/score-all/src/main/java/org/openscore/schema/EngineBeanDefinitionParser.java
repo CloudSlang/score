@@ -46,7 +46,7 @@ import io.cloudslang.engine.data.DataBaseDetector;
 import io.cloudslang.engine.data.HiloFactoryBean;
 import io.cloudslang.engine.data.SqlInQueryReader;
 import io.cloudslang.engine.data.SqlUtils;
-import org.openscore.job.ScoreEngineJobsImpl;
+import io.cloudslang.job.ScoreEngineJobsImpl;
 import org.openscore.schema.context.ScoreDatabaseContext;
 import org.openscore.schema.context.ScoreDefaultDatasourceContext;
 import io.cloudslang.orchestrator.services.ExecutionStateServiceImpl;

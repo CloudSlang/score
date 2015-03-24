@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.job;
+package io.cloudslang.job;
 
 /**
  * User: wahnonm

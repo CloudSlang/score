@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.job;
+package io.cloudslang.job;
 
 import io.cloudslang.engine.queue.services.cleaner.QueueCleanerService;
 import io.cloudslang.engine.queue.services.recovery.ExecutionRecoveryService;
