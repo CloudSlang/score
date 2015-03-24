@@ -22,7 +22,7 @@ import io.cloudslang.orchestrator.entities.SplitMessage;
 import io.cloudslang.orchestrator.entities.SuspendedExecution;
 import io.cloudslang.orchestrator.repositories.FinishedBranchRepository;
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
-import org.openscore.lang.SystemContext;
+import io.cloudslang.lang.SystemContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

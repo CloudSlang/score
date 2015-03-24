@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.lang;
+package io.cloudslang.lang;
 
 import java.io.Serializable;
 import java.util.Collection;

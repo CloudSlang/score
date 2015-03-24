@@ -16,7 +16,7 @@ import io.cloudslang.events.EventBus;
 import io.cloudslang.events.ScoreEvent;
 import io.cloudslang.facade.entities.Execution;
 import io.cloudslang.facade.execution.ExecutionSummary;
-import org.openscore.lang.SystemContext;
+import io.cloudslang.lang.SystemContext;
 import io.cloudslang.orchestrator.services.ExecutionStateService;
 import io.cloudslang.orchestrator.services.PauseResumeService;
 import io.cloudslang.orchestrator.services.SplitJoinService;

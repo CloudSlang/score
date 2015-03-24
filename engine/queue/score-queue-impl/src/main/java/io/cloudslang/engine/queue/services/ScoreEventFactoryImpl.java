@@ -17,7 +17,7 @@ import io.cloudslang.facade.entities.Execution;
 import io.cloudslang.facade.execution.ExecutionStatus;
 import io.cloudslang.facade.services.RunningExecutionPlanService;
 import org.apache.commons.lang.StringUtils;
-import org.openscore.lang.ExecutionRuntimeServices;
+import io.cloudslang.lang.ExecutionRuntimeServices;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;

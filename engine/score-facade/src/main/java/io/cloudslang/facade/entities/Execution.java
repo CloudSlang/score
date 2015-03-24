@@ -10,7 +10,7 @@
 
 package io.cloudslang.facade.entities;
 
-import org.openscore.lang.SystemContext;
+import io.cloudslang.lang.SystemContext;
 
 import java.io.Serializable;
 import java.util.HashMap;

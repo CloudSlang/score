@@ -10,7 +10,7 @@
 
 package io.cloudslang.api;
 
-import org.openscore.lang.SystemContext;
+import io.cloudslang.lang.SystemContext;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;

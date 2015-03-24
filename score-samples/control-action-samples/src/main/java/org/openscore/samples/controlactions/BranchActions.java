@@ -11,7 +11,7 @@
 package org.openscore.samples.controlactions;
 
 import io.cloudslang.api.EndBranchDataContainer;
-import org.openscore.lang.ExecutionRuntimeServices;
+import io.cloudslang.lang.ExecutionRuntimeServices;
 
 import java.io.Serializable;
 import java.util.ArrayList;

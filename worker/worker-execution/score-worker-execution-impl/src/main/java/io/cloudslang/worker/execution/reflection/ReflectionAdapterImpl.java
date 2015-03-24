@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
-import org.openscore.lang.ExecutionRuntimeServices;
+import io.cloudslang.lang.ExecutionRuntimeServices;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;

@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.lang;
+package io.cloudslang.lang;
 
 import io.cloudslang.api.EndBranchDataContainer;
 import io.cloudslang.events.ScoreEvent;

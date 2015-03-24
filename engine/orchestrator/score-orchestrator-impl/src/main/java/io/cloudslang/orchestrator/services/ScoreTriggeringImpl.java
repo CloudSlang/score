@@ -21,7 +21,7 @@ import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import io.cloudslang.facade.entities.Execution;
 import io.cloudslang.facade.services.RunningExecutionPlanService;
-import org.openscore.lang.SystemContext;
+import io.cloudslang.lang.SystemContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;

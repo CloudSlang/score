@@ -1,6 +1,6 @@
 package io.cloudslang.engine.queue.entities;
 
-import org.openscore.lang.SystemContext;
+import io.cloudslang.lang.SystemContext;
 
 import java.io.Serializable;
 import java.util.Map;

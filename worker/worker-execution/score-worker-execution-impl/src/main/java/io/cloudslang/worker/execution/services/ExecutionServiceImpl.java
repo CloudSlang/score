@@ -22,7 +22,7 @@ import io.cloudslang.facade.entities.RunningExecutionPlan;
 import io.cloudslang.facade.execution.ExecutionStatus;
 import io.cloudslang.facade.execution.ExecutionSummary;
 import io.cloudslang.facade.execution.PauseReason;
-import org.openscore.lang.SystemContext;
+import io.cloudslang.lang.SystemContext;
 import io.cloudslang.orchestrator.services.PauseResumeService;
 import io.cloudslang.worker.execution.reflection.ReflectionAdapter;
 import io.cloudslang.worker.management.WorkerConfigurationService;

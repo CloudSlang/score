@@ -19,7 +19,7 @@ import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.ExecutionQueueService;
 import io.cloudslang.facade.entities.Execution;
-import org.openscore.lang.SystemContext;
+import io.cloudslang.lang.SystemContext;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;

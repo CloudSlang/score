@@ -10,7 +10,7 @@
 
 package org.openscore.samples.controlactions;
 
-import org.openscore.lang.ExecutionRuntimeServices;
+import io.cloudslang.lang.ExecutionRuntimeServices;
 
 /**
  * User:
