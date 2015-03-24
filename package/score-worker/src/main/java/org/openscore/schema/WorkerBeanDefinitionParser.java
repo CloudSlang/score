@@ -11,14 +11,14 @@
 package org.openscore.schema;
 
 import org.openscore.events.EventBusImpl;
-import org.openscore.worker.execution.reflection.ReflectionAdapterImpl;
-import org.openscore.worker.execution.services.ExecutionServiceImpl;
-import org.openscore.worker.execution.services.SessionDataHandlerImpl;
-import org.openscore.worker.management.WorkerConfigurationServiceImpl;
-import org.openscore.worker.management.WorkerRegistration;
-import org.openscore.worker.management.monitor.ScheduledWorkerLoadMonitor;
-import org.openscore.worker.management.monitor.WorkerMonitorsImpl;
-import org.openscore.worker.management.services.*;
+import io.cloudslang.worker.execution.reflection.ReflectionAdapterImpl;
+import io.cloudslang.worker.execution.services.ExecutionServiceImpl;
+import io.cloudslang.worker.execution.services.SessionDataHandlerImpl;
+import io.cloudslang.worker.management.WorkerConfigurationServiceImpl;
+import io.cloudslang.worker.management.WorkerRegistration;
+import io.cloudslang.worker.management.monitor.ScheduledWorkerLoadMonitor;
+import io.cloudslang.worker.management.monitor.WorkerMonitorsImpl;
+import io.cloudslang.worker.management.services.*;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;

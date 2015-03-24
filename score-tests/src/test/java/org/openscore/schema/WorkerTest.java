@@ -28,8 +28,8 @@ import io.cloudslang.engine.queue.services.ScoreEventFactory;
 import io.cloudslang.orchestrator.services.CancelExecutionService;
 import io.cloudslang.orchestrator.services.OrchestratorDispatcherService;
 import io.cloudslang.orchestrator.services.PauseResumeService;
-import org.openscore.worker.management.services.WorkerManager;
-import org.openscore.worker.management.services.dbsupport.WorkerDbSupportService;
+import io.cloudslang.worker.management.services.WorkerManager;
+import io.cloudslang.worker.management.services.dbsupport.WorkerDbSupportService;
 
 import static org.mockito.Mockito.mock;
 
