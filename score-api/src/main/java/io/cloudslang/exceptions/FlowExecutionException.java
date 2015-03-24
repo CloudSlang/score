@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.exceptions;
+package io.cloudslang.exceptions;
 
 /**
  * Created by IntelliJ IDEA.

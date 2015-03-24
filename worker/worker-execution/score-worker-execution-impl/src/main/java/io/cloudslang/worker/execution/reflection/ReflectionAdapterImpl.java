@@ -29,7 +29,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 
 import io.cloudslang.api.ControlActionMetadata;
 import io.cloudslang.api.execution.ExecutionParametersConsts;
-import org.openscore.exceptions.FlowExecutionException;
+import io.cloudslang.exceptions.FlowExecutionException;
 import io.cloudslang.worker.execution.services.SessionDataHandler;
 
 /**
