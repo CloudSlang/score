@@ -10,7 +10,7 @@
 
 package org.openscore.orchestrator.repositories;
 
-import org.openscore.facade.execution.ExecutionStatus;
+import io.cloudslang.facade.execution.ExecutionStatus;
 import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
 import org.openscore.orchestrator.entities.ExecutionState;
 import liquibase.integration.spring.SpringLiquibase;

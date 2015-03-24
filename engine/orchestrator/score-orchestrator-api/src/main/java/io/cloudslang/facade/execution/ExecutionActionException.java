@@ -1,4 +1,4 @@
-package org.openscore.facade.execution;
+package io.cloudslang.facade.execution;
 
 /**
  * User: noym

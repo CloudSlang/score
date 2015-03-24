@@ -10,7 +10,7 @@
 
 package io.cloudslang.engine.queue.services;
 
-import org.openscore.facade.entities.Execution;
+import io.cloudslang.facade.entities.Execution;
 import org.openscore.events.ScoreEvent;
 
 /**

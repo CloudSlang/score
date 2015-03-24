@@ -10,7 +10,7 @@
 
 package org.openscore.orchestrator.entities;
 
-import org.openscore.facade.entities.Execution;
+import io.cloudslang.facade.entities.Execution;
 import io.cloudslang.engine.data.AbstractIdentifiable;
 
 import javax.persistence.*;

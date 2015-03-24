@@ -12,9 +12,9 @@ package org.openscore.orchestrator.services;
 
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
-import org.openscore.facade.entities.Execution;
-import org.openscore.facade.execution.ExecutionActionResult;
-import org.openscore.facade.execution.ExecutionStatus;
+import io.cloudslang.facade.entities.Execution;
+import io.cloudslang.facade.execution.ExecutionActionResult;
+import io.cloudslang.facade.execution.ExecutionStatus;
 import org.openscore.orchestrator.entities.ExecutionState;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.openscore.facade.execution.ExecutionSummary.EMPTY_BRANCH;
+import static io.cloudslang.facade.execution.ExecutionSummary.EMPTY_BRANCH;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;

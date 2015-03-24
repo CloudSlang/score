@@ -13,7 +13,7 @@ package io.cloudslang.engine.queue.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.cloudslang.engine.node.entities.WorkerNode;
-import org.openscore.facade.entities.Execution;
+import io.cloudslang.facade.entities.Execution;
 import org.openscore.orchestrator.entities.Message;
 import org.apache.commons.lang.builder.EqualsBuilder;
 

@@ -1,4 +1,4 @@
-package org.openscore.facade.execution;
+package io.cloudslang.facade.execution;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.facade.entities;
+package io.cloudslang.facade.entities;
 
 import org.openscore.api.ExecutionPlan;
 import org.apache.log4j.Logger;

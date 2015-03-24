@@ -10,10 +10,10 @@
 
 package org.openscore.orchestrator.services;
 
-import org.openscore.facade.entities.RunningExecutionPlan;
+import io.cloudslang.facade.entities.RunningExecutionPlan;
 import org.openscore.api.ExecutionPlan;
 import org.openscore.orchestrator.repositories.RunningExecutionPlanRepository;
-import org.openscore.facade.services.RunningExecutionPlanService;
+import io.cloudslang.facade.services.RunningExecutionPlanService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;

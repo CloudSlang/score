@@ -10,8 +10,8 @@
 
 package org.openscore.orchestrator.services;
 
-import org.openscore.facade.execution.ExecutionStatus;
-import org.openscore.facade.execution.PauseReason;
+import io.cloudslang.facade.execution.ExecutionStatus;
+import io.cloudslang.facade.execution.PauseReason;
 import org.openscore.orchestrator.entities.ExecutionState;
 import org.springframework.beans.factory.annotation.Autowired;
 

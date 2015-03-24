@@ -10,8 +10,8 @@
 
 package org.openscore.orchestrator.services;
 
-import org.openscore.facade.entities.RunningExecutionPlan;
-import org.openscore.facade.services.RunningExecutionPlanService;
+import io.cloudslang.facade.entities.RunningExecutionPlan;
+import io.cloudslang.facade.services.RunningExecutionPlanService;
 import org.openscore.api.ExecutionPlan;
 import org.openscore.orchestrator.repositories.RunningExecutionPlanRepository;
 import junit.framework.Assert;

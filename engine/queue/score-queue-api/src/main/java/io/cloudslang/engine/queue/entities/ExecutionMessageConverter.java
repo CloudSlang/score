@@ -11,7 +11,7 @@
 package io.cloudslang.engine.queue.entities;
 
 import org.apache.commons.io.IOUtils;
-import org.openscore.facade.entities.Execution;
+import io.cloudslang.facade.entities.Execution;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.BufferedInputStream;

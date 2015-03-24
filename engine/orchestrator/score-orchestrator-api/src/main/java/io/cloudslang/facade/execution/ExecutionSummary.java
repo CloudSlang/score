@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.facade.execution;
+package io.cloudslang.facade.execution;
 
 import org.apache.commons.lang.StringUtils;
 

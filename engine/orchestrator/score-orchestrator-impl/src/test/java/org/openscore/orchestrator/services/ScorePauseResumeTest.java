@@ -10,7 +10,7 @@
 
 package org.openscore.orchestrator.services;
 
-import org.openscore.facade.execution.ExecutionStatus;
+import io.cloudslang.facade.execution.ExecutionStatus;
 import org.openscore.orchestrator.entities.ExecutionState;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -11,8 +11,8 @@
 package org.openscore.orchestrator.services;
 
 
-import org.openscore.facade.execution.ExecutionStatus;
-import org.openscore.facade.entities.Execution;
+import io.cloudslang.facade.execution.ExecutionStatus;
+import io.cloudslang.facade.entities.Execution;
 import org.openscore.orchestrator.entities.ExecutionState;
 import org.openscore.orchestrator.repositories.ExecutionStateRepository;
 import org.junit.Rule;

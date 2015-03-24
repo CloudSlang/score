@@ -9,7 +9,7 @@
 *******************************************************************************/
 
 package org.openscore.worker.management.services.dbsupport;
-import org.openscore.facade.entities.RunningExecutionPlan;
+import io.cloudslang.facade.entities.RunningExecutionPlan;
 
 /**
  * Created by IntelliJ IDEA.

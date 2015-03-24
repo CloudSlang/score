@@ -10,7 +10,7 @@
 
 package org.openscore.orchestrator.repositories;
 
-import org.openscore.facade.execution.ExecutionStatus;
+import io.cloudslang.facade.execution.ExecutionStatus;
 import org.openscore.orchestrator.entities.ExecutionState;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

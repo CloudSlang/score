@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.facade;
+package io.cloudslang.facade;
 
 /**
  * Created by peerme on 03/09/2014.

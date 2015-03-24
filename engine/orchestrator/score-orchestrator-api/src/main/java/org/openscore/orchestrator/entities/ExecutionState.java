@@ -10,8 +10,8 @@
 
 package org.openscore.orchestrator.entities;
 
-import org.openscore.facade.execution.ExecutionStatus;
-import org.openscore.facade.execution.ExecutionSummary;
+import io.cloudslang.facade.execution.ExecutionStatus;
+import io.cloudslang.facade.execution.ExecutionSummary;
 import io.cloudslang.engine.data.AbstractIdentifiable;
 import org.apache.commons.lang.builder.EqualsBuilder;
 

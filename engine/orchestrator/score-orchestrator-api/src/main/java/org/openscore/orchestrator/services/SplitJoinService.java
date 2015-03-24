@@ -10,7 +10,7 @@
 
 package org.openscore.orchestrator.services;
 
-import org.openscore.facade.entities.Execution;
+import io.cloudslang.facade.entities.Execution;
 import org.openscore.orchestrator.entities.SplitMessage;
 
 import java.util.List;

@@ -8,9 +8,9 @@
 *
 *******************************************************************************/
 
-package org.openscore.facade.services;
+package io.cloudslang.facade.services;
 
-import org.openscore.facade.entities.RunningExecutionPlan;
+import io.cloudslang.facade.entities.RunningExecutionPlan;
 import org.openscore.api.ExecutionPlan;
 
 /**

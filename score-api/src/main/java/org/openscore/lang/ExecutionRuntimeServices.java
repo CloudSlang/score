@@ -13,7 +13,7 @@ package org.openscore.lang;
 import org.openscore.api.EndBranchDataContainer;
 import org.openscore.events.ScoreEvent;
 import org.openscore.api.StartBranchDataContainer;
-import org.openscore.facade.execution.ExecutionStatus;
+import io.cloudslang.facade.execution.ExecutionStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.EqualsBuilder;

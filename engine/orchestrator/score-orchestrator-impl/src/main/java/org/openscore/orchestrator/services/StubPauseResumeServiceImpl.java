@@ -10,9 +10,9 @@
 
 package org.openscore.orchestrator.services;
 
-import org.openscore.facade.execution.ExecutionSummary;
-import org.openscore.facade.execution.PauseReason;
-import org.openscore.facade.entities.Execution;
+import io.cloudslang.facade.execution.ExecutionSummary;
+import io.cloudslang.facade.execution.PauseReason;
+import io.cloudslang.facade.entities.Execution;
 
 import java.io.Serializable;
 import java.util.List;

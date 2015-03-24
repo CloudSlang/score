@@ -14,9 +14,9 @@ import org.apache.log4j.Logger;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
-import org.openscore.facade.entities.Execution;
-import org.openscore.facade.execution.ExecutionActionResult;
-import org.openscore.facade.execution.ExecutionStatus;
+import io.cloudslang.facade.entities.Execution;
+import io.cloudslang.facade.execution.ExecutionActionResult;
+import io.cloudslang.facade.execution.ExecutionStatus;
 import org.openscore.orchestrator.entities.ExecutionState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.openscore.facade.execution.ExecutionSummary.EMPTY_BRANCH;
+import static io.cloudslang.facade.execution.ExecutionSummary.EMPTY_BRANCH;
 
 /**
  * Created with IntelliJ IDEA.
