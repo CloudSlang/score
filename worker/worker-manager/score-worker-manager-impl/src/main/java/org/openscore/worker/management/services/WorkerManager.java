@@ -33,7 +33,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 
-import org.openscore.engine.node.services.WorkerNodeService;
+import io.cloudslang.engine.node.services.WorkerNodeService;
 
 import static ch.lambdaj.Lambda.max;
 import static ch.lambdaj.Lambda.on;

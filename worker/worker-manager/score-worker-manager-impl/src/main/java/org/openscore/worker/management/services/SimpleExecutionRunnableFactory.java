@@ -11,8 +11,8 @@
 package org.openscore.worker.management.services;
 
 import org.openscore.worker.execution.services.ExecutionService;
-import org.openscore.engine.queue.entities.ExecutionMessageConverter;
-import org.openscore.engine.queue.services.QueueStateIdGeneratorService;
+import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
+import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
 
 import org.openscore.worker.management.WorkerConfigurationService;
 import org.springframework.beans.factory.FactoryBean;

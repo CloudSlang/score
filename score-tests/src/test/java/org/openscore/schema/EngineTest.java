@@ -44,10 +44,10 @@ import org.openscore.api.ExecutionPlan;
 import org.openscore.api.ExecutionStep;
 import org.openscore.api.Score;
 import org.openscore.api.TriggeringProperties;
-import org.openscore.engine.data.SimpleHiloIdentifierGenerator;
-import org.openscore.engine.node.services.WorkerNodeService;
-import org.openscore.engine.queue.entities.ExecutionMessage;
-import org.openscore.engine.queue.services.QueueDispatcherService;
+import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
+import io.cloudslang.engine.node.services.WorkerNodeService;
+import io.cloudslang.engine.queue.entities.ExecutionMessage;
+import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import org.openscore.events.EventBus;
 
 import liquibase.integration.spring.SpringLiquibase;

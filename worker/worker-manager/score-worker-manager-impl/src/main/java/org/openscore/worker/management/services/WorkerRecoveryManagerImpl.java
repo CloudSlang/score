@@ -10,7 +10,7 @@
 
 package org.openscore.worker.management.services;
 
-import org.openscore.engine.node.services.WorkerNodeService;
+import io.cloudslang.engine.node.services.WorkerNodeService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 

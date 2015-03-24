@@ -12,9 +12,9 @@ package org.openscore.orchestrator.services;
 
 import ch.lambdaj.function.convert.Converter;
 import org.openscore.api.EndBranchDataContainer;
-import org.openscore.engine.queue.entities.ExecutionMessage;
-import org.openscore.engine.queue.entities.ExecutionMessageConverter;
-import org.openscore.engine.queue.services.QueueDispatcherService;
+import io.cloudslang.engine.queue.entities.ExecutionMessage;
+import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
+import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import org.openscore.facade.entities.Execution;
 import org.openscore.facade.execution.ExecutionStatus;
 import org.openscore.orchestrator.entities.BranchContexts;

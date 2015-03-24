@@ -12,12 +12,12 @@ package org.openscore.orchestrator.services;
 
 import org.openscore.facade.entities.RunningExecutionPlan;
 import org.openscore.facade.services.RunningExecutionPlanService;
-import org.openscore.engine.queue.entities.ExecutionMessage;
-import org.openscore.engine.queue.entities.ExecutionMessageConverter;
-import org.openscore.engine.queue.services.QueueDispatcherService;
+import io.cloudslang.engine.queue.entities.ExecutionMessage;
+import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
+import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import org.openscore.api.ExecutionPlan;
 import org.openscore.api.TriggeringProperties;
-import org.openscore.engine.data.IdentityGenerator;
+import io.cloudslang.engine.data.IdentityGenerator;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;

@@ -10,14 +10,13 @@
 
 package org.openscore.worker.management.services;
 
-import org.openscore.engine.queue.services.QueueDispatcherService;
+import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.openscore.worker.management.services.*;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;

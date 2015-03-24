@@ -10,7 +10,7 @@
 
 package org.openscore.orchestrator.entities;
 
-import org.openscore.engine.data.AbstractIdentifiable;
+import io.cloudslang.engine.data.AbstractIdentifiable;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.hibernate.annotations.Immutable;

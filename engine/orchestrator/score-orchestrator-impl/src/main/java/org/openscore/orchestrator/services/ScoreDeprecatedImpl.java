@@ -12,7 +12,7 @@ package org.openscore.orchestrator.services;
 
 import org.openscore.api.ScoreDeprecated;
 import org.openscore.api.TriggeringProperties;
-import org.openscore.engine.data.IdentityGenerator;
+import io.cloudslang.engine.data.IdentityGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**

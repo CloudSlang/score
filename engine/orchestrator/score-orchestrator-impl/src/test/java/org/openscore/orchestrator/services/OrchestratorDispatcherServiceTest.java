@@ -10,11 +10,11 @@
 
 package org.openscore.orchestrator.services;
 
-import org.openscore.engine.node.entities.WorkerNode;
-import org.openscore.engine.node.services.WorkerLockService;
-import org.openscore.engine.node.services.WorkerNodeService;
-import org.openscore.engine.queue.entities.ExecutionMessage;
-import org.openscore.engine.queue.services.QueueDispatcherService;
+import io.cloudslang.engine.node.entities.WorkerNode;
+import io.cloudslang.engine.node.services.WorkerLockService;
+import io.cloudslang.engine.node.services.WorkerNodeService;
+import io.cloudslang.engine.queue.entities.ExecutionMessage;
+import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import org.openscore.orchestrator.entities.Message;
 import org.junit.Before;
 import org.junit.Test;

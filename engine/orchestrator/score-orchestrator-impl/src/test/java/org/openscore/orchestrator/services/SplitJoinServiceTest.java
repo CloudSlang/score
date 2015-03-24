@@ -11,10 +11,10 @@
 package org.openscore.orchestrator.services;
 
 import org.openscore.api.EndBranchDataContainer;
-import org.openscore.engine.queue.entities.ExecStatus;
-import org.openscore.engine.queue.entities.ExecutionMessage;
-import org.openscore.engine.queue.entities.ExecutionMessageConverter;
-import org.openscore.engine.queue.services.QueueDispatcherService;
+import io.cloudslang.engine.queue.entities.ExecStatus;
+import io.cloudslang.engine.queue.entities.ExecutionMessage;
+import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
+import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import org.openscore.facade.entities.Execution;
 import org.openscore.orchestrator.entities.BranchContexts;
 import org.openscore.orchestrator.entities.FinishedBranch;

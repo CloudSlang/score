@@ -20,11 +20,11 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import org.openscore.engine.node.services.WorkerNodeService;
-import org.openscore.engine.queue.entities.ExecutionMessageConverter;
-import org.openscore.engine.queue.services.QueueDispatcherService;
-import org.openscore.engine.queue.services.QueueStateIdGeneratorService;
-import org.openscore.engine.queue.services.ScoreEventFactory;
+import io.cloudslang.engine.node.services.WorkerNodeService;
+import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
+import io.cloudslang.engine.queue.services.QueueDispatcherService;
+import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
+import io.cloudslang.engine.queue.services.ScoreEventFactory;
 import org.openscore.orchestrator.services.CancelExecutionService;
 import org.openscore.orchestrator.services.OrchestratorDispatcherService;
 import org.openscore.orchestrator.services.PauseResumeService;

@@ -11,7 +11,7 @@
 package org.openscore.orchestrator.entities;
 
 import org.openscore.facade.entities.Execution;
-import org.openscore.engine.data.AbstractIdentifiable;
+import io.cloudslang.engine.data.AbstractIdentifiable;
 
 import javax.persistence.*;
 import java.util.ArrayList;

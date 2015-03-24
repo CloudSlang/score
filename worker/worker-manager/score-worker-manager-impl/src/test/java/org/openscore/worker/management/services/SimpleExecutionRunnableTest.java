@@ -24,19 +24,15 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.openscore.worker.management.WorkerConfigurationService;
-import org.openscore.worker.management.services.EndExecutionCallback;
-import org.openscore.worker.management.services.InBuffer;
-import org.openscore.worker.management.services.OutboundBuffer;
-import org.openscore.worker.management.services.SimpleExecutionRunnable;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import org.openscore.engine.queue.entities.ExecStatus;
-import org.openscore.engine.queue.entities.ExecutionMessage;
-import org.openscore.engine.queue.entities.ExecutionMessageConverter;
-import org.openscore.engine.queue.entities.Payload;
-import org.openscore.engine.queue.services.QueueStateIdGeneratorService;
+import io.cloudslang.engine.queue.entities.ExecStatus;
+import io.cloudslang.engine.queue.entities.ExecutionMessage;
+import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
+import io.cloudslang.engine.queue.entities.Payload;
+import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
 import org.openscore.facade.entities.Execution;
 
 import static org.mockito.Matchers.any;

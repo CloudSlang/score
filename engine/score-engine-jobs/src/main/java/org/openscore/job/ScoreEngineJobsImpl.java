@@ -10,11 +10,11 @@
 
 package org.openscore.job;
 
-import org.openscore.engine.queue.services.cleaner.QueueCleanerService;
-import org.openscore.engine.queue.services.recovery.ExecutionRecoveryService;
-import org.openscore.engine.versioning.services.VersionService;
+import io.cloudslang.engine.queue.services.cleaner.QueueCleanerService;
+import io.cloudslang.engine.queue.services.recovery.ExecutionRecoveryService;
+import io.cloudslang.engine.versioning.services.VersionService;
 import org.openscore.orchestrator.services.SplitJoinService;
-import org.openscore.engine.partitions.services.PartitionTemplate;
+import io.cloudslang.engine.partitions.services.PartitionTemplate;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

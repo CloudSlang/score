@@ -10,8 +10,8 @@
 
 package org.openscore.orchestrator.services;
 
-import org.openscore.engine.queue.entities.ExecutionMessageConverter;
-import org.openscore.engine.queue.services.QueueDispatcherService;
+import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
+import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import org.openscore.facade.entities.Execution;
 import org.openscore.facade.execution.ExecutionActionResult;
 import org.openscore.facade.execution.ExecutionStatus;

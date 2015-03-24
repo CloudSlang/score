@@ -10,9 +10,9 @@
 
 package org.openscore.worker.management.services;
 
-import org.openscore.engine.queue.entities.ExecStatus;
-import org.openscore.engine.queue.entities.ExecutionMessage;
-import org.openscore.engine.queue.services.QueueDispatcherService;
+import io.cloudslang.engine.queue.entities.ExecStatus;
+import io.cloudslang.engine.queue.entities.ExecutionMessage;
+import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

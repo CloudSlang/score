@@ -10,12 +10,12 @@
 
 package org.openscore.worker.management.services;
 
-import org.openscore.engine.node.entities.WorkerNode;
-import org.openscore.engine.queue.entities.ExecStatus;
-import org.openscore.engine.queue.entities.ExecutionMessage;
-import org.openscore.engine.queue.entities.ExecutionMessageConverter;
-import org.openscore.engine.queue.entities.Payload;
-import org.openscore.engine.queue.services.QueueStateIdGeneratorService;
+import io.cloudslang.engine.node.entities.WorkerNode;
+import io.cloudslang.engine.queue.entities.ExecStatus;
+import io.cloudslang.engine.queue.entities.ExecutionMessage;
+import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
+import io.cloudslang.engine.queue.entities.Payload;
+import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
 import org.openscore.facade.TempConstants;
 import org.openscore.facade.entities.Execution;
 import org.openscore.orchestrator.entities.SplitMessage;
