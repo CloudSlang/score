@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.orchestrator.services;
+package io.cloudslang.orchestrator.services;
 
 import org.openscore.facade.entities.Execution;
 import org.openscore.facade.execution.ExecutionStatus;

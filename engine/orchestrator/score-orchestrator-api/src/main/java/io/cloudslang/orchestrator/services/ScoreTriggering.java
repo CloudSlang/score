@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.orchestrator.services;
+package io.cloudslang.orchestrator.services;
 
 import io.cloudslang.api.TriggeringProperties;
 

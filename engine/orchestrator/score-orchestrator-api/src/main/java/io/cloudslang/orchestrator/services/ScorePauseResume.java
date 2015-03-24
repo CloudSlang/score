@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.orchestrator.services;
+package io.cloudslang.orchestrator.services;
 
 import java.io.Serializable;
 import java.util.Map;
