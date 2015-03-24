@@ -10,9 +10,9 @@
 
 package io.cloudslang.orchestrator.services;
 
-import org.openscore.facade.entities.Execution;
-import org.openscore.facade.execution.ExecutionStatus;
-import org.openscore.orchestrator.entities.ExecutionState;
+import io.cloudslang.facade.entities.Execution;
+import io.cloudslang.facade.execution.ExecutionStatus;
+import io.cloudslang.orchestrator.entities.ExecutionState;
 
 import java.util.List;
 
