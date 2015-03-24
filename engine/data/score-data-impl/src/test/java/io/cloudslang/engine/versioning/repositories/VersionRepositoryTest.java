@@ -133,7 +133,7 @@ public class VersionRepositoryTest {
 			fb.setJpaProperties(hibernateProperties());
 			fb.setDataSource(dataSource());
 			fb.setPersistenceProviderClass(HibernatePersistence.class);
-			fb.setPackagesToScan("org.openscore.engine.versioning");
+			fb.setPackagesToScan("io.cloudslang.engine.versioning");
 			fb.setJpaVendorAdapter(jpaVendorAdapter);
 			return fb;
 		}

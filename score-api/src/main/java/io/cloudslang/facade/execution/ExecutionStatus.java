@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.facade.execution;
+package io.cloudslang.facade.execution;
 
 /**
  * Created by peerme on 17/08/2014.

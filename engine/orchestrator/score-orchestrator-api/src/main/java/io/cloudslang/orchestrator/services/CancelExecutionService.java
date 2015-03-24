@@ -8,9 +8,9 @@
 *
 *******************************************************************************/
 
-package org.openscore.orchestrator.services;
+package io.cloudslang.orchestrator.services;
 
-import org.openscore.facade.execution.ExecutionActionResult;
+import io.cloudslang.facade.execution.ExecutionActionResult;
 
 import java.util.List;
 

@@ -337,7 +337,7 @@ public class WorkerNodeServiceTest {
 			fb.setJpaProperties(hibernateProperties());
 			fb.setDataSource(dataSource());
 			fb.setPersistenceProviderClass(HibernatePersistence.class);
-			fb.setPackagesToScan("org.openscore.engine.node");
+			fb.setPackagesToScan("io.cloudslang.engine.node");
 			fb.setJpaVendorAdapter(jpaVendorAdapter);
 			return fb;
 		}

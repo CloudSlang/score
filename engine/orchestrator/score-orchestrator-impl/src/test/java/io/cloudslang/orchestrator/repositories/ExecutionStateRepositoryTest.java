@@ -73,7 +73,7 @@ public class ExecutionStateRepositoryTest {
     }
 
     @Configuration
-    @EnableJpaRepositories("org.openscore")
+    @EnableJpaRepositories("io.cloudslang")
     static class ExecutionStateRepositoryTestContext {
 
         @Bean

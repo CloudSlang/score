@@ -156,7 +156,7 @@ public class PartitionTemplateWithEmfTest {
 			LocalContainerEntityManagerFactoryBean fb = new LocalContainerEntityManagerFactoryBean();
 			fb.setDataSource(dataSource());
 			fb.setPersistenceProviderClass(HibernatePersistence.class);
-			fb.setPackagesToScan("org.openscore.engine.partitions");
+			fb.setPackagesToScan("io.cloudslang.engine.partitions");
 			fb.setJpaVendorAdapter(jpaVendorAdapter);
 			return fb;
 		}
