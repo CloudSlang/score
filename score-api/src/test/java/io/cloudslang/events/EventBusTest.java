@@ -8,15 +8,15 @@
 *
 *******************************************************************************/
 
-package org.openscore.events;
+package io.cloudslang.events;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.openscore.events.EventBus;
-import org.openscore.events.EventBusImpl;
-import org.openscore.events.ScoreEvent;
-import org.openscore.events.ScoreEventListener;
+import io.cloudslang.events.EventBus;
+import io.cloudslang.events.EventBusImpl;
+import io.cloudslang.events.ScoreEvent;
+import io.cloudslang.events.ScoreEventListener;
 
 import java.util.HashSet;
 import java.util.Set;

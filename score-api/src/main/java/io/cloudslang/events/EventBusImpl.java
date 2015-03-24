@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.events;
+package io.cloudslang.events;
 
 import java.util.Map;
 import java.util.Set;

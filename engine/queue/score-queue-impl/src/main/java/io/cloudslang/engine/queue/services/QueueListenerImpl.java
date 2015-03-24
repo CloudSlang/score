@@ -12,8 +12,8 @@ package io.cloudslang.engine.queue.services;
 
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
-import org.openscore.events.EventBus;
-import org.openscore.events.ScoreEvent;
+import io.cloudslang.events.EventBus;
+import io.cloudslang.events.ScoreEvent;
 import io.cloudslang.facade.entities.Execution;
 import io.cloudslang.facade.execution.ExecutionSummary;
 import io.cloudslang.facade.execution.PauseReason;

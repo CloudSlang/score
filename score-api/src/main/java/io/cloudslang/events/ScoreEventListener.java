@@ -8,7 +8,7 @@
 *
 *******************************************************************************/
 
-package org.openscore.events;
+package io.cloudslang.events;
 
 /**
  * Created with IntelliJ IDEA.

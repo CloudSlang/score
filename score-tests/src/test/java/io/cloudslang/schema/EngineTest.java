@@ -48,7 +48,7 @@ import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
-import org.openscore.events.EventBus;
+import io.cloudslang.events.EventBus;
 
 import liquibase.integration.spring.SpringLiquibase;
 

@@ -11,7 +11,7 @@
 package org.openscore.lang;
 
 import io.cloudslang.api.EndBranchDataContainer;
-import org.openscore.events.ScoreEvent;
+import io.cloudslang.events.ScoreEvent;
 import io.cloudslang.api.StartBranchDataContainer;
 import io.cloudslang.facade.execution.ExecutionStatus;
 import org.apache.commons.lang.StringUtils;

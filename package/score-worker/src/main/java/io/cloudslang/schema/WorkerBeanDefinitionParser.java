@@ -10,7 +10,7 @@
 
 package io.cloudslang.schema;
 
-import org.openscore.events.EventBusImpl;
+import io.cloudslang.events.EventBusImpl;
 import io.cloudslang.worker.execution.reflection.ReflectionAdapterImpl;
 import io.cloudslang.worker.execution.services.ExecutionServiceImpl;
 import io.cloudslang.worker.execution.services.SessionDataHandlerImpl;

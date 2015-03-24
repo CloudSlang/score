@@ -11,8 +11,8 @@
 package io.cloudslang.engine.queue.services;
 
 import io.cloudslang.api.execution.ExecutionParametersConsts;
-import org.openscore.events.EventConstants;
-import org.openscore.events.ScoreEvent;
+import io.cloudslang.events.EventConstants;
+import io.cloudslang.events.ScoreEvent;
 import io.cloudslang.facade.entities.Execution;
 import io.cloudslang.facade.execution.ExecutionStatus;
 import io.cloudslang.facade.services.RunningExecutionPlanService;
