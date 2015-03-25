@@ -9,7 +9,7 @@
         http://www.apache.org/licenses/LICENSE-2.0
     -->
     <parent>
-        <groupId>io.openscore</groupId>
+        <groupId>io.cloudslang</groupId>
         <artifactId>score-parent</artifactId>
         <version>0.1.268-SNAPSHOT</version>
     </parent>

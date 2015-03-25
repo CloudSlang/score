@@ -10,13 +10,13 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
        	      p:dataSource-ref="dataSource"
        	      p:changeLog="classpath:/META-INF/database/test-changes.xml"/>
 
-	<bean id="hiloFactoryBean" class="org.openscore.engine.data.HiloFactoryBean" depends-on="liquibase"/>
+	<bean id="hiloFactoryBean" class="io.cloudslang.engine.data.HiloFactoryBean" depends-on="liquibase"/>
 
     <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
           p:jpaProperties-ref="hibernateProperties"
           p:dataSource-ref="dataSource"
           p:persistenceProviderClass="org.hibernate.ejb.HibernatePersistence"
-          p:packagesToScan="org.openscore"
+          p:packagesToScan="io.cloudslang"
           depends-on="hiloFactoryBean">
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"

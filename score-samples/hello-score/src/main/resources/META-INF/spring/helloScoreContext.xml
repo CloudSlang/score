@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:score="http://www.openscore.org/schema/score"
+       xmlns:score="http://www.cloudslang.io/schema/score"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.openscore.org/schema/score http://www.openscore.org/schema/score.xsd">
+		http://www.cloudslang.io/schema/score http://www.cloudslang.io/schema/score.xsd">
 
     <score:engine/>
 
     <score:worker uuid="-1"/>
 
-    <bean class="org.openscore.samples.HelloScore"/>
+    <bean class="io.cloudslang.samples.HelloScore"/>
 
 </beans>

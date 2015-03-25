@@ -8,16 +8,16 @@
 
     <tx:annotation-driven/>
 
-	<jpa:repositories base-package="org.openscore" query-lookup-strategy="create-if-not-found">
-		<repository:include-filter type="regex" expression="org.openscore.engine.node.repositories.WorkerNodeRepository"/>
-		<repository:include-filter type="regex" expression="org.openscore.engine.versioning.repositories.VersionRepository"/>
-		<repository:include-filter type="regex" expression="org.openscore.orchestrator.repositories.SuspendedExecutionsRepository"/>
-		<repository:include-filter type="regex" expression="org.openscore.orchestrator.repositories.ExecutionInterruptsRepository"/>
-		<repository:include-filter type="regex" expression="org.openscore.engine.partitions.repositories.PartitionGroupRepository"/>
-		<repository:include-filter type="regex" expression="org.openscore.orchestrator.repositories.RunningExecutionPlanRepository"/>
-		<repository:include-filter type="regex" expression="org.openscore.orchestrator.repositories.FinishedBranchRepository"/>
-		<repository:include-filter type="regex" expression="org.openscore.orchestrator.repositories.ExecutionStateRepository"/>
-        <repository:include-filter type="regex" expression="org.openscore.engine.node.repositories.WorkerLockRepository"/>
+	<jpa:repositories base-package="io.cloudslang" query-lookup-strategy="create-if-not-found">
+		<repository:include-filter type="regex" expression="io.cloudslang.engine.node.repositories.WorkerNodeRepository"/>
+		<repository:include-filter type="regex" expression="io.cloudslang.engine.versioning.repositories.VersionRepository"/>
+		<repository:include-filter type="regex" expression="io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository"/>
+		<repository:include-filter type="regex" expression="io.cloudslang.orchestrator.repositories.ExecutionInterruptsRepository"/>
+		<repository:include-filter type="regex" expression="io.cloudslang.engine.partitions.repositories.PartitionGroupRepository"/>
+		<repository:include-filter type="regex" expression="io.cloudslang.orchestrator.repositories.RunningExecutionPlanRepository"/>
+		<repository:include-filter type="regex" expression="io.cloudslang.orchestrator.repositories.FinishedBranchRepository"/>
+		<repository:include-filter type="regex" expression="io.cloudslang.orchestrator.repositories.ExecutionStateRepository"/>
+        <repository:include-filter type="regex" expression="io.cloudslang.engine.node.repositories.WorkerLockRepository"/>
 	</jpa:repositories>
 
 </beans>
