@@ -12,7 +12,7 @@
 	<parent>
 		<groupId>io.cloudslang</groupId>
 		<artifactId>engine</artifactId>
-		<version>0.1.268</version>
+		<version>0.1.269-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>node</artifactId>
