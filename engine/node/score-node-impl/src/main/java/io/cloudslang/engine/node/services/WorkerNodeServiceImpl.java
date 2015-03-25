@@ -12,7 +12,7 @@ package io.cloudslang.engine.node.services;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import io.cloudslang.api.nodes.WorkerStatus;
+import io.cloudslang.score.api.nodes.WorkerStatus;
 import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.node.repositories.WorkerNodeRepository;
 import io.cloudslang.engine.versioning.services.VersionService;

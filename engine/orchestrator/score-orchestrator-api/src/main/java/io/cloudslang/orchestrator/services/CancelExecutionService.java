@@ -10,7 +10,7 @@
 
 package io.cloudslang.orchestrator.services;
 
-import io.cloudslang.facade.execution.ExecutionActionResult;
+import io.cloudslang.score.facade.execution.ExecutionActionResult;
 
 import java.util.List;
 

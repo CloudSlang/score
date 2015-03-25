@@ -10,7 +10,7 @@
 
 package io.cloudslang.samples.controlactions;
 
-import io.cloudslang.lang.ExecutionRuntimeServices;
+import io.cloudslang.score.lang.ExecutionRuntimeServices;
 
 /**
  * User:

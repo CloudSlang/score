@@ -13,7 +13,7 @@ package io.cloudslang.engine.queue.entities;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import io.cloudslang.lang.SystemContext;
+import io.cloudslang.score.lang.SystemContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

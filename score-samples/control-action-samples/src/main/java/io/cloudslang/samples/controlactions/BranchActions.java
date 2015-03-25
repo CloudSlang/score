@@ -10,8 +10,8 @@
 
 package io.cloudslang.samples.controlactions;
 
-import io.cloudslang.api.EndBranchDataContainer;
-import io.cloudslang.lang.ExecutionRuntimeServices;
+import io.cloudslang.score.api.EndBranchDataContainer;
+import io.cloudslang.score.lang.ExecutionRuntimeServices;
 
 import java.io.Serializable;
 import java.util.ArrayList;

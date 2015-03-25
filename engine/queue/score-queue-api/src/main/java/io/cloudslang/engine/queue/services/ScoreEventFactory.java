@@ -10,65 +10,65 @@
 
 package io.cloudslang.engine.queue.services;
 
-import io.cloudslang.facade.entities.Execution;
-import io.cloudslang.events.ScoreEvent;
+import io.cloudslang.score.facade.entities.Execution;
+import io.cloudslang.score.events.ScoreEvent;
 
 /**
  * User:
  * Date: 30/07/2014
  *
- * A factory to create {@link io.cloudslang.events.ScoreEvent}
+ * A factory to create {@link io.cloudslang.score.events.ScoreEvent}
  *
  */
 public interface ScoreEventFactory {
 
     /**
      *
-     * Creates a {@link io.cloudslang.events.ScoreEvent}
+     * Creates a {@link io.cloudslang.score.events.ScoreEvent}
      * for finished execution state
      *
      * @param execution the execution to create the event from
-     * @return {@link io.cloudslang.events.ScoreEvent} of the finished state
+     * @return {@link io.cloudslang.score.events.ScoreEvent} of the finished state
      */
 	public ScoreEvent createFinishedEvent(Execution execution);
 
     /**
      *
-     * Creates a {@link io.cloudslang.events.ScoreEvent}
+     * Creates a {@link io.cloudslang.score.events.ScoreEvent}
      * for failed branch execution state
      *
      * @param execution the execution to create the event from
-     * @return {@link io.cloudslang.events.ScoreEvent} of the failed branch state
+     * @return {@link io.cloudslang.score.events.ScoreEvent} of the failed branch state
      */
 	public ScoreEvent createFailedBranchEvent(Execution execution);
 
     /**
      *
-     * Creates a {@link io.cloudslang.events.ScoreEvent}
+     * Creates a {@link io.cloudslang.score.events.ScoreEvent}
      * for failure execution state
      *
      * @param execution the execution to create the event from
-     * @return {@link io.cloudslang.events.ScoreEvent} of the failure state
+     * @return {@link io.cloudslang.score.events.ScoreEvent} of the failure state
      */
 	public ScoreEvent createFailureEvent(Execution execution);
 
     /**
      *
-     * Creates a {@link io.cloudslang.events.ScoreEvent}
+     * Creates a {@link io.cloudslang.score.events.ScoreEvent}
      * for no worker execution state
      *
      * @param execution the execution to create the event from
-     * @return {@link io.cloudslang.events.ScoreEvent} of the no worker state
+     * @return {@link io.cloudslang.score.events.ScoreEvent} of the no worker state
      */
 	public ScoreEvent createNoWorkerEvent(Execution execution, Long pauseId);
 
     /**
      *
-     * Creates a {@link io.cloudslang.events.ScoreEvent}
+     * Creates a {@link io.cloudslang.score.events.ScoreEvent}
      * for finished branch execution state
      *
      * @param execution the execution to create the event from
-     * @return {@link io.cloudslang.events.ScoreEvent} of the finished branch state
+     * @return {@link io.cloudslang.score.events.ScoreEvent} of the finished branch state
      */
     public ScoreEvent createFinishedBranchEvent(Execution execution);
 }

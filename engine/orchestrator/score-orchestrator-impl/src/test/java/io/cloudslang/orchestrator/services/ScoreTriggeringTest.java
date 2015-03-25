@@ -10,13 +10,13 @@
 
 package io.cloudslang.orchestrator.services;
 
-import io.cloudslang.facade.entities.RunningExecutionPlan;
-import io.cloudslang.facade.services.RunningExecutionPlanService;
+import io.cloudslang.score.facade.entities.RunningExecutionPlan;
+import io.cloudslang.score.facade.services.RunningExecutionPlanService;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
-import io.cloudslang.api.ExecutionPlan;
-import io.cloudslang.api.TriggeringProperties;
+import io.cloudslang.score.api.ExecutionPlan;
+import io.cloudslang.score.api.TriggeringProperties;
 import io.cloudslang.engine.data.IdentityGenerator;
 import org.junit.Before;
 import org.junit.Test;

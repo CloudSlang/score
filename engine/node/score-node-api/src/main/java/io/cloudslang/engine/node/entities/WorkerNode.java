@@ -10,9 +10,9 @@
 
 package io.cloudslang.engine.node.entities;
 
-import io.cloudslang.api.nodes.WorkerStatus;
+import io.cloudslang.score.api.nodes.WorkerStatus;
 import io.cloudslang.engine.data.AbstractIdentifiable;
-import io.cloudslang.facade.TempConstants;
+import io.cloudslang.score.facade.TempConstants;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;

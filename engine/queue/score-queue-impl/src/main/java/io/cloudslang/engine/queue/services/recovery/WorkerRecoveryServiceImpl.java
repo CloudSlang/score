@@ -10,7 +10,7 @@
 
 package io.cloudslang.engine.queue.services.recovery;
 
-import io.cloudslang.api.nodes.WorkerStatus;
+import io.cloudslang.score.api.nodes.WorkerStatus;
 import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.node.services.LoginListener;
 import io.cloudslang.engine.node.services.WorkerLockService;

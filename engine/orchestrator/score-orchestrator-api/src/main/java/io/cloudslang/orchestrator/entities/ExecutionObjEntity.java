@@ -10,7 +10,7 @@
 
 package io.cloudslang.orchestrator.entities;
 
-import io.cloudslang.facade.entities.Execution;
+import io.cloudslang.score.facade.entities.Execution;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;

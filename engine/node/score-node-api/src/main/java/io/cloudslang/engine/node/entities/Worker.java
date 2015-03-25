@@ -10,7 +10,7 @@
 
 package io.cloudslang.engine.node.entities;
 
-import io.cloudslang.api.nodes.WorkerStatus;
+import io.cloudslang.score.api.nodes.WorkerStatus;
 
 import java.util.List;
 

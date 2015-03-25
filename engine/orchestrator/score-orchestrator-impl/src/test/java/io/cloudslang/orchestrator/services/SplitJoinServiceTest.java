@@ -10,19 +10,19 @@
 
 package io.cloudslang.orchestrator.services;
 
-import io.cloudslang.api.EndBranchDataContainer;
+import io.cloudslang.score.api.EndBranchDataContainer;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
-import io.cloudslang.facade.entities.Execution;
+import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.orchestrator.entities.BranchContexts;
 import io.cloudslang.orchestrator.entities.FinishedBranch;
 import io.cloudslang.orchestrator.entities.SplitMessage;
 import io.cloudslang.orchestrator.entities.SuspendedExecution;
 import io.cloudslang.orchestrator.repositories.FinishedBranchRepository;
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
-import io.cloudslang.lang.SystemContext;
+import io.cloudslang.score.lang.SystemContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

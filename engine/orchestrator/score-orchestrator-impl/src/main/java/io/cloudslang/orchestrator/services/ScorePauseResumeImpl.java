@@ -10,8 +10,8 @@
 
 package io.cloudslang.orchestrator.services;
 
-import io.cloudslang.facade.execution.ExecutionStatus;
-import io.cloudslang.facade.execution.PauseReason;
+import io.cloudslang.score.facade.execution.ExecutionStatus;
+import io.cloudslang.score.facade.execution.PauseReason;
 import io.cloudslang.orchestrator.entities.ExecutionState;
 import org.springframework.beans.factory.annotation.Autowired;
 

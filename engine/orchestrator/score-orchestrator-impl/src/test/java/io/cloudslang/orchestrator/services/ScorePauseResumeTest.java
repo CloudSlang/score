@@ -10,7 +10,7 @@
 
 package io.cloudslang.orchestrator.services;
 
-import io.cloudslang.facade.execution.ExecutionStatus;
+import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.orchestrator.entities.ExecutionState;
 import org.junit.Test;
 import org.junit.runner.RunWith;

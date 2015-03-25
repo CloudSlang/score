@@ -11,8 +11,8 @@
 package io.cloudslang.orchestrator.services;
 
 
-import io.cloudslang.facade.execution.ExecutionStatus;
-import io.cloudslang.facade.entities.Execution;
+import io.cloudslang.score.facade.execution.ExecutionStatus;
+import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.orchestrator.entities.ExecutionState;
 import io.cloudslang.orchestrator.repositories.ExecutionStateRepository;
 import org.junit.Rule;

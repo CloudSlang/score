@@ -10,7 +10,7 @@
 
 package io.cloudslang.engine.node.services;
 
-import io.cloudslang.api.nodes.WorkerStatus;
+import io.cloudslang.score.api.nodes.WorkerStatus;
 import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
 import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.node.repositories.WorkerNodeRepository;

@@ -10,19 +10,19 @@
 
 package io.cloudslang.worker.execution.services;
 
-import io.cloudslang.api.ExecutionStep;
-import io.cloudslang.api.StartBranchDataContainer;
-import io.cloudslang.api.execution.ExecutionParametersConsts;
-import io.cloudslang.events.EventBus;
-import io.cloudslang.events.EventConstants;
-import io.cloudslang.events.ScoreEvent;
-import io.cloudslang.facade.TempConstants;
-import io.cloudslang.facade.entities.Execution;
-import io.cloudslang.facade.entities.RunningExecutionPlan;
-import io.cloudslang.facade.execution.ExecutionStatus;
-import io.cloudslang.facade.execution.ExecutionSummary;
-import io.cloudslang.facade.execution.PauseReason;
-import io.cloudslang.lang.SystemContext;
+import io.cloudslang.score.api.ExecutionStep;
+import io.cloudslang.score.api.StartBranchDataContainer;
+import io.cloudslang.score.api.execution.ExecutionParametersConsts;
+import io.cloudslang.score.events.EventBus;
+import io.cloudslang.score.events.EventConstants;
+import io.cloudslang.score.events.ScoreEvent;
+import io.cloudslang.score.facade.TempConstants;
+import io.cloudslang.score.facade.entities.Execution;
+import io.cloudslang.score.facade.entities.RunningExecutionPlan;
+import io.cloudslang.score.facade.execution.ExecutionStatus;
+import io.cloudslang.score.facade.execution.ExecutionSummary;
+import io.cloudslang.score.facade.execution.PauseReason;
+import io.cloudslang.score.lang.SystemContext;
 import io.cloudslang.orchestrator.services.PauseResumeService;
 import io.cloudslang.worker.execution.reflection.ReflectionAdapter;
 import io.cloudslang.worker.management.WorkerConfigurationService;

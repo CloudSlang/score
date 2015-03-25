@@ -12,9 +12,9 @@ package io.cloudslang.worker.management.services;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import io.cloudslang.events.EventBus;
-import io.cloudslang.events.EventConstants;
-import io.cloudslang.events.ScoreEvent;
+import io.cloudslang.score.events.EventBus;
+import io.cloudslang.score.events.EventConstants;
+import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.worker.management.monitor.ScheduledWorkerMonitor;
 import io.cloudslang.worker.management.monitor.WorkerMonitors;
 import org.springframework.beans.factory.annotation.Autowired;

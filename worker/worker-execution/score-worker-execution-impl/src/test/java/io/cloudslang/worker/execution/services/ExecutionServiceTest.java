@@ -10,17 +10,17 @@
 
 package io.cloudslang.worker.execution.services;
 
-import io.cloudslang.api.ControlActionMetadata;
-import io.cloudslang.api.ExecutionPlan;
-import io.cloudslang.api.ExecutionStep;
-import io.cloudslang.events.EventBus;
-import io.cloudslang.events.EventConstants;
-import io.cloudslang.facade.TempConstants;
-import io.cloudslang.facade.entities.Execution;
-import io.cloudslang.facade.entities.RunningExecutionPlan;
-import io.cloudslang.facade.execution.ExecutionStatus;
-import io.cloudslang.facade.execution.ExecutionSummary;
-import io.cloudslang.facade.execution.PauseReason;
+import io.cloudslang.score.api.ControlActionMetadata;
+import io.cloudslang.score.api.ExecutionPlan;
+import io.cloudslang.score.api.ExecutionStep;
+import io.cloudslang.score.events.EventBus;
+import io.cloudslang.score.events.EventConstants;
+import io.cloudslang.score.facade.TempConstants;
+import io.cloudslang.score.facade.entities.Execution;
+import io.cloudslang.score.facade.entities.RunningExecutionPlan;
+import io.cloudslang.score.facade.execution.ExecutionStatus;
+import io.cloudslang.score.facade.execution.ExecutionSummary;
+import io.cloudslang.score.facade.execution.PauseReason;
 import io.cloudslang.orchestrator.services.CancelExecutionService;
 import io.cloudslang.orchestrator.services.PauseResumeService;
 import io.cloudslang.worker.execution.reflection.ReflectionAdapter;

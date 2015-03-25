@@ -10,14 +10,14 @@
 
 package io.cloudslang.engine.queue.services;
 
-import io.cloudslang.api.execution.ExecutionParametersConsts;
-import io.cloudslang.events.EventConstants;
-import io.cloudslang.events.ScoreEvent;
-import io.cloudslang.facade.entities.Execution;
-import io.cloudslang.facade.execution.ExecutionStatus;
-import io.cloudslang.facade.services.RunningExecutionPlanService;
+import io.cloudslang.score.api.execution.ExecutionParametersConsts;
+import io.cloudslang.score.events.EventConstants;
+import io.cloudslang.score.events.ScoreEvent;
+import io.cloudslang.score.facade.entities.Execution;
+import io.cloudslang.score.facade.execution.ExecutionStatus;
+import io.cloudslang.score.facade.services.RunningExecutionPlanService;
 import org.apache.commons.lang.StringUtils;
-import io.cloudslang.lang.ExecutionRuntimeServices;
+import io.cloudslang.score.lang.ExecutionRuntimeServices;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;

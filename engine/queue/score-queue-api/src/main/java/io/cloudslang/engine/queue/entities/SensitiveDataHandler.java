@@ -1,6 +1,6 @@
 package io.cloudslang.engine.queue.entities;
 
-import io.cloudslang.lang.SystemContext;
+import io.cloudslang.score.lang.SystemContext;
 
 import java.io.Serializable;
 import java.util.Map;

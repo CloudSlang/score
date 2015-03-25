@@ -10,7 +10,7 @@
 
 package io.cloudslang.worker.execution.services;
 
-import io.cloudslang.facade.entities.Execution;
+import io.cloudslang.score.facade.entities.Execution;
 
 import java.util.List;
 
@@ -28,8 +28,8 @@ public interface ExecutionService {
      *
      * Execute the given execution
      *
-     * @param execution the {@link io.cloudslang.facade.entities.Execution} to execute
-     * @return the {@link io.cloudslang.facade.entities.Execution} after executing
+     * @param execution the {@link io.cloudslang.score.facade.entities.Execution} to execute
+     * @return the {@link io.cloudslang.score.facade.entities.Execution} after executing
      * @throws InterruptedException
      */
 	Execution execute(Execution execution) throws InterruptedException;
@@ -38,8 +38,8 @@ public interface ExecutionService {
      *
      * Handles execution of split step
      *
-     * @param execution the split {@link io.cloudslang.facade.entities.Execution} to execute
-     * @return the List of {@link io.cloudslang.facade.entities.Execution} that the split returns
+     * @param execution the split {@link io.cloudslang.score.facade.entities.Execution} to execute
+     * @return the List of {@link io.cloudslang.score.facade.entities.Execution} that the split returns
      * returns null in case this execution is paused or cancelled and the split was not done
      * @throws InterruptedException
      */

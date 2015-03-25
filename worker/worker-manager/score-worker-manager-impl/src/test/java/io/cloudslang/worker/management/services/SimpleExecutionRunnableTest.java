@@ -33,7 +33,7 @@ import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
-import io.cloudslang.facade.entities.Execution;
+import io.cloudslang.score.facade.entities.Execution;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;

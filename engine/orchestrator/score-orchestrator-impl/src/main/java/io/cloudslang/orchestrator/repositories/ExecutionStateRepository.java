@@ -10,7 +10,7 @@
 
 package io.cloudslang.orchestrator.repositories;
 
-import io.cloudslang.facade.execution.ExecutionStatus;
+import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.orchestrator.entities.ExecutionState;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

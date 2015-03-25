@@ -10,7 +10,7 @@
 
 package io.cloudslang.worker.execution.reflection;
 
-import io.cloudslang.api.ControlActionMetadata;
+import io.cloudslang.score.api.ControlActionMetadata;
 
 import java.util.Map;
 

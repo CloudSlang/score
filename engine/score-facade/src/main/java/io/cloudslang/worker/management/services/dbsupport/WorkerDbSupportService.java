@@ -9,7 +9,7 @@
 *******************************************************************************/
 
 package io.cloudslang.worker.management.services.dbsupport;
-import io.cloudslang.facade.entities.RunningExecutionPlan;
+import io.cloudslang.score.facade.entities.RunningExecutionPlan;
 
 /**
  * Created by IntelliJ IDEA.

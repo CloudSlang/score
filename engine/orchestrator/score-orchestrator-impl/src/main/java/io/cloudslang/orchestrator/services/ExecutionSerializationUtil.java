@@ -10,7 +10,7 @@
 
 package io.cloudslang.orchestrator.services;
 
-import io.cloudslang.facade.entities.Execution;
+import io.cloudslang.score.facade.entities.Execution;
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedInputStream;

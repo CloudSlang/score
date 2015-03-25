@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
-import io.cloudslang.lang.ExecutionRuntimeServices;
+import io.cloudslang.score.lang.ExecutionRuntimeServices;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -27,9 +27,9 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 
-import io.cloudslang.api.ControlActionMetadata;
-import io.cloudslang.api.execution.ExecutionParametersConsts;
-import io.cloudslang.exceptions.FlowExecutionException;
+import io.cloudslang.score.api.ControlActionMetadata;
+import io.cloudslang.score.api.execution.ExecutionParametersConsts;
+import io.cloudslang.score.exceptions.FlowExecutionException;
 import io.cloudslang.worker.execution.services.SessionDataHandler;
 
 /**

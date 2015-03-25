@@ -10,8 +10,8 @@
 
 package io.cloudslang.orchestrator.services;
 
-import io.cloudslang.api.ExecutionPlan;
-import io.cloudslang.api.TriggeringProperties;
+import io.cloudslang.score.api.ExecutionPlan;
+import io.cloudslang.score.api.TriggeringProperties;
 import io.cloudslang.engine.data.IdentityGenerator;
 import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.queue.entities.ExecStatus;
@@ -19,9 +19,9 @@ import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
-import io.cloudslang.facade.entities.Execution;
-import io.cloudslang.facade.services.RunningExecutionPlanService;
-import io.cloudslang.lang.SystemContext;
+import io.cloudslang.score.facade.entities.Execution;
+import io.cloudslang.score.facade.services.RunningExecutionPlanService;
+import io.cloudslang.score.lang.SystemContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;

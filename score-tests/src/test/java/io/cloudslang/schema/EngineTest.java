@@ -40,15 +40,15 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import io.cloudslang.api.ExecutionPlan;
-import io.cloudslang.api.ExecutionStep;
-import io.cloudslang.api.Score;
-import io.cloudslang.api.TriggeringProperties;
+import io.cloudslang.score.api.ExecutionPlan;
+import io.cloudslang.score.api.ExecutionStep;
+import io.cloudslang.score.api.Score;
+import io.cloudslang.score.api.TriggeringProperties;
 import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
-import io.cloudslang.events.EventBus;
+import io.cloudslang.score.events.EventBus;
 
 import liquibase.integration.spring.SpringLiquibase;
 

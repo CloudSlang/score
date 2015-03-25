@@ -10,8 +10,8 @@
 
 package io.cloudslang.orchestrator.entities;
 
-import io.cloudslang.facade.execution.ExecutionStatus;
-import io.cloudslang.facade.execution.ExecutionSummary;
+import io.cloudslang.score.facade.execution.ExecutionStatus;
+import io.cloudslang.score.facade.execution.ExecutionSummary;
 import io.cloudslang.engine.data.AbstractIdentifiable;
 import org.apache.commons.lang.builder.EqualsBuilder;
 

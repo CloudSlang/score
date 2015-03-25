@@ -10,9 +10,9 @@
 
 package io.cloudslang.orchestrator.services;
 
-import io.cloudslang.facade.execution.ExecutionSummary;
-import io.cloudslang.facade.execution.PauseReason;
-import io.cloudslang.facade.entities.Execution;
+import io.cloudslang.score.facade.execution.ExecutionSummary;
+import io.cloudslang.score.facade.execution.PauseReason;
+import io.cloudslang.score.facade.entities.Execution;
 
 import java.io.Serializable;
 import java.util.List;

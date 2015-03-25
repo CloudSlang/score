@@ -10,7 +10,7 @@
 
 package io.cloudslang.engine.node.repositories;
 
-import io.cloudslang.api.nodes.WorkerStatus;
+import io.cloudslang.score.api.nodes.WorkerStatus;
 import io.cloudslang.engine.node.entities.WorkerNode;
 import junit.framework.Assert;
 import org.junit.Before;

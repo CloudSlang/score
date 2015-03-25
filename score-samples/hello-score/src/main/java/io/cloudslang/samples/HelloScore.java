@@ -10,15 +10,15 @@
 
 package io.cloudslang.samples;
 
-import io.cloudslang.api.ControlActionMetadata;
-import io.cloudslang.api.ExecutionPlan;
-import io.cloudslang.api.ExecutionStep;
-import io.cloudslang.api.Score;
-import io.cloudslang.api.TriggeringProperties;
-import io.cloudslang.events.EventBus;
-import io.cloudslang.events.EventConstants;
-import io.cloudslang.events.ScoreEvent;
-import io.cloudslang.events.ScoreEventListener;
+import io.cloudslang.score.api.ControlActionMetadata;
+import io.cloudslang.score.api.ExecutionPlan;
+import io.cloudslang.score.api.ExecutionStep;
+import io.cloudslang.score.api.Score;
+import io.cloudslang.score.api.TriggeringProperties;
+import io.cloudslang.score.events.EventBus;
+import io.cloudslang.score.events.EventConstants;
+import io.cloudslang.score.events.ScoreEvent;
+import io.cloudslang.score.events.ScoreEventListener;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;

@@ -10,7 +10,7 @@
 
 package io.cloudslang.orchestrator.services;
 
-import io.cloudslang.facade.entities.Execution;
+import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.orchestrator.entities.SplitMessage;
 
 import java.util.List;
