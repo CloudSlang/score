@@ -17,6 +17,7 @@ import java.util.UUID;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import io.cloudslang.engine.node.entities.WorkerNode;
@@ -61,9 +62,20 @@ public class WorkerRegistration {
 
 	protected void createWorker(String uuid, String password, String installPath) throws UnknownHostException {
 		log.info("Creating worker...");
-		workerNodeService.create(uuid, password, InetAddress.getLocalHost().getCanonicalHostName(), installPath);
+		workerNodeService.create(uuid, password,getLocalHostName(), installPath);
 		workerNodeService.activate(uuid);
 		log.info("Worker [" + uuid + "] registered and activated");
 	}
+
+    protected String getLocalHostName(){
+        String hostName = StringUtils.EMPTY;
+        try {
+            hostName = InetAddress.getLocalHost().getCanonicalHostName();
+        } catch (UnknownHostException e) {
+            // on Mac OS X with Java 7 calling 'getLocalHost()' can throw UnknownHostException
+            // see http://bugs.java.com/bugdatabase/view_bug.do?bug_id=7180557
+        }
+        return hostName;
+    }
 
 }
