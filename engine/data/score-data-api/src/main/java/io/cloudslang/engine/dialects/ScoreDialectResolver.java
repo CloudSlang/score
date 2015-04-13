@@ -10,6 +10,7 @@
 
 package io.cloudslang.engine.dialects;
 
+import org.apache.log4j.Logger;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.service.jdbc.dialect.internal.StandardDialectResolver;
 
@@ -24,11 +25,15 @@ import java.sql.SQLException;
  */
 public class ScoreDialectResolver  extends StandardDialectResolver {
 
+    private final Logger logger = Logger.getLogger(getClass());
+
     @Override
     protected Dialect resolveDialectInternal(DatabaseMetaData metaData) throws SQLException {
         String databaseName = metaData.getDatabaseProductName();
         int databaseMajorVersion = metaData.getDatabaseMajorVersion();
-        System.out.println("Database name is: " + databaseName + " databaseMajorVersion is: " + databaseMajorVersion);
+
+        logger.info("Database name is: " + databaseName + " databaseMajorVersion is: " + databaseMajorVersion);
+        
         if ( "MySQL".equals( databaseName ) ) {
 			return new ScoreMySQLDialect();
         }
