@@ -177,13 +177,17 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
 
     public void addExecutionMessage(ExecutionMessage msg) throws InterruptedException {
-        syncManager.startGetMessages(); //this is a public method that can push new executions from outside - from execution threads
-        //We need to check if the current execution thread was interrupted while waiting for the lock
-        if(Thread.currentThread().isInterrupted()){
-            throw new InterruptedException("Thread was interrupted while waiting on the lock in fillBufferPeriodically()!");
+        try{
+            syncManager.startGetMessages(); //this is a public method that can push new executions from outside - from execution threads
+            //We need to check if the current execution thread was interrupted while waiting for the lock
+            if(Thread.currentThread().isInterrupted()){
+                throw new InterruptedException("Thread was interrupted while waiting on the lock in fillBufferPeriodically()!");
+            }
+            addExecutionMessageInner(msg);
         }
-        addExecutionMessageInner(msg);
-        syncManager.finishGetMessages();
+        finally {
+            syncManager.finishGetMessages();
+        }
     }
 
     private void addExecutionMessageInner(ExecutionMessage msg) {
