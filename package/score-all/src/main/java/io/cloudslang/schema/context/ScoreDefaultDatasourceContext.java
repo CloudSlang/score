@@ -23,11 +23,13 @@ import javax.sql.DataSource;
  */
 public class ScoreDefaultDatasourceContext {
 
+    private static final String DB_NAME = "SCORE_DB";
+
     @Bean
     DataSource dataSource() {
         return new EmbeddedDatabaseBuilder()
                 .setType(EmbeddedDatabaseType.H2)
-                .setName("SCORE_DB")
+                .setName(DB_NAME)
                 .build();
     }
 
