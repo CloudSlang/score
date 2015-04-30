@@ -25,7 +25,10 @@ public class ScoreDefaultDatasourceContext {
 
     @Bean
     DataSource dataSource() {
-        return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.H2).build();
+        return new EmbeddedDatabaseBuilder()
+                .setType(EmbeddedDatabaseType.H2)
+                .setName("SCORE_DB")
+                .build();
     }
 
     @Bean
