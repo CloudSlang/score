@@ -10,7 +10,7 @@
     -->
     <groupId>io.cloudslang</groupId>
     <artifactId>score-parent</artifactId>
-    <version>0.1.276</version>
+    <version>0.1.277-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>A Java based orchestration engine</description>
@@ -26,7 +26,7 @@
         <connection>scm:git:https://github.com/CloudSlang/score.git</connection>
         <developerConnection>scm:git:git@github.com:CloudSlang/score.git</developerConnection>
         <url>https://github.com/CloudSlang/score.git</url>
-        <tag>score-parent-0.1.276</tag>
+        <tag>master</tag>
     </scm>
 
     <properties>
