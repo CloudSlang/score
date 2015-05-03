@@ -11,8 +11,10 @@
 package io.cloudslang.worker.management.services;
 
 import ch.lambdaj.group.Group;
+import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.orchestrator.entities.Message;
 import io.cloudslang.orchestrator.services.OrchestratorDispatcherService;
+import io.cloudslang.worker.management.ExecutionsActivityListener;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +50,9 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 
     @Autowired
    	private SynchronizationManager syncManager;
+
+    @Autowired(required = false)
+    private ExecutionsActivityListener executionsActivityListener;
 
 	private List<Message> buffer = new ArrayList<>();
 
@@ -185,6 +190,9 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
                 String wrv = recoveryManager.getWRV();
                 if (logger.isDebugEnabled()) logger.debug("Dispatch start with bulk number: " + bulkNumber);
 				dispatcherService.dispatch(optimizedBulk, bulkNumber, wrv, workerUuid);
+                if (executionsActivityListener != null) {
+                    executionsActivityListener.onHalt(extract(optimizedBulk, on(ExecutionMessage.class).getExecStateId()));
+                }
                 if (logger.isDebugEnabled()) logger.debug("Dispatch end with bulk number: " + bulkNumber);
 			}
 		});
