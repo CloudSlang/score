@@ -91,9 +91,8 @@ public class SimpleExecutionRunnable implements Runnable {
         //We are renaming the thread for logging/monitoring purposes
         String origThreadName = Thread.currentThread().getName();
         Thread.currentThread().setName(origThreadName + "_" + executionId);
-
+        Execution execution = null;
         try {
-            Execution execution;
             //If we got here because of te shortcut we have the object
             if(executionMessage.getExecutionObject() != null){
                 execution = executionMessage.getExecutionObject();
@@ -103,6 +102,12 @@ public class SimpleExecutionRunnable implements Runnable {
             else {
                 execution = converter.extractExecution(executionMessage.getPayload());
             }
+
+            String branchId = execution.getSystemContext().getBranchId();
+            if(logger.isDebugEnabled()){
+                logger.debug("Worker starts to work on execution: " + executionId + " branch: " + branchId);
+            }
+
 
             //Check which logic to trigger - regular execution or split
             if (executionService.isSplitStep(execution)) {
@@ -120,6 +125,9 @@ public class SimpleExecutionRunnable implements Runnable {
             executionMessage.setStatus(ExecStatus.FAILED);
             //send only one execution message back - the new one was not created because of error
             try {
+                if(executionMessage.getPayload() == null){
+                    executionMessage.setPayload(converter.createPayload(execution)); //this is done since we could get here from InBuffer shortcut - so no payload... and for FAILED message we need to set the payload
+                }
                 outBuffer.put(executionMessage);
             } catch (InterruptedException e) {
                 logger.warn("Thread was interrupted! Exiting the execution... ", ex);
