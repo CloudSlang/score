@@ -36,6 +36,7 @@ import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
 import io.cloudslang.score.facade.entities.Execution;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -78,6 +79,9 @@ public class SimpleExecutionRunnableTest {
 	@Mock
 	private WorkerConfigurationService workerConfigurationService;
 
+    @Mock
+    private WorkerManager workerManager;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -90,7 +94,7 @@ public class SimpleExecutionRunnableTest {
     @Test
     public void testGetExecutionMessage() throws Exception {
         SimpleExecutionRunnable simpleExecutionRunnable = new SimpleExecutionRunnable(executionService, outBuffer,
-                inBuffer, converter, endExecutionCallback, queueStateIdGenerator, "stam",workerConfigurationService);
+                inBuffer, converter, endExecutionCallback, queueStateIdGenerator, "stam",workerConfigurationService, workerManager);
         ExecutionMessage executionMessage = simpleExecutionRunnable.getExecutionMessage();
         Assert.assertNull(executionMessage);
 
@@ -117,8 +121,10 @@ public class SimpleExecutionRunnableTest {
 		    }
 	    }).when(outBuffer).put(any(ExecutionMessage[].class));
 
+        when(workerManager.isFromCurrentThreadPool(anyString())).thenReturn(true);
+
         SimpleExecutionRunnable simpleExecutionRunnable = new SimpleExecutionRunnable(executionService, outBuffer,
-                inBuffer, converter, endExecutionCallback, queueStateIdGenerator, "stam",workerConfigurationService);
+                inBuffer, converter, endExecutionCallback, queueStateIdGenerator, "stam",workerConfigurationService, workerManager);
 
         simpleExecutionRunnable.setExecutionMessage(new ExecutionMessage());
         simpleExecutionRunnable.run();

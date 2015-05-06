@@ -75,6 +75,9 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
     private volatile boolean initStarted = false;
 	private boolean up = false;
 
+    private volatile int threadPoolVersion = 0;
+
+
 	@PostConstruct
 	private void init() {
 		logger.info("Initialize worker with UUID: " + workerUuid);
@@ -85,7 +88,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 				numberOfThreads,
 				Long.MAX_VALUE, TimeUnit.NANOSECONDS,
 				inBuffer,
-				new WorkerThreadFactory("WorkerExecutionThread"));
+                new WorkerThreadFactory((++threadPoolVersion) + "_WorkerExecutionThread"));
 
 		mapOfRunningTasks = new ConcurrentHashMap<>(numberOfThreads);
 	}
@@ -224,7 +227,20 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 
 	public boolean isUp() {
 		return up;
-	}
+    }
+
+    public synchronized boolean isFromCurrentThreadPool(String threadName){
+        if(threadName.startsWith(String.valueOf(threadPoolVersion))){
+            if(logger.isDebugEnabled()){
+                logger.debug("Current thread is from current thread pool");
+            }
+            return true;
+        }
+        else {
+            logger.warn("Current thread is NOT from current thread pool!!!");
+            return false;
+        }
+    }
 
     //Must clean the buffer that holds Runnables that wait for execution and also drop all the executions that currently run
     public void doRecovery() {
@@ -240,11 +256,14 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 //        processing actively executing tasks.  For example, typical
 //        implementations will cancel via {@link Thread#interrupt}, so any
 //        task that fails to respond to interrupts may never terminate.
-        executorService.shutdownNow();
-
         try {
-            logger.warn("Worker is in doRecovery(). Cleaning state and cancelling running tasks. It may take up to 3 minutes...");
-            boolean finished = executorService.awaitTermination(3, TimeUnit.MINUTES);
+            synchronized (this){
+                executorService.shutdownNow(); //shutting down current running threads
+                threadPoolVersion++;           //updating the thread pool version to a new one - so current running threads will exit
+                logger.warn("Worker is in doRecovery(). Cleaning state and cancelling running tasks. It may take up to 30 seconds...");
+            }
+
+            boolean finished = executorService.awaitTermination(30, TimeUnit.SECONDS);
 
             if(finished){
                 logger.warn("Worker succeeded to cancel running tasks during doRecovery().");
@@ -262,6 +281,6 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
                 numberOfThreads,
                 Long.MAX_VALUE, TimeUnit.NANOSECONDS,
                 inBuffer,
-                new WorkerThreadFactory("WorkerExecutionThread"));
+                new WorkerThreadFactory((threadPoolVersion) + "_WorkerExecutionThread"));
     }
 }

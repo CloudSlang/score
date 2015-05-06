@@ -55,6 +55,8 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private boolean isRecoveryDisabled; //System property - whether the executions are recoverable in case of restart/failure.
 
+    private WorkerManager workerManager;
+
     public SimpleExecutionRunnable(ExecutionService executionService,
                                    OutboundBuffer outBuffer,
                                    InBuffer inBuffer,
@@ -62,7 +64,8 @@ public class SimpleExecutionRunnable implements Runnable {
                                    EndExecutionCallback endExecutionCallback,
                                    QueueStateIdGeneratorService queueStateIdGeneratorService,
                                    String workerUUID,
-                                   WorkerConfigurationService workerConfigurationService
+                                   WorkerConfigurationService workerConfigurationService,
+                                   WorkerManager workerManager
     ) {
         this.executionService = executionService;
         this.outBuffer = outBuffer;
@@ -72,7 +75,7 @@ public class SimpleExecutionRunnable implements Runnable {
         this.queueStateIdGeneratorService = queueStateIdGeneratorService;
         this.workerUUID = workerUUID;
         this.workerConfigurationService = workerConfigurationService;
-
+        this.workerManager = workerManager;
         this.isRecoveryDisabled = Boolean.getBoolean("is.recovery.disabled");
     }
 
@@ -291,7 +294,25 @@ public class SimpleExecutionRunnable implements Runnable {
     }
 
     private boolean isInterrupted() {
-        return Thread.currentThread().isInterrupted();
+        boolean interrupted = Thread.currentThread().isInterrupted();
+        if(interrupted){
+            if (logger.isDebugEnabled())
+                logger.debug("Checked if execution is interrupted: " + interrupted);
+            return true;
+        }
+        else {
+            boolean oldThread = !workerManager.isFromCurrentThreadPool(Thread.currentThread().getName());
+            if(oldThread){
+                if(logger.isDebugEnabled())
+                    logger.debug("Checked if execution is on old thread: " + oldThread);
+                return true;
+            }
+            else {
+                if(logger.isDebugEnabled())
+                    logger.debug("Execution was not interrupted and is in current thread pool! Continue... ");
+                return false;
+            }
+        }
     }
 
     private boolean isRunningTooLong(Long startTime, Execution nextStepExecution) {
