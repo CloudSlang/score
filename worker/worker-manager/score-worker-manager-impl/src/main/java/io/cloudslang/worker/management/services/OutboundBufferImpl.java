@@ -65,7 +65,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
     }
 
 	@Override
-	public void put(final Message... messages) throws InterruptedException{
+	public void put(final Message... messages) throws InterruptedException {
 		Validate.notEmpty(messages, "The array of messages is null or empty");
         try{
             syncManager.startPutMessages();
@@ -73,6 +73,10 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
             //We need to check if the current thread was interrupted while waiting for the lock (ExecutionThread or InBufferThread in ackMessages)
             if(Thread.currentThread().isInterrupted()){
                 throw new InterruptedException("Thread was interrupted while waiting on the lock! Exiting...");
+            }
+            else {
+                if(logger.isDebugEnabled())
+                    logger.debug("Current thread was not interrupted! Proceeding to put messages to OutBuffer...");
             }
 
             while (currentWeight >= maxBufferWeight){
