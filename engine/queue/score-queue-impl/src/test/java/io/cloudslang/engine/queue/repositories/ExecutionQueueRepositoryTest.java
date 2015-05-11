@@ -41,6 +41,7 @@ import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.Mockito.when;
 
@@ -101,6 +102,20 @@ public class ExecutionQueueRepositoryTest {
         ExecutionMessage resultMsg = result.get(0);
         Assert.assertEquals(ExecStatus.SENT,resultMsg.getStatus());
         Assert.assertEquals("group1",resultMsg.getWorkerGroup());
+    }
+
+    @Test
+    public void testGetFinishedExecStateIds(){
+        List<ExecutionMessage> msg = new ArrayList<>();
+        msg.add(generateFinishedMessage(1L));
+        msg.add(generateFinishedMessage(1L));
+        msg.add(generateFinishedMessage(2L));
+        msg.add(generateFinishedMessage(3L));
+        executionQueueRepository.insertExecutionQueue(msg,1L);
+
+        Set<Long> result = executionQueueRepository.getFinishedExecStateIds();
+        Assert.assertNotNull(result);
+        Assert.assertEquals(3, result.size());
     }
 
     @Test
@@ -248,6 +263,14 @@ public class ExecutionQueueRepositoryTest {
         Payload payload = new Payload(false, false, payloadData);
         return new ExecutionMessage(-1, ExecutionMessage.EMPTY_WORKER, groupName, msgId , ExecStatus.SENT, payload, 1);
     }
+
+    private ExecutionMessage generateFinishedMessage(long execStateId) {
+        byte[] payloadData;
+        payloadData = "This is just a test".getBytes();
+        Payload payload = new Payload(false, false, payloadData);
+        return new ExecutionMessage(execStateId, ExecutionMessage.EMPTY_WORKER, "group", "123" , ExecStatus.FINISHED, payload, 1);
+    }
+
 
     private ExecutionMessage generateMessageForWorker(String groupName,String msgId, String workerUuid) {
         byte[] payloadData;

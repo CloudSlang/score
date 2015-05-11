@@ -50,7 +50,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
     private Logger logger = Logger.getLogger(getClass());
 
-    final private String SELECT_FINISHED_STEPS_IDS =  " SELECT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES_1 " +
+    final private String SELECT_FINISHED_STEPS_IDS =  " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES_1 " +
                                                       " WHERE " +
                                                       "        (STATUS = "+ExecStatus.TERMINATED.getNumber()+") OR " +
                                                       "        (STATUS = "+ExecStatus.FAILED.getNumber()+") OR " +
