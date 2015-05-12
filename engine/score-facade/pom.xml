@@ -9,7 +9,7 @@
         http://www.apache.org/licenses/LICENSE-2.0
     -->
     <parent>
-        <groupId>io.cloudslang</groupId>
+        <groupId>natasha.cloudslang</groupId>
         <artifactId>engine</artifactId>
         <version>0.1.279-SNAPSHOT</version>
     </parent>
@@ -24,7 +24,7 @@
         </dependency>
 
         <dependency>
-            <groupId>io.cloudslang</groupId>
+            <groupId>natasha.cloudslang</groupId>
             <artifactId>score-data-api</artifactId>
             <version>${project.version}</version>
         </dependency>

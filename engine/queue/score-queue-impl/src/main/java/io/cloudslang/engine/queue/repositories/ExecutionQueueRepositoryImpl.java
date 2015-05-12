@@ -59,6 +59,11 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 	final private String QUERY_DELETE_FINISHED_STEPS = "DELETE FROM OO_EXECUTION_QUEUES_1 " +
 			" WHERE EXEC_STATE_ID in (:ids)";
 
+    final private String QUERY_DELETE_FINISHED_STEPS_FROM_STATES_1 = "DELETE FROM OO_EXECUTION_STATES_1 " +
+    			" WHERE ID in (:ids)";
+
+    final private String QUERY_DELETE_FINISHED_STEPS_FROM_STATES_2 = "DELETE FROM OO_EXECUTION_STATES_2 " +
+        			" WHERE ID in (:ids)";
 
 	final private String QUERY_MESSAGES_WITHOUT_ACK_SQL =
 			"SELECT EXEC_STATE_ID,      " +
@@ -329,10 +334,30 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         if(logger.isDebugEnabled()){
             logger.debug("Deleted " + deletedRows + " rows of finished steps from queue table.");
         }
-	}
 
-	@Override
-	public Set<Long> getFinishedExecStateIds() {
+        String query_states_1 = QUERY_DELETE_FINISHED_STEPS_FROM_STATES_1.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
+
+        logSQL(query,args);
+
+        deletedRows = deleteFinishedStepsJDBCTemplate.update(query_states_1, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
+
+        if(logger.isDebugEnabled()){
+            logger.debug("Deleted " + deletedRows + " rows of finished steps from states_1 table.");
+        }
+
+        String query_states_2 = QUERY_DELETE_FINISHED_STEPS_FROM_STATES_2.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
+
+        logSQL(query,args);
+
+        deletedRows = deleteFinishedStepsJDBCTemplate.update(query_states_2, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
+
+        if(logger.isDebugEnabled()){
+            logger.debug("Deleted " + deletedRows + " rows of finished steps from states_2 table.");
+        }
+    }
+
+    @Override
+    public Set<Long> getFinishedExecStateIds() {
         getFinishedExecStateIdsJDBCTemplate.setMaxRows(1000000);
         getFinishedExecStateIdsJDBCTemplate.setFetchSize(1000000);
 
