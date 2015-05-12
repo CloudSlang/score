@@ -23,9 +23,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:https://github.com/CloudSlang/score.git</connection>
-        <developerConnection>scm:git:git@github.com:CloudSlang/score.git</developerConnection>
-        <url>https://github.com/CloudSlang/score.git</url>
+        <connection>scm:git:https://github.com/natabeck/score/score.git</connection>
+        <developerConnection>scm:git:git@github.com:natabeck/score.git</developerConnection>
+        <url>https://github.com/natabeck/score/score.git</url>
         <tag>master</tag>
     </scm>
 
