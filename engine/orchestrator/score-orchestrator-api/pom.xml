@@ -11,7 +11,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>io.cloudslang</groupId>
+		<groupId>oobranch.cloudslang</groupId>
 		<artifactId>orchestrator</artifactId>
 		<version>0.1.279-SNAPSHOT</version>
 	</parent>

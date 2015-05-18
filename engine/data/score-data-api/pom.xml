@@ -10,7 +10,7 @@
     -->
 	<parent>
 		<artifactId>data</artifactId>
-		<groupId>io.cloudslang</groupId>
+		<groupId>oobranch.cloudslang</groupId>
 		<version>0.1.279-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>

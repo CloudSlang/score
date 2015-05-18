@@ -9,7 +9,7 @@
         http://www.apache.org/licenses/LICENSE-2.0
     -->
 	<parent>
-		<groupId>io.cloudslang</groupId>
+		<groupId>oobranch.cloudslang</groupId>
 		<artifactId>score-parent</artifactId>
 		<version>0.1.279-SNAPSHOT</version>
 	</parent>
