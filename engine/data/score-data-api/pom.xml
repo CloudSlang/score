@@ -10,8 +10,8 @@
     -->
 	<parent>
 		<artifactId>data</artifactId>
-		<groupId>natasha.cloudslang</groupId>
-		<version>0.1.280-SNAPSHOT</version>
+		<groupId>io.cloudslang</groupId>
+		<version>0.1.279-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 

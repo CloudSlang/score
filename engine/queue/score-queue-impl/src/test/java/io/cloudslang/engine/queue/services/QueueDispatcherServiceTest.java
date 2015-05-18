@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Mockito.*;
 
@@ -39,9 +38,6 @@ import static org.mockito.Mockito.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 public class QueueDispatcherServiceTest {
-
-
-
     @Mock
     private ExecutionQueueService executionQueueService;
 
@@ -56,7 +52,6 @@ public class QueueDispatcherServiceTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
     }
-
 
     @Test
     public void testDispatchEmptyValues() throws Exception {

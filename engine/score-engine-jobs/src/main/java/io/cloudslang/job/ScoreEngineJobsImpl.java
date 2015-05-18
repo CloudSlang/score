@@ -14,11 +14,9 @@ import io.cloudslang.engine.queue.services.cleaner.QueueCleanerService;
 import io.cloudslang.engine.queue.services.recovery.ExecutionRecoveryService;
 import io.cloudslang.engine.versioning.services.VersionService;
 import io.cloudslang.orchestrator.services.SplitJoinService;
-import io.cloudslang.engine.partitions.services.PartitionTemplate;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -43,10 +41,6 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
 
     @Autowired
     private ExecutionRecoveryService executionRecoveryService;
-
-    @Autowired
-    @Qualifier("OO_EXECUTION_STATES")
-    private PartitionTemplate execStatesPartitionTemplate;
 
     private final Logger logger = Logger.getLogger(getClass());
 
@@ -106,14 +100,6 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
         } catch (Exception ex) {
             logger.error("SplitJoinJob failed", ex);
         }
-    }
-
-    /**
-     * Job that will handle the rolling of Execution states rolling tables.
-     */
-    @Override
-    public void statesRollingJob(){
-        execStatesPartitionTemplate.onRolling();
     }
 
     /**

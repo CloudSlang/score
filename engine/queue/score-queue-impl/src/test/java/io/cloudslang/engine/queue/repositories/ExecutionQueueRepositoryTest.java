@@ -10,22 +10,19 @@
 
 package io.cloudslang.engine.queue.repositories;
 
+import io.cloudslang.engine.data.IdentityGenerator;
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.versioning.services.VersionService;
-import io.cloudslang.engine.partitions.services.PartitionTemplate;
-import io.cloudslang.engine.data.IdentityGenerator;
 import junit.framework.Assert;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -43,8 +40,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import static org.mockito.Mockito.when;
-
 /**
  * User: wahnonm
  * Date: 29/10/13
@@ -59,16 +54,6 @@ public class ExecutionQueueRepositoryTest {
     @Autowired
     private ExecutionQueueRepository executionQueueRepository;
 
-    @Autowired
-    @Qualifier("OO_EXECUTION_STATES")
-    private PartitionTemplate partitionTemplate;
-
-    @Before
-    public void init(){
-        Mockito.reset(partitionTemplate);
-        when(partitionTemplate.activeTable()).thenReturn("OO_EXECUTION_STATES_1");
-        when(partitionTemplate.previousTable()).thenReturn("OO_EXECUTION_STATES_2");
-    }
 
     @Test
     public void testInsert(){
@@ -170,7 +155,7 @@ public class ExecutionQueueRepositoryTest {
     @Test
     public void testPollForRecoveryDuplicateMsg(){
 
-        //insert to states table 1
+        //insert to states table
         List<ExecutionMessage> msg = new ArrayList<>();
         ExecutionMessage execMsg = generateMessage("group1","msg1");
         execMsg.setWorkerId("worker1");
@@ -179,10 +164,6 @@ public class ExecutionQueueRepositoryTest {
         executionQueueRepository.insertExecutionStates(msg);
         executionQueueRepository.insertExecutionQueue(msg,1L);
 
-        //insert to states table 2
-        when(partitionTemplate.activeTable()).thenReturn("OO_EXECUTION_STATES_2");
-        executionQueueRepository.insertExecutionStates(msg);
-        executionQueueRepository.insertExecutionQueue(msg,1L);
 
         List<ExecutionMessage> result = executionQueueRepository.poll("worker1",10,ExecStatus.IN_PROGRESS);
 
@@ -195,18 +176,12 @@ public class ExecutionQueueRepositoryTest {
     @Test
     public void testPollForRecoveryDuplicateMsg2(){
 
-        //insert to states table 1
+        //insert to states table
         List<ExecutionMessage> msg = new ArrayList<>();
         ExecutionMessage execMsg = generateMessage("group1","msg1");
         execMsg.setWorkerId("worker1");
         execMsg.setStatus(ExecStatus.IN_PROGRESS);
         msg.add(execMsg);
-        executionQueueRepository.insertExecutionStates(msg);
-        executionQueueRepository.insertExecutionQueue(msg,1L);
-
-        //insert to states table 2
-        when(partitionTemplate.activeTable()).thenReturn("OO_EXECUTION_STATES_2");
-        execMsg.incMsgSeqId();
         executionQueueRepository.insertExecutionStates(msg);
         executionQueueRepository.insertExecutionQueue(msg,1L);
 
@@ -216,30 +191,6 @@ public class ExecutionQueueRepositoryTest {
         Assert.assertNotNull(result);
         Assert.assertFalse(result.isEmpty());
         Assert.assertEquals("should find only 1 msg result!, since the second msg has higher msg seq id",1,result.size());
-    }
-
-    @Test
-    public void testPollForRecoveryInPrvTable(){
-
-        //insert to states table 2
-        when(partitionTemplate.activeTable()).thenReturn("OO_EXECUTION_STATES_2");
-        List<ExecutionMessage> msg = new ArrayList<>();
-        ExecutionMessage execMsg = generateMessage("group1","msg1");
-        execMsg.setWorkerId("worker1");
-        execMsg.setStatus(ExecStatus.IN_PROGRESS);
-        msg.add(execMsg);
-        executionQueueRepository.insertExecutionStates(msg);
-        executionQueueRepository.insertExecutionQueue(msg,1L);
-
-        //move pointer to states table 1
-        when(partitionTemplate.activeTable()).thenReturn("OO_EXECUTION_STATES_1");
-
-        List<ExecutionMessage> result = executionQueueRepository.poll("worker1",10,ExecStatus.IN_PROGRESS);
-
-
-        Assert.assertNotNull(result);
-        Assert.assertFalse(result.isEmpty());
-        Assert.assertEquals("should find msg even that it is in previous states table!",1,result.size());
     }
 
     @Test
@@ -333,18 +284,6 @@ public class ExecutionQueueRepositoryTest {
         @Bean
         WorkerNodeService workerNodeService(){
             return Mockito.mock(WorkerNodeService.class);
-        }
-
-        @Bean(name="OO_EXECUTION_STATES")
-        PartitionTemplate statePartitionTemplate(){
-            PartitionTemplate partitionTemplate = Mockito.mock(PartitionTemplate.class);
-            when(partitionTemplate.activeTable()).thenReturn("OO_EXECUTION_STATES_1");
-            return  partitionTemplate;
-        }
-
-        @Bean(name="OO_EXECUTION_QUEUES")
-        PartitionTemplate queuePartitionTemplate(){
-            return Mockito.mock(PartitionTemplate.class);
         }
 
         @Bean

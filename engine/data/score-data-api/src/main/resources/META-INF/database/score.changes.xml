@@ -66,7 +66,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
     <changeSet id="create OO_EXECUTION_STATES" author="engine">
 
-        <createTable tableName="OO_EXECUTION_STATES_1">
+        <createTable tableName="OO_EXECUTION_STATES">
             <column name="ID" type="bigint">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -79,19 +79,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
             <column name="CREATE_TIME" type="${timestamp.type}"/>
         </createTable>
 
-        <createTable tableName="OO_EXECUTION_STATES_2">
-            <column name="ID" type="bigint">
-                <constraints primaryKey="true" nullable="false" />
-            </column>
-            <column name="MSG_ID" type="varchar(255)">
-                <constraints nullable="false" />
-            </column>
-            <column name="PAYLOAD" type="blob">
-                <constraints nullable="false" />
-            </column>
-            <column name="CREATE_TIME" type="${timestamp.type}" />
-        </createTable>
-
     </changeSet>
 
     <!--The payload column is a blob in mysql it is not big enough-->
@@ -101,7 +88,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
     </changeSet>
 
     <changeSet id="create OO_EXECUTION_QUEUES" author="engine">
-        <createTable tableName="OO_EXECUTION_QUEUES_1">
+        <createTable tableName="OO_EXECUTION_QUEUES">
             <column name="ID" type="bigint">
                 <constraints primaryKey="true" nullable="false" />
             </column>

@@ -8,9 +8,9 @@
         The Apache License is available at
         http://www.apache.org/licenses/LICENSE-2.0
     -->
-    <groupId>natasha.cloudslang</groupId>
+    <groupId>io.cloudslang</groupId>
     <artifactId>score-parent</artifactId>
-    <version>0.1.280-SNAPSHOT</version>
+    <version>0.1.279-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>A Java based orchestration engine</description>
