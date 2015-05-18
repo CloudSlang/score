@@ -12,7 +12,7 @@
 	<parent>
 		<groupId>oobranch.cloudslang</groupId>
 		<artifactId>queue</artifactId>
-		<version>0.1.279</version>
+		<version>0.2.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>score-queue-api</artifactId>
