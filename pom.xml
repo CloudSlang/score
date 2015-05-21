@@ -10,7 +10,7 @@
     -->
     <groupId>oobranch.cloudslang</groupId>
     <artifactId>score-parent</artifactId>
-    <version>0.1.279-SNAPSHOT</version>
+    <version>0.2.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>A Java based orchestration engine</description>
