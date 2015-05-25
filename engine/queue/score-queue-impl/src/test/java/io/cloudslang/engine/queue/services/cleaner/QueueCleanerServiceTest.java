@@ -121,7 +121,7 @@ public class QueueCleanerServiceTest {
 	private ExecutionMessage generateMessage(long execStateId, String groupName, String msgId, ExecStatus status) {
 		byte[] payloadData;
 		payloadData = "This is just a test".getBytes();
-		Payload payload = new Payload(false, false, payloadData);
+		Payload payload = new Payload(payloadData);
 		return new ExecutionMessage(execStateId, "myWorker", groupName, msgId, status, payload, 1);
 	}
 

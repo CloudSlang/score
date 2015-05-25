@@ -211,14 +211,14 @@ public class ExecutionQueueRepositoryTest {
     private ExecutionMessage generateMessage(String groupName,String msgId) {
         byte[] payloadData;
         payloadData = "This is just a test".getBytes();
-        Payload payload = new Payload(false, false, payloadData);
+        Payload payload = new Payload(payloadData);
         return new ExecutionMessage(-1, ExecutionMessage.EMPTY_WORKER, groupName, msgId , ExecStatus.SENT, payload, 1);
     }
 
     private ExecutionMessage generateFinishedMessage(long execStateId) {
         byte[] payloadData;
         payloadData = "This is just a test".getBytes();
-        Payload payload = new Payload(false, false, payloadData);
+        Payload payload = new Payload(payloadData);
         return new ExecutionMessage(execStateId, ExecutionMessage.EMPTY_WORKER, "group", "123" , ExecStatus.FINISHED, payload, 1);
     }
 
@@ -226,7 +226,7 @@ public class ExecutionQueueRepositoryTest {
     private ExecutionMessage generateMessageForWorker(String groupName,String msgId, String workerUuid) {
         byte[] payloadData;
         payloadData = "This is just a test".getBytes();
-        Payload payload = new Payload(false, false, payloadData);
+        Payload payload = new Payload(payloadData);
         return new ExecutionMessage(-1, workerUuid, groupName, msgId , ExecStatus.SENT, payload, 1);
     }
 

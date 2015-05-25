@@ -410,7 +410,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 			public void processRow(ResultSet resultSet) throws SQLException {
 				result.put(
 						resultSet.getLong(1),
-						new Payload(false, false, resultSet.getBytes("payload"))
+						new Payload(resultSet.getBytes("payload"))
 				);
 			}
 		});
@@ -449,7 +449,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					rs.getString("EXEC_GROUP"),
 					rs.getString("MSG_ID"),
 					ExecStatus.find(rs.getInt("STATUS")),
-					new Payload(false, false, rs.getBytes("PAYLOAD")),
+					new Payload(rs.getBytes("PAYLOAD")),
 					rs.getInt("MSG_SEQ_ID"),
 					rs.getTimestamp("CREATE_TIME"));
 		}

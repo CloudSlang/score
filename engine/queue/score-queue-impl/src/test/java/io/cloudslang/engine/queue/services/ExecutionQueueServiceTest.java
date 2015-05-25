@@ -245,7 +245,7 @@ public class ExecutionQueueServiceTest {
 	private ExecutionMessage generateMessage(String groupName, String msgId) {
 		byte[] payloadData;
 		payloadData = "This is just a test".getBytes();
-		Payload payload = new Payload(false, false, payloadData);
+		Payload payload = new Payload(payloadData);
 		return new ExecutionMessage(-1, ExecutionMessage.EMPTY_WORKER, groupName, msgId, ExecStatus.PENDING, payload, 1);
 	}
 

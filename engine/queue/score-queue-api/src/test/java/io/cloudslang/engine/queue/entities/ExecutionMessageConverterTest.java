@@ -63,16 +63,20 @@ public class ExecutionMessageConverterTest {
         MyExecutionForTest execution = new MyExecutionForTest(111L, 999L, 0L, names);
 
         Payload payload = executionMessageConverter.createPayload(execution);
-        assertFalse(payload.isEncrypt());
+        assertFalse(executionMessageConverter.containsSensitiveData(payload));
+        assertTrue(payload.getData()[0] == 0);
 
         payload = executionMessageConverter.createPayload(execution);
-        assertFalse(payload.isEncrypt());
+        assertFalse(executionMessageConverter.containsSensitiveData(payload));
+        assertTrue(payload.getData()[0] == 0);
 
         payload = executionMessageConverter.createPayload(execution, false);
-        assertFalse(payload.isEncrypt());
+        assertFalse(executionMessageConverter.containsSensitiveData(payload));
+        assertTrue(payload.getData()[0] == 0);
 
         payload = executionMessageConverter.createPayload(execution, true);
-        assertTrue(payload.isEncrypt());
+        assertTrue(executionMessageConverter.containsSensitiveData(payload));
+        assertTrue(payload.getData()[0] == 1);
     }
 
     @Test
@@ -83,16 +87,31 @@ public class ExecutionMessageConverterTest {
         MyExecutionForTest execution = new MyExecutionForTest(111L, 999L, 0L, names);
 
         Payload payload = executionMessageConverter.createPayload(execution);
-        assertTrue(payload.isEncrypt());
+        assertTrue(executionMessageConverter.containsSensitiveData(payload));
+        assertTrue(payload.getData()[0] == 1);
 
         payload = executionMessageConverter.createPayload(execution);
-        assertTrue(payload.isEncrypt());
+        assertTrue(executionMessageConverter.containsSensitiveData(payload));
+        assertTrue(payload.getData()[0] == 1);
 
         payload = executionMessageConverter.createPayload(execution, false);
-        assertTrue(payload.isEncrypt());
+        assertTrue(executionMessageConverter.containsSensitiveData(payload));
+        assertTrue(payload.getData()[0] == 1);
 
         payload = executionMessageConverter.createPayload(execution, true);
-        assertTrue(payload.isEncrypt());
+        assertTrue(executionMessageConverter.containsSensitiveData(payload));
+        assertTrue(payload.getData()[0] == 1);
+    }
+
+    @Test
+    public void testPayloadForSensitiveData() {
+        Payload p = new Payload();
+        p.setData(new byte[]{0, 1, 2});
+        assertFalse(executionMessageConverter.containsSensitiveData(p));
+
+        p = new Payload();
+        p.setData(new byte[]{1, 0, 0});
+        assertTrue(executionMessageConverter.containsSensitiveData(p));
     }
 
 //    @Test
