@@ -117,6 +117,10 @@ public class ExecutionRuntimeServices implements Serializable {
     public String getLanguageName(){
         return ((String) contextMap.get(LANGUAGE_TYPE));
     }
+
+    public void setLanguageName(String languageName){
+        contextMap.put(LANGUAGE_TYPE, languageName);
+    }
     /**
      *
      * @return the brunchId of the current execution
