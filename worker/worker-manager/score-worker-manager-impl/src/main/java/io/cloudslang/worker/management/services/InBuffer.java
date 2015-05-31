@@ -13,6 +13,7 @@ package io.cloudslang.worker.management.services;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
+import io.cloudslang.worker.management.ExecutionsActivityListener;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
+
+import static ch.lambdaj.Lambda.extract;
+import static ch.lambdaj.Lambda.on;
 
 /**
  * Created with IntelliJ IDEA.
@@ -70,6 +74,9 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 	@Autowired
 	private SynchronizationManager syncManager;
 
+    @Autowired(required = false)
+    private ExecutionsActivityListener executionsActivityListener;
+
     private Date currentCreateDate = new Date(0);
 
     @PostConstruct
@@ -109,6 +116,9 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
                         if (logger.isDebugEnabled()) logger.debug("Polling messages from queue (max " + messagesToGet + ")");
                         List<ExecutionMessage> newMessages = queueDispatcher.poll(workerUuid, messagesToGet, currentCreateDate);
+                        if (executionsActivityListener != null) {
+                            executionsActivityListener.onActivate(extract(newMessages, on(ExecutionMessage.class).getExecStateId()));
+                        }
                         if (logger.isDebugEnabled()) logger.debug("Received " + newMessages.size() + " messages from queue");
 
                         if (!newMessages.isEmpty()) {
