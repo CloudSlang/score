@@ -9,9 +9,9 @@
         http://www.apache.org/licenses/LICENSE-2.0
     -->
 	<parent>
-		<groupId>oobranch.cloudslang</groupId>
+		<groupId>io.cloudslang</groupId>
 		<artifactId>score-parent</artifactId>
-		<version>0.2.4-SNAPSHOT</version>
+		<version>0.1.279-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
@@ -29,13 +29,13 @@
 			</dependency>
 
 			<dependency>
-				<groupId>oobranch.cloudslang</groupId>
+				<groupId>io.cloudslang</groupId>
 				<artifactId>score-worker-execution-api</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>oobranch.cloudslang</groupId>
+				<groupId>io.cloudslang</groupId>
 				<artifactId>score-worker-manager-api</artifactId>
 				<version>${project.version}</version>
 			</dependency>
