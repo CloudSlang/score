@@ -15,46 +15,7 @@
 
 
 	<changeSet id="create OO_EXECUTION_STATES" author="engine">
-		<createTable tableName="OO_EXECUTION_STATES_1">
-			<column name="ID" type="bigint">
-				<constraints primaryKey="true" nullable="false"/>
-			</column>
-			<column name="MSG_ID" type="varchar(255)">
-				<constraints nullable="false"/>
-			</column>
-			<column name="PAYLOAD" type="blob">
-				<constraints nullable="false"/>
-			</column>
-			<column name="CREATE_TIME" type="timestamp"/>
-		</createTable>
-
-		<createTable tableName="OO_EXECUTION_STATES_2">
-			<column name="ID" type="bigint">
-				<constraints primaryKey="true" nullable="false"/>
-			</column>
-			<column name="MSG_ID" type="varchar(255)">
-				<constraints nullable="false"/>
-			</column>
-			<column name="PAYLOAD" type="blob">
-				<constraints nullable="false"/>
-			</column>
-			<column name="CREATE_TIME" type="timestamp"/>
-		</createTable>
-
-		<createTable tableName="OO_EXECUTION_STATES_3">
-			<column name="ID" type="bigint">
-				<constraints primaryKey="true" nullable="false"/>
-			</column>
-			<column name="MSG_ID" type="varchar(255)">
-				<constraints nullable="false"/>
-			</column>
-			<column name="PAYLOAD" type="blob">
-				<constraints nullable="false"/>
-			</column>
-			<column name="CREATE_TIME" type="timestamp"/>
-		</createTable>
-
-		<createTable tableName="OO_EXECUTION_STATES_4">
+		<createTable tableName="OO_EXECUTION_STATES">
 			<column name="ID" type="bigint">
 				<constraints primaryKey="true" nullable="false"/>
 			</column>
@@ -69,7 +30,7 @@
 	</changeSet>
 
 	<changeSet id="create OO_EXECUTION_QUEUES" author="engine">
-		<createTable tableName="OO_EXECUTION_QUEUES_1">
+		<createTable tableName="OO_EXECUTION_QUEUES">
 			<column name="ID" type="bigint"><constraints primaryKey="true" nullable="false"/></column>
 			<column name="EXEC_STATE_ID" type="bigint"><constraints nullable="false"/></column>
 			<column name="ASSIGNED_WORKER" type="varchar(40)"/>
@@ -82,7 +43,7 @@
 	</changeSet>
 
 	<changeSet id="add index to OO_EXECUTION_QUEUES tables" author="engine">
-		<createIndex tableName="OO_EXECUTION_QUEUES_1" indexName="OO_Q_EXEC_STATE_1_IDX"><column name="EXEC_STATE_ID"/></createIndex>
-		<createIndex tableName="OO_EXECUTION_QUEUES_1" indexName="OO_Q_CREATE_TIME_1_IDX"><column name="CREATE_TIME"/></createIndex>
+		<createIndex tableName="OO_EXECUTION_QUEUES" indexName="OO_Q_EXEC_STATE_1_IDX"><column name="EXEC_STATE_ID"/></createIndex>
+		<createIndex tableName="OO_EXECUTION_QUEUES" indexName="OO_Q_CREATE_TIME_1_IDX"><column name="CREATE_TIME"/></createIndex>
 	</changeSet>
 </databaseChangeLog>

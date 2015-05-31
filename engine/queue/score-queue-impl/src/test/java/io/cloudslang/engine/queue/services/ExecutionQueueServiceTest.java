@@ -12,6 +12,8 @@ package io.cloudslang.engine.queue.services;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import io.cloudslang.engine.data.IdentityGenerator;
+import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
@@ -22,16 +24,12 @@ import io.cloudslang.engine.queue.repositories.ExecutionQueueRepositoryImpl;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerService;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerServiceImpl;
 import io.cloudslang.engine.versioning.services.VersionService;
-import io.cloudslang.engine.partitions.services.PartitionTemplate;
-import io.cloudslang.engine.data.IdentityGenerator;
-import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
 import junit.framework.Assert;
 import liquibase.integration.spring.SpringLiquibase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -44,14 +42,10 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -69,14 +63,6 @@ public class ExecutionQueueServiceTest {
 	public WorkerNodeService workerNodeService;
 
 	@Autowired
-	@Qualifier("OO_EXECUTION_STATES")
-	private PartitionTemplate statePartitionTemplate;
-
-	@Autowired
-	@Qualifier("OO_EXECUTION_QUEUES")
-	private PartitionTemplate queuePartitionTemplate;
-
-	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
 	@Autowired
@@ -84,25 +70,9 @@ public class ExecutionQueueServiceTest {
 
 	@Before
 	public void before() {
-		jdbcTemplate.execute("delete from OO_EXECUTION_QUEUES_1");
-		jdbcTemplate.execute("delete from OO_EXECUTION_STATES_2");
-		jdbcTemplate.execute("delete from OO_EXECUTION_STATES_1");
-		// init queuePartitionTemplate
-		reset(queuePartitionTemplate);
-		when(queuePartitionTemplate.activeTable()).thenReturn("OO_EXECUTION_QUEUES_1");
-		when(queuePartitionTemplate.previousTable()).thenReturn("OO_EXECUTION_QUEUES_1");
-		when(queuePartitionTemplate.reversedTables()).thenReturn((Arrays.asList(
-				"OO_EXECUTION_QUEUES_1",
-				"OO_EXECUTION_QUEUES_1")));
+		jdbcTemplate.execute("delete from OO_EXECUTION_QUEUES");
+		jdbcTemplate.execute("delete from OO_EXECUTION_STATES");
 
-
-		// init statePartitionTemplate
-		reset(statePartitionTemplate);
-		when(statePartitionTemplate.activeTable()).thenReturn("OO_EXECUTION_STATES_2");
-		when(statePartitionTemplate.previousTable()).thenReturn("OO_EXECUTION_STATES_1");
-		when(statePartitionTemplate.reversedTables()).thenReturn((Arrays.asList(
-				"OO_EXECUTION_STATES_2",
-				"OO_EXECUTION_STATES_1")));
 		reset(workerNodeService);
 	}
 
@@ -275,7 +245,7 @@ public class ExecutionQueueServiceTest {
 	private ExecutionMessage generateMessage(String groupName, String msgId) {
 		byte[] payloadData;
 		payloadData = "This is just a test".getBytes();
-		Payload payload = new Payload(false, false, payloadData);
+		Payload payload = new Payload(payloadData);
 		return new ExecutionMessage(-1, ExecutionMessage.EMPTY_WORKER, groupName, msgId, ExecStatus.PENDING, payload, 1);
 	}
 
@@ -337,16 +307,6 @@ public class ExecutionQueueServiceTest {
 		@Bean
 		public WorkerNodeService workerNodeService() {
 			return mock(WorkerNodeService.class);
-		}
-
-		@Bean
-		public PartitionTemplate OO_EXECUTION_STATES() {
-			return mock(PartitionTemplate.class);
-		}
-
-		@Bean
-		public PartitionTemplate OO_EXECUTION_QUEUES() {
-			return mock(PartitionTemplate.class);
 		}
 
 		@Bean

@@ -11,14 +11,12 @@
 package io.cloudslang.engine.queue.repositories;
 
 import io.cloudslang.engine.data.IdentityGenerator;
-import io.cloudslang.engine.partitions.services.PartitionTemplate;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -50,15 +48,17 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
     private Logger logger = Logger.getLogger(getClass());
 
-    final private String SELECT_FINISHED_STEPS_IDS =  " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES_1 " +
+    final private String SELECT_FINISHED_STEPS_IDS =  " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES " +
                                                       " WHERE " +
                                                       "        (STATUS = "+ExecStatus.TERMINATED.getNumber()+") OR " +
                                                       "        (STATUS = "+ExecStatus.FAILED.getNumber()+") OR " +
                                                       "        (STATUS = "+ExecStatus.FINISHED.getNumber()+") ";
 
-	final private String QUERY_DELETE_FINISHED_STEPS = "DELETE FROM OO_EXECUTION_QUEUES_1 " +
+	final private String QUERY_DELETE_FINISHED_STEPS = "DELETE FROM OO_EXECUTION_QUEUES " +
 			" WHERE EXEC_STATE_ID in (:ids)";
 
+    final private String QUERY_DELETE_FINISHED_STEPS_FROM_STATES = "DELETE FROM OO_EXECUTION_STATES " +
+    			" WHERE ID in (:ids)";
 
 	final private String QUERY_MESSAGES_WITHOUT_ACK_SQL =
 			"SELECT EXEC_STATE_ID,      " +
@@ -67,11 +67,11 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					"       STATUS,       " +
 					"       MSG_SEQ_ID,   " +
 					"      CREATE_TIME " +
-					"  FROM  OO_EXECUTION_QUEUES_1 q  " +
+					"  FROM  OO_EXECUTION_QUEUES q  " +
 					"  WHERE " +
 					"      (q.STATUS  = ? ) AND " +
 					"     (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
-					"                  FROM OO_EXECUTION_QUEUES_1 qq " +
+					"                  FROM OO_EXECUTION_QUEUES qq " +
 					"                  WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND " +
 					"                        qq.MSG_SEQ_ID > q.MSG_SEQ_ID" +
 					"                 )" +
@@ -81,12 +81,12 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
     final private String QUERY_COUNT_MESSAGES_WITHOUT_ACK_FOR_WORKER_SQL =
             "SELECT COUNT(*)  " +
-                        "  FROM  OO_EXECUTION_QUEUES_1  q  " +
+                        "  FROM  OO_EXECUTION_QUEUES  q  " +
                         "  WHERE " +
                         "      (q.ASSIGNED_WORKER  = ? ) AND " +
                         "      (q.STATUS  = ? ) AND " +
                         "     (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
-                        "                  FROM OO_EXECUTION_QUEUES_1 qq " +
+                        "                  FROM OO_EXECUTION_QUEUES qq " +
                         "                  WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND " +
                         "                        qq.MSG_SEQ_ID > q.MSG_SEQ_ID " +
                         "                 )" +
@@ -103,15 +103,15 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					"       MSG_SEQ_ID ,      " +
 					"       MSG_ID," +
 					"       q.CREATE_TIME " +
-					" FROM  OO_EXECUTION_QUEUES_1 q,  " +
-					"      :OO_EXECUTION_STATES s   " +
+					" FROM  OO_EXECUTION_QUEUES q,  " +
+					"      OO_EXECUTION_STATES s   " +
 					" WHERE  " +
 					"      (q.CREATE_TIME >= ? ) AND " +
 					"      (q.ASSIGNED_WORKER =  ?)  AND " +
 					"      (q.STATUS IN (:status)) AND " +
 					" (q.EXEC_STATE_ID = s.ID) AND " +
 					" (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
-					"              FROM OO_EXECUTION_QUEUES_1 qq " +
+					"              FROM OO_EXECUTION_QUEUES qq " +
 					"              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
 					" ORDER BY q.CREATE_TIME  ";
 
@@ -124,14 +124,14 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       MSG_SEQ_ID,      " +
                     "       MSG_ID," +
                     "       q.CREATE_TIME " +
-                    " FROM  OO_EXECUTION_QUEUES_1 q,  " +
-                    "       :OO_EXECUTION_STATES s1   " +
+                    " FROM  OO_EXECUTION_QUEUES q,  " +
+                    "       OO_EXECUTION_STATES s1   " +
                     " WHERE  " +
                     "      (q.ASSIGNED_WORKER =  ?)  AND " +
                     "      (q.STATUS IN (:status)) AND " +
                     " q.EXEC_STATE_ID = s1.ID AND" +
                     " (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
-                    "              FROM OO_EXECUTION_QUEUES_1 qq " +
+                    "              FROM OO_EXECUTION_QUEUES qq " +
                     "              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) ";
 
 	final private String QUERY_MESSAGES_BY_STATUSES =
@@ -141,21 +141,21 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					"  STATUS, " +
 					"  MSG_SEQ_ID, " +
 					"  CREATE_TIME " +
-					"FROM  OO_EXECUTION_QUEUES_1 q  " +
+					"FROM  OO_EXECUTION_QUEUES q  " +
 					"WHERE STATUS IN (:status) AND " +
 					"  NOT EXISTS (" +
 					"     SELECT qq.MSG_SEQ_ID " +
-					"     FROM OO_EXECUTION_QUEUES_1 qq " +
+					"     FROM OO_EXECUTION_QUEUES qq " +
 					"     WHERE" +
 					"         qq.EXEC_STATE_ID = q.EXEC_STATE_ID" +
 					"         AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID" +
 					"  )";
 
-	final private String INSERT_EXEC_STATE = "INSERT INTO :OO_EXECUTION_STATES  (ID, MSG_ID,  PAYLOAD, CREATE_TIME) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
+	final private String INSERT_EXEC_STATE = "INSERT INTO OO_EXECUTION_STATES  (ID, MSG_ID,  PAYLOAD, CREATE_TIME) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
 
-	final private String INSERT_QUEUE = "INSERT INTO OO_EXECUTION_QUEUES_1 (ID, EXEC_STATE_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS,MSG_SEQ_ID, CREATE_TIME,MSG_VERSION) VALUES (?, ?, ?, ?, ?, ?,CURRENT_TIMESTAMP,?)";
+	final private String INSERT_QUEUE = "INSERT INTO OO_EXECUTION_QUEUES (ID, EXEC_STATE_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS,MSG_SEQ_ID, CREATE_TIME,MSG_VERSION) VALUES (?, ?, ?, ?, ?, ?,CURRENT_TIMESTAMP,?)";
 
-	private static final String QUERY_PAYLOAD_BY_EXECUTION_IDS = "SELECT ID, PAYLOAD FROM :OO_EXECUTION_STATES WHERE ID IN (:IDS)";
+	private static final String QUERY_PAYLOAD_BY_EXECUTION_IDS = "SELECT ID, PAYLOAD FROM OO_EXECUTION_STATES WHERE ID IN (:IDS)";
 
 
     //We use dedicated JDBCTemplates for each query since JDBCTemplate is state-full object and we have different settings for each query.
@@ -172,10 +172,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
 	@Autowired
 	private IdentityGenerator idGen;
-
-	@Autowired
-	@Qualifier("OO_EXECUTION_STATES")
-	private PartitionTemplate statePartitionTemplate;
 
 	@Autowired
 	private DataSource dataSource;
@@ -202,7 +198,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 	@Override
 	public void insertExecutionStates(final List<ExecutionMessage> stateMessages) {
 		String insertExecStateSQL = INSERT_EXEC_STATE;
-		insertExecStateSQL = insertExecStateSQL.replaceAll(":OO_EXECUTION_STATES", getExecStateTableName());
         insertExecutionJDBCTemplate.batchUpdate(insertExecStateSQL, new BatchPreparedStatementSetter() {
 
 			@Override
@@ -257,11 +252,9 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
         // prepare the sql statement
         String sqlStatPrvTable = QUERY_WORKER_RECOVERY_SQL
-                .replaceAll(":OO_EXECUTION_STATES", getPrvExecStateTableName())
                 .replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
 
         String sqlStatActiveTable = QUERY_WORKER_RECOVERY_SQL
-                .replaceAll(":OO_EXECUTION_STATES", getExecStateTableName())
                 .replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
 
         // prepare the argument
@@ -297,7 +290,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
         // prepare the sql statement
 		String sqlStat = QUERY_WORKER_SQL
-				.replaceAll(":OO_EXECUTION_STATES", getExecStateTableName())
 				.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
 
 		// prepare the argument
@@ -329,10 +321,20 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         if(logger.isDebugEnabled()){
             logger.debug("Deleted " + deletedRows + " rows of finished steps from queue table.");
         }
-	}
 
-	@Override
-	public Set<Long> getFinishedExecStateIds() {
+        String query_states = QUERY_DELETE_FINISHED_STEPS_FROM_STATES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
+
+        logSQL(query,args);
+
+        deletedRows = deleteFinishedStepsJDBCTemplate.update(query_states, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
+
+        if(logger.isDebugEnabled()){
+            logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_STATES table.");
+        }
+    }
+
+    @Override
+    public Set<Long> getFinishedExecStateIds() {
         getFinishedExecStateIdsJDBCTemplate.setMaxRows(1000000);
         getFinishedExecStateIdsJDBCTemplate.setFetchSize(1000000);
 
@@ -344,7 +346,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
 	public List<ExecutionMessage> pollMessagesWithoutAck(int maxSize, long minVersionAllowed) {
 
-		String sqlStat = QUERY_MESSAGES_WITHOUT_ACK_SQL.replaceAll(":OO_EXECUTION_STATES", getExecStateTableName());
+		String sqlStat = QUERY_MESSAGES_WITHOUT_ACK_SQL;
 
         pollMessagesWithoutAckJDBCTemplate.setMaxRows(maxSize);
         pollMessagesWithoutAckJDBCTemplate.setFetchSize(maxSize);
@@ -399,9 +401,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
 	@Override
 	public Map<Long, Payload> findPayloadByExecutionIds(Long... ids) {
-		String sqlStat = QUERY_PAYLOAD_BY_EXECUTION_IDS.replaceAll(":OO_EXECUTION_STATES", getExecStateTableName());
-		String qMarks = StringUtils.repeat("?", ",", ids.length);
-		sqlStat = sqlStat.replace(":IDS", qMarks);
+        String qMarks = StringUtils.repeat("?", ",", ids.length);
+        String sqlStat = QUERY_PAYLOAD_BY_EXECUTION_IDS.replace(":IDS", qMarks);
 
 		final Map<Long, Payload> result = new HashMap<>();
         findPayloadByExecutionIdsJDBCTemplate.query(sqlStat, ids, new RowCallbackHandler() {
@@ -409,7 +410,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 			public void processRow(ResultSet resultSet) throws SQLException {
 				result.put(
 						resultSet.getLong(1),
-						new Payload(false, false, resultSet.getBytes("payload"))
+						new Payload(resultSet.getBytes("payload"))
 				);
 			}
 		});
@@ -424,7 +425,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
 		// prepare the sql statement
 		String sqlStat = QUERY_MESSAGES_BY_STATUSES
-				.replaceAll(":OO_EXECUTION_STATES", getExecStateTableName()) // set the table name
 				.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length)); // set ? according to the number of parameters
 
 		Object[] values = new Object[statuses.length];
@@ -441,14 +441,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 		}
 	}
 
-	private String getExecStateTableName() {
-		return statePartitionTemplate.activeTable();
-	}
-
-    private String getPrvExecStateTableName() {
-        return statePartitionTemplate.previousTable();
-    }
-
 	private class ExecutionMessageRowMapper implements RowMapper<ExecutionMessage> {
 		@Override
 		public ExecutionMessage mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -457,7 +449,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					rs.getString("EXEC_GROUP"),
 					rs.getString("MSG_ID"),
 					ExecStatus.find(rs.getInt("STATUS")),
-					new Payload(false, false, rs.getBytes("PAYLOAD")),
+					new Payload(rs.getBytes("PAYLOAD")),
 					rs.getInt("MSG_SEQ_ID"),
 					rs.getTimestamp("CREATE_TIME"));
 		}

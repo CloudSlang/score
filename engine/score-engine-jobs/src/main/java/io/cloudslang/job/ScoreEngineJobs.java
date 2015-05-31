@@ -28,11 +28,6 @@ public interface ScoreEngineJobs {
     void joinFinishedSplitsJob();
 
     /**
-     * job that create rolling in the partition table
-     */
-    void statesRollingJob();
-
-    /**
      * job that update version number - we use it instead of time
      */
     void recoveryVersionJob();
