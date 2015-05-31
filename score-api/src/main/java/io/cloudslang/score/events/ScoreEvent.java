@@ -19,6 +19,7 @@ import java.io.Serializable;
 public class ScoreEvent implements Serializable {
 
 	private String eventType;
+    private String languageName;
 	private Serializable data;
 
 	public ScoreEvent(String eventType, Serializable data) {
@@ -26,11 +27,20 @@ public class ScoreEvent implements Serializable {
 		this.data = data;
 	}
 
-	public String getEventType() {
+    public ScoreEvent(String eventType, String languageName, Serializable data) {
+        this(eventType,data);
+        this.languageName = languageName;
+    }
+
+    public String getEventType() {
 		return eventType;
 	}
 
-	public Serializable getData() {
+    public String getLanguageName() {
+        return languageName;
+    }
+
+    public Serializable getData() {
 		return data;
 	}
 }
