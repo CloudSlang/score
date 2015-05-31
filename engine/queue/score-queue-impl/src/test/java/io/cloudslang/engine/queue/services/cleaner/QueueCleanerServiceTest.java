@@ -10,6 +10,8 @@
 
 package io.cloudslang.engine.queue.services.cleaner;
 
+import io.cloudslang.engine.data.IdentityGenerator;
+import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
@@ -22,16 +24,12 @@ import io.cloudslang.engine.queue.services.ExecutionQueueServiceImpl;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerService;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerServiceImpl;
 import io.cloudslang.engine.versioning.services.VersionService;
-import io.cloudslang.engine.partitions.services.PartitionTemplate;
-import io.cloudslang.engine.data.IdentityGenerator;
-import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
 import junit.framework.Assert;
 import liquibase.integration.spring.SpringLiquibase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -45,13 +43,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.reset;
 
 /**
  * User: A
@@ -71,36 +66,11 @@ public class QueueCleanerServiceTest {
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
-	@Autowired
-	@Qualifier("OO_EXECUTION_STATES")
-	private PartitionTemplate statePartitionTemplate;
-
-	@Autowired
-	@Qualifier("OO_EXECUTION_QUEUES")
-	private PartitionTemplate queuePartitionTemplate;
 
 	@Before
 	public void before() {
-		jdbcTemplate.execute("delete from OO_EXECUTION_QUEUES_1");
-		jdbcTemplate.execute("delete from OO_EXECUTION_STATES_2");
-		jdbcTemplate.execute("delete from OO_EXECUTION_STATES_1");
-		// init queuePartitionTemplate
-		reset(queuePartitionTemplate);
-		when(queuePartitionTemplate.activeTable()).thenReturn("OO_EXECUTION_QUEUES_1");
-		when(queuePartitionTemplate.previousTable()).thenReturn("OO_EXECUTION_QUEUES_1");
-		when(queuePartitionTemplate.reversedTables()).thenReturn((Arrays.asList(
-				"OO_EXECUTION_QUEUES_1",
-				"OO_EXECUTION_QUEUES_1")));
-
-
-		// init statePartitionTemplate
-		reset(statePartitionTemplate);
-		when(statePartitionTemplate.activeTable()).thenReturn("OO_EXECUTION_STATES_2");
-		when(statePartitionTemplate.previousTable()).thenReturn("OO_EXECUTION_STATES_1");
-		when(statePartitionTemplate.reversedTables()).thenReturn((Arrays.asList(
-				"OO_EXECUTION_STATES_2",
-				"OO_EXECUTION_STATES_1")));
-		// Mockito.reset(workerNodeService);
+		jdbcTemplate.execute("delete from OO_EXECUTION_QUEUES");
+		jdbcTemplate.execute("delete from OO_EXECUTION_STATES");
 	}
 
 	@Test
@@ -151,7 +121,7 @@ public class QueueCleanerServiceTest {
 	private ExecutionMessage generateMessage(long execStateId, String groupName, String msgId, ExecStatus status) {
 		byte[] payloadData;
 		payloadData = "This is just a test".getBytes();
-		Payload payload = new Payload(false, false, payloadData);
+		Payload payload = new Payload(payloadData);
 		return new ExecutionMessage(execStateId, "myWorker", groupName, msgId, status, payload, 1);
 	}
 
@@ -210,16 +180,6 @@ public class QueueCleanerServiceTest {
 		@Bean
 		WorkerNodeService workerNodeService() {
 			return mock(WorkerNodeService.class);
-		}
-
-		@Bean
-		PartitionTemplate OO_EXECUTION_STATES() {
-			return mock(PartitionTemplate.class);
-		}
-
-		@Bean
-		PartitionTemplate OO_EXECUTION_QUEUES() {
-			return mock(PartitionTemplate.class);
 		}
 
 		@Bean

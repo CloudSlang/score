@@ -15,7 +15,6 @@ import io.cloudslang.engine.node.services.WorkerNodeServiceImpl;
 import io.cloudslang.engine.node.services.WorkersMBean;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepositoryImpl;
-import io.cloudslang.engine.queue.repositories.callbacks.ExecutionStatesCallback;
 import io.cloudslang.engine.queue.services.ExecutionQueueServiceImpl;
 import io.cloudslang.engine.queue.services.QueueDispatcherServiceImpl;
 import io.cloudslang.engine.queue.services.QueueListenerImpl;
@@ -105,7 +104,6 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(ExecutionQueueRepositoryImpl.class, null);
 		put(HiloFactoryBean.class, "scoreHiloFactoryBean");
 		put(WorkersMBean.class, "io.cloudslang.engine.node.services.WorkersMBean");
-		put(ExecutionStatesCallback.class, "executionStatesCallback");
         put(WorkerDbSupportServiceImpl.class, null);
         put(ScoreDeprecatedImpl.class, null);
         put(ScoreEngineJobsImpl.class,"scoreEngineJobs");
@@ -152,7 +150,6 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	}
 
     private void registerSpecialBeans(Element element, ParserContext parserContext) {
-        registerPartitionTemplates(parserContext);
         registerPauseResume(element,parserContext);
     }
 
@@ -162,10 +159,6 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
             new BeanRegistrator(parserContext).CLASS(StubPauseResumeServiceImpl.class).register();
         }
     }
-
-	private void registerPartitionTemplates(ParserContext parserContext) {
-		registerPartitionTemplate("OO_EXECUTION_STATES", 2, 50000, -1, parserContext,ExecutionStatesCallback.class);
-	}
 
 	private void registerPartitionTemplate(String name, int groupSize, long sizeThreshold, long timeThreshold,
                                            ParserContext parserContext,

@@ -1,12 +1,12 @@
 /*******************************************************************************
-* (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
-* All rights reserved. This program and the accompanying materials
-* are made available under the terms of the Apache License v2.0 which accompany this distribution.
-*
-* The Apache License is available at
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-*******************************************************************************/
+ * (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Apache License v2.0 which accompany this distribution.
+ *
+ * The Apache License is available at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *******************************************************************************/
 
 package io.cloudslang.engine.queue.entities;
 
@@ -21,31 +21,16 @@ import java.io.Serializable;
  * Time: 09:39
  */
 public class Payload implements Cloneable, Serializable {
+	private static final long serialVersionUID = 1198403948027561284L;
 
-    private static final long serialVersionUID = 1198403948027561284L;
-
-	private boolean compressed;
-	private boolean encrypt;
 	private byte[] data;
 
 	public Payload() {
-		compressed = false;
-		encrypt = false;
 		data = null;
 	}
 
-	public Payload(boolean compressed, boolean encrypt, byte[] data) {
-		this.compressed = compressed;
-		this.encrypt = encrypt;
+	public Payload(byte[] data) {
 		this.data = data;
-	}
-
-	public boolean isCompressed() {
-		return compressed;
-	}
-
-	public boolean isEncrypt() {
-		return encrypt;
 	}
 
 	public byte[] getData() {
@@ -64,8 +49,6 @@ public class Payload implements Cloneable, Serializable {
 		Payload that = (Payload)obj;
 
 		return new EqualsBuilder()
-				.append(this.compressed, that.compressed)
-				.append(this.encrypt, that.encrypt)
 				.append(this.data, that.data)
 				.isEquals();
 	}
