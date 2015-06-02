@@ -61,6 +61,8 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String REQUESTED_EXECUTION_PLAN_ID = "REQUESTED_EXECUTION_PLAN_ID";
 
+    public static final String LANGUAGE_TYPE = "LANGUAGE_TYPE";
+
     protected Map<String, Serializable> contextMap = new HashMap<>();
 
     public ExecutionRuntimeServices(){}
@@ -112,6 +114,13 @@ public class ExecutionRuntimeServices implements Serializable {
         return ((Map<String, Long>) contextMap.get(BEGIN_STEPS_MAP)).get(subFlowUuid);
     }
 
+    public String getLanguageName(){
+        return ((String) contextMap.get(LANGUAGE_TYPE));
+    }
+
+    public void setLanguageName(String languageName){
+        contextMap.put(LANGUAGE_TYPE, languageName);
+    }
     /**
      *
      * @return the brunchId of the current execution
@@ -255,7 +264,7 @@ public class ExecutionRuntimeServices implements Serializable {
 			eventsQueue = new ArrayDeque<>();
 			contextMap.put(SCORE_EVENTS_QUEUE, (ArrayDeque) eventsQueue);
 		}
-		eventsQueue.add(new ScoreEvent(eventType, eventData));
+		eventsQueue.add(new ScoreEvent(eventType,getLanguageName(),  eventData));
 	}
 
     /**
