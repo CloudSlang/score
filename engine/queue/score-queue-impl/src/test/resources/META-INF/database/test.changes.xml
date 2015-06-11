@@ -50,6 +50,8 @@
 			<column name="CREATE_TIME" type="${timestamp.type}"/>
 			<column name="MSG_VERSION" type="BIGINT" />
 		</createTable>
+
+        <addUniqueConstraint constraintName="OO_EXECUTION_QUEUES_CONSTRAINT" columnNames="EXEC_STATE_ID, MSG_SEQ_ID" tableName="OO_EXECUTION_QUEUES"/>
 	</changeSet>
 
 	<changeSet id="add index to OO_EXECUTION_QUEUES tables" author="engine">

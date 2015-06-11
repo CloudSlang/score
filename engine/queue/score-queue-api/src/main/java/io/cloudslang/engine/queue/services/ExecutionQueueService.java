@@ -13,6 +13,7 @@ package io.cloudslang.engine.queue.services;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
+import io.cloudslang.orchestrator.entities.Message;
 
 import java.util.Date;
 import java.util.List;
@@ -95,4 +96,10 @@ public interface ExecutionQueueService {
      * @return the number of messages that didn't receive ack for a number of recovery versions
      */
     int countMessagesWithoutAckForWorker(int maxSize,long minVersionAllowed, String workerUuid);
+
+    /**
+     * force termination of messages failed to be enqueue because of RuntimeException
+     * @param message
+     */
+    public void terminateCorruptedMessage(Message message);
 }

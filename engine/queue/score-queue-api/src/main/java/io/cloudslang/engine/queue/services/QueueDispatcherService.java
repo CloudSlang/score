@@ -13,6 +13,7 @@ package io.cloudslang.engine.queue.services;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
+import io.cloudslang.orchestrator.entities.Message;
 
 import java.util.Date;
 import java.util.List;
@@ -34,6 +35,14 @@ public interface QueueDispatcherService {
      * @param messages the messages to dispatch
      */
 	void dispatch(List<ExecutionMessage> messages);
+
+    /**
+     *
+     * terminate Exception messages to prevent endless recovery
+     *
+     * @param message the messages to dispatch
+     */
+	void terminateCorruptedMessage(Message message);
 
     /**
      *

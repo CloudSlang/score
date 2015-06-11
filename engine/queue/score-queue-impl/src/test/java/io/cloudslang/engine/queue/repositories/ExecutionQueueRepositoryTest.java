@@ -58,7 +58,7 @@ public class ExecutionQueueRepositoryTest {
     @Test
     public void testInsert(){
         List<ExecutionMessage> msg = new ArrayList<>();
-        msg.add(generateMessage("group1","msg1"));
+        msg.add(generateMessage("group1","msg1", 1));
         executionQueueRepository.insertExecutionQueue(msg,1L);
 
         List<ExecutionMessage> result = executionQueueRepository.pollMessagesWithoutAck(100,2);
@@ -70,14 +70,22 @@ public class ExecutionQueueRepositoryTest {
         Assert.assertEquals("group1",resultMsg.getWorkerGroup());
     }
 
+    @Test(expected = RuntimeException.class)
+    public void testInsertFailureDueToUniqueConstraint(){
+        List<ExecutionMessage> msg = new ArrayList<>();
+        msg.add(generateMessage("group1","msg1", 1));
+        msg.add(generateMessage("group1","msg1", 1));
+        executionQueueRepository.insertExecutionQueue(msg,1L);
+    }
+
     @Test
     public void testPollMessagesWithoutAckWithVersion(){
         List<ExecutionMessage> msg = new ArrayList<>();
-        msg.add(generateMessage("group1","msg1"));
-        executionQueueRepository.insertExecutionQueue(msg,1L);
+        msg.add(generateMessage(1, "group1", "msg1", 1));
+        executionQueueRepository.insertExecutionQueue(msg, 1L);
 
         msg.clear();
-        msg.add(generateMessage("group2","msg2"));
+        msg.add(generateMessage(2, "group2","msg2", 1));
         executionQueueRepository.insertExecutionQueue(msg,4L);
 
         List<ExecutionMessage> result = executionQueueRepository.pollMessagesWithoutAck(100,3);
@@ -85,18 +93,18 @@ public class ExecutionQueueRepositoryTest {
         Assert.assertEquals(1, result.size());
 
         ExecutionMessage resultMsg = result.get(0);
-        Assert.assertEquals(ExecStatus.SENT,resultMsg.getStatus());
+        Assert.assertEquals(ExecStatus.SENT, resultMsg.getStatus());
         Assert.assertEquals("group1",resultMsg.getWorkerGroup());
     }
 
     @Test
     public void testGetFinishedExecStateIds(){
         List<ExecutionMessage> msg = new ArrayList<>();
-        msg.add(generateFinishedMessage(1L));
-        msg.add(generateFinishedMessage(1L));
-        msg.add(generateFinishedMessage(2L));
-        msg.add(generateFinishedMessage(3L));
-        executionQueueRepository.insertExecutionQueue(msg,1L);
+        msg.add(generateFinishedMessage(1L, 1));
+        msg.add(generateFinishedMessage(1L, 2));
+        msg.add(generateFinishedMessage(2L, 3));
+        msg.add(generateFinishedMessage(3L, 4));
+        executionQueueRepository.insertExecutionQueue(msg, 1L);
 
         Set<Long> result = executionQueueRepository.getFinishedExecStateIds();
         Assert.assertNotNull(result);
@@ -106,13 +114,13 @@ public class ExecutionQueueRepositoryTest {
     @Test
     public void testCountMessagesWithoutAckWithVersionForWorker(){
         List<ExecutionMessage> msg = new ArrayList<>();
-        msg.add(generateMessageForWorker("group1","msg1",ExecutionMessage.EMPTY_WORKER));
-        msg.add(generateMessageForWorker("group2","msg2","uuid2"));
-        msg.add(generateMessageForWorker("group3","msg3",ExecutionMessage.EMPTY_WORKER));
+        msg.add(generateMessageForWorker(1, "group1", "msg1", ExecutionMessage.EMPTY_WORKER, 1));
+        msg.add(generateMessageForWorker(2, "group2", "msg2", "uuid2", 1));
+        msg.add(generateMessageForWorker(3, "group3","msg3",ExecutionMessage.EMPTY_WORKER, 1));
         executionQueueRepository.insertExecutionQueue(msg,1L);
 
         msg.clear();
-        msg.add(generateMessageForWorker("group2","msg2",ExecutionMessage.EMPTY_WORKER));
+        msg.add(generateMessageForWorker(4, "group2","msg2",ExecutionMessage.EMPTY_WORKER, 1));
 
         executionQueueRepository.insertExecutionQueue(msg,4L);
 
@@ -122,14 +130,14 @@ public class ExecutionQueueRepositoryTest {
         result = executionQueueRepository.countMessagesWithoutAckForWorker(100,3,"uuid2");
         Assert.assertEquals(result.intValue(),1);
         result = executionQueueRepository.countMessagesWithoutAckForWorker(100,3,"uuid3");
-        Assert.assertEquals(result.intValue(),0);
+        Assert.assertEquals(result.intValue(), 0);
     }
 
     @Test
     public void testPollMessagesWithoutAckEmptyResult(){
         List<ExecutionMessage> msg = new ArrayList<>();
-        msg.add(generateMessage("group1","msg1"));
-        executionQueueRepository.insertExecutionQueue(msg,1L);
+        msg.add(generateMessage("group1","msg1", 1));
+        executionQueueRepository.insertExecutionQueue(msg, 1L);
 
         List<ExecutionMessage> result = executionQueueRepository.pollMessagesWithoutAck(100,0);
         Assert.assertNotNull(result);
@@ -139,7 +147,7 @@ public class ExecutionQueueRepositoryTest {
     @Test
     public void testPollForRecovery(){
         List<ExecutionMessage> msg = new ArrayList<>();
-        ExecutionMessage execMsg = generateMessage("group1","msg1");
+        ExecutionMessage execMsg = generateMessage("group1","msg1", 1);
         execMsg.setWorkerId("worker1");
         execMsg.setStatus(ExecStatus.IN_PROGRESS);
         execMsg.incMsgSeqId();
@@ -157,7 +165,7 @@ public class ExecutionQueueRepositoryTest {
 
         //insert to states table
         List<ExecutionMessage> msg = new ArrayList<>();
-        ExecutionMessage execMsg = generateMessage("group1","msg1");
+        ExecutionMessage execMsg = generateMessage("group1","msg1", 1);
         execMsg.setWorkerId("worker1");
         execMsg.setStatus(ExecStatus.IN_PROGRESS);
         msg.add(execMsg);
@@ -178,7 +186,7 @@ public class ExecutionQueueRepositoryTest {
 
         //insert to states table
         List<ExecutionMessage> msg = new ArrayList<>();
-        ExecutionMessage execMsg = generateMessage("group1","msg1");
+        ExecutionMessage execMsg = generateMessage("group1","msg1", 1);
         execMsg.setWorkerId("worker1");
         execMsg.setStatus(ExecStatus.IN_PROGRESS);
         msg.add(execMsg);
@@ -190,13 +198,13 @@ public class ExecutionQueueRepositoryTest {
 
         Assert.assertNotNull(result);
         Assert.assertFalse(result.isEmpty());
-        Assert.assertEquals("should find only 1 msg result!, since the second msg has higher msg seq id",1,result.size());
+        Assert.assertEquals("should find only 1 msg result!, since the second msg has higher msg seq id", 1, result.size());
     }
 
     @Test
     public void testPoll(){
         List<ExecutionMessage> msg = new ArrayList<>();
-        ExecutionMessage execMsg = generateMessage("group1","msg1");
+        ExecutionMessage execMsg = generateMessage("group1","msg1", 1);
         execMsg.setWorkerId("worker1");
         execMsg.setStatus(ExecStatus.IN_PROGRESS);
         msg.add(execMsg);
@@ -208,26 +216,34 @@ public class ExecutionQueueRepositoryTest {
         Assert.assertFalse(result.isEmpty());
     }
 
-    private ExecutionMessage generateMessage(String groupName,String msgId) {
+    private ExecutionMessage generateMessage(String groupName,String msgId, int msg_seq_id) {
         byte[] payloadData;
         payloadData = "This is just a test".getBytes();
         Payload payload = new Payload(payloadData);
-        return new ExecutionMessage(-1, ExecutionMessage.EMPTY_WORKER, groupName, msgId , ExecStatus.SENT, payload, 1);
+        return new ExecutionMessage(-1, ExecutionMessage.EMPTY_WORKER, groupName, msgId , ExecStatus.SENT, payload, msg_seq_id);
     }
 
-    private ExecutionMessage generateFinishedMessage(long execStateId) {
+    private ExecutionMessage generateMessage(long exec_state_id, String groupName,String msgId, int msg_seq_id) {
         byte[] payloadData;
         payloadData = "This is just a test".getBytes();
         Payload payload = new Payload(payloadData);
-        return new ExecutionMessage(execStateId, ExecutionMessage.EMPTY_WORKER, "group", "123" , ExecStatus.FINISHED, payload, 1);
+        return new ExecutionMessage(exec_state_id, ExecutionMessage.EMPTY_WORKER, groupName, msgId , ExecStatus.SENT, payload, msg_seq_id);
     }
 
 
-    private ExecutionMessage generateMessageForWorker(String groupName,String msgId, String workerUuid) {
+    private ExecutionMessage generateFinishedMessage(long execStateId, int msg_seq_id) {
         byte[] payloadData;
         payloadData = "This is just a test".getBytes();
         Payload payload = new Payload(payloadData);
-        return new ExecutionMessage(-1, workerUuid, groupName, msgId , ExecStatus.SENT, payload, 1);
+        return new ExecutionMessage(execStateId, ExecutionMessage.EMPTY_WORKER, "group", "123" , ExecStatus.FINISHED, payload, msg_seq_id);
+    }
+
+
+    private ExecutionMessage generateMessageForWorker(long exec_state_id, String groupName,String msgId, String workerUuid, int msg_seq_id) {
+        byte[] payloadData;
+        payloadData = "This is just a test".getBytes();
+        Payload payload = new Payload(payloadData);
+        return new ExecutionMessage(exec_state_id, workerUuid, groupName, msgId , ExecStatus.SENT, payload, msg_seq_id);
     }
 
     @Configuration

@@ -26,6 +26,8 @@ import java.util.List;
 public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedExecution, Long> {
     public List<SuspendedExecution> findBySplitIdIn(List<String> splitIds);
 
+    public List<SuspendedExecution> findByExecutionId(String executionId);
+
     @Query("from SuspendedExecution se where se.numberOfBranches=size(se.finishedBranches)")
     public List<SuspendedExecution> findFinishedSuspendedExecutions(Pageable pageRequest);
 }

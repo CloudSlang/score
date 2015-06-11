@@ -55,6 +55,27 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 		return (Serializable) eventData;
 	}
 
+    public ScoreEvent createCorruptedMessageEvent(Execution execution, String exceptionMessage) {
+        String eventType = EventConstants.SCORE_CORRUPTED_MESSAGE_EVENT;
+        Serializable eventData = createExceptedEventData(execution, exceptionMessage);
+        return new ScoreEvent(eventType, eventData);
+    }
+
+    private Serializable createExceptedEventData(Execution execution, String exceptionMessage) {
+        Map<String, Serializable> eventData = new HashMap<>();
+        ExecutionRuntimeServices runtimeServices = execution.getSystemContext();
+
+        // always system failure
+        runtimeServices.setFlowTerminationType(ExecutionStatus.SYSTEM_FAILURE);
+        runtimeServices.setStepErrorKey(exceptionMessage);
+
+        eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, runtimeServices);
+        eventData.put(EventConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
+        eventData.put(EventConstants.EXECUTION_CONTEXT, (Serializable) execution.getContexts());
+        eventData.put(EventConstants.IS_BRANCH, !StringUtils.isEmpty(runtimeServices.getBranchId()));
+        return (Serializable) eventData;
+    }
+
 	public ScoreEvent createFailedBranchEvent(Execution execution) {
 		String eventType = EventConstants.SCORE_BRANCH_FAILURE_EVENT;
 		Serializable eventData = createBranchFailureEventData(execution);
@@ -96,6 +117,15 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
         Serializable eventData = createFinishedEventData(execution);
         return new ScoreEvent(eventType, execution.getSystemContext().getLanguageName(), eventData);
     }
+//
+//    @Override
+//    public ScoreEvent createExceptedBranchEvent(Execution execution) {
+//        String eventType = EventConstants.SCORE_EXCEPTED_BRANCH_EVENT;
+//        Serializable eventData = createExceptedEventData(execution, exceptionMessage);
+//        return new ScoreEvent(eventType, eventData);
+//    }
+//
+
 
     private Serializable createNoWorkerFailureEventData(Execution execution, Long pauseId) {
 		String flowUuid = extractFlowUuid(execution.getRunningExecutionPlanId());

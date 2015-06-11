@@ -30,6 +30,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -192,11 +193,10 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
     @Override
     @Transactional
-    public void joinFinishedSplits() {
-        try {
-            joinFinishedSplits(BULK_SIZE);
-        } catch (Exception ex) {
-            logger.error("SplitJoinJob failed", ex);
+    public void deleteSuspendedExecutionsWithBranches(Long executionId) {
+        List<SuspendedExecution> se = suspendedExecutionsRepository.findByExecutionId(executionId.toString());
+        if(se != null && !se.isEmpty()){
+            suspendedExecutionsRepository.delete(se);
         }
     }
 

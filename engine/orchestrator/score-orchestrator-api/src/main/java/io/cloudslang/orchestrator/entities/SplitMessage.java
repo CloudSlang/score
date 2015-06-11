@@ -32,6 +32,7 @@ public class SplitMessage implements Message {
 	private final String splitId;
     private final Execution parent;
     private final List<Execution> children;
+    private String exceptionMessage;
 
     public SplitMessage(String splitId, Execution parent, List<Execution> children) {
         Validate.notNull(splitId, "splitId cannot be null");
@@ -71,7 +72,17 @@ public class SplitMessage implements Message {
 		return messages; // do nothing
 	}
 
-	@Override
+    @Override
+    public String getExceptionMessage() {
+        return exceptionMessage;
+    }
+
+    @Override
+    public void setExceptionMessage(String msg) {
+        exceptionMessage = msg;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof SplitMessage)) return false;

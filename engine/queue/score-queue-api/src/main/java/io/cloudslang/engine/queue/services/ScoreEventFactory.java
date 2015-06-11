@@ -71,4 +71,24 @@ public interface ScoreEventFactory {
      * @return {@link io.cloudslang.score.events.ScoreEvent} of the finished branch state
      */
     public ScoreEvent createFinishedBranchEvent(Execution execution);
+
+ /**
+     *
+     * Creates a {@link io.cloudslang.score.events.ScoreEvent}
+     * for excepted branch execution state
+     *
+     * @param execution the execution to create the event from
+     * @return {@link io.cloudslang.score.events.ScoreEvent} of the excepted branch state
+     */
+//    public ScoreEvent createExceptedBranchEvent(Execution execution);
+
+    /**
+     * Creates a {@link io.cloudslang.score.events.ScoreEvent}
+     * for excepted branch execution state
+     *
+     * @param execution the execution to create the event from
+     * @param exceptionMessage
+     * @return {@link io.cloudslang.score.events.ScoreEvent} of the excepted branch state
+     */
+    public ScoreEvent createCorruptedMessageEvent(Execution execution, String exceptionMessage);
 }

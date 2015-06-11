@@ -30,7 +30,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
@@ -60,6 +59,9 @@ public class OrchestratorDispatcherServiceTest {
     private QueueDispatcherService queueDispatcher;
 
     @Mock
+    private QueueDispatcherHelperService dispatcherHelperService;
+
+    @Mock
     private SplitJoinService splitJoinService;
 
     @Before
@@ -83,8 +85,7 @@ public class OrchestratorDispatcherServiceTest {
 
         orchestratorDispatcherService.dispatch(messages, newBulkNumber, "1", uuid);
         Mockito.verify(workerLockService, times(1)).lock(uuid);
-        Mockito.verify(queueDispatcher, times(1)).dispatch(anyList());
-        Mockito.verify(workerNodeService, times(1)).updateBulkNumber(uuid, newBulkNumber);
+        Mockito.verify(dispatcherHelperService, times(1)).dispatchBulk(anyList(), anyString(), anyString());
     }
 
     @Test
@@ -102,8 +103,7 @@ public class OrchestratorDispatcherServiceTest {
 
         orchestratorDispatcherService.dispatch(messages, newBulkNumber, "1", uuid);
         Mockito.verify(workerLockService, times(1)).lock(uuid);
-        Mockito.verify(queueDispatcher, times(1)).dispatch(anyList());
-        Mockito.verify(workerNodeService, times(1)).updateBulkNumber(uuid, newBulkNumber);
+        Mockito.verify(dispatcherHelperService, times(1)).dispatchBulk(anyList(), anyString(), anyString());
     }
 
     @Test
@@ -122,7 +122,7 @@ public class OrchestratorDispatcherServiceTest {
 
         orchestratorDispatcherService.dispatch(messages, newBulkNumber, "1", uuid);
         Mockito.verify(workerLockService, times(1)).lock(uuid);
-        Mockito.verify(queueDispatcher, times(0)).dispatch(anyList());
+        Mockito.verify(dispatcherHelperService, times(0)).dispatchBulk(anyList(), anyString(), anyString());
         Mockito.verify(workerNodeService, times(0)).updateBulkNumber(uuid, newBulkNumber);
     }
     

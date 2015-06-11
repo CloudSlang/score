@@ -11,6 +11,7 @@
 package io.cloudslang.engine.queue.services;
 
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
+import io.cloudslang.orchestrator.entities.Message;
 
 import java.util.List;
 
@@ -66,4 +67,10 @@ public interface QueueListener {
      * @param messages the failed messages
      */
 	void onFailed(List<ExecutionMessage> messages);
+
+    /**
+     *
+     * @param message - execution message
+     */
+    void onCorrupted(Message message);
 }

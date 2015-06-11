@@ -49,11 +49,5 @@ public interface SplitJoinService {
      */
     int joinFinishedSplits(int bulkSize);
 
-    /**
-     * Collects all finished forks from the DB,
-     * merges the children into the parent executions,
-     * and triggers the parent Executions back to the queue.
-     *
-     */
-    void joinFinishedSplits();
+    void deleteSuspendedExecutionsWithBranches(Long executionId);
 }
