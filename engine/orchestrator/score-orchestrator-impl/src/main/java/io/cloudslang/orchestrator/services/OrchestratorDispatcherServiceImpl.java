@@ -88,7 +88,7 @@ public final class OrchestratorDispatcherServiceImpl implements OrchestratorDisp
                 catch (Exception bulkException){
                     //If it is the third loop and we still got exception - throw exception
                     if(i == (dispatchBulkRetries - 1) ){
-                        logger.error("Failed to dispatch bulk of messages to the queue for 3 times, going to check DB connection! ", bulkException);
+                        logger.error("Failed to dispatch bulk of messages to the queue for " + dispatchBulkRetries + " times, going to check DB connection! ", bulkException);
                         throw bulkException;
                     }
                     //Sleep one second
