@@ -32,6 +32,9 @@ import static ch.lambdaj.Lambda.filter;
 public final class OrchestratorDispatcherServiceImpl implements OrchestratorDispatcherService {
     private final Logger logger = Logger.getLogger(getClass());
 
+    private static int dbConnectionRetries = 5;
+    private static int dispatchBulkRetries = 3;
+
     @Autowired
     private QueueDispatcherService queueDispatcher;
 
@@ -75,7 +78,7 @@ public final class OrchestratorDispatcherServiceImpl implements OrchestratorDisp
 
     private void dispatchBulk(List<? extends Serializable> messages, String bulkNumber, String workerUuid){
         try {
-            for(int i=0; i<3; i++){
+            for(int i=0; i < dispatchBulkRetries; i++){
                 try{
                     //Dispatch list of messages in NEW transaction!!!
                     dispatcherHelperService.dispatchBulk(messages, bulkNumber, workerUuid);
@@ -84,7 +87,7 @@ public final class OrchestratorDispatcherServiceImpl implements OrchestratorDisp
                 }
                 catch (Exception bulkException){
                     //If it is the third loop and we still got exception - throw exception
-                    if(i == 2){
+                    if(i == (dispatchBulkRetries - 1) ){
                         logger.error("Failed to dispatch bulk of messages to the queue for 3 times, going to check DB connection! ", bulkException);
                         throw bulkException;
                     }
@@ -110,7 +113,7 @@ public final class OrchestratorDispatcherServiceImpl implements OrchestratorDisp
     private boolean isDbConnectionOk(){
         boolean result;
         //This method is just checking connection to db for 5 times in separate transaction
-        for(int i=0; i<5; i++) {
+        for(int i=0; i < dbConnectionRetries; i++) {
             try {
                 result = dispatcherHelperService.isDbConnectionOk();
                 if(result){
