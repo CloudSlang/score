@@ -11,7 +11,7 @@
 package io.cloudslang.orchestrator.repositories;
 
 import io.cloudslang.score.facade.execution.ExecutionStatus;
-import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
+import io.cloudslang.engine.data.LocalMemIncrementGenerator;
 import io.cloudslang.orchestrator.entities.ExecutionState;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
@@ -46,7 +46,7 @@ import static org.fest.assertions.Assertions.assertThat;
  * Date: 21/05/2014
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
+@ContextConfiguration(classes = ExecutionStateRepositoryTest.ExecutionStateRepositoryTestContext.class)
 public class ExecutionStateRepositoryTest {
 
     @Autowired
@@ -90,7 +90,6 @@ public class ExecutionStateRepositoryTest {
         @Bean(name="entityManagerFactory")
         @DependsOn({"liquibase", "dataSource"})
         FactoryBean<EntityManagerFactory> emf(JpaVendorAdapter jpaVendorAdapter) {
-            SimpleHiloIdentifierGenerator.setDataSource(dataSource());
             LocalContainerEntityManagerFactoryBean fb = new LocalContainerEntityManagerFactoryBean();
             fb.setJpaProperties(hibernateProperties());
             fb.setDataSource(dataSource());

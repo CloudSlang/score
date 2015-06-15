@@ -44,7 +44,7 @@ import io.cloudslang.score.api.ExecutionPlan;
 import io.cloudslang.score.api.ExecutionStep;
 import io.cloudslang.score.api.Score;
 import io.cloudslang.score.api.TriggeringProperties;
-import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
+import io.cloudslang.engine.data.LocalMemIncrementGenerator;
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
@@ -117,7 +117,6 @@ public class EngineTest {
             SpringLiquibase liquibase = new SpringLiquibase();
             liquibase.setDataSource(dataSource);
             liquibase.setChangeLog("classpath:/META-INF/database/test.changes.xml");
-            SimpleHiloIdentifierGenerator.setDataSource(dataSource);
             return liquibase;
         }
 

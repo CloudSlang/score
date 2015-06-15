@@ -11,7 +11,7 @@
 package io.cloudslang.engine.partitions.services;
 
 import io.cloudslang.engine.partitions.entities.PartitionGroup;
-import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
+import io.cloudslang.engine.data.LocalMemIncrementGenerator;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.hibernate.ejb.HibernatePersistence;
@@ -138,7 +138,6 @@ public class PartitionTemplateWithEmfTest {
 			SpringLiquibase liquibase = new SpringLiquibase();
 			liquibase.setDataSource(dataSource);
 			liquibase.setChangeLog("classpath:/META-INF/database/test.changes.xml");
-			SimpleHiloIdentifierGenerator.setDataSource(dataSource);
 			return liquibase;
 		}
 

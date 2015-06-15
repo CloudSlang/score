@@ -13,7 +13,7 @@ package io.cloudslang.engine.queue.services;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import io.cloudslang.engine.data.IdentityGenerator;
-import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
+import io.cloudslang.engine.data.LocalMemIncrementGenerator;
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
@@ -273,7 +273,6 @@ public class ExecutionQueueServiceTest {
 			SpringLiquibase liquibase = new SpringLiquibase();
 			liquibase.setDataSource(dataSource);
 			liquibase.setChangeLog("classpath:/META-INF/database/test.changes.xml");
-			SimpleHiloIdentifierGenerator.setDataSource(dataSource);
 			return liquibase;
 		}
 

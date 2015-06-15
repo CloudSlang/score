@@ -10,7 +10,7 @@
 
 package io.cloudslang.schema.context;
 
-import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
+import io.cloudslang.engine.data.LocalMemIncrementGenerator;
 import org.hibernate.ejb.HibernatePersistence;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.DependsOn;
@@ -58,10 +58,6 @@ public class ScoreDatabaseContext {
     @Bean
     @DependsOn("liquibase")
 	LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
-		//Init the IdentityManager
-		SimpleHiloIdentifierGenerator.setDataSource(dataSource);
-
-        //Now create the bean
         LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
 		emf.setDataSource(dataSource);
 		emf.setJpaProperties(jpaProperties());

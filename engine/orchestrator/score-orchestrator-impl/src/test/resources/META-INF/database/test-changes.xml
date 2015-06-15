@@ -5,13 +5,4 @@
         xsi:schemaLocation="
 http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
-    <changeSet id="create OO_HILO table" author="test">
-        <createTable tableName="OO_HILO">
-            <column name="NEXT_HI" type="INT"/>
-		</createTable>
-		<insert tableName="OO_HILO">
-			<column name="NEXT_HI" value="0"/>
-		</insert>
-	</changeSet>
-
 </databaseChangeLog>

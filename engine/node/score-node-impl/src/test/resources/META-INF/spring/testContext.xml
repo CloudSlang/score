@@ -16,7 +16,7 @@ http://www.springframework.org/schema/tx http://www.springframework.org/schema/t
           p:dataSource-ref="dataSource"
           p:persistenceProviderClass="org.hibernate.ejb.HibernatePersistence"
           p:packagesToScan="io.cloudslang.engine.node"
-          depends-on="liquibase,scoreHiloFactoryBean">
+          depends-on="liquibase">
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"
                   p:showSql="false"
@@ -24,8 +24,6 @@ http://www.springframework.org/schema/tx http://www.springframework.org/schema/t
                     />
         </property>
     </bean>
-
-    <bean id="scoreHiloFactoryBean" class="io.cloudslang.engine.data.HiloFactoryBean" depends-on="liquibase"/>
 
     <util:properties id="test-hibernateProperties">
         <prop key="hibernate.show_sql">false</prop>

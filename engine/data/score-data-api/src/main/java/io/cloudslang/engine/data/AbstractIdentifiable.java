@@ -27,8 +27,8 @@ public abstract class AbstractIdentifiable implements Identifiable {
 	private static final long serialVersionUID = 3575134062242610091L;
 
 	@Id
-	@GeneratedValue(generator = "oo-hilo")
-	@GenericGenerator(name = "oo-hilo", strategy = "io.cloudslang.engine.data.SimpleHiloIdentifierGenerator")
+	@GeneratedValue(generator = "local-inc")
+	@GenericGenerator(name = "local-inc", strategy = "io.cloudslang.engine.data.LocalMemIncrementGenerator")
 	@Column(unique = true, nullable = false, name = "ID")
 	protected Long id;
 

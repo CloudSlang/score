@@ -11,7 +11,7 @@
 package io.cloudslang.engine.node.services;
 
 import io.cloudslang.score.api.nodes.WorkerStatus;
-import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
+import io.cloudslang.engine.data.LocalMemIncrementGenerator;
 import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.node.repositories.WorkerNodeRepository;
 import io.cloudslang.engine.versioning.services.VersionService;
@@ -304,7 +304,6 @@ public class WorkerNodeServiceTest {
 			SpringLiquibase liquibase = new SpringLiquibase();
 			liquibase.setDataSource(dataSource);
 			liquibase.setChangeLog("classpath:/META-INF/database/test.changes.xml");
-			SimpleHiloIdentifierGenerator.setDataSource(dataSource);
 			return liquibase;
 		}
 

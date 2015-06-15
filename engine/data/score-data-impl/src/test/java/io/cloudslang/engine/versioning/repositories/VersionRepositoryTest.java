@@ -11,7 +11,7 @@
 package io.cloudslang.engine.versioning.repositories;
 
 import io.cloudslang.engine.versioning.entities.VersionCounter;
-import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
+import io.cloudslang.engine.data.LocalMemIncrementGenerator;
 import junit.framework.Assert;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
@@ -100,7 +100,6 @@ public class VersionRepositoryTest {
 			SpringLiquibase liquibase = new SpringLiquibase();
 			liquibase.setDataSource(dataSource);
 			liquibase.setChangeLog("classpath:/META-INF/database/test.changes.xml");
-			SimpleHiloIdentifierGenerator.setDataSource(dataSource);
 			return liquibase;
 		}
 
