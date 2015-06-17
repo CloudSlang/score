@@ -61,6 +61,7 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
         SystemContext scoreSystemContext = new SystemContext(triggeringProperties.getRuntimeValues());
         Long runningExecutionPlanId = saveRunningExecutionPlans(triggeringProperties.getExecutionPlan(), triggeringProperties.getDependencies(), scoreSystemContext);
         scoreSystemContext.setExecutionId(executionId);
+        scoreSystemContext.putMetaData(triggeringProperties.getMetadata());
         Execution execution = new Execution(executionId, runningExecutionPlanId, triggeringProperties.getStartStep(), triggeringProperties.getContext(), scoreSystemContext);
 
         // create execution record in ExecutionSummary table

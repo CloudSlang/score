@@ -16,6 +16,7 @@ import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.score.facade.services.RunningExecutionPlanService;
+import io.cloudslang.score.lang.SystemContext;
 import org.apache.commons.lang.StringUtils;
 import io.cloudslang.score.lang.ExecutionRuntimeServices;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,8 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 	public ScoreEvent createFinishedEvent(Execution execution) {
 		String eventType = EventConstants.SCORE_FINISHED_EVENT;
 		Serializable eventData = createFinishedEventData(execution);
-        return new ScoreEvent(eventType, execution.getSystemContext().getLanguageName(), eventData);
+		SystemContext systemContext = execution.getSystemContext();
+	    return new ScoreEvent(eventType, systemContext.getLanguageName(), eventData, systemContext.getMetaData());
 	}
 
 	private Serializable createFinishedEventData(Execution execution) {
@@ -58,7 +60,8 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 	public ScoreEvent createFailedBranchEvent(Execution execution) {
 		String eventType = EventConstants.SCORE_BRANCH_FAILURE_EVENT;
 		Serializable eventData = createBranchFailureEventData(execution);
-        return new ScoreEvent(eventType, execution.getSystemContext().getLanguageName(), eventData);
+		SystemContext systemContext = execution.getSystemContext();
+        return new ScoreEvent(eventType, systemContext.getLanguageName(), eventData, systemContext.getMetaData());
 	}
 
 	private Serializable createBranchFailureEventData(Execution execution) {
@@ -72,7 +75,8 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 	public ScoreEvent createFailureEvent(Execution execution) {
 		String eventType = EventConstants.SCORE_FAILURE_EVENT;
 		Serializable eventData = createFailureEventData(execution);
-        return new ScoreEvent(eventType, execution.getSystemContext().getLanguageName(), eventData);
+		SystemContext systemContext = execution.getSystemContext();
+        return new ScoreEvent(eventType, systemContext.getLanguageName(), eventData, systemContext.getMetaData());
 	}
 
 	private Serializable createFailureEventData(Execution execution) {
@@ -87,14 +91,16 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 	public ScoreEvent createNoWorkerEvent(Execution execution, Long pauseId) {
 		String eventType = EventConstants.SCORE_NO_WORKER_FAILURE_EVENT;
 		Serializable eventData = createNoWorkerFailureEventData(execution, pauseId);
-        return new ScoreEvent(eventType, execution.getSystemContext().getLanguageName(), eventData);
+		SystemContext systemContext = execution.getSystemContext();
+        return new ScoreEvent(eventType, systemContext.getLanguageName(), eventData, systemContext.getMetaData());
 	}
 
     @Override
     public ScoreEvent createFinishedBranchEvent(Execution execution) {
         String eventType = EventConstants.SCORE_FINISHED_BRANCH_EVENT;
         Serializable eventData = createFinishedEventData(execution);
-        return new ScoreEvent(eventType, execution.getSystemContext().getLanguageName(), eventData);
+		SystemContext systemContext = execution.getSystemContext();
+        return new ScoreEvent(eventType, systemContext.getLanguageName(), eventData, systemContext.getMetaData());
     }
 
     private Serializable createNoWorkerFailureEventData(Execution execution, Long pauseId) {
