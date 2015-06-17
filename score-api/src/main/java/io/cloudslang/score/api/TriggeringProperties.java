@@ -25,6 +25,7 @@ public class TriggeringProperties {
     private Map<String, ExecutionPlan> dependencies = new HashMap<>();
     private Map<String, ? extends Serializable> context = new HashMap<>();
     private Map<String, ? extends Serializable> runtimeValues = new HashMap<>();
+    private Map<String, ? extends Serializable> metadata = new HashMap<>();
     private Long startStep;
 
     private TriggeringProperties(ExecutionPlan executionPlan){
@@ -56,6 +57,11 @@ public class TriggeringProperties {
         return this;
     }
 
+    public TriggeringProperties setMetadata(Map<String, ? extends Serializable> metadata) {
+        this.metadata = metadata;
+        return this;
+    }
+
     public ExecutionPlan getExecutionPlan() {
         return executionPlan;
     }
@@ -74,5 +80,9 @@ public class TriggeringProperties {
 
     public Long getStartStep() {
         return startStep;
+    }
+
+    public Map<String, ? extends Serializable> getMetadata() {
+        return metadata;
     }
 }

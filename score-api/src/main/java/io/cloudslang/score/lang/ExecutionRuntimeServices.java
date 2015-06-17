@@ -63,6 +63,8 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public static final String LANGUAGE_TYPE = "LANGUAGE_TYPE";
 
+    private static final String METADATA = "METADATA";
+
     protected Map<String, Serializable> contextMap = new HashMap<>();
 
     public ExecutionRuntimeServices(){}
@@ -264,7 +266,7 @@ public class ExecutionRuntimeServices implements Serializable {
 			eventsQueue = new ArrayDeque<>();
 			contextMap.put(SCORE_EVENTS_QUEUE, (ArrayDeque) eventsQueue);
 		}
-		eventsQueue.add(new ScoreEvent(eventType,getLanguageName(),  eventData));
+		eventsQueue.add(new ScoreEvent(eventType,getLanguageName(), eventData, getMetaData()));
 	}
 
     /**
@@ -335,6 +337,14 @@ public class ExecutionRuntimeServices implements Serializable {
      */
     public List<EndBranchDataContainer> getFinishedChildBranchesData() {
         return (List<EndBranchDataContainer>) removeFromMap(FINISHED_CHILD_BRANCHES_DATA);
+    }
+
+    public void putMetaData(Map<String,? extends  Serializable> metadata){
+        contextMap.put(METADATA, (Serializable)metadata);
+    }
+
+    public Map<String,? extends Serializable> getMetaData(){
+        return (Map<String,Serializable>)contextMap.get(METADATA);
     }
 
 	private <T> T removeFromMap(String key) {

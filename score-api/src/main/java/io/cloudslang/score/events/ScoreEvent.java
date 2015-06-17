@@ -11,6 +11,7 @@
 package io.cloudslang.score.events;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * User:
@@ -21,6 +22,7 @@ public class ScoreEvent implements Serializable {
 	private String eventType;
     private String languageName;
 	private Serializable data;
+    private Map<String, ? extends  Serializable> metadata;
 
 	public ScoreEvent(String eventType, Serializable data) {
 		this.eventType = eventType;
@@ -30,6 +32,17 @@ public class ScoreEvent implements Serializable {
     public ScoreEvent(String eventType, String languageName, Serializable data) {
         this(eventType,data);
         this.languageName = languageName;
+    }
+
+    public ScoreEvent(String eventType, String languageName, Serializable data, Map<String, ? extends  Serializable> metadata) {
+        this.eventType = eventType;
+        this.languageName = languageName;
+        this.data = data;
+        this.metadata = metadata;
+    }
+
+    public Map<String, ? extends  Serializable> getMetadata() {
+        return metadata;
     }
 
     public String getEventType() {

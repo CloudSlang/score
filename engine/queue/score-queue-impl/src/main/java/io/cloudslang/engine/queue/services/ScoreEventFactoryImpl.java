@@ -36,7 +36,7 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 	public ScoreEvent createFinishedEvent(Execution execution) {
 		String eventType = EventConstants.SCORE_FINISHED_EVENT;
 		Serializable eventData = createFinishedEventData(execution);
-        return new ScoreEvent(eventType, execution.getSystemContext().getLanguageName(), eventData);
+	    return new ScoreEvent(eventType, execution.getSystemContext().getLanguageName(), eventData, execution.getSystemContext().getMetaData());
 	}
 
 	private Serializable createFinishedEventData(Execution execution) {
@@ -58,7 +58,7 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 	public ScoreEvent createFailedBranchEvent(Execution execution) {
 		String eventType = EventConstants.SCORE_BRANCH_FAILURE_EVENT;
 		Serializable eventData = createBranchFailureEventData(execution);
-        return new ScoreEvent(eventType, execution.getSystemContext().getLanguageName(), eventData);
+        return new ScoreEvent(eventType, execution.getSystemContext().getLanguageName(), eventData, execution.getSystemContext().getMetaData());
 	}
 
 	private Serializable createBranchFailureEventData(Execution execution) {
@@ -72,7 +72,7 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 	public ScoreEvent createFailureEvent(Execution execution) {
 		String eventType = EventConstants.SCORE_FAILURE_EVENT;
 		Serializable eventData = createFailureEventData(execution);
-        return new ScoreEvent(eventType, execution.getSystemContext().getLanguageName(), eventData);
+        return new ScoreEvent(eventType, execution.getSystemContext().getLanguageName(), eventData, execution.getSystemContext().getMetaData());
 	}
 
 	private Serializable createFailureEventData(Execution execution) {
@@ -87,14 +87,14 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 	public ScoreEvent createNoWorkerEvent(Execution execution, Long pauseId) {
 		String eventType = EventConstants.SCORE_NO_WORKER_FAILURE_EVENT;
 		Serializable eventData = createNoWorkerFailureEventData(execution, pauseId);
-        return new ScoreEvent(eventType, execution.getSystemContext().getLanguageName(), eventData);
+        return new ScoreEvent(eventType, execution.getSystemContext().getLanguageName(), eventData, execution.getSystemContext().getMetaData());
 	}
 
     @Override
     public ScoreEvent createFinishedBranchEvent(Execution execution) {
         String eventType = EventConstants.SCORE_FINISHED_BRANCH_EVENT;
         Serializable eventData = createFinishedEventData(execution);
-        return new ScoreEvent(eventType, execution.getSystemContext().getLanguageName(), eventData);
+        return new ScoreEvent(eventType, execution.getSystemContext().getLanguageName(), eventData, execution.getSystemContext().getMetaData());
     }
 
     private Serializable createNoWorkerFailureEventData(Execution execution, Long pauseId) {
