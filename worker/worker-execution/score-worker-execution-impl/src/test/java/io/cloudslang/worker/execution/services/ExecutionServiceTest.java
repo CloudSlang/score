@@ -173,7 +173,8 @@ public class ExecutionServiceTest {
 		Execution exe = new Execution(EXECUTION_ID_1,0L, 0L, new HashMap<String,String>(), null);
 
 		exe.getSystemContext().put(TempConstants.CONTENT_EXECUTION_STEP, executionStep);
-
+		Map<String,Serializable> metadata = new HashMap<>();
+		exe.getSystemContext().putMetaData(metadata);
 		ExecutionStep loadedStep = executionService.loadExecutionStep(exe);
 
 		Assert.assertEquals(executionStep.getExecStepId(), loadedStep.getExecStepId());
@@ -190,7 +191,7 @@ public class ExecutionServiceTest {
 		executionStep = new ExecutionStep(EXECUTION_STEP_2_ID);
 
 		exe = new Execution(RUNNING_EXE_PLAN_ID, EXECUTION_STEP_2_ID, new HashMap<String,String>());
-
+		exe.getSystemContext().putMetaData(metadata);
 		loadedStep = executionService.loadExecutionStep(exe);
 
 		Assert.assertEquals(executionStep.getExecStepId(), loadedStep.getExecStepId());
