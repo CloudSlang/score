@@ -10,8 +10,10 @@
 
 package io.cloudslang.worker.execution.services;
 
+import io.cloudslang.score.api.ExecutionPlan;
 import io.cloudslang.score.api.ExecutionStep;
 import io.cloudslang.score.api.StartBranchDataContainer;
+import io.cloudslang.score.api.execution.ExecutionMetadataConsts;
 import io.cloudslang.score.api.execution.ExecutionParametersConsts;
 import io.cloudslang.score.events.EventBus;
 import io.cloudslang.score.events.EventConstants;
@@ -296,6 +298,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 			if(position != null) {
 				runningExecutionPlan = workerDbSupportService.readExecutionPlanById(execution.getRunningExecutionPlanId());
 				if(runningExecutionPlan != null) {
+					updateMetadata(execution,runningExecutionPlan);
 					ExecutionStep currStep = runningExecutionPlan.getExecutionPlan().getStep(position);
 					if(logger.isDebugEnabled()) {
 						logger.debug("Begin step: " + position + " in flow " + runningExecutionPlan.getExecutionPlan().getFlowUuid() + " [" + execution.getExecutionId() + "]");
@@ -308,6 +311,13 @@ public final class ExecutionServiceImpl implements ExecutionService {
 		}
 		// If we got here - one of the objects was null
 		throw new RuntimeException("Failed to load ExecutionStep!");
+	}
+
+	private void updateMetadata(Execution execution, RunningExecutionPlan runningExecutionPlan){
+		Map<String,Serializable> executionMetadata = (Map<String,Serializable>)execution.getSystemContext().getMetaData();
+		ExecutionPlan executionPlan  = runningExecutionPlan.getExecutionPlan();
+		executionMetadata.put(ExecutionMetadataConsts.EXECUTION_PLAN_ID,executionPlan.getFlowUuid());
+		executionMetadata.put(ExecutionMetadataConsts.EXECUTION_PLAN_NAME,executionPlan.getName());
 	}
 
 	protected void executeStep(Execution execution, ExecutionStep currStep) {
