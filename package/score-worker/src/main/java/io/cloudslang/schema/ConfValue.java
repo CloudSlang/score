@@ -50,10 +50,7 @@ class ConfValue {
 	}
 
 	private Object fromString(String value) {
-		String sysValue = System.getProperty("cloudslang.worker." + name);
-		if(sysValue != null) {
-			value = sysValue;
-		}
+		value = System.getProperty("cloudslang.worker." + name, value);
 		if (StringUtils.hasText(value)){
 			try {
 				return clazz.getConstructor(String.class).newInstance(value);
