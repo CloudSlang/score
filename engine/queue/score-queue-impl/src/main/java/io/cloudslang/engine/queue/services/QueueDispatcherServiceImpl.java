@@ -14,6 +14,7 @@ import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
+import io.cloudslang.orchestrator.entities.Message;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
@@ -75,6 +76,12 @@ public final class QueueDispatcherServiceImpl implements QueueDispatcherService 
 		if (logger.isDebugEnabled()) logger.debug("Polled " + result.size() + " messages for worker [" + workerId + ']');
 		return result;
 	}
+
+    @Transactional
+    @Override
+    public void terminateCorruptedMessage(Message message) {
+        execQueue.terminateCorruptedMessage(message);
+    }
 
 	@Transactional
 	@Override

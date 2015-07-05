@@ -12,14 +12,16 @@ package io.cloudslang.engine.queue.services;
 
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
+import io.cloudslang.orchestrator.entities.Message;
+import io.cloudslang.orchestrator.entities.SplitMessage;
+import io.cloudslang.orchestrator.services.ExecutionStateService;
+import io.cloudslang.orchestrator.services.PauseResumeService;
+import io.cloudslang.orchestrator.services.SplitJoinService;
 import io.cloudslang.score.events.EventBus;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.execution.ExecutionSummary;
 import io.cloudslang.score.facade.execution.PauseReason;
-import io.cloudslang.orchestrator.services.ExecutionStateService;
-import io.cloudslang.orchestrator.services.PauseResumeService;
-import io.cloudslang.orchestrator.services.SplitJoinService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -96,13 +98,64 @@ public class QueueListenerImpl implements QueueListener {
                 logger.error("Thread is interrupted. Ignoring... ", e);
             }
         }
-	}
+    }
 
-	private ScoreEvent[] handleTerminatedMessages(List<ExecutionMessage> messages) {
-		List<ScoreEvent> scoreEvents = new ArrayList<>(messages.size());
+    @Override
+    public void onCorrupted(Message message) {
+        ScoreEvent[] scoreEvents = handleCorruptedMessage(message);
+        if (scoreEvents.length > 0) {
+            try {
+                eventBus.dispatch(scoreEvents);
+            } catch (InterruptedException e) {
+                logger.error("Thread is interrupted. Ignoring... ", e);
+            }
+        }
+    }
+
+    private ScoreEvent[] handleCorruptedMessage(Message message) {
+
+        Execution execution = null;
+
+        if(message instanceof ExecutionMessage){
+            execution = extractExecution((ExecutionMessage) message);
+        }
+        else if(message instanceof SplitMessage){
+            execution = ((SplitMessage) message).getParent();
+        }
+
+        return handleCorruptedMessage(execution, message.getExceptionMessage());
+
+    }
+
+    private ScoreEvent[] handleCorruptedMessage(Execution execution, String exceptionMessage) {
+        List<ScoreEvent> scoreEvents = new ArrayList<>();
+
+        String branchId = execution.getSystemContext().getBranchId();
+        Long executionId = execution.getExecutionId();
+
+        Boolean isBranch = isBranch(execution);
+
+        scoreEvents.add(scoreEventFactory.createCorruptedMessageEvent(execution, exceptionMessage));
+
+        if (!isBranch) {
+            executionStateService.deleteExecutionState(executionId, ExecutionSummary.EMPTY_BRANCH);
+        }
+        else {
+            executionStateService.deleteExecutionState(executionId, branchId);
+        }
+
+        //for corrupted execution - we need to delete its parents executions (all levels!!!) and finished branches
+        splitJoinService.deleteSuspendedExecutionsWithBranches(executionId);
+
+        return scoreEvents.toArray(new ScoreEvent[scoreEvents.size()]);
+    }
+
+
+    private ScoreEvent[] handleTerminatedMessages(List<ExecutionMessage> messages) {
+        List<ScoreEvent> scoreEvents = new ArrayList<>(messages.size());
         List<Execution> branches = new ArrayList<>();
 
-		for (ExecutionMessage executionMessage : messages) {
+        for (ExecutionMessage executionMessage : messages) {
             Execution execution = extractExecution(executionMessage);
             Boolean isBranch = isBranch(execution);
             if(!isBranch){

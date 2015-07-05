@@ -19,7 +19,7 @@ import java.util.List;
  *
  * An in interface for messages in the execution buffers
  */
-public interface Message extends Serializable{
+public interface Message extends Serializable {
     /**
      *
      * return the id of the message
@@ -45,4 +45,8 @@ public interface Message extends Serializable{
      * @return list of {@link Message} after shrinking
      */
 	List<Message> shrink(List<Message> messages);
+
+    String getExceptionMessage();
+
+    void setExceptionMessage(String msg);
 }

@@ -46,6 +46,7 @@ public class ExecutionMessage implements Message, Cloneable {
 	private transient String workerKey;
 
     private transient Execution executionObject;
+    private String exceptionMessage;
 
 	public ExecutionMessage() {
 		execStateId = EMPTY_EXEC_STATE_ID;
@@ -118,6 +119,14 @@ public class ExecutionMessage implements Message, Cloneable {
         this.executionObject = executionObject;
         this.payload = payload;
         this.msgSeqId = msgSeqId;
+    }
+
+    public String getExceptionMessage() {
+        return exceptionMessage;
+    }
+
+    public void setExceptionMessage(String messageException) {
+        this.exceptionMessage = messageException;
     }
 
     public Execution getExecutionObject() {

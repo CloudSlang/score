@@ -52,7 +52,17 @@ public class ExecutionMessageTests {
 			public List<Message> shrink(List<Message> messages) {
 				return null;
 			}
-		}, new ExecutionMessage(), new ExecutionMessage(), new ExecutionMessage(), new ExecutionMessage(), new ExecutionMessage());
+
+            @Override
+            public String getExceptionMessage() {
+                return null;
+            }
+
+            @Override
+            public void setExceptionMessage(String msg) {
+                /**/
+            }
+        }, new ExecutionMessage(), new ExecutionMessage(), new ExecutionMessage(), new ExecutionMessage(), new ExecutionMessage());
 		List<Message> result = messages.shrink(buffer);
 
 		assertThat(result).isEqualTo(buffer);

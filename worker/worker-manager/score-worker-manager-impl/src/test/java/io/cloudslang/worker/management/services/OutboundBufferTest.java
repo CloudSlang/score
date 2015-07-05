@@ -302,6 +302,16 @@ public class OutboundBufferTest {
         public List<Message> shrink(List<Message> messages) {
             return messages;
         }
+
+        @Override
+        public String getExceptionMessage() {
+            return null;
+        }
+
+        @Override
+        public void setExceptionMessage(String msg) {
+            //do nothing
+        }
     }
 
     static class DummyMsg2 implements Message {
@@ -315,6 +325,16 @@ public class OutboundBufferTest {
 
         public List<Message> shrink(List<Message> messages) {
             return messages;
+        }
+
+        @Override
+        public String getExceptionMessage() {
+            return null;
+        }
+
+        @Override
+        public void setExceptionMessage(String msg) {
+            //do nothing
         }
     }
 

@@ -10,6 +10,8 @@
 
 package io.cloudslang.engine.queue.services;
 
+import io.cloudslang.orchestrator.entities.Message;
+import io.cloudslang.orchestrator.entities.SplitMessage;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.time.StopWatch;
 import io.cloudslang.engine.queue.entities.ExecStatus;
@@ -24,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -150,15 +153,67 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 		return result;
 	}
 
-	@Override
-	@Transactional(readOnly = true)
-	public Map<Long, Payload> readPayloadByExecutionIds(Long... ids) {
-		if (ArrayUtils.isEmpty(ids)) throw new IllegalArgumentException("List of IDs is null or empty");
-		return executionQueueRepository.findPayloadByExecutionIds(ids);
-	}
+    @Override
+    @Transactional
+    public void terminateCorruptedMessage(Message message) {
 
-	@Override
-	@Transactional(readOnly = true)
+        if (message instanceof ExecutionMessage) {
+            logger.error("Execution #" + ((ExecutionMessage)message).getMsgId() + " is corrupted due to the following error: " + message.getExceptionMessage() + ". Terminating it!");
+            terminateCorruptedExecutionMessage((ExecutionMessage) message);
+
+        } else if (message instanceof SplitMessage) {
+            logger.error("Execution #" + ((SplitMessage)message).getSplitId() + " is corrupted due to the following error: " + message.getExceptionMessage() + ". Terminating it!");
+            terminateCorruptedSplitMessage((SplitMessage) message);
+        }
+
+    }
+
+    private void terminateCorruptedExecutionMessage(ExecutionMessage message) {
+        // assign worker for messages with pending status
+        final List<ExecutionMessage> stateMessages = new ArrayList<>();
+
+        //We are setting exec_state_id before inserting it to DB
+        if (message.getExecStateId() == ExecutionMessage.EMPTY_EXEC_STATE_ID) {
+            long execStateId = executionQueueRepository.generateExecStateId();
+            message.setExecStateId(execStateId);
+            stateMessages.add(message);
+        }
+        //Mark the message as terminated - does not matter in which status it was before - it is corrupted
+        message.setStatus(ExecStatus.TERMINATED);
+
+        if (stateMessages.size() > 0) {
+            executionQueueRepository.insertExecutionStates(stateMessages);
+        }
+
+        long msgVersion = versionService.getCurrentVersion(VersionService.MSG_RECOVERY_VERSION_COUNTER_NAME);
+
+        executionQueueRepository.insertExecutionQueue(Arrays.asList(message), msgVersion);
+
+        if (CollectionUtils.isNotEmpty(listeners)) {
+            for (QueueListener listener : listeners) {
+                listener.onCorrupted(message);
+            }
+        }
+    }
+
+    private void terminateCorruptedSplitMessage(SplitMessage message) {
+
+        if (CollectionUtils.isNotEmpty(listeners)) {
+            for (QueueListener listener : listeners) {
+                listener.onCorrupted(message);
+            }
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<Long, Payload> readPayloadByExecutionIds(Long... ids) {
+        if (ArrayUtils.isEmpty(ids)) throw new IllegalArgumentException("List of IDs is null or empty");
+        return executionQueueRepository.findPayloadByExecutionIds(ids);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
 	public List<ExecutionMessage> readMessagesByStatus(int maxSize, ExecStatus... statuses) {
 		return executionQueueRepository.findByStatuses(maxSize, statuses);
 	}

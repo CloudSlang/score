@@ -34,6 +34,7 @@ import static ch.lambdaj.Lambda.*;
 public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListener {
 	private final Logger logger = Logger.getLogger(this.getClass());
 
+    @SuppressWarnings("FieldCanBeLocal")
     private static long GB = 900000000;//there is JVM overhead, so i will take 10% buffer...
 
 	@Autowired
@@ -258,6 +259,16 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         @Override
         public List<Message> shrink(List<Message> messages) {
             return messages; // do nothing
+        }
+
+        @Override
+        public String getExceptionMessage() {
+            return null;
+        }
+
+        @Override
+        public void setExceptionMessage(String msg) {
+            //do nothing
         }
     }
 

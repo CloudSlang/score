@@ -122,6 +122,26 @@ public class SuspendedExecutionsRepositoryTest {
     }
 
     @Test
+    public void findByExecutionIdTest(){
+
+        Map<String, String> contexts = new HashMap<>();
+        contexts.put("flowContext", "");
+
+        Execution exec = new Execution(2L, 0L, contexts);
+        SuspendedExecution suspendedExecution_1 = new SuspendedExecution("111", "888", 5, exec);
+        SuspendedExecution suspendedExecution_2 = new SuspendedExecution("111", "999", 5, exec);
+
+        repository.save(suspendedExecution_1);
+        repository.save(suspendedExecution_2);
+
+        List<SuspendedExecution> read = repository.findByExecutionId("111");
+
+        Assert.assertTrue(read != null);
+
+        Assert.assertEquals(2, read.size());
+    }
+
+    @Test
     public void findFinishedSuspendedExecutionsTest(){
 
         Map<String, String> contexts = new HashMap<>();
