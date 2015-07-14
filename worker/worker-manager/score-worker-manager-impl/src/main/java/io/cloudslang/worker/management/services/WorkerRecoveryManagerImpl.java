@@ -23,9 +23,10 @@ import java.util.List;
  */
 public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager {
 
-	protected static final Logger logger = Logger.getLogger(WorkerRecoveryManagerImpl.class);
+    protected static final Logger logger = Logger.getLogger(WorkerRecoveryManagerImpl.class);
+    private static final int EXIT_STATUS = 111;
 
-	@Autowired
+    @Autowired
 	private List<WorkerRecoveryListener> listeners;
 	@Autowired
 	private WorkerNodeService workerNodeService;
@@ -46,7 +47,7 @@ public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager {
             //If we are configured to restart on recovery - do shutdown
             if(toRestart){
                 logger.warn("Worker is configured to restart on recovery and since internal recovery is needed the process is exiting...");
-                System.exit(255);
+                System.exit(EXIT_STATUS);
             }
 
             synchronized (this){
