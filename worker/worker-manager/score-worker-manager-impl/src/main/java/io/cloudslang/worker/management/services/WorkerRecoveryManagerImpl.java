@@ -41,7 +41,14 @@ public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager {
     private volatile String wrv; //must be volatile since it is read/written in several threads
 
 	public void doRecovery(){
-		try{
+        try {
+            boolean toRestart = Boolean.getBoolean("restart.on.recovery");
+            //If we are configured to restart on recovery - do shutdown
+            if(toRestart){
+                logger.warn("Worker is configured to restart on recovery and since internal recovery is needed the process is exiting...");
+                System.exit(255);
+            }
+
             synchronized (this){
                 //If already in recovery - then return and do nothing
                 if(inRecovery){
