@@ -24,7 +24,7 @@ import java.util.List;
 public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager {
 
     protected static final Logger logger = Logger.getLogger(WorkerRecoveryManagerImpl.class);
-    private static final int EXIT_STATUS = 111;
+    private static final int EXIT_STATUS = 75;
 
     @Autowired
 	private List<WorkerRecoveryListener> listeners;
