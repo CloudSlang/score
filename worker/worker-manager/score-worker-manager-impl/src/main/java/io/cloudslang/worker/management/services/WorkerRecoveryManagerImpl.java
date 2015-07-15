@@ -43,7 +43,7 @@ public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager {
 
 	public void doRecovery(){
         try {
-            boolean toRestart = Boolean.getBoolean("restart.on.recovery");
+            boolean toRestart = Boolean.getBoolean("cloudslang.worker.restart.on.recovery");
             //If we are configured to restart on recovery - do shutdown
             if(toRestart){
                 logger.warn("Worker is configured to restart on recovery and since internal recovery is needed the process is exiting...");
