@@ -100,6 +100,7 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
             for (ExecutionState branch : branches) {
                 if (!EMPTY_BRANCH.equals(branch.getBranchId())) { // exclude the base execution
                     returnCanceledRunToQueue(branch);
+                    executionStateService.deleteExecutionState(branch.getExecutionId(), branch.getBranchId());
                 }
             }
             executionStateToCancel.setStatus(ExecutionStatus.PENDING_CANCEL); // when the parent will return to queue - should have the correct status
