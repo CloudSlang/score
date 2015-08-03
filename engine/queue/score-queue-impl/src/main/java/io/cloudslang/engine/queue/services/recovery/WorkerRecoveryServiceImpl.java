@@ -105,7 +105,7 @@ public class WorkerRecoveryServiceImpl implements WorkerRecoveryService, LoginLi
         workerNodeService.updateWRV(workerUuid, newWRV);
         workerNodeService.updateStatus(workerUuid, WorkerStatus.RECOVERED);
 
-        logger.warn("Worker [" + workerUuid + "] recovery id done in " + (System.currentTimeMillis() - time) + " ms");
+        logger.warn("Worker [" + workerUuid + "] recovery is done in " + (System.currentTimeMillis() - time) + " ms");
     }
 
     private int getMessagesWithoutAck(int maxSize, String workerUuid) {

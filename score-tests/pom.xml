@@ -12,7 +12,7 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>score-parent</artifactId>
-        <version>0.1.283-SNAPSHOT</version>
+        <version>0.1.287-SNAPSHOT</version>
     </parent>
 
     <artifactId>score-tests</artifactId>

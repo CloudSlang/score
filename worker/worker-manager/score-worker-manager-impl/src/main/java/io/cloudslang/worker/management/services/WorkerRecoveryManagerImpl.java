@@ -23,9 +23,10 @@ import java.util.List;
  */
 public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager {
 
-	protected static final Logger logger = Logger.getLogger(WorkerRecoveryManagerImpl.class);
+    protected static final Logger logger = Logger.getLogger(WorkerRecoveryManagerImpl.class);
+    private static final int EXIT_STATUS = 75;
 
-	@Autowired
+    @Autowired
 	private List<WorkerRecoveryListener> listeners;
 	@Autowired
 	private WorkerNodeService workerNodeService;
@@ -41,7 +42,14 @@ public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager {
     private volatile String wrv; //must be volatile since it is read/written in several threads
 
 	public void doRecovery(){
-		try{
+        try {
+            boolean toRestart = Boolean.getBoolean("cloudslang.worker.restart.on.recovery");
+            //If we are configured to restart on recovery - do shutdown
+            if(toRestart){
+                logger.warn("Worker is configured to restart on recovery and since internal recovery is needed the process is exiting...");
+                System.exit(EXIT_STATUS);
+            }
+
             synchronized (this){
                 //If already in recovery - then return and do nothing
                 if(inRecovery){
