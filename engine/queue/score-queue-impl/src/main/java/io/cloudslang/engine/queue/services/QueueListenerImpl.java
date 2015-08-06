@@ -155,6 +155,8 @@ public class QueueListenerImpl implements QueueListener {
 		//Check if this execution is not paused already (by user)
 		Long pauseId;
 		if (pe == null) {
+			// When cancel execution and no worker in group it should return to be paused without any termination type
+			execution.getSystemContext().setFlowTerminationType(null);
 			pauseId = pauseResumeService.pauseExecution(execution.getExecutionId(), branchId, PauseReason.NO_WORKERS_IN_GROUP);
 			pauseResumeService.writeExecutionObject(execution.getExecutionId(), branchId, execution);
 		} else {
