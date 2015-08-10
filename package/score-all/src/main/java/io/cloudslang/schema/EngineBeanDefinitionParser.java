@@ -33,10 +33,6 @@ import io.cloudslang.orchestrator.services.RunningExecutionPlanServiceImpl;
 import io.cloudslang.orchestrator.services.SplitJoinServiceImpl;
 import io.cloudslang.orchestrator.services.StubPauseResumeServiceImpl;
 import io.cloudslang.orchestrator.services.WorkerDbSupportServiceImpl;
-import io.cloudslang.engine.partitions.services.PartitionCallback;
-import io.cloudslang.engine.partitions.services.PartitionServiceImpl;
-import io.cloudslang.engine.partitions.services.PartitionTemplateImpl;
-import io.cloudslang.engine.partitions.services.PartitionUtils;
 import io.cloudslang.orchestrator.services.ScoreDeprecatedImpl;
 import io.cloudslang.orchestrator.services.ScoreImpl;
 import io.cloudslang.orchestrator.services.ScorePauseResumeImpl;
@@ -79,7 +75,6 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(QueueDispatcherServiceImpl.class, "queueDispatcherService");
 		put(ExecutionQueueServiceImpl.class, "executionQueueService");
 		put(ExecutionAssignerServiceImpl.class, "executionAssignerService");
-		put(PartitionServiceImpl.class, null);
 		put(RunningExecutionPlanServiceImpl.class, "runningEP");
 		put(WorkerNodeServiceImpl.class, null);
 		put(VersionServiceImpl.class, null);
@@ -95,7 +90,6 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(QueueStateIdGeneratorServiceImpl.class, null);
         put(ScoreTriggeringImpl.class,null);
 
-		put(PartitionUtils.class, null);
 		put(ExecutionMessageConverter.class, null);
 		put(ExecutionSerializationUtil.class, null);
 		put(SqlUtils.class, null);
@@ -159,19 +153,6 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
             new BeanRegistrator(parserContext).CLASS(StubPauseResumeServiceImpl.class).register();
         }
     }
-
-	private void registerPartitionTemplate(String name, int groupSize, long sizeThreshold, long timeThreshold,
-                                           ParserContext parserContext,
-                                           Class<? extends PartitionCallback> callbackClass){
-		new BeanRegistrator(parserContext)
-				.NAME(name)
-				.CLASS(PartitionTemplateImpl.class)
-				.addPropertyValue("groupSize", groupSize)
-				.addPropertyValue("sizeThreshold", sizeThreshold)
-				.addPropertyValue("timeThreshold", timeThreshold)
-                .addPropertyValue("callbackClass",callbackClass)
-				.register();
-	}
 
 	@Override
 	protected boolean shouldGenerateId() {

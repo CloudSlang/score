@@ -76,6 +76,7 @@ public class StandAloneTest {
         Thread.sleep(1000L);
     }
 
+
     @Test(timeout = 20000)
     public void baseStandAloneTest() {
         ExecutionPlan executionPlan = createExecutionPlan();
