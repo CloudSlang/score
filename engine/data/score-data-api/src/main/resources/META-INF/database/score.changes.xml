@@ -98,6 +98,8 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
             <column name="MSG_VERSION" type="BIGINT" />
         </createTable>
 
+        <addUniqueConstraint constraintName="OO_EXECUTION_QUEUES_CONSTRAINT" columnNames="EXEC_STATE_ID, MSG_SEQ_ID" tableName="OO_EXECUTION_QUEUES"/>
+
     </changeSet>
 
     <!--Create new tables for the Split mechanism in orchestrator-->

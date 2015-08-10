@@ -76,11 +76,11 @@ public class QueueCleanerServiceTest {
 	@Test
 	public void cleanTest() throws Exception {
 		List<ExecutionMessage> msgs = new ArrayList<>();
-		ExecutionMessage message15 = generateMessage(1, "group1", "1", ExecStatus.IN_PROGRESS);
-		ExecutionMessage message16 = generateMessage(1, "group1", "1", ExecStatus.FINISHED);
+		ExecutionMessage message15 = generateMessage(1, "group1", "1", ExecStatus.IN_PROGRESS, 1);
+		ExecutionMessage message16 = generateMessage(1, "group1", "1", ExecStatus.FINISHED, 2);
 
-		ExecutionMessage message25 = generateMessage(2, "group1", "2", ExecStatus.IN_PROGRESS);
-		ExecutionMessage message26 = generateMessage(2, "group1", "2", ExecStatus.FINISHED);
+		ExecutionMessage message25 = generateMessage(2, "group1", "2", ExecStatus.IN_PROGRESS, 1);
+		ExecutionMessage message26 = generateMessage(2, "group1", "2", ExecStatus.FINISHED, 2);
 
 		msgs.clear();
 		msgs.add(message15);
@@ -118,11 +118,11 @@ public class QueueCleanerServiceTest {
 		Assert.assertEquals(0, ids.size());
 	}
 
-	private ExecutionMessage generateMessage(long execStateId, String groupName, String msgId, ExecStatus status) {
+	private ExecutionMessage generateMessage(long execStateId, String groupName, String msgId, ExecStatus status, int msg_seq_id) {
 		byte[] payloadData;
 		payloadData = "This is just a test".getBytes();
 		Payload payload = new Payload(payloadData);
-		return new ExecutionMessage(execStateId, "myWorker", groupName, msgId, status, payload, 1);
+		return new ExecutionMessage(execStateId, "myWorker", groupName, msgId, status, payload, msg_seq_id);
 	}
 
 

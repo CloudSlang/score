@@ -19,11 +19,13 @@ import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
+import io.cloudslang.score.api.execution.ExecutionMetadataConsts;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.services.RunningExecutionPlanService;
 import io.cloudslang.score.lang.SystemContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,6 +63,8 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
         SystemContext scoreSystemContext = new SystemContext(triggeringProperties.getRuntimeValues());
         Long runningExecutionPlanId = saveRunningExecutionPlans(triggeringProperties.getExecutionPlan(), triggeringProperties.getDependencies(), scoreSystemContext);
         scoreSystemContext.setExecutionId(executionId);
+        Map<String,Serializable> executionMetadata = createMetadata(triggeringProperties);
+        scoreSystemContext.putMetaData(executionMetadata);
         Execution execution = new Execution(executionId, runningExecutionPlanId, triggeringProperties.getStartStep(), triggeringProperties.getContext(), scoreSystemContext);
 
         // create execution record in ExecutionSummary table
@@ -70,6 +74,20 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
         ExecutionMessage message = createExecutionMessage(execution);
         enqueue(message);
         return executionId;
+    }
+
+    private Map<String,Serializable> createMetadata(TriggeringProperties triggeringProperties){
+        Map<String,Serializable> executionMetadata = new HashMap<>();
+        ExecutionPlan executionPlan = triggeringProperties.getExecutionPlan();
+        executionMetadata.put(ExecutionMetadataConsts.EXECUTION_PLAN_ID, executionPlan.getFlowUuid());
+        executionMetadata.put(ExecutionMetadataConsts.EXECUTION_PLAN_NAME,executionPlan.getName());
+
+        Map<String,Serializable> platformMetadata = (Map<String,Serializable>)triggeringProperties.getPlatformMetadata();
+        if (platformMetadata != null){
+            executionMetadata.putAll(platformMetadata);
+        }
+
+        return executionMetadata;
     }
 
     private Long saveRunningExecutionPlans(ExecutionPlan executionPlan, Map<String, ExecutionPlan> dependencies, SystemContext systemContext) {
