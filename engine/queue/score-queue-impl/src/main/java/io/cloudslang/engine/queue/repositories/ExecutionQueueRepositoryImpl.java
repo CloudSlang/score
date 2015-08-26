@@ -54,7 +54,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                                                       "        (STATUS = "+ExecStatus.FAILED.getNumber()+") OR " +
                                                       "        (STATUS = "+ExecStatus.FINISHED.getNumber()+") ";
 
-	final private String QUERY_DELETE_FINISHED_STEPS = "DELETE FROM OO_EXECUTION_QUEUES " +
+	final private String QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES = "DELETE FROM OO_EXECUTION_QUEUES " +
 			" WHERE EXEC_STATE_ID in (:ids)";
 
     final private String QUERY_DELETE_FINISHED_STEPS_FROM_STATES = "DELETE FROM OO_EXECUTION_STATES " +
@@ -311,7 +311,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 		if (ids == null || ids.size() == 0)
 			return;
 
-		String query = QUERY_DELETE_FINISHED_STEPS.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
+		// Access STATES first and then QUEUES - same order as ExecutionQueueService#enqueue (prevents deadlocks on MSSQL)
+		String query = QUERY_DELETE_FINISHED_STEPS_FROM_STATES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
 
         Object[] args = ids.toArray(new Object[ids.size()]);
         logSQL(query,args);
@@ -319,17 +320,16 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         int deletedRows = deleteFinishedStepsJDBCTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
 
         if(logger.isDebugEnabled()){
-            logger.debug("Deleted " + deletedRows + " rows of finished steps from queue table.");
+            logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_STATES table.");
         }
 
-        String query_states = QUERY_DELETE_FINISHED_STEPS_FROM_STATES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
-
+        query = QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
         logSQL(query,args);
 
-        deletedRows = deleteFinishedStepsJDBCTemplate.update(query_states, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
+        deletedRows = deleteFinishedStepsJDBCTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
 
         if(logger.isDebugEnabled()){
-            logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_STATES table.");
+            logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_QUEUES table.");
         }
     }
 
