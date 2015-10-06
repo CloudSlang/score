@@ -10,22 +10,21 @@
 
 package io.cloudslang.engine.queue.services;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.time.StopWatch;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerService;
 import io.cloudslang.engine.versioning.services.VersionService;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -120,8 +119,8 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<ExecutionMessage> poll(Date createDate, String workerId, int maxSize, ExecStatus... statuses) {
-		List<ExecutionMessage> result = executionQueueRepository.poll(createDate, workerId, maxSize, statuses);
+	public List<ExecutionMessage> poll(String workerId, int maxSize, ExecStatus... statuses) {
+		List<ExecutionMessage> result = executionQueueRepository.poll(workerId, maxSize, statuses);
 
 		for (QueueListener listener : listeners) {
 			listener.onPoll(result, result.size());
@@ -133,8 +132,8 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<ExecutionMessage> poll(String workerId, int maxSize, ExecStatus... statuses) {
-		return executionQueueRepository.poll(workerId, maxSize, statuses);
+	public List<ExecutionMessage> pollRecovery(String workerId, int maxSize, ExecStatus... statuses) {
+		return executionQueueRepository.pollRecovery(workerId, maxSize, statuses);
 	}
 
 	@Override

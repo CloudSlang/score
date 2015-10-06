@@ -66,8 +66,8 @@ public class ExecutionAssignerServiceTest {
         groupWorkersMap.put("DefaultGroup", "worker2");
 
         List<ExecutionMessage> assignMessages = new ArrayList<>();
-        ExecutionMessage msg1 = new ExecutionMessage(1, ExecutionMessage.EMPTY_WORKER, "DefaultGroup", "msg1", ExecStatus.PENDING, null, 0, new Date(0));
-        ExecutionMessage msg2 = new ExecutionMessage(2, ExecutionMessage.EMPTY_WORKER, "DefaultGroup", "msg2", ExecStatus.PENDING, null, 0, new Date(0));
+        ExecutionMessage msg1 = new ExecutionMessage(1, ExecutionMessage.EMPTY_WORKER, "DefaultGroup", "msg1", ExecStatus.PENDING, null, 0, (new Date(0)).getTime());
+        ExecutionMessage msg2 = new ExecutionMessage(2, ExecutionMessage.EMPTY_WORKER, "DefaultGroup", "msg2", ExecStatus.PENDING, null, 0, (new Date(0)).getTime());
         assignMessages.add(msg1);
         assignMessages.add(msg2);
 
@@ -94,7 +94,7 @@ public class ExecutionAssignerServiceTest {
         groupWorkersMap.put("DefaultGroup", "worker2");
 
         List<ExecutionMessage> assignMessages = new ArrayList<>();
-        ExecutionMessage msg1 = new ExecutionMessage(1, ExecutionMessage.EMPTY_WORKER, "GroupX", "msg1", ExecStatus.PENDING, null, 0, new Date(0));
+        ExecutionMessage msg1 = new ExecutionMessage(1, ExecutionMessage.EMPTY_WORKER, "GroupX", "msg1", ExecStatus.PENDING, null, 0, (new Date(0)).getTime());
         assignMessages.add(msg1);
 
         Mockito.reset(executionQueueService);

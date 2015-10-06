@@ -103,7 +103,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
             <column name="MSG_SEQ_ID" type="integer">
                 <constraints nullable="false" />
             </column>
-            <column name="CREATE_TIME" type="${timestamp.type}" />
+            <column name="CREATE_TIME" type="BIGINT" />
             <column name="MSG_VERSION" type="BIGINT" />
         </createTable>
 
@@ -279,5 +279,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
             </column>
         </createTable>
     </changeSet>
+
+
 
 </databaseChangeLog>

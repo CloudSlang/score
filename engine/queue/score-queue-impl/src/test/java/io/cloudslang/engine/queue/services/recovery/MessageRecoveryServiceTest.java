@@ -57,7 +57,7 @@ public class MessageRecoveryServiceTest {
         String uuid = "uuid1";
         int poolSize = 5;
         List<ExecutionMessage> messages = new ArrayList<>();
-        when(executionQueueService.poll(uuid, poolSize, ExecStatus.ASSIGNED, ExecStatus.IN_PROGRESS)).thenReturn(messages);
+        when(executionQueueService.pollRecovery(uuid, poolSize, ExecStatus.ASSIGNED, ExecStatus.IN_PROGRESS)).thenReturn(messages);
         boolean toContinue = messageRecoveryService.recoverMessagesBulk(uuid, poolSize);
         assertThat("no messages, should not continue", toContinue, is(Boolean.FALSE));
         verify(executionQueueService, never()).enqueue(anyList());
@@ -71,7 +71,7 @@ public class MessageRecoveryServiceTest {
         int poolSize = 5;
         List<ExecutionMessage> messages = new ArrayList<>();
         messages.add(mock(ExecutionMessage.class));
-        when(executionQueueService.poll(uuid, poolSize, ExecStatus.ASSIGNED,  ExecStatus.SENT, ExecStatus.IN_PROGRESS)).thenReturn(messages);
+        when(executionQueueService.pollRecovery(uuid, poolSize, ExecStatus.ASSIGNED, ExecStatus.SENT, ExecStatus.IN_PROGRESS)).thenReturn(messages);
         boolean toContinue = messageRecoveryService.recoverMessagesBulk(uuid, poolSize);
         setMessageListToRecovered(messages);
         assertThat("no messages to continue , should not continue", toContinue, is(Boolean.FALSE));
@@ -86,7 +86,7 @@ public class MessageRecoveryServiceTest {
         List<ExecutionMessage> messages = new ArrayList<>();
         messages.add(mock(ExecutionMessage.class));
         messages.add(mock(ExecutionMessage.class));
-        when(executionQueueService.poll(uuid, poolSize, ExecStatus.ASSIGNED, ExecStatus.SENT, ExecStatus.IN_PROGRESS)).thenReturn(messages);
+        when(executionQueueService.pollRecovery(uuid, poolSize, ExecStatus.ASSIGNED, ExecStatus.SENT, ExecStatus.IN_PROGRESS)).thenReturn(messages);
         boolean toContinue = messageRecoveryService.recoverMessagesBulk(uuid, poolSize);
         setMessageListToRecovered(messages);
         assertThat("no messages, should not continue", toContinue, is(Boolean.TRUE));

@@ -14,7 +14,6 @@ import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,9 +25,9 @@ import java.util.Set;
  */
 public interface ExecutionQueueRepository {
 
-    List<ExecutionMessage> poll(Date createDate, String workerId, int maxSize, ExecStatus... statuses);
+    List<ExecutionMessage> poll(String workerId, int maxSize, ExecStatus... statuses);
 
-	List<ExecutionMessage> poll(String workerId, int maxSize, ExecStatus... statuses);
+	List<ExecutionMessage> pollRecovery(String workerId, int maxSize, ExecStatus... statuses);
 
 	List<ExecutionMessage> pollMessagesWithoutAck(int maxSize,long minVersionAllowed);
 

@@ -75,8 +75,8 @@ public class QueueDispatcherServiceTest {
     @Test
     public void testPoll() throws Exception {
         Date now = new Date();
-        queueDispatcherService.poll("workerId",5,now);
-        verify(executionQueueService,times(1)).poll(now,"workerId",5, ExecStatus.ASSIGNED);
+        queueDispatcherService.poll("workerId",5);
+        verify(executionQueueService,times(1)).poll("workerId", 5, ExecStatus.ASSIGNED);
     }
 
     @Test
@@ -84,8 +84,8 @@ public class QueueDispatcherServiceTest {
         Date now = new Date();
         List<ExecutionMessage> msg = new ArrayList<>();
 
-        when(executionQueueService.poll(now,"workerId",5, ExecStatus.ASSIGNED)).thenReturn(msg);
-        List<ExecutionMessage> result = queueDispatcherService.poll("workerId",5,now);
+        when(executionQueueService.poll("workerId", 5, ExecStatus.ASSIGNED)).thenReturn(msg);
+        List<ExecutionMessage> result = queueDispatcherService.poll("workerId",5);
         Assert.assertTrue(result.isEmpty());
     }
 
@@ -100,8 +100,8 @@ public class QueueDispatcherServiceTest {
         msg.add(new ExecutionMessage());
         msg.get(1).setMsgId("id2");
 
-        when(executionQueueService.poll(now, "workerId", 5, ExecStatus.ASSIGNED)).thenReturn(msg);
-        List<ExecutionMessage> result = queueDispatcherService.poll("workerId",5,now);
+        when(executionQueueService.poll("workerId", 5, ExecStatus.ASSIGNED)).thenReturn(msg);
+        List<ExecutionMessage> result = queueDispatcherService.poll("workerId",5);
         Assert.assertEquals(2,result.size());
         Assert.assertEquals("id1",result.get(0).getMsgId());
         Assert.assertEquals("id2",result.get(1).getMsgId());
