@@ -94,12 +94,12 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     private void fillBufferPeriodically() {
         long pollCounter = 0;
         while (!inShutdown) {
-            pollCounter = pollCounter + 1;
+//            pollCounter = pollCounter + 1;
             // we reset the currentCreateDate every 100 queries , for the theoretical problem of records
             // with wrong order of create_time in the queue table.
-            if ((pollCounter % 100) == 0) {
-                currentCreateDate = new Date(0);
-            }
+//            if ((pollCounter % 100) == 0) {
+//                currentCreateDate = new Date(0);
+//            }
             try {
                 boolean workerUp = workerManager.isUp();
                 if(!workerUp) {
@@ -118,7 +118,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
                         int messagesToGet = capacity - workerManager.getInBufferSize();
 
                         if (logger.isDebugEnabled()) logger.debug("Polling messages from queue (max " + messagesToGet + ")");
-                        List<ExecutionMessage> newMessages = queueDispatcher.poll(workerUuid, messagesToGet, currentCreateDate);
+                        List<ExecutionMessage> newMessages = queueDispatcher.poll(workerUuid, messagesToGet);
                         if (executionsActivityListener != null) {
                             executionsActivityListener.onActivate(extract(newMessages, on(ExecutionMessage.class).getExecStateId()));
                         }
@@ -126,7 +126,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
                         if (!newMessages.isEmpty()) {
                             // update currentCreateDate;
-                            currentCreateDate = new Date(newMessages.get(newMessages.size()-1).getCreateDate().getTime() - 100);
+//                            currentCreateDate = new Date(newMessages.get(newMessages.size()-1).getCreateDate() - 100);
 
                             //we must acknowledge the messages that we took from the queue
                             ackMessages(newMessages);

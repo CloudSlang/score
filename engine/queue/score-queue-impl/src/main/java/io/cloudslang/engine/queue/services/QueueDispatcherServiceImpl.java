@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 
@@ -51,11 +50,11 @@ public final class QueueDispatcherServiceImpl implements QueueDispatcherService 
 
 	@Transactional
 	@Override
-	public List<ExecutionMessage> poll(String workerId, int maxSize, Date createDate) {
+	public List<ExecutionMessage> poll(String workerId, int maxSize) {
 		if (logger.isDebugEnabled()) logger.debug("Polling messages for worker [" + workerId + "], max size " + maxSize);
 		// poll assigned messages to workerID
 		long t = System.currentTimeMillis();
-		List<ExecutionMessage> result = execQueue.poll(createDate,workerId,maxSize,ExecStatus.ASSIGNED);
+		List<ExecutionMessage> result = execQueue.poll_(workerId,maxSize,ExecStatus.ASSIGNED);
 		t = System.currentTimeMillis()-t;
 		if (logger.isDebugEnabled()) logger.debug("Poll: " + result.size() + "/" + t + " messages/ms");
 

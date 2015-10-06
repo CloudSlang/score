@@ -36,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -210,7 +209,7 @@ public class ExecutionQueueRepositoryTest {
         msg.add(execMsg);
         executionQueueRepository.insertExecutionQueue(msg,1L);
         executionQueueRepository.insertExecutionStates(msg);
-        List<ExecutionMessage> result = executionQueueRepository.poll(new Date(0), "worker1", 10, ExecStatus.IN_PROGRESS);
+        List<ExecutionMessage> result = executionQueueRepository.poll_("worker1", 10, ExecStatus.IN_PROGRESS);
 
         Assert.assertNotNull(result);
         Assert.assertFalse(result.isEmpty());

@@ -13,12 +13,11 @@ package io.cloudslang.engine.queue.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.cloudslang.engine.node.entities.WorkerNode;
-import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.orchestrator.entities.Message;
+import io.cloudslang.score.facade.entities.Execution;
 import org.apache.commons.lang.builder.EqualsBuilder;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -41,7 +40,7 @@ public class ExecutionMessage implements Message, Cloneable {
 	private Payload payload;
 	private int msgSeqId;
 	private String msgId;
-    private Date createDate;
+    private Long createDate;
 
 	private transient String workerKey;
 
@@ -75,7 +74,7 @@ public class ExecutionMessage implements Message, Cloneable {
     	                        ExecStatus status,
     	                        Payload payload,
     	                        int msgSeqId,
-                                Date createDate) {
+                                Long createDate) {
     		this.execStateId = execStateId;
     		this.workerId = workerId;
     		this.workerGroup = workerGroup;
@@ -128,11 +127,11 @@ public class ExecutionMessage implements Message, Cloneable {
         this.executionObject = executionObject;
     }
 
-    public Date getCreateDate() {
+    public Long getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(Date createDate) {
+    public void setCreateDate(Long createDate) {
         this.createDate = createDate;
     }
 

@@ -14,7 +14,6 @@ import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -39,10 +38,9 @@ public interface QueueDispatcherService {
      *
      * @param uuid the worker id
      * @param maxSize max size of the poll bulk
-     * @param createDate the first message create date
      * @return a list of {@link io.cloudslang.engine.queue.entities.ExecutionMessage}
      */
-	List<ExecutionMessage> poll(String uuid, int maxSize, Date createDate);
+	List<ExecutionMessage> poll(String uuid, int maxSize);
 
     /**
      *

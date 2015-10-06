@@ -10,13 +10,16 @@
 
 package io.cloudslang.schema;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
-
-import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
-
+import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
+import io.cloudslang.engine.node.services.WorkerNodeService;
+import io.cloudslang.engine.queue.entities.ExecutionMessage;
+import io.cloudslang.engine.queue.services.QueueDispatcherService;
+import io.cloudslang.score.api.ExecutionPlan;
+import io.cloudslang.score.api.ExecutionStep;
+import io.cloudslang.score.api.Score;
+import io.cloudslang.score.api.TriggeringProperties;
+import io.cloudslang.score.events.EventBus;
+import liquibase.integration.spring.SpringLiquibase;
 import org.hibernate.ejb.HibernatePersistence;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,17 +43,10 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import io.cloudslang.score.api.ExecutionPlan;
-import io.cloudslang.score.api.ExecutionStep;
-import io.cloudslang.score.api.Score;
-import io.cloudslang.score.api.TriggeringProperties;
-import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
-import io.cloudslang.engine.node.services.WorkerNodeService;
-import io.cloudslang.engine.queue.entities.ExecutionMessage;
-import io.cloudslang.engine.queue.services.QueueDispatcherService;
-import io.cloudslang.score.events.EventBus;
-
-import liquibase.integration.spring.SpringLiquibase;
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
+import java.util.List;
+import java.util.Properties;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -84,7 +80,7 @@ public class EngineTest {
         TriggeringProperties triggeringProperties = TriggeringProperties.create(executionPlan);
         score.trigger(triggeringProperties);
 
-        List<ExecutionMessage> messages = dispatcherService.poll("uuid", 10, new Date(0));
+        List<ExecutionMessage> messages = dispatcherService.poll("uuid", 10);
 
         assertThat(messages).hasSize(1);
     }

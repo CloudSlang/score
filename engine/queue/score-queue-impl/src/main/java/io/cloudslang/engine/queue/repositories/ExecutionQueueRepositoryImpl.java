@@ -30,7 +30,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -106,7 +106,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					" FROM  OO_EXECUTION_QUEUES q,  " +
 					"      OO_EXECUTION_STATES s   " +
 					" WHERE  " +
-					"      (q.CREATE_TIME >= ? ) AND " +
 					"      (q.ASSIGNED_WORKER =  ?)  AND " +
 					"      (q.STATUS IN (:status)) AND " +
 					" (q.EXEC_STATE_ID = s.ID) AND " +
@@ -153,7 +152,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
 	final private String INSERT_EXEC_STATE = "INSERT INTO OO_EXECUTION_STATES  (ID, MSG_ID,  PAYLOAD, CREATE_TIME) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
 
-	final private String INSERT_QUEUE = "INSERT INTO OO_EXECUTION_QUEUES (ID, EXEC_STATE_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS,MSG_SEQ_ID, CREATE_TIME,MSG_VERSION) VALUES (?, ?, ?, ?, ?, ?,CURRENT_TIMESTAMP,?)";
+	final private String INSERT_QUEUE = "INSERT INTO OO_EXECUTION_QUEUES (ID, EXEC_STATE_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS,MSG_SEQ_ID, CREATE_TIME,MSG_VERSION) VALUES (?, ?, ?, ?, ?, ?,?,?)";
 
 	private static final String QUERY_PAYLOAD_BY_EXECUTION_IDS = "SELECT ID, PAYLOAD FROM OO_EXECUTION_STATES WHERE ID IN (:IDS)";
 
@@ -232,7 +231,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 				ps.setString(4, msg.getWorkerGroup());
 				ps.setInt(5, msg.getStatus().getNumber());
 				ps.setInt(6, msg.getMsgSeqId());
-				ps.setLong(7, version);
+				ps.setLong(7, Calendar.getInstance().getTimeInMillis());
+				ps.setLong(8, version);
 			}
 
 			@Override
@@ -283,7 +283,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
 
 	@Override
-	public List<ExecutionMessage> poll(Date createTime, String workerId, int maxSize, ExecStatus... statuses) {
+	public List<ExecutionMessage> poll_(String workerId, int maxSize, ExecStatus... statuses) {
 
         pollJDBCTemplate.setMaxRows(maxSize);
         pollJDBCTemplate.setFetchSize(maxSize);
@@ -294,10 +294,9 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
 		// prepare the argument
 		java.lang.Object[] values;
-		values = new Object[statuses.length + 2];
-		values[0] = new java.sql.Timestamp(createTime.getTime());// createTime;
-		values[1] = workerId;
-		int i = 2;
+		values = new Object[statuses.length + 1];
+		values[0] = workerId;
+		int i = 1;
 
 		for (ExecStatus status : statuses) {
 			values[i++] = status.getNumber();
@@ -451,7 +450,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					ExecStatus.find(rs.getInt("STATUS")),
 					new Payload(rs.getBytes("PAYLOAD")),
 					rs.getInt("MSG_SEQ_ID"),
-					rs.getTimestamp("CREATE_TIME"));
+					rs.getLong("CREATE_TIME"));
 		}
 	}
 
@@ -465,7 +464,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					ExecStatus.find(rs.getInt("STATUS")),
 					null,
 					rs.getInt("MSG_SEQ_ID"),
-					rs.getTimestamp("CREATE_TIME"));
+					rs.getLong("CREATE_TIME"));
 		}
 	}
 

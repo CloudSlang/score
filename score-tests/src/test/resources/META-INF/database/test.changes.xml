@@ -37,7 +37,7 @@
 			<column name="EXEC_GROUP" type="varchar(255)"><constraints nullable="false"/></column>
 			<column name="STATUS" type="integer"/>
 			<column name="MSG_SEQ_ID" type="integer"><constraints nullable="false"/></column>
-			<column name="CREATE_TIME" type="timestamp"/>
+			<column name="CREATE_TIME" type="BIGINT"/>
 			<column name="MSG_VERSION" type="BIGINT" />
 		</createTable>
 
@@ -48,4 +48,58 @@
 		<createIndex tableName="OO_EXECUTION_QUEUES" indexName="OO_Q_EXEC_STATE_1_IDX"><column name="EXEC_STATE_ID"/></createIndex>
 		<createIndex tableName="OO_EXECUTION_QUEUES" indexName="OO_Q_CREATE_TIME_1_IDX"><column name="CREATE_TIME"/></createIndex>
 	</changeSet>
+
+    <!--<changeSet id="alter OO_EXECUTION_QUEUES CREATE_TIME" author="engine">-->
+
+        <!--<preConditions onSqlOutput="TEST" onFail="CONTINUE">-->
+            <!--<not><columnExists columnName="CREATE_TIME_LONG" tableName="OO_EXECUTION_QUEUES"/></not>-->
+        <!--</preConditions>-->
+
+        <!--<addColumn tableName="OO_EXECUTION_QUEUES">-->
+            <!--<column name="CREATE_TIME_LONG" type="BIGINT"/>-->
+        <!--</addColumn>-->
+
+        <!--&lt;!&ndash;create time &ndash;&gt;-->
+        <!--<createIndex tableName="OO_EXECUTION_QUEUES" indexName="OO_Q_CREATE_TIME_L_IDX">-->
+            <!--<column name="CREATE_TIME_LONG"/>-->
+        <!--</createIndex>-->
+
+        <!--<dropIndex tableName="OO_EXECUTION_QUEUES" indexName="OO_Q_CREATE_TIME_IDX"/>-->
+        <!--<dropColumn tableName="OO_EXECUTION_QUEUES" columnName="CREATE_TIME"/>-->
+
+        <!--<rollback>-->
+
+            <!--<dropIndex tableName="OO_EXECUTION_QUEUES" indexName="OO_Q_CREATE_TIME_L_IDX"/>-->
+            <!--<dropColumn tableName="OO_EXECUTION_QUEUES" columnName="CREATE_TIME_LONG"/>-->
+
+            <!--<addColumn tableName="OO_EXECUTION_QUEUES">-->
+                <!--<column name="CREATE_TIME" type="${timestamp.type}"/>-->
+            <!--</addColumn>-->
+
+            <!--&lt;!&ndash;create time &ndash;&gt;-->
+            <!--<createIndex tableName="OO_EXECUTION_QUEUES" indexName="OO_Q_CREATE_TIME_IDX">-->
+                <!--<column name="CREATE_TIME"/>-->
+            <!--</createIndex>-->
+
+
+        <!--</rollback>-->
+
+    <!--</changeSet>-->
+
+    <!--<changeSet id="alter OO_EXECUTION_QUEUES CREATE_TIME" author="engine">-->
+
+        <!--<addColumn tableName="OO_EXECUTION_QUEUES">-->
+            <!--<column name="CREATE_TIME_LONG" type="BIGINT"/>-->
+        <!--</addColumn>-->
+
+        <!--<createIndex tableName="OO_EXECUTION_QUEUES" indexName="OO_Q_CREATE_TIME_L_IDX">-->
+            <!--<column name="CREATE_TIME_LONG"/>-->
+        <!--</createIndex>-->
+
+        <!--<rollback>-->
+            <!--<dropIndex tableName="OO_EXECUTION_QUEUES" indexName="OO_Q_CREATE_TIME_L_IDX"/>-->
+            <!--<dropColumn tableName="OO_EXECUTION_QUEUES" columnName="CREATE_TIME_LONG"/>-->
+        <!--</rollback>-->
+
+    <!--</changeSet>-->
 </databaseChangeLog>
