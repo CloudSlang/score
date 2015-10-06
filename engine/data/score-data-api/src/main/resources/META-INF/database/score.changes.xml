@@ -280,22 +280,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         </createTable>
     </changeSet>
 
-    <!--<changeSet id="alter OO_EXECUTION_QUEUES CREATE_TIME" author="engine">-->
-
-        <!--<addColumn tableName="OO_EXECUTION_QUEUES">-->
-            <!--<column name="CREATE_TIME_LONG" type="BIGINT"/>-->
-        <!--</addColumn>-->
-
-        <!--<createIndex tableName="OO_EXECUTION_QUEUES" indexName="OO_Q_CREATE_TIME_L_IDX">-->
-            <!--<column name="CREATE_TIME_LONG"/>-->
-        <!--</createIndex>-->
-
-        <!--<rollback>-->
-            <!--<dropIndex tableName="OO_EXECUTION_QUEUES" indexName="OO_Q_CREATE_TIME_L_IDX"/>-->
-            <!--<dropColumn tableName="OO_EXECUTION_QUEUES" columnName="CREATE_TIME_LONG"/>-->
-        <!--</rollback>-->
-
-    <!--</changeSet>-->
 
 
 </databaseChangeLog>

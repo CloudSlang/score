@@ -37,7 +37,7 @@ final public class MessageRecoveryServiceImpl implements MessageRecoveryService 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public boolean recoverMessagesBulk(String workerName, int defaultPoolSize) {
 
-        List<ExecutionMessage> messages = executionQueueService.poll(workerName, defaultPoolSize,
+        List<ExecutionMessage> messages = executionQueueService.pollRecovery(workerName, defaultPoolSize,
                 ExecStatus.ASSIGNED,
                 ExecStatus.SENT,
                 ExecStatus.IN_PROGRESS);

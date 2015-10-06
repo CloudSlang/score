@@ -93,7 +93,7 @@ public class QueueCleanerServiceTest {
 		msgs.add(message16);
 		executionQueueService.enqueue(msgs);
 
-		executionQueueService.poll("myWorker", 100, ExecStatus.IN_PROGRESS, ExecStatus.FINISHED);
+		executionQueueService.pollRecovery("myWorker", 100, ExecStatus.IN_PROGRESS, ExecStatus.FINISHED);
 
 		ids = queueCleanerService.getFinishedExecStateIds();
 		Assert.assertEquals(1, ids.size());

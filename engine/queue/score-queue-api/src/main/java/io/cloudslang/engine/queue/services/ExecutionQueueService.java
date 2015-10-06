@@ -43,7 +43,7 @@ public interface ExecutionQueueService {
      * @param statuses requested messages statuses
      * @return a List of {@link io.cloudslang.engine.queue.entities.ExecutionMessage} requested
      */
-    List<ExecutionMessage> poll_(String workerId, int maxSize, ExecStatus... statuses);
+    List<ExecutionMessage> poll(String workerId, int maxSize, ExecStatus... statuses);
 
     /**
      *
@@ -54,7 +54,7 @@ public interface ExecutionQueueService {
      * @param statuses requested messages statuses
      * @return a List of {@link io.cloudslang.engine.queue.entities.ExecutionMessage} requested
      */
-	List<ExecutionMessage> poll(String workerId, int maxSize, ExecStatus... statuses);
+	List<ExecutionMessage> pollRecovery(String workerId, int maxSize, ExecStatus... statuses);
 
     /**
      *

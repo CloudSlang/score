@@ -60,20 +60,6 @@
 		</createIndex>
 	</changeSet>
 
-    <!--<changeSet id="alter OO_EXECUTION_QUEUES CREATE_TIME" author="engine">-->
-
-        <!--<preConditions onSqlOutput="TEST" onFail="CONTINUE">-->
-            <!--<not><columnExists columnName="CREATE_TIME_LONG" tableName="OO_EXECUTION_QUEUES"/></not>-->
-        <!--</preConditions>-->
-
-        <!--<addColumn tableName="OO_EXECUTION_QUEUES">-->
-            <!--<column name="CREATE_TIME_LONG" type="BIGINT"/>-->
-        <!--</addColumn>-->
-
-        <!--<rollback/>-->
-
-    <!--</changeSet>-->
-
 
 
 </databaseChangeLog>
