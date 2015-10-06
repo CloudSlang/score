@@ -25,7 +25,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.util.Date;
 import java.util.List;
 
 import static ch.lambdaj.Lambda.extract;
@@ -80,8 +79,6 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     @Autowired(required = false)
     private ExecutionsActivityListener executionsActivityListener;
 
-    private Date currentCreateDate = new Date(0);
-
     @PostConstruct
     private void init(){
         capacity = Integer.getInteger("worker.inbuffer.capacity",capacity);
@@ -92,14 +89,8 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
 
     private void fillBufferPeriodically() {
-        long pollCounter = 0;
+
         while (!inShutdown) {
-//            pollCounter = pollCounter + 1;
-            // we reset the currentCreateDate every 100 queries , for the theoretical problem of records
-            // with wrong order of create_time in the queue table.
-//            if ((pollCounter % 100) == 0) {
-//                currentCreateDate = new Date(0);
-//            }
             try {
                 boolean workerUp = workerManager.isUp();
                 if(!workerUp) {
@@ -125,9 +116,6 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
                         if (logger.isDebugEnabled()) logger.debug("Received " + newMessages.size() + " messages from queue");
 
                         if (!newMessages.isEmpty()) {
-                            // update currentCreateDate;
-//                            currentCreateDate = new Date(newMessages.get(newMessages.size()-1).getCreateDate() - 100);
-
                             //we must acknowledge the messages that we took from the queue
                             ackMessages(newMessages);
                             for(ExecutionMessage msg :newMessages){

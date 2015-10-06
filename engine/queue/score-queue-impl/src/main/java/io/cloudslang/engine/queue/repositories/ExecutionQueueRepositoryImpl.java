@@ -245,7 +245,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 	}
 
 	@Override
-	public List<ExecutionMessage> poll(String workerId, int maxSize, ExecStatus... statuses) {
+	public List<ExecutionMessage> pollRecovery(String workerId, int maxSize, ExecStatus... statuses) {
 
         pollForRecoveryJDBCTemplate.setMaxRows(maxSize);
         pollForRecoveryJDBCTemplate.setFetchSize(maxSize);
@@ -283,7 +283,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
 
 	@Override
-	public List<ExecutionMessage> poll_(String workerId, int maxSize, ExecStatus... statuses) {
+	public List<ExecutionMessage> poll(String workerId, int maxSize, ExecStatus... statuses) {
 
         pollJDBCTemplate.setMaxRows(maxSize);
         pollJDBCTemplate.setFetchSize(maxSize);

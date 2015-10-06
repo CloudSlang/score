@@ -120,7 +120,7 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<ExecutionMessage> poll(String workerId, int maxSize, ExecStatus... statuses) {
-		List<ExecutionMessage> result = executionQueueRepository.poll_(workerId, maxSize, statuses);
+		List<ExecutionMessage> result = executionQueueRepository.poll(workerId, maxSize, statuses);
 
 		for (QueueListener listener : listeners) {
 			listener.onPoll(result, result.size());
@@ -133,7 +133,7 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<ExecutionMessage> pollRecovery(String workerId, int maxSize, ExecStatus... statuses) {
-		return executionQueueRepository.poll(workerId, maxSize, statuses);
+		return executionQueueRepository.pollRecovery(workerId, maxSize, statuses);
 	}
 
 	@Override

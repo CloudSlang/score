@@ -25,9 +25,9 @@ import java.util.Set;
  */
 public interface ExecutionQueueRepository {
 
-    List<ExecutionMessage> poll_(String workerId, int maxSize, ExecStatus... statuses);
+    List<ExecutionMessage> poll(String workerId, int maxSize, ExecStatus... statuses);
 
-	List<ExecutionMessage> poll(String workerId, int maxSize, ExecStatus... statuses);
+	List<ExecutionMessage> pollRecovery(String workerId, int maxSize, ExecStatus... statuses);
 
 	List<ExecutionMessage> pollMessagesWithoutAck(int maxSize,long minVersionAllowed);
 

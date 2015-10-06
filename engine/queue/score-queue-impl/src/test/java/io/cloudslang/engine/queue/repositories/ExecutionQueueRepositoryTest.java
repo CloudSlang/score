@@ -153,7 +153,7 @@ public class ExecutionQueueRepositoryTest {
         msg.add(execMsg);
         executionQueueRepository.insertExecutionStates(msg);
         executionQueueRepository.insertExecutionQueue(msg,1L);
-        List<ExecutionMessage> result = executionQueueRepository.poll("worker1",10,ExecStatus.IN_PROGRESS);
+        List<ExecutionMessage> result = executionQueueRepository.pollRecovery("worker1", 10, ExecStatus.IN_PROGRESS);
 
         Assert.assertNotNull(result);
         Assert.assertFalse(result.isEmpty());
@@ -172,7 +172,7 @@ public class ExecutionQueueRepositoryTest {
         executionQueueRepository.insertExecutionQueue(msg,1L);
 
 
-        List<ExecutionMessage> result = executionQueueRepository.poll("worker1",10,ExecStatus.IN_PROGRESS);
+        List<ExecutionMessage> result = executionQueueRepository.pollRecovery("worker1", 10, ExecStatus.IN_PROGRESS);
 
 
         Assert.assertNotNull(result);
@@ -192,7 +192,7 @@ public class ExecutionQueueRepositoryTest {
         executionQueueRepository.insertExecutionStates(msg);
         executionQueueRepository.insertExecutionQueue(msg,1L);
 
-        List<ExecutionMessage> result = executionQueueRepository.poll("worker1",10,ExecStatus.IN_PROGRESS);
+        List<ExecutionMessage> result = executionQueueRepository.pollRecovery("worker1", 10, ExecStatus.IN_PROGRESS);
 
 
         Assert.assertNotNull(result);
@@ -209,7 +209,7 @@ public class ExecutionQueueRepositoryTest {
         msg.add(execMsg);
         executionQueueRepository.insertExecutionQueue(msg,1L);
         executionQueueRepository.insertExecutionStates(msg);
-        List<ExecutionMessage> result = executionQueueRepository.poll_("worker1", 10, ExecStatus.IN_PROGRESS);
+        List<ExecutionMessage> result = executionQueueRepository.poll("worker1", 10, ExecStatus.IN_PROGRESS);
 
         Assert.assertNotNull(result);
         Assert.assertFalse(result.isEmpty());
