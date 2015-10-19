@@ -10,6 +10,7 @@
 	<task:scheduled-tasks scheduler="scoreWorkerScheduler">
 		<task:scheduled ref="outBuffer" method="drain" fixed-delay="#{outBufferInterval}"/>
 		<task:scheduled ref="workerManager" method="workerKeepAlive" fixed-rate="#{keepAliveInterval}"/>
+		<task:scheduled ref="workerManager" method="interruptCanceledExecutions" fixed-rate="#{interruptCanceledInterval}"/>
         <task:scheduled ref="workerConfiguration" method="refresh" fixed-delay="#{configRefreshInterval}"/>
 		<task:scheduled ref="workerManager" method="logStatistics" fixed-rate="#{statisticsInterval}"/>
         <task:scheduled ref="sessionDataHandler" method="sessionTimeOutScheduler" fixed-rate="60000"/>
