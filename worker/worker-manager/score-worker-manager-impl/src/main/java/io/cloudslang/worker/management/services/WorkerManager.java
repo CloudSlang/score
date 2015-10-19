@@ -10,6 +10,19 @@
 
 package io.cloudslang.worker.management.services;
 
+import io.cloudslang.engine.node.services.WorkerNodeService;
+import io.cloudslang.worker.management.WorkerConfigurationService;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.ContextRefreshedEvent;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Map;
@@ -19,21 +32,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.log4j.Logger;
-import io.cloudslang.worker.management.WorkerConfigurationService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextClosedEvent;
-import org.springframework.context.event.ContextRefreshedEvent;
-
-import io.cloudslang.engine.node.services.WorkerNodeService;
 
 import static ch.lambdaj.Lambda.max;
 import static ch.lambdaj.Lambda.on;
@@ -106,6 +104,17 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 	public int getInBufferSize() {
 		return inBuffer.size();
 	}
+
+    @SuppressWarnings("unused")
+    //scheduled in scoreWorkerSchedulerContext.xml
+    public void interruptCanceledExecutions(){
+        for(Long executionId  : mapOfRunningTasks.keySet()){
+            if(workerConfigurationService.isExecutionCancelled(executionId)){
+                Future future = mapOfRunningTasks.get(executionId);
+                future.cancel(true);
+            }
+        }
+    }
 
 	@SuppressWarnings("unused")
     //scheduled in xml
