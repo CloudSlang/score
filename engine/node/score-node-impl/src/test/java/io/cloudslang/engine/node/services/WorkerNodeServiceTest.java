@@ -88,7 +88,7 @@ public class WorkerNodeServiceTest {
 
     @After
     public void reset(){
-        Mockito.reset(versionService,workerLockService);
+        Mockito.reset(versionService, workerLockService);
     }
 	@Test
 	public void keepAlive() throws Exception {
@@ -233,7 +233,7 @@ public class WorkerNodeServiceTest {
 		WorkerNode worker = workerNodeService.readByUUID("H3");
 		Assert.assertEquals(WorkerStatus.FAILED, worker.getStatus());
 
-		workerNodeService.updateStatus("H3",WorkerStatus.RUNNING);
+		workerNodeService.updateStatus("H3", WorkerStatus.RUNNING);
 		worker = workerNodeService.readByUUID("H3");
 		Assert.assertEquals(WorkerStatus.RUNNING, worker.getStatus());
 	}
@@ -257,7 +257,7 @@ public class WorkerNodeServiceTest {
 		workerNodeService.updateWorkerGroups("H3", "group 1", "group 2");
 		workerNodeService.updateWorkerGroups("H1", "group 1");
 		groups = workerNodeService.readAllWorkerGroups();
-		Assert.assertEquals(WorkerNode.DEFAULT_WORKER_GROUPS.length+2, groups.size());
+		Assert.assertEquals(WorkerNode.DEFAULT_WORKER_GROUPS.length + 2, groups.size());
 
 		workerNodeService.updateWorkerGroups("H3");
 		WorkerNode workerNode = workerNodeService.readByUUID("H3");
@@ -282,6 +282,19 @@ public class WorkerNodeServiceTest {
 		workerNode = workerNodeService.readByUUID("H1");
 
 		Assert.assertEquals(groupSize+1, workerNode.getGroups().size());
+	}
+
+	@Test
+	public void updateVersionTest() {
+		workerNodeService.create("worker_1", "password", "stamHost", "c:/dir");
+		WorkerNode workerNode = workerNodeService.readByUUID("H1");
+		Assert.assertEquals("N/A", workerNode.getVersion());
+
+		workerNodeService.updateVersion("H1", "VERSION");
+
+		workerNode = workerNodeService.readByUUID("H1");
+
+		Assert.assertEquals("Version not updated!", "VERSION", workerNode.getVersion());
 	}
 
 	@Configuration
