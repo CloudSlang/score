@@ -94,33 +94,33 @@ public class ExecutionQueueServiceTest {
 
 
 		List<ExecutionMessage> msgInQueue, msgFromQueue;
-		msgInQueue = executionQueueService.poll("worker3", 100, ExecStatus.ASSIGNED);
+		msgInQueue = executionQueueService.pollRecovery("worker3", 100, ExecStatus.ASSIGNED);
 		Assert.assertEquals(2, msgInQueue.size());
 		Assert.assertNotNull(msgInQueue.get(0).getPayload().getData());
 
 		msgInQueue = updateMessages(msgInQueue, ExecStatus.ASSIGNED, "worker1");
 		executionQueueService.enqueue(msgInQueue);
-		msgFromQueue = executionQueueService.poll("worker1", 100, ExecStatus.ASSIGNED);
+		msgFromQueue = executionQueueService.pollRecovery("worker1", 100, ExecStatus.ASSIGNED);
 		Assert.assertEquals(2, msgFromQueue.size());
-		msgFromQueue = executionQueueService.poll("worker2", 100, ExecStatus.ASSIGNED);
+		msgFromQueue = executionQueueService.pollRecovery("worker2", 100, ExecStatus.ASSIGNED);
 		Assert.assertEquals(0, msgFromQueue.size());
 
 
 		msgInQueue = updateMessages(msgInQueue, ExecStatus.SENT, "worker1");
 		executionQueueService.enqueue(msgInQueue);
-		msgFromQueue = executionQueueService.poll("worker1", 100, ExecStatus.SENT);
+		msgFromQueue = executionQueueService.pollRecovery("worker1", 100, ExecStatus.SENT);
 		Assert.assertEquals(ExecStatus.SENT, msgFromQueue.get(0).getStatus());
 		Assert.assertEquals(2, msgFromQueue.size());
 
 		msgInQueue = updateMessages(msgInQueue, ExecStatus.IN_PROGRESS, "worker1");
 		executionQueueService.enqueue(msgInQueue);
-		msgFromQueue = executionQueueService.poll("worker1", 100, ExecStatus.IN_PROGRESS);
+		msgFromQueue = executionQueueService.pollRecovery("worker1", 100, ExecStatus.IN_PROGRESS);
 		Assert.assertEquals(ExecStatus.IN_PROGRESS, msgFromQueue.get(0).getStatus());
 		Assert.assertEquals(2, msgFromQueue.size());
 
 		msgInQueue = updateMessages(msgInQueue, ExecStatus.FINISHED, "worker1");
 		executionQueueService.enqueue(msgInQueue);
-		msgFromQueue = executionQueueService.poll("worker1", 100, ExecStatus.FINISHED);
+		msgFromQueue = executionQueueService.pollRecovery("worker1", 100, ExecStatus.FINISHED);
 		Assert.assertEquals(ExecStatus.FINISHED, msgFromQueue.get(0).getStatus());
 		Assert.assertEquals(2, msgFromQueue.size());
 
