@@ -16,9 +16,10 @@ import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
+import io.cloudslang.orchestrator.entities.SplitMessage;
 import io.cloudslang.score.facade.TempConstants;
 import io.cloudslang.score.facade.entities.Execution;
-import io.cloudslang.orchestrator.entities.SplitMessage;
+import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.worker.execution.services.ExecutionService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
 import org.apache.commons.lang.StringUtils;
@@ -120,7 +121,14 @@ public class SimpleExecutionRunnable implements Runnable {
             }
         }
         catch (InterruptedException interruptedException){
-            logger.error("Execution thread is interrupted!!! Exiting...", interruptedException);
+
+            // not old thread and interrupted by cancel
+            boolean oldThread = !workerManager.isFromCurrentThreadPool(Thread.currentThread().getName());
+            if(!oldThread && isExecutionCancelled(execution)){
+                if (logger.isDebugEnabled())  logger.debug("Execution is interrupted...");
+            }else {
+                logger.error("Execution thread is interrupted!!! Exiting...", interruptedException);
+            }
         }
         catch (Exception ex) {
             logger.error("Error during execution!!!", ex);
@@ -171,8 +179,8 @@ public class SimpleExecutionRunnable implements Runnable {
         //6. Running too long
 
         //The order is important!!!
-
-        return isInterrupted() ||
+        return isOldThread() ||
+                isExecutionCancelled(nextStepExecution) ||
                 isExecutionPaused(nextStepExecution) ||
                 isExecutionTerminating(nextStepExecution) ||
                 isSplitStep(nextStepExecution) ||
@@ -294,27 +302,67 @@ public class SimpleExecutionRunnable implements Runnable {
         return (workerUUID != null && groupName.endsWith(workerUUID));
     }
 
-    private boolean isInterrupted() {
-        boolean interrupted = Thread.currentThread().isInterrupted();
-        if(interrupted){
-            if (logger.isDebugEnabled())
-                logger.debug("Checked if execution is interrupted: " + interrupted);
+    private boolean isOldThread() {
+
+        boolean oldThread = !workerManager.isFromCurrentThreadPool(Thread.currentThread().getName());
+        if(oldThread){ // interrupted old (recovery) thread
+            if(logger.isDebugEnabled()) {
+                logger.debug("Checked if execution is on old thread: " + oldThread);
+            }
             return true;
-        }
-        else {
-            boolean oldThread = !workerManager.isFromCurrentThreadPool(Thread.currentThread().getName());
-            if(oldThread){
-                if(logger.isDebugEnabled())
-                    logger.debug("Checked if execution is on old thread: " + oldThread);
-                return true;
+        }else {
+            if(logger.isDebugEnabled()) {
+                logger.debug("Execution was not interrupted and is in current thread pool! Continue... ");
             }
-            else {
-                if(logger.isDebugEnabled())
-                    logger.debug("Execution was not interrupted and is in current thread pool! Continue... ");
-                return false;
-            }
+            return false;
         }
     }
+
+    private boolean isExecutionCancelled(Execution execution) {
+
+        if(isCancelledExecution(execution)) {
+            if (logger.isDebugEnabled())  logger.debug("Execution is interrupted by Cancel");
+
+            // NOTE: an execution can be cancelled directly from CancelExecutionService, if it's currently paused.
+            // Thus, if you change the code here, please check CancelExecutionService as well.
+            execution.getSystemContext().setFlowTerminationType(ExecutionStatus.CANCELED);
+            execution.setPosition(null);
+
+            //set current step to finished
+            executionMessage.setStatus(ExecStatus.FINISHED);
+            executionMessage.incMsgSeqId();
+            executionMessage.setPayload(null);
+
+            //Flow is finished - does not matter if successfully or not
+            ExecutionMessage terminationMessage = createTerminatedExecutionMessage(execution);
+            ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage, terminationMessage}; //Messages that we will send to OutBuffer
+
+            try {
+                outBuffer.put(executionMessagesToSend);
+            } catch (InterruptedException e) {
+                logger.warn("Thread was interrupted While canceling! Exiting the execution... ", e);
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean isCancelledExecution(Execution execution) {
+
+        if(execution==null) return false;
+
+        boolean executionIsCancelled = workerConfigurationService.isExecutionCancelled(execution.getExecutionId()); // in this case - just check if need to cancel. It will set as cancelled later on QueueEventListener
+        // Another scenario of getting canceled - it was cancelled from the SplitJoinService (the configuration can still be not updated). Defect #:22060
+        if(ExecutionStatus.CANCELED.equals(execution.getSystemContext().getFlowTerminationType())) {
+            executionIsCancelled = true;
+        }
+
+        return executionIsCancelled;
+    }
+
+
+
 
     private boolean isRunningTooLong(Long startTime, Execution nextStepExecution) {
         Long currentTime = System.currentTimeMillis();
