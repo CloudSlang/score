@@ -244,4 +244,13 @@ public interface WorkerNodeService {
      * @return a List of String of the worker uuids
      */
     List<String> readAllWorkersUuids();
+
+    /**
+     *
+     * updates the worker version of a given worker
+     *
+     * @param workerUuid the uuid of the worker to update
+     * @param version the new worker recovery version
+     */
+    void updateVersion(String workerUuid, String version);
 }

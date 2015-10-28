@@ -41,4 +41,6 @@ public interface Worker {
 	List<String> getGroups();
 
     boolean isDeleted();
+
+	String getVersion();
 }

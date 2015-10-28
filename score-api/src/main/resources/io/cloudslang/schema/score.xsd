@@ -21,6 +21,7 @@
             <xsd:attribute type="xsd:boolean" name="externalDatabase" />
             <xsd:attribute type="xsd:boolean" name="ignoreEngineJobs" />
             <xsd:attribute type="xsd:boolean" name="registerPauseResumeService"/>
+            <xsd:attribute type="xsd:boolean" name="registerWorkerNodeService"/>
         </xsd:complexType>
 	</xsd:element>
 

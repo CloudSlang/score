@@ -33,7 +33,7 @@ import java.util.List;
  * @since 11/11/2012
  * @version $Id$
  */
-public final class WorkerNodeServiceImpl implements WorkerNodeService {
+public class WorkerNodeServiceImpl implements WorkerNodeService {
 
 	private static final long maxVersionGapAllowed = Long.getLong("max.allowed.version.gap.worker.recovery", 2);
 	private static final String MSG_RECOVERY_VERSION_NAME = "MSG_RECOVERY_VERSION";
@@ -148,6 +148,16 @@ public final class WorkerNodeServiceImpl implements WorkerNodeService {
 			result.add(w.getUuid());
 		}
 		return result;
+	}
+
+	@Override
+	@Transactional
+	public void updateVersion(String workerUuid, String version) {
+		WorkerNode worker = workerNodeRepository.findByUuid(workerUuid);
+		if(worker == null) {
+			throw new IllegalStateException("No worker was found by the specified UUID:" + workerUuid);
+		}
+		worker.setVersion(version);
 	}
 
 	@Override

@@ -81,7 +81,6 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(ExecutionAssignerServiceImpl.class, "executionAssignerService");
 		put(PartitionServiceImpl.class, null);
 		put(RunningExecutionPlanServiceImpl.class, "runningEP");
-		put(WorkerNodeServiceImpl.class, null);
 		put(VersionServiceImpl.class, null);
 		put(CancelExecutionServiceImpl.class, "cancelExecutionService");
 		put(ScoreEventFactoryImpl.class, "scoreEventFactory");
@@ -151,6 +150,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
     private void registerSpecialBeans(Element element, ParserContext parserContext) {
         registerPauseResume(element,parserContext);
+		registerWorkerNodeService(element, parserContext);
     }
 
     private void registerPauseResume(Element element, ParserContext parserContext){
@@ -159,6 +159,13 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
             new BeanRegistrator(parserContext).CLASS(StubPauseResumeServiceImpl.class).register();
         }
     }
+
+	private void registerWorkerNodeService(Element element, ParserContext parserContext){
+		String registerWorkerNodeService = element.getAttribute("registerWorkerNodeService");
+		if(!registerWorkerNodeService.equals(Boolean.FALSE.toString())){
+			new BeanRegistrator(parserContext).CLASS(WorkerNodeServiceImpl.class).register();
+		}
+	}
 
 	private void registerPartitionTemplate(String name, int groupSize, long sizeThreshold, long timeThreshold,
                                            ParserContext parserContext,

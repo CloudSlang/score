@@ -105,6 +105,9 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
     @Column(name = "WRV", length = 48)
     private String workerRecoveryVersion;
 
+	@Column(name = "VERSION", length = 48, nullable = false)
+	private String version = "";
+
     @Override
 	public String getUuid() {
 		return uuid;
@@ -244,52 +247,84 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
         this.workerRecoveryVersion = workerRecoveryVersion;
     }
 
-    @Override
+	@Override
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (!(o instanceof WorkerNode)) return false;
+		if (o == null || getClass() != o.getClass()) return false;
 
 		WorkerNode that = (WorkerNode) o;
 
-		return new EqualsBuilder()
-				.append(this.uuid, that.uuid)
-				.append(this.description, that.description)
-				.append(this.hostName, that.hostName)
-				.append(this.installPath, that.installPath)
-				.append(this.active, that.active)
-				.append(this.ackTime, that.ackTime)
-                .append(this.ackVersion, that.ackVersion)
-				.append(this.os, that.os)
-				.append(this.jvm, that.jvm)
-				.append(this.dotNetVersion, that.dotNetVersion)
-				.append(this.groups, that.groups)
-                .append(this.bulkNumber, that.bulkNumber)
-                .append(this.workerRecoveryVersion, that.workerRecoveryVersion)
-				.isEquals();
+		if (active != that.active) return false;
+		if (deleted != that.deleted) return false;
+		if (ackVersion != that.ackVersion) return false;
+		if (uuid != null ? !uuid.equals(that.uuid) : that.uuid != null) return false;
+		if (status != that.status) return false;
+		if (hostName != null ? !hostName.equals(that.hostName) : that.hostName != null) return false;
+		if (installPath != null ? !installPath.equals(that.installPath) : that.installPath != null) return false;
+		if (description != null ? !description.equals(that.description) : that.description != null) return false;
+		if (password != null ? !password.equals(that.password) : that.password != null) return false;
+		if (os != null ? !os.equals(that.os) : that.os != null) return false;
+		if (jvm != null ? !jvm.equals(that.jvm) : that.jvm != null) return false;
+		if (dotNetVersion != null ? !dotNetVersion.equals(that.dotNetVersion) : that.dotNetVersion != null) return false;
+		if (ackTime != null ? !ackTime.equals(that.ackTime) : that.ackTime != null) return false;
+		if (groups != null ? !groups.equals(that.groups) : that.groups != null) return false;
+		if (bulkNumber != null ? !bulkNumber.equals(that.bulkNumber) : that.bulkNumber != null) return false;
+		if (workerRecoveryVersion != null ? !workerRecoveryVersion.equals(that.workerRecoveryVersion) : that.workerRecoveryVersion != null) return false;
+		return !(version != null ? !version.equals(that.version) : that.version != null);
+
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(uuid,description,hostName,installPath,active,ackVersion,ackTime,os,jvm,dotNetVersion,groups,bulkNumber,workerRecoveryVersion);
+		int result = uuid != null ? uuid.hashCode() : 0;
+		result = 31 * result + (status != null ? status.hashCode() : 0);
+		result = 31 * result + (active ? 1 : 0);
+		result = 31 * result + (hostName != null ? hostName.hashCode() : 0);
+		result = 31 * result + (installPath != null ? installPath.hashCode() : 0);
+		result = 31 * result + (description != null ? description.hashCode() : 0);
+		result = 31 * result + (password != null ? password.hashCode() : 0);
+		result = 31 * result + (os != null ? os.hashCode() : 0);
+		result = 31 * result + (jvm != null ? jvm.hashCode() : 0);
+		result = 31 * result + (dotNetVersion != null ? dotNetVersion.hashCode() : 0);
+		result = 31 * result + (ackTime != null ? ackTime.hashCode() : 0);
+		result = 31 * result + (deleted ? 1 : 0);
+		result = 31 * result + (int) (ackVersion ^ (ackVersion >>> 32));
+		result = 31 * result + (groups != null ? groups.hashCode() : 0);
+		result = 31 * result + (bulkNumber != null ? bulkNumber.hashCode() : 0);
+		result = 31 * result + (workerRecoveryVersion != null ? workerRecoveryVersion.hashCode() : 0);
+		result = 31 * result + (version != null ? version.hashCode() : 0);
+		return result;
 	}
 
 	@Override
 	public String toString() {
-
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("UUID", uuid)
-				.append("active", active)
-				.append("ackTime", ackTime)
-                .append("ackVersion", ackVersion)
-				.append("host", hostName)
-				.append("path", installPath)
-				.append("OS", os)
-				.append("JVM", jvm)
-				.append(".NET", dotNetVersion)
-				.append("groups", groups)
-                .append("bulkNumber", bulkNumber)
-                .append("workerRecoveryVersion", workerRecoveryVersion)
-				.toString()
-		;
+		return "WorkerNode{" +
+				"uuid='" + uuid + '\'' +
+				", status=" + status +
+				", active=" + active +
+				", hostName='" + hostName + '\'' +
+				", installPath='" + installPath + '\'' +
+				", description='" + description + '\'' +
+				", password='" + password + '\'' +
+				", os='" + os + '\'' +
+				", jvm='" + jvm + '\'' +
+				", dotNetVersion='" + dotNetVersion + '\'' +
+				", ackTime=" + ackTime +
+				", deleted=" + deleted +
+				", ackVersion=" + ackVersion +
+				", groups=" + groups +
+				", bulkNumber='" + bulkNumber + '\'' +
+				", workerRecoveryVersion='" + workerRecoveryVersion + '\'' +
+				", version='" + version + '\'' +
+				'}';
 	}
 }
