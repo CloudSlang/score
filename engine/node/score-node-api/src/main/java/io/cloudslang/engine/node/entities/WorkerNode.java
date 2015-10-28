@@ -106,7 +106,7 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
     private String workerRecoveryVersion;
 
 	@Column(name = "VERSION", length = 48, nullable = false)
-	private String version = "N/A";
+	private String version = "";
 
     @Override
 	public String getUuid() {

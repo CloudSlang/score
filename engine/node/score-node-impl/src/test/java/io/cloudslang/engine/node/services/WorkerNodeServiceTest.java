@@ -288,7 +288,7 @@ public class WorkerNodeServiceTest {
 	public void updateVersionTest() {
 		workerNodeService.create("worker_1", "password", "stamHost", "c:/dir");
 		WorkerNode workerNode = workerNodeService.readByUUID("H1");
-		Assert.assertEquals("N/A", workerNode.getVersion());
+		Assert.assertEquals("", workerNode.getVersion());
 
 		workerNodeService.updateVersion("H1", "VERSION");
 
