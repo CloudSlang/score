@@ -27,6 +27,7 @@ public class ExecutionSummary implements Serializable {
     private String resultStatusType;
     private String resultStatusName;
     private PauseReason pauseReason;
+    private CancelReason cancelReason;
     private String owner;
     private String triggeredBy;
     private String flowUuid;
@@ -174,6 +175,14 @@ public class ExecutionSummary implements Serializable {
     @SuppressWarnings("UnusedDeclaration")
     public void setRoi(Double roi) {
         this.roi = roi;
+    }
+
+    public CancelReason getCancelReason() {
+        return cancelReason;
+    }
+
+    public void setCancelReason(CancelReason cancelReason) {
+        this.cancelReason = cancelReason;
     }
 
     @Override
