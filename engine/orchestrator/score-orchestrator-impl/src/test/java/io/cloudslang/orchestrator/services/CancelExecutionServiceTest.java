@@ -140,7 +140,6 @@ public class CancelExecutionServiceTest {
     @Test
     public void testInvalidRequestCancel() {
         checkInvalidRequestCancel(ExecutionStatus.COMPLETED, ExecutionActionResult.FAILED_ALREADY_COMPLETED);
-        checkInvalidRequestCancel(ExecutionStatus.PENDING_PAUSE, ExecutionActionResult.FAILED_PENDING_PAUSE);
         checkInvalidRequestCancel(ExecutionStatus.SYSTEM_FAILURE, ExecutionActionResult.FAILED_SYSTEM_FAILURE);
     }
 
