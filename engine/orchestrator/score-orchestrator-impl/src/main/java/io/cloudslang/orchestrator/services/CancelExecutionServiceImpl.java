@@ -75,7 +75,7 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
         // it's possible to cancel only running or paused executions.
         // If it's running - set to pending-cancel, and the ExecutionServiceImpl will handle it and extract it from the queue.
         // If it's paused - sometimes needs to handle its branches (if such exists).
-        if (status.equals(ExecutionStatus.RUNNING)) {
+        if (status.equals(ExecutionStatus.RUNNING) || status.equals(ExecutionStatus.PENDING_PAUSE)) {
             executionStateToCancel.setStatus(ExecutionStatus.PENDING_CANCEL);
         } else if (status.equals(ExecutionStatus.PAUSED)) {
             cancelPausedRun(executionStateToCancel);
