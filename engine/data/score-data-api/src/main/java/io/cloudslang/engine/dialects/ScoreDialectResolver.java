@@ -12,7 +12,8 @@ package io.cloudslang.engine.dialects;
 
 import org.apache.log4j.Logger;
 import org.hibernate.dialect.Dialect;
-import org.hibernate.service.jdbc.dialect.internal.StandardDialectResolver;
+import org.hibernate.engine.jdbc.dialect.internal.StandardDialectResolver;
+import org.hibernate.engine.jdbc.dialect.spi.DatabaseMetaDataDialectResolutionInfoAdapter;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -27,7 +28,6 @@ public class ScoreDialectResolver  extends StandardDialectResolver {
 
     private final Logger logger = Logger.getLogger(getClass());
 
-    @Override
     protected Dialect resolveDialectInternal(DatabaseMetaData metaData) throws SQLException {
         String databaseName = metaData.getDatabaseProductName();
         int databaseMajorVersion = metaData.getDatabaseMajorVersion();
@@ -37,6 +37,7 @@ public class ScoreDialectResolver  extends StandardDialectResolver {
         if ( "MySQL".equals( databaseName ) ) {
 			return new ScoreMySQLDialect();
         }
-        return super.resolveDialectInternal(metaData);
+        DatabaseMetaDataDialectResolutionInfoAdapter databaseMetaDataDialectResolutionInfoAdapter=new DatabaseMetaDataDialectResolutionInfoAdapter(metaData);
+        return resolveDialect(databaseMetaDataDialectResolutionInfoAdapter);
     }
 }
