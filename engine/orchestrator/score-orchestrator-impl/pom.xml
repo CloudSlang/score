@@ -18,10 +18,10 @@
     <artifactId>score-orchestrator-impl</artifactId>
 
     <dependencies>
-	
-		<dependency>
-                <groupId>org.hamcrest</groupId>
-                <artifactId>hamcrest-all</artifactId>
+
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
         </dependency>
 		
         <dependency>
