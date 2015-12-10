@@ -59,6 +59,7 @@
 			<xsd:attribute type="xsd:string" name="uuid" use="required"/>
 			<xsd:attribute type="xsd:string" name="depends-on"/>
 			<xsd:attribute type="xsd:boolean" name="register"/>
+			<xsd:attribute type="xsd:boolean" name="registerWorkerVersionService"/>
 		</xsd:complexType>
 	</xsd:element>
 </xsd:schema>

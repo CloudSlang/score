@@ -113,6 +113,15 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		if(!"false".equalsIgnoreCase(element.getAttribute("register"))) {
 			new BeanRegistrator(parserContext).CLASS(WorkerRegistration.class).register();
 		}
+
+		registerWorkerVersionService(element, parserContext);
+	}
+
+	private static void registerWorkerVersionService(Element element, ParserContext parserContext){
+		String registerWorkerVersionService = element.getAttribute("registerWorkerVersionService");
+		if(!registerWorkerVersionService.equals(Boolean.FALSE.toString())){
+			new BeanRegistrator(parserContext).CLASS(WorkerVersionServiceImpl.class).register();
+		}
 	}
 
 	private void registerConfiguration(Element configurationElement, ParserContext parserContext) {

@@ -37,6 +37,9 @@ public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager {
     @Autowired
     private SynchronizationManager syncManager;
 
+    @Autowired
+   	protected WorkerVersionService workerVersionService;
+
 	private volatile boolean inRecovery; //must be volatile since it is read/written in several threads
 
     private volatile String wrv; //must be volatile since it is read/written in several threads
@@ -75,7 +78,7 @@ public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager {
                 @Override
                 public void tryOnce() {
 					if(logger.isDebugEnabled()) logger.debug("sending worker UP");
-                    String newWrv = workerNodeService.up(System.getProperty("worker.uuid"));
+                    String newWrv = workerNodeService.up(System.getProperty("worker.uuid"), workerVersionService.getWorkerVersion() );
                     setWRV(newWrv);
                     if(logger.isDebugEnabled()) logger.debug("the worker is UP");
                 }

@@ -66,7 +66,7 @@ public interface WorkerNodeService {
      * @param uuid the the uuid of the worker that went up
      * @return a String of the current recovery version of the worker
      */
-	String up(String uuid);
+	String up(String uuid, String version);
 
     /**
      *

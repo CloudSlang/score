@@ -106,6 +106,7 @@ public class ScheduledWorkerLoadMonitorTest {
         @Bean public WorkerNodeService workerNodeService() {return mock(WorkerNodeService.class);}
         @Bean public WorkerConfigurationService workerConfigurationService() {return mock(WorkerConfigurationService.class);}
         @Bean public WorkerRecoveryManager workerRecoveryManager() {return mock(WorkerRecoveryManager.class);}
+        @Bean public WorkerVersionService workerVersionService() {return mock(WorkerVersionService.class);}
         @Bean public Integer numberOfExecutionThreads() {return 1;}
         @Bean public Long initStartUpSleep() {return 1L;}
         @Bean public Long maxStartUpSleep() {return 2L;}

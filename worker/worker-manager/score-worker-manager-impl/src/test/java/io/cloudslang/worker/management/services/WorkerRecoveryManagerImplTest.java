@@ -79,6 +79,11 @@ public class WorkerRecoveryManagerImplTest {
         }
 
         @Bean
+        public WorkerVersionService workerVersionService(){
+            return mock(WorkerVersionService.class);
+        }
+
+        @Bean
         public RetryTemplate retryTemplate(){
             return mock(RetryTemplate.class);
         }
