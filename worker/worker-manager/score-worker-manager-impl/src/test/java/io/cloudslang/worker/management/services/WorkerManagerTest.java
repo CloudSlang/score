@@ -26,12 +26,7 @@ import io.cloudslang.engine.node.services.WorkerNodeService;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.Fail.fail;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 
 /**
@@ -89,7 +84,7 @@ public class WorkerManagerTest {
 
 		workerManager.onApplicationEvent(mock(ContextRefreshedEvent.class));
 		Thread.sleep(1000L); // must sleep some time since the start up is being processed in a new thread
-		verify(workerNodeService,atLeastOnce()).up(CREDENTIAL_UUID);
+		verify(workerNodeService,atLeastOnce()).up(CREDENTIAL_UUID, "version");
 		assertThat(workerManager.isUp()).isTrue();
 	}
 
@@ -103,12 +98,12 @@ public class WorkerManagerTest {
 				.doThrow(new RuntimeException("try 2"))
 				.doThrow(new RuntimeException("try 3"))
 				.doReturn("1")
-				.when(workerNodeService).up(CREDENTIAL_UUID);
+				.when(workerNodeService).up(CREDENTIAL_UUID, "version");
 
 		workerManager.onApplicationEvent(mock(ContextRefreshedEvent.class));
 
 		Thread.sleep(2000L); // must sleep some time since the start up is being processed in a new thread
-		verify(workerNodeService, times(4)).up(CREDENTIAL_UUID);
+		verify(workerNodeService, times(4)).up(CREDENTIAL_UUID, "version");
 		assertThat(workerManager.isUp()).isTrue();
 	}
 
@@ -179,6 +174,13 @@ public class WorkerManagerTest {
 		@Bean
 		Long maxStartUpSleep() {
 			return 100L;
+		}
+
+		@Bean
+		WorkerVersionService workerVersionService() {
+			WorkerVersionService service =  mock(WorkerVersionService.class);
+			when(service.getWorkerVersion()).thenReturn("version");
+			return service;
 		}
 	}
 }

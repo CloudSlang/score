@@ -98,7 +98,8 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 
 	@Override
 	@Transactional
-	public String up(String uuid) {
+	public String up(String uuid, String version) {
+
 		if(loginListeners != null) {
 			for(LoginListener listener : loginListeners) {
 				listener.preLogin(uuid);
@@ -110,6 +111,9 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 				listener.postLogin(uuid);
 			}
 		}
+
+		updateVersion(uuid, version);
+
 		return wrv;
 	}
 

@@ -119,6 +119,7 @@ public class WorkerMonitorsImplTest {
 
         @Bean public ExecutionService executionService() {return mock(ExecutionService.class);}
         @Bean public ExecutionMessageConverter executionMessageConverter() {return mock(ExecutionMessageConverter.class);}
+        @Bean public WorkerVersionService workerVersionService() {return mock(WorkerVersionService.class);}
         @Bean public EndExecutionCallback endExecutionCallback() {return mock(EndExecutionCallback.class);}
         @Bean public QueueStateIdGeneratorService queueStateIdGeneratorService() {return mock(QueueStateIdGeneratorService.class);}
     }
