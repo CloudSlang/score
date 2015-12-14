@@ -12,9 +12,4 @@ public class WorkerVersionServiceImpl implements WorkerVersionService {
     public String getWorkerVersion() {
         return "";
     }
-
-    @Override
-    public String getWorkerComparableVersion() {
-        return "";
-    }
 }

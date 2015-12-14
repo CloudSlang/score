@@ -64,6 +64,7 @@ public interface WorkerNodeService {
      * Notifies the orchestrator that a worker went up
      *
      * @param uuid the the uuid of the worker that went up
+     * @param version the version of the worker that went up
      * @return a String of the current recovery version of the worker
      */
 	String up(String uuid, String version);
