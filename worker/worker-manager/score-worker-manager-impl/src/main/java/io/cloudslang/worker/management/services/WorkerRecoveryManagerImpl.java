@@ -78,7 +78,7 @@ public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager {
                 @Override
                 public void tryOnce() {
 					if(logger.isDebugEnabled()) logger.debug("sending worker UP");
-                    String newWrv = workerNodeService.up(System.getProperty("worker.uuid"), workerVersionService.getWorkerVersion() );
+                    String newWrv = workerNodeService.up(System.getProperty("worker.uuid"), workerVersionService.getWorkerVersion(), workerVersionService.getWorkerVersionId());
                     setWRV(newWrv);
                     if(logger.isDebugEnabled()) logger.debug("the worker is UP");
                 }

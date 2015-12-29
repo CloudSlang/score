@@ -43,4 +43,6 @@ public interface Worker {
     boolean isDeleted();
 
 	String getVersion();
+
+	String getVersionId();
 }

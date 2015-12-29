@@ -108,6 +108,9 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
 	@Column(name = "VERSION", length = 48, nullable = false)
 	private String version = "";
 
+	@Column(name = "VERSION_ID", length = 48, nullable = false)
+	private String versionId = "";
+
     @Override
 	public String getUuid() {
 		return uuid;
@@ -257,6 +260,15 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
 	}
 
 	@Override
+	public String getVersionId() {
+		return versionId;
+	}
+
+	public void setVersionId(String versionId) {
+		this.versionId = versionId;
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
@@ -279,7 +291,8 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
 		if (groups != null ? !groups.equals(that.groups) : that.groups != null) return false;
 		if (bulkNumber != null ? !bulkNumber.equals(that.bulkNumber) : that.bulkNumber != null) return false;
 		if (workerRecoveryVersion != null ? !workerRecoveryVersion.equals(that.workerRecoveryVersion) : that.workerRecoveryVersion != null) return false;
-		return !(version != null ? !version.equals(that.version) : that.version != null);
+		if (version != null ? !version.equals(that.version) : that.version != null) return false;
+		return !(versionId != null ? !versionId.equals(that.versionId) : that.versionId != null);
 
 	}
 
@@ -302,6 +315,7 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
 		result = 31 * result + (bulkNumber != null ? bulkNumber.hashCode() : 0);
 		result = 31 * result + (workerRecoveryVersion != null ? workerRecoveryVersion.hashCode() : 0);
 		result = 31 * result + (version != null ? version.hashCode() : 0);
+		result = 31 * result + (versionId != null ? versionId.hashCode() : 0);
 		return result;
 	}
 
@@ -325,6 +339,7 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
 				", bulkNumber='" + bulkNumber + '\'' +
 				", workerRecoveryVersion='" + workerRecoveryVersion + '\'' +
 				", version='" + version + '\'' +
+				", versionId='" + versionId + '\'' +
 				'}';
 	}
 }

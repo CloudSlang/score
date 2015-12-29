@@ -118,7 +118,7 @@ public class WorkerNodeServiceTest {
 		workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
 		WorkerNode worker = workerNodeService.readByUUID("H3");
 		Assert.assertEquals(WorkerStatus.FAILED, worker.getStatus());
-		workerNodeService.up("H3", "version");
+		workerNodeService.up("H3", "version", "123");
 		worker = workerNodeService.readByUUID("H3");
 		Assert.assertEquals(WorkerStatus.RUNNING, worker.getStatus());
 	}
@@ -150,7 +150,7 @@ public class WorkerNodeServiceTest {
         workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
         WorkerNode worker = workerNodeService.readByUUID("H3");
         Assert.assertEquals(WorkerStatus.FAILED, worker.getStatus());
-        workerNodeService.up("H3", "version");
+        workerNodeService.up("H3", "version", "123");
         Assert.assertEquals(WorkerStatus.RUNNING, worker.getStatus());
         workerNodeService.updateWorkerToDeleted("H3");
         Assert.assertEquals(WorkerStatus.IN_RECOVERY, worker.getStatus());
@@ -174,7 +174,7 @@ public class WorkerNodeServiceTest {
 		Assert.assertEquals(0, workers.size());//still it not "non responding" because it yet to login(first login)
 
 		// after login version is current system version.
-		workerNodeService.up("H3", "version");
+		workerNodeService.up("H3", "version", "123");
 		workers = workerNodeService.readNonRespondingWorkers();
 		Assert.assertEquals(0, workers.size());
 
@@ -184,7 +184,7 @@ public class WorkerNodeServiceTest {
         Assert.assertEquals(3, workers.size());
 
         //after up the worker version will be aligned with current system version.
-        workerNodeService.up("H3", "version");
+        workerNodeService.up("H3", "version", "123");
         workers = workerNodeService.readNonRespondingWorkers();
         Assert.assertEquals(2, workers.size());
         Assert.assertFalse(workers.contains("H3"));
@@ -290,7 +290,7 @@ public class WorkerNodeServiceTest {
 		WorkerNode workerNode = workerNodeService.readByUUID("H1");
 		Assert.assertEquals("", workerNode.getVersion());
 
-		workerNodeService.updateVersion("H1", "VERSION");
+		workerNodeService.updateVersion("H1", "VERSION", "123");
 
 		workerNode = workerNodeService.readByUUID("H1");
 

@@ -189,7 +189,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
                         boolean shouldRetry = true;
 		                while (shouldRetry) {
 			                try {
-				                String newWrv = workerNodeService.up(workerUuid, workerVersionService.getWorkerVersion());
+				                String newWrv = workerNodeService.up(workerUuid, workerVersionService.getWorkerVersion(), workerVersionService.getWorkerVersionId());
                                 recoveryManager.setWRV(newWrv); //we do set of WRV here and in doRecovery() only!!! not in keepalive!!!
 				                shouldRetry = false;
 				                logger.info("Worker is up");
