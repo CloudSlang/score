@@ -98,7 +98,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 
 	@Override
 	@Transactional
-	public String up(String uuid, String version) {
+	public String up(String uuid, String version, String versionId) {
 
 		if(loginListeners != null) {
 			for(LoginListener listener : loginListeners) {
@@ -112,8 +112,27 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 			}
 		}
 
-		updateVersion(uuid, version);
+		updateVersion(uuid, version, versionId);
 
+		return wrv;
+	}
+
+	@Override
+	@Transactional
+	@Deprecated //is left here for backward compatibility
+	public String up(String uuid) {
+
+		if(loginListeners != null) {
+			for(LoginListener listener : loginListeners) {
+				listener.preLogin(uuid);
+			}
+		}
+		String wrv = keepAlive(uuid);
+		if(loginListeners != null) {
+			for(LoginListener listener : loginListeners) {
+				listener.postLogin(uuid);
+			}
+		}
 		return wrv;
 	}
 
@@ -156,12 +175,13 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 
 	@Override
 	@Transactional
-	public void updateVersion(String workerUuid, String version) {
+	public void updateVersion(String workerUuid, String version, String versionId) {
 		WorkerNode worker = workerNodeRepository.findByUuid(workerUuid);
 		if(worker == null) {
 			throw new IllegalStateException("No worker was found by the specified UUID:" + workerUuid);
 		}
 		worker.setVersion(version);
+		worker.setVersionId(versionId);
 	}
 
 	@Override

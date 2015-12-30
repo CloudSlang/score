@@ -6,4 +6,6 @@ package io.cloudslang.worker.management.services;
 public interface WorkerVersionService {
 
     String getWorkerVersion();
+
+    String getWorkerVersionId();
 }

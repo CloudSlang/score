@@ -84,7 +84,7 @@ public class WorkerManagerTest {
 
 		workerManager.onApplicationEvent(mock(ContextRefreshedEvent.class));
 		Thread.sleep(1000L); // must sleep some time since the start up is being processed in a new thread
-		verify(workerNodeService,atLeastOnce()).up(CREDENTIAL_UUID, "version");
+		verify(workerNodeService,atLeastOnce()).up(CREDENTIAL_UUID, "version", "123");
 		assertThat(workerManager.isUp()).isTrue();
 	}
 
@@ -98,12 +98,12 @@ public class WorkerManagerTest {
 				.doThrow(new RuntimeException("try 2"))
 				.doThrow(new RuntimeException("try 3"))
 				.doReturn("1")
-				.when(workerNodeService).up(CREDENTIAL_UUID, "version");
+				.when(workerNodeService).up(CREDENTIAL_UUID, "version", "123");
 
 		workerManager.onApplicationEvent(mock(ContextRefreshedEvent.class));
 
 		Thread.sleep(2000L); // must sleep some time since the start up is being processed in a new thread
-		verify(workerNodeService, times(4)).up(CREDENTIAL_UUID, "version");
+		verify(workerNodeService, times(4)).up(CREDENTIAL_UUID, "version", "123");
 		assertThat(workerManager.isUp()).isTrue();
 	}
 
@@ -180,6 +180,7 @@ public class WorkerManagerTest {
 		WorkerVersionService workerVersionService() {
 			WorkerVersionService service =  mock(WorkerVersionService.class);
 			when(service.getWorkerVersion()).thenReturn("version");
+			when(service.getWorkerVersionId()).thenReturn("123");
 			return service;
 		}
 	}
