@@ -197,11 +197,11 @@ public interface WorkerNodeService {
     /**
      *
      * Reads all of the worker that are active and running and their groups
-     *
+     * @param versionId - the version of workers
      * @return A {@link com.google.common.collect.Multimap} of the
-     * active and running workers and their groups
+     * active and running workers in specific version and their groups
      */
-	Multimap<String, String> readGroupWorkersMapActiveAndRunning();
+	Multimap<String, String> readGroupWorkersMapActiveAndRunningAndVersion(String versionId);
 
     /**
      *

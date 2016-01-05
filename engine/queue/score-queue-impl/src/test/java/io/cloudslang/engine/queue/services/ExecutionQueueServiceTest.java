@@ -24,11 +24,13 @@ import io.cloudslang.engine.queue.repositories.ExecutionQueueRepositoryImpl;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerService;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerServiceImpl;
 import io.cloudslang.engine.versioning.services.VersionService;
+import io.cloudslang.orchestrator.services.EngineVersionService;
 import junit.framework.Assert;
 import liquibase.integration.spring.SpringLiquibase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -68,12 +70,15 @@ public class ExecutionQueueServiceTest {
 	@Autowired
 	private VersionService versionService;
 
+	@Autowired
+	private EngineVersionService engineVersionService;
+
 	@Before
 	public void before() {
 		jdbcTemplate.execute("delete from OO_EXECUTION_QUEUES");
 		jdbcTemplate.execute("delete from OO_EXECUTION_STATES");
 
-		reset(workerNodeService);
+		reset(workerNodeService, engineVersionService);
 	}
 
 
@@ -82,7 +87,7 @@ public class ExecutionQueueServiceTest {
 		Multimap<String, String> groupWorkerMap = ArrayListMultimap.create();
 		groupWorkerMap.put("group1", "worker3");
 		groupWorkerMap.put("group2", "worker3");
-		when(workerNodeService.readGroupWorkersMapActiveAndRunning()).thenReturn(groupWorkerMap);
+		when(workerNodeService.readGroupWorkersMapActiveAndRunningAndVersion(engineVersionService.getEngineVersionId())).thenReturn(groupWorkerMap);
 
 
 		ExecutionMessage message1 = generateMessage("group1", "11");
@@ -131,7 +136,7 @@ public class ExecutionQueueServiceTest {
 		Multimap<String, String> groupWorkerMap = ArrayListMultimap.create();
 		groupWorkerMap.put("group1", "worker1");
 		groupWorkerMap.put("group1", "worker2");
-		when(workerNodeService.readGroupWorkersMapActiveAndRunning()).thenReturn(groupWorkerMap);
+		when(workerNodeService.readGroupWorkersMapActiveAndRunningAndVersion(engineVersionService.getEngineVersionId())).thenReturn(groupWorkerMap);
 
 		when(versionService.getCurrentVersion(anyString())).thenReturn(0L);
 
@@ -158,7 +163,7 @@ public class ExecutionQueueServiceTest {
 		Multimap<String, String> groupWorkerMap = ArrayListMultimap.create();
 		groupWorkerMap.put("group1", "worker1");
 		groupWorkerMap.put("group1", "worker2");
-		when(workerNodeService.readGroupWorkersMapActiveAndRunning()).thenReturn(groupWorkerMap);
+		when(workerNodeService.readGroupWorkersMapActiveAndRunningAndVersion(engineVersionService.getEngineVersionId())).thenReturn(groupWorkerMap);
 
 		when(versionService.getCurrentVersion(anyString())).thenReturn(0L);
 
@@ -184,7 +189,7 @@ public class ExecutionQueueServiceTest {
 		Multimap<String, String> groupWorkerMap = ArrayListMultimap.create();
 		groupWorkerMap.put("group1", "worker1");
 		groupWorkerMap.put("group1", "worker2");
-		when(workerNodeService.readGroupWorkersMapActiveAndRunning()).thenReturn(groupWorkerMap);
+		when(workerNodeService.readGroupWorkersMapActiveAndRunningAndVersion("")).thenReturn(groupWorkerMap);
 
 		List<ExecutionMessage> msgInQueue = executionQueueService.pollMessagesWithoutAck(100, 0);
 		Assert.assertEquals(0, msgInQueue.size());
@@ -224,7 +229,7 @@ public class ExecutionQueueServiceTest {
 		groupWorkerMap.put("group2", "worker1");
 		groupWorkerMap.put("group2", "worker2");
 		reset(workerNodeService);
-		when(workerNodeService.readGroupWorkersMapActiveAndRunning()).thenReturn(groupWorkerMap);
+		when(workerNodeService.readGroupWorkersMapActiveAndRunningAndVersion(engineVersionService.getEngineVersionId())).thenReturn(groupWorkerMap);
 
 		ExecutionMessage message1 = generateMessage("group1", "6");
 		ExecutionMessage message2 = generateMessage("group2", "6");
@@ -332,6 +337,15 @@ public class ExecutionQueueServiceTest {
 		@Bean
 		ExecutionMessageConverter executionMessageConverter(){
 			return new ExecutionMessageConverter();
+		}
+
+		@Bean
+		EngineVersionService engineVersionService(){
+			EngineVersionService mock =  mock(EngineVersionService.class);
+
+			when(mock.getEngineVersionId()).thenReturn("");
+
+			return mock;
 		}
 	}
 }

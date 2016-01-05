@@ -10,6 +10,7 @@
 
 package io.cloudslang.schema;
 
+import io.cloudslang.orchestrator.services.EngineVersionService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,11 @@ public class WorkerTest {
 	@Configuration
 	@ImportResource("classpath:META-INF/spring/schema/schemaWorkerTestContext.xml")
 	static class Context{
+
+		@Bean
+		EngineVersionService versionService(){
+			return mock(EngineVersionService.class);
+		}
 
 		@Bean
 		OrchestratorDispatcherService orchestratorDispatcherService(){

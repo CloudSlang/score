@@ -24,6 +24,7 @@ import io.cloudslang.engine.queue.services.ExecutionQueueServiceImpl;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerService;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerServiceImpl;
 import io.cloudslang.engine.versioning.services.VersionService;
+import io.cloudslang.orchestrator.services.EngineVersionService;
 import junit.framework.Assert;
 import liquibase.integration.spring.SpringLiquibase;
 import org.junit.Before;
@@ -47,6 +48,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * User: A
@@ -205,6 +207,11 @@ public class QueueCleanerServiceTest {
 		@Bean
 		ExecutionMessageConverter executionMessageConverter(){
 			return new ExecutionMessageConverter();
+		}
+
+		@Bean
+		EngineVersionService engineVersionService(){
+			return mock(EngineVersionService.class);
 		}
 	}
 }
