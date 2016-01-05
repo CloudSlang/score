@@ -27,6 +27,7 @@ import io.cloudslang.engine.queue.services.recovery.MessageRecoveryServiceImpl;
 import io.cloudslang.engine.queue.services.recovery.WorkerRecoveryServiceImpl;
 import io.cloudslang.engine.versioning.services.VersionServiceImpl;
 import io.cloudslang.orchestrator.services.CancelExecutionServiceImpl;
+import io.cloudslang.orchestrator.services.EngineVersionServiceImpl;
 import io.cloudslang.orchestrator.services.ExecutionSerializationUtil;
 import io.cloudslang.orchestrator.services.OrchestratorDispatcherServiceImpl;
 import io.cloudslang.orchestrator.services.RunningExecutionPlanServiceImpl;
@@ -151,6 +152,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
     private void registerSpecialBeans(Element element, ParserContext parserContext) {
         registerPauseResume(element,parserContext);
 		registerWorkerNodeService(element, parserContext);
+		registerEngineVersionService(element, parserContext);
     }
 
     private void registerPauseResume(Element element, ParserContext parserContext){
@@ -164,6 +166,13 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		String registerWorkerNodeService = element.getAttribute("registerWorkerNodeService");
 		if(!registerWorkerNodeService.equals(Boolean.FALSE.toString())){
 			new BeanRegistrator(parserContext).CLASS(WorkerNodeServiceImpl.class).register();
+		}
+	}
+
+	private void registerEngineVersionService(Element element, ParserContext parserContext){
+		String registerEngineVersionService = element.getAttribute("registerEngineVersionService");
+		if(!registerEngineVersionService.equals(Boolean.FALSE.toString())){
+			new BeanRegistrator(parserContext).CLASS(EngineVersionServiceImpl.class).register();
 		}
 	}
 

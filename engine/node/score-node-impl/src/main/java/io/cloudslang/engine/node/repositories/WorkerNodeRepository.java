@@ -34,6 +34,8 @@ public interface WorkerNodeRepository extends JpaRepository<WorkerNode,Long> {
 
 	List<WorkerNode> findByActiveAndStatusAndDeleted(boolean isActive, WorkerStatus status, boolean deleted);
 
+	List<WorkerNode> findByActiveAndStatusAndDeletedAndVersionId(boolean isActive, WorkerStatus status, boolean deleted, String versionId);
+
 	List<WorkerNode> findByGroupsAndDeleted(String group, boolean deleted);
 
 	@Query("select w.uuid from WorkerNode w where (w.ackVersion < ?1) and w.status <> ?2")

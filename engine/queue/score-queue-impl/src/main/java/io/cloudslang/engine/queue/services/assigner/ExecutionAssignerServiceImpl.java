@@ -17,6 +17,7 @@ import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.ExecutionQueueService;
+import io.cloudslang.orchestrator.services.EngineVersionService;
 import io.cloudslang.score.facade.entities.Execution;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,9 @@ final public class ExecutionAssignerServiceImpl implements ExecutionAssignerServ
 
 	@Autowired
 	private ExecutionMessageConverter converter;
+
+    @Autowired
+    private EngineVersionService engineVersionService;
 
 
 	private void addErrorMessage(ExecutionMessage message) {
@@ -101,7 +105,9 @@ final public class ExecutionAssignerServiceImpl implements ExecutionAssignerServ
 
             if ( msg.getWorkerId().equals(ExecutionMessage.EMPTY_WORKER) && msg.getStatus() == ExecStatus.PENDING) {
                 if (groupWorkersMap == null) {
-                    groupWorkersMap = workerNodeService.readGroupWorkersMapActiveAndRunning();
+                    String engineVersionId = engineVersionService.getEngineVersionId();
+                    //We allow to assign to workers who's version is equal to the engine version
+                    groupWorkersMap = workerNodeService.readGroupWorkersMapActiveAndRunningAndVersion(engineVersionId);
                 }
                 String workerId = chooseWorker(msg.getWorkerGroup(), groupWorkersMap,randIntGenerator);
                 if (workerId == null) {

@@ -18,6 +18,7 @@ import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.ExecutionQueueService;
+import io.cloudslang.orchestrator.services.EngineVersionService;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.lang.SystemContext;
 import junit.framework.Assert;
@@ -37,6 +38,8 @@ import java.util.Date;
 import java.util.List;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by IntelliJ IDEA.
@@ -58,6 +61,9 @@ public class ExecutionAssignerServiceTest {
     @Autowired
     private ExecutionMessageConverter executionMessageConverter;
 
+    @Autowired
+   	private EngineVersionService engineVersionService;
+
     @Test
     public void assign() throws Exception {
 
@@ -73,7 +79,7 @@ public class ExecutionAssignerServiceTest {
 
         Mockito.reset(executionQueueService);
         Mockito.reset(workerNodeService);
-        Mockito.when(workerNodeService.readGroupWorkersMapActiveAndRunning()).thenReturn(groupWorkersMap);
+        Mockito.when(workerNodeService.readGroupWorkersMapActiveAndRunningAndVersion(engineVersionService.getEngineVersionId())).thenReturn(groupWorkersMap);
 
         final List<ExecutionMessage> messagesInQ = executionAssignerService.assignWorkers(assignMessages);
 
@@ -99,7 +105,7 @@ public class ExecutionAssignerServiceTest {
 
         Mockito.reset(executionQueueService);
         Mockito.reset(workerNodeService);
-        Mockito.when(workerNodeService.readGroupWorkersMapActiveAndRunning()).thenReturn(groupWorkersMap);
+        Mockito.when(workerNodeService.readGroupWorkersMapActiveAndRunningAndVersion(engineVersionService.getEngineVersionId())).thenReturn(groupWorkersMap);
         Execution execution = Mockito.mock(Execution.class);
         Mockito.when(execution.getSystemContext()).thenReturn(new SystemContext());
         Mockito.when(executionMessageConverter.extractExecution(any(Payload.class))).thenReturn(execution);
@@ -147,6 +153,15 @@ public class ExecutionAssignerServiceTest {
             TransactionTemplate bean = new TransactionTemplate();
             bean.setTransactionManager(Mockito.mock(PlatformTransactionManager.class));
             return bean;
+        }
+
+        @Bean
+        EngineVersionService engineVersionService(){
+            EngineVersionService mock =  mock(EngineVersionService.class);
+
+            when(mock.getEngineVersionId()).thenReturn("");
+
+            return mock;
         }
     }
 }

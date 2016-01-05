@@ -22,6 +22,7 @@
             <xsd:attribute type="xsd:boolean" name="ignoreEngineJobs" />
             <xsd:attribute type="xsd:boolean" name="registerPauseResumeService"/>
             <xsd:attribute type="xsd:boolean" name="registerWorkerNodeService"/>
+            <xsd:attribute type="xsd:boolean" name="registerEngineVersionService"/>
         </xsd:complexType>
 	</xsd:element>
 

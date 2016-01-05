@@ -266,10 +266,10 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public Multimap<String, String> readGroupWorkersMapActiveAndRunning() {
+	public Multimap<String, String> readGroupWorkersMapActiveAndRunningAndVersion(String versionId) {
 		Multimap<String, String> result = ArrayListMultimap.create();
 		List<WorkerNode> workers;
-		workers = workerNodeRepository.findByActiveAndStatusAndDeleted(true, WorkerStatus.RUNNING, false);
+		workers = workerNodeRepository.findByActiveAndStatusAndDeletedAndVersionId(true, WorkerStatus.RUNNING, false, versionId);
 		for(WorkerNode worker : workers) {
 			for(String groupName : worker.getGroups()) {
 				result.put(groupName, worker.getUuid());
