@@ -10,11 +10,11 @@
 
 package io.cloudslang.engine.node.services;
 
-import io.cloudslang.score.api.nodes.WorkerStatus;
 import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
 import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.node.repositories.WorkerNodeRepository;
 import io.cloudslang.engine.versioning.services.VersionService;
+import io.cloudslang.score.api.nodes.WorkerStatus;
 import junit.framework.Assert;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
@@ -46,6 +46,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
@@ -285,6 +286,38 @@ public class WorkerNodeServiceTest {
 	}
 
 	@Test
+	public void addWorkerInDuplicateGroups() {
+		List<String> groups = workerNodeService.readAllWorkerGroups();
+		Assert.assertEquals(WorkerNode.DEFAULT_WORKER_GROUPS.length, groups.size());
+
+		List<String> list;
+		HashSet<String> expected;
+
+		workerNodeService.create("PLM", "PLM", "dan.filip", "c:/plm");
+
+		workerNodeService.updateWorkerGroups("PLM", "c1", "c2", "c2", "c3");
+		list = workerNodeService.readWorkerGroups("PLM");
+
+		expected = new HashSet<>(Arrays.asList("c2","c1","c3"));
+		org.junit.Assert.assertTrue("worker groups contain duplicates?", new HashSet<>(list).equals(expected));
+
+		// test null is not allowed + duplicates
+		workerNodeService.updateWorkerGroups("PLM", null, "1", null, "1", "1");
+		list = workerNodeService.readWorkerGroups("PLM");
+
+		expected = new HashSet<>(Arrays.asList("1"));
+		org.junit.Assert.assertTrue("worker groups contain duplicates?", new HashSet<>(list).equals(expected));
+
+		// test add worker in the same group twice
+		workerNodeService.addGroupToWorker("PLM", "g1");
+		workerNodeService.addGroupToWorker("PLM", "g1");
+
+		list = workerNodeService.readWorkerGroups("PLM");
+		expected = new HashSet<>(Arrays.asList("1", "g1"));
+		org.junit.Assert.assertTrue("worker groups contain duplicates?", new HashSet<>(list).equals(expected));
+	}
+
+	@Test
 	public void updateVersionTest() {
 		workerNodeService.create("worker_1", "password", "stamHost", "c:/dir");
 		WorkerNode workerNode = workerNodeService.readByUUID("H1");
@@ -316,7 +349,8 @@ public class WorkerNodeServiceTest {
 		SpringLiquibase liquibase(DataSource dataSource) {
 			SpringLiquibase liquibase = new SpringLiquibase();
 			liquibase.setDataSource(dataSource);
-			liquibase.setChangeLog("classpath:/META-INF/database/test.changes.xml");
+			//liquibase.setChangeLog("classpath:/META-INF/database/test.changes.xml");
+			liquibase.setChangeLog("classpath:/META-INF/database/score.changes.xml");
 			SimpleHiloIdentifierGenerator.setDataSource(dataSource);
 			return liquibase;
 		}
@@ -326,7 +360,7 @@ public class WorkerNodeServiceTest {
 		Properties hibernateProperties() {
 			return new Properties(){{
 				setProperty("hibernate.format_sql", "true");
-				setProperty("hibernate.hbm2ddl.auto", "create-drop");
+				setProperty("hibernate.hbm2ddl.auto", "validate");
 				setProperty("hibernate.cache.use_query_cache", "false");
 				setProperty("hibernate.generate_statistics", "false");
 				setProperty("hibernate.cache.use_second_level_cache", "false");
