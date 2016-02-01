@@ -83,8 +83,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
     <!--The payload column is a blob in mysql it is not big enough-->
     <changeSet id="alter OO_EXECUTION_STATES PAYLOAD column" author="engine" dbms="mysql">
-        <sql>ALTER TABLE OO_EXECUTION_STATES_1 MODIFY PAYLOAD MEDIUMBLOB NOT NULL;</sql>
-        <sql>ALTER TABLE OO_EXECUTION_STATES_2 MODIFY PAYLOAD MEDIUMBLOB NOT NULL;</sql>
+        <sql>ALTER TABLE OO_EXECUTION_STATES MODIFY PAYLOAD MEDIUMBLOB NOT NULL;</sql>
     </changeSet>
 
     <changeSet id="create OO_EXECUTION_QUEUES" author="engine">

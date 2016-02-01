@@ -12,10 +12,10 @@ package io.cloudslang.engine.node.services;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import io.cloudslang.score.api.nodes.WorkerStatus;
 import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.node.repositories.WorkerNodeRepository;
 import io.cloudslang.engine.versioning.services.VersionService;
+import io.cloudslang.score.api.nodes.WorkerStatus;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
@@ -23,9 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author
@@ -260,7 +261,12 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 	@Transactional
 	public void updateWorkerGroups(String uuid, String... groupNames) {
 		WorkerNode worker = readByUUID(uuid);
-		List<String> groups = groupNames != null ? Arrays.asList(groupNames) : Collections.<String> emptyList();
+
+		Set<String> groupSet = groupNames != null ? new HashSet<>(Arrays.asList(groupNames)) : new HashSet<String>();
+		List<String> groups = new ArrayList<>();
+		groupSet.remove(null);
+		groups.addAll(groupSet);
+
 		worker.setGroups(groups);
 	}
 
@@ -281,10 +287,18 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 	@Override
 	@Transactional
 	public void addGroupToWorker(String workerUuid, String group) {
+
+		if (group == null) {
+			return;
+		}
+
 		WorkerNode worker = readByUUID(workerUuid);
-		List<String> groups = new ArrayList<>(worker.getGroups());
-		groups.add(group);
-		worker.setGroups(groups);
+
+		if (!worker.getGroups().contains(group)) {
+			List<String> groups = new ArrayList<>(worker.getGroups());
+			groups.add(group);
+			worker.setGroups(groups);
+		}
 	}
 
 	@Override
