@@ -51,28 +51,36 @@ public final class QueueDispatcherServiceImpl implements QueueDispatcherService 
 	@Transactional
 	@Override
 	public List<ExecutionMessage> poll(String workerId, int maxSize) {
-		if (logger.isDebugEnabled()) logger.debug("Polling messages for worker [" + workerId + "], max size " + maxSize);
-		// poll assigned messages to workerID
-		long t = System.currentTimeMillis();
-		List<ExecutionMessage> result = execQueue.poll(workerId, maxSize, ExecStatus.ASSIGNED);
-		t = System.currentTimeMillis()-t;
-		if (logger.isDebugEnabled()) logger.debug("Poll: " + result.size() + "/" + t + " messages/ms");
-
-		if (!result.isEmpty()){
-			t = System.currentTimeMillis();
-			// change status to SENT
-			for(ExecutionMessage msg:result){
-				msg.setStatus(ExecStatus.SENT);
-				msg.incMsgSeqId();
-			}
-			// update the queue
-			execQueue.enqueue(result);
+		try {
+			if (logger.isDebugEnabled()) logger.debug("Polling messages for worker [" + workerId + "], max size " + maxSize);
+			// poll assigned messages to workerID
+			long t = System.currentTimeMillis();
+			List<ExecutionMessage> result = execQueue.poll(workerId, maxSize, ExecStatus.ASSIGNED);
 			t = System.currentTimeMillis()-t;
-			if (logger.isDebugEnabled()) logger.debug("Enqueue: " + result.size() + "/" + t + " messages/ms");
+			if (logger.isDebugEnabled()) logger.debug("Poll: " + result.size() + "/" + t + " messages/ms");
+
+			if (!result.isEmpty()){
+				t = System.currentTimeMillis();
+				// change status to SENT
+				for(ExecutionMessage msg:result){
+					msg.setStatus(ExecStatus.SENT);
+					msg.incMsgSeqId();
+				}
+				// update the queue
+				execQueue.enqueue(result);
+				t = System.currentTimeMillis()-t;
+				if (logger.isDebugEnabled()) logger.debug("Enqueue: " + result.size() + "/" + t + " messages/ms");
+			}
+			// send the result to the worker
+			if (logger.isDebugEnabled()) logger.debug("Polled " + result.size() + " messages for worker [" + workerId + ']');
+			return result;
 		}
-		// send the result to the worker
-		if (logger.isDebugEnabled()) logger.debug("Polled " + result.size() + " messages for worker [" + workerId + ']');
-		return result;
+		catch (Exception ex){
+			//This can happen if the InBuffer retries while the first try is still running on the server side
+			//The UC is preventing the duplication
+			logger.error("Error while polling assigned messages for worker " + workerId, ex);
+			throw ex;
+		}
 	}
 
 	@Transactional

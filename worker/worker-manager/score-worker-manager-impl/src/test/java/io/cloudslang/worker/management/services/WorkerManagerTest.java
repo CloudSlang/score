@@ -10,6 +10,7 @@
 
 package io.cloudslang.worker.management.services;
 
+import io.cloudslang.orchestrator.services.EngineVersionService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -181,6 +182,13 @@ public class WorkerManagerTest {
 			WorkerVersionService service =  mock(WorkerVersionService.class);
 			when(service.getWorkerVersion()).thenReturn("version");
 			when(service.getWorkerVersionId()).thenReturn("123");
+			return service;
+		}
+
+		@Bean
+		EngineVersionService engineVersionService() {
+			EngineVersionService service =  mock(EngineVersionService.class);
+			when(service.getEngineVersionId()).thenReturn("123");
 			return service;
 		}
 	}

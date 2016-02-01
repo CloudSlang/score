@@ -30,6 +30,7 @@ import java.io.ObjectOutputStream;
  */
 public class ExecutionMessageConverter {
 
+	public static final int SIZE = 1024;
 	@Autowired(required = false)
 	private SensitiveDataHandler sensitiveDataHandler;
 
@@ -84,7 +85,7 @@ public class ExecutionMessageConverter {
 	private byte[] objToBytes(Object obj){
 		ObjectOutputStream oos = null;
 		try {
-			ByteArrayOutputStream bout = new ByteArrayOutputStream();
+			ByteArrayOutputStream bout = new ByteArrayOutputStream(SIZE);
 
 			initPayloadMetaData(bout);
 
