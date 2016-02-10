@@ -11,6 +11,7 @@
 package io.cloudslang.worker.management.services;
 
 import io.cloudslang.engine.node.services.WorkerNodeService;
+import io.cloudslang.orchestrator.services.EngineVersionService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
@@ -53,6 +54,9 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 
 	@Autowired
 	protected WorkerNodeService workerNodeService;
+
+	@Autowired
+	private EngineVersionService engineVersionService;
 
 	@Autowired
 	protected WorkerConfigurationService workerConfigurationService;
@@ -184,34 +188,42 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 	private void doStartup() {
 		new Thread(new Runnable() {
 			@Override public void run() {
-                        initStarted = true;
-                        long sleep = initStartUpSleep;
-                        boolean shouldRetry = true;
-		                while (shouldRetry) {
-			                try {
-				                String newWrv = workerNodeService.up(workerUuid, workerVersionService.getWorkerVersion(), workerVersionService.getWorkerVersionId());
-                                recoveryManager.setWRV(newWrv); //we do set of WRV here and in doRecovery() only!!! not in keepalive!!!
-				                shouldRetry = false;
-				                logger.info("Worker is up");
-			                } catch (Exception ex) {
-				                logger.error("Worker failed on start up, will retry in a " + sleep / 1000 + " seconds", ex);
-				                try {
-					                Thread.sleep(sleep);
-				                } catch (InterruptedException iex) {/*do nothing*/}
-				                sleep = Math.min(maxStartUpSleep, sleep * 2); // double the sleep time until max 10 minute
-			                }
-		                }
+				initStarted = true;
+				long sleep = initStartUpSleep;
+				boolean shouldRetry = true;
+				while (shouldRetry) {
+					try {
+						String newWrv = workerNodeService.up(workerUuid, workerVersionService.getWorkerVersion(), workerVersionService.getWorkerVersionId());
+						recoveryManager.setWRV(newWrv); //we do set of WRV here and in doRecovery() only!!! not in keepalive!!!
+						shouldRetry = false;
+						logger.info("Worker is up");
+					} catch (Exception ex) {
+						logger.error("Worker failed on start up, will retry in a " + sleep / 1000 + " seconds", ex);
+						try {
+							Thread.sleep(sleep);
+						} catch (InterruptedException iex) {/*do nothing*/}
+						sleep = Math.min(maxStartUpSleep, sleep * 2); // double the sleep time until max 10 minute
+					}
+				}
 
-		                endOfInit = true;
-		                //mark that worker is up and its recovery is ended - only now we can start asking for messages from queue
-		                up = true;
+				endOfInit = true;
 
-		                workerConfigurationService.setEnabled(true);
-		                workerNodeService.updateEnvironmentParams(workerUuid,
-				                System.getProperty("os.name"),
-				                System.getProperty("java.version"),
-				                resolveDotNetVersion());
-	                }
+				//Check that this Worker is in the same version as engine - if not - stay idle
+				String engineVersionId = engineVersionService.getEngineVersionId();
+				if(workerVersionService.getWorkerVersionId().equals(engineVersionId)){
+
+					//mark that worker is up and its recovery is ended - only now we can start asking for messages from queue
+					up = true;
+					workerConfigurationService.setEnabled(true);
+					workerNodeService.updateEnvironmentParams(workerUuid,
+							System.getProperty("os.name"),
+							System.getProperty("java.version"),
+							resolveDotNetVersion());
+				}
+				else{
+					logger.warn("Worker's version is not equal to engine version. Won't be able to start processing flows!");
+				}
+			}
 		}).start();
 	}
 

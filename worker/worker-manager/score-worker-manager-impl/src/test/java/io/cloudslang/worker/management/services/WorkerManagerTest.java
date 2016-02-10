@@ -10,6 +10,8 @@
 
 package io.cloudslang.worker.management.services;
 
+import io.cloudslang.orchestrator.services.EngineVersionService;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +29,7 @@ import io.cloudslang.engine.node.services.WorkerNodeService;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.Fail.fail;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.reset;
 
 
 /**
@@ -48,12 +51,20 @@ public class WorkerManagerTest {
 	@Autowired
 	private WorkerRecoveryManager workerRecoveryManager;
 
+	@Autowired
+	private EngineVersionService engineVersionService;
+
 	static final String CREDENTIAL_UUID = "uuid";
 
 	@Before
 	public void setup() throws Exception {
 		reset(workerNodeService, workerRecoveryManager);
 		startWorker();
+	}
+
+	@After
+	public void shutdownWorker() throws Exception {
+		shutdownWorkerAndWait();
 	}
 
 	private void startWorker() throws InterruptedException {
@@ -69,6 +80,19 @@ public class WorkerManagerTest {
 		}
 	}
 
+	private void shutdownWorkerAndWait() throws InterruptedException {
+		final long TIME_OUT = 3000L;
+		workerManager.onApplicationEvent(mock(ContextClosedEvent.class));
+		long t = System.currentTimeMillis();
+		while (workerManager.isUp()) {
+			if (System.currentTimeMillis() - t > TIME_OUT) {
+				throw fail("The worker has failed to shut down on timeout: " + TIME_OUT + " ms");
+			} else {
+				Thread.sleep(100L);
+			}
+		}
+	}
+
 	@Test
 	public void testResolveDotnetVersion() {
 		String version = WorkerManager.resolveDotNetVersion();
@@ -78,6 +102,7 @@ public class WorkerManagerTest {
 
 	@Test
 	public void startUp() throws Exception {
+		//shutting the service down
 		workerManager.onApplicationEvent(mock(ContextClosedEvent.class));
 		assertThat(workerManager.isUp()).isFalse();
 		reset(workerNodeService);
@@ -89,7 +114,29 @@ public class WorkerManagerTest {
 	}
 
 	@Test
+	public void startUpWrongVersion() throws Exception {
+
+		//shutting the service down
+		workerManager.onApplicationEvent(mock(ContextClosedEvent.class));
+		assertThat(workerManager.isUp()).isFalse();
+		reset(workerNodeService);
+
+		reset(engineVersionService);
+		when(engineVersionService.getEngineVersionId()).thenReturn("666");
+
+		//starting it again
+		workerManager.onApplicationEvent(mock(ContextRefreshedEvent.class));
+		Thread.sleep(1000L); // must sleep some time since the start up is being processed in a new thread
+		assertThat(workerManager.isUp()).isFalse();
+
+		reset(engineVersionService);
+		when(engineVersionService.getEngineVersionId()).thenReturn("123");
+	}
+
+
+	@Test
 	public void startUpWithFailure() throws Exception {
+		//shutting the service down
 		workerManager.onApplicationEvent(mock(ContextClosedEvent.class));
 		assertThat(workerManager.isUp()).isFalse();
 		reset(workerNodeService);
@@ -100,6 +147,7 @@ public class WorkerManagerTest {
 				.doReturn("1")
 				.when(workerNodeService).up(CREDENTIAL_UUID, "version", "123");
 
+		//start again
 		workerManager.onApplicationEvent(mock(ContextRefreshedEvent.class));
 
 		Thread.sleep(2000L); // must sleep some time since the start up is being processed in a new thread
@@ -120,10 +168,10 @@ public class WorkerManagerTest {
 
 	@Test
 	public void shutDown() {
-		workerManager.onApplicationEvent(mock(ContextRefreshedEvent.class));
 		assertThat(workerManager.isUp()).isTrue();
 		reset(workerNodeService);
 
+		//shut down
 		workerManager.onApplicationEvent(mock(ContextClosedEvent.class));
 		assertThat(workerManager.isUp()).isFalse();
 	}
@@ -181,6 +229,13 @@ public class WorkerManagerTest {
 			WorkerVersionService service =  mock(WorkerVersionService.class);
 			when(service.getWorkerVersion()).thenReturn("version");
 			when(service.getWorkerVersionId()).thenReturn("123");
+			return service;
+		}
+
+		@Bean
+		EngineVersionService engineVersionService() {
+			EngineVersionService service =  mock(EngineVersionService.class);
+			when(service.getEngineVersionId()).thenReturn("123");
 			return service;
 		}
 	}

@@ -11,6 +11,8 @@
 package io.cloudslang.worker.management.monitor;
 
 import static org.junit.Assert.*;
+
+import io.cloudslang.orchestrator.services.EngineVersionService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -102,6 +104,7 @@ public class ScheduledWorkerLoadMonitorTest {
     public static class MyTestConfig {
         @Bean public ScheduledWorkerLoadMonitor scheduledWorkerLoadMonitor() {return new ScheduledWorkerLoadMonitor();}
         @Bean public WorkerManager workerManager() {return mock(WorkerManager.class);}
+        @Bean public EngineVersionService EngineVersionService() {return mock(EngineVersionService.class);}
         @Bean public OutboundBuffer outboundBuffer() {return mock(OutboundBuffer.class);}
         @Bean public WorkerNodeService workerNodeService() {return mock(WorkerNodeService.class);}
         @Bean public WorkerConfigurationService workerConfigurationService() {return mock(WorkerConfigurationService.class);}

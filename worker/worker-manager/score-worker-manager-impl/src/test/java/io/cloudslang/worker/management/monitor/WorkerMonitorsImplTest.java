@@ -10,6 +10,7 @@
 
 package io.cloudslang.worker.management.monitor;
 
+import io.cloudslang.orchestrator.services.EngineVersionService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -120,6 +121,7 @@ public class WorkerMonitorsImplTest {
         @Bean public ExecutionService executionService() {return mock(ExecutionService.class);}
         @Bean public ExecutionMessageConverter executionMessageConverter() {return mock(ExecutionMessageConverter.class);}
         @Bean public WorkerVersionService workerVersionService() {return mock(WorkerVersionService.class);}
+        @Bean public EngineVersionService engineVersionService() {return mock(EngineVersionService.class);}
         @Bean public EndExecutionCallback endExecutionCallback() {return mock(EndExecutionCallback.class);}
         @Bean public QueueStateIdGeneratorService queueStateIdGeneratorService() {return mock(QueueStateIdGeneratorService.class);}
     }
