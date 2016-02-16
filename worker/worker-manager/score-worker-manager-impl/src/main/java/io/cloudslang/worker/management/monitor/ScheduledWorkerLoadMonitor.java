@@ -47,7 +47,7 @@ public class ScheduledWorkerLoadMonitor implements ScheduledWorkerMonitor{
     @Override
     public synchronized void captureMonitorInfo(Map<WorkerMonitorInfoEnum, Serializable> monitorInfo) {
         monitorInfo.put(WorkerMonitorInfoEnum.INBUFFER_SIZE_AVERAGE, probeCount > 0 ? inBufferSize / probeCount : 0);
-        monitorInfo.put(WorkerMonitorInfoEnum.OUTBUDDER_SIZE_AVERAGE, probeCount > 0 ? outBufferSize / probeCount : 0);
+        monitorInfo.put(WorkerMonitorInfoEnum.OUTBUFFER_SIZE_AVERAGE, probeCount > 0 ? outBufferSize / probeCount : 0);
         monitorInfo.put(WorkerMonitorInfoEnum.RUNNING_TASKS_AVERAGE, probeCount > 0 ? runningTasks / probeCount : 0);
         resetMonitor();
     }

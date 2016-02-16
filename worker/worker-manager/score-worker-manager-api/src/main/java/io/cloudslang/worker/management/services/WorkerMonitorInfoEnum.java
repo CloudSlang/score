@@ -11,7 +11,7 @@
 package io.cloudslang.worker.management.services;
 
 public enum WorkerMonitorInfoEnum {
-    WROKER_ID,
+    WORKER_ID,
     MONITOR_START_TIME,
     MONITOR_END_TIME,
 
@@ -19,12 +19,12 @@ public enum WorkerMonitorInfoEnum {
     INBUFFER_SIZE_AVERAGE,
 
     OUTBUFFER_CAPACITY,
-    OUTBUDDER_SIZE_AVERAGE,
+    OUTBUFFER_SIZE_AVERAGE,
 
     RUNNING_TASKS_AVERAGE,
     EXECUTION_THREADS_AMOUNT,
 
-    FREE_MOMORY,
-    MAX_MOMORY,
+    FREE_MEMORY,
+    MAX_MEMORY,
     TOTAL_MEMORY
 }

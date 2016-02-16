@@ -65,9 +65,9 @@ public class WorkerMonitorsImplTest {
 
         Map<WorkerMonitorInfoEnum, Serializable> monitorInfo = workerMonitors.getMonitorInfo();
         assertNotNull(monitorInfo.get(WorkerMonitorInfoEnum.TOTAL_MEMORY));
-        assertNotNull(monitorInfo.get(WorkerMonitorInfoEnum.FREE_MOMORY));
-        assertNotNull(monitorInfo.get(WorkerMonitorInfoEnum.MAX_MOMORY));
-        assertNotNull(monitorInfo.get(WorkerMonitorInfoEnum.WROKER_ID));
+        assertNotNull(monitorInfo.get(WorkerMonitorInfoEnum.FREE_MEMORY));
+        assertNotNull(monitorInfo.get(WorkerMonitorInfoEnum.MAX_MEMORY));
+        assertNotNull(monitorInfo.get(WorkerMonitorInfoEnum.WORKER_ID));
         assertNotNull(monitorInfo.get(WorkerMonitorInfoEnum.EXECUTION_THREADS_AMOUNT));
         assertEquals(5, monitorInfo.get(WorkerMonitorInfoEnum.EXECUTION_THREADS_AMOUNT));
         assertNotNull(monitorInfo.get(WorkerMonitorInfoEnum.OUTBUFFER_CAPACITY));
