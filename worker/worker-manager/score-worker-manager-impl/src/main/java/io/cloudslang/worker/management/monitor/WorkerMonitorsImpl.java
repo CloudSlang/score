@@ -48,10 +48,10 @@ public class WorkerMonitorsImpl implements WorkerMonitors {
 
             Runtime runtime = Runtime.getRuntime();
             monitorInfo.put(WorkerMonitorInfoEnum.TOTAL_MEMORY, runtime.totalMemory());
-            monitorInfo.put(WorkerMonitorInfoEnum.FREE_MOMORY, runtime.freeMemory());
-            monitorInfo.put(WorkerMonitorInfoEnum.MAX_MOMORY, runtime.maxMemory());
+            monitorInfo.put(WorkerMonitorInfoEnum.FREE_MEMORY, runtime.freeMemory());
+            monitorInfo.put(WorkerMonitorInfoEnum.MAX_MEMORY, runtime.maxMemory());
 
-            monitorInfo.put(WorkerMonitorInfoEnum.WROKER_ID, workerManager.getWorkerUuid());
+            monitorInfo.put(WorkerMonitorInfoEnum.WORKER_ID, workerManager.getWorkerUuid());
 
             monitorInfo.put(WorkerMonitorInfoEnum.EXECUTION_THREADS_AMOUNT, workerManager.getExecutionThreadsCount());
 

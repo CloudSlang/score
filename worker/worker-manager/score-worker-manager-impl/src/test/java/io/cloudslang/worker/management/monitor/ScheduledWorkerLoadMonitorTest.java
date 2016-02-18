@@ -59,7 +59,7 @@ public class ScheduledWorkerLoadMonitorTest {
         monitor.captureMonitorInfo(monitorInfo);
 
         assertEquals(0, monitorInfo.get(WorkerMonitorInfoEnum.INBUFFER_SIZE_AVERAGE));
-        assertEquals(0, monitorInfo.get(WorkerMonitorInfoEnum.OUTBUDDER_SIZE_AVERAGE));
+        assertEquals(0, monitorInfo.get(WorkerMonitorInfoEnum.OUTBUFFER_SIZE_AVERAGE));
         assertEquals(0, monitorInfo.get(WorkerMonitorInfoEnum.RUNNING_TASKS_AVERAGE));
 
         monitor.executeScheduled();
@@ -67,14 +67,14 @@ public class ScheduledWorkerLoadMonitorTest {
         monitor.captureMonitorInfo(monitorInfo);
 
         assertEquals(10, monitorInfo.get(WorkerMonitorInfoEnum.INBUFFER_SIZE_AVERAGE));
-        assertEquals(2000, monitorInfo.get(WorkerMonitorInfoEnum.OUTBUDDER_SIZE_AVERAGE));
+        assertEquals(2000, monitorInfo.get(WorkerMonitorInfoEnum.OUTBUFFER_SIZE_AVERAGE));
         assertEquals(5, monitorInfo.get(WorkerMonitorInfoEnum.RUNNING_TASKS_AVERAGE));
 
         monitor.captureMonitorInfo(monitorInfo);
 
         //after capture should be reset
         assertEquals(0, monitorInfo.get(WorkerMonitorInfoEnum.INBUFFER_SIZE_AVERAGE));
-        assertEquals(0, monitorInfo.get(WorkerMonitorInfoEnum.OUTBUDDER_SIZE_AVERAGE));
+        assertEquals(0, monitorInfo.get(WorkerMonitorInfoEnum.OUTBUFFER_SIZE_AVERAGE));
         assertEquals(0, monitorInfo.get(WorkerMonitorInfoEnum.RUNNING_TASKS_AVERAGE));
 
         reset(workerManager, outboundBuffer);
@@ -96,7 +96,7 @@ public class ScheduledWorkerLoadMonitorTest {
         monitor.captureMonitorInfo(monitorInfo);
 
         assertEquals(15, monitorInfo.get(WorkerMonitorInfoEnum.INBUFFER_SIZE_AVERAGE));
-        assertEquals(2500, monitorInfo.get(WorkerMonitorInfoEnum.OUTBUDDER_SIZE_AVERAGE));
+        assertEquals(2500, monitorInfo.get(WorkerMonitorInfoEnum.OUTBUFFER_SIZE_AVERAGE));
         assertEquals(6, monitorInfo.get(WorkerMonitorInfoEnum.RUNNING_TASKS_AVERAGE));
     }
 
