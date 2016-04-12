@@ -65,6 +65,10 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String METADATA = "METADATA";
 
+    private static final String STEP_PERSIST = "STEP_PERSIST";
+
+    private static final String STEP_PERSIST_ID = "STEP_PERSIST_ID";
+
     protected Map<String, Serializable> contextMap = new HashMap<>();
 
     public ExecutionRuntimeServices(){}
@@ -204,6 +208,35 @@ public class ExecutionRuntimeServices implements Serializable {
      */
     public String removeStepErrorKey(){
         return (String)removeFromMap(EXECUTION_STEP_ERROR_KEY);
+    }
+
+    public void setStepPersist(boolean stepPersist){
+        contextMap.put(STEP_PERSIST, stepPersist);
+    }
+
+    public boolean isStepPersist(){
+        if (getFromMap(STEP_PERSIST) == null){
+            return false;
+        }
+        else {
+            return getFromMap(STEP_PERSIST);
+        }
+    }
+
+    public void removeStepPersist(){
+        removeFromMap(STEP_PERSIST);
+    }
+
+    public void setStepPersistId(String stepPersistId){
+        contextMap.put(STEP_PERSIST_ID, stepPersistId);
+    }
+
+    public String getStepPersistId(){
+        return getFromMap(STEP_PERSIST_ID);
+    }
+
+    public void removeStepPersistID(){
+        removeFromMap(STEP_PERSIST_ID);
     }
 
     /**

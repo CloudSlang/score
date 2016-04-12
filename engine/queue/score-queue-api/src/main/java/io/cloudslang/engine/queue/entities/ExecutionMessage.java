@@ -42,6 +42,9 @@ public class ExecutionMessage implements Message, Cloneable {
 	private String msgId;
     private Long createDate;
 
+	private boolean stepPersist;
+	private String stepPersistId;
+
 	private transient String workerKey;
 
     private transient Execution executionObject;
@@ -119,7 +122,23 @@ public class ExecutionMessage implements Message, Cloneable {
         this.msgSeqId = msgSeqId;
     }
 
-    public Execution getExecutionObject() {
+	public boolean isStepPersist() {
+		return stepPersist;
+	}
+
+	public void setStepPersist(boolean stepPersist) {
+		this.stepPersist = stepPersist;
+	}
+
+	public String getStepPersistId() {
+		return stepPersistId;
+	}
+
+	public void setStepPersistId(String stepPersistId) {
+		this.stepPersistId = stepPersistId;
+	}
+
+	public Execution getExecutionObject() {
         return executionObject;
     }
 
