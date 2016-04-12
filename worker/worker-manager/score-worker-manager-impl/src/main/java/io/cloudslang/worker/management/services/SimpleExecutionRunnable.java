@@ -262,6 +262,8 @@ public class SimpleExecutionRunnable implements Runnable {
 
             ExecutionMessage inProgressMessageForInBuffer = (ExecutionMessage) inProgressMessage.clone();
             inProgressMessageForInBuffer.setPayload(null); //we do not need the payload for the inBuffer shortcut, we have execution there
+            inProgressMessageForInBuffer.setStepPersist(false);
+            inProgressMessageForInBuffer.setStepPersistId(null);
 
             try {
                 //The order is important!!!!!
