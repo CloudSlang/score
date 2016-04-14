@@ -253,17 +253,15 @@ public class SimpleExecutionRunnable implements Runnable {
             //set current step to finished
             executionMessage.setStatus(ExecStatus.FINISHED);
             executionMessage.incMsgSeqId();
-            executionMessage.setPayload(null);
+            //executionMessage.setPayload(null);//we need it for persistency
+            executionMessage.setStepPersist(true);
+            executionMessage.setStepPersistId(nextStepExecution.getSystemContext().getStepPersistId());
 
             ExecutionMessage inProgressMessage = createInProgressExecutionMessage(nextStepExecution);
-            inProgressMessage.setStepPersist(true);
-            inProgressMessage.setStepPersistId(nextStepExecution.getSystemContext().getStepPersistId());
             ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage, inProgressMessage}; //for the outBuffer
 
             ExecutionMessage inProgressMessageForInBuffer = (ExecutionMessage) inProgressMessage.clone();
             inProgressMessageForInBuffer.setPayload(null); //we do not need the payload for the inBuffer shortcut, we have execution there
-            inProgressMessageForInBuffer.setStepPersist(false);
-            inProgressMessageForInBuffer.setStepPersistId(null);
 
             try {
                 //The order is important!!!!!
