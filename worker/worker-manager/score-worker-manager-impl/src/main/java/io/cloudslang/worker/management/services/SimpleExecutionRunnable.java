@@ -253,7 +253,10 @@ public class SimpleExecutionRunnable implements Runnable {
             //set current step to finished
             executionMessage.setStatus(ExecStatus.FINISHED);
             executionMessage.incMsgSeqId();
-            //executionMessage.setPayload(null);//we need it for persistency
+            //we need it for persistency - in case it came from InBuffer shortcut the payload can be null
+            if(executionMessage.getPayload() == null){
+                executionMessage.setPayload(converter.createPayload(executionMessage.getExecutionObject()));
+            }
             executionMessage.setStepPersist(true);
             executionMessage.setStepPersistId(nextStepExecution.getSystemContext().getStepPersistId());
 
