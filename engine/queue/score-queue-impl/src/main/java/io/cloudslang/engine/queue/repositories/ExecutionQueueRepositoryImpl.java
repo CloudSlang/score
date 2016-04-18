@@ -254,9 +254,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         String sqlStatPrvTable = QUERY_WORKER_RECOVERY_SQL
                 .replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
 
-        String sqlStatActiveTable = QUERY_WORKER_RECOVERY_SQL
-                .replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
-
         // prepare the argument
         java.lang.Object[] values;
         values = new Object[statuses.length + 1];
@@ -267,18 +264,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
             values[i++] = status.getNumber();
         }
 
-        List<ExecutionMessage> resultPrvTable =  doSelectWithTemplate(pollForRecoveryJDBCTemplate, sqlStatPrvTable, new ExecutionMessageRowMapper(), values);
-
-        List<ExecutionMessage> resultActiveTable =  doSelectWithTemplate(pollForRecoveryJDBCTemplate, sqlStatActiveTable, new ExecutionMessageRowMapper(), values);
-
-        Map<Long,ExecutionMessage> resultAsMap = new HashMap<>();
-        for(ExecutionMessage executionMessage:resultPrvTable){ //remove duplications
-            resultAsMap.put(executionMessage.getExecStateId(),executionMessage);
-        }
-        for(ExecutionMessage executionMessage:resultActiveTable){ //remove duplications
-            resultAsMap.put(executionMessage.getExecStateId(),executionMessage);
-        }
-        return new ArrayList<>(resultAsMap.values());
+        return doSelectWithTemplate(pollForRecoveryJDBCTemplate, sqlStatPrvTable, new ExecutionMessageRowMapper(), values);
 	}
 
 

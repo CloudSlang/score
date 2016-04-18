@@ -95,12 +95,18 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 			stopWatch.split();
 			List<ExecutionMessage> failedMessages = filter(messages, ExecStatus.FAILED);
 			List<ExecutionMessage> terminatedMessages = filter(messages, ExecStatus.TERMINATED);
+			List<ExecutionMessage> toPersistMessages = filterToPersistMessages(messages);
 			for (QueueListener listener : listeners) {
 				listener.onEnqueue(messages, messages.size());
-				if (failedMessages.size() > 0)
+				if (!failedMessages.isEmpty()){
 					listener.onFailed(failedMessages);
-				if (terminatedMessages.size() > 0)
+				}
+				if (!terminatedMessages.isEmpty()){
 					listener.onTerminated(terminatedMessages);
+				}
+				if (!toPersistMessages.isEmpty()){
+					listener.onPersistMessage(toPersistMessages);
+				}
 			}
 			if (logger.isDebugEnabled()) logger.debug("Listeners done in " + (stopWatch.getSplitTime()) + " ms");
 		}
@@ -111,6 +117,16 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 		List<ExecutionMessage> result = new ArrayList<>();
 		for (ExecutionMessage msg : messages) {
 			if (msg.getStatus() == status) {
+				result.add(msg);
+			}
+		}
+		return result;
+	}
+
+	private List<ExecutionMessage> filterToPersistMessages(List<ExecutionMessage> messages) {
+		List<ExecutionMessage> result = new ArrayList<>();
+		for (ExecutionMessage msg : messages) {
+			if (msg.isStepPersist()) {
 				result.add(msg);
 			}
 		}

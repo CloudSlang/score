@@ -185,6 +185,7 @@ public class SimpleExecutionRunnable implements Runnable {
                 isExecutionTerminating(nextStepExecution) ||
                 isSplitStep(nextStepExecution) ||
                 shouldChangeWorkerGroup(nextStepExecution) ||
+                isPersistStep(nextStepExecution) ||
                 isRecoveryCheckpoint(nextStepExecution) ||
                 isRunningTooLong(startTime, nextStepExecution);
     }
@@ -227,6 +228,40 @@ public class SimpleExecutionRunnable implements Runnable {
 
             ExecutionMessage inProgressMessageForInBuffer = (ExecutionMessage) inProgressMessage.clone();
             inProgressMessageForInBuffer.setPayload(null); //we do not need the payload for the inBuffer shortcut
+
+            try {
+                //The order is important!!!!!
+                outBuffer.put(executionMessagesToSend);
+                inBuffer.addExecutionMessage(inProgressMessageForInBuffer);
+            } catch (InterruptedException e) {
+                logger.warn("Thread was interrupted! Exiting the execution... ", e);
+                return true; //exiting... in shutdown...
+            }
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    private boolean isPersistStep(Execution nextStepExecution) {
+        //Here we check if we need to go to queue to persist the step context - we can do it with shortcut to InBuffer!!!!!!!!
+        if (nextStepExecution.getSystemContext().isStepPersist()) {
+            //clean key
+            nextStepExecution.getSystemContext().removeStepPersist();
+
+            //set current step to finished
+            executionMessage.setStatus(ExecStatus.FINISHED);
+            executionMessage.incMsgSeqId();
+            //executionMessage.setPayload(null);//we need it for persistency
+            executionMessage.setStepPersist(true);
+            executionMessage.setStepPersistId(nextStepExecution.getSystemContext().getStepPersistId());
+
+            ExecutionMessage inProgressMessage = createInProgressExecutionMessage(nextStepExecution);
+            ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage, inProgressMessage}; //for the outBuffer
+
+            ExecutionMessage inProgressMessageForInBuffer = (ExecutionMessage) inProgressMessage.clone();
+            inProgressMessageForInBuffer.setPayload(null); //we do not need the payload for the inBuffer shortcut, we have execution there
 
             try {
                 //The order is important!!!!!

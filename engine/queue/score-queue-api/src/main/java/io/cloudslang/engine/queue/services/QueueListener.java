@@ -66,4 +66,13 @@ public interface QueueListener {
      * @param messages the failed messages
      */
 	void onFailed(List<ExecutionMessage> messages);
+
+    /**
+     *
+     * A callback that will be called when messages are required to be persisted in addition to the queue
+     *
+     * @param messages the to be persisted messages
+     */
+	void onPersistMessage(List<ExecutionMessage> messages);
+
 }

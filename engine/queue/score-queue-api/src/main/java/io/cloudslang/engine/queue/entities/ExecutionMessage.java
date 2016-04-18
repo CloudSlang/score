@@ -17,7 +17,7 @@ import io.cloudslang.orchestrator.entities.Message;
 import io.cloudslang.score.facade.entities.Execution;
 import org.apache.commons.lang.builder.EqualsBuilder;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -41,6 +41,9 @@ public class ExecutionMessage implements Message, Cloneable {
 	private int msgSeqId;
 	private String msgId;
     private Long createDate;
+
+	private boolean stepPersist;
+	private String stepPersistId;
 
 	private transient String workerKey;
 
@@ -119,7 +122,23 @@ public class ExecutionMessage implements Message, Cloneable {
         this.msgSeqId = msgSeqId;
     }
 
-    public Execution getExecutionObject() {
+	public boolean isStepPersist() {
+		return stepPersist;
+	}
+
+	public void setStepPersist(boolean stepPersist) {
+		this.stepPersist = stepPersist;
+	}
+
+	public String getStepPersistId() {
+		return stepPersistId;
+	}
+
+	public void setStepPersistId(String stepPersistId) {
+		this.stepPersistId = stepPersistId;
+	}
+
+	public Execution getExecutionObject() {
         return executionObject;
     }
 
@@ -217,24 +236,51 @@ public class ExecutionMessage implements Message, Cloneable {
 
 	@Override
 	public List<Message> shrink(List<Message> messages) {
-        if (messages.size() > 2) {
-            ExecutionMessage firstMessage  = (ExecutionMessage) messages.get(0);
-            ExecutionMessage secondMessage = (ExecutionMessage) messages.get(1);
-            ExecutionMessage lastMessage = (ExecutionMessage) messages.get(messages.size()-1);
+		if (messages.size() > 2) {
+			List<Message> resultAfterShrink = new ArrayList<>();
 
+			ExecutionMessage firstMessage  = (ExecutionMessage) messages.get(0);
+            ExecutionMessage secondMessage = (ExecutionMessage) messages.get(1);
+
+			List<Message> toPersistMessages = filerToPersistMessages(messages.subList(2, messages.size() - 1));
+
+			ExecutionMessage lastMessage = (ExecutionMessage) messages.get(messages.size()-1);
+
+            //Shrink is done for messages of same msg.id - this is set in the id field of ExecutionMessage in Inbuffer (executionId + execStateId)
+			//If messages run in InBuffer shortcut they keep running with the same msg.id even if execStateId is changing - in order to shrink more
+			//But we must keep the toPersist messages and not shrink them!!!
             if (firstMessage.getStatus().equals(ExecStatus.IN_PROGRESS)) {
-//                if(logger.isDebugEnabled())
-//                    logger.debug("Shrinking... Keeping second and last from messages: \n" + messagesToString(messages));
-				return Arrays.asList((Message)secondMessage, lastMessage);
+				resultAfterShrink.add(secondMessage);
+				resultAfterShrink.addAll(toPersistMessages);
+				resultAfterShrink.add(lastMessage);
+				return resultAfterShrink;
 			}
-            else {
-//                if(logger.isDebugEnabled())
-//                    logger.debug("Shrinking... Keeping first and last from messages: \n" + messagesToString(messages));
-				return Arrays.asList((Message)firstMessage, lastMessage);
+			else {
+				resultAfterShrink.add(firstMessage);
+
+				//If second needs to be persisted - we must add it also
+				if(secondMessage.isStepPersist()&& secondMessage.getStatus().equals(ExecStatus.FINISHED) ){
+					resultAfterShrink.add(secondMessage);
+				}
+
+				resultAfterShrink.addAll(toPersistMessages);
+				resultAfterShrink.add(lastMessage);
+				return resultAfterShrink;
 			}
 		} else {
 			return messages;
 		}
+	}
+
+	protected List<Message> filerToPersistMessages(List<Message> messages){
+		List<Message> result = new ArrayList<>();
+		//We need to get from the list the FINISHED persisted messages
+		for(Message msg : messages){
+			if(((ExecutionMessage)msg).isStepPersist() && ((ExecutionMessage)msg).getStatus().equals(ExecStatus.FINISHED)){
+				result.add(msg);
+			}
+		}
+		return result;
 	}
 
     private String messagesToString(List<Message> messages){

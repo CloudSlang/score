@@ -147,6 +147,11 @@ public class QueueListenerImpl implements QueueListener {
         }
 	}
 
+	@Override
+	public void onPersistMessage(List<ExecutionMessage> messages) {
+		//do nothing
+	}
+
 	private Long pauseExecution(Execution execution) {
 		String branchId = execution.getSystemContext().getBranchId();
 
