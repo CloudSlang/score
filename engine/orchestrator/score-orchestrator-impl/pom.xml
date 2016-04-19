@@ -18,7 +18,11 @@
     <artifactId>score-orchestrator-impl</artifactId>
 
     <dependencies>
-	
+        <dependency>
+            <groupId>javax.el</groupId>
+            <artifactId>javax.el-api</artifactId>
+        </dependency>
+
 		<dependency>
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest-all</artifactId>
