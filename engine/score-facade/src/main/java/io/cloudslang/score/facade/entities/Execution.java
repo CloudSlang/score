@@ -92,6 +92,10 @@ public class Execution implements Serializable {
         return systemContext;
     }
 
+    public void setExecutionId(Long executionId){
+        this.executionId = executionId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)
