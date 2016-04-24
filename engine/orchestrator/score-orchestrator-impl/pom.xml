@@ -11,14 +11,18 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>orchestrator</artifactId>
-        <version>0.3.15-SNAPSHOT</version>
+        <version>0.3.17-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>score-orchestrator-impl</artifactId>
 
     <dependencies>
-	
+        <dependency>
+            <groupId>javax.el</groupId>
+            <artifactId>javax.el-api</artifactId>
+        </dependency>
+
 		<dependency>
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest-all</artifactId>

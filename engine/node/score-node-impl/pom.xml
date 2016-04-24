@@ -11,13 +11,20 @@
 	<parent>
 		<groupId>io.cloudslang</groupId>
 		<artifactId>node</artifactId>
-		<version>0.3.15-SNAPSHOT</version>
+		<version>0.3.17-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>score-node-impl</artifactId>
 
 	<dependencies>
+
+		<dependency>
+			<groupId>javax.el</groupId>
+			<artifactId>javax.el-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>

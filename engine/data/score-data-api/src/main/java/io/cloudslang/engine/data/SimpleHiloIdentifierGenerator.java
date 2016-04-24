@@ -97,7 +97,7 @@ public class SimpleHiloIdentifierGenerator implements IdentifierGenerator, Ident
             JdbcTemplate jdbcTemplate = new JdbcTemplate(new SingleConnectionDataSource(conn, true));
 
             jdbcTemplate.update(SQL_LOCK);
-            currentChunk = jdbcTemplate.queryForInt(SQL_SELECT);
+            currentChunk = jdbcTemplate.queryForObject(SQL_SELECT, Integer.class);
             if (logger.isDebugEnabled())
                 logger.debug("Current chunk: " + currentChunk);
             jdbcTemplate.execute(SQL_UPDATE);

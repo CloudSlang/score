@@ -123,7 +123,8 @@ public final class PartitionServiceImpl implements PartitionService {
 		}
 
 		if (partitionGroup.getSizeThreshold() != -1){
-			long partitionSize = jdbcTemplate.queryForLong(SQL("select count(*) from " + table(partitionGroup)));
+			Number number = jdbcTemplate.queryForObject(SQL("select count(*) from " + table(partitionGroup)), Long.class);
+			long partitionSize = number !=null ? number.intValue() : 0;
 			if (logger.isDebugEnabled()) logger.debug("Partition group [" + partitionGroup.getName() + "]: active partition=" + partitionGroup.getActivePartition() + ", size=" + partitionSize);
 
 			if (partitionSize >= partitionGroup.getSizeThreshold()){
