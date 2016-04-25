@@ -10,6 +10,11 @@
 
 package io.cloudslang.score.api;
 
+import io.cloudslang.score.lang.SystemContext;
+
+import java.io.Serializable;
+import java.util.Map;
+
 /**
  * Created by peerme on 23/07/2014.
  */
@@ -31,4 +36,8 @@ public interface ScoreDeprecated {
      * @return the give executionId
      */
     public Long trigger(Long executionId, TriggeringProperties triggeringProperties);
+
+    public Long reTrigger(SystemContext newSystemContext, byte[] executionObj);
+
+    public SystemContext extractSystemContext(byte[] executionObjectSerialized);
 }
