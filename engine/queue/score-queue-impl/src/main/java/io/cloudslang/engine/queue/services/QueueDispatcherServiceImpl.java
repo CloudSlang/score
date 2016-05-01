@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -35,6 +36,9 @@ public final class QueueDispatcherServiceImpl implements QueueDispatcherService 
 
 	@Autowired
 	private ExecutionQueueService execQueue;
+
+	@Autowired
+	private BusyWorkersService busyWorkersService;
 
 	@Transactional
 	@Override
@@ -55,7 +59,11 @@ public final class QueueDispatcherServiceImpl implements QueueDispatcherService 
 		if (logger.isDebugEnabled()) logger.debug("Polling messages for worker [" + workerId + "], max size " + maxSize);
 		// poll assigned messages to workerID
 		long t = System.currentTimeMillis();
-		List<ExecutionMessage> result = execQueue.poll(createDate,workerId,maxSize,ExecStatus.ASSIGNED);
+		List<ExecutionMessage> result = new ArrayList<>();
+		//check if the worker has work before actually polling for work
+		if(busyWorkersService.isWorkerBusy(workerId)) {
+			result = execQueue.poll(createDate, workerId, maxSize, ExecStatus.ASSIGNED);
+		}
 		t = System.currentTimeMillis()-t;
 		if (logger.isDebugEnabled()) logger.debug("Poll: " + result.size() + "/" + t + " messages/ms");
 

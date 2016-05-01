@@ -216,6 +216,20 @@ public class ExecutionQueueRepositoryTest {
         Assert.assertFalse(result.isEmpty());
     }
 
+    @Test
+    public void testGetBusyWorkersBusyWorker(){
+        List<ExecutionMessage> msg = new ArrayList<>();
+        ExecutionMessage execMsg = generateMessage("group1","msg1", 1);
+        execMsg.setWorkerId("worker1");
+        execMsg.setStatus(ExecStatus.IN_PROGRESS);
+        execMsg.incMsgSeqId();
+        msg.add(execMsg);
+        executionQueueRepository.insertExecutionStates(msg);
+        executionQueueRepository.insertExecutionQueue(msg,1L);
+        List<String> busyWorkers = executionQueueRepository.getBusyWorkers(ExecStatus.ASSIGNED);
+        Assert.assertNotNull(busyWorkers);
+    }
+
     private ExecutionMessage generateMessage(String groupName,String msgId, int msg_seq_id) {
         byte[] payloadData;
         payloadData = "This is just a test".getBytes();

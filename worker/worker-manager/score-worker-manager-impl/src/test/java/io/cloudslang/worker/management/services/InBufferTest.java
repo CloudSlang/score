@@ -11,6 +11,7 @@
 package io.cloudslang.worker.management.services;
 
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
+import io.cloudslang.engine.queue.services.BusyWorkersService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,6 +56,10 @@ public class InBufferTest {
     @Mock
     private SynchronizationManager synchronizationManager;
 
+    @Mock
+    private BusyWorkersService busyWorkersService;
+
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -78,6 +83,7 @@ public class InBufferTest {
 
         ContextClosedEvent event = mock(ContextClosedEvent.class);
         when(workerManager.isUp()).thenReturn(true);
+        when(busyWorkersService.isWorkerBusy("")).thenReturn(true);
         Thread thread = new Thread(inBuffer);
         thread.start();
 
