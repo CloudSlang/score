@@ -568,6 +568,14 @@
           <plugin>
               <artifactId>maven-source-plugin</artifactId>
           </plugin>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <configuration>
+                  <source>1.7</source>
+                  <target>1.7</target>
+              </configuration>
+          </plugin>
       </plugins>
     </build>
     <profiles>
@@ -648,5 +656,7 @@
         <module>score-tests</module>
         <module>score-api</module>
         <module>score-samples</module>
+        <module>dependency-support</module>
+        <module>runtime-support</module>
     </modules>
 </project>
