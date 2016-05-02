@@ -10,6 +10,7 @@ package io.cloudslang.runtime.api.python;
  *
  *******************************************************************************/
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,12 +19,7 @@ public interface PythonRuntimeService {
      * exec used for python script executions
      * @param dependencies - list of resources with maven GAV notation ‘groupId:artifactId:version’ which can be used to resolve resources with Maven Repository Support
      */
-    Object exec (Set<String> dependencies, String script, Map<String, Object> vars);
+    Map<String, Serializable> exec (Set<String> dependencies, String script, Map<String, Serializable> vars);
 
-    /**
-     * eval used for expressions evaluation
-     * @param dependencies - list of resources with maven GAV notation ‘groupId:artifactId:version’ which can be used to resolve resources with Maven Repository Support
-     */
-    Object eval (Set<String> dependencies, String script, Map<String, Object> vars);
-
+    Serializable eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars);
 }

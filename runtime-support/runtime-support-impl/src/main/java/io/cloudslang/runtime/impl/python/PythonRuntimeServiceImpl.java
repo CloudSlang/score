@@ -1,20 +1,42 @@
 package io.cloudslang.runtime.impl.python;
 
+/*******************************************************************************
+ * (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Apache License v2.0 which accompany this distribution.
+ *
+ * The Apache License is available at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *******************************************************************************/
+
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
 import org.springframework.stereotype.Component;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
 @Component
 public class PythonRuntimeServiceImpl implements PythonRuntimeService {
+    @Autowired
+    private PythonExecutor pythonExecutor;
+
+    @Autowired
+    private PythonEvaluator pythonEvaluator;
+
     @Override
-    public Object exec(Set<String> dependencies, String script, Map<String, Object> vars) {
-        return null;
+    public synchronized Map<String, Serializable> exec(Set<String> dependencies, String script, Map<String, Serializable> vars) {
+        return pythonExecutor.executeScript(script, vars);
     }
 
     @Override
-    public Object eval(Set<String> dependencies, String script, Map<String, Object> vars) {
-        return null;
+    public synchronized Serializable eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
+        if(prepareEnvironmentScript != null && !prepareEnvironmentScript.isEmpty()) {
+            pythonEvaluator.evalExpr(prepareEnvironmentScript, vars);
+        }
+        return pythonEvaluator.evalExpr(script, vars);
     }
 }
