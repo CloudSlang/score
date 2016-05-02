@@ -6,8 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 @Component
 public class JavaSimpleExecutorProvider extends ExecutorProvider implements JavaExecutorProvider{
@@ -15,7 +14,7 @@ public class JavaSimpleExecutorProvider extends ExecutorProvider implements Java
     private DependencyService dependencyService;
 
     @Override
-    public JavaExecutor allocateExecutor(List<String> dependencies) {
-        return new JavaExecutor(dependencyService.resolveDependencies(dependencies == null ? Collections.<String>emptyList() : dependencies));
+    public JavaExecutor allocateExecutor(Set<String> dependencies) {
+        return new JavaExecutor(dependencyService.resolveDependencies(dependencies));
     }
 }

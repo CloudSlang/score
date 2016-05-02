@@ -1,7 +1,7 @@
 package io.cloudslang.runtime.impl.java;
 
-import java.util.List;
+import java.util.Set;
 
 public interface JavaExecutorProvider {
-    JavaExecutor allocateExecutor(List<String> dependencies);
+    JavaExecutor allocateExecutor(Set<String> dependencies);
 }

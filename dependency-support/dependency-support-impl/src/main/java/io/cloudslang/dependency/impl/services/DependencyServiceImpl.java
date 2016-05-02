@@ -5,8 +5,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+
+/*******************************************************************************
+ * (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Apache License v2.0 which accompany this distribution.
+ *
+ * The Apache License is available at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *******************************************************************************/
 
 @Service
 public class DependencyServiceImpl implements DependencyService {
@@ -15,8 +25,8 @@ public class DependencyServiceImpl implements DependencyService {
     private String mavenLocalRepo;
 
     @Override
-    public List<String> resolveDependencies(List<String> resources) {
-        List<String> resolvedResources = new ArrayList<>(resources.size());
+    public Set<String> resolveDependencies(Set<String> resources) {
+        Set<String> resolvedResources = new HashSet<>(resources.size());
         for (String resource : resources) {
             String [] gav = resource.split(":");
             String resourceFolderRelativePath = resource.replace(":", File.separator);

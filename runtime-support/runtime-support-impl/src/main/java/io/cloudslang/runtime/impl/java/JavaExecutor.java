@@ -6,7 +6,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class JavaExecutor {
@@ -23,7 +22,7 @@ public class JavaExecutor {
 
     private final ClassLoader classLoader;
 
-    JavaExecutor(List<String> filePaths) {
+    JavaExecutor(Set<String> filePaths) {
         if(!filePaths.isEmpty()) {
             Set<URL> result = new HashSet<>();
             for (String filePath : filePaths) {

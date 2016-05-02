@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import org.springframework.beans.factory.annotation.Value;
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 @Component
 public class JavaRuntimeServiceImpl implements JavaRuntimeService {
@@ -19,7 +19,7 @@ public class JavaRuntimeServiceImpl implements JavaRuntimeService {
     private DependencyService dependencyService;
 
     @Override
-    public Object execute(List<String> dependencies, String className, String methodName, Object ... args) {
-        return javaExecutorProvider.allocateExecutor(dependencies == null ? Collections.<String>emptyList() : dependencies).execute(className, methodName, args);
+    public Object execute(Set<String> dependencies, String className, String methodName, Object ... args) {
+        return javaExecutorProvider.allocateExecutor(dependencies == null ? Collections.<String>emptySet() : dependencies).execute(className, methodName, args);
     }
 }

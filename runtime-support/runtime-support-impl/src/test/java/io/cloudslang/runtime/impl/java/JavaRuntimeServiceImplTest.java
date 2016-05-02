@@ -13,7 +13,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = JavaRuntimeServiceImplTest.TestConfig.class)
@@ -28,7 +29,7 @@ public class JavaRuntimeServiceImplTest {
     @Test
     public void testJavaRuntimeService() {
         System.out.println("+++++++++++++++++++++++++[" + javaRuntimeServiceImpl.execute(null, "java.util.Date", "toGMTString") + "]");
-        System.out.println("+++++++++++++++++++++++++[" + javaRuntimeServiceImpl.execute(Collections.<String>emptyList(), "java.util.Date", "toGMTString") + "]");
+        System.out.println("+++++++++++++++++++++++++[" + javaRuntimeServiceImpl.execute(Collections.<String>emptySet(), "java.util.Date", "toGMTString") + "]");
     }
 
     @Configuration
@@ -42,8 +43,8 @@ public class JavaRuntimeServiceImplTest {
         @Bean
         public DependencyService dependencyService() {return new DependencyService() {
             @Override
-            public List<String> resolveDependencies(List<String> resources) {
-                return Arrays.asList("c:\\a.jar", "c:\\b.jar");
+            public Set<String> resolveDependencies(Set<String> resources) {
+                return new HashSet<>(Arrays.asList("c:\\a.jar", "c:\\b.jar"));
             }
         };}
     }

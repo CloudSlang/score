@@ -1,7 +1,6 @@
 package io.cloudslang.runtime.impl.java;
 
 import io.cloudslang.dependency.api.services.DependencyService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -27,12 +26,12 @@ public class JavaCachedExecutorProvider extends ExecutorProvider implements Java
     private boolean cacheEnabled = false;
 
     @Override
-    public JavaExecutor allocateExecutor(List<String> dependencies) {
+    public JavaExecutor allocateExecutor(Set<String> dependencies) {
         String dependenciesKey = generatedDependenciesKey(dependencies);
 
         JavaExecutor executor;
         executor = executors.get(dependenciesKey);
-        List<String> filePaths = null;
+        Set<String> filePaths = null;
         if (executor == null) {
             // may be first time execution - ensure resource resolution
             filePaths = dependencyService.resolveDependencies(dependencies);

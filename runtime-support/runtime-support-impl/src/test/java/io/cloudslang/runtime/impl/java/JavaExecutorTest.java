@@ -16,6 +16,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = JavaCachedExecutorProviderTest.TestConfig.class)
@@ -36,9 +37,9 @@ public class JavaExecutorTest {
         File another2 = new File(getClass().getClassLoader().getResource("another2.zip").getFile());
         File another3 = new File(getClass().getClassLoader().getResource("another3.zip").getFile());
 
-        JavaExecutor javaExecutor1 = new JavaExecutor(Arrays.asList(one1.getAbsolutePath(), another2.getAbsolutePath()));
-        JavaExecutor javaExecutor2 = new JavaExecutor(Arrays.asList(one2.getAbsolutePath(), another3.getAbsolutePath()));
-        JavaExecutor javaExecutor3 = new JavaExecutor(Arrays.asList(one3.getAbsolutePath(), another1.getAbsolutePath()));
+        JavaExecutor javaExecutor1 = new JavaExecutor(new HashSet<>(Arrays.asList(one1.getAbsolutePath(), another2.getAbsolutePath())));
+        JavaExecutor javaExecutor2 = new JavaExecutor(new HashSet<>(Arrays.asList(one2.getAbsolutePath(), another3.getAbsolutePath())));
+        JavaExecutor javaExecutor3 = new JavaExecutor(new HashSet<>(Arrays.asList(one3.getAbsolutePath(), another1.getAbsolutePath())));
 
         assertEquals("The version is One 1 and [The version is Another 2]", javaExecutor1.execute(CLASS_NAME, METHOD_NAME, ARGS).toString());
         assertEquals("The version is One 2 and [The version is Another 3]", javaExecutor2.execute(CLASS_NAME, METHOD_NAME, ARGS).toString());
@@ -59,7 +60,7 @@ public class JavaExecutorTest {
 
         File one = new File(getClass().getClassLoader().getResource("one1.zip").getFile());
 
-        JavaExecutor javaExecutor = new JavaExecutor(Collections.singletonList(one.getAbsolutePath()));
+        JavaExecutor javaExecutor = new JavaExecutor(new HashSet<>(Arrays.asList(one.getAbsolutePath())));
 
         javaExecutor.execute(CLASS_NAME, METHOD_NAME, ARGS).toString();
     }
