@@ -8,12 +8,12 @@ public interface PythonRuntimeService {
      * exec used for python script executions
      * @param dependencies - list of resources with maven GAV notation ‘groupId:artifactId:version’ which can be used to resolve resources with Maven Repository Support
      */
-    Object exec (String script, Map<String, Object> vars, List<String> dependencies);
+    Object exec (List<String> dependencies, String script, Map<String, Object> vars);
 
     /**
      * eval used for expressions evaluation
      * @param dependencies - list of resources with maven GAV notation ‘groupId:artifactId:version’ which can be used to resolve resources with Maven Repository Support
      */
-    Object eval (String script, Map<String, Object> vars, List<String> dependencies);
+    Object eval (List<String> dependencies, String script, Map<String, Object> vars);
 
 }

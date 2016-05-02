@@ -1,10 +1,10 @@
-package io.cloudslang.runtime.impl;
+package io.cloudslang.runtime.impl.java;
 
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract class ExecutorPool {
+public abstract class ExecutorProvider {
     private static final String NO_DEPENDENCIES_KEY = "";
 
     protected String generatedDependenciesKey(List<String> dependencies) {

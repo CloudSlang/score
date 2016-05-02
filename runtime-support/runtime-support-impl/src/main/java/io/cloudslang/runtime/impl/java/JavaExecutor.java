@@ -1,8 +1,5 @@
 package io.cloudslang.runtime.impl.java;
 
-import io.cloudslang.dependency.api.services.DependencyService;
-import io.cloudslang.runtime.impl.Executor;
-
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -12,7 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class JavaExecutor extends Executor {
+public class JavaExecutor {
     private static final ClassLoader PARENT_CLASS_LOADER;
 
     static {
@@ -25,13 +22,9 @@ public class JavaExecutor extends Executor {
     }
 
     private final ClassLoader classLoader;
-    private final DependencyService dependencyService;
 
-    protected JavaExecutor(List<String> deps, String depKey, DependencyService depService) {
-        super(deps, depKey);
-        dependencyService = depService;
-        if(!dependencies.isEmpty()) {
-            List<String> filePaths = dependencyService.resolveDependencies(dependencies);
+    JavaExecutor(List<String> filePaths) {
+        if(!filePaths.isEmpty()) {
             Set<URL> result = new HashSet<>();
             for (String filePath : filePaths) {
                 try {
@@ -47,13 +40,13 @@ public class JavaExecutor extends Executor {
         }
     }
 
-    public Object execute(String className, String methodName, List<Object> args) {
+    Object execute(String className, String methodName, Object ... args) {
         try {
             Class actionClass = getActionClass(className);
             Method actionMethod = getMethodByName(actionClass, methodName);
-            return actionMethod.invoke(actionClass.newInstance(), args.toArray());
+            return actionMethod.invoke(actionClass.newInstance(), args);
         } catch (Exception e) {
-            throw new RuntimeException("Invocation of method " + methodName + " of class " + className + " threw an exception", e);
+            throw new RuntimeException("Method [" + methodName + "] invocation of class [" + className + "] failed!!!!", e);
         }
     }
 
@@ -76,30 +69,5 @@ public class JavaExecutor extends Executor {
             }
         }
         return actionMethod;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        Executor that = (Executor) o;
-
-        return getDependenciesKey().equals(that.getDependenciesKey());
-
-    }
-
-    @Override
-    public int hashCode() {
-        return getDependenciesKey().hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "JavaExecutor{dependenciesKey=[" + dependenciesKey + "]}";
     }
 }

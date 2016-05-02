@@ -9,12 +9,12 @@ import java.util.Map;
 @Component
 public class PythonRuntimeServiceImpl implements PythonRuntimeService {
     @Override
-    public Object exec(String script, Map<String, Object> vars, List<String> dependencies) {
+    public Object exec(List<String> dependencies, String script, Map<String, Object> vars) {
         return null;
     }
 
     @Override
-    public Object eval(String script, Map<String, Object> vars, List<String> dependencies) {
+    public Object eval(List<String> dependencies, String script, Map<String, Object> vars) {
         return null;
     }
 }
