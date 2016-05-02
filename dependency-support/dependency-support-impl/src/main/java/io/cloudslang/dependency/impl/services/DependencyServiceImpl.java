@@ -1,13 +1,5 @@
 package io.cloudslang.dependency.impl.services;
 
-import io.cloudslang.dependency.api.services.DependencyService;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
-
 /*******************************************************************************
  * (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
  * All rights reserved. This program and the accompanying materials
@@ -17,6 +9,14 @@ import java.util.Set;
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  *******************************************************************************/
+
+import io.cloudslang.dependency.api.services.DependencyService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 public class DependencyServiceImpl implements DependencyService {
