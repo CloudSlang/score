@@ -656,7 +656,7 @@
         <module>score-tests</module>
         <module>score-api</module>
         <module>score-samples</module>
-        <module>dependency-support</module>
-        <module>runtime-support</module>
+        <module>dependency-management</module>
+        <module>runtime-management</module>
     </modules>
 </project>
