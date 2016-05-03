@@ -1,12 +1,17 @@
 package io.cloudslang.runtime.impl.python;
 
 import org.python.util.PythonInterpreter;
+import org.python.core.Options;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class PythonRuntimeConfig {
+    static {
+        Options.importSite = false;
+    }
+
     @Bean
     public PythonInterpreter evalInterpreter(){
         return new PythonInterpreter();

@@ -19,10 +19,13 @@ public class PythonEvaluator extends AbstractScriptInterpreter {
     @Qualifier("evalInterpreter")
     private PythonInterpreter interpreter;
 
-    public synchronized Serializable evalExpr(String expr, Map<String, Serializable> context) {
+    public synchronized Serializable evalExpr(String prepareEnvironmentScript, String expr, Map<String, Serializable> context) {
         try {
             cleanInterpreter(interpreter);
             prepareInterpreterContext(context);
+            if(prepareEnvironmentScript != null && !prepareEnvironmentScript.isEmpty()) {
+                exec(interpreter, prepareEnvironmentScript);
+            }
             return eval(interpreter, expr);
         } catch (Exception exception) {
             String message;

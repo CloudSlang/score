@@ -34,9 +34,6 @@ public class PythonRuntimeServiceImpl implements PythonRuntimeService {
 
     @Override
     public synchronized Serializable eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
-        if(prepareEnvironmentScript != null && !prepareEnvironmentScript.isEmpty()) {
-            pythonEvaluator.evalExpr(prepareEnvironmentScript, vars);
-        }
-        return pythonEvaluator.evalExpr(script, vars);
+        return pythonEvaluator.evalExpr(prepareEnvironmentScript, script, vars);
     }
 }

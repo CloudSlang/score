@@ -36,7 +36,7 @@ public class PythonExecutor extends AbstractScriptInterpreter {
             prepareInterpreterContext(interpreter, callArguments);
             return exec(interpreter, script);
         } catch (Exception e) {
-            throw new RuntimeException("Error executing python script: " + e, e);
+            throw new RuntimeException("Error executing python script: " + e.getMessage(), e);
         }
     }
 }
