@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <!--
+        (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
+        All rights reserved. This program and the accompanying materials
+        are made available under the terms of the Apache License v2.0 which accompany this distribution.
+
+        The Apache License is available at
+        http://www.apache.org/licenses/LICENSE-2.0
+    -->
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.cloudslang</groupId>
+        <artifactId>score-parent</artifactId>
+        <version>0.3.17-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>dependency-management</artifactId>
+    <packaging>pom</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>4.2.5.RELEASE</version>
+        </dependency>
+    </dependencies>
+
+    <modules>
+        <module>dependency-management-api</module>
+        <module>dependency-management-impl</module>
+    </modules>
+
+
+</project>
