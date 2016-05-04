@@ -22,4 +22,6 @@ public interface PythonRuntimeService {
     Map<String, Serializable> exec (Set<String> dependencies, String script, Map<String, Serializable> vars);
 
     Serializable eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars);
+
+    void setPythonEncoding(String pythonEncoding);
 }
