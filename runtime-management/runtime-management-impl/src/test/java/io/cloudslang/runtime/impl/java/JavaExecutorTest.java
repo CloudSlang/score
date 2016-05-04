@@ -7,7 +7,6 @@ import org.junit.runner.RunWith;
 
 import static org.junit.Assert.*;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import org.springframework.test.context.ContextConfiguration;
@@ -15,11 +14,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = JavaCachedExecutorProviderTest.TestConfig.class)
+@ContextConfiguration(classes = JavaCachedStaticsSharedExecutionEngineTest.TestConfig.class)
 public class JavaExecutorTest {
 
     public static final String CLASS_NAME = "group.artifact.OneClass";

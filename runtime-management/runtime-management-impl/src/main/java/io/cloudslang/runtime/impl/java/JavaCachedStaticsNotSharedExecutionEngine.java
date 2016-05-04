@@ -12,18 +12,20 @@ package io.cloudslang.runtime.impl.java;
 
 import io.cloudslang.dependency.api.services.DependencyService;
 
+import org.python.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
 @Component
-public class JavaSimpleExecutorProvider extends ExecutorProvider implements JavaExecutorProvider{
+public class JavaCachedStaticsNotSharedExecutionEngine extends ExecutionEngine implements JavaExecutionEngine {
     @Autowired
     private DependencyService dependencyService;
 
     @Override
-    public JavaExecutor allocateExecutor(Set<String> dependencies) {
-        return new JavaExecutor(dependencyService.getDependencies(dependencies));
+    public Object execute(String dependency, String className, String methodName, Object ... args) {
+        return new JavaExecutor(dependencyService.getDependencies((dependency == null || dependency.isEmpty()) ? Sets.<String>newHashSet() :
+                Sets.newHashSet(dependency))).execute(className, methodName, args);
     }
 }

@@ -11,18 +11,16 @@ package io.cloudslang.runtime.impl.java;
  *******************************************************************************/
 
 import io.cloudslang.runtime.api.java.JavaRuntimeService;
-import org.python.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JavaRuntimeServiceImpl implements JavaRuntimeService {
     @Autowired
-    private JavaExecutorProvider javaExecutorProvider;
+    private JavaExecutionEngine javaExecutionEngine;
 
     @Override
     public Object execute(String dependency, String className, String methodName, Object ... args) {
-        return javaExecutorProvider.allocateExecutor((dependency == null || dependency.isEmpty()) ? Sets.<String>newHashSet() :
-                Sets.newHashSet(dependency)).execute(className, methodName, args);
+        return javaExecutionEngine.execute(dependency, className, methodName, args);
     }
 }

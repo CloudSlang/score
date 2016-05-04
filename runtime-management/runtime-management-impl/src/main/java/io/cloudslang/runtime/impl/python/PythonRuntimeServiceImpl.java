@@ -11,10 +11,8 @@ package io.cloudslang.runtime.impl.python;
  *******************************************************************************/
 
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
-import org.python.core.PySystemState;
-import org.springframework.stereotype.Component;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -36,12 +34,5 @@ public class PythonRuntimeServiceImpl implements PythonRuntimeService {
     @Override
     public synchronized Serializable eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
         return pythonEvaluator.evalExpr(prepareEnvironmentScript, script, vars);
-    }
-
-    @Override
-    public void setPythonEncoding(String pythonEncoding) {
-        if(pythonEncoding != null && !pythonEncoding.isEmpty()) {
-            System.getProperties().setProperty(PySystemState.PYTHON_IO_ENCODING, pythonEncoding);
-        }
     }
 }

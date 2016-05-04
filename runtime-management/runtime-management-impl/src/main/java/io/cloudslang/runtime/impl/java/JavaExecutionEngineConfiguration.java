@@ -10,8 +10,14 @@ package io.cloudslang.runtime.impl.java;
  *
  *******************************************************************************/
 
-import java.util.Set;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-public interface JavaExecutorProvider {
-    JavaExecutor allocateExecutor(Set<String> dependencies);
+@Configuration
+public class JavaExecutionEngineConfiguration {
+    @Bean
+    JavaExecutionEngine javaExecutorProvider() {
+        return System.getProperty("java.executor.provider", "JavaCachedStaticsSharedExecutionEngine").equals("JavaCachedStaticsNotSharedExecutionEngine") ?
+                new JavaCachedStaticsNotSharedExecutionEngine() : new JavaCachedStaticsSharedExecutionEngine();
+    }
 }

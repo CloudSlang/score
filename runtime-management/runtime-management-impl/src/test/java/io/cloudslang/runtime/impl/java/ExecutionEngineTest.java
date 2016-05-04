@@ -6,11 +6,11 @@ import java.util.*;
 
 import static org.junit.Assert.*;
 
-public class ExecutorProviderTest {
+public class ExecutionEngineTest {
     @Test
     public void testEmptyDependencies() {
         Set<String> dep = new HashSet<>();
-        String generatedKey = new ExecutorProvider() {}.generatedDependenciesKey(dep);
+        String generatedKey = new ExecutionEngine() {}.generatedDependenciesKey(dep);
         assertNotNull(generatedKey);
         assertTrue(generatedKey.isEmpty());
     }
@@ -20,7 +20,7 @@ public class ExecutorProviderTest {
         String dep = "g1:a2:v3";
         Set<String> deps = new HashSet<>();
         deps.add(dep);
-        String generatedKey = new ExecutorProvider() {}.generatedDependenciesKey(deps);
+        String generatedKey = new ExecutionEngine() {}.generatedDependenciesKey(deps);
         assertNotNull(generatedKey);
         assertEquals(dep, generatedKey);
     }
@@ -34,7 +34,7 @@ public class ExecutorProviderTest {
         deps.add(dep1);
         deps.add(dep2);
         deps.add(dep3);
-        String generatedKey = new ExecutorProvider() {}.generatedDependenciesKey(deps);
+        String generatedKey = new ExecutionEngine() {}.generatedDependenciesKey(deps);
         assertNotNull(generatedKey);
         assertEquals(dep1 + ";" + dep2 + ";" + dep3 + ";", generatedKey);
     }

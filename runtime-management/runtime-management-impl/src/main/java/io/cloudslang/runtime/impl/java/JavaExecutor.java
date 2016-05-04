@@ -10,6 +10,8 @@ package io.cloudslang.runtime.impl.java;
  *
  *******************************************************************************/
 
+import io.cloudslang.runtime.impl.Executor;
+
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -18,7 +20,7 @@ import java.net.URLClassLoader;
 import java.util.HashSet;
 import java.util.Set;
 
-public class JavaExecutor {
+public class JavaExecutor implements Executor {
     private static final ClassLoader PARENT_CLASS_LOADER;
 
     static {

@@ -15,7 +15,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-public abstract class ExecutorProvider {
+public abstract class ExecutionEngine {
     private static final String NO_DEPENDENCIES_KEY = "";
 
     protected String generatedDependenciesKey(Set<String> dependencies) {

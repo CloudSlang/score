@@ -2,7 +2,6 @@ package io.cloudslang.runtime.impl.java;
 
 import io.cloudslang.dependency.api.services.DependencyService;
 import io.cloudslang.runtime.api.java.JavaRuntimeService;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.context.annotation.Bean;
@@ -12,7 +11,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,7 +18,7 @@ import java.util.Set;
 @ContextConfiguration(classes = JavaRuntimeServiceImplTest.TestConfig.class)
 public class JavaRuntimeServiceImplTest {
     static {
-        System.setProperty("java.executor.provider", "JavaCachedExecutorProvider");
+        System.setProperty("java.executor.provider", "JavaCachedExecutionEngine");
     }
 
     @Autowired
@@ -38,7 +36,7 @@ public class JavaRuntimeServiceImplTest {
         public JavaRuntimeService javaRuntimeService() {return new JavaRuntimeServiceImpl();}
 
         @Bean
-        public JavaExecutorProvider javaExecutorProvider() {return new JavaCachedExecutorProvider();}
+        public JavaExecutionEngine javaExecutorProvider() {return new JavaCachedStaticsSharedExecutionEngine();}
 
         @Bean
         public DependencyService dependencyService() {return new DependencyService() {
