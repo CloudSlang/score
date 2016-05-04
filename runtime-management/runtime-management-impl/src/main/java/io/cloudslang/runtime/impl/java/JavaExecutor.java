@@ -81,4 +81,7 @@ public class JavaExecutor implements Executor {
         }
         return actionMethod;
     }
+
+    @Override
+    public void release() {}
 }

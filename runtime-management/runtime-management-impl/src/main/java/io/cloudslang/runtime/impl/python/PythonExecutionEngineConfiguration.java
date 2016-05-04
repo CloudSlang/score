@@ -1,4 +1,6 @@
-package io.cloudslang.runtime.impl;
+package io.cloudslang.runtime.impl.python;
+
+import org.springframework.context.annotation.Bean;
 
 /*******************************************************************************
  * (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
@@ -10,6 +12,10 @@ package io.cloudslang.runtime.impl;
  *
  *******************************************************************************/
 
-public interface Executor {
-    void release();
+public class PythonExecutionEngineConfiguration {
+    @Bean
+    PythonExecutionEngine pythonExecutionEngine() {
+        return System.getProperty("java.executor.provider", "PythonCachedStaticsSharedExecutionEngine").equals("PythonCachedStaticsNotSharedExecutionEngine") ?
+                new PythonCachedStaticsNotSharedExecutionEngine() : new PythonCachedStaticsSharedExecutionEngine();
+    }
 }

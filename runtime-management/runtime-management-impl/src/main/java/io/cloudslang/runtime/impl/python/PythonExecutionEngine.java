@@ -1,4 +1,4 @@
-package io.cloudslang.runtime.impl;
+package io.cloudslang.runtime.impl.python;
 
 /*******************************************************************************
  * (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
@@ -10,6 +10,11 @@ package io.cloudslang.runtime.impl;
  *
  *******************************************************************************/
 
-public interface Executor {
-    void release();
+import java.io.Serializable;
+import java.util.Map;
+import java.util.Set;
+
+public interface PythonExecutionEngine {
+    Map<String, Serializable> exec(Set<String> dependencies, String script, Map<String, Serializable> vars);
+    Serializable eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars);
 }

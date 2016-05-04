@@ -26,12 +26,14 @@ public class DependencyServiceImpl implements DependencyService {
 
     @Override
     public Set<String> getDependencies(Set<String> resources) {
-        Set<String> resolvedResources = new HashSet<>(resources.size());
-        for (String resource : resources) {
-            String [] gav = resource.split(":");
-            String resourceFolderRelativePath = resource.replace(":", File.separator);
-            String resouceFileName = gav[1] + "-" + gav[2] + ".jar";
-            resolvedResources.add(mavenLocalRepo + File.separator + resourceFolderRelativePath + File.separator + resouceFileName);
+        Set<String> resolvedResources = new HashSet<>();
+        if(resources != null && !resources.isEmpty()) {
+            for (String resource : resources) {
+                String[] gav = resource.split(":");
+                String resourceFolderRelativePath = resource.replace(":", File.separator);
+                String resouceFileName = gav[1] + "-" + gav[2] + ".jar";
+                resolvedResources.add(mavenLocalRepo + File.separator + resourceFolderRelativePath + File.separator + resouceFileName);
+            }
         }
         return resolvedResources;
     }

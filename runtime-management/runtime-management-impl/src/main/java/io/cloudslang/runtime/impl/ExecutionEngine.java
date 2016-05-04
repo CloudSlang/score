@@ -1,4 +1,4 @@
-package io.cloudslang.runtime.impl.java;
+package io.cloudslang.runtime.impl;
 
 /*******************************************************************************
  * (c) Copyright 2014 Hewlett-Packard Development Company, L.P.

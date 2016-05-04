@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class JavaExecutionEngineConfiguration {
     @Bean
-    JavaExecutionEngine javaExecutorProvider() {
+    JavaExecutionEngine javaExecutionEngine() {
         return System.getProperty("java.executor.provider", "JavaCachedStaticsSharedExecutionEngine").equals("JavaCachedStaticsNotSharedExecutionEngine") ?
                 new JavaCachedStaticsNotSharedExecutionEngine() : new JavaCachedStaticsSharedExecutionEngine();
     }

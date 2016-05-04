@@ -21,18 +21,15 @@ import java.util.Set;
 @Component
 public class PythonRuntimeServiceImpl implements PythonRuntimeService {
     @Autowired
-    private PythonExecutor pythonExecutor;
-
-    @Autowired
-    private PythonEvaluator pythonEvaluator;
+    private PythonExecutionEngine pythonExecutionEngine;
 
     @Override
     public synchronized Map<String, Serializable> exec(Set<String> dependencies, String script, Map<String, Serializable> vars) {
-        return pythonExecutor.executeScript(script, vars);
+        return pythonExecutionEngine.exec(dependencies, script, vars);
     }
 
     @Override
     public synchronized Serializable eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
-        return pythonEvaluator.evalExpr(prepareEnvironmentScript, script, vars);
+        return pythonExecutionEngine.eval(prepareEnvironmentScript, script, vars);
     }
 }

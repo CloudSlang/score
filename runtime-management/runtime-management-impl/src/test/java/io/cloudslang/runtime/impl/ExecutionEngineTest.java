@@ -1,5 +1,6 @@
-package io.cloudslang.runtime.impl.java;
+package io.cloudslang.runtime.impl;
 
+import io.cloudslang.runtime.impl.ExecutionEngine;
 import org.junit.Test;
 
 import java.util.*;

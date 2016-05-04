@@ -12,11 +12,10 @@ package io.cloudslang.runtime.impl.java;
 
 import io.cloudslang.dependency.api.services.DependencyService;
 
+import io.cloudslang.runtime.impl.ExecutionEngine;
 import org.python.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.Set;
 
 @Component
 public class JavaCachedStaticsNotSharedExecutionEngine extends ExecutionEngine implements JavaExecutionEngine {
