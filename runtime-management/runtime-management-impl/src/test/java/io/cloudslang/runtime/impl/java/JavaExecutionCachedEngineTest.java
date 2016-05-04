@@ -22,10 +22,10 @@ import java.util.concurrent.Executors;
 import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = JavaCachedStaticsSharedExecutionEngineTest.TestConfig.class)
-public class JavaCachedStaticsSharedExecutionEngineTest {
+@ContextConfiguration(classes = JavaExecutionCachedEngineTest.TestConfig.class)
+public class JavaExecutionCachedEngineTest {
     static {
-        System.setProperty("java.executor.provider", "JavaCachedExecutionEngine");
+        System.setProperty("java.executor.provider", JavaExecutionCachedEngine.class.getSimpleName());
         System.setProperty("java.executor.cache.size", "3");
     }
 
@@ -39,15 +39,15 @@ public class JavaCachedStaticsSharedExecutionEngineTest {
         final Set<String> dependencies2 = new HashSet<>(Arrays.asList("g3:a4:v5", "g4:a5:v6"));
         final Set<String> dependencies3 = new HashSet<>(Arrays.asList("g4:a5:v6", "g5:a6:v7"));
 
-        int executionsNumber = 2000;
-        int threads = 50;
+        int executionsNumber = 200;
+        int threads = 20;
 
         long start = System.currentTimeMillis();
         final CountDownLatch latch = new CountDownLatch(executionsNumber);
 
         ExecutorService service = Executors.newFixedThreadPool(threads);
 
-        final JavaCachedStaticsSharedExecutionEngineAllocator javaExecutionEngineAllocator = (JavaCachedStaticsSharedExecutionEngineAllocator) javaExecutionEngine;
+        final JavaExecutionCachedEngineAllocator javaExecutionEngineAllocator = (JavaExecutionCachedEngineAllocator) javaExecutionEngine;
 
         for(int i = 0; i < executionsNumber; i++) {
             final int executioId = i;
@@ -84,7 +84,7 @@ public class JavaCachedStaticsSharedExecutionEngineTest {
         System.out.println("@@@@@@@@@@@@@@[" + executionsNumber + "] executions by [" +  threads+ "] threads finished in [" + (System.currentTimeMillis() - start) + "] msecs");
     }
     public void testJavaCachedExecutorProviderTest() {
-        JavaCachedStaticsSharedExecutionEngineAllocator javaExecutionEngineAllocator = (JavaCachedStaticsSharedExecutionEngineAllocator) javaExecutionEngine;
+        JavaExecutionCachedEngineAllocator javaExecutionEngineAllocator = (JavaExecutionCachedEngineAllocator) javaExecutionEngine;
         final Set<String> dependencies1 = new HashSet<>(Arrays.asList("g1:a2:v3", "g2:a3:v4"));
         JavaExecutor javaExecutor1 = javaExecutionEngineAllocator.allocateExecutor(dependencies1);
         // L-> 1
@@ -190,7 +190,7 @@ public class JavaCachedStaticsSharedExecutionEngineTest {
     @Configuration
     static class TestConfig {
         @Bean
-        public JavaExecutionEngine javaExecutorProvider() {return new JavaCachedStaticsSharedExecutionEngineAllocator();}
+        public JavaExecutionEngine javaExecutorProvider() {return new JavaExecutionCachedEngineAllocator();}
 
         @Bean
         public DependencyService dependencyService() {return new DependencyService() {
@@ -201,7 +201,7 @@ public class JavaCachedStaticsSharedExecutionEngineTest {
         };}
     }
 
-    private static class JavaCachedStaticsSharedExecutionEngineAllocator extends JavaCachedStaticsSharedExecutionEngine {
+    private static class JavaExecutionCachedEngineAllocator extends JavaExecutionCachedEngine {
         public JavaExecutor allocateExecutor(Set<String> dependencies) {
             return super.allocateExecutor(dependencies);
         }

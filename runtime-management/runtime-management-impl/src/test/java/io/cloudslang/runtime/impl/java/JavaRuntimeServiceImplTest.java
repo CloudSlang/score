@@ -18,7 +18,7 @@ import java.util.Set;
 @ContextConfiguration(classes = JavaRuntimeServiceImplTest.TestConfig.class)
 public class JavaRuntimeServiceImplTest {
     static {
-        System.setProperty("java.executor.provider", "JavaCachedExecutionEngine");
+        System.setProperty("java.executor.provider", JavaExecutionCachedEngine.class.getSimpleName());
     }
 
     @Autowired
@@ -36,7 +36,7 @@ public class JavaRuntimeServiceImplTest {
         public JavaRuntimeService javaRuntimeService() {return new JavaRuntimeServiceImpl();}
 
         @Bean
-        public JavaExecutionEngine javaExecutorProvider() {return new JavaCachedStaticsSharedExecutionEngine();}
+        public JavaExecutionEngine javaExecutorProvider() {return new JavaExecutionCachedEngine();}
 
         @Bean
         public DependencyService dependencyService() {return new DependencyService() {

@@ -11,7 +11,7 @@
 package io.cloudslang.runtime.impl.java;
 
 import io.cloudslang.dependency.api.services.DependencyService;
-import io.cloudslang.runtime.impl.CachedStaticsSharedExecutionEngine;
+import io.cloudslang.runtime.impl.ExecutionCachedEngine;
 import org.python.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 @Component
-public class JavaCachedStaticsSharedExecutionEngine extends CachedStaticsSharedExecutionEngine<JavaExecutor> implements JavaExecutionEngine {
+public class JavaExecutionCachedEngine extends ExecutionCachedEngine<JavaExecutor> implements JavaExecutionEngine {
     @Autowired
     private DependencyService dependencyService;
 

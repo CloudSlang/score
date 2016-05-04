@@ -11,7 +11,7 @@
 package io.cloudslang.runtime.impl.python;
 
 import io.cloudslang.dependency.api.services.DependencyService;
-import io.cloudslang.runtime.impl.CachedStaticsSharedExecutionEngine;
+import io.cloudslang.runtime.impl.ExecutionCachedEngine;
 import org.python.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,7 +20,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
-public class PythonCachedStaticsSharedExecutionEngine extends CachedStaticsSharedExecutionEngine<PythonExecutor> implements PythonExecutionEngine{
+public class PythonExecutionCachedEngine extends ExecutionCachedEngine<PythonExecutor> implements PythonExecutionEngine{
     @Autowired
     private DependencyService dependencyService;
 

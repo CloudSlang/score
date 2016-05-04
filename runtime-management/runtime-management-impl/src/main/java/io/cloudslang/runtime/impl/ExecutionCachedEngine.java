@@ -17,7 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class CachedStaticsSharedExecutionEngine<T extends Executor> extends ExecutionEngine {
+public abstract class ExecutionCachedEngine<T extends Executor> extends ExecutionEngine {
     // key --> dependencies concatenated
     // value --> classloader/pythoninterpreter which was build with classpath from these dependencies
     // if we reached the limit of cache we will release the least recently used

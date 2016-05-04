@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = JavaCachedStaticsSharedExecutionEngineTest.TestConfig.class)
+@ContextConfiguration(classes = JavaExecutorTest.TestConfig.class)
 public class JavaExecutorTest {
 
     public static final String CLASS_NAME = "group.artifact.OneClass";

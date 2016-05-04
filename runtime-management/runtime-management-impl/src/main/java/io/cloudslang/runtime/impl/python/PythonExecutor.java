@@ -21,7 +21,7 @@ public class PythonExecutor implements Executor {
     private static final String TRUE = "true";
     private static final String FALSE = "false";
 
-    private static final PythonInterpreter GLOBAL_INTERPRETER = new PythonInterpreter();
+    private static final PythonInterpreter GLOBAL_INTERPRETER = new ThreadSafePythonInterpreter(null);
 
     static {
         //here to avoid jython preferring io.cloudslang package over python io package
@@ -44,7 +44,7 @@ public class PythonExecutor implements Executor {
             for (String dependency: dependencies) {
                 systemState.path.append(new PyString(dependency));
             }
-            return new PythonInterpreter(null, systemState);
+            return new ThreadSafePythonInterpreter(systemState);
         }
         return GLOBAL_INTERPRETER;
     }
@@ -94,7 +94,7 @@ public class PythonExecutor implements Executor {
         }
     }
 
-    private Serializable eval(String prepareEnvironmentScript, String script) {
+    protected Serializable eval(String prepareEnvironmentScript, String script) {
         if (interpreter.get(TRUE) == null)
             interpreter.set(TRUE, Boolean.TRUE);
         if (interpreter.get(FALSE) == null)
@@ -172,5 +172,15 @@ public class PythonExecutor implements Executor {
                 value instanceof PyModule ||
                 value instanceof PyFunction ||
                 value instanceof PySystemState;
+    }
+
+    private static class ThreadSafePythonInterpreter extends PythonInterpreter {
+        ThreadSafePythonInterpreter() {
+            this(null);
+        }
+
+        ThreadSafePythonInterpreter(PySystemState systemState) {
+            super(null, systemState, true);
+        }
     }
 }

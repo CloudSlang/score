@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class JavaCachedStaticsNotSharedExecutionEngine extends ExecutionEngine implements JavaExecutionEngine {
+public class JavaExecutionNoCachedEngine extends ExecutionEngine implements JavaExecutionEngine {
     @Autowired
     private DependencyService dependencyService;
 

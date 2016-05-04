@@ -24,12 +24,12 @@ public class PythonRuntimeServiceImpl implements PythonRuntimeService {
     private PythonExecutionEngine pythonExecutionEngine;
 
     @Override
-    public synchronized Map<String, Serializable> exec(Set<String> dependencies, String script, Map<String, Serializable> vars) {
+    public Map<String, Serializable> exec(Set<String> dependencies, String script, Map<String, Serializable> vars) {
         return pythonExecutionEngine.exec(dependencies, script, vars);
     }
 
     @Override
-    public synchronized Serializable eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
+    public Serializable eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
         return pythonExecutionEngine.eval(prepareEnvironmentScript, script, vars);
     }
 }

@@ -18,7 +18,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-public class PythonCachedStaticsNotSharedExecutionEngine implements PythonExecutionEngine{
+public class PythonExecutionNotCachedEngine implements PythonExecutionEngine{
     @Autowired
     private DependencyService dependencyService;
 

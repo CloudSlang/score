@@ -15,7 +15,9 @@ import org.springframework.context.annotation.Bean;
 public class PythonExecutionEngineConfiguration {
     @Bean
     PythonExecutionEngine pythonExecutionEngine() {
-        return System.getProperty("java.executor.provider", "PythonCachedStaticsSharedExecutionEngine").equals("PythonCachedStaticsNotSharedExecutionEngine") ?
-                new PythonCachedStaticsNotSharedExecutionEngine() : new PythonCachedStaticsSharedExecutionEngine();
+        String noCacheEngine = PythonExecutionNotCachedEngine.class.getSimpleName();
+        String cacheEngine = PythonExecutionCachedEngine.class.getSimpleName();
+        return System.getProperty("java.executor.provider", cacheEngine).equals(noCacheEngine) ?
+                new PythonExecutionNotCachedEngine() : new PythonExecutionCachedEngine();
     }
 }
