@@ -42,8 +42,25 @@ public class DependencyServiceTest {
                 "C:/aaaa/bbbb/cccc.jar", "C:/bbbb/cccc/dddd.zip");
         Assert.assertTrue("Unexpected returned set", ret.containsAll(referenceList) && ret.size() == referenceList.size());
 
+        ret = dependencyService.getDependencies(new HashSet<>(Arrays.asList("groupId1:test-artifact1:1.1")));
+        referenceList = Arrays.asList("C:/aaaa/bbbb/cccc.jar", "C:/bbbb/cccc/dddd.zip");
+        Assert.assertTrue("Unexpected returned set", ret.containsAll(referenceList) && ret.size() == referenceList.size());
+    }
+
+    @Test
+    public void testEmptyResourceSet() {
         Set<String> ret1 = dependencyService.getDependencies(new HashSet<String>());
         Assert.assertTrue("Unexpected returned set", ret1.isEmpty());
+    }
+
+    @Test
+    public void testMalformedGav() {
+        try {
+            Set<String> ret1 = dependencyService.getDependencies(new HashSet<String>(Arrays.asList("groupId1:test-artifact1")));
+            Assert.fail("Expected IllegalArgumentException, but succeeded");
+        } catch (IllegalArgumentException e) {
+
+        }
     }
 
     @Configuration
