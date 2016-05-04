@@ -1,5 +1,3 @@
-package io.cloudslang.dependency.api.services;
-
 /*******************************************************************************
  * (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
  * All rights reserved. This program and the accompanying materials
@@ -10,10 +8,13 @@ package io.cloudslang.dependency.api.services;
  *
  *******************************************************************************/
 
+package io.cloudslang.dependency.api.services;
+
 /**
  * @author Alexander Eskin
  */
 public interface MavenConfig {
+    String SEPARATOR = "/";
     String getLocalMavenRepoPath();
     String getRemoteMaveRepoUrl();
 }

@@ -1,5 +1,3 @@
-package io.cloudslang.runtime.impl.python;
-
 /*******************************************************************************
  * (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
  * All rights reserved. This program and the accompanying materials
@@ -9,6 +7,8 @@ package io.cloudslang.runtime.impl.python;
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  *******************************************************************************/
+
+package io.cloudslang.runtime.impl.python;
 
 import io.cloudslang.dependency.api.services.DependencyService;
 import io.cloudslang.runtime.impl.CachedStaticsSharedExecutionEngine;
@@ -29,8 +29,7 @@ public class PythonCachedStaticsSharedExecutionEngine extends CachedStaticsShare
 
     @Override
     public Map<String, Serializable> exec(Set<String> dependencies, String script, Map<String, Serializable> vars) {
-        return allocateExecutor((dependencies == null || dependencies.isEmpty()) ? Sets.<String>newHashSet() :
-                Sets.newHashSet(dependencies)).exec(script, vars);
+        return allocateExecutor(dependencies).exec(script, vars);
     }
 
     @Override

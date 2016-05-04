@@ -1,12 +1,3 @@
-package io.cloudslang.runtime.impl.python;
-
-import io.cloudslang.runtime.impl.Executor;
-import org.python.core.*;
-import org.python.util.PythonInterpreter;
-
-import java.io.Serializable;
-import java.util.*;
-
 /*******************************************************************************
  * (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
  * All rights reserved. This program and the accompanying materials
@@ -16,6 +7,15 @@ import java.util.*;
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  *******************************************************************************/
+
+package io.cloudslang.runtime.impl.python;
+
+import io.cloudslang.runtime.impl.Executor;
+import org.python.core.*;
+import org.python.util.PythonInterpreter;
+
+import java.io.Serializable;
+import java.util.*;
 
 public class PythonExecutor implements Executor {
     private static final String TRUE = "true";

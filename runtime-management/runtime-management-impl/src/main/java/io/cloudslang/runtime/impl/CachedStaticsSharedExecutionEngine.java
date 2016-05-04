@@ -1,5 +1,3 @@
-package io.cloudslang.runtime.impl;
-
 /*******************************************************************************
  * (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
  * All rights reserved. This program and the accompanying materials
@@ -10,18 +8,20 @@ package io.cloudslang.runtime.impl;
  *
  *******************************************************************************/
 
+package io.cloudslang.runtime.impl;
+
 import io.cloudslang.dependency.api.services.DependencyService;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class CachedStaticsSharedExecutionEngine<T extends Executor> extends ExecutionEngine {
     // key --> dependencies concatenated
-    // value --> classloader/pyinterpreter which was build with classpath from these dependencies
-    private final Map<String, T> executors = new HashMap<>();
-
-    // if cached classloaders/intepreters number is limited and limit is reached we will
-    // remove the least recently used (first in the list) and will create the new one
-    private final Set<String> recentlyUsed = new LinkedHashSet<>();
+    // value --> classloader/pythoninterpreter which was build with classpath from these dependencies
+    // if we reached the limit of cache we will release the least recently used
+    private final Map<String, T> executors = new LinkedHashMap<>();
 
     protected T allocateExecutor(Set<String> dependencies) {
         String dependenciesKey = generatedDependenciesKey(dependencies);
@@ -34,20 +34,20 @@ public abstract class CachedStaticsSharedExecutionEngine<T extends Executor> ext
             filePaths = getDependencyService().getDependencies(dependencies);
         }
 
-        synchronized (recentlyUsed) {
+        T candidateForRemove = null;
+        synchronized (executors) {
             if (executor == null) {
-                if (recentlyUsed.size() == getCacheSize()) {
-                    Iterator<String> executorIterator = recentlyUsed.iterator();
-                    String candidateForRemovalKey = executorIterator.next();
-                    executorIterator.remove();
-                    T removedExecutor = executors.remove(candidateForRemovalKey);
-                    removedExecutor.release();
+                if (executors.size() == getCacheSize()) {
+                    Iterator<Map.Entry<String, T>> iterator = executors.entrySet().iterator();
+                    candidateForRemove = iterator.next().getValue();
+                    iterator.remove();
                 }
                 executor = createNewExecutor(filePaths);
                 executors.put(dependenciesKey, executor);
             }
-            recentlyUsed.remove(dependenciesKey);
-            recentlyUsed.add(dependenciesKey);
+        }
+        if(candidateForRemove != null) {
+            candidateForRemove.release();
         }
         return executor;
     }

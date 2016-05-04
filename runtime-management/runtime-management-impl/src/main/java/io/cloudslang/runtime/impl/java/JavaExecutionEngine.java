@@ -1,5 +1,3 @@
-package io.cloudslang.runtime.impl.java;
-
 /*******************************************************************************
  * (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
  * All rights reserved. This program and the accompanying materials
@@ -9,6 +7,8 @@ package io.cloudslang.runtime.impl.java;
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  *******************************************************************************/
+
+package io.cloudslang.runtime.impl.java;
 
 public interface JavaExecutionEngine {
     Object execute(String dependency, String className, String methodName, Object ... args);

@@ -1,5 +1,3 @@
-package io.cloudslang.dependency.impl.services;
-
 /*******************************************************************************
  * (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
  * All rights reserved. This program and the accompanying materials
@@ -10,21 +8,20 @@ package io.cloudslang.dependency.impl.services;
  *
  *******************************************************************************/
 
+package io.cloudslang.dependency.impl.services;
+
 import io.cloudslang.dependency.api.services.DependencyService;
 import io.cloudslang.dependency.api.services.MavenConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static io.cloudslang.dependency.api.services.MavenConfig.SEPARATOR;
 
 /**
  * @author Alexander Eskin
@@ -33,7 +30,6 @@ import java.util.Set;
 @SuppressWarnings("unused")
 public class DependencyServiceImpl implements DependencyService {
     protected static final String DEPENDENCY_DELIMITER = ";";
-    public static final String SEPARATOR = "/";
 
     @Autowired
     private MavenConfig mavenConfig;

@@ -1,5 +1,3 @@
-package io.cloudslang.dependency.impl.services;
-
 /*******************************************************************************
  * (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
  * All rights reserved. This program and the accompanying materials
@@ -9,6 +7,8 @@ package io.cloudslang.dependency.impl.services;
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  *******************************************************************************/
+
+package io.cloudslang.dependency.impl.services;
 
 import io.cloudslang.dependency.api.services.MavenConfig;
 
@@ -23,7 +23,7 @@ public class MavenConfigImpl implements MavenConfig {
     public static final String USER_HOME        = "user.home";
     @Override
     public String getLocalMavenRepoPath() {
-        String defValue = System.getProperty(USER_HOME) + File.separator + ".m2" + File.separator + "repository";
+        String defValue = System.getProperty(USER_HOME) + SEPARATOR + ".m2" + SEPARATOR + "repository";
         return System.getProperty(MAVEN_REPO_LOCAL, defValue);
     }
 
