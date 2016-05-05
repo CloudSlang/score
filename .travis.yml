@@ -1,4 +1,2 @@
 language: java
-env:
-  global:
-    - JAVA_OPTS="-XX:MaxPermSize=512m -Xmx512M"
+script: mvn clean install -Xms256m -Xmx512m
