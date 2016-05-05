@@ -64,7 +64,7 @@ public class PythonExecutorTest {
 
     @Test
     public void testMultithreadedEval() throws InterruptedException {
-        int executionsNum = 20;
+        int executionsNum = 5;
         final String varName = "XXX";
         final String varValue = "YYY";
 
@@ -106,7 +106,7 @@ public class PythonExecutorTest {
 
     @Test
     public void testMultithreadedExecNoDependencies() throws InterruptedException {
-        int executionsNum = 20;
+        int executionsNum = 5;
 
         final CountDownLatch latch = new CountDownLatch(executionsNum);
 
@@ -131,7 +131,7 @@ public class PythonExecutorTest {
 
     @Test
     public void testMultithreadedExecWithDependencies() throws InterruptedException {
-        int executionsNum = 20;
+        int executionsNum = 5;
 
         final CountDownLatch latch = new CountDownLatch(executionsNum);
 
