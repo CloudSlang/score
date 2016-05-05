@@ -17,13 +17,16 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
+ */
 public abstract class ExecutionCachedEngine<T extends Executor> extends ExecutionEngine {
     // key --> dependencies concatenated
     // value --> classloader/pythoninterpreter which was build with classpath from these dependencies
     // if we reached the limit of cache we will release the least recently used
     private final Map<String, T> executors = new LinkedHashMap<>();
 
-    protected T allocateExecutor(Set<String> dependencies) {
+    public T allocateExecutor(Set<String> dependencies) {
         String dependenciesKey = generatedDependenciesKey(dependencies);
 
         T executor;

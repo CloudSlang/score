@@ -13,24 +13,33 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.File;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.text.MessageFormat;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
+/**
+ * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
+ */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = PythonExecutorTest.TestConfig.class)
 public class PythonExecutorTest {
+
+    static {
+        String provideralAlreadyConfigured = System.setProperty("python.executor.engine", PythonExecutionNotCachedEngine.class.getSimpleName());
+        assertNull("python.executor.engine was configured before this test!!!!!!!", provideralAlreadyConfigured);
+    }
+
     private static String LINE_SEPARATOR = System.lineSeparator();
     private static final String SYSTEM_PROPERTIES_MAP = "__sys_prop__";
 
     private static final String GET_SP_FUNCTION_DEFINITION =
                     "import time" + LINE_SEPARATOR +
                     "def check_env(sysPropName, expectedSysPropValue, variable, expectedVariableValue):" + LINE_SEPARATOR +
-                    "  time.sleep(5)" + LINE_SEPARATOR +
+                    "  time.sleep(3)" + LINE_SEPARATOR +
                     "  property_value = __sys_prop__.get(sysPropName)" + LINE_SEPARATOR +
                     "  print 'sysProperty: found ' + property_value + ', expected ' + expectedSysPropValue" + LINE_SEPARATOR +
                     "  global_variable_value = globals().get(variable)" + LINE_SEPARATOR +
@@ -38,6 +47,17 @@ public class PythonExecutorTest {
                     "  EXPECTED=expectedVariableValue" + LINE_SEPARATOR +
                     "  ACTUAL=property_value" + LINE_SEPARATOR +
                     "  return expectedSysPropValue + ':' + property_value + ',' + expectedVariableValue + ':' + global_variable_value";
+
+    private static final String VAR1 = "VAR1";
+    private static final String VAR2 = "VAR2";
+    private static final String EXECUTION_SCRIPT =
+                    "import sys" + LINE_SEPARATOR +
+                    "import time" + LINE_SEPARATOR +
+                    "time.sleep(3)" + LINE_SEPARATOR +
+                    VAR1 + "={0}" + LINE_SEPARATOR +
+                    VAR2 + "={1}" + LINE_SEPARATOR +
+                    "print ''VAR1='' + str(" + VAR1 + ")" + LINE_SEPARATOR +
+                    "print ''VAR2='' + str(" + VAR2 + ")" + LINE_SEPARATOR;
 
     @Autowired
     private PythonRuntimeService pythonRuntimeService;
@@ -84,6 +104,74 @@ public class PythonExecutorTest {
         latch.await();
     }
 
+    @Test
+    public void testMultithreadedExecNoDependencies() throws InterruptedException {
+        int executionsNum = 20;
+
+        final CountDownLatch latch = new CountDownLatch(executionsNum);
+
+        for(int i = 0; i < executionsNum; i++) {
+            final String executioId = String.valueOf(i);
+            new Thread() {
+                public void run() {
+                    try {
+                        String script = MessageFormat.format(EXECUTION_SCRIPT, executioId, executioId);
+                        Map<String, Serializable> result = pythonRuntimeService.exec(Collections.<String>emptySet(), script, Collections.<String, Serializable>emptyMap());
+                        assertNotNull(result);
+                        assertEquals(executioId, result.get(VAR1).toString());
+                        assertEquals(executioId, result.get(VAR2).toString());
+                    } finally {
+                        latch.countDown();
+                    }
+                }
+            }.start();
+        }
+        latch.await();
+    }
+
+    @Test
+    public void testMultithreadedExecWithDependencies() throws InterruptedException {
+        int executionsNum = 20;
+
+        final CountDownLatch latch = new CountDownLatch(executionsNum);
+
+        final String [] dependencies = {
+                new File(getClass().getClassLoader().getResource(".m2/repository/python/math2/mult/1.0/mult-1.0.zip").getFile()).getAbsolutePath(),
+                new File(getClass().getClassLoader().getResource(".m2/repository/python/math2/sum/2.1/sum-2.1.zip").getFile()).getAbsolutePath(),
+                new File(getClass().getClassLoader().getResource(".m2/repository/python/math3/mult/1.2/mult-1.2.zip").getFile()).getAbsolutePath(),
+                new File(getClass().getClassLoader().getResource(".m2/repository/python/math3/sum/4.1/sum-4.1.zip").getFile()).getAbsolutePath()
+        };
+
+        for(int i = 0; i < executionsNum; i++) {
+            final String executioId = String.valueOf(i);
+            final String varName = "VAR";
+            final String script = "import sys\nimport time\nimport math_fake.utils.print_text as print_text\ntime.sleep(3)\n" + varName + " = print_text.foo('" + executioId + "')\nprint " + varName + "\n";
+            final String dependency = dependencies[i % 4];
+
+            int count = dependency.indexOf("math2") != -1 ? 2 : 3;
+            String sign = dependency.indexOf("sum-") != -1 ? "+" : "*";
+
+            final StringBuilder expectedResult = new StringBuilder(executioId);
+            while (--count > 0) {
+                expectedResult.append(sign).append(executioId);
+            }
+
+            new Thread() {
+                public void run() {
+                    try {
+                        Map<String, Serializable> result = pythonRuntimeService.exec(new HashSet<>(Collections.singletonList(dependency)), script, Collections.<String, Serializable>emptyMap());
+                        assertNotNull(result);
+                        assertNotNull(result.get(varName));
+                        assertEquals(expectedResult.toString(), result.get(varName).toString());
+                    } finally {
+                        latch.countDown();
+                    }
+                }
+            }.start();
+        }
+        latch.await();
+    }
+
     private String buildAddFunctionsScript(String ... functionDependencies) {
         String functions = "";
         for (String function : functionDependencies) {
@@ -100,7 +188,11 @@ public class PythonExecutorTest {
     static class TestConfig {
         @Bean public PythonRuntimeService pythonRuntimeService() {return new PythonRuntimeServiceImpl();}
         @Bean public PythonExecutionEngine pythonExecutionEngine() {return new PythonExecutionCachedEngine();}
-        @Bean public DependencyService dependencyService() {return new DependencyServiceImpl();}
+        @Bean public DependencyService dependencyService() {return new DependencyServiceImpl() {
+            public Set<String> getDependencies(Set<String> resources) {
+                return resources;
+            }
+        };}
         @Bean public MavenConfig mavenConfig() {return new MavenConfigImpl();}
     }
 }

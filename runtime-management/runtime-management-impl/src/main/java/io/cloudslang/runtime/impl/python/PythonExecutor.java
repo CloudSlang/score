@@ -17,6 +17,9 @@ import org.python.util.PythonInterpreter;
 import java.io.Serializable;
 import java.util.*;
 
+/**
+ * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
+ */
 public class PythonExecutor implements Executor {
     private static final String TRUE = "true";
     private static final String FALSE = "false";

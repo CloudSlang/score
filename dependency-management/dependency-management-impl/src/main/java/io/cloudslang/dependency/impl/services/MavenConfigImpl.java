@@ -11,6 +11,7 @@
 package io.cloudslang.dependency.impl.services;
 
 import io.cloudslang.dependency.api.services.MavenConfig;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 
@@ -18,6 +19,7 @@ import java.io.File;
  * @author Alexander Eskin
  */
 @SuppressWarnings("unused")
+@Component
 public class MavenConfigImpl implements MavenConfig {
     public static final String MAVEN_REPO_LOCAL = "cloudslang.maven.repo.local";
     public static final String USER_HOME        = "user.home";

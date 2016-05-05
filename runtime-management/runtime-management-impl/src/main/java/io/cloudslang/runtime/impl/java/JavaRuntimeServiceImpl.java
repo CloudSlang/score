@@ -14,6 +14,9 @@ import io.cloudslang.runtime.api.java.JavaRuntimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
+ */
 @Component
 public class JavaRuntimeServiceImpl implements JavaRuntimeService {
     @Autowired

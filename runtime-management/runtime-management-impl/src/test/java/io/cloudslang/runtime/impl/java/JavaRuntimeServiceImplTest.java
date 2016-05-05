@@ -1,6 +1,8 @@
 package io.cloudslang.runtime.impl.java;
 
 import io.cloudslang.dependency.api.services.DependencyService;
+import io.cloudslang.dependency.api.services.MavenConfig;
+import io.cloudslang.dependency.impl.services.MavenConfigImpl;
 import io.cloudslang.runtime.api.java.JavaRuntimeService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +16,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
+ */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = JavaRuntimeServiceImplTest.TestConfig.class)
 public class JavaRuntimeServiceImplTest {
@@ -45,5 +50,8 @@ public class JavaRuntimeServiceImplTest {
                 return new HashSet<>(Arrays.asList("c:\\a.jar", "c:\\b.jar"));
             }
         };}
+
+        @Bean
+        public MavenConfig mavenConfig() {return new MavenConfigImpl();}
     }
 }
