@@ -70,7 +70,7 @@ public class EngineTest {
     private QueueDispatcherService dispatcherService;
 
     @Test
-    public void baseEngineTest() {
+    public void baseEngineTest() throws InterruptedException {
         // register worker
         workerNodeService.create("uuid", "password", "host", "dir");
         workerNodeService.activate("uuid");
@@ -79,7 +79,7 @@ public class EngineTest {
         ExecutionPlan executionPlan = createExecutionPlan();
         TriggeringProperties triggeringProperties = TriggeringProperties.create(executionPlan);
         score.trigger(triggeringProperties);
-
+        Thread.sleep(300);
         List<ExecutionMessage> messages = dispatcherService.poll("uuid", 10);
 
         assertThat(messages).hasSize(1);

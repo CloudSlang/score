@@ -46,4 +46,5 @@ public interface ExecutionQueueRepository {
     Set<Long> getFinishedExecStateIds();
 
 	List<ExecutionMessage> findByStatuses(int maxSize, ExecStatus... statuses);
+	List<String> getBusyWorkers(ExecStatus... statuses);
 }
