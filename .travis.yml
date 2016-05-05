@@ -1,1 +1,4 @@
 language: java
+env:
+  global:
+    - JAVA_OPTS="-XX:MaxPermSize=512m -Xmx512M"
