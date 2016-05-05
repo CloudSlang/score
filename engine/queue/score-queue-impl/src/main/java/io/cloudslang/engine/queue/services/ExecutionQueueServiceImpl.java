@@ -43,6 +43,9 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 	@Autowired
 	private ExecutionAssignerService executionAssignerService;
 
+	@Autowired
+	private BusyWorkersService busyWorkersService;
+
 	@Autowired(required = false)
 	private List<QueueListener> listeners = Collections.emptyList();
 
@@ -136,7 +139,10 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<ExecutionMessage> poll(String workerId, int maxSize, ExecStatus... statuses) {
-		List<ExecutionMessage> result = executionQueueRepository.poll(workerId, maxSize, statuses);
+		List<ExecutionMessage> result = new ArrayList<>();
+		//check if the worker has work before actually polling for work
+		if(busyWorkersService.isWorkerBusy(workerId))
+		result = executionQueueRepository.poll(workerId, maxSize, statuses);
 
 		for (QueueListener listener : listeners) {
 			listener.onPoll(result, result.size());

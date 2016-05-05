@@ -65,6 +65,9 @@ public class ExecutionQueueServiceTest {
 	public WorkerNodeService workerNodeService;
 
 	@Autowired
+	private BusyWorkersService busyWorkersService;
+
+	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
 	@Autowired
@@ -190,7 +193,8 @@ public class ExecutionQueueServiceTest {
 		groupWorkerMap.put("group1", "worker1");
 		groupWorkerMap.put("group1", "worker2");
 		when(workerNodeService.readGroupWorkersMapActiveAndRunningAndVersion("")).thenReturn(groupWorkerMap);
-
+		when(busyWorkersService.isWorkerBusy("worker1")).thenReturn(true);
+		when(busyWorkersService.isWorkerBusy("worker1")).thenReturn(true);
 		List<ExecutionMessage> msgInQueue = executionQueueService.pollMessagesWithoutAck(100, 0);
 		Assert.assertEquals(0, msgInQueue.size());
 
@@ -312,6 +316,11 @@ public class ExecutionQueueServiceTest {
 		@Bean
 		public WorkerNodeService workerNodeService() {
 			return mock(WorkerNodeService.class);
+		}
+
+		@Bean
+		public BusyWorkersService busyWorkersService() {
+			return mock(BusyWorkersService.class);
 		}
 
 		@Bean
