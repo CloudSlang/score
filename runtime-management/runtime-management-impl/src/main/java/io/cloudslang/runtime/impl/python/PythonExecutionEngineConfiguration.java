@@ -8,23 +8,21 @@
  *
  *******************************************************************************/
 
-package io.cloudslang.runtime.impl.java;
+package io.cloudslang.runtime.impl.python;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
 @Configuration
-@ComponentScan("io.cloudslang.runtime.impl.java")
-public class JavaExecutionEngineConfiguration {
+public class PythonExecutionEngineConfiguration {
     @Bean
-    JavaExecutionEngine javaExecutionEngine() {
-        String noCacheEngine = JavaExecutionNoCachedEngine.class.getSimpleName();
-        String cacheEngine = JavaExecutionCachedEngine.class.getSimpleName();
-        return System.getProperty("java.executor.engine", cacheEngine).equals(noCacheEngine) ?
-                new JavaExecutionNoCachedEngine() : new JavaExecutionCachedEngine();
+    PythonExecutionEngine pythonExecutionEngine() {
+        String noCacheEngine = PythonExecutionNotCachedEngine.class.getSimpleName();
+        String cacheEngine = PythonExecutionCachedEngine.class.getSimpleName();
+        return System.getProperty("python.executor.engine", cacheEngine).equals(noCacheEngine) ?
+                new PythonExecutionNotCachedEngine() : new PythonExecutionCachedEngine();
     }
 }

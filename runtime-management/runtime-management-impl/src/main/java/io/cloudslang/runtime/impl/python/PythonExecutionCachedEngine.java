@@ -1,5 +1,3 @@
-package io.cloudslang.runtime.impl.java;
-
 /*******************************************************************************
  * (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
  * All rights reserved. This program and the accompanying materials
@@ -10,27 +8,36 @@ package io.cloudslang.runtime.impl.java;
  *
  *******************************************************************************/
 
+package io.cloudslang.runtime.impl.python;
+
 import io.cloudslang.dependency.api.services.DependencyService;
-import io.cloudslang.runtime.impl.CachedStaticsSharedExecutionEngine;
+import io.cloudslang.runtime.impl.ExecutionCachedEngine;
 import org.python.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.io.Serializable;
+import java.util.Map;
+import java.util.Set;
 
-@Component
-public class JavaCachedStaticsSharedExecutionEngine extends CachedStaticsSharedExecutionEngine<JavaExecutor> implements JavaExecutionEngine {
+/**
+ * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
+ */
+public class PythonExecutionCachedEngine extends ExecutionCachedEngine<PythonExecutor> implements PythonExecutionEngine{
     @Autowired
     private DependencyService dependencyService;
 
-    @Value("#{systemProperties['java.executor.cache.size'] != null ? systemProperties['java.executor.cache.size'] : 200}")
+    @Value("#{systemProperties['python.executor.cache.size'] != null ? systemProperties['python.executor.cache.size'] : 100}")
     private int cacheSize;
 
     @Override
-    public Object execute(String dependency, String className, String methodName, Object ... args) {
-        return allocateExecutor((dependency == null || dependency.isEmpty()) ? Sets.<String>newHashSet() :
-                Sets.newHashSet(dependency)).execute(className, methodName, args);
+    public Map<String, Serializable> exec(Set<String> dependencies, String script, Map<String, Serializable> vars) {
+        return allocateExecutor(dependencies).exec(script, vars);
+    }
+
+    @Override
+    public Serializable eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
+        return allocateExecutor(Sets.<String>newHashSet()).eval(prepareEnvironmentScript, script, vars);
     }
 
     @Override
@@ -44,7 +51,7 @@ public class JavaCachedStaticsSharedExecutionEngine extends CachedStaticsSharedE
     }
 
     @Override
-    protected JavaExecutor createNewExecutor(Set<String> filePaths) {
-        return new JavaExecutor(filePaths);
+    protected PythonExecutor createNewExecutor(Set<String> filePaths) {
+        return new PythonExecutor(filePaths);
     }
 }

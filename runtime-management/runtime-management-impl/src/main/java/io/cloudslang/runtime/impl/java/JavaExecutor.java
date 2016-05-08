@@ -1,5 +1,3 @@
-package io.cloudslang.runtime.impl.java;
-
 /*******************************************************************************
  * (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
  * All rights reserved. This program and the accompanying materials
@@ -9,6 +7,8 @@ package io.cloudslang.runtime.impl.java;
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  *******************************************************************************/
+
+package io.cloudslang.runtime.impl.java;
 
 import io.cloudslang.runtime.impl.Executor;
 
@@ -20,6 +20,9 @@ import java.net.URLClassLoader;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
+ */
 public class JavaExecutor implements Executor {
     private static final ClassLoader PARENT_CLASS_LOADER;
 
@@ -81,4 +84,7 @@ public class JavaExecutor implements Executor {
         }
         return actionMethod;
     }
+
+    @Override
+    public void release() {}
 }

@@ -8,11 +8,16 @@
  *
  *******************************************************************************/
 
-package io.cloudslang.runtime.impl.java;
+package io.cloudslang.runtime.impl.python;
+
+import java.io.Serializable;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
-public interface JavaExecutionEngine {
-    Object execute(String dependency, String className, String methodName, Object ... args);
+public interface PythonExecutionEngine {
+    Map<String, Serializable> exec(Set<String> dependencies, String script, Map<String, Serializable> vars);
+    Serializable eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars);
 }

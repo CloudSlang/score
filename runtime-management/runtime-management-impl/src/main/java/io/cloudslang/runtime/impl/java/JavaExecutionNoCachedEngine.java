@@ -1,5 +1,3 @@
-package io.cloudslang.runtime.impl.java;
-
 /*******************************************************************************
  * (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
  * All rights reserved. This program and the accompanying materials
@@ -10,16 +8,20 @@ package io.cloudslang.runtime.impl.java;
  *
  *******************************************************************************/
 
+package io.cloudslang.runtime.impl.java;
+
 import io.cloudslang.dependency.api.services.DependencyService;
 
+import io.cloudslang.runtime.impl.ExecutionEngine;
 import org.python.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Set;
-
+/**
+ * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
+ */
 @Component
-public class JavaCachedStaticsNotSharedExecutionEngine extends ExecutionEngine implements JavaExecutionEngine {
+public class JavaExecutionNoCachedEngine extends ExecutionEngine implements JavaExecutionEngine {
     @Autowired
     private DependencyService dependencyService;
 

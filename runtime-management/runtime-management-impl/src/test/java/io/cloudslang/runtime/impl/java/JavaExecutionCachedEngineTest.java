@@ -3,12 +3,12 @@ package io.cloudslang.runtime.impl.java;
 import io.cloudslang.dependency.api.services.DependencyService;
 import io.cloudslang.dependency.api.services.MavenConfig;
 import io.cloudslang.dependency.impl.services.MavenConfigImpl;
-import io.cloudslang.runtime.api.java.JavaRuntimeService;
+import io.cloudslang.runtime.impl.AbsExecutionCachedEngineTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -20,28 +20,30 @@ import java.util.Set;
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = JavaRuntimeServiceImplTest.TestConfig.class)
-public class JavaRuntimeServiceImplTest {
+@ContextConfiguration(classes = JavaExecutionCachedEngineTest.TestConfig.class)
+public class JavaExecutionCachedEngineTest extends AbsExecutionCachedEngineTest {
     static {
         System.setProperty("java.executor.provider", JavaExecutionCachedEngine.class.getSimpleName());
+        System.setProperty("java.executor.cache.size", "3");
     }
 
     @Autowired
-    private JavaRuntimeService javaRuntimeServiceImpl;
+    private JavaExecutionEngine javaExecutionEngine;
 
     @Test
-    public void testJavaRuntimeService() {
-        System.out.println("+++++++++++++++++++++++++[" + javaRuntimeServiceImpl.execute("", "java.util.Date", "toGMTString") + "]");
-        System.out.println("+++++++++++++++++++++++++[" + javaRuntimeServiceImpl.execute("nothing", "java.util.Date", "toGMTString") + "]");
+    public void testJavaCachedExecutorEngineMultiThreadedTest() throws InterruptedException {
+        testCachedExecutorEngineMultiThreaded((JavaExecutionCachedEngineAllocator) javaExecutionEngine);
+    }
+
+    @Test
+    public void testJavaCachedExecutorProviderTest() {
+        testLeastRecentrlyUse((JavaExecutionCachedEngineAllocator) javaExecutionEngine);
     }
 
     @Configuration
     static class TestConfig {
         @Bean
-        public JavaRuntimeService javaRuntimeService() {return new JavaRuntimeServiceImpl();}
-
-        @Bean
-        public JavaExecutionEngine javaExecutorProvider() {return new JavaExecutionCachedEngine();}
+        public JavaExecutionEngine javaExecutorProvider() {return new JavaExecutionCachedEngineAllocator();}
 
         @Bean
         public DependencyService dependencyService() {return new DependencyService() {
@@ -53,5 +55,11 @@ public class JavaRuntimeServiceImplTest {
 
         @Bean
         public MavenConfig mavenConfig() {return new MavenConfigImpl();}
+    }
+
+    private static class JavaExecutionCachedEngineAllocator extends JavaExecutionCachedEngine {
+        public JavaExecutor allocateExecutor(Set<String> dependencies) {
+            return super.allocateExecutor(dependencies);
+        }
     }
 }

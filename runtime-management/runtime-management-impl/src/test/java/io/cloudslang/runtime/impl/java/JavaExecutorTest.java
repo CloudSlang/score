@@ -16,8 +16,11 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 
+/**
+ * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
+ */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = JavaCachedStaticsSharedExecutionEngineTest.TestConfig.class)
+@ContextConfiguration(classes = JavaExecutorTest.TestConfig.class)
 public class JavaExecutorTest {
 
     public static final String CLASS_NAME = "group.artifact.OneClass";
