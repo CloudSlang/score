@@ -15,11 +15,7 @@ import io.cloudslang.engine.node.services.WorkerNodeServiceImpl;
 import io.cloudslang.engine.node.services.WorkersMBean;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepositoryImpl;
-import io.cloudslang.engine.queue.services.ExecutionQueueServiceImpl;
-import io.cloudslang.engine.queue.services.QueueDispatcherServiceImpl;
-import io.cloudslang.engine.queue.services.QueueListenerImpl;
-import io.cloudslang.engine.queue.services.QueueStateIdGeneratorServiceImpl;
-import io.cloudslang.engine.queue.services.ScoreEventFactoryImpl;
+import io.cloudslang.engine.queue.services.*;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerServiceImpl;
 import io.cloudslang.engine.queue.services.cleaner.QueueCleanerServiceImpl;
 import io.cloudslang.engine.queue.services.recovery.ExecutionRecoveryServiceImpl;
@@ -107,6 +103,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
         put(WorkerDbSupportServiceImpl.class, null);
         put(ScoreDeprecatedImpl.class, null);
         put(ScoreEngineJobsImpl.class,"scoreEngineJobs");
+		put(BusyWorkersServiceImpl.class,"busyWorkersService");
 	}};
 
 	@Override

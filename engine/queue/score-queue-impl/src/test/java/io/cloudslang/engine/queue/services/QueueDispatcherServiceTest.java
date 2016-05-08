@@ -41,6 +41,8 @@ public class QueueDispatcherServiceTest {
     @Mock
     private ExecutionQueueService executionQueueService;
 
+    @Mock
+    private BusyWorkersService busyWorkersService;
 
     @InjectMocks
     private QueueDispatcherService queueDispatcherService = new QueueDispatcherServiceImpl();
@@ -75,6 +77,7 @@ public class QueueDispatcherServiceTest {
     @Test
     public void testPoll() throws Exception {
         Date now = new Date();
+        when(busyWorkersService.isWorkerBusy("workerId")).thenReturn(true);
         queueDispatcherService.poll("workerId",5);
         verify(executionQueueService,times(1)).poll("workerId", 5, ExecStatus.ASSIGNED);
     }

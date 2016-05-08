@@ -19,6 +19,7 @@ import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepositoryImpl;
+import io.cloudslang.engine.queue.services.BusyWorkersService;
 import io.cloudslang.engine.queue.services.ExecutionQueueService;
 import io.cloudslang.engine.queue.services.ExecutionQueueServiceImpl;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerService;
@@ -66,6 +67,9 @@ public class QueueCleanerServiceTest {
 	public QueueCleanerService queueCleanerService;
 
 	@Autowired
+	private BusyWorkersService busyWorkersService;
+
+	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
 
@@ -83,7 +87,7 @@ public class QueueCleanerServiceTest {
 
 		ExecutionMessage message25 = generateMessage(2, "group1", "2", ExecStatus.IN_PROGRESS, 1);
 		ExecutionMessage message26 = generateMessage(2, "group1", "2", ExecStatus.FINISHED, 2);
-
+		when(busyWorkersService.isWorkerBusy("myWorker")).thenReturn(true);
 		msgs.clear();
 		msgs.add(message15);
 		executionQueueService.enqueue(msgs);
@@ -182,6 +186,11 @@ public class QueueCleanerServiceTest {
 		@Bean
 		WorkerNodeService workerNodeService() {
 			return mock(WorkerNodeService.class);
+		}
+
+		@Bean
+		public BusyWorkersService busyWorkersService() {
+			return mock(BusyWorkersService.class);
 		}
 
 		@Bean
