@@ -1,0 +1,63 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+
+    <localRepository>${cloudslang.maven.repo.local}</localRepository>
+    <mirrors>
+        <mirror>
+            <id>nexus</id>
+            <mirrorOf>external:*,!oo-public-snapshots,!oo-public</mirrorOf>
+            <url>http://mydtbld0034.hpeswlab.net:8081/nexus/content/groups/oo-public/</url>
+        </mirror>
+    </mirrors>
+
+
+    <profiles>
+        <profile>
+            <id>default-settings</id>
+            <properties>
+                <maven.dev.monitoring.enableMonitoring>false</maven.dev.monitoring.enableMonitoring>
+            </properties>
+
+            <repositories>
+                <repository>
+                    <id>oo-public-snapshots</id>
+                    <!--url>http://mydtbld0034.hpeswlab.net:8081/nexus/content/groups/oo-public-snapshots/</url-->
+                    <url>http://mydphdb0166.hpswlabs.adapps.hp.com:8081/nexus/content/repositories/snapshots/</url>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>oo-public</id>
+                    <url>http://mydtbld0034.hpeswlab.net:8081/nexus/content/groups/oo-public</url>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </pluginRepository>
+            </pluginRepositories>
+
+        </profile>
+    </profiles>
+    <activeProfiles>
+        <activeProfile>default-settings</activeProfile>
+    </activeProfiles>
+
+
+    <proxies>
+        <proxy>
+            <id>myhttpsproxy</id>
+            <active>true</active>
+            <protocol>https</protocol>
+            <host>proxy.bbn.hp.com</host>
+            <port>8080</port>
+            <nonProxyHosts>*.hp.com</nonProxyHosts>
+        </proxy>
+    </proxies>
+
+
+</settings>
