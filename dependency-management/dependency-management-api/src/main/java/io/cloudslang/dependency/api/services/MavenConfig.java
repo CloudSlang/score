@@ -16,5 +16,5 @@ package io.cloudslang.dependency.api.services;
 public interface MavenConfig {
     String SEPARATOR = "/";
     String getLocalMavenRepoPath();
-    String getRemoteMaveRepoUrl();
+    String getRemoteMavenRepoUrl();
 }

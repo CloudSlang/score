@@ -30,7 +30,7 @@ public class MavenConfigImpl implements MavenConfig {
     }
 
     @Override
-    public String getRemoteMaveRepoUrl() {
+    public String getRemoteMavenRepoUrl() {
         //TODO
         return null;
     }

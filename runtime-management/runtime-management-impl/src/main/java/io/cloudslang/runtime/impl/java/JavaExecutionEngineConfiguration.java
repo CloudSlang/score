@@ -20,11 +20,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ComponentScan("io.cloudslang.runtime.impl.java")
 public class JavaExecutionEngineConfiguration {
+
     @Bean
     JavaExecutionEngine javaExecutionEngine() {
         String noCacheEngine = JavaExecutionNoCachedEngine.class.getSimpleName();
         String cacheEngine = JavaExecutionCachedEngine.class.getSimpleName();
-        return System.getProperty("java.executor.engine", cacheEngine).equals(noCacheEngine) ?
+        return System.getProperty(JavaExecutionConfigurationConsts.JAVA_EXECUTOR_ENGINE, cacheEngine).equals(noCacheEngine) ?
                 new JavaExecutionNoCachedEngine() : new JavaExecutionCachedEngine();
     }
 }
