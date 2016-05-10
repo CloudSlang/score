@@ -35,15 +35,18 @@ public class DependencyServiceTest {
     private DependencyService dependencyService;
 
     @Test
-    public void testDependencyResolution() {
+    public void testMultipleDependencyResolution() {
         Set<String> ret = dependencyService.getDependencies(new HashSet<>(Arrays.asList("groupId1:test-artifact:1.0",
                 "groupId1:test-artifact1:1.1")));
         List<String> referenceList = Arrays.asList("C:/aaa/bbb/ccc.jar", "C:/bbb/ccc/ddd.zip", "C:/ccc/ddd/eee/fff.jar",
                 "C:/aaaa/bbbb/cccc.jar", "C:/bbbb/cccc/dddd.zip");
         Assert.assertTrue("Unexpected returned set", ret.containsAll(referenceList) && ret.size() == referenceList.size());
+    }
 
-        ret = dependencyService.getDependencies(new HashSet<>(Arrays.asList("groupId1:test-artifact1:1.1")));
-        referenceList = Arrays.asList("C:/aaaa/bbbb/cccc.jar", "C:/bbbb/cccc/dddd.zip");
+    @Test
+    public void testSingleDependencyResolution() {
+        Set<String> ret = dependencyService.getDependencies(new HashSet<>(Arrays.asList("groupId1:test-artifact1:1.1")));
+        List<String> referenceList = Arrays.asList("C:/aaaa/bbbb/cccc.jar", "C:/bbbb/cccc/dddd.zip");
         Assert.assertTrue("Unexpected returned set", ret.containsAll(referenceList) && ret.size() == referenceList.size());
     }
 
@@ -85,7 +88,7 @@ public class DependencyServiceTest {
                 }
 
                 @Override
-                public String getRemoteMaveRepoUrl() {
+                public String getRemoteMavenRepoUrl() {
                     return null;
                 }
             };

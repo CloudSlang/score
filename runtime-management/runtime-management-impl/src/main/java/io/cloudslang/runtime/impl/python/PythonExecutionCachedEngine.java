@@ -27,7 +27,7 @@ public class PythonExecutionCachedEngine extends ExecutionCachedEngine<PythonExe
     @Autowired
     private DependencyService dependencyService;
 
-    @Value("#{systemProperties['python.executor.cache.size'] != null ? systemProperties['python.executor.cache.size'] : 100}")
+    @Value("#{systemProperties['" + PythonExecutionConfigurationConsts.PYTHON_EXECUTOR_CACHE_SIZE + "'] != null ? systemProperties['" + PythonExecutionConfigurationConsts.PYTHON_EXECUTOR_CACHE_SIZE + "'] : " + PythonExecutionConfigurationConsts.PYTHON_EXECUTOR_CACHE_DEFAULT_SIZE + "}")
     private int cacheSize;
 
     @Override
