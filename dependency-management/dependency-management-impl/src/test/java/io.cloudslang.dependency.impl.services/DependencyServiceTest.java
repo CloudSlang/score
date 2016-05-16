@@ -36,14 +36,21 @@ public class DependencyServiceTest {
     @Before
     public void init() {
         System.setProperty(MavenConfigImpl.MAVEN_REPO_LOCAL, new TestConfig().mavenConfig().getLocalMavenRepoPath());
+        System.setProperty(MavenConfigImpl.MAVEN_REMOTE_URL, "http://mydtbld0034.hpeswlab.net:8081/nexus/content/groups/oo-public");
+        System.setProperty(MavenConfigImpl.MAVEN_PLUGINS_URL, "http://mydphdb0166.hpswlabs.adapps.hp.com:8081/nexus/content/repositories/snapshots/");
         System.setProperty("maven.home", getClass().getClassLoader().getResource("apache-maven-3.2.1").getPath());
+
+        System.setProperty(MavenConfigImpl.MAVEN_PROXY_PROTOCOL, "https");
+        System.setProperty(MavenConfigImpl.MAVEN_PROXY_HOST, "proxy.bbn.hp.com");
+        System.setProperty(MavenConfigImpl.MAVEN_PROXY_PORT, "8080");
+        System.setProperty(MavenConfigImpl.MAVEN_PROXY_NON_PROXY_HOSTS, "*.hp.com");
     }
 
     @After
     public void cleanup() {
-        String basePath = new TestConfig().mavenConfig().getLocalMavenRepoPath();
-        new File(basePath + "/junit/junit/4.12/junit-4.12.path").delete();
-        new File(basePath + "/groupId1/mvn_artifact1/1.0/mvn_artifact1-1.0.path").delete();
+//        String basePath = new TestConfig().mavenConfig().getLocalMavenRepoPath();
+//        new File(basePath + "/junit/junit/4.12/junit-4.12.path").delete();
+//        new File(basePath + "/groupId1/mvn_artifact1/1.0/mvn_artifact1-1.0.path").delete();
     }
 
     @Test
