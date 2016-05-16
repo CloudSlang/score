@@ -21,16 +21,6 @@ import java.io.File;
 @SuppressWarnings("unused")
 @Component
 public class MavenConfigImpl implements MavenConfig {
-    public static final String MAVEN_REPO_LOCAL = "cloudslang.maven.repo.local";
-    public static final String MAVEN_REMOTE_URL = "cloudslang.maven.repo.remote.url";
-    public static final String MAVEN_PLUGINS_URL = "cloudslang.maven.plugins.remote.url";
-    public static final String USER_HOME = "user.home";
-
-    public static final String MAVEN_PROXY_PROTOCOL = "maven.proxy.protocol";
-    public static final String MAVEN_PROXY_HOST = "maven.proxy.host";
-    public static final String MAVEN_PROXY_PORT = "maven.proxy.port";
-    public static final String MAVEN_PROXY_NON_PROXY_HOSTS = "maven.proxy.non.proxy.hosts";
-
     @Override
     public String getLocalMavenRepoPath() {
         String defValue = System.getProperty(USER_HOME) + SEPARATOR + ".m2" + SEPARATOR + "repository";

@@ -13,9 +13,15 @@ import io.cloudslang.dependency.api.services.DependencyService;
 import io.cloudslang.dependency.api.services.MavenConfig;
 import org.codehaus.plexus.classworlds.launcher.Launcher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.io.*;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -29,9 +35,40 @@ import static io.cloudslang.dependency.api.services.MavenConfig.SEPARATOR;
 @Service
 @SuppressWarnings("unused")
 public class DependencyServiceImpl implements DependencyService {
+    private static final String MAVEN_LAUNCHER_CLASS = "org.codehaus.plexus.classworlds.launcher.Launcher";
+    private static final String MAVEN_LAUNCHER_METHOD = "mainWithExitCode";
+
+    private Method launcherMethod;
+
+    @Value("#{systemProperties['" + MavenConfig.MAVEN_HOME + "']}")
+    private String mavenHome;
+
+    private ClassLoader mavenClassLoader;
+
+    @PostConstruct
+    private void initMaven() throws ClassNotFoundException, NoSuchMethodException, MalformedURLException {
+        ClassLoader parentClassLoader = DependencyServiceImpl.class.getClassLoader();
+        while(parentClassLoader.getParent() != null) {
+            parentClassLoader = parentClassLoader.getParent();
+        }
+
+        File libDir = new File(mavenHome, "boot");
+        File [] mavenJars = libDir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.toLowerCase().endsWith("jar");
+            }
+        });
+
+        URL [] mavenJarUrls = new URL[mavenJars.length];
+        for(int i = 0; i < mavenJarUrls.length; i++) {
+            mavenJarUrls[i] = mavenJars[i].toURI().toURL();
+        }
+
+        mavenClassLoader = new URLClassLoader(mavenJarUrls, parentClassLoader);
+    }
+
     protected static final String DEPENDENCY_DELIMITER = ";";
-    public static final String M2_CONF = "m2.conf";
-    public static final String SETTINGS_XML = "settings.xml";
 
     @Autowired
     private MavenConfig mavenConfig;
@@ -65,14 +102,17 @@ public class DependencyServiceImpl implements DependencyService {
         String pomFilePath = getResourceFolderPath(gav) + SEPARATOR + getFileName(gav, "pom");
         System.setProperty("mdep.outputFile", getDependencyFileName(gav));
         System.setProperty("mdep.pathSeparator", DEPENDENCY_DELIMITER);
-        System.setProperty("classworlds.conf", getClass().getClassLoader().getResource(M2_CONF).getPath());
+        System.setProperty("classworlds.conf", System.getProperty(MavenConfig.MAVEN_M2_CONF_PATH));
         String[] args = new String[]{
                 "-s",
-                getClass().getClassLoader().getResource(SETTINGS_XML).getPath(),
+                System.getProperty(MavenConfig.MAVEN_SETTINGS_PATH),
                 "-f",
                 pomFilePath,
                 "dependency:build-classpath"
         };
+
+        ClassLoader origCL = Thread.currentThread().getContextClassLoader();
+//        Thread.currentThread().setContextClassLoader(mavenClassLoader);
         try {
             int exitCode = Launcher.mainWithExitCode(args);
             if (exitCode != 0) {
@@ -81,7 +121,10 @@ public class DependencyServiceImpl implements DependencyService {
             }
         } catch (Exception e) {
             throw new IllegalStateException("Failed to build classpath using Maven", e);
+        } finally {
+            Thread.currentThread().setContextClassLoader(origCL);
         }
+
         File fileToReturn = new File(getResourceFolderPath(gav) + SEPARATOR + getDependencyFileName(gav));
         if(!fileToReturn.exists()) {
             throw new IllegalStateException(fileToReturn.getPath() + " not found");
