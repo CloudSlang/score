@@ -5,7 +5,6 @@ import io.cloudslang.dependency.api.services.MavenConfig;
 import io.cloudslang.dependency.impl.services.utils.UnzipUtil;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +15,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Consumer;
+import java.util.*;
 
 /**
  * Created by eskin on 03/05/2016.
@@ -99,12 +92,9 @@ public class DependencyServiceTest {
     @Test public void testBuildClassPath1() {
         Set <String> ret = dependencyService.getDependencies(new HashSet<>(Collections.singletonList("groupId1:mvn_artifact1:1.0")));
         final List<File> retFiles = new ArrayList<>();
-        ret.forEach(new Consumer<String>() {
-            @Override
-            public void accept(String s) {
-                retFiles.add(new File(s));
-            }
-        });
+        for (String s : ret) {
+            retFiles.add(new File(s));
+        }
         String basePath = new TestConfig().mavenConfig().getLocalMavenRepoPath();
         List<File> referenceList = Arrays.asList(
                 new File(basePath + "/junit/junit/4.12/junit-4.12.jar"),
