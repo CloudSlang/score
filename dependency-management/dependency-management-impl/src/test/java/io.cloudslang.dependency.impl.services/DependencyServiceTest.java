@@ -30,6 +30,12 @@ import java.util.function.Consumer;
 @ContextConfiguration(classes = DependencyServiceTest.TestConfig.class)
 public class DependencyServiceTest {
     static  {
+        String settingsXmlPath = DependencyServiceTest.class.getClassLoader().getResource("settings.xml").getPath();
+
+        File mavenHome = new File(settingsXmlPath).getParentFile();
+
+        System.setProperty(MavenConfigImpl.MAVEN_HOME,  mavenHome.getAbsolutePath());
+
         System.setProperty(MavenConfigImpl.MAVEN_REPO_LOCAL, new TestConfig().mavenConfig().getLocalMavenRepoPath());
         System.setProperty(MavenConfigImpl.MAVEN_REMOTE_URL, "http://mydtbld0034.hpeswlab.net:8081/nexus/content/groups/oo-public");
         System.setProperty(MavenConfigImpl.MAVEN_PLUGINS_URL, "http://mydphdb0166.hpswlabs.adapps.hp.com:8081/nexus/content/repositories/snapshots/");
@@ -40,7 +46,7 @@ public class DependencyServiceTest {
         System.setProperty(MavenConfigImpl.MAVEN_PROXY_PORT, "8080");
         System.setProperty(MavenConfigImpl.MAVEN_PROXY_NON_PROXY_HOSTS, "*.hp.com");
 
-        System.setProperty(MavenConfigImpl.MAVEN_SETTINGS_PATH, DependencyServiceTest.class.getClassLoader().getResource("settings.xml").getPath());
+        System.setProperty(MavenConfigImpl.MAVEN_SETTINGS_PATH, settingsXmlPath);
         System.setProperty(MavenConfigImpl.MAVEN_M2_CONF_PATH, DependencyServiceTest.class.getClassLoader().getResource("m2.conf").getPath());
     }
 
