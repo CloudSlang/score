@@ -62,7 +62,7 @@ public class DependencyServiceImpl implements DependencyService {
 
     @SuppressWarnings("ConstantConditions")
     private File buildDependencyFile(String[] gav) {
-        String pomFilePath = getResourceFolderPath(gav) + File.separator + getFileName(gav, "pom");
+        String pomFilePath = getResourceFolderPath(gav) + SEPARATOR + getFileName(gav, "pom");
         System.setProperty("mdep.outputFile", getDependencyFileName(gav));
         System.setProperty("mdep.pathSeparator", DEPENDENCY_DELIMITER);
         System.setProperty("classworlds.conf", getClass().getClassLoader().getResource(M2_CONF).getPath());
@@ -82,7 +82,7 @@ public class DependencyServiceImpl implements DependencyService {
         } catch (Exception e) {
             throw new IllegalStateException("Failed to build classpath using Maven", e);
         }
-        File fileToReturn = new File(getResourceFolderPath(gav) + File.separator + getDependencyFileName(gav));
+        File fileToReturn = new File(getResourceFolderPath(gav) + SEPARATOR + getDependencyFileName(gav));
         if(!fileToReturn.exists()) {
             throw new IllegalStateException(fileToReturn.getPath() + " not found");
         }
@@ -151,7 +151,7 @@ public class DependencyServiceImpl implements DependencyService {
     }
 
     private String getGroupIDPath(String[] gav) {
-        return gav[0].replace('.', File.separatorChar);
+        return gav[0].replace('.', SEPARATOR);
     }
 
     private String getArtifactID(String[] gav) {
