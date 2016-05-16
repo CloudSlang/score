@@ -118,12 +118,10 @@ public class DependencyServiceTest {
     @Test public void testBuildClassPath2() {
         Set <String> ret = dependencyService.getDependencies(new HashSet<>(Collections.singletonList("junit:junit:4.12")));
         final List<File> retFiles = new ArrayList<>();
-        ret.forEach(new Consumer<String>() {
-            @Override
-            public void accept(String s) {
-                retFiles.add(new File(s));
-            }
-        });
+        for (String s : ret) {
+            retFiles.add(new File(s));
+        }
+
         String basePath = new TestConfig().mavenConfig().getLocalMavenRepoPath();
         List<File> referenceList = Arrays.asList(
                 new File(basePath + "/junit/junit/4.12/junit-4.12.jar"),
