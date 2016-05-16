@@ -45,6 +45,11 @@ public class DependencyServiceImpl implements DependencyService {
 
     private ClassLoader mavenClassLoader;
 
+    protected static final String DEPENDENCY_DELIMITER = ";";
+
+    @Autowired
+    private MavenConfig mavenConfig;
+
     @PostConstruct
     private void initMaven() throws ClassNotFoundException, NoSuchMethodException, MalformedURLException {
         ClassLoader parentClassLoader = DependencyServiceImpl.class.getClassLoader();
@@ -53,6 +58,12 @@ public class DependencyServiceImpl implements DependencyService {
         }
 
         File libDir = new File(mavenHome, "boot");
+        URL[] mavenJarUrls = getUrls(libDir);
+
+        mavenClassLoader = new URLClassLoader(mavenJarUrls, parentClassLoader);
+    }
+
+    private URL[] getUrls(File libDir) throws MalformedURLException {
         File [] mavenJars = libDir.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
@@ -64,14 +75,8 @@ public class DependencyServiceImpl implements DependencyService {
         for(int i = 0; i < mavenJarUrls.length; i++) {
             mavenJarUrls[i] = mavenJars[i].toURI().toURL();
         }
-
-        mavenClassLoader = new URLClassLoader(mavenJarUrls, parentClassLoader);
+        return mavenJarUrls;
     }
-
-    protected static final String DEPENDENCY_DELIMITER = ";";
-
-    @Autowired
-    private MavenConfig mavenConfig;
 
     @Override
     public Set<String> getDependencies(Set<String> resources) {
@@ -112,9 +117,11 @@ public class DependencyServiceImpl implements DependencyService {
         };
 
         ClassLoader origCL = Thread.currentThread().getContextClassLoader();
-//        Thread.currentThread().setContextClassLoader(mavenClassLoader);
+        Thread.currentThread().setContextClassLoader(mavenClassLoader);
         try {
-            int exitCode = Launcher.mainWithExitCode(args);
+            Object exitCodeObj = Class.forName("org.codehaus.plexus.classworlds.launcher.Launcher", true, mavenClassLoader).
+                    getMethod("mainWithExitCode", String[].class).invoke (null, new Object[]{args});
+            int exitCode = (Integer)exitCodeObj;
             if (exitCode != 0) {
                 throw new RuntimeException("mvn dependency:build-classpath returned " +
                         exitCode + ", see log for details");
