@@ -4,6 +4,7 @@ import io.cloudslang.dependency.api.services.DependencyService;
 import io.cloudslang.dependency.api.services.MavenConfig;
 import io.cloudslang.dependency.impl.services.DependencyServiceImpl;
 import io.cloudslang.dependency.impl.services.MavenConfigImpl;
+import io.cloudslang.dependency.impl.services.utils.UnzipUtil;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +30,28 @@ import static org.junit.Assert.*;
 public class PythonExecutorTest {
 
     static {
+        ClassLoader classLoader = PythonExecutorTest.class.getClassLoader();
+
+        String settingsXmlPath = classLoader.getResource("settings.xml").getPath();
+        File rootHome = new File(settingsXmlPath).getParentFile();
+        File mavenHome = new File(rootHome, "maven");
+        UnzipUtil.unzipToFolder(mavenHome.getAbsolutePath(), classLoader.getResourceAsStream("maven.zip"));
+
+        System.setProperty(MavenConfigImpl.MAVEN_HOME, mavenHome.getAbsolutePath());
+
+        System.setProperty(MavenConfigImpl.MAVEN_REPO_LOCAL, new TestConfig().mavenConfig().getLocalMavenRepoPath());
+        System.setProperty(MavenConfigImpl.MAVEN_REMOTE_URL, "http://mydtbld0034.hpeswlab.net:8081/nexus/content/groups/oo-public");
+        System.setProperty(MavenConfigImpl.MAVEN_PLUGINS_URL, "http://mydphdb0166.hpswlabs.adapps.hp.com:8081/nexus/content/repositories/snapshots/");
+        System.setProperty("maven.home", classLoader.getResource("maven").getPath());
+
+        System.setProperty(MavenConfigImpl.MAVEN_PROXY_PROTOCOL, "https");
+        System.setProperty(MavenConfigImpl.MAVEN_PROXY_HOST, "proxy.bbn.hp.com");
+        System.setProperty(MavenConfigImpl.MAVEN_PROXY_PORT, "8080");
+        System.setProperty(MavenConfigImpl.MAVEN_PROXY_NON_PROXY_HOSTS, "*.hp.com");
+
+        System.setProperty(MavenConfigImpl.MAVEN_SETTINGS_PATH, settingsXmlPath);
+        System.setProperty(MavenConfigImpl.MAVEN_M2_CONF_PATH, classLoader.getResource("m2.conf").getPath());
+
         String provideralAlreadyConfigured = System.setProperty("python.executor.engine", PythonExecutionNotCachedEngine.class.getSimpleName());
         assertNull("python.executor.engine was configured before this test!!!!!!!", provideralAlreadyConfigured);
     }

@@ -11,7 +11,6 @@ package io.cloudslang.dependency.impl.services;
 
 import io.cloudslang.dependency.api.services.DependencyService;
 import io.cloudslang.dependency.api.services.MavenConfig;
-import org.codehaus.plexus.classworlds.launcher.Launcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -35,8 +34,8 @@ import static io.cloudslang.dependency.api.services.MavenConfig.SEPARATOR;
 @Service
 @SuppressWarnings("unused")
 public class DependencyServiceImpl implements DependencyService {
-    private static final String MAVEN_LAUNCHER_CLASS = "org.codehaus.plexus.classworlds.launcher.Launcher";
-    private static final String MAVEN_LAUNCHER_METHOD = "mainWithExitCode";
+    private static final String MAVEN_LAUNCHER_CLASS_NAME = "org.codehaus.plexus.classworlds.launcher.Launcher";
+    private static final String MAVEN_LANUCHER_METHOD_NAME = "mainWithExitCode";
 
     private Method launcherMethod;
 
@@ -119,8 +118,8 @@ public class DependencyServiceImpl implements DependencyService {
         ClassLoader origCL = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(mavenClassLoader);
         try {
-            Object exitCodeObj = Class.forName("org.codehaus.plexus.classworlds.launcher.Launcher", true, mavenClassLoader).
-                    getMethod("mainWithExitCode", String[].class).invoke (null, new Object[]{args});
+            Object exitCodeObj = Class.forName(MAVEN_LAUNCHER_CLASS_NAME, true, mavenClassLoader).
+                    getMethod(MAVEN_LANUCHER_METHOD_NAME, String[].class).invoke (null, new Object[]{args});
             int exitCode = (Integer)exitCodeObj;
             if (exitCode != 0) {
                 throw new RuntimeException("mvn dependency:build-classpath returned " +

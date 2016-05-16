@@ -2,6 +2,7 @@ package io.cloudslang.dependency.impl.services;
 
 import io.cloudslang.dependency.api.services.DependencyService;
 import io.cloudslang.dependency.api.services.MavenConfig;
+import io.cloudslang.dependency.impl.services.utils.UnzipUtil;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -30,16 +31,18 @@ import java.util.function.Consumer;
 @ContextConfiguration(classes = DependencyServiceTest.TestConfig.class)
 public class DependencyServiceTest {
     static  {
-        String settingsXmlPath = DependencyServiceTest.class.getClassLoader().getResource("settings.xml").getPath();
-
-        File mavenHome = new File(settingsXmlPath).getParentFile();
+        ClassLoader classLoader = DependencyServiceTest.class.getClassLoader();
+        String settingsXmlPath = classLoader.getResource("settings.xml").getPath();
+        File rootHome = new File(settingsXmlPath).getParentFile();
+        File mavenHome = new File(rootHome, "maven");
+        UnzipUtil.unzipToFolder(mavenHome.getAbsolutePath(), classLoader.getResourceAsStream("maven.zip"));
 
         System.setProperty(MavenConfigImpl.MAVEN_HOME,  mavenHome.getAbsolutePath());
 
         System.setProperty(MavenConfigImpl.MAVEN_REPO_LOCAL, new TestConfig().mavenConfig().getLocalMavenRepoPath());
         System.setProperty(MavenConfigImpl.MAVEN_REMOTE_URL, "http://mydtbld0034.hpeswlab.net:8081/nexus/content/groups/oo-public");
         System.setProperty(MavenConfigImpl.MAVEN_PLUGINS_URL, "http://mydphdb0166.hpswlabs.adapps.hp.com:8081/nexus/content/repositories/snapshots/");
-        System.setProperty("maven.home", DependencyServiceTest.class.getClassLoader().getResource("apache-maven-3.2.1").getPath());
+        System.setProperty("maven.home", classLoader.getResource("maven").getPath());
 
         System.setProperty(MavenConfigImpl.MAVEN_PROXY_PROTOCOL, "https");
         System.setProperty(MavenConfigImpl.MAVEN_PROXY_HOST, "proxy.bbn.hp.com");
@@ -47,7 +50,7 @@ public class DependencyServiceTest {
         System.setProperty(MavenConfigImpl.MAVEN_PROXY_NON_PROXY_HOSTS, "*.hp.com");
 
         System.setProperty(MavenConfigImpl.MAVEN_SETTINGS_PATH, settingsXmlPath);
-        System.setProperty(MavenConfigImpl.MAVEN_M2_CONF_PATH, DependencyServiceTest.class.getClassLoader().getResource("m2.conf").getPath());
+        System.setProperty(MavenConfigImpl.MAVEN_M2_CONF_PATH, classLoader.getResource("m2.conf").getPath());
     }
 
 
