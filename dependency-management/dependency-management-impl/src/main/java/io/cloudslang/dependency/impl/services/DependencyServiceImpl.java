@@ -14,6 +14,7 @@ import io.cloudslang.dependency.api.services.MavenConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
@@ -166,7 +167,7 @@ public class DependencyServiceImpl implements DependencyService {
     }
 
     private String getResourceString(String[] gav) {
-        return String.join(DEPENDENCY_DELIMITER, gav);
+        return StringUtils.arrayToDelimitedString(gav, DEPENDENCY_DELIMITER);
     }
 
     private String getDependencyFileName(String[] gav) {
