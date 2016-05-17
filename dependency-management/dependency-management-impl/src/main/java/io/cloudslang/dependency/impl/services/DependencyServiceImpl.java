@@ -18,18 +18,8 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import javax.annotation.PostConstruct;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -47,6 +37,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static io.cloudslang.dependency.api.services.MavenConfig.SEPARATOR;
 
@@ -58,7 +50,7 @@ import static io.cloudslang.dependency.api.services.MavenConfig.SEPARATOR;
 public class DependencyServiceImpl implements DependencyService {
     private static final String MAVEN_LAUNCHER_CLASS_NAME = "org.codehaus.plexus.classworlds.launcher.Launcher";
     private static final String MAVEN_LANUCHER_METHOD_NAME = "mainWithExitCode";
-    public static final String PROPERTIES_TAG = "properties";
+    public static final String DEPENDENCY_FILE_EXTENSION = "path";
 
     private Method launcherMethod;
 
@@ -71,6 +63,8 @@ public class DependencyServiceImpl implements DependencyService {
 
     @Autowired
     private MavenConfig mavenConfig;
+
+    Lock lock = new ReentrantLock();
 
     @PostConstruct
     private void initMaven() throws ClassNotFoundException, NoSuchMethodException, MalformedURLException {
@@ -86,14 +80,14 @@ public class DependencyServiceImpl implements DependencyService {
     }
 
     private URL[] getUrls(File libDir) throws MalformedURLException {
-        File [] mavenJars = libDir.listFiles(new FilenameFilter() {
+        File[] mavenJars = libDir.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
                 return name.toLowerCase().endsWith("jar");
             }
         });
 
-        URL [] mavenJarUrls = new URL[mavenJars.length];
+        URL[] mavenJarUrls = new URL[mavenJars.length];
         for(int i = 0; i < mavenJarUrls.length; i++) {
             mavenJarUrls[i] = mavenJars[i].toURI().toURL();
         }
@@ -104,9 +98,14 @@ public class DependencyServiceImpl implements DependencyService {
     public Set<String> getDependencies(Set<String> resources) {
         Set<String> resolvedResources = new HashSet<>(resources.size());
         for (String resource : resources) {
-            String[] gav = extractGav(resource);
-            List<String> dependencyList = getDependencyList(gav);
-            resolvedResources.addAll(dependencyList);
+            lock.lock();
+            try {
+                String[] gav = extractGav(resource);
+                List<String> dependencyList = getDependencyList(gav);
+                resolvedResources.addAll(dependencyList);
+            } finally {
+                lock.unlock();
+            }
         }
         return resolvedResources;
     }
@@ -127,35 +126,22 @@ public class DependencyServiceImpl implements DependencyService {
     @SuppressWarnings("ConstantConditions")
     private File buildDependencyFile(String[] gav) {
         String pomFilePath = getResourceFolderPath(gav) + SEPARATOR + getFileName(gav, "pom");
+        downloadArtifactsIfNeeded(pomFilePath, gav);
+        System.setProperty("mdep.outputFile", getDependencyFileName(gav));
         System.setProperty("mdep.pathSeparator", DEPENDENCY_DELIMITER);
         System.setProperty("classworlds.conf", System.getProperty(MavenConfig.MAVEN_M2_CONF_PATH));
-        try {
-            createUpdatedPomFile(pomFilePath, getDependencyFileName(gav));
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create temporary pom file", e);
-        }
         String[] args = new String[]{
                 "-s",
                 System.getProperty(MavenConfig.MAVEN_SETTINGS_PATH),
                 "-f",
-                getTmpPomFileName(pomFilePath),
+                pomFilePath,
                 "dependency:build-classpath"
         };
 
-        ClassLoader origCL = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(mavenClassLoader);
         try {
-            Object exitCodeObj = Class.forName(MAVEN_LAUNCHER_CLASS_NAME, true, mavenClassLoader).
-                    getMethod(MAVEN_LANUCHER_METHOD_NAME, String[].class).invoke (null, new Object[]{args});
-            int exitCode = (Integer)exitCodeObj;
-            if (exitCode != 0) {
-                throw new RuntimeException("mvn dependency:build-classpath returned " +
-                        exitCode + ", see log for details");
-            }
+            invokeMavenLauncher(args);
         } catch (Exception e) {
             throw new IllegalStateException("Failed to build classpath using Maven", e);
-        } finally {
-            Thread.currentThread().setContextClassLoader(origCL);
         }
 
         File fileToReturn = new File(getResourceFolderPath(gav) + SEPARATOR + getDependencyFileName(gav));
@@ -164,6 +150,46 @@ public class DependencyServiceImpl implements DependencyService {
         }
         appendSelfToPathFile(gav, fileToReturn);
         return fileToReturn;
+    }
+
+    private void invokeMavenLauncher(String[] args) throws Exception {
+        ClassLoader origCL = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(mavenClassLoader);
+        try {
+            Object exitCodeObj = Class.forName(MAVEN_LAUNCHER_CLASS_NAME, true, mavenClassLoader).
+                    getMethod(MAVEN_LANUCHER_METHOD_NAME, String[].class).invoke (null, new Object[]{args});
+            int exitCode = (Integer)exitCodeObj;
+            if (exitCode != 0) {
+                throw new RuntimeException("mvn " + StringUtils.arrayToDelimitedString(args, " ") + " returned " +
+                        exitCode + ", see log for details");
+            }
+        } finally {
+            Thread.currentThread().setContextClassLoader(origCL);
+        }
+    }
+
+    private void downloadArtifactsIfNeeded(String pomFilePath, String[] gav) {
+        File pomFile = new File(pomFilePath);
+        if(!pomFile.exists()) {
+            downloadArtifacts(gav);
+        }
+    }
+
+    private void downloadArtifacts(String[] gav) {
+        System.setProperty("artifact", getResourceString(gav));
+        System.setProperty("classworlds.conf", System.getProperty(MavenConfig.MAVEN_M2_CONF_PATH));
+        String[] args = new String[]{
+                "-s",
+                System.getProperty(MavenConfig.MAVEN_SETTINGS_PATH),
+                "dependency:get"
+        };
+
+        try {
+            invokeMavenLauncher(args);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to download resources using Maven", e);
+        }
+
     }
 
     private void appendSelfToPathFile(String[] gav, File pathFile) {
@@ -193,11 +219,11 @@ public class DependencyServiceImpl implements DependencyService {
     }
 
     private String getResourceString(String[] gav) {
-        return StringUtils.arrayToDelimitedString(gav, DEPENDENCY_DELIMITER);
+        return StringUtils.arrayToDelimitedString(gav, ":");
     }
 
     private String getDependencyFileName(String[] gav) {
-        return getFileName(gav, "path");
+        return getFileName(gav, DEPENDENCY_FILE_EXTENSION);
     }
 
     private String getFileName(String[] gav, String extension) {
@@ -238,45 +264,9 @@ public class DependencyServiceImpl implements DependencyService {
         return gav[2];
     }
 
-    private void createUpdatedPomFile(String originalPomFile, String outputFilePath) throws
-            ParserConfigurationException, IOException, SAXException, TransformerException {
-        DocumentBuilderFactory docFactory = DocumentBuilderFactory
-                .newInstance();
-        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-        Document doc = docBuilder.parse(originalPomFile);
-
-        // Get the root element
-        Node project = doc.getFirstChild();
-        NodeList secondLevelNodes = project.getChildNodes();
-        boolean isPropertiesNodeExist = false;
-        for(int i = 0; i < secondLevelNodes.getLength(); i++) {
-            Node node = secondLevelNodes.item(i);
-            if(node.getNodeName().equals(PROPERTIES_TAG)) {
-                isPropertiesNodeExist = true;
-                appendOutputFileProperty(outputFilePath, doc, node);
-            }
-        }
-        if(!isPropertiesNodeExist) {
-            Element propertiesNode = doc.createElement(PROPERTIES_TAG);
-            appendOutputFileProperty(outputFilePath, doc, propertiesNode);
-            project.appendChild(propertiesNode);
-        }
-
-        // write the content into xml file
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer = transformerFactory.newTransformer();
-        DOMSource source = new DOMSource(doc);
-        StreamResult result = new StreamResult(new File(getTmpPomFileName(originalPomFile)));
-        transformer.transform(source, result);
-    }
-
     private void appendOutputFileProperty(String outputFilePath, Document doc, Node node) {
         Element outputFileNode = doc.createElement("mdep.outputFile");
         outputFileNode.setTextContent(outputFilePath);
         node.appendChild(outputFileNode);
-    }
-
-    private String getTmpPomFileName(String originalPomFile) {
-        return originalPomFile + ".tmp";
     }
 }

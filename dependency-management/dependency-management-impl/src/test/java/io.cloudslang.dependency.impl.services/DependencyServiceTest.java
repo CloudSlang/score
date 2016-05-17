@@ -16,8 +16,12 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.File;
 import java.net.URL;
-import java.net.UnknownHostException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author A. Eskin
@@ -25,7 +29,7 @@ import java.util.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = DependencyServiceTest.TestConfig.class)
 public class DependencyServiceTest {
-    private static boolean isHpeNetwork;
+    private static boolean shouldRunMaven;
     static  {
         ClassLoader classLoader = DependencyServiceTest.class.getClassLoader();
         @SuppressWarnings("ConstantConditions") String settingsXmlPath = classLoader.getResource("settings.xml").getPath();
@@ -35,25 +39,12 @@ public class DependencyServiceTest {
 
         System.setProperty(MavenConfigImpl.MAVEN_HOME,  mavenHome.getAbsolutePath());
 
+        shouldRunMaven = System.getProperties().containsKey(MavenConfigImpl.MAVEN_REMOTE_URL) &&
+                System.getProperties().containsKey(MavenConfigImpl.MAVEN_PLUGINS_URL);
         System.setProperty(MavenConfigImpl.MAVEN_REPO_LOCAL, new TestConfig().mavenConfig().getLocalMavenRepoPath());
-
-        System.setProperty(MavenConfigImpl.MAVEN_REMOTE_URL, "http://mydtbld0034.hpeswlab.net:8081/nexus/content/groups/oo-public");
-        System.setProperty(MavenConfigImpl.MAVEN_PLUGINS_URL, "http://mydphdb0166.hpswlabs.adapps.hp.com:8081/nexus/content/repositories/snapshots/");
-
-        try {
-            String hostName = java.net.InetAddress.getLocalHost().getCanonicalHostName().toLowerCase();
-            isHpeNetwork = hostName.contains(".hpq") || hostName.contains(".hpeswlab");
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
 
         //noinspection ConstantConditions
         System.setProperty("maven.home", classLoader.getResource("maven").getPath());
-
-        System.setProperty(MavenConfigImpl.MAVEN_PROXY_PROTOCOL, "https");
-        System.setProperty(MavenConfigImpl.MAVEN_PROXY_HOST, "proxy.bbn.hp.com");
-        System.setProperty(MavenConfigImpl.MAVEN_PROXY_PORT, "8080");
-        System.setProperty(MavenConfigImpl.MAVEN_PROXY_NON_PROXY_HOSTS, "*.hp.com");
 
         System.setProperty(MavenConfigImpl.MAVEN_SETTINGS_PATH, settingsXmlPath);
         //noinspection ConstantConditions
@@ -105,7 +96,7 @@ public class DependencyServiceTest {
 
     @Test
     public void testBuildClassPath1() {
-        Assume.assumeTrue(isHpeNetwork);
+        Assume.assumeTrue(shouldRunMaven);
         Set <String> ret = dependencyService.getDependencies(new HashSet<>(Collections.singletonList("groupId1:mvn_artifact1:1.0")));
         final List<File> retFiles = new ArrayList<>();
         for (String s : ret) {
@@ -123,14 +114,19 @@ public class DependencyServiceTest {
 
     @Test
     public void testBuildClassPath2() {
-        Assume.assumeTrue(isHpeNetwork);
+        Assume.assumeTrue(shouldRunMaven);
+        String basePath = new TestConfig().mavenConfig().getLocalMavenRepoPath();
+        File junitArtifactDir = new File(basePath + "/junit");
+        if(junitArtifactDir.exists()) {
+            boolean isDeleted1 = new File(basePath + "/junit/junit/4.12/junit-4.12.jar").delete();
+            boolean isDeleted2 = new File(basePath + "/junit/junit/4.12/junit-4.12.pom").delete();
+            Assert.assertTrue(isDeleted1 && isDeleted2);
+        }
         Set <String> ret = dependencyService.getDependencies(new HashSet<>(Collections.singletonList("junit:junit:4.12")));
         final List<File> retFiles = new ArrayList<>();
         for (String s : ret) {
             retFiles.add(new File(s));
         }
-
-        String basePath = new TestConfig().mavenConfig().getLocalMavenRepoPath();
         List<File> referenceList = Arrays.asList(
                 new File(basePath + "/junit/junit/4.12/junit-4.12.jar"),
                 new File(basePath + "/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar"));
