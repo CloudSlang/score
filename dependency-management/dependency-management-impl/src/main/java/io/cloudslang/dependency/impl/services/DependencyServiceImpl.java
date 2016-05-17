@@ -15,9 +15,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import javax.annotation.PostConstruct;
-import java.io.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -37,6 +58,7 @@ import static io.cloudslang.dependency.api.services.MavenConfig.SEPARATOR;
 public class DependencyServiceImpl implements DependencyService {
     private static final String MAVEN_LAUNCHER_CLASS_NAME = "org.codehaus.plexus.classworlds.launcher.Launcher";
     private static final String MAVEN_LANUCHER_METHOD_NAME = "mainWithExitCode";
+    public static final String PROPERTIES_TAG = "properties";
 
     private Method launcherMethod;
 
@@ -105,14 +127,18 @@ public class DependencyServiceImpl implements DependencyService {
     @SuppressWarnings("ConstantConditions")
     private File buildDependencyFile(String[] gav) {
         String pomFilePath = getResourceFolderPath(gav) + SEPARATOR + getFileName(gav, "pom");
-        System.setProperty("mdep.outputFile", getDependencyFileName(gav));
         System.setProperty("mdep.pathSeparator", DEPENDENCY_DELIMITER);
         System.setProperty("classworlds.conf", System.getProperty(MavenConfig.MAVEN_M2_CONF_PATH));
+        try {
+            createUpdatedPomFile(pomFilePath, getDependencyFileName(gav));
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create temporary pom file", e);
+        }
         String[] args = new String[]{
                 "-s",
                 System.getProperty(MavenConfig.MAVEN_SETTINGS_PATH),
                 "-f",
-                pomFilePath,
+                getTmpPomFileName(pomFilePath),
                 "dependency:build-classpath"
         };
 
@@ -210,5 +236,47 @@ public class DependencyServiceImpl implements DependencyService {
 
     private String getVersion(String[] gav) {
         return gav[2];
+    }
+
+    private void createUpdatedPomFile(String originalPomFile, String outputFilePath) throws
+            ParserConfigurationException, IOException, SAXException, TransformerException {
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory
+                .newInstance();
+        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+        Document doc = docBuilder.parse(originalPomFile);
+
+        // Get the root element
+        Node project = doc.getFirstChild();
+        NodeList secondLevelNodes = project.getChildNodes();
+        boolean isPropertiesNodeExist = false;
+        for(int i = 0; i < secondLevelNodes.getLength(); i++) {
+            Node node = secondLevelNodes.item(i);
+            if(node.getNodeName().equals(PROPERTIES_TAG)) {
+                isPropertiesNodeExist = true;
+                appendOutputFileProperty(outputFilePath, doc, node);
+            }
+        }
+        if(!isPropertiesNodeExist) {
+            Element propertiesNode = doc.createElement(PROPERTIES_TAG);
+            appendOutputFileProperty(outputFilePath, doc, propertiesNode);
+            project.appendChild(propertiesNode);
+        }
+
+        // write the content into xml file
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        DOMSource source = new DOMSource(doc);
+        StreamResult result = new StreamResult(new File(getTmpPomFileName(originalPomFile)));
+        transformer.transform(source, result);
+    }
+
+    private void appendOutputFileProperty(String outputFilePath, Document doc, Node node) {
+        Element outputFileNode = doc.createElement("mdep.outputFile");
+        outputFileNode.setTextContent(outputFilePath);
+        node.appendChild(outputFileNode);
+    }
+
+    private String getTmpPomFileName(String originalPomFile) {
+        return originalPomFile + ".tmp";
     }
 }
