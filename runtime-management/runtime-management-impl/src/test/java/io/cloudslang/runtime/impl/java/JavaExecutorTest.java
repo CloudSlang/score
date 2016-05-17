@@ -1,5 +1,6 @@
 package io.cloudslang.runtime.impl.java;
 
+import io.cloudslang.runtime.api.java.JavaExecutionParametersProvider;
 import org.junit.Test;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
@@ -13,6 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -23,9 +25,14 @@ import java.util.HashSet;
 @ContextConfiguration(classes = JavaExecutorTest.TestConfig.class)
 public class JavaExecutorTest {
 
-    public static final String CLASS_NAME = "group.artifact.OneClass";
-    public static final String METHOD_NAME = "getVersion";
-    public static final Object[] ARGS = new Object[0];
+    private static final String CLASS_NAME = "group.artifact.OneClass";
+    private static final String METHOD_NAME = "getVersion";
+    private static final JavaExecutionParametersProvider PARAM_PROVIDER = new JavaExecutionParametersProvider() {
+        @Override
+        public Object[] getExecutionParameters(Method executionMethod) {
+            return new Object[0];
+        }
+    };
 
     @Test
     public void testJavaExecutorDifferentClassloaders() {
@@ -42,13 +49,13 @@ public class JavaExecutorTest {
         JavaExecutor javaExecutor2 = new JavaExecutor(new HashSet<>(Arrays.asList(one2.getAbsolutePath(), another3.getAbsolutePath())));
         JavaExecutor javaExecutor3 = new JavaExecutor(new HashSet<>(Arrays.asList(one3.getAbsolutePath(), another1.getAbsolutePath())));
 
-        assertEquals("The version is One 1 and [The version is Another 2]", javaExecutor1.execute(CLASS_NAME, METHOD_NAME, ARGS).toString());
-        assertEquals("The version is One 2 and [The version is Another 3]", javaExecutor2.execute(CLASS_NAME, METHOD_NAME, ARGS).toString());
-        assertEquals("The version is One 3 and [The version is Another 1]", javaExecutor3.execute(CLASS_NAME, METHOD_NAME, ARGS).toString());
+        assertEquals("The version is One 1 and [The version is Another 2]", javaExecutor1.execute(CLASS_NAME, METHOD_NAME, PARAM_PROVIDER).toString());
+        assertEquals("The version is One 2 and [The version is Another 3]", javaExecutor2.execute(CLASS_NAME, METHOD_NAME, PARAM_PROVIDER).toString());
+        assertEquals("The version is One 3 and [The version is Another 1]", javaExecutor3.execute(CLASS_NAME, METHOD_NAME, PARAM_PROVIDER).toString());
 
-        assertEquals("The version is One 1 and [The version is Another 2]", javaExecutor1.execute(CLASS_NAME, METHOD_NAME, ARGS).toString());
-        assertEquals("The version is One 2 and [The version is Another 3]", javaExecutor2.execute(CLASS_NAME, METHOD_NAME, ARGS).toString());
-        assertEquals("The version is One 3 and [The version is Another 1]", javaExecutor3.execute(CLASS_NAME, METHOD_NAME, ARGS).toString());
+        assertEquals("The version is One 1 and [The version is Another 2]", javaExecutor1.execute(CLASS_NAME, METHOD_NAME, PARAM_PROVIDER).toString());
+        assertEquals("The version is One 2 and [The version is Another 3]", javaExecutor2.execute(CLASS_NAME, METHOD_NAME, PARAM_PROVIDER).toString());
+        assertEquals("The version is One 3 and [The version is Another 1]", javaExecutor3.execute(CLASS_NAME, METHOD_NAME, PARAM_PROVIDER).toString());
     }
 
     @Rule
@@ -63,7 +70,7 @@ public class JavaExecutorTest {
 
         JavaExecutor javaExecutor = new JavaExecutor(new HashSet<>(Arrays.asList(one.getAbsolutePath())));
 
-        javaExecutor.execute(CLASS_NAME, METHOD_NAME, ARGS).toString();
+        javaExecutor.execute(CLASS_NAME, METHOD_NAME, PARAM_PROVIDER).toString();
     }
 
     @Configuration

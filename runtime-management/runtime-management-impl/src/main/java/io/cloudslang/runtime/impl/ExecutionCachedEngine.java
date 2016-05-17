@@ -31,15 +31,10 @@ public abstract class ExecutionCachedEngine<T extends Executor> extends Executio
 
         T executor;
         executor = executors.get(dependenciesKey);
-        Set<String> filePaths = null;
         if (executor == null) {
-            // may be first time execution - ensure resource resolution
-            filePaths = getDependencyService().getDependencies(dependencies);
-        }
-
-        T candidateForRemove = null;
-        synchronized (executors) {
-            if (executor == null) {
+            Set<String> filePaths = getDependencyService().getDependencies(dependencies);
+            T candidateForRemove = null;
+            synchronized (executors) {
                 if (executors.size() == getCacheSize()) {
                     Iterator<Map.Entry<String, T>> iterator = executors.entrySet().iterator();
                     candidateForRemove = iterator.next().getValue();
@@ -48,9 +43,9 @@ public abstract class ExecutionCachedEngine<T extends Executor> extends Executio
                 executor = createNewExecutor(filePaths);
                 executors.put(dependenciesKey, executor);
             }
-        }
-        if(candidateForRemove != null) {
-            candidateForRemove.release();
+            if(candidateForRemove != null) {
+                candidateForRemove.release();
+            }
         }
         return executor;
     }

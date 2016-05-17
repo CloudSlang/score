@@ -21,8 +21,6 @@ import java.io.File;
 @SuppressWarnings("unused")
 @Component
 public class MavenConfigImpl implements MavenConfig {
-    public static final String MAVEN_REPO_LOCAL = "cloudslang.maven.repo.local";
-    public static final String USER_HOME        = "user.home";
     @Override
     public String getLocalMavenRepoPath() {
         String defValue = System.getProperty(USER_HOME) + SEPARATOR + ".m2" + SEPARATOR + "repository";

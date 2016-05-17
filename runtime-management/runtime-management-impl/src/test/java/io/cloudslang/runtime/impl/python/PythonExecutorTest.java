@@ -4,7 +4,9 @@ import io.cloudslang.dependency.api.services.DependencyService;
 import io.cloudslang.dependency.api.services.MavenConfig;
 import io.cloudslang.dependency.impl.services.DependencyServiceImpl;
 import io.cloudslang.dependency.impl.services.MavenConfigImpl;
+import io.cloudslang.dependency.impl.services.utils.UnzipUtil;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +29,27 @@ import static org.junit.Assert.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = PythonExecutorTest.TestConfig.class)
 public class PythonExecutorTest {
-
+    private static boolean shouldRunMaven;
     static {
+        ClassLoader classLoader = PythonExecutorTest.class.getClassLoader();
+
+        String settingsXmlPath = classLoader.getResource("settings.xml").getPath();
+        File rootHome = new File(settingsXmlPath).getParentFile();
+        File mavenHome = new File(rootHome, "maven");
+        UnzipUtil.unzipToFolder(mavenHome.getAbsolutePath(), classLoader.getResourceAsStream("maven.zip"));
+
+        System.setProperty(MavenConfig.MAVEN_HOME, mavenHome.getAbsolutePath());
+
+        System.setProperty(MavenConfig.MAVEN_REPO_LOCAL, new TestConfig().mavenConfig().getLocalMavenRepoPath());
+        System.setProperty("maven.home", classLoader.getResource("maven").getPath());
+
+        shouldRunMaven = System.getProperties().containsKey(MavenConfigImpl.MAVEN_REMOTE_URL) &&
+                System.getProperties().containsKey(MavenConfigImpl.MAVEN_PLUGINS_URL);
+
+
+        System.setProperty(MavenConfig.MAVEN_SETTINGS_PATH, settingsXmlPath);
+        System.setProperty(MavenConfig.MAVEN_M2_CONF_PATH, classLoader.getResource("m2.conf").getPath());
+
         String provideralAlreadyConfigured = System.setProperty("python.executor.engine", PythonExecutionNotCachedEngine.class.getSimpleName());
         assertNull("python.executor.engine was configured before this test!!!!!!!", provideralAlreadyConfigured);
     }
@@ -64,6 +85,7 @@ public class PythonExecutorTest {
 
     @Test
     public void testMultithreadedEval() throws InterruptedException {
+        Assume.assumeTrue(shouldRunMaven);
         int executionsNum = 5;
         final String varName = "XXX";
         final String varValue = "YYY";
@@ -106,6 +128,7 @@ public class PythonExecutorTest {
 
     @Test
     public void testMultithreadedExecNoDependencies() throws InterruptedException {
+        Assume.assumeTrue(shouldRunMaven);
         int executionsNum = 5;
 
         final CountDownLatch latch = new CountDownLatch(executionsNum);
@@ -131,6 +154,7 @@ public class PythonExecutorTest {
 
     @Test
     public void testMultithreadedExecWithDependencies() throws InterruptedException {
+        Assume.assumeTrue(shouldRunMaven);
         int executionsNum = 5;
 
         final CountDownLatch latch = new CountDownLatch(executionsNum);

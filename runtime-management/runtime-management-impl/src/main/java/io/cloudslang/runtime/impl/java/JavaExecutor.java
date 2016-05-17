@@ -10,6 +10,7 @@
 
 package io.cloudslang.runtime.impl.java;
 
+import io.cloudslang.runtime.api.java.JavaExecutionParametersProvider;
 import io.cloudslang.runtime.impl.Executor;
 
 import java.io.File;
@@ -54,11 +55,11 @@ public class JavaExecutor implements Executor {
         }
     }
 
-    Object execute(String className, String methodName, Object ... args) {
+    Object execute(String className, String methodName, JavaExecutionParametersProvider parametersProvider) {
         try {
             Class actionClass = getActionClass(className);
-            Method actionMethod = getMethodByName(actionClass, methodName);
-            return actionMethod.invoke(actionClass.newInstance(), args);
+            Method executionMethod = getMethodByName(actionClass, methodName);
+            return executionMethod.invoke(actionClass.newInstance(), parametersProvider.getExecutionParameters(executionMethod));
         } catch (Exception e) {
             throw new RuntimeException("Method [" + methodName + "] invocation of class [" + className + "] failed!!!!", e);
         }

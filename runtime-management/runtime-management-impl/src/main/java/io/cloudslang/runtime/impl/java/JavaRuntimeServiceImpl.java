@@ -10,6 +10,7 @@
 
 package io.cloudslang.runtime.impl.java;
 
+import io.cloudslang.runtime.api.java.JavaExecutionParametersProvider;
 import io.cloudslang.runtime.api.java.JavaRuntimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,7 +24,7 @@ public class JavaRuntimeServiceImpl implements JavaRuntimeService {
     private JavaExecutionEngine javaExecutionEngine;
 
     @Override
-    public Object execute(String dependency, String className, String methodName, Object ... args) {
-        return javaExecutionEngine.execute(dependency, className, methodName, args);
+    public Object execute(String dependency, String className, String methodName, JavaExecutionParametersProvider parametersProvider) {
+        return javaExecutionEngine.execute(dependency, className, methodName, parametersProvider);
     }
 }
