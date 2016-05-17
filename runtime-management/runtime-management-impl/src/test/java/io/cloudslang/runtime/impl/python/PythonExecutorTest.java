@@ -6,6 +6,7 @@ import io.cloudslang.dependency.impl.services.DependencyServiceImpl;
 import io.cloudslang.dependency.impl.services.MavenConfigImpl;
 import io.cloudslang.dependency.impl.services.utils.UnzipUtil;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.File;
 import java.io.Serializable;
+import java.net.UnknownHostException;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -28,7 +30,7 @@ import static org.junit.Assert.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = PythonExecutorTest.TestConfig.class)
 public class PythonExecutorTest {
-
+    private static boolean isHpeNetwork;
     static {
         ClassLoader classLoader = PythonExecutorTest.class.getClassLoader();
 
@@ -37,20 +39,27 @@ public class PythonExecutorTest {
         File mavenHome = new File(rootHome, "maven");
         UnzipUtil.unzipToFolder(mavenHome.getAbsolutePath(), classLoader.getResourceAsStream("maven.zip"));
 
-        System.setProperty(MavenConfigImpl.MAVEN_HOME, mavenHome.getAbsolutePath());
+        System.setProperty(MavenConfig.MAVEN_HOME, mavenHome.getAbsolutePath());
 
-        System.setProperty(MavenConfigImpl.MAVEN_REPO_LOCAL, new TestConfig().mavenConfig().getLocalMavenRepoPath());
-        System.setProperty(MavenConfigImpl.MAVEN_REMOTE_URL, "http://mydtbld0034.hpeswlab.net:8081/nexus/content/groups/oo-public");
-        System.setProperty(MavenConfigImpl.MAVEN_PLUGINS_URL, "http://mydphdb0166.hpswlabs.adapps.hp.com:8081/nexus/content/repositories/snapshots/");
+        System.setProperty(MavenConfig.MAVEN_REPO_LOCAL, new TestConfig().mavenConfig().getLocalMavenRepoPath());
+        System.setProperty(MavenConfig.MAVEN_REMOTE_URL, "http://mydtbld0034.hpeswlab.net:8081/nexus/content/groups/oo-public");
+        System.setProperty(MavenConfig.MAVEN_PLUGINS_URL, "http://mydphdb0166.hpswlabs.adapps.hp.com:8081/nexus/content/repositories/snapshots/");
         System.setProperty("maven.home", classLoader.getResource("maven").getPath());
 
-        System.setProperty(MavenConfigImpl.MAVEN_PROXY_PROTOCOL, "https");
-        System.setProperty(MavenConfigImpl.MAVEN_PROXY_HOST, "proxy.bbn.hp.com");
-        System.setProperty(MavenConfigImpl.MAVEN_PROXY_PORT, "8080");
-        System.setProperty(MavenConfigImpl.MAVEN_PROXY_NON_PROXY_HOSTS, "*.hp.com");
+        try {
+            String hostName = java.net.InetAddress.getLocalHost().getCanonicalHostName().toLowerCase();
+            isHpeNetwork = hostName.contains(".hpq") || hostName.contains(".hpeswlab");
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
 
-        System.setProperty(MavenConfigImpl.MAVEN_SETTINGS_PATH, settingsXmlPath);
-        System.setProperty(MavenConfigImpl.MAVEN_M2_CONF_PATH, classLoader.getResource("m2.conf").getPath());
+        System.setProperty(MavenConfig.MAVEN_PROXY_PROTOCOL, "https");
+        System.setProperty(MavenConfig.MAVEN_PROXY_HOST, "proxy.bbn.hp.com");
+        System.setProperty(MavenConfig.MAVEN_PROXY_PORT, "8080");
+        System.setProperty(MavenConfig.MAVEN_PROXY_NON_PROXY_HOSTS, "*.hp.com");
+
+        System.setProperty(MavenConfig.MAVEN_SETTINGS_PATH, settingsXmlPath);
+        System.setProperty(MavenConfig.MAVEN_M2_CONF_PATH, classLoader.getResource("m2.conf").getPath());
 
         String provideralAlreadyConfigured = System.setProperty("python.executor.engine", PythonExecutionNotCachedEngine.class.getSimpleName());
         assertNull("python.executor.engine was configured before this test!!!!!!!", provideralAlreadyConfigured);
@@ -87,6 +96,7 @@ public class PythonExecutorTest {
 
     @Test
     public void testMultithreadedEval() throws InterruptedException {
+        Assume.assumeTrue(isHpeNetwork);
         int executionsNum = 5;
         final String varName = "XXX";
         final String varValue = "YYY";
@@ -129,6 +139,7 @@ public class PythonExecutorTest {
 
     @Test
     public void testMultithreadedExecNoDependencies() throws InterruptedException {
+        Assume.assumeTrue(isHpeNetwork);
         int executionsNum = 5;
 
         final CountDownLatch latch = new CountDownLatch(executionsNum);
@@ -154,6 +165,7 @@ public class PythonExecutorTest {
 
     @Test
     public void testMultithreadedExecWithDependencies() throws InterruptedException {
+        Assume.assumeTrue(isHpeNetwork);
         int executionsNum = 5;
 
         final CountDownLatch latch = new CountDownLatch(executionsNum);

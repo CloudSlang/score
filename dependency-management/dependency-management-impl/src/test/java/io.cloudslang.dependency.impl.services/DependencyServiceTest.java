@@ -5,6 +5,7 @@ import io.cloudslang.dependency.api.services.MavenConfig;
 import io.cloudslang.dependency.impl.services.utils.UnzipUtil;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,17 +16,19 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.File;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.*;
 
 /**
- * Created by eskin on 03/05/2016.
+ * @author A. Eskin
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = DependencyServiceTest.TestConfig.class)
 public class DependencyServiceTest {
+    private static boolean isHpeNetwork;
     static  {
         ClassLoader classLoader = DependencyServiceTest.class.getClassLoader();
-        String settingsXmlPath = classLoader.getResource("settings.xml").getPath();
+        @SuppressWarnings("ConstantConditions") String settingsXmlPath = classLoader.getResource("settings.xml").getPath();
         File rootHome = new File(settingsXmlPath).getParentFile();
         File mavenHome = new File(rootHome, "maven");
         UnzipUtil.unzipToFolder(mavenHome.getAbsolutePath(), classLoader.getResourceAsStream("maven.zip"));
@@ -33,8 +36,18 @@ public class DependencyServiceTest {
         System.setProperty(MavenConfigImpl.MAVEN_HOME,  mavenHome.getAbsolutePath());
 
         System.setProperty(MavenConfigImpl.MAVEN_REPO_LOCAL, new TestConfig().mavenConfig().getLocalMavenRepoPath());
+
         System.setProperty(MavenConfigImpl.MAVEN_REMOTE_URL, "http://mydtbld0034.hpeswlab.net:8081/nexus/content/groups/oo-public");
         System.setProperty(MavenConfigImpl.MAVEN_PLUGINS_URL, "http://mydphdb0166.hpswlabs.adapps.hp.com:8081/nexus/content/repositories/snapshots/");
+
+        try {
+            String hostName = java.net.InetAddress.getLocalHost().getCanonicalHostName().toLowerCase();
+            isHpeNetwork = hostName.contains(".hpq") || hostName.contains(".hpeswlab");
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+
+        //noinspection ConstantConditions
         System.setProperty("maven.home", classLoader.getResource("maven").getPath());
 
         System.setProperty(MavenConfigImpl.MAVEN_PROXY_PROTOCOL, "https");
@@ -43,6 +56,7 @@ public class DependencyServiceTest {
         System.setProperty(MavenConfigImpl.MAVEN_PROXY_NON_PROXY_HOSTS, "*.hp.com");
 
         System.setProperty(MavenConfigImpl.MAVEN_SETTINGS_PATH, settingsXmlPath);
+        //noinspection ConstantConditions
         System.setProperty(MavenConfigImpl.MAVEN_M2_CONF_PATH, classLoader.getResource("m2.conf").getPath());
     }
 
@@ -89,7 +103,9 @@ public class DependencyServiceTest {
         }
     }
 
-    @Test public void testBuildClassPath1() {
+    @Test
+    public void testBuildClassPath1() {
+        Assume.assumeTrue(isHpeNetwork);
         Set <String> ret = dependencyService.getDependencies(new HashSet<>(Collections.singletonList("groupId1:mvn_artifact1:1.0")));
         final List<File> retFiles = new ArrayList<>();
         for (String s : ret) {
@@ -105,7 +121,9 @@ public class DependencyServiceTest {
         Assert.assertTrue("Unexpected returned set", retFiles.containsAll(referenceList) && ret.size() == referenceList.size());
     }
 
-    @Test public void testBuildClassPath2() {
+    @Test
+    public void testBuildClassPath2() {
+        Assume.assumeTrue(isHpeNetwork);
         Set <String> ret = dependencyService.getDependencies(new HashSet<>(Collections.singletonList("junit:junit:4.12")));
         final List<File> retFiles = new ArrayList<>();
         for (String s : ret) {
