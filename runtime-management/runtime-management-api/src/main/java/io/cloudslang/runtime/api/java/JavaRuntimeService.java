@@ -19,5 +19,5 @@ public interface JavaRuntimeService {
      * @param dependency - resource with maven GAV notation ‘groupId:artifactId:version’ which can be used to resolve resources with Maven Repository Support
      */
 
-    Object execute (String dependency, String className, String methodName, Object ... args);
+    Object execute (String dependency, String className, String methodName, JavaExecutionParametersProvider parametersProvider);
 }

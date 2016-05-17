@@ -3,6 +3,7 @@ package io.cloudslang.runtime.impl.java;
 import io.cloudslang.dependency.api.services.DependencyService;
 import io.cloudslang.dependency.api.services.MavenConfig;
 import io.cloudslang.dependency.impl.services.MavenConfigImpl;
+import io.cloudslang.runtime.api.java.JavaExecutionParametersProvider;
 import io.cloudslang.runtime.api.java.JavaRuntimeService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -22,6 +24,14 @@ import java.util.Set;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = JavaRuntimeServiceImplTest.TestConfig.class)
 public class JavaRuntimeServiceImplTest {
+
+    private static final JavaExecutionParametersProvider PARAMETERS_PROVIDER = new JavaExecutionParametersProvider() {
+        @Override
+        public Object[] getExecutionParameters(Method executionMethod) {
+            return new Object[0];
+        }
+    };
+
     static {
         System.setProperty("java.executor.provider", JavaExecutionCachedEngine.class.getSimpleName());
     }
@@ -31,8 +41,8 @@ public class JavaRuntimeServiceImplTest {
 
     @Test
     public void testJavaRuntimeService() {
-        System.out.println("+++++++++++++++++++++++++[" + javaRuntimeServiceImpl.execute("", "java.util.Date", "toGMTString") + "]");
-        System.out.println("+++++++++++++++++++++++++[" + javaRuntimeServiceImpl.execute("nothing", "java.util.Date", "toGMTString") + "]");
+        System.out.println("+++++++++++++++++++++++++[" + javaRuntimeServiceImpl.execute("", "java.util.Date", "toGMTString", PARAMETERS_PROVIDER) + "]");
+        System.out.println("+++++++++++++++++++++++++[" + javaRuntimeServiceImpl.execute("nothing", "java.util.Date", "toGMTString", PARAMETERS_PROVIDER) + "]");
     }
 
     @Configuration

@@ -11,6 +11,7 @@
 package io.cloudslang.runtime.impl.java;
 
 import io.cloudslang.dependency.api.services.DependencyService;
+import io.cloudslang.runtime.api.java.JavaExecutionParametersProvider;
 import io.cloudslang.runtime.impl.ExecutionCachedEngine;
 import org.python.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +32,9 @@ public class JavaExecutionCachedEngine extends ExecutionCachedEngine<JavaExecuto
     private int cacheSize;
 
     @Override
-    public Object execute(String dependency, String className, String methodName, Object ... args) {
+    public Object execute(String dependency, String className, String methodName, JavaExecutionParametersProvider parametersProvider) {
         return allocateExecutor((dependency == null || dependency.isEmpty()) ? Sets.<String>newHashSet() :
-                Sets.newHashSet(dependency)).execute(className, methodName, args);
+                Sets.newHashSet(dependency)).execute(className, methodName, parametersProvider);
     }
 
     @Override

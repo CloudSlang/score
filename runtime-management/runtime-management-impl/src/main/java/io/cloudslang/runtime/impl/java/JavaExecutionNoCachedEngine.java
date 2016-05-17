@@ -12,6 +12,7 @@ package io.cloudslang.runtime.impl.java;
 
 import io.cloudslang.dependency.api.services.DependencyService;
 
+import io.cloudslang.runtime.api.java.JavaExecutionParametersProvider;
 import io.cloudslang.runtime.impl.ExecutionEngine;
 import org.python.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +27,8 @@ public class JavaExecutionNoCachedEngine extends ExecutionEngine implements Java
     private DependencyService dependencyService;
 
     @Override
-    public Object execute(String dependency, String className, String methodName, Object ... args) {
+    public Object execute(String dependency, String className, String methodName, JavaExecutionParametersProvider parametersProvider) {
         return new JavaExecutor(dependencyService.getDependencies((dependency == null || dependency.isEmpty()) ? Sets.<String>newHashSet() :
-                Sets.newHashSet(dependency))).execute(className, methodName, args);
+                Sets.newHashSet(dependency))).execute(className, methodName, parametersProvider);
     }
 }
