@@ -23,7 +23,6 @@ import java.util.*;
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
-@Component
 public class JavaExecutionCachedEngine extends ExecutionCachedEngine<JavaExecutor> implements JavaExecutionEngine {
     @Autowired
     private DependencyService dependencyService;

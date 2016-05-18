@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
-@Component
 public class JavaRuntimeServiceImpl implements JavaRuntimeService {
     @Autowired
     private JavaExecutionEngine javaExecutionEngine;

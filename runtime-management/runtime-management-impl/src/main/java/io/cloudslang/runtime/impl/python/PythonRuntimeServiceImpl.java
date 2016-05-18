@@ -21,7 +21,6 @@ import java.util.Set;
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
-@Service
 public class PythonRuntimeServiceImpl implements PythonRuntimeService {
     @Autowired
     private PythonExecutionEngine pythonExecutionEngine;

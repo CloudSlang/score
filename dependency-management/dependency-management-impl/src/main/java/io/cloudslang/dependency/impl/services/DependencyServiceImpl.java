@@ -45,7 +45,6 @@ import static io.cloudslang.dependency.api.services.MavenConfig.SEPARATOR;
 /**
  * @author Alexander Eskin
  */
-@Service
 @SuppressWarnings("unused")
 public class DependencyServiceImpl implements DependencyService {
     private static final String MAVEN_LAUNCHER_CLASS_NAME = "org.codehaus.plexus.classworlds.launcher.Launcher";
