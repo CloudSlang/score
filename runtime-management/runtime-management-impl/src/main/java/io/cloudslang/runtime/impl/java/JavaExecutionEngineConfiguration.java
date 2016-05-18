@@ -11,16 +11,13 @@
 package io.cloudslang.runtime.impl.java;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
 @Configuration
-@ComponentScan("io.cloudslang.runtime.impl.java")
 public class JavaExecutionEngineConfiguration {
-
     @Bean
     JavaExecutionEngine javaExecutionEngine() {
         String noCacheEngine = JavaExecutionNoCachedEngine.class.getSimpleName();

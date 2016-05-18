@@ -98,33 +98,30 @@ public class DependencyServiceImpl implements DependencyService {
     public Set<String> getDependencies(Set<String> resources) {
         Set<String> resolvedResources = new HashSet<>(resources.size());
         for (String resource : resources) {
-            lock.lock();
+            String[] gav = extractGav(resource);
+            List<String> dependencyList;
             try {
-                String[] gav = extractGav(resource);
-                List<String> dependencyList = getDependencyList(gav);
+                String dependencyFilePath = getResourceFolderPath(gav) + SEPARATOR + getDependencyFileName(gav);
+                File file = new File(dependencyFilePath);
+                if(!file.exists()) {
+                    lock.lock();
+                    try {
+                        buildDependencyFile(gav);
+                    } finally {
+                        lock.unlock();
+                    }
+                }
+                dependencyList = parse(file);
                 resolvedResources.addAll(dependencyList);
-            } finally {
-                lock.unlock();
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
             }
         }
         return resolvedResources;
     }
 
-    private List<String> getDependencyList(String[] gav) {
-        String dependencyFilePath = getResourceFolderPath(gav) + SEPARATOR + getDependencyFileName(gav);
-        File file = new File(dependencyFilePath);
-        if(!file.exists()) {
-            file = buildDependencyFile(gav);
-        }
-        try {
-            return parse(file);
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
     @SuppressWarnings("ConstantConditions")
-    private File buildDependencyFile(String[] gav) {
+    private void buildDependencyFile(String[] gav) {
         String pomFilePath = getResourceFolderPath(gav) + SEPARATOR + getFileName(gav, "pom");
         downloadArtifactsIfNeeded(pomFilePath, gav);
         System.setProperty("mdep.outputFile", getDependencyFileName(gav));
@@ -149,7 +146,6 @@ public class DependencyServiceImpl implements DependencyService {
             throw new IllegalStateException(fileToReturn.getPath() + " not found");
         }
         appendSelfToPathFile(gav, fileToReturn);
-        return fileToReturn;
     }
 
     private void invokeMavenLauncher(String[] args) throws Exception {

@@ -18,7 +18,6 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class PythonExecutionEngineConfiguration {
-
     @Bean
     PythonExecutionEngine pythonExecutionEngine() {
         String noCacheEngine = PythonExecutionNotCachedEngine.class.getSimpleName();
