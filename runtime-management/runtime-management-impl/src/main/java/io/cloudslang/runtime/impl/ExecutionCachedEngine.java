@@ -31,21 +31,29 @@ public abstract class ExecutionCachedEngine<T extends Executor> extends Executio
 
         T executor;
         executor = executors.get(dependenciesKey);
+        Set<String> filePaths = null;
         if (executor == null) {
-            Set<String> filePaths = getDependencyService().getDependencies(dependencies);
-            T candidateForRemove = null;
-            synchronized (executors) {
+            // may be first time execution - ensure resource resolution
+            filePaths = getDependencyService().getDependencies(dependencies);
+        }
+
+        T candidateForRemove = null;
+        synchronized (executors) {
+            if (executor == null) {
                 if (executors.size() == getCacheSize()) {
                     Iterator<Map.Entry<String, T>> iterator = executors.entrySet().iterator();
                     candidateForRemove = iterator.next().getValue();
                     iterator.remove();
                 }
                 executor = createNewExecutor(filePaths);
-                executors.put(dependenciesKey, executor);
+            } else {
+                // remove it and place at the end - most recently used
+                executors.remove(dependenciesKey);
             }
-            if(candidateForRemove != null) {
-                candidateForRemove.release();
-            }
+            executors.put(dependenciesKey, executor);
+        }
+        if(candidateForRemove != null) {
+            candidateForRemove.release();
         }
         return executor;
     }
