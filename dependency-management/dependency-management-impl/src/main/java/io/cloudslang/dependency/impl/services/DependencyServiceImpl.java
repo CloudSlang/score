@@ -48,9 +48,11 @@ import static io.cloudslang.dependency.api.services.MavenConfig.SEPARATOR;
 @Service
 @SuppressWarnings("unused")
 public class DependencyServiceImpl implements DependencyService {
-    private static final String MAVEN_LAUNCHER_CLASS_NAME = "org.codehaus.plexus.classworlds.launcher.Launcher";
-    private static final String MAVEN_LANUCHER_METHOD_NAME = "mainWithExitCode";
-    public static final String DEPENDENCY_FILE_EXTENSION = "path";
+    private   static final String MAVEN_LAUNCHER_CLASS_NAME  = "org.codehaus.plexus.classworlds.launcher.Launcher";
+    private   static final String MAVEN_LANUCHER_METHOD_NAME = "mainWithExitCode";
+    public    static final String PATH_FILE_EXTENSION        = "path";
+    public    static final String GAV_DELIMITER              = ":";
+    protected static final String PATH_FILE_DELIMITER        = ";";
 
     private Method launcherMethod;
 
@@ -58,8 +60,6 @@ public class DependencyServiceImpl implements DependencyService {
     private String mavenHome;
 
     private ClassLoader mavenClassLoader;
-
-    protected static final String DEPENDENCY_DELIMITER = ";";
 
     @Autowired
     private MavenConfig mavenConfig;
@@ -101,7 +101,7 @@ public class DependencyServiceImpl implements DependencyService {
             String[] gav = extractGav(resource);
             List<String> dependencyList;
             try {
-                String dependencyFilePath = getResourceFolderPath(gav) + SEPARATOR + getDependencyFileName(gav);
+                String dependencyFilePath = getResourceFolderPath(gav) + SEPARATOR + getPathFileName(gav);
                 File file = new File(dependencyFilePath);
                 if(!file.exists()) {
                     lock.lock();
@@ -124,8 +124,8 @@ public class DependencyServiceImpl implements DependencyService {
     private void buildDependencyFile(String[] gav) {
         String pomFilePath = getResourceFolderPath(gav) + SEPARATOR + getFileName(gav, "pom");
         downloadArtifactsIfNeeded(pomFilePath, gav);
-        System.setProperty("mdep.outputFile", getDependencyFileName(gav));
-        System.setProperty("mdep.pathSeparator", DEPENDENCY_DELIMITER);
+        System.setProperty("mdep.outputFile", getPathFileName(gav));
+        System.setProperty("mdep.pathSeparator", PATH_FILE_DELIMITER);
         System.setProperty("classworlds.conf", System.getProperty(MavenConfig.MAVEN_M2_CONF_PATH));
         String[] args = new String[]{
                 "-s",
@@ -141,7 +141,7 @@ public class DependencyServiceImpl implements DependencyService {
             throw new IllegalStateException("Failed to build classpath using Maven", e);
         }
 
-        File fileToReturn = new File(getResourceFolderPath(gav) + SEPARATOR + getDependencyFileName(gav));
+        File fileToReturn = new File(getResourceFolderPath(gav) + SEPARATOR + getPathFileName(gav));
         if(!fileToReturn.exists()) {
             throw new IllegalStateException(fileToReturn.getPath() + " not found");
         }
@@ -207,7 +207,7 @@ public class DependencyServiceImpl implements DependencyService {
         try (FileWriter fw = new FileWriter(pathFile, true);
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter out = new PrintWriter(bw)){
-            out.print(DEPENDENCY_DELIMITER);
+            out.print(PATH_FILE_DELIMITER);
             out.print(resourceFile.getCanonicalPath());
         } catch (IOException e) {
             throw new IllegalStateException("Failed to append to file " + pathFile.getParent(), e);
@@ -215,11 +215,11 @@ public class DependencyServiceImpl implements DependencyService {
     }
 
     private String getResourceString(String[] gav) {
-        return StringUtils.arrayToDelimitedString(gav, ":");
+        return StringUtils.arrayToDelimitedString(gav, GAV_DELIMITER);
     }
 
-    private String getDependencyFileName(String[] gav) {
-        return getFileName(gav, DEPENDENCY_FILE_EXTENSION);
+    private String getPathFileName(String[] gav) {
+        return getFileName(gav, PATH_FILE_EXTENSION);
     }
 
     private String getFileName(String[] gav, String extension) {
@@ -229,7 +229,7 @@ public class DependencyServiceImpl implements DependencyService {
     private List<String> parse(File file) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
             String line = reader.readLine();
-            String[] paths = line.split(DEPENDENCY_DELIMITER);
+            String[] paths = line.split(PATH_FILE_DELIMITER);
             return Arrays.asList(paths);
         }
     }
@@ -240,7 +240,7 @@ public class DependencyServiceImpl implements DependencyService {
     }
 
     private String[] extractGav(String resource) {
-        String[] gav = resource.split(":");
+        String[] gav = resource.split(GAV_DELIMITER);
         if(gav.length != 3) {
             throw new IllegalArgumentException("Unexpected resource format: " + resource +
                     ", should be <group ID>:<artifact ID>:<version>");
