@@ -15,10 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-
 import javax.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -153,7 +149,7 @@ public class DependencyServiceImpl implements DependencyService {
         Thread.currentThread().setContextClassLoader(mavenClassLoader);
         try {
             Object exitCodeObj = Class.forName(MAVEN_LAUNCHER_CLASS_NAME, true, mavenClassLoader).
-                    getMethod(MAVEN_LANUCHER_METHOD_NAME, String[].class).invoke (null, new Object[]{args});
+                    getMethod(MAVEN_LANUCHER_METHOD_NAME, String[].class).invoke(null, new Object[]{args});
             int exitCode = (Integer)exitCodeObj;
             if (exitCode != 0) {
                 throw new RuntimeException("mvn " + StringUtils.arrayToDelimitedString(args, " ") + " returned " +
@@ -258,11 +254,5 @@ public class DependencyServiceImpl implements DependencyService {
 
     private String getVersion(String[] gav) {
         return gav[2];
-    }
-
-    private void appendOutputFileProperty(String outputFilePath, Document doc, Node node) {
-        Element outputFileNode = doc.createElement("mdep.outputFile");
-        outputFileNode.setTextContent(outputFilePath);
-        node.appendChild(outputFileNode);
     }
 }
