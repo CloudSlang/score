@@ -72,10 +72,16 @@ public class DependencyServiceImpl implements DependencyService {
             parentClassLoader = parentClassLoader.getParent();
         }
 
-        File libDir = new File(mavenHome, "boot");
-        URL[] mavenJarUrls = getUrls(libDir);
+        if(isMavenConfigured()) {
+            File libDir = new File(mavenHome, "boot");
+            URL[] mavenJarUrls = getUrls(libDir);
 
-        mavenClassLoader = new URLClassLoader(mavenJarUrls, parentClassLoader);
+            mavenClassLoader = new URLClassLoader(mavenJarUrls, parentClassLoader);
+        }
+    }
+
+    private boolean isMavenConfigured() {
+        return (mavenHome != null) && !mavenHome.isEmpty();
     }
 
     private URL[] getUrls(File libDir) throws MalformedURLException {
@@ -103,9 +109,12 @@ public class DependencyServiceImpl implements DependencyService {
                 String dependencyFilePath = getResourceFolderPath(gav) + SEPARATOR + getDependencyFileName(gav);
                 File file = new File(dependencyFilePath);
                 if(!file.exists()) {
-                    lock.lock();
                     try {
-                        buildDependencyFile(gav);
+                        lock.lock();
+                        //double check if file was just created
+                        if(!file.exists()) {
+                            buildDependencyFile(gav);
+                        }
                     } finally {
                         lock.unlock();
                     }
