@@ -26,8 +26,11 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileFilter;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -79,7 +82,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 	private Long maxStartUpSleep = 10*60*1000L; // by default 10 minutes
     private int keepAliveFailCount = 0;
 	private ExecutorService executorService;
-	private Map<Long, Future> mapOfRunningTasks;
+	private Map<Long, ConcurrentLinkedQueue<Future>> mapOfRunningTasks;
 	private volatile boolean endOfInit = false;
     private volatile boolean initStarted = false;
 	private boolean up = false;
@@ -103,13 +106,24 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 	}
 
 	public void addExecution(Long executionId, Runnable runnable) {
+		//It is possible that in linear flow we will have step 2 that is already running, but step 1 that still did not clean itself from the table (race condition)
         Future future = executorService.submit(runnable);
-        mapOfRunningTasks.put(executionId, future);
+
+		if( mapOfRunningTasks.get(executionId) == null){
+			mapOfRunningTasks.put(executionId, new ConcurrentLinkedQueue<Future>());
+		}
+		mapOfRunningTasks.get(executionId).add(future);
 	}
 
 	@Override
 	public void endExecution(Long executionId) {
-		mapOfRunningTasks.remove(executionId);
+		Queue queue = mapOfRunningTasks.get(executionId);
+		queue.poll(); //also removes the element
+
+		//If we removed the last future for this execution - remove the whole entry
+		if(queue.isEmpty()){
+			mapOfRunningTasks.remove(executionId);
+		}
 	}
 
 	public int getInBufferSize() {
@@ -121,9 +135,11 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
     public void interruptCanceledExecutions(){
         for(Long executionId  : mapOfRunningTasks.keySet()){
             if(workerConfigurationService.isExecutionCancelled(executionId)){
-                Future future = mapOfRunningTasks.get(executionId);
-                future.cancel(true);
-            }
+                Collection<Future> futures = mapOfRunningTasks.get(executionId);
+				for(Future future : futures) {
+					future.cancel(true);
+				}
+			}
         }
     }
 
