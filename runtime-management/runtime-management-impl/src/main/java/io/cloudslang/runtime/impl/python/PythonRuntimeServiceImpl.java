@@ -12,7 +12,6 @@ package io.cloudslang.runtime.impl.python;
 
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
 import java.util.Map;
