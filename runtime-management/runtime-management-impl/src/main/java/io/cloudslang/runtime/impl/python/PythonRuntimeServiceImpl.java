@@ -12,7 +12,6 @@ package io.cloudslang.runtime.impl.python;
 
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -21,7 +20,6 @@ import java.util.Set;
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
-@Service
 public class PythonRuntimeServiceImpl implements PythonRuntimeService {
     @Autowired
     private PythonExecutionEngine pythonExecutionEngine;
