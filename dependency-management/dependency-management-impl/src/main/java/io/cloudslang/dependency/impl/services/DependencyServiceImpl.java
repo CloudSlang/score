@@ -237,9 +237,9 @@ public class DependencyServiceImpl implements DependencyService {
 
     private String[] extractGav(String resource) {
         String[] gav = resource.split(GAV_DELIMITER);
-        if(gav.length != 3) {
+        if((gav.length < 3) || (gav.length > 5)) {//at least g:a:v at maximum g:a:v:p:c
             throw new IllegalArgumentException("Unexpected resource format: " + resource +
-                    ", should be <group ID>:<artifact ID>:<version>");
+                    ", should be <group ID>:<artifact ID>:<version> or <group ID>:<artifact ID>:<version>:<packaging> or <group ID>:<artifact ID>:<version>:<packaging>:<classifier>");
         }
         return gav;
     }
