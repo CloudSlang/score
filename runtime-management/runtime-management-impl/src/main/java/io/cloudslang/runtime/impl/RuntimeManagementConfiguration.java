@@ -1,6 +1,5 @@
 package io.cloudslang.runtime.impl;
 
-import io.cloudslang.dependency.impl.services.DependenciesManagementConfiguration;
 import io.cloudslang.runtime.impl.java.JavaExecutionEngineConfiguration;
 import io.cloudslang.runtime.impl.python.PythonExecutionEngineConfiguration;
 import org.springframework.context.annotation.Configuration;

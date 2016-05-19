@@ -12,7 +12,6 @@ package io.cloudslang.runtime.impl.java;
 
 import io.cloudslang.dependency.impl.services.DependenciesManagementConfiguration;
 import io.cloudslang.runtime.api.java.JavaRuntimeService;
-import io.cloudslang.runtime.impl.python.PythonExecutionEngineConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
