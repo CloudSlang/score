@@ -6,5 +6,5 @@ package io.cloudslang.runtime.impl.java;
 public interface JavaExecutionConfigurationConsts {
     String JAVA_EXECUTOR_ENGINE = "java.executor.engine";
     String JAVA_EXECUTOR_CACHE_SIZE = "java.executor.cache.size";
-    int JAVA_EXECUTOR_CACHE_DEFAULT_SIZE = 100;
+    int JAVA_EXECUTOR_CACHE_DEFAULT_SIZE = 200;
 }
