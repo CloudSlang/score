@@ -16,6 +16,8 @@ import org.python.util.PythonInterpreter;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
@@ -32,6 +34,10 @@ public class PythonExecutor implements Executor {
     }
 
     private final PythonInterpreter interpreter;
+
+    private final Lock allocationLock = new ReentrantLock();
+    private int allocations = 0;
+    private boolean closed = false;
 
     public PythonExecutor() {
         this(Collections.<String>emptySet());
@@ -113,11 +119,38 @@ public class PythonExecutor implements Executor {
     }
 
     @Override
+    public void allocate() {
+        try {
+            allocationLock.lock();
+            allocations++;
+        } finally {
+            allocationLock.unlock();
+        }
+    }
+
+    @Override
     public void release() {
-        if(interpreter != GLOBAL_INTERPRETER) {
-            try {interpreter.getSystemState().close();} catch (Throwable e) {e.printStackTrace();}
-            try {interpreter.cleanup();} catch (Throwable e) {e.printStackTrace();}
-            try {interpreter.close();} catch (Throwable e) {e.printStackTrace();}
+        try {
+            allocationLock.lock();
+            allocations--;
+            if(closed && (allocations == 0)) {
+                close();
+            }
+        } finally {
+            allocationLock.unlock();
+        }
+    }
+
+    @Override
+    public void close() {
+        try {
+            allocationLock.lock();
+            closed = true;
+            if ((interpreter != GLOBAL_INTERPRETER) && (allocations == 0)) {
+                try {interpreter.close();} catch (Throwable e) {}
+            }
+        } finally {
+            allocationLock.unlock();
         }
     }
 

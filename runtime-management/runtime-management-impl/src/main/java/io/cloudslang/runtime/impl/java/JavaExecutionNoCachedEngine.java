@@ -25,7 +25,12 @@ public class JavaExecutionNoCachedEngine extends ExecutionEngine implements Java
 
     @Override
     public Object execute(String dependency, String className, String methodName, JavaExecutionParametersProvider parametersProvider) {
-        return new JavaExecutor(dependencyService.getDependencies((dependency == null || dependency.isEmpty()) ? Sets.<String>newHashSet() :
-                Sets.newHashSet(dependency))).execute(className, methodName, parametersProvider);
+        JavaExecutor executor = new JavaExecutor(dependencyService.getDependencies((dependency == null || dependency.isEmpty()) ? Sets.<String>newHashSet() :
+                Sets.newHashSet(dependency)));
+        try {
+            return executor.execute(className, methodName, parametersProvider);
+        } finally {
+            executor.close();
+        }
     }
 }

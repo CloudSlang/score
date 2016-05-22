@@ -87,5 +87,10 @@ public class JavaExecutor implements Executor {
     }
 
     @Override
+    public void allocate() {}
+
+    @Override
     public void release() {}
+    @Override
+    public void close() {}
 }
