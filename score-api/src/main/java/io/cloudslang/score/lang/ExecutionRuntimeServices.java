@@ -47,7 +47,7 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String BRANCH_ID = "BRANCH_ID";
 
-    private static final String EXECUTION_ID_CONTEXT = "executionIdContext";
+    public static final String EXECUTION_ID_CONTEXT = "executionIdContext";
 
     private static final String EXECUTION_STEP_ERROR_KEY = "EXECUTION_STEP_ERROR_KEY";
 

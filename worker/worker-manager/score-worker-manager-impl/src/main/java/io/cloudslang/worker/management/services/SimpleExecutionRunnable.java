@@ -247,7 +247,7 @@ public class SimpleExecutionRunnable implements Runnable {
     private boolean isPersistStep(Execution nextStepExecution) {
         //Here we check if we need to go to queue to persist the step context - we can do it with shortcut to InBuffer!!!!!!!!
         if (nextStepExecution.getSystemContext().isStepPersist()) {
-            //clean key
+            //clean the persist data
             nextStepExecution.getSystemContext().removeStepPersist();
 
             //set current step to finished
@@ -259,6 +259,8 @@ public class SimpleExecutionRunnable implements Runnable {
             }
             executionMessage.setStepPersist(true);
             executionMessage.setStepPersistId(nextStepExecution.getSystemContext().getStepPersistId());
+            //clean the persist data
+            nextStepExecution.getSystemContext().removeStepPersistID();
 
             ExecutionMessage inProgressMessage = createInProgressExecutionMessage(nextStepExecution);
             ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage, inProgressMessage}; //for the outBuffer
