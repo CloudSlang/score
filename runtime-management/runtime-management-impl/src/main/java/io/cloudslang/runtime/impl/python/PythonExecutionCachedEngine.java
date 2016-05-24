@@ -32,12 +32,22 @@ public class PythonExecutionCachedEngine extends ExecutionCachedEngine<PythonExe
 
     @Override
     public Map<String, Serializable> exec(Set<String> dependencies, String script, Map<String, Serializable> vars) {
-        return allocateExecutor(dependencies).exec(script, vars);
+        PythonExecutor executor = allocateExecutor(dependencies);
+        try {
+            return executor.exec(script, vars);
+        } finally {
+            releaseExecutor(executor);
+        }
     }
 
     @Override
     public Serializable eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
-        return allocateExecutor(Sets.<String>newHashSet()).eval(prepareEnvironmentScript, script, vars);
+        PythonExecutor executor = allocateExecutor(Sets.<String>newHashSet());
+        try {
+            return executor.eval(prepareEnvironmentScript, script, vars);
+        } finally {
+            releaseExecutor(executor);
+        }
     }
 
     @Override

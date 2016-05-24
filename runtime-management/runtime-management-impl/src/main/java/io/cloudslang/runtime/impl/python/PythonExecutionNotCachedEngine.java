@@ -31,7 +31,7 @@ public class PythonExecutionNotCachedEngine implements PythonExecutionEngine{
         try {
             return pythonExecutor.exec(script, vars);
         } finally {
-            pythonExecutor.release();
+            pythonExecutor.close();
         }
     }
 
@@ -41,7 +41,7 @@ public class PythonExecutionNotCachedEngine implements PythonExecutionEngine{
         try {
             return pythonExecutor.eval(prepareEnvironmentScript, script, vars);
         } finally {
-            pythonExecutor.release();
+            pythonExecutor.close();
         }
     }
 }
