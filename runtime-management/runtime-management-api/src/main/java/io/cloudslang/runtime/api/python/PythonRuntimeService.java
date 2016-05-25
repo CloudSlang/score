@@ -22,6 +22,6 @@ public interface PythonRuntimeService {
      * exec used for python script executions
      * @param dependencies - list of resources with maven GAV notation ‘groupId:artifactId:version’ which can be used to resolve resources with Maven Repository Support
      */
-    Map<String, Serializable> exec (Set<String> dependencies, String script, Map<String, Serializable> vars);
-    Serializable eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars);
+    PythonExecutionResult exec(Set<String> dependencies, String script, Map<String, Serializable> vars);
+    PythonEvaluationResult eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars);
 }
