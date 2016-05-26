@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,6 +30,13 @@ public class JavaExecutionCachedEngineTest extends AbsExecutionCachedEngineTest 
     static {
         System.setProperty("java.executor.provider", JavaExecutionCachedEngine.class.getSimpleName());
         System.setProperty("java.executor.cache.size", "3");
+
+        ClassLoader classLoader = JavaExecutorTest.class.getClassLoader();
+
+        String settingsXmlPath = classLoader.getResource("settings.xml").getPath();
+        File rootHome = new File(settingsXmlPath).getParentFile();
+
+        System.setProperty("app.home", rootHome.getAbsolutePath());
     }
 
     @Autowired
