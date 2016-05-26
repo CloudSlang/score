@@ -63,106 +63,106 @@ public class AbsExecutionCachedEngineTest {
         System.out.println("@@@@@@@@@@@@@@[" + executionsNumber + "] executions by [" +  threads+ "] threads finished in [" + (System.currentTimeMillis() - start) + "] msecs");
     }
 
-    protected void testLeastRecentrlyUse(ExecutionCachedEngine executionEngineAllocator) {
+    protected void testLeastRecentlyUse(ExecutionCachedEngine executionEngineAllocator) {
         final Set<String> dependencies1 = new HashSet<>(Arrays.asList("g1:a2:v3", "g2:a3:v4"));
-        Executor javaExecutor1 = executionEngineAllocator.allocateExecutor(dependencies1);
+        Executor executor1 = executionEngineAllocator.allocateExecutor(dependencies1);
         // L-> 1
         final Set<String> dependencies2 = new HashSet<>(Arrays.asList("g2:a3:v4", "g3:a4:v5"));
-        Executor javaExecutor2 = executionEngineAllocator.allocateExecutor(dependencies2);
+        Executor executor2 = executionEngineAllocator.allocateExecutor(dependencies2);
         // L-> 1 -> 2
-        assertNotEquals(javaExecutor1, javaExecutor2);
+        assertNotEquals(executor1, executor2);
 
         final Set<String> dependencies3 = new HashSet<>(Arrays.asList("g3:a4:v5", "g4:a5:v6"));
-        Executor javaExecutor3 = executionEngineAllocator.allocateExecutor(dependencies3);
+        Executor executor3 = executionEngineAllocator.allocateExecutor(dependencies3);
         // L-> 1 -> 2 -> 3
-        assertNotEquals(javaExecutor1, javaExecutor3);
-        assertNotEquals(javaExecutor2, javaExecutor3);
+        assertNotEquals(executor1, executor3);
+        assertNotEquals(executor2, executor3);
 
         // already cached
-        assertEquals(javaExecutor1, executionEngineAllocator.allocateExecutor(dependencies1));
-        assertEquals(javaExecutor1, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g2:a3:v4", "g1:a2:v3"))));
+        assertEquals(executor1, executionEngineAllocator.allocateExecutor(dependencies1));
+        assertEquals(executor1, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g2:a3:v4", "g1:a2:v3"))));
         // L-> 2 -> 3 -> 1
 
         // already cached
-        assertEquals(javaExecutor2, executionEngineAllocator.allocateExecutor(dependencies2));
-        assertEquals(javaExecutor2, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g3:a4:v5", "g2:a3:v4"))));
+        assertEquals(executor2, executionEngineAllocator.allocateExecutor(dependencies2));
+        assertEquals(executor2, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g3:a4:v5", "g2:a3:v4"))));
         // L-> 3 -> 1 -> 2
 
         // already cached
-        assertEquals(javaExecutor3, executionEngineAllocator.allocateExecutor(dependencies3));
-        assertEquals(javaExecutor3, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g4:a5:v6", "g3:a4:v5"))));
+        assertEquals(executor3, executionEngineAllocator.allocateExecutor(dependencies3));
+        assertEquals(executor3, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g4:a5:v6", "g3:a4:v5"))));
         // L-> 1 -> 2 -> 3
 
 
         // new one, should remove javaExecutor1
         final Set<String> dependencies4 = new HashSet<>(Arrays.asList("g4:a5:v6", "g5:a6:v7"));
-        Executor javaExecutor4 = executionEngineAllocator.allocateExecutor(dependencies4);
+        Executor executor4 = executionEngineAllocator.allocateExecutor(dependencies4);
         // L-> 2 -> 3 -> 4
-        assertNotEquals(javaExecutor1, javaExecutor4);
-        assertNotEquals(javaExecutor2, javaExecutor4);
-        assertNotEquals(javaExecutor3, javaExecutor4);
+        assertNotEquals(executor1, executor4);
+        assertNotEquals(executor2, executor4);
+        assertNotEquals(executor3, executor4);
 
         // still cached
-        assertEquals(javaExecutor2, executionEngineAllocator.allocateExecutor(dependencies2));
-        assertEquals(javaExecutor2, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g3:a4:v5", "g2:a3:v4"))));
+        assertEquals(executor2, executionEngineAllocator.allocateExecutor(dependencies2));
+        assertEquals(executor2, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g3:a4:v5", "g2:a3:v4"))));
         // L-> 3 -> 4 -> 2
 
         // still cached
-        assertEquals(javaExecutor3, executionEngineAllocator.allocateExecutor(dependencies3));
-        assertEquals(javaExecutor3, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g4:a5:v6", "g3:a4:v5"))));
+        assertEquals(executor3, executionEngineAllocator.allocateExecutor(dependencies3));
+        assertEquals(executor3, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g4:a5:v6", "g3:a4:v5"))));
         // L-> 4 -> 2 -> 3
 
         // already cached
-        assertEquals(javaExecutor4, executionEngineAllocator.allocateExecutor(dependencies4));
-        assertEquals(javaExecutor4, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g5:a6:v7", "g4:a5:v6"))));
+        assertEquals(executor4, executionEngineAllocator.allocateExecutor(dependencies4));
+        assertEquals(executor4, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g5:a6:v7", "g4:a5:v6"))));
         // L-> 2 -> 3 -> 4
 
 
-        Executor javaExecutor1New = executionEngineAllocator.allocateExecutor(dependencies1);
-        assertNotEquals(javaExecutor1, javaExecutor1New);
-        assertEquals(javaExecutor1New, executionEngineAllocator.allocateExecutor(dependencies1));
-        assertEquals(javaExecutor1New, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g2:a3:v4", "g1:a2:v3"))));
+        Executor executor1New = executionEngineAllocator.allocateExecutor(dependencies1);
+        assertNotEquals(executor1, executor1New);
+        assertEquals(executor1New, executionEngineAllocator.allocateExecutor(dependencies1));
+        assertEquals(executor1New, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g2:a3:v4", "g1:a2:v3"))));
         // L-> 3 -> 4 -> 1
 
         // still cached
-        assertEquals(javaExecutor3, executionEngineAllocator.allocateExecutor(dependencies3));
-        assertEquals(javaExecutor3, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g4:a5:v6", "g3:a4:v5"))));
+        assertEquals(executor3, executionEngineAllocator.allocateExecutor(dependencies3));
+        assertEquals(executor3, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g4:a5:v6", "g3:a4:v5"))));
         // L-> 4 -> 1 -> 3
 
         // still cached
-        assertEquals(javaExecutor4, executionEngineAllocator.allocateExecutor(dependencies4));
-        assertEquals(javaExecutor4, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g5:a6:v7", "g4:a5:v6"))));
+        assertEquals(executor4, executionEngineAllocator.allocateExecutor(dependencies4));
+        assertEquals(executor4, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g5:a6:v7", "g4:a5:v6"))));
         // L-> 1 -> 3 -> 4
 
         // still cached
-        assertEquals(javaExecutor1New, executionEngineAllocator.allocateExecutor(dependencies1));
-        assertEquals(javaExecutor1New, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g2:a3:v4", "g1:a2:v3"))));
+        assertEquals(executor1New, executionEngineAllocator.allocateExecutor(dependencies1));
+        assertEquals(executor1New, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g2:a3:v4", "g1:a2:v3"))));
         // L-> 3 -> 4 -> 1
 
-        Executor javaExecutor2New = executionEngineAllocator.allocateExecutor(dependencies2);
-        assertNotEquals(javaExecutor2, javaExecutor2New);
-        assertEquals(javaExecutor2New, executionEngineAllocator.allocateExecutor(dependencies2));
-        assertEquals(javaExecutor2New, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g3:a4:v5", "g2:a3:v4"))));
+        Executor executor2New = executionEngineAllocator.allocateExecutor(dependencies2);
+        assertNotEquals(executor2, executor2New);
+        assertEquals(executor2New, executionEngineAllocator.allocateExecutor(dependencies2));
+        assertEquals(executor2New, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g3:a4:v5", "g2:a3:v4"))));
         // L-> 4 -> 1 -> 2
 
-        Executor javaExecutor3New = executionEngineAllocator.allocateExecutor(dependencies3);
-        assertNotEquals(javaExecutor3, javaExecutor3New);
-        assertEquals(javaExecutor3New, executionEngineAllocator.allocateExecutor(dependencies3));
-        assertEquals(javaExecutor3New, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g4:a5:v6", "g3:a4:v5"))));
+        Executor executor3New = executionEngineAllocator.allocateExecutor(dependencies3);
+        assertNotEquals(executor3, executor3New);
+        assertEquals(executor3New, executionEngineAllocator.allocateExecutor(dependencies3));
+        assertEquals(executor3New, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g4:a5:v6", "g3:a4:v5"))));
         // L-> 1 -> 2 -> 3
 
         // now this fourth one removed --> javaExecutor1New removed
-        assertNotEquals(javaExecutor4, executionEngineAllocator.allocateExecutor(dependencies4));
+        assertNotEquals(executor4, executionEngineAllocator.allocateExecutor(dependencies4));
         // L-> 2 -> 3 -> 1
 
         // already cached
-        assertEquals(javaExecutor2New, executionEngineAllocator.allocateExecutor(dependencies2));
-        assertEquals(javaExecutor2New, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g3:a4:v5", "g2:a3:v4"))));
+        assertEquals(executor2New, executionEngineAllocator.allocateExecutor(dependencies2));
+        assertEquals(executor2New, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g3:a4:v5", "g2:a3:v4"))));
         // L-> 3 -> 1 -> 2
 
         // already cached
-        assertEquals(javaExecutor3New, executionEngineAllocator.allocateExecutor(dependencies3));
-        assertEquals(javaExecutor3New, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g4:a5:v6", "g3:a4:v5"))));
+        assertEquals(executor3New, executionEngineAllocator.allocateExecutor(dependencies3));
+        assertEquals(executor3New, executionEngineAllocator.allocateExecutor(new HashSet<>(Arrays.asList("g4:a5:v6", "g3:a4:v5"))));
         // L-> 1 -> 2 -> 3
     }
 

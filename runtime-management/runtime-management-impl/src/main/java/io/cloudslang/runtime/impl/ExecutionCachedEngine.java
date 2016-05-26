@@ -16,6 +16,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
@@ -25,6 +27,8 @@ public abstract class ExecutionCachedEngine<T extends Executor> extends Executio
     // value --> classloader/pythoninterpreter which was build with classpath from these dependencies
     // if we reached the limit of cache we will release the least recently used
     private final Map<String, T> executors = new LinkedHashMap<>();
+
+    private final Lock lock = new ReentrantLock();
 
     public T allocateExecutor(Set<String> dependencies) {
         String dependenciesKey = generatedDependenciesKey(dependencies);
@@ -38,7 +42,8 @@ public abstract class ExecutionCachedEngine<T extends Executor> extends Executio
         }
 
         T candidateForRemove = null;
-        synchronized (executors) {
+        try {
+            lock.lock();
             if (executor == null) {
                 if (executors.size() == getCacheSize()) {
                     Iterator<Map.Entry<String, T>> iterator = executors.entrySet().iterator();
@@ -50,12 +55,19 @@ public abstract class ExecutionCachedEngine<T extends Executor> extends Executio
                 // remove it and place at the end - most recently used
                 executors.remove(dependenciesKey);
             }
+            executor.allocate();
             executors.put(dependenciesKey, executor);
+        } finally {
+            lock.unlock();
         }
         if(candidateForRemove != null) {
-            candidateForRemove.release();
+            candidateForRemove.close();
         }
         return executor;
+    }
+
+    protected void releaseExecutor(T executor) {
+        executor.release();
     }
 
     protected abstract DependencyService getDependencyService();
