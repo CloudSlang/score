@@ -11,6 +11,8 @@
 package io.cloudslang.runtime.impl.python;
 
 import io.cloudslang.dependency.api.services.DependencyService;
+import io.cloudslang.runtime.api.python.PythonEvaluationResult;
+import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.impl.ExecutionCachedEngine;
 import org.python.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +33,7 @@ public class PythonExecutionCachedEngine extends ExecutionCachedEngine<PythonExe
     private int cacheSize;
 
     @Override
-    public Map<String, Serializable> exec(Set<String> dependencies, String script, Map<String, Serializable> vars) {
+    public PythonExecutionResult exec(Set<String> dependencies, String script, Map<String, Serializable> vars) {
         PythonExecutor executor = allocateExecutor(dependencies);
         try {
             return executor.exec(script, vars);
@@ -41,7 +43,7 @@ public class PythonExecutionCachedEngine extends ExecutionCachedEngine<PythonExe
     }
 
     @Override
-    public Serializable eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
+    public PythonEvaluationResult eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
         PythonExecutor executor = allocateExecutor(Sets.<String>newHashSet());
         try {
             return executor.eval(prepareEnvironmentScript, script, vars);
