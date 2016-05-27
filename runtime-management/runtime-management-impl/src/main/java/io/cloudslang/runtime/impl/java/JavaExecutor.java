@@ -23,15 +23,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
-import java.util.Properties;
 import java.util.Set;
 
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
 public class JavaExecutor implements Executor {
-    private static final String CONTENT_SDK_PROPERTIES = "content_sdk.properties";
-    private static final String PRELOADED_CLASSES = "preloaded_classes";
     private static final String SCORE_CONTENT_SDK_JAR = "score-content-sdk*.jar";
     private static final String APP_HOME = "app.home";
 
@@ -62,18 +59,6 @@ public class JavaExecutor implements Executor {
         }
 
         PARENT_CLASS_LOADER = new URLClassLoader(parentUrls, parentClassLoader);
-        try {
-            Properties props = new Properties();
-            props.load(JavaExecutor.class.getClassLoader().getResourceAsStream(CONTENT_SDK_PROPERTIES));
-            String preloadedClasses = props.getProperty(PRELOADED_CLASSES);
-            if(preloadedClasses != null) {
-                for (String preloadedClass: preloadedClasses.split(",")) {
-                    PARENT_CLASS_LOADER.loadClass(preloadedClass);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private final ClassLoader classLoader;
