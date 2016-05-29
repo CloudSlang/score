@@ -11,6 +11,7 @@ import io.cloudslang.runtime.api.python.PythonRuntimeService;
 import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.python.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -196,6 +197,51 @@ public class PythonExecutorTest {
             }.start();
         }
         latch.await();
+    }
+
+    @Test
+    public void testPythonExecutorNoAllocationNotClosed() {
+        PythonExecutor executor = new PythonExecutor(Sets.newHashSet("a.zip, b.zip"));
+        executor.exec("print 'x'", new HashMap<String, Serializable>());
+        executor.close();
+        assertTrue(executor.isClosed());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testPythonExecutorNoAllocationClosed() {
+        PythonExecutor executor = new PythonExecutor(Sets.newHashSet("a.zip, b.zip"));
+        executor.close();
+        executor.exec("print 'x'", new HashMap<String, Serializable>());
+    }
+
+    @Test
+    public void testPythonExecutorAllocationSuccess() {
+        PythonExecutor executor = new PythonExecutor(Sets.newHashSet("a.zip, b.zip"));
+        executor.exec("print 'x'", new HashMap<String, Serializable>());
+        executor.allocate();
+        executor.exec("print 'x'", new HashMap<String, Serializable>());
+        executor.allocate();
+        executor.exec("print 'x'", new HashMap<String, Serializable>());
+        executor.close();
+        executor.exec("print 'x'", new HashMap<String, Serializable>());
+        assertFalse(executor.isClosed());
+        executor.exec("print 'x'", new HashMap<String, Serializable>());
+        executor.release();
+        executor.exec("print 'x'", new HashMap<String, Serializable>());
+        assertFalse(executor.isClosed());
+        executor.exec("print 'x'", new HashMap<String, Serializable>());
+        executor.release();
+        assertTrue(executor.isClosed());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testPythonExecutorAllocationFailure() {
+        PythonExecutor executor = new PythonExecutor(Sets.newHashSet("a.zip, b.zip"));
+        executor.allocate();
+        executor.close();
+        executor.release();
+        assertTrue(executor.isClosed());
+        executor.exec("print 'x'", new HashMap<String, Serializable>());
     }
 
     private String buildAddFunctionsScript(String ... functionDependencies) {

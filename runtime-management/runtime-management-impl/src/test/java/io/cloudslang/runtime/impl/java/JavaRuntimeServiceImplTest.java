@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -34,7 +35,14 @@ public class JavaRuntimeServiceImplTest {
 
     static {
         System.setProperty("java.executor.provider", JavaExecutionCachedEngine.class.getSimpleName());
+        ClassLoader classLoader = JavaExecutorTest.class.getClassLoader();
+
+        String settingsXmlPath = classLoader.getResource("settings.xml").getPath();
+        File rootHome = new File(settingsXmlPath).getParentFile();
+
+        System.setProperty("app.home", rootHome.getAbsolutePath());
     }
+
 
     @Autowired
     private JavaRuntimeService javaRuntimeServiceImpl;

@@ -12,35 +12,60 @@ package io.cloudslang.runtime.impl.java;
 
 import io.cloudslang.runtime.api.java.JavaExecutionParametersProvider;
 import io.cloudslang.runtime.impl.Executor;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.python.google.common.collect.Sets;
 
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.Set;
 
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
 public class JavaExecutor implements Executor {
+    private static final String SCORE_CONTENT_SDK_JAR = "score-content-sdk*.jar";
+    private static final String APP_HOME = "app.home";
+
     private static final ClassLoader PARENT_CLASS_LOADER;
 
     static {
         ClassLoader parentClassLoader = JavaExecutor.class.getClassLoader();
+
         while(parentClassLoader.getParent() != null) {
             parentClassLoader = parentClassLoader.getParent();
         }
 
-        PARENT_CLASS_LOADER = new URLClassLoader(new URL[0], parentClassLoader);
+        URL[] parentUrls = new URL[0];
+        try {
+            String appHomeDir = System.getProperty(APP_HOME);
+            File appLibDir = new File(appHomeDir, "lib");
+
+            if(appLibDir.exists() && appLibDir.isDirectory()) {
+                Collection<File> foundFiles = FileUtils.listFiles(appLibDir, new WildcardFileFilter(SCORE_CONTENT_SDK_JAR), DirectoryFileFilter.DIRECTORY);
+                if(foundFiles != null && !foundFiles.isEmpty()) {
+                    for (File file : foundFiles) {
+                        parentUrls = new URL[]{file.toURI().toURL()};
+                    }
+                }
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        PARENT_CLASS_LOADER = new URLClassLoader(parentUrls, parentClassLoader);
     }
 
     private final ClassLoader classLoader;
 
     JavaExecutor(Set<String> filePaths) {
         if(!filePaths.isEmpty()) {
-            Set<URL> result = new HashSet<>();
+            Set<URL> result = Sets.newHashSet();
             for (String filePath : filePaths) {
                 try {
                     result.add(new File(filePath).toURI().toURL());
@@ -87,5 +112,10 @@ public class JavaExecutor implements Executor {
     }
 
     @Override
+    public void allocate() {}
+
+    @Override
     public void release() {}
+    @Override
+    public void close() {}
 }

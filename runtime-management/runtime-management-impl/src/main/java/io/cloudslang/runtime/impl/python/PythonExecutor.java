@@ -32,14 +32,9 @@ import org.python.core.PyType;
 import org.python.util.PythonInterpreter;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -57,6 +52,13 @@ public class PythonExecutor implements Executor {
     }
 
     private final PythonInterpreter interpreter;
+
+    private final Lock allocationLock = new ReentrantLock();
+    private int allocations = 0;
+    //Executor marked to be actuallyClosed. Executor may be still in use thus we don't close it immediately
+    private boolean markedClosed = false;
+    //Executor was finally actuallyClosed
+    private boolean actuallyClosed = false;
 
     public PythonExecutor() {
         this(Collections.<String>emptySet());
@@ -79,6 +81,7 @@ public class PythonExecutor implements Executor {
 
     //we need this method to be synchronized so we will not have multiple scripts run in parallel on the same context
     public PythonExecutionResult exec(String script, Map<String, Serializable> callArguments) {
+        checkValidInterpreter();
         try {
             initInterpreter();
             prepareInterpreterContext(callArguments);
@@ -120,6 +123,7 @@ public class PythonExecutor implements Executor {
     }
 
     public PythonEvaluationResult eval(String prepareEnvironmentScript, String expr, Map<String, Serializable> context) {
+        checkValidInterpreter();
         try {
             initInterpreter();
             prepareInterpreterContext(context);
@@ -134,6 +138,12 @@ public class PythonExecutor implements Executor {
                 message = exception.getMessage();
             }
             throw new RuntimeException(message, exception);
+        }
+    }
+
+    private void checkValidInterpreter() {
+        if(isClosed()) {
+            throw new RuntimeException("Trying to execute script on already closed python interpreter");
         }
     }
 
@@ -153,12 +163,44 @@ public class PythonExecutor implements Executor {
     }
 
     @Override
-    public void release() {
-        if(interpreter != GLOBAL_INTERPRETER) {
-            try {interpreter.getSystemState().close();} catch (Throwable e) {e.printStackTrace();}
-            try {interpreter.cleanup();} catch (Throwable e) {e.printStackTrace();}
-            try {interpreter.close();} catch (Throwable e) {e.printStackTrace();}
+    public void allocate() {
+        try {
+            allocationLock.lock();
+            allocations++;
+        } finally {
+            allocationLock.unlock();
         }
+    }
+
+    @Override
+    public void release() {
+        try {
+            allocationLock.lock();
+            allocations--;
+            if(markedClosed && (allocations == 0)) {
+                close();
+            }
+        } finally {
+            allocationLock.unlock();
+        }
+    }
+
+    @Override
+    public void close() {
+        try {
+            allocationLock.lock();
+            markedClosed = true;
+            if ((interpreter != GLOBAL_INTERPRETER) && (allocations == 0)) {
+                try {interpreter.close();} catch (Throwable e) {}
+                actuallyClosed = true;
+            }
+        } finally {
+            allocationLock.unlock();
+        }
+    }
+
+    public boolean isClosed() {
+        return actuallyClosed;
     }
 
     private void initInterpreter() {
