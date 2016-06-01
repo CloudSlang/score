@@ -232,9 +232,12 @@ public class PythonExecutor implements Executor {
         if (value == null) {
             return null;
         }
+        if (value instanceof PyBoolean) {
+            PyBoolean pyBoolean = (PyBoolean) value;
+            return pyBoolean.getBooleanValue();
+        }
         try {
-            value.getType(); // sets the accessed flag to true
-            return (Serializable)toJava(value);
+            return Py.tojava(value, Serializable.class);
         } catch (PyException e) {
             PyObject typeObject = e.type;
             if (typeObject instanceof PyType) {
@@ -246,28 +249,6 @@ public class PythonExecutor implements Executor {
             }
             throw e;
         }
-    }
-
-    private Object toJava(PyObject value) {
-        if (value instanceof PyBoolean) {
-            return ((PyBoolean) value).getBooleanValue();
-        }
-        if (value instanceof PyList) {
-            return new ArrayList<>((List<?>)value);
-        }
-        if (value instanceof PyDictionary) {
-            return new ConcurrentHashMap<>((Map<?, ?>)value);
-        }
-        if (value instanceof PySet) {
-            return new HashSet<>((Set<?>)value);
-        }
-        if (value instanceof PyArray) {
-            return SerializationUtils.clone((Serializable)((PyArray) value).getArray());
-        }
-        if (value instanceof PyType) {
-            return ((PyType) value).getName();
-        }
-        return Py.tojava(value, Serializable.class);
     }
 
     private boolean keyIsExcluded(String key, PyObject value) {
