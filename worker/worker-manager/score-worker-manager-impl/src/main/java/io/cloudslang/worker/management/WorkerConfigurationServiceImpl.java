@@ -13,6 +13,8 @@ package io.cloudslang.worker.management;
 import java.util.List;
 import java.util.Set;
 
+import io.cloudslang.orchestrator.entities.MergedConfigurationDataContainer;
+import io.cloudslang.orchestrator.services.MergedConfigurationService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -33,6 +35,7 @@ public class WorkerConfigurationServiceImpl implements WorkerConfigurationServic
 	private volatile List<Long> cancelledExecutions;
 	private volatile Set<String> pausedExecutions;
 	private volatile List<String> workerGroups;
+	private MergedConfigurationDataContainer mergedConfigurationDataContainer;
 	private volatile boolean enabled;
 	@Autowired
 	private CancelExecutionService cancelExecutionService;
@@ -40,6 +43,9 @@ public class WorkerConfigurationServiceImpl implements WorkerConfigurationServic
 	private PauseResumeService pauseResumeService;
 	@Autowired
 	private WorkerNodeService workerNodeService;
+
+	@Autowired
+	private MergedConfigurationService 	mergedConfigurationService;
 
 	@Override
 	public boolean isExecutionCancelled(Long executionId) {
@@ -63,6 +69,7 @@ public class WorkerConfigurationServiceImpl implements WorkerConfigurationServic
 
 	public void refresh() {
 		if(!enabled) return;
+		mergedConfigurationDataContainer = mergedConfigurationService.fetchMergedConfiguration();
 		fetchCanceledExecutions();
 		fetchPausedExecutions();
 		fetchWorkerGroups();
@@ -70,7 +77,7 @@ public class WorkerConfigurationServiceImpl implements WorkerConfigurationServic
 
 	protected void fetchCanceledExecutions() {
 		try {
-			cancelledExecutions = cancelExecutionService.readCanceledExecutionsIds();
+			cancelledExecutions = mergedConfigurationDataContainer.getCancelledExecutions();
 		} catch(Exception ex) {
 			log.error("Failed to fetch cancelled information: ", ex);
 		}
@@ -78,7 +85,7 @@ public class WorkerConfigurationServiceImpl implements WorkerConfigurationServic
 
 	protected void fetchPausedExecutions() {
 		try {
-			pausedExecutions = pauseResumeService.readAllPausedExecutionBranchIds();
+			pausedExecutions = mergedConfigurationDataContainer.getPausedExecutions();
 		} catch(Exception ex) {
 			log.error("Failed to fetch paused information: ", ex);
 		}
@@ -86,7 +93,7 @@ public class WorkerConfigurationServiceImpl implements WorkerConfigurationServic
 
 	protected void fetchWorkerGroups() {
 		try {
-			workerGroups = workerNodeService.readWorkerGroups(getWorkerUuid());
+			workerGroups = mergedConfigurationDataContainer.getWorkerGroups();
 		} catch(Exception ex) {
 			log.error("Failed to fetch worker group information: ", ex);
 		}

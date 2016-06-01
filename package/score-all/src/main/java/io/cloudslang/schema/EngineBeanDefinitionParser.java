@@ -22,22 +22,11 @@ import io.cloudslang.engine.queue.services.recovery.ExecutionRecoveryServiceImpl
 import io.cloudslang.engine.queue.services.recovery.MessageRecoveryServiceImpl;
 import io.cloudslang.engine.queue.services.recovery.WorkerRecoveryServiceImpl;
 import io.cloudslang.engine.versioning.services.VersionServiceImpl;
-import io.cloudslang.orchestrator.services.CancelExecutionServiceImpl;
-import io.cloudslang.orchestrator.services.EngineVersionServiceImpl;
-import io.cloudslang.orchestrator.services.ExecutionSerializationUtil;
-import io.cloudslang.orchestrator.services.OrchestratorDispatcherServiceImpl;
-import io.cloudslang.orchestrator.services.RunningExecutionPlanServiceImpl;
-import io.cloudslang.orchestrator.services.SplitJoinServiceImpl;
-import io.cloudslang.orchestrator.services.StubPauseResumeServiceImpl;
-import io.cloudslang.orchestrator.services.WorkerDbSupportServiceImpl;
+import io.cloudslang.orchestrator.services.*;
 import io.cloudslang.engine.partitions.services.PartitionCallback;
 import io.cloudslang.engine.partitions.services.PartitionServiceImpl;
 import io.cloudslang.engine.partitions.services.PartitionTemplateImpl;
 import io.cloudslang.engine.partitions.services.PartitionUtils;
-import io.cloudslang.orchestrator.services.ScoreDeprecatedImpl;
-import io.cloudslang.orchestrator.services.ScoreImpl;
-import io.cloudslang.orchestrator.services.ScorePauseResumeImpl;
-import io.cloudslang.orchestrator.services.ScoreTriggeringImpl;
 import io.cloudslang.engine.data.DataBaseDetector;
 import io.cloudslang.engine.data.HiloFactoryBean;
 import io.cloudslang.engine.data.SqlInQueryReader;
@@ -45,7 +34,6 @@ import io.cloudslang.engine.data.SqlUtils;
 import io.cloudslang.job.ScoreEngineJobsImpl;
 import io.cloudslang.schema.context.ScoreDatabaseContext;
 import io.cloudslang.schema.context.ScoreDefaultDatasourceContext;
-import io.cloudslang.orchestrator.services.ExecutionStateServiceImpl;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -104,6 +92,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
         put(ScoreDeprecatedImpl.class, null);
         put(ScoreEngineJobsImpl.class,"scoreEngineJobs");
 		put(BusyWorkersServiceImpl.class,"busyWorkersService");
+		put(MergedConfigurationServiceImpl.class,"MergedConfigurationService");
 	}};
 
 	@Override

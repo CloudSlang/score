@@ -10,7 +10,7 @@
 
 package io.cloudslang.schema;
 
-import io.cloudslang.orchestrator.services.EngineVersionService;
+import io.cloudslang.orchestrator.services.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +26,6 @@ import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
 import io.cloudslang.engine.queue.services.ScoreEventFactory;
-import io.cloudslang.orchestrator.services.CancelExecutionService;
-import io.cloudslang.orchestrator.services.OrchestratorDispatcherService;
-import io.cloudslang.orchestrator.services.PauseResumeService;
 import io.cloudslang.worker.management.services.WorkerManager;
 import io.cloudslang.worker.management.services.dbsupport.WorkerDbSupportService;
 
@@ -89,6 +86,11 @@ public class WorkerTest {
 		@Bean
 		CancelExecutionService cancelExecutionService(){
 			return mock(CancelExecutionService.class);
+		}
+
+		@Bean
+		MergedConfigurationService mergedConfigurationService(){
+			return mock(MergedConfigurationService.class);
 		}
 
 		@Bean
