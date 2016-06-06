@@ -14,6 +14,7 @@ import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.impl.Executor;
 import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang.StringUtils;
 import org.python.core.Py;
 import org.python.core.PyArray;
 import org.python.core.PyBoolean;
@@ -87,7 +88,7 @@ public class PythonExecutor implements Executor {
             prepareInterpreterContext(callArguments);
             return exec(script);
         } catch (Exception e) {
-            throw new RuntimeException("Error executing python script: " + e.getMessage(), e);
+            throw new RuntimeException("Error executing python script: " + e, e);
         }
     }
 
@@ -137,8 +138,18 @@ public class PythonExecutor implements Executor {
             } else {
                 message = exception.getMessage();
             }
-            throw new RuntimeException(message, exception);
+            throw new RuntimeException(
+                    "Error in running script expression: '"
+                            + expr + "',\n\tException is: " + handleExceptionSpecialCases(message), exception);
         }
+    }
+
+    private String handleExceptionSpecialCases(String message) {
+        String processedMessage = message;
+        if (StringUtils.isNotEmpty(message) && message.contains("get_sp") && message.contains("not defined")) {
+            processedMessage =  message + ". Make sure to use correct syntax for the function: get_sp('fully.qualified.name', optional_default_value).";
+        }
+        return processedMessage;
     }
 
     private void checkValidInterpreter() {
