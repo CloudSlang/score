@@ -108,7 +108,11 @@ public class HelloScore {
         eventBus.subscribe(new ScoreEventListener() {
             @Override
             public void onEvent(ScoreEvent event) {
-                logger.info("Listener " + this.toString() + " invoked on type: " + event.getEventType() + " with data: " + event.getData());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Listener " + this.toString() + " invoked on type: " + event.getEventType() + " with data: " + event.getData());
+                } else {
+                    logger.info("Listener " + this.toString() + " invoked on type: " + event.getEventType());
+                }
                 synchronized (lock) {
                     lock.notify();
                 }

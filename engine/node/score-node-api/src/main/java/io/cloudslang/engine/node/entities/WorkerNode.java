@@ -328,7 +328,6 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
 				", hostName='" + hostName + '\'' +
 				", installPath='" + installPath + '\'' +
 				", description='" + description + '\'' +
-				", password='" + password + '\'' +
 				", os='" + os + '\'' +
 				", jvm='" + jvm + '\'' +
 				", dotNetVersion='" + dotNetVersion + '\'' +
