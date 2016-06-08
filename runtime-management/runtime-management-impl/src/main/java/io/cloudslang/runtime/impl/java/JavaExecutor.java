@@ -81,12 +81,16 @@ public class JavaExecutor implements Executor {
     }
 
     Object execute(String className, String methodName, JavaExecutionParametersProvider parametersProvider) {
+        ClassLoader origCL = Thread.currentThread().getContextClassLoader();
         try {
+            Thread.currentThread().setContextClassLoader(classLoader);
             Class actionClass = getActionClass(className);
             Method executionMethod = getMethodByName(actionClass, methodName);
             return executionMethod.invoke(actionClass.newInstance(), parametersProvider.getExecutionParameters(executionMethod));
         } catch (Exception e) {
             throw new RuntimeException("Method [" + methodName + "] invocation of class [" + className + "] failed!!!!", e);
+        } finally {
+            Thread.currentThread().setContextClassLoader(origCL);
         }
     }
 
