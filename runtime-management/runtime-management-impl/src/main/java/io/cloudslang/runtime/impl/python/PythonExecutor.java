@@ -10,12 +10,33 @@
 
 package io.cloudslang.runtime.impl.python;
 
+import io.cloudslang.runtime.api.python.PythonEvaluationResult;
+import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.impl.Executor;
-import org.python.core.*;
+import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang.StringUtils;
+import org.python.core.Py;
+import org.python.core.PyArray;
+import org.python.core.PyBoolean;
+import org.python.core.PyDictionary;
+import org.python.core.PyException;
+import org.python.core.PyFile;
+import org.python.core.PyFunction;
+import org.python.core.PyList;
+import org.python.core.PyModule;
+import org.python.core.PyObject;
+import org.python.core.PySet;
+import org.python.core.PyString;
+import org.python.core.PyStringMap;
+import org.python.core.PySystemState;
+import org.python.core.PyType;
 import org.python.util.PythonInterpreter;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
@@ -32,6 +53,13 @@ public class PythonExecutor implements Executor {
     }
 
     private final PythonInterpreter interpreter;
+
+    private final Lock allocationLock = new ReentrantLock();
+    private int allocations = 0;
+    //Executor marked to be actuallyClosed. Executor may be still in use thus we don't close it immediately
+    private boolean markedClosed = false;
+    //Executor was finally actuallyClosed
+    private boolean actuallyClosed = false;
 
     public PythonExecutor() {
         this(Collections.<String>emptySet());
@@ -53,17 +81,18 @@ public class PythonExecutor implements Executor {
     }
 
     //we need this method to be synchronized so we will not have multiple scripts run in parallel on the same context
-    public Map<String, Serializable> exec(String script, Map<String, Serializable> callArguments) {
+    public PythonExecutionResult exec(String script, Map<String, Serializable> callArguments) {
+        checkValidInterpreter();
         try {
             initInterpreter();
             prepareInterpreterContext(callArguments);
             return exec(script);
         } catch (Exception e) {
-            throw new RuntimeException("Error executing python script: " + e.getMessage(), e);
+            throw new RuntimeException("Error executing python script: " + e, e);
         }
     }
 
-    private Map<String, Serializable> exec(String script) {
+    private PythonExecutionResult exec(String script) {
         interpreter.exec(script);
         Iterator<PyObject> localsIterator = interpreter.getLocals().asIterable().iterator();
         Map<String, Serializable> returnValue = new HashMap<>();
@@ -76,15 +105,31 @@ public class PythonExecutor implements Executor {
             Serializable javaValue = resolveJythonObjectToJavaExec(value, key);
             returnValue.put(key, javaValue);
         }
-        return returnValue;
+        return new PythonExecutionResult(returnValue);
     }
 
-    public Serializable eval(String prepareEnvironmentScript, String expr, Map<String, Serializable> context) {
+    private Map<String, Serializable> getPythonLocals() {
+        Map<String, Serializable> result = new HashMap<>();
+        if(interpreter.getLocals() != null) {
+            for (PyObject pyObject : interpreter.getLocals().asIterable()) {
+                String key = pyObject.asString();
+                PyObject value = interpreter.get(key);
+                if (keyIsExcluded(key, value)) {
+                    continue;
+                }
+                result.put(key, value);
+            }
+        }
+        return result;
+    }
+
+    public PythonEvaluationResult eval(String prepareEnvironmentScript, String expr, Map<String, Serializable> context) {
+        checkValidInterpreter();
         try {
             initInterpreter();
             prepareInterpreterContext(context);
 
-            return eval(prepareEnvironmentScript, expr);
+            return new PythonEvaluationResult(eval(prepareEnvironmentScript, expr), getPythonLocals());
         } catch (Exception exception) {
             String message;
             if (exception instanceof PyException) {
@@ -93,7 +138,23 @@ public class PythonExecutor implements Executor {
             } else {
                 message = exception.getMessage();
             }
-            throw new RuntimeException(message, exception);
+            throw new RuntimeException(
+                    "Error in running script expression: '"
+                            + expr + "',\n\tException is: " + handleExceptionSpecialCases(message), exception);
+        }
+    }
+
+    private String handleExceptionSpecialCases(String message) {
+        String processedMessage = message;
+        if (StringUtils.isNotEmpty(message) && message.contains("get_sp") && message.contains("not defined")) {
+            processedMessage =  message + ". Make sure to use correct syntax for the function: get_sp('fully.qualified.name', optional_default_value).";
+        }
+        return processedMessage;
+    }
+
+    private void checkValidInterpreter() {
+        if(isClosed()) {
+            throw new RuntimeException("Trying to execute script on already closed python interpreter");
         }
     }
 
@@ -104,7 +165,7 @@ public class PythonExecutor implements Executor {
             interpreter.set(FALSE, Boolean.FALSE);
 
         if(prepareEnvironmentScript != null && !prepareEnvironmentScript.isEmpty()) {
-            exec(prepareEnvironmentScript);
+            interpreter.exec(prepareEnvironmentScript);
         }
         PyObject evalResultAsPyObject = interpreter.eval(script);
         Serializable evalResult;
@@ -113,12 +174,44 @@ public class PythonExecutor implements Executor {
     }
 
     @Override
-    public void release() {
-        if(interpreter != GLOBAL_INTERPRETER) {
-            try {interpreter.getSystemState().close();} catch (Throwable e) {e.printStackTrace();}
-            try {interpreter.cleanup();} catch (Throwable e) {e.printStackTrace();}
-            try {interpreter.close();} catch (Throwable e) {e.printStackTrace();}
+    public void allocate() {
+        try {
+            allocationLock.lock();
+            allocations++;
+        } finally {
+            allocationLock.unlock();
         }
+    }
+
+    @Override
+    public void release() {
+        try {
+            allocationLock.lock();
+            allocations--;
+            if(markedClosed && (allocations == 0)) {
+                close();
+            }
+        } finally {
+            allocationLock.unlock();
+        }
+    }
+
+    @Override
+    public void close() {
+        try {
+            allocationLock.lock();
+            markedClosed = true;
+            if ((interpreter != GLOBAL_INTERPRETER) && (allocations == 0)) {
+                try {interpreter.close();} catch (Throwable e) {}
+                actuallyClosed = true;
+            }
+        } finally {
+            allocationLock.unlock();
+        }
+    }
+
+    public boolean isClosed() {
+        return actuallyClosed;
     }
 
     private void initInterpreter() {

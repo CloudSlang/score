@@ -23,6 +23,15 @@ import static org.junit.Assert.assertEquals;
 @ContextConfiguration(classes = JavaExecutorTest.TestConfig.class)
 public class JavaExecutorTest {
 
+    static {
+        ClassLoader classLoader = JavaExecutorTest.class.getClassLoader();
+
+        String settingsXmlPath = classLoader.getResource("settings.xml").getPath();
+        File rootHome = new File(settingsXmlPath).getParentFile();
+
+        System.setProperty("app.home", rootHome.getAbsolutePath());
+    }
+
     private static final String CLASS_NAME = "group.artifact.OneClass";
     private static final String METHOD_NAME = "getVersion";
     private static final JavaExecutionParametersProvider PARAM_PROVIDER = new JavaExecutionParametersProvider() {

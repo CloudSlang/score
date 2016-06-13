@@ -3,7 +3,7 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>runtime-management</artifactId>
-        <version>0.3.21-SNAPSHOT</version>
+        <version>0.3.28-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -31,6 +31,16 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
         </dependency>
 
         <dependency>

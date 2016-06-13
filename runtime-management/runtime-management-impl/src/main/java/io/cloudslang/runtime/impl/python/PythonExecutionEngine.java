@@ -10,6 +10,9 @@
 
 package io.cloudslang.runtime.impl.python;
 
+import io.cloudslang.runtime.api.python.PythonEvaluationResult;
+import io.cloudslang.runtime.api.python.PythonExecutionResult;
+
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
@@ -18,6 +21,6 @@ import java.util.Set;
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
 public interface PythonExecutionEngine {
-    Map<String, Serializable> exec(Set<String> dependencies, String script, Map<String, Serializable> vars);
-    Serializable eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars);
+    PythonExecutionResult exec(Set<String> dependencies, String script, Map<String, Serializable> vars);
+    PythonEvaluationResult eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars);
 }

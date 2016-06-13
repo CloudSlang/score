@@ -5,10 +5,13 @@ import io.cloudslang.dependency.api.services.MavenConfig;
 import io.cloudslang.dependency.impl.services.DependencyServiceImpl;
 import io.cloudslang.dependency.impl.services.MavenConfigImpl;
 import io.cloudslang.dependency.impl.services.utils.UnzipUtil;
+import io.cloudslang.runtime.api.python.PythonEvaluationResult;
+import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
 import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.python.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -108,8 +111,8 @@ public class PythonExecutorTest {
                         vars.put(SYSTEM_PROPERTIES_MAP, (Serializable) sysProps);
                         String prepareEnvironmentScript = buildAddFunctionsScript(GET_SP_FUNCTION_DEFINITION);
                         String script = "check_env('" + varName + "', '" + value + "', '" + doubleName + "', '" + doubleValue + "')";
-                        Serializable result = pythonRuntimeService.eval(prepareEnvironmentScript, script, vars);
-                        String [] pyResults = ((String) result).split(",");
+                        PythonEvaluationResult result = pythonRuntimeService.eval(prepareEnvironmentScript, script, vars);
+                        String [] pyResults = ((String) result.getEvalResult()).split(",");
                         assertNotNull(pyResults.length == 2);
                         String [] sysValues = pyResults[0].split(":");
                         assertNotNull(sysValues.length == 2);
@@ -139,10 +142,10 @@ public class PythonExecutorTest {
                 public void run() {
                     try {
                         String script = MessageFormat.format(EXECUTION_SCRIPT, executioId, executioId);
-                        Map<String, Serializable> result = pythonRuntimeService.exec(Collections.<String>emptySet(), script, Collections.<String, Serializable>emptyMap());
+                        PythonExecutionResult result = pythonRuntimeService.exec(Collections.<String>emptySet(), script, Collections.<String, Serializable>emptyMap());
                         assertNotNull(result);
-                        assertEquals(executioId, result.get(VAR1).toString());
-                        assertEquals(executioId, result.get(VAR2).toString());
+                        assertEquals(executioId, result.getExecutionResult().get(VAR1).toString());
+                        assertEquals(executioId, result.getExecutionResult().get(VAR2).toString());
                     } finally {
                         latch.countDown();
                     }
@@ -183,10 +186,10 @@ public class PythonExecutorTest {
             new Thread() {
                 public void run() {
                     try {
-                        Map<String, Serializable> result = pythonRuntimeService.exec(new HashSet<>(Collections.singletonList(dependency)), script, Collections.<String, Serializable>emptyMap());
+                        PythonExecutionResult result = pythonRuntimeService.exec(new HashSet<>(Collections.singletonList(dependency)), script, Collections.<String, Serializable>emptyMap());
                         assertNotNull(result);
-                        assertNotNull(result.get(varName));
-                        assertEquals(expectedResult.toString(), result.get(varName).toString());
+                        assertNotNull(result.getExecutionResult().get(varName));
+                        assertEquals(expectedResult.toString(), result.getExecutionResult().get(varName).toString());
                     } finally {
                         latch.countDown();
                     }
@@ -194,6 +197,51 @@ public class PythonExecutorTest {
             }.start();
         }
         latch.await();
+    }
+
+    @Test
+    public void testPythonExecutorNoAllocationNotClosed() {
+        PythonExecutor executor = new PythonExecutor(Sets.newHashSet("a.zip, b.zip"));
+        executor.exec("print 'x'", new HashMap<String, Serializable>());
+        executor.close();
+        assertTrue(executor.isClosed());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testPythonExecutorNoAllocationClosed() {
+        PythonExecutor executor = new PythonExecutor(Sets.newHashSet("a.zip, b.zip"));
+        executor.close();
+        executor.exec("print 'x'", new HashMap<String, Serializable>());
+    }
+
+    @Test
+    public void testPythonExecutorAllocationSuccess() {
+        PythonExecutor executor = new PythonExecutor(Sets.newHashSet("a.zip, b.zip"));
+        executor.exec("print 'x'", new HashMap<String, Serializable>());
+        executor.allocate();
+        executor.exec("print 'x'", new HashMap<String, Serializable>());
+        executor.allocate();
+        executor.exec("print 'x'", new HashMap<String, Serializable>());
+        executor.close();
+        executor.exec("print 'x'", new HashMap<String, Serializable>());
+        assertFalse(executor.isClosed());
+        executor.exec("print 'x'", new HashMap<String, Serializable>());
+        executor.release();
+        executor.exec("print 'x'", new HashMap<String, Serializable>());
+        assertFalse(executor.isClosed());
+        executor.exec("print 'x'", new HashMap<String, Serializable>());
+        executor.release();
+        assertTrue(executor.isClosed());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testPythonExecutorAllocationFailure() {
+        PythonExecutor executor = new PythonExecutor(Sets.newHashSet("a.zip, b.zip"));
+        executor.allocate();
+        executor.close();
+        executor.release();
+        assertTrue(executor.isClosed());
+        executor.exec("print 'x'", new HashMap<String, Serializable>());
     }
 
     private String buildAddFunctionsScript(String ... functionDependencies) {
