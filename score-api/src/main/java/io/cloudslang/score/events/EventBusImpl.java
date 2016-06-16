@@ -13,6 +13,7 @@ package io.cloudslang.score.events;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * User: hajyhia
@@ -21,25 +22,53 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class EventBusImpl implements EventBus {
 
+	private ReentrantLock reentrantLock = new ReentrantLock();
+
 	private Map<ScoreEventListener, Set<String>> handlers = new ConcurrentHashMap<>();
 
 	public void subscribe(ScoreEventListener eventListener, Set<String> eventTypes) {
-		handlers.put(eventListener, eventTypes);
+		acquireLock();
+		try {
+			handlers.put(eventListener, eventTypes);
+		} finally {
+			releaseLock();
+		}
 	}
 
 	public void unsubscribe(ScoreEventListener eventListener) {
-		handlers.remove(eventListener);
+		acquireLock();
+		try {
+			handlers.remove(eventListener);
+		} finally {
+			releaseLock();
+		}
 	}
 
     public void dispatch(ScoreEvent... events)  throws InterruptedException {
-        for (ScoreEventListener eventHandler : handlers.keySet()) {
-            Set<String> eventTypes = handlers.get(eventHandler);
-            for (ScoreEvent eventWrapper : events) {
-                if (eventTypes.contains(eventWrapper.getEventType())) {
-                    eventHandler.onEvent(eventWrapper);
-                }
+		acquireLock();
+		try {
+			for (ScoreEventListener eventHandler : handlers.keySet()) {
+				Set<String> eventTypes = handlers.get(eventHandler);
+				for (ScoreEvent eventWrapper : events) {
+					if (eventTypes.contains(eventWrapper.getEventType())) {
+						eventHandler.onEvent(eventWrapper);
+					}
+				}
 			}
+		} finally {
+			releaseLock();
 		}
+	}
+
+	private void acquireLock() {
+		reentrantLock.lock();
+		if (reentrantLock.getHoldCount() > 1) {
+			throw new RuntimeException("Lock acquired twice by the same thread: two mutually exclusive regions are accessed.");
+		}
+	}
+
+	private void releaseLock() {
+		reentrantLock.unlock();
 	}
 
 }
