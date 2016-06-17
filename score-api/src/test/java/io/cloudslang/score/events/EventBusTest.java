@@ -83,7 +83,10 @@ public class EventBusTest {
         ScoreEvent event = new ScoreEvent(EVENT_TYPE_1, EVENT_DATA_1);
 
         expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Lock acquired twice by the same thread");
+        expectedException.expectMessage(
+				"Lock acquired twice by the same thread:" +
+						" two mutually exclusive regions are accessed."
+		);
 
         localEventBus.dispatch(event);
 	}
