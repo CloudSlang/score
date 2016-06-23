@@ -70,7 +70,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 			new ConfValue().NAME("outBufferInterval").DEFAULT(100L),
 			new ConfValue().NAME("keepAliveInterval").DEFAULT(10000L),
 			new ConfValue().NAME("configRefreshInterval").DEFAULT(1000L),
-			new ConfValue().NAME("interruptCanceledInterval").DEFAULT(1000L),
+			new ConfValue().NAME("interruptCanceledInterval").DEFAULT(30000L),
             new ConfValue().NAME("statisticsInterval").DEFAULT(1000L),
             new ConfValue().NAME("scheduledWorkerMonitorInterval").DEFAULT(10000L),
             new ConfValue().NAME("workerMonitorRefreshInterval").DEFAULT(300000L)
