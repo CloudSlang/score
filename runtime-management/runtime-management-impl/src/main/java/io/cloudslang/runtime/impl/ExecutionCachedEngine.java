@@ -42,8 +42,8 @@ public abstract class ExecutionCachedEngine<T extends Executor> extends Executio
         }
 
         T candidateForRemove = null;
+        lock.lock();
         try {
-            lock.lock();
             if (executor == null) {
                 if (executors.size() == getCacheSize()) {
                     Iterator<Map.Entry<String, T>> iterator = executors.entrySet().iterator();

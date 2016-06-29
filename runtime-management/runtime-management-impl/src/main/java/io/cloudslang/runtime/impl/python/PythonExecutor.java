@@ -175,8 +175,8 @@ public class PythonExecutor implements Executor {
 
     @Override
     public void allocate() {
+        allocationLock.lock();
         try {
-            allocationLock.lock();
             allocations++;
         } finally {
             allocationLock.unlock();
@@ -185,8 +185,8 @@ public class PythonExecutor implements Executor {
 
     @Override
     public void release() {
+        allocationLock.lock();
         try {
-            allocationLock.lock();
             allocations--;
             if(markedClosed && (allocations == 0)) {
                 close();
@@ -198,8 +198,8 @@ public class PythonExecutor implements Executor {
 
     @Override
     public void close() {
+        allocationLock.lock();
         try {
-            allocationLock.lock();
             markedClosed = true;
             if ((interpreter != GLOBAL_INTERPRETER) && (allocations == 0)) {
                 try {interpreter.close();} catch (Throwable e) {}
