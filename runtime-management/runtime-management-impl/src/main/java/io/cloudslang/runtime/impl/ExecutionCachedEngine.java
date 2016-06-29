@@ -34,23 +34,17 @@ public abstract class ExecutionCachedEngine<T extends Executor> extends Executio
         String dependenciesKey = generatedDependenciesKey(dependencies);
 
         T executor;
-        executor = executors.get(dependenciesKey);
-        Set<String> filePaths = null;
-        if (executor == null) {
-            // may be first time execution - ensure resource resolution
-            filePaths = getDependencyService().getDependencies(dependencies);
-        }
-
         T candidateForRemove = null;
         lock.lock();
         try {
+            executor = executors.get(dependenciesKey);
             if (executor == null) {
                 if (executors.size() == getCacheSize()) {
                     Iterator<Map.Entry<String, T>> iterator = executors.entrySet().iterator();
                     candidateForRemove = iterator.next().getValue();
                     iterator.remove();
                 }
-                executor = createNewExecutor(filePaths);
+                executor = createNewExecutor(getDependencyService().getDependencies(dependencies));
             } else {
                 // remove it and place at the end - most recently used
                 executors.remove(dependenciesKey);

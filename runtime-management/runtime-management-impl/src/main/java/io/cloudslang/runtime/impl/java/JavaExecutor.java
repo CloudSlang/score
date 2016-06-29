@@ -64,6 +64,7 @@ public class JavaExecutor implements Executor {
     private final ClassLoader classLoader;
 
     JavaExecutor(Set<String> filePaths) {
+        System.out.println("Creating java classloader with [" + filePaths.size() + "] dependencies [" + filePaths + "]");
         if(!filePaths.isEmpty()) {
             Set<URL> result = Sets.newHashSet();
             for (String filePath : filePaths) {

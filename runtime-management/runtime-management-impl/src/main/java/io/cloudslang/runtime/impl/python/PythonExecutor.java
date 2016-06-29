@@ -54,6 +54,7 @@ public class PythonExecutor implements Executor {
     }
 
     protected PythonInterpreter initInterpreter(Set<String> dependencies) {
+        System.out.println("Creating python interpreter with [" + dependencies.size() + "] dependencies [" + dependencies + "]");
         if(!dependencies.isEmpty()) {
             PySystemState systemState = new PySystemState();
             for (String dependency: dependencies) {
