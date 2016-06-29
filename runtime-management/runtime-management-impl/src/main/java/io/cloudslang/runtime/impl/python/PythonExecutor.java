@@ -13,30 +13,14 @@ package io.cloudslang.runtime.impl.python;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.impl.Executor;
-import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang.StringUtils;
-import org.python.core.Py;
-import org.python.core.PyArray;
-import org.python.core.PyBoolean;
-import org.python.core.PyDictionary;
-import org.python.core.PyException;
-import org.python.core.PyFile;
-import org.python.core.PyFunction;
-import org.python.core.PyList;
-import org.python.core.PyModule;
-import org.python.core.PyObject;
-import org.python.core.PySet;
-import org.python.core.PyString;
-import org.python.core.PyStringMap;
-import org.python.core.PySystemState;
-import org.python.core.PyType;
+import org.python.core.*;
 import org.python.util.PythonInterpreter;
 
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
