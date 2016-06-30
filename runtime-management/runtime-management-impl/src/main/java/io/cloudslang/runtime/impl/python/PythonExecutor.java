@@ -91,7 +91,7 @@ public class PythonExecutor implements Executor {
                 return exec(script);
             } catch (Exception e) {
                 if(!isThreadsRelatedModuleIssue(e)) {
-                    throw new RuntimeException("Error executing python script: " + originException, originException);
+                    throw new RuntimeException("Error executing python script: " + e, e);
                 }
                 if(originException == null) {
                     originException = e;
