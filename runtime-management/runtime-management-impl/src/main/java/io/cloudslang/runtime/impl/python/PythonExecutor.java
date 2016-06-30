@@ -14,6 +14,7 @@ import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.impl.Executor;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.python.core.*;
 import org.python.util.PythonInterpreter;
 
@@ -26,10 +27,20 @@ import java.util.concurrent.locks.ReentrantLock;
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
 public class PythonExecutor implements Executor {
+    public static final String THREADED_MODULES_ISSUE = "No module named";
+    private final Logger logger = Logger.getLogger(getClass());
+
     private static final String TRUE = "true";
     private static final String FALSE = "false";
 
     private static final PythonInterpreter GLOBAL_INTERPRETER = new ThreadSafePythonInterpreter(null);
+
+    /**
+     * There is an issue in loaded environment - existing python module not found in PySystem.modules.table
+     * although it exists in the table.
+     * Meanwhile we execute retries ans will open an issue to the jython.org
+     */
+    public static final int RETRIES_NUMBER_ON_THREADED_ISSUE = 3;
 
     static {
         //here to avoid jython preferring io.cloudslang package over python io package
@@ -45,16 +56,19 @@ public class PythonExecutor implements Executor {
     //Executor was finally actuallyClosed
     private boolean actuallyClosed = false;
 
+    private final Set<String> dependencies;
+
     public PythonExecutor() {
         this(Collections.<String>emptySet());
     }
 
     public PythonExecutor(Set<String> dependencies) {
+        this.dependencies = dependencies;
         interpreter = initInterpreter(dependencies);
     }
 
     protected PythonInterpreter initInterpreter(Set<String> dependencies) {
-        System.out.println("Creating python interpreter with [" + dependencies.size() + "] dependencies [" + dependencies + "]");
+        logger.info("Creating python interpreter with [" + dependencies.size() + "] dependencies [" + dependencies + "]");
         if(!dependencies.isEmpty()) {
             PySystemState systemState = new PySystemState();
             for (String dependency: dependencies) {
@@ -68,13 +82,32 @@ public class PythonExecutor implements Executor {
     //we need this method to be synchronized so we will not have multiple scripts run in parallel on the same context
     public PythonExecutionResult exec(String script, Map<String, Serializable> callArguments) {
         checkValidInterpreter();
-        try {
-            initInterpreter();
-            prepareInterpreterContext(callArguments);
-            return exec(script);
-        } catch (Exception e) {
-            throw new RuntimeException("Error executing python script: " + e, e);
+        initInterpreter();
+        prepareInterpreterContext(callArguments);
+
+        Exception originException = null;
+        for(int i = 0; i < RETRIES_NUMBER_ON_THREADED_ISSUE; i++) {
+            try {
+                return exec(script);
+            } catch (Exception e) {
+                if(!isThreadsRelatedModuleIssue(e)) {
+                    throw new RuntimeException("Error executing python script: " + originException, originException);
+                }
+                if(originException == null) {
+                    originException = e;
+                }
+            }
         }
+        throw new RuntimeException("Error executing python script: " + originException, originException);
+    }
+
+    private boolean isThreadsRelatedModuleIssue(Exception e) {
+        if (e instanceof PyException) {
+            PyException pyException = (PyException) e;
+            String message = pyException.value.toString();
+            return message.contains(THREADED_MODULES_ISSUE);
+        }
+        return false;
     }
 
     private PythonExecutionResult exec(String script) {
@@ -187,6 +220,7 @@ public class PythonExecutor implements Executor {
         try {
             markedClosed = true;
             if ((interpreter != GLOBAL_INTERPRETER) && (allocations == 0)) {
+                logger.info("Removing LRU python executor for dependencies [" + dependencies + "]");
                 try {interpreter.close();} catch (Throwable e) {}
                 actuallyClosed = true;
             }
