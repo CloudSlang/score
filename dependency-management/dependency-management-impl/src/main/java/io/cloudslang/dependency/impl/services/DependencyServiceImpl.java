@@ -97,8 +97,8 @@ public class DependencyServiceImpl implements DependencyService {
                 String dependencyFilePath = getResourceFolderPath(gav) + SEPARATOR + getPathFileName(gav);
                 File file = new File(dependencyFilePath);
                 if(!file.exists()) {
+                    lock.lock();
                     try {
-                        lock.lock();
                         //double check if file was just created
                         if(!file.exists()) {
                             buildDependencyFile(gav);
