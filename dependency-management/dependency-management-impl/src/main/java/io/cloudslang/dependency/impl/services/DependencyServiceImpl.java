@@ -40,6 +40,8 @@ public class DependencyServiceImpl implements DependencyService {
     public    static final String PATH_FILE_EXTENSION        = "path";
     public    static final String GAV_DELIMITER              = ":";
     protected static final String PATH_FILE_DELIMITER        = ";";
+    private static final int MINIMAL_GAV_PARTS = 3;
+    private static final int MAXIMAL_GAV_PARTS = 5;
 
     private Method launcherMethod;
 
@@ -51,7 +53,7 @@ public class DependencyServiceImpl implements DependencyService {
     @Autowired
     private MavenConfig mavenConfig;
 
-    Lock lock = new ReentrantLock();
+    private final Lock lock = new ReentrantLock();
 
     @PostConstruct
     private void initMaven() throws ClassNotFoundException, NoSuchMethodException, MalformedURLException {
@@ -237,7 +239,7 @@ public class DependencyServiceImpl implements DependencyService {
 
     private String[] extractGav(String resource) {
         String[] gav = resource.split(GAV_DELIMITER);
-        if((gav.length < 3) || (gav.length > 5)) {//at least g:a:v at maximum g:a:v:p:c
+        if((gav.length < MINIMAL_GAV_PARTS) || (gav.length > MAXIMAL_GAV_PARTS)) {//at least g:a:v at maximum g:a:v:p:c
             throw new IllegalArgumentException("Unexpected resource format: " + resource +
                     ", should be <group ID>:<artifact ID>:<version> or <group ID>:<artifact ID>:<version>:<packaging> or <group ID>:<artifact ID>:<version>:<packaging>:<classifier>");
         }
