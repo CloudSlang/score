@@ -11,6 +11,9 @@ package io.cloudslang.dependency.impl.services;
 
 import io.cloudslang.dependency.api.services.DependencyService;
 import io.cloudslang.dependency.api.services.MavenConfig;
+import org.apache.log4j.Appender;
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
@@ -21,10 +24,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -35,13 +35,16 @@ import static io.cloudslang.dependency.api.services.MavenConfig.SEPARATOR;
  */
 @SuppressWarnings("unused")
 public class DependencyServiceImpl implements DependencyService {
-    private   static final String MAVEN_LAUNCHER_CLASS_NAME  = "org.codehaus.plexus.classworlds.launcher.Launcher";
-    private   static final String MAVEN_LANUCHER_METHOD_NAME = "mainWithExitCode";
-    public    static final String PATH_FILE_EXTENSION        = "path";
-    public    static final String GAV_DELIMITER              = ":";
-    protected static final String PATH_FILE_DELIMITER        = ";";
+    private static final Logger logger = Logger.getLogger(DependencyServiceImpl.class);
+
+    private static final String MAVEN_LAUNCHER_CLASS_NAME  = "org.codehaus.plexus.classworlds.launcher.Launcher";
+    private static final String MAVEN_LANUCHER_METHOD_NAME = "mainWithExitCode";
+    public static final String PATH_FILE_EXTENSION = "path";
+    public static final String GAV_DELIMITER = ":";
+    protected static final String PATH_FILE_DELIMITER = ";";
     private static final int MINIMAL_GAV_PARTS = 3;
     private static final int MAXIMAL_GAV_PARTS = 5;
+    public static final String GAV_SEPARATOR = "_";
 
     private Method launcherMethod;
 
@@ -49,6 +52,10 @@ public class DependencyServiceImpl implements DependencyService {
     private String mavenHome;
 
     private ClassLoader mavenClassLoader;
+
+    private Method MAVEN_EXECUTE_METHOD;
+
+    private String mavenLogFolder;
 
     @Autowired
     private MavenConfig mavenConfig;
@@ -67,7 +74,40 @@ public class DependencyServiceImpl implements DependencyService {
             URL[] mavenJarUrls = getUrls(libDir);
 
             mavenClassLoader = new URLClassLoader(mavenJarUrls, parentClassLoader);
+            MAVEN_EXECUTE_METHOD = Class.forName(MAVEN_LAUNCHER_CLASS_NAME, true, mavenClassLoader).
+                    getMethod(MAVEN_LANUCHER_METHOD_NAME, String[].class);
+            initMavenLogs();
         }
+    }
+
+    private void initMavenLogs() {
+        String logFolderPath = calculateLogFolderPath();
+        File logFolderFile = new File(logFolderPath);
+        logFolderFile.mkdirs();
+        File mavenLogFolderFile = new File(logFolderFile, "maven");
+        mavenLogFolderFile.mkdirs();
+        this.mavenLogFolder = mavenLogFolderFile.getAbsolutePath();
+    }
+
+    private String calculateLogFolderPath() {
+        Enumeration e = Logger.getRootLogger().getAllAppenders();
+        while ( e.hasMoreElements() ){
+            Appender app = (Appender)e.nextElement();
+            if ( app instanceof FileAppender){
+                String logFile = ((FileAppender) app).getFile();
+                return new File(logFile).getParentFile().getAbsolutePath();
+            }
+        }
+        return new File(System.getProperty("app.home"), "logs").getAbsolutePath();
+    }
+
+    protected PrintStream outputFile(String name) throws FileNotFoundException {
+        File logFile = new File(name);
+        File parentFile = logFile.getParentFile();
+        if(!parentFile.exists() && !parentFile.mkdirs()) {
+            logger.error("Failed to create parent folder [" + parentFile.getAbsolutePath() + "] for log file [" + name + "]");
+        }
+        return new PrintStream(new BufferedOutputStream(new FileOutputStream(name)));
     }
 
     private boolean isMavenConfigured() {
@@ -130,7 +170,9 @@ public class DependencyServiceImpl implements DependencyService {
                 System.getProperty(MavenConfig.MAVEN_SETTINGS_PATH),
                 "-f",
                 pomFilePath,
-                "dependency:build-classpath"
+                "dependency:build-classpath",
+                "--log-file",
+                constructGavLogFilePath(gav)
         };
 
         try {
@@ -146,13 +188,15 @@ public class DependencyServiceImpl implements DependencyService {
         appendSelfToPathFile(gav, fileToReturn);
     }
 
+    private String constructGavLogFilePath(String[] gav) {
+        return new File(mavenLogFolder, gav[0] + GAV_SEPARATOR + gav[1] + GAV_SEPARATOR + gav[2] + ".log").getAbsolutePath();
+    }
+
     private void invokeMavenLauncher(String[] args) throws Exception {
         ClassLoader origCL = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(mavenClassLoader);
         try {
-            Object exitCodeObj = Class.forName(MAVEN_LAUNCHER_CLASS_NAME, true, mavenClassLoader).
-                    getMethod(MAVEN_LANUCHER_METHOD_NAME, String[].class).invoke(null, new Object[]{args});
-            int exitCode = (Integer)exitCodeObj;
+            int exitCode = (Integer)MAVEN_EXECUTE_METHOD.invoke(null, new Object[]{args});
             if (exitCode != 0) {
                 throw new RuntimeException("mvn " + StringUtils.arrayToDelimitedString(args, " ") + " returned " +
                         exitCode + ", see log for details");
@@ -175,7 +219,9 @@ public class DependencyServiceImpl implements DependencyService {
         String[] args = new String[]{
                 "-s",
                 System.getProperty(MavenConfig.MAVEN_SETTINGS_PATH),
-                "dependency:get"
+                "dependency:get",
+                "--log-file",
+                constructGavLogFilePath(gav)
         };
 
         try {
