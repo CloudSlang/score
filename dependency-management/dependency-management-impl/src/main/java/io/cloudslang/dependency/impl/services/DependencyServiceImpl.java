@@ -44,7 +44,7 @@ public class DependencyServiceImpl implements DependencyService {
     protected static final String PATH_FILE_DELIMITER = ";";
     private static final int MINIMAL_GAV_PARTS = 3;
     private static final int MAXIMAL_GAV_PARTS = 5;
-    public static final String GAV_SEPARATOR = "_";
+    private static final String GAV_SEPARATOR = "_";
 
     private Method launcherMethod;
 
@@ -81,10 +81,7 @@ public class DependencyServiceImpl implements DependencyService {
     }
 
     private void initMavenLogs() {
-        String logFolderPath = calculateLogFolderPath();
-        File logFolderFile = new File(logFolderPath);
-        logFolderFile.mkdirs();
-        File mavenLogFolderFile = new File(logFolderFile, "maven");
+        File mavenLogFolderFile = new File(new File(calculateLogFolderPath()), MavenConfig.MAVEN_FOLDER);
         mavenLogFolderFile.mkdirs();
         this.mavenLogFolder = mavenLogFolderFile.getAbsolutePath();
     }
@@ -98,7 +95,7 @@ public class DependencyServiceImpl implements DependencyService {
                 return new File(logFile).getParentFile().getAbsolutePath();
             }
         }
-        return new File(System.getProperty("app.home"), "logs").getAbsolutePath();
+        return new File(System.getProperty(MavenConfig.APP_HOME), MavenConfig.LOGS_FOLDER_NAME).getAbsolutePath();
     }
 
     protected PrintStream outputFile(String name) throws FileNotFoundException {
@@ -160,18 +157,18 @@ public class DependencyServiceImpl implements DependencyService {
 
     @SuppressWarnings("ConstantConditions")
     private void buildDependencyFile(String[] gav) {
-        String pomFilePath = getResourceFolderPath(gav) + SEPARATOR + getFileName(gav, "pom");
+        String pomFilePath = getResourceFolderPath(gav) + SEPARATOR + getFileName(gav, MavenConfig.POM_EXTENSION);
         downloadArtifactsIfNeeded(pomFilePath, gav);
-        System.setProperty("mdep.outputFile", getPathFileName(gav));
-        System.setProperty("mdep.pathSeparator", PATH_FILE_DELIMITER);
-        System.setProperty("classworlds.conf", System.getProperty(MavenConfig.MAVEN_M2_CONF_PATH));
+        System.setProperty(MavenConfig.MAVEN_MDEP_OUTPUT_FILE_PROPEPRTY, getPathFileName(gav));
+        System.setProperty(MavenConfig.MAVEN_MDEP_PATH_SEPARATOR_PROPERTY, PATH_FILE_DELIMITER);
+        System.setProperty(MavenConfig.MAVEN_CLASSWORLDS_CONF_PROPERTY, System.getProperty(MavenConfig.MAVEN_M2_CONF_PATH));
         String[] args = new String[]{
-                "-s",
+                MavenConfig.MAVEN_SETTINGS_FILE_FLAG,
                 System.getProperty(MavenConfig.MAVEN_SETTINGS_PATH),
-                "-f",
+                MavenConfig.MAVEN_POM_PATH_PROPERTY,
                 pomFilePath,
-                "dependency:build-classpath",
-                "--log-file",
+                MavenConfig.DEPENDENCY_BUILD_CLASSPATH_COMMAND,
+                MavenConfig.LOG_FILE_FLAG,
                 constructGavLogFilePath(gav)
         };
 
@@ -214,13 +211,13 @@ public class DependencyServiceImpl implements DependencyService {
     }
 
     private void downloadArtifacts(String[] gav) {
-        System.setProperty("artifact", getResourceString(gav));
-        System.setProperty("classworlds.conf", System.getProperty(MavenConfig.MAVEN_M2_CONF_PATH));
+        System.setProperty(MavenConfig.MAVEN_ARTIFACT_PROPERTY, getResourceString(gav));
+        System.setProperty(MavenConfig.MAVEN_CLASSWORLDS_CONF_PROPERTY, System.getProperty(MavenConfig.MAVEN_M2_CONF_PATH));
         String[] args = new String[]{
-                "-s",
+                MavenConfig.MAVEN_SETTINGS_FILE_FLAG,
                 System.getProperty(MavenConfig.MAVEN_SETTINGS_PATH),
-                "dependency:get",
-                "--log-file",
+                MavenConfig.DEPENDENCY_GET_COMMAND,
+                MavenConfig.LOG_FILE_FLAG,
                 constructGavLogFilePath(gav)
         };
 
