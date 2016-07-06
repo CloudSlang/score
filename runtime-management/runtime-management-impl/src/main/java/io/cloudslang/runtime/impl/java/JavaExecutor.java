@@ -15,6 +15,7 @@ import io.cloudslang.runtime.impl.Executor;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.apache.log4j.Logger;
 import org.python.google.common.collect.Sets;
 
 import java.io.File;
@@ -29,6 +30,8 @@ import java.util.Set;
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
 public class JavaExecutor implements Executor {
+    private static final Logger logger = Logger.getLogger(JavaExecutor.class);
+
     private static final String SCORE_CONTENT_SDK_JAR = "score-content-sdk*.jar";
     private static final String APP_HOME = "app.home";
 
@@ -55,7 +58,7 @@ public class JavaExecutor implements Executor {
                 }
             }
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            logger.error("Failed to build classpath for parent classloader", e);
         }
 
         PARENT_CLASS_LOADER = new URLClassLoader(parentUrls, parentClassLoader);
@@ -64,14 +67,14 @@ public class JavaExecutor implements Executor {
     private final ClassLoader classLoader;
 
     JavaExecutor(Set<String> filePaths) {
-        System.out.println("Creating java classloader with [" + filePaths.size() + "] dependencies [" + filePaths + "]");
+        logger.info("Creating java classloader with [" + filePaths.size() + "] dependencies [" + filePaths + "]");
         if(!filePaths.isEmpty()) {
             Set<URL> result = Sets.newHashSet();
             for (String filePath : filePaths) {
                 try {
                     result.add(new File(filePath).toURI().toURL());
                 } catch (MalformedURLException e) {
-                    e.printStackTrace();
+                    logger.error("Failed to add to the classloader path [" + filePath + "]", e);
                 }
             }
             classLoader = new URLClassLoader(result.toArray(new URL[result.size()]), PARENT_CLASS_LOADER);

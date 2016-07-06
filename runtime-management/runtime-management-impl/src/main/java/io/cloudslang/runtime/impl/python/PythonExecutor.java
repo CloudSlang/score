@@ -28,7 +28,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class PythonExecutor implements Executor {
     public static final String THREADED_MODULES_ISSUE = "No module named";
-    private final Logger logger = Logger.getLogger(getClass());
+    private static final Logger logger = Logger.getLogger(PythonExecutor.class);
 
     private static final String TRUE = "true";
     private static final String FALSE = "false";
@@ -148,17 +148,12 @@ public class PythonExecutor implements Executor {
             prepareInterpreterContext(context);
 
             return new PythonEvaluationResult(eval(prepareEnvironmentScript, expr), getPythonLocals());
+        } catch (PyException exception) {
+            throw new RuntimeException("Error in running script expression: '" + expr + "',\n\tException is: " +
+                    handleExceptionSpecialCases(exception.value.toString()), exception);
         } catch (Exception exception) {
-            String message;
-            if (exception instanceof PyException) {
-                PyException pyException = (PyException) exception;
-                message = pyException.value.toString();
-            } else {
-                message = exception.getMessage();
-            }
-            throw new RuntimeException(
-                    "Error in running script expression: '"
-                            + expr + "',\n\tException is: " + handleExceptionSpecialCases(message), exception);
+            throw new RuntimeException("Error in running script expression: '" + expr + "',\n\tException is: " +
+                    handleExceptionSpecialCases(exception.getMessage()), exception);
         }
     }
 
@@ -177,10 +172,12 @@ public class PythonExecutor implements Executor {
     }
 
     protected Serializable eval(String prepareEnvironmentScript, String script) {
-        if (interpreter.get(TRUE) == null)
+        if (interpreter.get(TRUE) == null) {
             interpreter.set(TRUE, Boolean.TRUE);
-        if (interpreter.get(FALSE) == null)
+        }
+        if (interpreter.get(FALSE) == null) {
             interpreter.set(FALSE, Boolean.FALSE);
+        }
 
         if(prepareEnvironmentScript != null && !prepareEnvironmentScript.isEmpty()) {
             interpreter.exec(prepareEnvironmentScript);
@@ -246,7 +243,7 @@ public class PythonExecutor implements Executor {
     private Serializable resolveJythonObjectToJavaExec(PyObject value, String key) {
         String errorMessage =
                 "Non-serializable values are not allowed in the output context of a Python script:\n" +
-                        "\tConversion failed for '" + key + "' (" + String.valueOf(value) + "),\n" +
+                        "\tConversion failed for '" + key + "' (" + value + "),\n" +
                         "\tThe error can be solved by removing the variable from the context in the script: e.g. 'del " + key + "'.\n";
         return resolveJythonObjectToJava(value, errorMessage);
     }
@@ -254,7 +251,7 @@ public class PythonExecutor implements Executor {
     private Serializable resolveJythonObjectToJavaEval(PyObject value, String expression) {
         String errorMessage =
                 "Evaluation result for a Python expression should be serializable:\n" +
-                        "\tConversion failed for '" + expression + "' (" + String.valueOf(value) + ").\n";
+                        "\tConversion failed for '" + expression + "' (" + value + ").\n";
         return resolveJythonObjectToJava(value, errorMessage);
     }
 
