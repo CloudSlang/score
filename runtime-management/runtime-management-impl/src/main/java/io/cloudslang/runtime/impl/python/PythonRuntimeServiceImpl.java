@@ -10,9 +10,10 @@
 
 package io.cloudslang.runtime.impl.python;
 
+import io.cloudslang.runtime.api.python.PythonEvaluationResult;
+import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -21,18 +22,17 @@ import java.util.Set;
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
-@Service
 public class PythonRuntimeServiceImpl implements PythonRuntimeService {
     @Autowired
     private PythonExecutionEngine pythonExecutionEngine;
 
     @Override
-    public Map<String, Serializable> exec(Set<String> dependencies, String script, Map<String, Serializable> vars) {
+    public PythonExecutionResult exec(Set<String> dependencies, String script, Map<String, Serializable> vars) {
         return pythonExecutionEngine.exec(dependencies, script, vars);
     }
 
     @Override
-    public Serializable eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
+    public PythonEvaluationResult eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
         return pythonExecutionEngine.eval(prepareEnvironmentScript, script, vars);
     }
 }

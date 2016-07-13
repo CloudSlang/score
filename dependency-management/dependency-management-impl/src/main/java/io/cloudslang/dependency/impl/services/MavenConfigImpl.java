@@ -13,8 +13,6 @@ package io.cloudslang.dependency.impl.services;
 import io.cloudslang.dependency.api.services.MavenConfig;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-
 /**
  * @author Alexander Eskin
  */

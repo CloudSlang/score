@@ -11,32 +11,20 @@ package io.cloudslang.dependency.impl.services;
 
 import io.cloudslang.dependency.api.services.DependencyService;
 import io.cloudslang.dependency.api.services.MavenConfig;
+import org.apache.log4j.Appender;
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 import javax.annotation.PostConstruct;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -45,12 +33,18 @@ import static io.cloudslang.dependency.api.services.MavenConfig.SEPARATOR;
 /**
  * @author Alexander Eskin
  */
-@Service
 @SuppressWarnings("unused")
 public class DependencyServiceImpl implements DependencyService {
-    private static final String MAVEN_LAUNCHER_CLASS_NAME = "org.codehaus.plexus.classworlds.launcher.Launcher";
+    private static final Logger logger = Logger.getLogger(DependencyServiceImpl.class);
+
+    private static final String MAVEN_LAUNCHER_CLASS_NAME  = "org.codehaus.plexus.classworlds.launcher.Launcher";
     private static final String MAVEN_LANUCHER_METHOD_NAME = "mainWithExitCode";
-    public static final String DEPENDENCY_FILE_EXTENSION = "path";
+    public static final String PATH_FILE_EXTENSION = "path";
+    public static final String GAV_DELIMITER = ":";
+    protected static final String PATH_FILE_DELIMITER = ";";
+    private static final int MINIMAL_GAV_PARTS = 3;
+    private static final int MAXIMAL_GAV_PARTS = 5;
+    private static final String GAV_SEPARATOR = "_";
 
     private Method launcherMethod;
 
@@ -59,12 +53,14 @@ public class DependencyServiceImpl implements DependencyService {
 
     private ClassLoader mavenClassLoader;
 
-    protected static final String DEPENDENCY_DELIMITER = ";";
+    private Method MAVEN_EXECUTE_METHOD;
+
+    private String mavenLogFolder;
 
     @Autowired
     private MavenConfig mavenConfig;
 
-    Lock lock = new ReentrantLock();
+    private final Lock lock = new ReentrantLock();
 
     @PostConstruct
     private void initMaven() throws ClassNotFoundException, NoSuchMethodException, MalformedURLException {
@@ -73,10 +69,46 @@ public class DependencyServiceImpl implements DependencyService {
             parentClassLoader = parentClassLoader.getParent();
         }
 
-        File libDir = new File(mavenHome, "boot");
-        URL[] mavenJarUrls = getUrls(libDir);
+        if(isMavenConfigured()) {
+            File libDir = new File(mavenHome, "boot");
+            URL[] mavenJarUrls = getUrls(libDir);
 
-        mavenClassLoader = new URLClassLoader(mavenJarUrls, parentClassLoader);
+            mavenClassLoader = new URLClassLoader(mavenJarUrls, parentClassLoader);
+            MAVEN_EXECUTE_METHOD = Class.forName(MAVEN_LAUNCHER_CLASS_NAME, true, mavenClassLoader).
+                    getMethod(MAVEN_LANUCHER_METHOD_NAME, String[].class);
+            initMavenLogs();
+        }
+    }
+
+    private void initMavenLogs() {
+        File mavenLogFolderFile = new File(new File(calculateLogFolderPath()), MavenConfig.MAVEN_FOLDER);
+        mavenLogFolderFile.mkdirs();
+        this.mavenLogFolder = mavenLogFolderFile.getAbsolutePath();
+    }
+
+    private String calculateLogFolderPath() {
+        Enumeration e = Logger.getRootLogger().getAllAppenders();
+        while ( e.hasMoreElements() ){
+            Appender app = (Appender)e.nextElement();
+            if ( app instanceof FileAppender){
+                String logFile = ((FileAppender) app).getFile();
+                return new File(logFile).getParentFile().getAbsolutePath();
+            }
+        }
+        return new File(System.getProperty(MavenConfig.APP_HOME), MavenConfig.LOGS_FOLDER_NAME).getAbsolutePath();
+    }
+
+    protected PrintStream outputFile(String name) throws FileNotFoundException {
+        File logFile = new File(name);
+        File parentFile = logFile.getParentFile();
+        if(!parentFile.exists() && !parentFile.mkdirs()) {
+            logger.error("Failed to create parent folder [" + parentFile.getAbsolutePath() + "] for log file [" + name + "]");
+        }
+        return new PrintStream(new BufferedOutputStream(new FileOutputStream(name)));
+    }
+
+    private boolean isMavenConfigured() {
+        return (mavenHome != null) && !mavenHome.isEmpty();
     }
 
     private URL[] getUrls(File libDir) throws MalformedURLException {
@@ -101,12 +133,15 @@ public class DependencyServiceImpl implements DependencyService {
             String[] gav = extractGav(resource);
             List<String> dependencyList;
             try {
-                String dependencyFilePath = getResourceFolderPath(gav) + SEPARATOR + getDependencyFileName(gav);
+                String dependencyFilePath = getResourceFolderPath(gav) + SEPARATOR + getPathFileName(gav);
                 File file = new File(dependencyFilePath);
                 if(!file.exists()) {
                     lock.lock();
                     try {
-                        buildDependencyFile(gav);
+                        //double check if file was just created
+                        if(!file.exists()) {
+                            buildDependencyFile(gav);
+                        }
                     } finally {
                         lock.unlock();
                     }
@@ -122,17 +157,19 @@ public class DependencyServiceImpl implements DependencyService {
 
     @SuppressWarnings("ConstantConditions")
     private void buildDependencyFile(String[] gav) {
-        String pomFilePath = getResourceFolderPath(gav) + SEPARATOR + getFileName(gav, "pom");
+        String pomFilePath = getResourceFolderPath(gav) + SEPARATOR + getFileName(gav, MavenConfig.POM_EXTENSION);
         downloadArtifactsIfNeeded(pomFilePath, gav);
-        System.setProperty("mdep.outputFile", getDependencyFileName(gav));
-        System.setProperty("mdep.pathSeparator", DEPENDENCY_DELIMITER);
-        System.setProperty("classworlds.conf", System.getProperty(MavenConfig.MAVEN_M2_CONF_PATH));
+        System.setProperty(MavenConfig.MAVEN_MDEP_OUTPUT_FILE_PROPEPRTY, getPathFileName(gav));
+        System.setProperty(MavenConfig.MAVEN_MDEP_PATH_SEPARATOR_PROPERTY, PATH_FILE_DELIMITER);
+        System.setProperty(MavenConfig.MAVEN_CLASSWORLDS_CONF_PROPERTY, System.getProperty(MavenConfig.MAVEN_M2_CONF_PATH));
         String[] args = new String[]{
-                "-s",
+                MavenConfig.MAVEN_SETTINGS_FILE_FLAG,
                 System.getProperty(MavenConfig.MAVEN_SETTINGS_PATH),
-                "-f",
+                MavenConfig.MAVEN_POM_PATH_PROPERTY,
                 pomFilePath,
-                "dependency:build-classpath"
+                MavenConfig.DEPENDENCY_BUILD_CLASSPATH_COMMAND,
+                MavenConfig.LOG_FILE_FLAG,
+                constructGavLogFilePath(gav)
         };
 
         try {
@@ -141,20 +178,22 @@ public class DependencyServiceImpl implements DependencyService {
             throw new IllegalStateException("Failed to build classpath using Maven", e);
         }
 
-        File fileToReturn = new File(getResourceFolderPath(gav) + SEPARATOR + getDependencyFileName(gav));
+        File fileToReturn = new File(getResourceFolderPath(gav) + SEPARATOR + getPathFileName(gav));
         if(!fileToReturn.exists()) {
             throw new IllegalStateException(fileToReturn.getPath() + " not found");
         }
         appendSelfToPathFile(gav, fileToReturn);
     }
 
+    private String constructGavLogFilePath(String[] gav) {
+        return new File(mavenLogFolder, gav[0] + GAV_SEPARATOR + gav[1] + GAV_SEPARATOR + gav[2] + ".log").getAbsolutePath();
+    }
+
     private void invokeMavenLauncher(String[] args) throws Exception {
         ClassLoader origCL = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(mavenClassLoader);
         try {
-            Object exitCodeObj = Class.forName(MAVEN_LAUNCHER_CLASS_NAME, true, mavenClassLoader).
-                    getMethod(MAVEN_LANUCHER_METHOD_NAME, String[].class).invoke (null, new Object[]{args});
-            int exitCode = (Integer)exitCodeObj;
+            int exitCode = (Integer)MAVEN_EXECUTE_METHOD.invoke(null, new Object[]{args});
             if (exitCode != 0) {
                 throw new RuntimeException("mvn " + StringUtils.arrayToDelimitedString(args, " ") + " returned " +
                         exitCode + ", see log for details");
@@ -172,12 +211,14 @@ public class DependencyServiceImpl implements DependencyService {
     }
 
     private void downloadArtifacts(String[] gav) {
-        System.setProperty("artifact", getResourceString(gav));
-        System.setProperty("classworlds.conf", System.getProperty(MavenConfig.MAVEN_M2_CONF_PATH));
+        System.setProperty(MavenConfig.MAVEN_ARTIFACT_PROPERTY, getResourceString(gav));
+        System.setProperty(MavenConfig.MAVEN_CLASSWORLDS_CONF_PROPERTY, System.getProperty(MavenConfig.MAVEN_M2_CONF_PATH));
         String[] args = new String[]{
-                "-s",
+                MavenConfig.MAVEN_SETTINGS_FILE_FLAG,
                 System.getProperty(MavenConfig.MAVEN_SETTINGS_PATH),
-                "dependency:get"
+                MavenConfig.DEPENDENCY_GET_COMMAND,
+                MavenConfig.LOG_FILE_FLAG,
+                constructGavLogFilePath(gav)
         };
 
         try {
@@ -207,7 +248,7 @@ public class DependencyServiceImpl implements DependencyService {
         try (FileWriter fw = new FileWriter(pathFile, true);
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter out = new PrintWriter(bw)){
-            out.print(DEPENDENCY_DELIMITER);
+            out.print(PATH_FILE_DELIMITER);
             out.print(resourceFile.getCanonicalPath());
         } catch (IOException e) {
             throw new IllegalStateException("Failed to append to file " + pathFile.getParent(), e);
@@ -215,11 +256,11 @@ public class DependencyServiceImpl implements DependencyService {
     }
 
     private String getResourceString(String[] gav) {
-        return StringUtils.arrayToDelimitedString(gav, ":");
+        return StringUtils.arrayToDelimitedString(gav, GAV_DELIMITER);
     }
 
-    private String getDependencyFileName(String[] gav) {
-        return getFileName(gav, DEPENDENCY_FILE_EXTENSION);
+    private String getPathFileName(String[] gav) {
+        return getFileName(gav, PATH_FILE_EXTENSION);
     }
 
     private String getFileName(String[] gav, String extension) {
@@ -229,7 +270,7 @@ public class DependencyServiceImpl implements DependencyService {
     private List<String> parse(File file) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
             String line = reader.readLine();
-            String[] paths = line.split(DEPENDENCY_DELIMITER);
+            String[] paths = line.split(PATH_FILE_DELIMITER);
             return Arrays.asList(paths);
         }
     }
@@ -240,10 +281,10 @@ public class DependencyServiceImpl implements DependencyService {
     }
 
     private String[] extractGav(String resource) {
-        String[] gav = resource.split(":");
-        if(gav.length != 3) {
+        String[] gav = resource.split(GAV_DELIMITER);
+        if((gav.length < MINIMAL_GAV_PARTS) || (gav.length > MAXIMAL_GAV_PARTS)) {//at least g:a:v at maximum g:a:v:p:c
             throw new IllegalArgumentException("Unexpected resource format: " + resource +
-                    ", should be <group ID>:<artifact ID>:<version>");
+                    ", should be <group ID>:<artifact ID>:<version> or <group ID>:<artifact ID>:<version>:<packaging> or <group ID>:<artifact ID>:<version>:<packaging>:<classifier>");
         }
         return gav;
     }
@@ -258,11 +299,5 @@ public class DependencyServiceImpl implements DependencyService {
 
     private String getVersion(String[] gav) {
         return gav[2];
-    }
-
-    private void appendOutputFileProperty(String outputFilePath, Document doc, Node node) {
-        Element outputFileNode = doc.createElement("mdep.outputFile");
-        outputFileNode.setTextContent(outputFilePath);
-        node.appendChild(outputFileNode);
     }
 }

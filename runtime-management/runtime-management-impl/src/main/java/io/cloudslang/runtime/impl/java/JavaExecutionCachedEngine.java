@@ -16,14 +16,12 @@ import io.cloudslang.runtime.impl.ExecutionCachedEngine;
 import org.python.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Set;
 
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
-@Component
 public class JavaExecutionCachedEngine extends ExecutionCachedEngine<JavaExecutor> implements JavaExecutionEngine {
     @Autowired
     private DependencyService dependencyService;
@@ -33,8 +31,13 @@ public class JavaExecutionCachedEngine extends ExecutionCachedEngine<JavaExecuto
 
     @Override
     public Object execute(String dependency, String className, String methodName, JavaExecutionParametersProvider parametersProvider) {
-        return allocateExecutor((dependency == null || dependency.isEmpty()) ? Sets.<String>newHashSet() :
-                Sets.newHashSet(dependency)).execute(className, methodName, parametersProvider);
+        JavaExecutor executor = allocateExecutor((dependency == null || dependency.isEmpty()) ? Sets.<String>newHashSet() :
+                Sets.newHashSet(dependency));
+        try {
+            return executor.execute(className, methodName, parametersProvider);
+        } finally {
+            releaseExecutor(executor);
+        }
     }
 
     @Override

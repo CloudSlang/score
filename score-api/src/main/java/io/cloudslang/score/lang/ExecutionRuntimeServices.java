@@ -11,6 +11,7 @@
 package io.cloudslang.score.lang;
 
 import io.cloudslang.score.api.EndBranchDataContainer;
+import io.cloudslang.score.api.execution.ExecutionParametersConsts;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.api.StartBranchDataContainer;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
@@ -51,8 +52,6 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String EXECUTION_STEP_ERROR_KEY = "EXECUTION_STEP_ERROR_KEY";
 
-    private static final String FINISHED_CHILD_BRANCHES_DATA = "FINISHED_CHILD_BRANCHES_DATA";
-
     private static final String RUNNING_PLANS_MAP = "RUNNING_PLANS_MAP";
 
     private static final String BEGIN_STEPS_MAP = "BEGIN_STEPS_MAP";
@@ -88,8 +87,8 @@ public class ExecutionRuntimeServices implements Serializable {
      * @param data  - list of EndBranchDataContainer
      */
     public void setFinishedChildBranchesData(ArrayList<EndBranchDataContainer> data){
-        Validate.isTrue(!contextMap.containsKey(FINISHED_CHILD_BRANCHES_DATA), "not allowed to overwrite finished branches data");
-        contextMap.put(FINISHED_CHILD_BRANCHES_DATA, data);
+        Validate.isTrue(!contextMap.containsKey(ExecutionParametersConsts.FINISHED_CHILD_BRANCHES_DATA), "not allowed to overwrite finished branches data");
+        contextMap.put(ExecutionParametersConsts.FINISHED_CHILD_BRANCHES_DATA, data);
     }
 
     /**
@@ -374,7 +373,7 @@ public class ExecutionRuntimeServices implements Serializable {
      * @return a list of all branches ended.
      */
     public List<EndBranchDataContainer> getFinishedChildBranchesData() {
-        return (List<EndBranchDataContainer>) removeFromMap(FINISHED_CHILD_BRANCHES_DATA);
+        return (List<EndBranchDataContainer>) removeFromMap(ExecutionParametersConsts.FINISHED_CHILD_BRANCHES_DATA);
     }
 
     public void putMetaData(Map<String,? extends  Serializable> metadata){

@@ -1,15 +1,11 @@
 package io.cloudslang.runtime.impl.java;
 
 import io.cloudslang.runtime.api.java.JavaExecutionParametersProvider;
-import org.junit.Test;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-
-import static org.junit.Assert.*;
-
 import org.springframework.context.annotation.Configuration;
-
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -18,12 +14,23 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = JavaExecutorTest.TestConfig.class)
 public class JavaExecutorTest {
+
+    static {
+        ClassLoader classLoader = JavaExecutorTest.class.getClassLoader();
+
+        String settingsXmlPath = classLoader.getResource("settings.xml").getPath();
+        File rootHome = new File(settingsXmlPath).getParentFile();
+
+        System.setProperty("app.home", rootHome.getAbsolutePath());
+    }
 
     private static final String CLASS_NAME = "group.artifact.OneClass";
     private static final String METHOD_NAME = "getVersion";

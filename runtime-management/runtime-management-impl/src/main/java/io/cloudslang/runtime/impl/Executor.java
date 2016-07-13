@@ -14,5 +14,7 @@ package io.cloudslang.runtime.impl;
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
 public interface Executor {
+    void allocate();
     void release();
+    void close();
 }
