@@ -247,20 +247,20 @@ public class SimpleExecutionRunnable implements Runnable {
     private boolean isPersistStep(Execution nextStepExecution) {
         //Here we check if we need to go to queue to persist the step context - we can do it with shortcut to InBuffer!!!!!!!!
         if (nextStepExecution.getSystemContext().isStepPersist()) {
-            //clean the persist data
+            //clean the persist key
             nextStepExecution.getSystemContext().removeStepPersist();
 
             //set current step to finished
             executionMessage.setStatus(ExecStatus.FINISHED);
             executionMessage.incMsgSeqId();
-            //we need it for persistency - in case it came from InBuffer shortcut the payload can be null
-            if(executionMessage.getPayload() == null){
-                executionMessage.setPayload(converter.createPayload(executionMessage.getExecutionObject()));
-            }
+
             executionMessage.setStepPersist(true);
             executionMessage.setStepPersistId(nextStepExecution.getSystemContext().getStepPersistId());
             //clean the persist data
             nextStepExecution.getSystemContext().removeStepPersistID();
+
+            //set the payload to the current step and not from the message that could be several micro step behind
+            executionMessage.setPayload(converter.createPayload(nextStepExecution));
 
             ExecutionMessage inProgressMessage = createInProgressExecutionMessage(nextStepExecution);
             ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage, inProgressMessage}; //for the outBuffer
@@ -347,7 +347,7 @@ public class SimpleExecutionRunnable implements Runnable {
         boolean oldThread = !workerManager.isFromCurrentThreadPool(Thread.currentThread().getName());
         if(oldThread){ // interrupted old (recovery) thread
             if(logger.isDebugEnabled()) {
-                logger.debug("Checked if execution is on old thread: " + oldThread);
+                logger.debug("This thread is from old thread pool...");
             }
             return true;
         }else {
