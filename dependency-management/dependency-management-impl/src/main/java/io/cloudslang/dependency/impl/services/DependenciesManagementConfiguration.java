@@ -1,7 +1,5 @@
 package io.cloudslang.dependency.impl.services;
 
-import io.cloudslang.dependency.api.services.DependencyService;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
@@ -11,8 +9,4 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ComponentScan("io.cloudslang.dependency")
 public class DependenciesManagementConfiguration {
-    @Bean
-    public DependencyService dependencyService() {
-        return new DependencyServiceImpl();
-    }
 }

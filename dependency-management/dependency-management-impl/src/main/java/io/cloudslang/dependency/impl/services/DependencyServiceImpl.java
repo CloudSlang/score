@@ -16,6 +16,7 @@ import org.apache.log4j.FileAppender;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
@@ -33,6 +34,7 @@ import static io.cloudslang.dependency.api.services.MavenConfig.SEPARATOR;
 /**
  * @author Alexander Eskin
  */
+@Component
 @SuppressWarnings("unused")
 public class DependencyServiceImpl implements DependencyService {
     private static final Logger logger = Logger.getLogger(DependencyServiceImpl.class);
@@ -71,12 +73,14 @@ public class DependencyServiceImpl implements DependencyService {
 
         if(isMavenConfigured()) {
             File libDir = new File(mavenHome, "boot");
-            URL[] mavenJarUrls = getUrls(libDir);
+            if(libDir.exists()) {
+                URL[] mavenJarUrls = getUrls(libDir);
 
-            mavenClassLoader = new URLClassLoader(mavenJarUrls, parentClassLoader);
-            MAVEN_EXECUTE_METHOD = Class.forName(MAVEN_LAUNCHER_CLASS_NAME, true, mavenClassLoader).
-                    getMethod(MAVEN_LANUCHER_METHOD_NAME, String[].class);
-            initMavenLogs();
+                mavenClassLoader = new URLClassLoader(mavenJarUrls, parentClassLoader);
+                MAVEN_EXECUTE_METHOD = Class.forName(MAVEN_LAUNCHER_CLASS_NAME, true, mavenClassLoader).
+                        getMethod(MAVEN_LANUCHER_METHOD_NAME, String[].class);
+                initMavenLogs();
+            }
         }
     }
 
