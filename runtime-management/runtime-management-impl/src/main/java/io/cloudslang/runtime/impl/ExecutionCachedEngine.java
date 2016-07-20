@@ -12,6 +12,7 @@ package io.cloudslang.runtime.impl;
 
 import io.cloudslang.dependency.api.services.DependencyService;
 
+import org.apache.log4j.Logger;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -23,6 +24,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
 public abstract class ExecutionCachedEngine<T extends Executor> extends ExecutionEngine {
+    private final Logger logger = Logger.getLogger(getClass());
     // key --> dependencies concatenated
     // value --> classloader/pythoninterpreter which was build with classpath from these dependencies
     // if we reached the limit of cache we will release the least recently used
@@ -34,23 +36,19 @@ public abstract class ExecutionCachedEngine<T extends Executor> extends Executio
         String dependenciesKey = generatedDependenciesKey(dependencies);
 
         T executor;
-        executor = executors.get(dependenciesKey);
-        Set<String> filePaths = null;
-        if (executor == null) {
-            // may be first time execution - ensure resource resolution
-            filePaths = getDependencyService().getDependencies(dependencies);
-        }
-
         T candidateForRemove = null;
+        lock.lock();
         try {
-            lock.lock();
+            executor = executors.get(dependenciesKey);
             if (executor == null) {
-                if (executors.size() == getCacheSize()) {
+                int cacheSize = getCacheSize();
+                if (executors.size() == cacheSize) {
+                    logger.info("Reached cached executors limit[" + cacheSize + "], replacing LRU executor.");
                     Iterator<Map.Entry<String, T>> iterator = executors.entrySet().iterator();
                     candidateForRemove = iterator.next().getValue();
                     iterator.remove();
                 }
-                executor = createNewExecutor(filePaths);
+                executor = createNewExecutor(getDependencyService().getDependencies(dependencies));
             } else {
                 // remove it and place at the end - most recently used
                 executors.remove(dependenciesKey);

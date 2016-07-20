@@ -8,8 +8,11 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class UnzipUtil {
+
+    private static final int DEFAULT_BUFFER_SIZE = 2048;
+
     public static void unzipToFolder(String folderPath, InputStream source) {
-        byte[] buffer = new byte[2048];
+        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
         File mavenHome = new File(folderPath);
         if(!mavenHome.exists()) {
             try (ZipInputStream zio = new ZipInputStream(source)) {

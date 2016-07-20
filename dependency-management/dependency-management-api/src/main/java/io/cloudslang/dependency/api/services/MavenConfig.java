@@ -30,6 +30,21 @@ public interface MavenConfig {
 
 
     char SEPARATOR = '/';
+
+    String APP_HOME = "app.home";
+    String LOGS_FOLDER_NAME = "logs";
+    String MAVEN_FOLDER = "maven";
+    String POM_EXTENSION = "pom";
+    String LOG_FILE_FLAG = "--log-file";
+    String DEPENDENCY_BUILD_CLASSPATH_COMMAND = "dependency:build-classpath";
+    String DEPENDENCY_GET_COMMAND = "dependency:get";
+    String MAVEN_SETTINGS_FILE_FLAG = "-s";
+    String MAVEN_POM_PATH_PROPERTY = "-f";
+    String MAVEN_CLASSWORLDS_CONF_PROPERTY = "classworlds.conf";
+    String MAVEN_ARTIFACT_PROPERTY = "artifact";
+    String MAVEN_MDEP_OUTPUT_FILE_PROPEPRTY = "mdep.outputFile";
+    String MAVEN_MDEP_PATH_SEPARATOR_PROPERTY = "mdep.pathSeparator";
+
     String getLocalMavenRepoPath();
     String getRemoteMavenRepoUrl();
 }
