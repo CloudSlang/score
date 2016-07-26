@@ -135,7 +135,7 @@ public class PythonExecutor implements Executor {
                 if (keyIsExcluded(key, value)) {
                     continue;
                 }
-                result.put(key, value);
+                result.put(key, resolveJythonObjectToJavaEvalResultContext(key, value));
             }
         }
         return result;
@@ -255,6 +255,13 @@ public class PythonExecutor implements Executor {
         return resolveJythonObjectToJava(value, errorMessage);
     }
 
+    private Serializable resolveJythonObjectToJavaEvalResultContext(String key, PyObject value) {
+        String errorMessage =
+                "Non-serializable values are not allowed in the output context of a Python script:\n" +
+                        "\tConversion failed for '" + key + "' (" + value + ").\n";
+        return resolveJythonObjectToJava(value, errorMessage);
+    }
+
     private Serializable resolveJythonObjectToJava(PyObject value, String errorMessage) {
         if (value == null) {
             return null;
@@ -283,7 +290,8 @@ public class PythonExecutor implements Executor {
                 value instanceof PyFile ||
                 value instanceof PyModule ||
                 value instanceof PyFunction ||
-                value instanceof PySystemState;
+                value instanceof PySystemState ||
+                value instanceof PyClass;
     }
 
     private static class ThreadSafePythonInterpreter extends PythonInterpreter {
