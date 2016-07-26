@@ -135,7 +135,7 @@ public class PythonExecutor implements Executor {
                 if (keyIsExcluded(key, value)) {
                     continue;
                 }
-                result.put(key, resolveJythonObjectToJavaEvalResultContext(key, value));
+                result.put(key, value);
             }
         }
         return result;
@@ -252,13 +252,6 @@ public class PythonExecutor implements Executor {
         String errorMessage =
                 "Evaluation result for a Python expression should be serializable:\n" +
                         "\tConversion failed for '" + expression + "' (" + value + ").\n";
-        return resolveJythonObjectToJava(value, errorMessage);
-    }
-
-    private Serializable resolveJythonObjectToJavaEvalResultContext(String key, PyObject value) {
-        String errorMessage =
-                "Non-serializable values are not allowed in the output context of a Python script:\n" +
-                        "\tConversion failed for '" + key + "' (" + value + ").\n";
         return resolveJythonObjectToJava(value, errorMessage);
     }
 

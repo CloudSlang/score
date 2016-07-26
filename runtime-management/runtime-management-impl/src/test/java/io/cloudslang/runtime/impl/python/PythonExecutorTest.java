@@ -12,6 +12,8 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.python.core.PyBoolean;
+import org.python.core.PyString;
 import org.python.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -93,9 +95,10 @@ public class PythonExecutorTest {
     static {
         EXPECTED_CONTEXT_EXEC = new HashMap<>();
         EXPECTED_CONTEXT_EXEC.put("x", "abc");
-        EXPECTED_CONTEXT_EVAL = new HashMap<>(EXPECTED_CONTEXT_EXEC);
-        EXPECTED_CONTEXT_EVAL.put("true", Boolean.TRUE);
-        EXPECTED_CONTEXT_EVAL.put("false", Boolean.FALSE);
+        EXPECTED_CONTEXT_EVAL = new HashMap<>(3);
+        EXPECTED_CONTEXT_EVAL.put("x", new PyString("abc"));
+        EXPECTED_CONTEXT_EVAL.put("true", new PyBoolean(true));
+        EXPECTED_CONTEXT_EVAL.put("false", new PyBoolean(false));
     }
 
     @Autowired
