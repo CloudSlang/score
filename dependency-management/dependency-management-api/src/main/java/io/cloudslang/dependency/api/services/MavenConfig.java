@@ -44,6 +44,7 @@ public interface MavenConfig {
     String MAVEN_ARTIFACT_PROPERTY = "artifact";
     String MAVEN_MDEP_OUTPUT_FILE_PROPEPRTY = "mdep.outputFile";
     String MAVEN_MDEP_PATH_SEPARATOR_PROPERTY = "mdep.pathSeparator";
+    String TRANSITIVE_PROPERTY = "transitive";
 
     String getLocalMavenRepoPath();
     String getRemoteMavenRepoUrl();

@@ -18,8 +18,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.annotation.PostConstruct;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -161,8 +174,8 @@ public class DependencyServiceImpl implements DependencyService {
 
     @SuppressWarnings("ConstantConditions")
     private void buildDependencyFile(String[] gav) {
-        String pomFilePath = getResourceFolderPath(gav) + SEPARATOR + getFileName(gav, MavenConfig.POM_EXTENSION);
-        downloadArtifactsIfNeeded(pomFilePath, gav);
+        String pomFilePath = getPomFilePath(gav);
+        downloadArtifacts(gav);
         System.setProperty(MavenConfig.MAVEN_MDEP_OUTPUT_FILE_PROPEPRTY, getPathFileName(gav));
         System.setProperty(MavenConfig.MAVEN_MDEP_PATH_SEPARATOR_PROPERTY, PATH_FILE_DELIMITER);
         System.setProperty(MavenConfig.MAVEN_CLASSWORLDS_CONF_PROPERTY, System.getProperty(MavenConfig.MAVEN_M2_CONF_PATH));
@@ -189,6 +202,10 @@ public class DependencyServiceImpl implements DependencyService {
         appendSelfToPathFile(gav, fileToReturn);
     }
 
+    private String getPomFilePath(String[] gav) {
+        return getResourceFolderPath(gav) + SEPARATOR + getFileName(gav, MavenConfig.POM_EXTENSION);
+    }
+
     private String constructGavLogFilePath(String[] gav) {
         return new File(mavenLogFolder, gav[0] + GAV_SEPARATOR + gav[1] + GAV_SEPARATOR + gav[2] + ".log").getAbsolutePath();
     }
@@ -207,16 +224,15 @@ public class DependencyServiceImpl implements DependencyService {
         }
     }
 
-    private void downloadArtifactsIfNeeded(String pomFilePath, String[] gav) {
-        File pomFile = new File(pomFilePath);
-        if(!pomFile.exists()) {
-            downloadArtifacts(gav);
-        }
+    private void downloadArtifacts(String[] gav) {
+        getDependencies(gav, false);
+        getDependencies(gav, true);
     }
 
-    private void downloadArtifacts(String[] gav) {
-        System.setProperty(MavenConfig.MAVEN_ARTIFACT_PROPERTY, getResourceString(gav));
+    private void getDependencies(String[] gav, Boolean transitive) {
+        System.setProperty(MavenConfig.MAVEN_ARTIFACT_PROPERTY, getResourceString(gav, transitive));
         System.setProperty(MavenConfig.MAVEN_CLASSWORLDS_CONF_PROPERTY, System.getProperty(MavenConfig.MAVEN_M2_CONF_PATH));
+        System.setProperty(MavenConfig.TRANSITIVE_PROPERTY, transitive.toString());
         String[] args = new String[]{
                 MavenConfig.MAVEN_SETTINGS_FILE_FLAG,
                 System.getProperty(MavenConfig.MAVEN_SETTINGS_PATH),
@@ -227,10 +243,38 @@ public class DependencyServiceImpl implements DependencyService {
 
         try {
             invokeMavenLauncher(args);
+            if(!transitive) {
+                removeTestScopeDependencies(gav);
+            }
         } catch (Exception e) {
             throw new IllegalStateException("Failed to download resources using Maven", e);
+        } finally {
+            System.getProperties().remove(MavenConfig.TRANSITIVE_PROPERTY);
         }
 
+    }
+
+    private void removeTestScopeDependencies(String[] gav) {
+        String pomFilePath = getPomFilePath(gav);
+        try {
+            File xmlFile = new File(pomFilePath);
+            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xmlFile);
+            XPath xpath = XPathFactory.newInstance().newXPath();
+            NodeList nl = (NodeList)xpath.compile("/project/dependencies/dependency[scope[contains(text(), 'test')]]").
+                    evaluate(doc, XPathConstants.NODESET);
+
+            for (int i = 0; i < nl.getLength(); i++) {
+                Node node = nl.item(i);
+                node.getParentNode().removeChild(node);
+            }
+
+            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            Result output = new StreamResult(new File(pomFilePath));
+            Source input = new DOMSource(doc);
+            transformer.transform(input, output);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void appendSelfToPathFile(String[] gav, File pathFile) {
@@ -259,8 +303,18 @@ public class DependencyServiceImpl implements DependencyService {
         }
     }
 
-    private String getResourceString(String[] gav) {
-        return StringUtils.arrayToDelimitedString(gav, GAV_DELIMITER);
+    private String getResourceString(String[] gav, boolean transitive) {
+        //if not transitive, use type "pom"
+        String[] newGav = new String[Math.max(4, gav.length)];
+        System.arraycopy(gav, 0, newGav, 0, gav.length);
+        if(!transitive) {
+            newGav[3] = "pom";
+        } else {
+            if(newGav[3] == null) {
+                newGav[3] = "jar";
+            }
+        }
+        return StringUtils.arrayToDelimitedString(newGav, GAV_DELIMITER);
     }
 
     private String getPathFileName(String[] gav) {
