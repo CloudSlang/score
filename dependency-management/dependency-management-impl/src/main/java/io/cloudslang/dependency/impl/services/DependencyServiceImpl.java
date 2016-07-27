@@ -186,7 +186,7 @@ public class DependencyServiceImpl implements DependencyService {
                 pomFilePath,
                 MavenConfig.DEPENDENCY_BUILD_CLASSPATH_COMMAND,
                 MavenConfig.LOG_FILE_FLAG,
-                constructGavLogFilePath(gav)
+                constructGavLogFilePath(gav, "build")
         };
 
         try {
@@ -206,8 +206,9 @@ public class DependencyServiceImpl implements DependencyService {
         return getResourceFolderPath(gav) + SEPARATOR + getFileName(gav, MavenConfig.POM_EXTENSION);
     }
 
-    private String constructGavLogFilePath(String[] gav) {
-        return new File(mavenLogFolder, gav[0] + GAV_SEPARATOR + gav[1] + GAV_SEPARATOR + gav[2] + ".log").getAbsolutePath();
+    private String constructGavLogFilePath(String[] gav, String what) {
+        return new File(mavenLogFolder, gav[0] + GAV_SEPARATOR + gav[1] + GAV_SEPARATOR + gav[2] + GAV_SEPARATOR +
+                what + ".log").getAbsolutePath();
     }
 
     private void invokeMavenLauncher(String[] args) throws Exception {
@@ -238,7 +239,7 @@ public class DependencyServiceImpl implements DependencyService {
                 System.getProperty(MavenConfig.MAVEN_SETTINGS_PATH),
                 MavenConfig.DEPENDENCY_GET_COMMAND,
                 MavenConfig.LOG_FILE_FLAG,
-                constructGavLogFilePath(gav)
+                constructGavLogFilePath(gav, "get")
         };
 
         try {
@@ -269,7 +270,8 @@ public class DependencyServiceImpl implements DependencyService {
             }
 
             Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            Result output = new StreamResult(new File(pomFilePath));
+            // need to convert to file and then to path to override a problem with spaces
+            Result output = new StreamResult(new File(pomFilePath).getPath());
             Source input = new DOMSource(doc);
             transformer.transform(input, output);
         } catch (Exception e) {
