@@ -3,7 +3,7 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>runtime-management</artifactId>
-        <version>0.3.34-SNAPSHOT</version>
+        <version>0.3.34</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
