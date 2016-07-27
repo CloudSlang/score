@@ -21,17 +21,17 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import javax.annotation.PostConstruct;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.*;
 import java.lang.reflect.Method;
@@ -258,12 +258,21 @@ public class DependencyServiceImpl implements DependencyService {
     private void removeTestScopeDependencies(String[] gav) {
         String pomFilePath = getPomFilePath(gav);
         try {
-            File xmlFile = new File(pomFilePath);
-            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xmlFile);
-            XPath xpath = XPathFactory.newInstance().newXPath();
-            NodeList nl = (NodeList)xpath.compile("/project/dependencies/dependency[scope[contains(text(), 'test')]]").
-                    evaluate(doc, XPathConstants.NODESET);
+            removeByXpathExpression(pomFilePath, "/project/dependencies/dependency[scope[contains(text(), 'test')]]");
+            removeByXpathExpression(pomFilePath, "/project/dependencyManagement/dependencies/dependency[scope[contains(text(), 'test')]]");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
+    private void removeByXpathExpression(String pomFilePath, String expression) throws SAXException, IOException, ParserConfigurationException, XPathExpressionException, TransformerException {
+        File xmlFile = new File(pomFilePath);
+        Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xmlFile);
+        XPath xpath = XPathFactory.newInstance().newXPath();
+        NodeList nl = (NodeList)xpath.compile(expression).
+                evaluate(doc, XPathConstants.NODESET);
+
+        if(nl != null && nl.getLength() > 0) {
             for (int i = 0; i < nl.getLength(); i++) {
                 Node node = nl.item(i);
                 node.getParentNode().removeChild(node);
@@ -274,8 +283,6 @@ public class DependencyServiceImpl implements DependencyService {
             Result output = new StreamResult(new File(pomFilePath).getPath());
             Source input = new DOMSource(doc);
             transformer.transform(input, output);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -330,6 +337,9 @@ public class DependencyServiceImpl implements DependencyService {
     private List<String> parse(File file) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
             String line = reader.readLine();
+            if(line.startsWith(PATH_FILE_DELIMITER)) {
+                line = line.substring(PATH_FILE_DELIMITER.length());
+            }
             String[] paths = line.split(PATH_FILE_DELIMITER);
             return Arrays.asList(paths);
         }
