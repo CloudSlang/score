@@ -55,8 +55,8 @@ public void testCancelledFlows(){
     cancelledFlows.add(cancelledExecution1);
     cancelledFlows.add(cancelledExecution2);
     when(cancelExecutionService.readCanceledExecutionsIds()).thenReturn(cancelledFlows);
-    assertTrue(mergedConfigurationService.fetchMergedConfiguration().getCancelledExecutions().contains(cancelledExecution1));
-    assertTrue(mergedConfigurationService.fetchMergedConfiguration().getCancelledExecutions().contains(cancelledExecution2));
+    assertTrue(mergedConfigurationService.fetchMergedConfiguration(getWorkerUuid()).getCancelledExecutions().contains(cancelledExecution1));
+    assertTrue(mergedConfigurationService.fetchMergedConfiguration(getWorkerUuid()).getCancelledExecutions().contains(cancelledExecution2));
 }
 
     @Test
@@ -65,7 +65,7 @@ public void testCancelledFlows(){
         HashSet<String> pausedFlows= new HashSet<>();
         pausedFlows.add(pausedExecutionId);
         when(pauseResumeService.readAllPausedExecutionBranchIds()).thenReturn(pausedFlows);
-        assertTrue(mergedConfigurationService.fetchMergedConfiguration().getPausedExecutions().contains(pausedExecutionId));
+        assertTrue(mergedConfigurationService.fetchMergedConfiguration(getWorkerUuid()).getPausedExecutions().contains(pausedExecutionId));
     }
 
     @Test
@@ -80,9 +80,9 @@ public void testCancelledFlows(){
         cancelledFlows.add(cancelledExecution2);
         when(pauseResumeService.readAllPausedExecutionBranchIds()).thenReturn(pausedFlows);
         when(cancelExecutionService.readCanceledExecutionsIds()).thenReturn(cancelledFlows);
-        assertTrue(mergedConfigurationService.fetchMergedConfiguration().getPausedExecutions().contains(pausedExecutionId));
-        assertTrue(mergedConfigurationService.fetchMergedConfiguration().getCancelledExecutions().contains(cancelledExecution1));
-        assertTrue(mergedConfigurationService.fetchMergedConfiguration().getCancelledExecutions().contains(cancelledExecution2));
+        assertTrue(mergedConfigurationService.fetchMergedConfiguration(getWorkerUuid()).getPausedExecutions().contains(pausedExecutionId));
+        assertTrue(mergedConfigurationService.fetchMergedConfiguration(getWorkerUuid()).getCancelledExecutions().contains(cancelledExecution1));
+        assertTrue(mergedConfigurationService.fetchMergedConfiguration(getWorkerUuid()).getCancelledExecutions().contains(cancelledExecution2));
     }
 
 
@@ -131,4 +131,9 @@ public void testCancelledFlows(){
         }
 
     }
+
+    protected static String getWorkerUuid() {
+        return System.getProperty("worker.uuid");
+    }
+
 }
