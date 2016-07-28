@@ -35,14 +35,7 @@ public class WorkerConfigurationServiceImpl implements WorkerConfigurationServic
 	private volatile List<Long> cancelledExecutions;
 	private volatile Set<String> pausedExecutions;
 	private volatile List<String> workerGroups;
-	private MergedConfigurationDataContainer mergedConfigurationDataContainer;
 	private volatile boolean enabled;
-	@Autowired
-	private CancelExecutionService cancelExecutionService;
-	@Autowired
-	private PauseResumeService pauseResumeService;
-	@Autowired
-	private WorkerNodeService workerNodeService;
 
 	@Autowired
 	private MergedConfigurationService 	mergedConfigurationService;
@@ -69,13 +62,13 @@ public class WorkerConfigurationServiceImpl implements WorkerConfigurationServic
 
 	public void refresh() {
 		if(!enabled) return;
-		mergedConfigurationDataContainer = mergedConfigurationService.fetchMergedConfiguration();
-		fetchCanceledExecutions();
-		fetchPausedExecutions();
-		fetchWorkerGroups();
+		MergedConfigurationDataContainer mergedConfigurationDataContainer = mergedConfigurationService.fetchMergedConfiguration(getWorkerUuid());
+		setCanceledExecutions(mergedConfigurationDataContainer);
+		setPausedExecutions(mergedConfigurationDataContainer);
+		setWorkerGroups(mergedConfigurationDataContainer);
 	}
 
-	protected void fetchCanceledExecutions() {
+	protected void setCanceledExecutions(MergedConfigurationDataContainer mergedConfigurationDataContainer) {
 		try {
 			cancelledExecutions = mergedConfigurationDataContainer.getCancelledExecutions();
 		} catch(Exception ex) {
@@ -83,7 +76,7 @@ public class WorkerConfigurationServiceImpl implements WorkerConfigurationServic
 		}
 	}
 
-	protected void fetchPausedExecutions() {
+	protected void setPausedExecutions(MergedConfigurationDataContainer mergedConfigurationDataContainer) {
 		try {
 			pausedExecutions = mergedConfigurationDataContainer.getPausedExecutions();
 		} catch(Exception ex) {
@@ -91,7 +84,7 @@ public class WorkerConfigurationServiceImpl implements WorkerConfigurationServic
 		}
 	}
 
-	protected void fetchWorkerGroups() {
+	protected void setWorkerGroups(MergedConfigurationDataContainer mergedConfigurationDataContainer) {
 		try {
 			workerGroups = mergedConfigurationDataContainer.getWorkerGroups();
 		} catch(Exception ex) {
