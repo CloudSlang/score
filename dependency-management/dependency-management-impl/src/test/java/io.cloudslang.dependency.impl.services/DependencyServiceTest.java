@@ -108,6 +108,34 @@ public class DependencyServiceTest {
     }
 
     @Test
+    public void testBuildClassPath1_1() {
+        Assume.assumeTrue(shouldRunMaven);
+        Set <String> ret = dependencyService.getDependencies(new HashSet<>(Collections.singletonList("groupId1:mvn_artifact1:1.1")));
+        final List<File> retFiles = new ArrayList<>();
+        for (String s : ret) {
+            retFiles.add(new File(s));
+        }
+        String basePath = new TestConfig().mavenConfig().getLocalMavenRepoPath();
+        List<File> referenceList = Collections.singletonList(
+                new File(basePath + "/groupId1/mvn_artifact1/1.1/mvn_artifact1-1.1.jar"));
+        Assert.assertTrue("Unexpected returned set", retFiles.containsAll(referenceList) && ret.size() == referenceList.size());
+    }
+
+    @Test
+    public void testBuildClassPath1_2() {
+        Assume.assumeTrue(shouldRunMaven);
+        Set <String> ret = dependencyService.getDependencies(new HashSet<>(Collections.singletonList("groupId1:mvn_artifact1:1.2")));
+        final List<File> retFiles = new ArrayList<>();
+        for (String s : ret) {
+            retFiles.add(new File(s));
+        }
+        String basePath = new TestConfig().mavenConfig().getLocalMavenRepoPath();
+        List<File> referenceList = Collections.singletonList(
+                new File(basePath + "/groupId1/mvn_artifact1/1.2/mvn_artifact1-1.2.jar"));
+        Assert.assertTrue("Unexpected returned set", retFiles.containsAll(referenceList) && ret.size() == referenceList.size());
+    }
+
+    @Test
     public void testBuildClassPath2() {
         Assume.assumeTrue(shouldRunMaven);
         String basePath = new TestConfig().mavenConfig().getLocalMavenRepoPath();

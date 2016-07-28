@@ -283,7 +283,8 @@ public class PythonExecutor implements Executor {
                 value instanceof PyFile ||
                 value instanceof PyModule ||
                 value instanceof PyFunction ||
-                value instanceof PySystemState;
+                value instanceof PySystemState ||
+                value instanceof PyClass;
     }
 
     private static class ThreadSafePythonInterpreter extends PythonInterpreter {
