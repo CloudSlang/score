@@ -29,7 +29,7 @@ public class MergedConfigurationServiceImpl implements MergedConfigurationServic
     private WorkerNodeService workerNodeService;
 
     @Override
-    public MergedConfigurationDataContainer fetchMergedConfiguration() {
+    public MergedConfigurationDataContainer fetchMergedConfiguration(String workerUuid) {
         MergedConfigurationDataContainer mergedConfigurationDataContainer = new MergedConfigurationDataContainer();
         try {
             mergedConfigurationDataContainer.setCancelledExecutions(cancelExecutionService.readCanceledExecutionsIds());
@@ -44,18 +44,12 @@ public class MergedConfigurationServiceImpl implements MergedConfigurationServic
         }
 
         try {
-            mergedConfigurationDataContainer.setWorkerGroups(workerNodeService.readWorkerGroups(getWorkerUuid()));
+            mergedConfigurationDataContainer.setWorkerGroups(workerNodeService.readWorkerGroups(workerUuid));
         } catch(Exception ex) {
             log.error("Failed to fetch worker group information: ", ex);
         }
 
         return mergedConfigurationDataContainer;
     }
-
-    protected static String getWorkerUuid() {
-        return System.getProperty("worker.uuid");
-    }
-
-
 }
 
