@@ -30,9 +30,7 @@ public class BusyWorkersServiceImpl implements BusyWorkersService {
     @Override
     @Transactional(readOnly = true)
     public boolean isWorkerBusy(String workerId) {
-        logger.info("Started to see if the worker is busy");
         boolean busyWorkerContained = busyWorkersMap.containsKey(workerId);
-        logger.info("Finished to see if the worker is busy and the answer is ["+ busyWorkerContained + "]");
         return busyWorkerContained;
     }
 
@@ -47,12 +45,10 @@ public class BusyWorkersServiceImpl implements BusyWorkersService {
         List<String> busyWorkers = executionQueueRepository.getBusyWorkers(ExecStatus.ASSIGNED);
         for (String bw : busyWorkers) {
             this.busyWorkersMap.put(bw, bw);
-
         }
-
         if (logger.isDebugEnabled()) {
             long endTime = System.currentTimeMillis();
-            logger.info("Queried for busy workers, the following workers are busy: " + this.busyWorkersMap + ". Query took: " + (endTime - startTime) + " ms to complete");
+            logger.debug("Queried for busy workers, the following workers are busy: " + this.busyWorkersMap + ". Query took: " + (endTime - startTime) + " ms to complete");
         }
     }
 
