@@ -32,9 +32,15 @@ public class ExecutionPlan implements Serializable {
 
     protected Long beginStep;
 
+    private long timestamp;
+
     protected String name;
     //the name of the flow language this execution plan  represents, such as afl
     protected String language;
+
+    public ExecutionPlan() {
+        this.timestamp=System.currentTimeMillis();
+    }
 
     protected Map<Long, ExecutionStep> steps = new HashMap<Long, ExecutionStep>();
 
@@ -74,6 +80,10 @@ public class ExecutionPlan implements Serializable {
     public ExecutionPlan setFlowUuid(String flowUuid) {
         this.flowUuid = flowUuid;
         return this;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
     }
 
     public Long getBeginStep() {

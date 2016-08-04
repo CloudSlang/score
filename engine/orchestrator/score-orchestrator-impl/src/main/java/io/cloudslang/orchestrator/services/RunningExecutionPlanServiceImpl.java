@@ -64,7 +64,7 @@ public final class RunningExecutionPlanServiceImpl implements RunningExecutionPl
         //If existsByUuid - check if the plans are equal
         else {
             for (RunningExecutionPlan existingRunningPlan : existingRunningPlans) {
-                if (existingRunningPlan.getExecutionPlan().equals(executionPlan)) {
+                if (existingRunningPlan.getExecutionPlan().getTimestamp() == executionPlan.getTimestamp()){
                     return existingRunningPlan.getId();
                 }
             }

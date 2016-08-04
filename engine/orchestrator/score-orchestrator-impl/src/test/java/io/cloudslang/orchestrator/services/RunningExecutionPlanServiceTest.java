@@ -56,12 +56,12 @@ public class RunningExecutionPlanServiceTest {
     }
 
     @Test
-    public void testCreateRunningExecutionPlan() {
+    public void testCreateRunningExecutionPlan() throws InterruptedException {
         ExecutionPlan executionPlan = new ExecutionPlan();
         executionPlan.setFlowUuid("uuid");
         RunningExecutionPlan oldRunningExecutionPlan = new RunningExecutionPlan();
         oldRunningExecutionPlan.setId(3L);
-
+        Thread.sleep(1000);
         ExecutionPlan diffExecutionPlan = new ExecutionPlan();
         diffExecutionPlan.setFlowUuid("diff uuid");
         oldRunningExecutionPlan.setExecutionPlan(diffExecutionPlan);
