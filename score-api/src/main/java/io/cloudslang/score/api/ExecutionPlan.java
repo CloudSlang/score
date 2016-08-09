@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Date: 8/1/11
@@ -32,9 +33,15 @@ public class ExecutionPlan implements Serializable {
 
     protected Long beginStep;
 
+    private String executionPlanUuid;
+
     protected String name;
     //the name of the flow language this execution plan  represents, such as afl
     protected String language;
+
+    public ExecutionPlan() {
+        this.executionPlanUuid= UUID.randomUUID().toString();
+    }
 
     protected Map<Long, ExecutionStep> steps = new HashMap<Long, ExecutionStep>();
 
@@ -74,6 +81,10 @@ public class ExecutionPlan implements Serializable {
     public ExecutionPlan setFlowUuid(String flowUuid) {
         this.flowUuid = flowUuid;
         return this;
+    }
+
+    public String getExecutionPlanUuid() {
+        return executionPlanUuid;
     }
 
     public Long getBeginStep() {
@@ -133,24 +144,13 @@ public class ExecutionPlan implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        EqualsBuilder equalsBuilder = new EqualsBuilder();
-
         if (!(o instanceof ExecutionPlan)) {
             return false;
         }
 
         ExecutionPlan other = (ExecutionPlan) o;
-
-        equalsBuilder.append(this.getFlowUuid(), other.getFlowUuid());
-        equalsBuilder.append(this.getBeginStep(), other.getBeginStep());
-        equalsBuilder.append(this.getName(), other.getName());
-        equalsBuilder.append(this.getLanguage(), other.getLanguage());
-        equalsBuilder.append(this.getSubflowsUUIDs(), other.getSubflowsUUIDs());
-        equalsBuilder.append(this.getSysAccPaths(), other.getSysAccPaths());
-        equalsBuilder.append(this.getSteps(), other.getSteps());
-
-        return equalsBuilder.isEquals();
-    }
+        return other.getExecutionPlanUuid().equals(this.getExecutionPlanUuid());
+     }
 
     @Override
     public int hashCode() {

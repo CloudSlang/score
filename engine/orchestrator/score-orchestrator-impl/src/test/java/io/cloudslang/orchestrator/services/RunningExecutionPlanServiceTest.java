@@ -56,7 +56,7 @@ public class RunningExecutionPlanServiceTest {
     }
 
     @Test
-    public void testCreateRunningExecutionPlan() {
+    public void testCreateRunningExecutionPlan() throws InterruptedException {
         ExecutionPlan executionPlan = new ExecutionPlan();
         executionPlan.setFlowUuid("uuid");
         RunningExecutionPlan oldRunningExecutionPlan = new RunningExecutionPlan();
