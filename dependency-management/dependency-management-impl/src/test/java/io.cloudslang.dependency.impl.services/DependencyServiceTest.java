@@ -41,6 +41,11 @@ public class DependencyServiceTest {
         //noinspection ConstantConditions
         System.setProperty("maven.home", classLoader.getResource("maven").getPath());
 
+        String localRepository = System.getProperty(MavenConfigImpl.MAVEN_REPO_LOCAL);
+        if (localRepository != null && !localRepository.isEmpty()) {
+            System.setProperty("maven.repo.local", localRepository);
+        }
+
         System.setProperty(MavenConfigImpl.MAVEN_SETTINGS_PATH, settingsXmlPath);
         //noinspection ConstantConditions
         System.setProperty(MavenConfigImpl.MAVEN_M2_CONF_PATH, classLoader.getResource("m2.conf").getPath());
