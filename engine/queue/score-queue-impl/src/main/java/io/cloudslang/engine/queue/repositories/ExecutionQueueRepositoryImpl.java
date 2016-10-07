@@ -440,7 +440,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
 	@Override
 	public List<String> getBusyWorkers(ExecStatus... statuses) {
-		//todo Change to stream when score is upgraded to java 8
 		// prepare the sql statement
 		String sqlStat = BUSY_WORKERS_SQL
 				.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));

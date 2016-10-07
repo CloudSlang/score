@@ -64,7 +64,7 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = WorkerNodeServiceTest.Configurator.class)
 @Transactional
 @TransactionConfiguration(defaultRollback=true)
-//TODO Eliya- this test depend on repo - should mock it!
+// this test depend on repo - should mock it!
 public class WorkerNodeServiceTest {
 	private static final boolean SHOW_SQL = false;
 
