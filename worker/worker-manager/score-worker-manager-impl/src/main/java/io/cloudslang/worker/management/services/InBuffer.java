@@ -226,7 +226,6 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
             logger.warn("InBuffer would not poll messages, because there is not enough free memory.");
             if (System.currentTimeMillis() > (gcTimer + MINIMUM_GC_DELTA)){
                 logger.warn("Trying to initiate garbage collection");
-                //Todo find a better solution than manually triggering GC
                 System.gc();
                 gcTimer = System.currentTimeMillis();
             }

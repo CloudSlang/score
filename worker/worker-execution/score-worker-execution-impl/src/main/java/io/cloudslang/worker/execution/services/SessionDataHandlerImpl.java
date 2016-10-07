@@ -119,7 +119,7 @@ public class SessionDataHandlerImpl implements SessionDataHandler {
         }
 
         // set value to large long value before running an action. Reset it after action finishes -
-        // in order to prevent resetting in the middle of running long actions- solves BUG : 170636
+        // in order to prevent resetting in the middle of running long actions
         void setMaxTimestamp() {
             if(logger.isDebugEnabled()) logger.debug("Locking session timestamp for execution: " + executionId);
             timeStamp = Long.MAX_VALUE;

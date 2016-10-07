@@ -108,7 +108,7 @@ public class PythonExecutorTest {
     public void testMultithreadedEval() throws InterruptedException {
         Assume.assumeTrue(shouldRunMaven);
         int executionsNum = 5;
-        final String varName = "XXX";
+        final String varName = "ABC";
         final String varValue = "YYY";
 
         final CountDownLatch latch = new CountDownLatch(executionsNum);
