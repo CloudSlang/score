@@ -1,12 +1,12 @@
 /*******************************************************************************
-* (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
-* All rights reserved. This program and the accompanying materials
-* are made available under the terms of the Apache License v2.0 which accompany this distribution.
-*
-* The Apache License is available at
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-*******************************************************************************/
+ * (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Apache License v2.0 which accompany this distribution.
+ *
+ * The Apache License is available at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *******************************************************************************/
 
 package io.cloudslang.samples;
 
@@ -36,9 +36,11 @@ import java.util.Set;
  */
 public class HelloScore {
 
+    @SuppressWarnings("SpringJavaAutowiringInspection")
     @Autowired
     private Score score;
 
+    @SuppressWarnings("SpringJavaAutowiringInspection")
     @Autowired
     private EventBus eventBus;
 
@@ -50,7 +52,7 @@ public class HelloScore {
         HelloScore app = loadApp();
         app.registerEventListener();
         app.start();
-
+        System.exit(0);
     }
 
     private static HelloScore loadApp() {
@@ -81,19 +83,20 @@ public class HelloScore {
         ExecutionPlan executionPlan = new ExecutionPlan();
 
         executionPlan.setFlowUuid("1");
-
+        executionPlan.setName("Sample name");
+        executionPlan.setLanguage("Sample lang");
         executionPlan.setBeginStep(0L);
 
         ExecutionStep executionStep = new ExecutionStep(0L);
-        executionStep.setAction(new ControlActionMetadata("ConsoleControlActions", "echoHelloScore"));
+        executionStep.setAction(new ControlActionMetadata("io.cloudslang.samples.controlactions.ConsoleControlActions", "echoHelloScore"));
         executionStep.setActionData(new HashMap<String, Serializable>());
-        executionStep.setNavigation(new ControlActionMetadata("NavigationActions", "nextStepNavigation"));
+        executionStep.setNavigation(new ControlActionMetadata("io.cloudslang.samples.controlactions.NavigationActions", "nextStepNavigation"));
         executionStep.setNavigationData(new HashMap<String, Serializable>());
 
         executionPlan.addStep(executionStep);
 
         ExecutionStep executionStep2 = new ExecutionStep(1L);
-        executionStep2.setAction(new ControlActionMetadata("ConsoleControlActions", "echoHelloScore"));
+        executionStep2.setAction(new ControlActionMetadata("io.cloudslang.samples.controlactions.ConsoleControlActions", "echoHelloScore"));
         executionStep2.setActionData(new HashMap<String, Serializable>());
 
         executionPlan.addStep(executionStep2);
