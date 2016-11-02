@@ -8,6 +8,7 @@ import io.cloudslang.dependency.impl.services.utils.UnzipUtil;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
+import io.cloudslang.score.events.EventBus;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
@@ -24,10 +25,19 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.io.File;
 import java.io.Serializable;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
@@ -64,7 +74,7 @@ public class PythonExecutorTest {
     private static final String SYSTEM_PROPERTIES_MAP = "__sys_prop__";
 
     private static final String GET_SP_FUNCTION_DEFINITION =
-                    "import time" + LINE_SEPARATOR +
+            "import time" + LINE_SEPARATOR +
                     "def check_env(sysPropName, expectedSysPropValue, variable, expectedVariableValue):" + LINE_SEPARATOR +
                     "  time.sleep(3)" + LINE_SEPARATOR +
                     "  property_value = __sys_prop__.get(sysPropName)" + LINE_SEPARATOR +
@@ -78,7 +88,7 @@ public class PythonExecutorTest {
     private static final String VAR1 = "VAR1";
     private static final String VAR2 = "VAR2";
     private static final String EXECUTION_SCRIPT =
-                    "import sys" + LINE_SEPARATOR +
+            "import sys" + LINE_SEPARATOR +
                     "import time" + LINE_SEPARATOR +
                     "time.sleep(3)" + LINE_SEPARATOR +
                     VAR1 + "={0}" + LINE_SEPARATOR +
@@ -87,7 +97,7 @@ public class PythonExecutorTest {
                     "print ''VAR2='' + str(" + VAR2 + ")" + LINE_SEPARATOR;
     private static final String PY_CLASS_IS_EXCLUDED_SCRIPT =
             "from Queue import Queue" + LINE_SEPARATOR +
-            "x = 'abc'" + LINE_SEPARATOR;
+                    "x = 'abc'" + LINE_SEPARATOR;
     private static final Map<String, Serializable> EMPTY_CALL_ARGUMENTS = Collections.emptyMap();
     private static final Map<String, Serializable> EXPECTED_CONTEXT_EXEC;
     private static final Map<String, Serializable> EXPECTED_CONTEXT_EVAL;
@@ -193,8 +203,8 @@ public class PythonExecutorTest {
             final String script = "import sys\nimport time\nimport math_fake.utils.print_text as print_text\ntime.sleep(3)\n" + varName + " = print_text.foo('" + executioId + "')\nprint " + varName + "\n";
             final String dependency = dependencies[i % 4];
 
-            int count = dependency.indexOf("math2") != -1 ? 2 : 3;
-            String sign = dependency.indexOf("sum-") != -1 ? "+" : "*";
+            int count = dependency.contains("math2") ? 2 : 3;
+            String sign = dependency.contains("sum-") ? "+" : "*";
 
             final StringBuilder expectedResult = new StringBuilder(executioId);
             while (--count > 0) {
@@ -301,6 +311,7 @@ public class PythonExecutorTest {
                 return resources;
             }
         };}
+        @Bean public EventBus eventBus() { return mock(EventBus.class);}
         @Bean public MavenConfig mavenConfig() {return new MavenConfigImpl();}
     }
 }

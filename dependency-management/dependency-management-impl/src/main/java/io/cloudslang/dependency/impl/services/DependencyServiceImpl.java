@@ -11,6 +11,9 @@ package io.cloudslang.dependency.impl.services;
 
 import io.cloudslang.dependency.api.services.DependencyService;
 import io.cloudslang.dependency.api.services.MavenConfig;
+import io.cloudslang.score.events.EventBus;
+import io.cloudslang.score.events.EventConstants;
+import io.cloudslang.score.events.ScoreEvent;
 import org.apache.log4j.Appender;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Logger;
@@ -26,19 +29,42 @@ import org.xml.sax.SAXException;
 import javax.annotation.PostConstruct;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.*;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -54,9 +80,9 @@ public class DependencyServiceImpl implements DependencyService {
 
     private static final String MAVEN_LAUNCHER_CLASS_NAME  = "org.codehaus.plexus.classworlds.launcher.Launcher";
     private static final String MAVEN_LANUCHER_METHOD_NAME = "mainWithExitCode";
-    public static final String PATH_FILE_EXTENSION = "path";
-    public static final String GAV_DELIMITER = ":";
-    protected static final String PATH_FILE_DELIMITER = ";";
+    private static final String PATH_FILE_EXTENSION = "path";
+    private static final String GAV_DELIMITER = ":";
+    private static final String PATH_FILE_DELIMITER = ";";
     private static final int MINIMAL_GAV_PARTS = 3;
     private static final int MAXIMAL_GAV_PARTS = 5;
     private static final String GAV_SEPARATOR = "_";
@@ -74,6 +100,9 @@ public class DependencyServiceImpl implements DependencyService {
 
     @Autowired
     private MavenConfig mavenConfig;
+
+    @Autowired
+    private EventBus eventBus;
 
     private final Lock lock = new ReentrantLock();
 
@@ -99,7 +128,10 @@ public class DependencyServiceImpl implements DependencyService {
 
     private void initMavenLogs() {
         File mavenLogFolderFile = new File(new File(calculateLogFolderPath()), MavenConfig.MAVEN_FOLDER);
-        mavenLogFolderFile.mkdirs();
+        boolean dirsCreated = mavenLogFolderFile.mkdirs();
+        if (!dirsCreated) {
+            logger.error("Failed to create maven log directories " + mavenLogFolderFile.getAbsolutePath());
+        }
         this.mavenLogFolder = mavenLogFolderFile.getAbsolutePath();
     }
 
@@ -174,6 +206,7 @@ public class DependencyServiceImpl implements DependencyService {
 
     @SuppressWarnings("ConstantConditions")
     private void buildDependencyFile(String[] gav) {
+        sendMavenDependencyBuildEvent(gav);
         String pomFilePath = getPomFilePath(gav);
         downloadArtifacts(gav);
         System.setProperty(MavenConfig.MAVEN_MDEP_OUTPUT_FILE_PROPEPRTY, getPathFileName(gav));
@@ -200,6 +233,37 @@ public class DependencyServiceImpl implements DependencyService {
             throw new IllegalStateException(fileToReturn.getPath() + " not found");
         }
         appendSelfToPathFile(gav, fileToReturn);
+        sendMavenDependencyBuildFinishedEvent(gav);
+    }
+
+    private void sendMavenDependencyBuildFinishedEvent(String[] gav) {
+        String message = "Artifact download complete";
+        if (gav.length >= 3) {
+            message = String.format("Downloading complete for artifact with gav: %s:%s:%s ", gav[0], gav[1], gav[2]);
+        }
+        Map<String, Serializable> data = new HashMap<>();
+        data.put(EventConstants.MAVEN_DEPENDENCY_BUILD_FINISHED, message);
+        ScoreEvent eventWrapper = new ScoreEvent(EventConstants.MAVEN_DEPENDENCY_BUILD_FINISHED, (Serializable) data);
+        dispatchEvent(eventWrapper);
+    }
+
+    private void sendMavenDependencyBuildEvent(String[] gav) {
+        String message = "Downloading artifact..";
+        if (gav.length >= 3) {
+            message = String.format("Downloading artifact with gav: %s:%s:%s ", gav[0], gav[1], gav[2]);
+        }
+        Map<String, Serializable> data = new HashMap<>();
+        data.put(EventConstants.MAVEN_DEPENDENCY_BUILD, message);
+        ScoreEvent eventWrapper = new ScoreEvent(EventConstants.MAVEN_DEPENDENCY_BUILD, (Serializable) data);
+        dispatchEvent(eventWrapper);
+    }
+
+    private void dispatchEvent(ScoreEvent eventWrapper) {
+        try {
+            eventBus.dispatch(eventWrapper);
+        } catch (InterruptedException e) {
+            logger.error("Thread is interrupted. Ignoring... ", e);
+        }
     }
 
     private String getPomFilePath(String[] gav) {
