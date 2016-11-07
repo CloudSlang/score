@@ -138,12 +138,12 @@ public class DependencyServiceTest {
 
         List<ScoreEvent> scoreEvents = argumentCaptor.getAllValues();
 
-        assertEquals( "Argument does not match", "mavenDependencyBuild", scoreEvents.get(0).getEventType());
+        assertEquals( "Argument does not match", "MAVEN_DEPENDENCY_BUILD", scoreEvents.get(0).getEventType());
         Map<String, Serializable> dataBuildEvent = (Map<String, Serializable>) scoreEvents.get(0).getData();
         assertEquals("Argument does not match", "Downloading artifact with gav: groupId1:mvn_artifact1:1.0 ",
                 dataBuildEvent.get(EventConstants.MAVEN_DEPENDENCY_BUILD));
 
-        assertEquals( "Argument does not match", "mavenDependencyBuildFinished", scoreEvents.get(1).getEventType());
+        assertEquals( "Argument does not match", "MAVEN_DEPENDENCY_BUILD_FINISHED", scoreEvents.get(1).getEventType());
         Map<String, Serializable> dataBuildFinishedEvent = (Map<String, Serializable>) scoreEvents.get(1).getData();
         assertEquals("Argument does not match", "Downloading complete for artifact with gav: groupId1:mvn_artifact1:1.0 ",
                 dataBuildFinishedEvent.get(EventConstants.MAVEN_DEPENDENCY_BUILD_FINISHED));

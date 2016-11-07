@@ -40,6 +40,6 @@ public class EventConstants {
 
     public static final String EXECUTION_ID_CONTEXT = "executionIdContext";
 
-    public static final String MAVEN_DEPENDENCY_BUILD = "mavenDependencyBuild";
-    public static final String MAVEN_DEPENDENCY_BUILD_FINISHED = "mavenDependencyBuildFinished";
+    public static final String MAVEN_DEPENDENCY_BUILD = "MAVEN_DEPENDENCY_BUILD";
+    public static final String MAVEN_DEPENDENCY_BUILD_FINISHED = "MAVEN_DEPENDENCY_BUILD_FINISHED";
 }
