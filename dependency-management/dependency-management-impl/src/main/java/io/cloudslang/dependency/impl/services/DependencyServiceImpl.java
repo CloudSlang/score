@@ -237,7 +237,7 @@ public class DependencyServiceImpl implements DependencyService {
     }
 
     private void sendMavenDependencyBuildFinishedEvent(String[] gav) throws InterruptedException {
-        String message = String.format("Downloading complete for artifact with gav: %s ",
+        String message = String.format("Download complete for artifact with gav: %s ",
                 StringUtils.arrayToDelimitedString(gav, ":"));
 
         Map<String, Serializable> data = new HashMap<>();

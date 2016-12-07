@@ -145,7 +145,7 @@ public class DependencyServiceTest {
 
         assertEquals( "Argument does not match", "MAVEN_DEPENDENCY_BUILD_FINISHED", scoreEvents.get(1).getEventType());
         Map<String, Serializable> dataBuildFinishedEvent = (Map<String, Serializable>) scoreEvents.get(1).getData();
-        assertEquals("Argument does not match", "Downloading complete for artifact with gav: groupId1:mvn_artifact1:1.0 ",
+        assertEquals("Argument does not match", "Download complete for artifact with gav: groupId1:mvn_artifact1:1.0 ",
                 dataBuildFinishedEvent.get(EventConstants.MAVEN_DEPENDENCY_BUILD_FINISHED));
 
         Assert.assertTrue("Unexpected returned set", retFiles.containsAll(referenceList) && ret.size() == referenceList.size());
