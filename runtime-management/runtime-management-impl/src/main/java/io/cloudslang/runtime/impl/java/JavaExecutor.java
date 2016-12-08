@@ -12,28 +12,19 @@ package io.cloudslang.runtime.impl.java;
 
 import io.cloudslang.runtime.api.java.JavaExecutionParametersProvider;
 import io.cloudslang.runtime.impl.Executor;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.DirectoryFileFilter;
-import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.apache.log4j.Logger;
-import org.python.google.common.collect.Sets;
-
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.Collection;
 import java.util.Set;
+import org.apache.log4j.Logger;
+import org.python.google.common.collect.Sets;
 
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
 public class JavaExecutor implements Executor {
     private static final Logger logger = Logger.getLogger(JavaExecutor.class);
-
-    private static final String SCORE_CONTENT_SDK_JAR = "score-content-sdk*.jar";
-    private static final String APP_HOME = "app.home";
 
     private static final ClassLoader PARENT_CLASS_LOADER;
 
@@ -44,24 +35,7 @@ public class JavaExecutor implements Executor {
             parentClassLoader = parentClassLoader.getParent();
         }
 
-        URL[] parentUrls = new URL[0];
-        try {
-            String appHomeDir = System.getProperty(APP_HOME);
-            File appLibDir = new File(appHomeDir, "lib");
-
-            if(appLibDir.exists() && appLibDir.isDirectory()) {
-                Collection<File> foundFiles = FileUtils.listFiles(appLibDir, new WildcardFileFilter(SCORE_CONTENT_SDK_JAR), DirectoryFileFilter.DIRECTORY);
-                if(foundFiles != null && !foundFiles.isEmpty()) {
-                    for (File file : foundFiles) {
-                        parentUrls = new URL[]{file.toURI().toURL()};
-                    }
-                }
-            }
-        } catch (MalformedURLException e) {
-            logger.error("Failed to build classpath for parent classloader", e);
-        }
-
-        PARENT_CLASS_LOADER = new URLClassLoader(parentUrls, parentClassLoader);
+        PARENT_CLASS_LOADER = parentClassLoader;
     }
 
     private final ClassLoader classLoader;
@@ -77,7 +51,11 @@ public class JavaExecutor implements Executor {
                     logger.error("Failed to add to the classloader path [" + filePath + "]", e);
                 }
             }
-            classLoader = new URLClassLoader(result.toArray(new URL[result.size()]), PARENT_CLASS_LOADER);
+            classLoader = new JavaExecutionClassLoader(
+                    result.toArray(new URL[result.size()]),
+                    PARENT_CLASS_LOADER,
+                    Thread.currentThread().getContextClassLoader()
+            );
         } else {
             // no dependencies - use application classloader
             classLoader = getClass().getClassLoader();
@@ -90,7 +68,8 @@ public class JavaExecutor implements Executor {
             Thread.currentThread().setContextClassLoader(classLoader);
             Class actionClass = getActionClass(className);
             Method executionMethod = getMethodByName(actionClass, methodName);
-            return executionMethod.invoke(actionClass.newInstance(), parametersProvider.getExecutionParameters(executionMethod));
+            Object[] params = parametersProvider.getExecutionParameters(executionMethod);
+            return executionMethod.invoke(actionClass.newInstance(), params);
         } catch (Exception e) {
             throw new RuntimeException("Method [" + methodName + "] invocation of class [" + className + "] failed!!!!", e);
         } finally {
