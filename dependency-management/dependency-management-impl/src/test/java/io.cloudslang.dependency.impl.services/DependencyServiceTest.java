@@ -3,11 +3,15 @@ package io.cloudslang.dependency.impl.services;
 import io.cloudslang.dependency.api.services.DependencyService;
 import io.cloudslang.dependency.api.services.MavenConfig;
 import io.cloudslang.dependency.impl.services.utils.UnzipUtil;
+import io.cloudslang.score.events.EventBus;
+import io.cloudslang.score.events.EventConstants;
+import io.cloudslang.score.events.ScoreEvent;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,8 +19,21 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.File;
+import java.io.Serializable;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
 
 /**
  * @author A. Eskin
@@ -55,11 +72,15 @@ public class DependencyServiceTest {
     @Autowired
     private DependencyService dependencyService;
 
+    @Autowired
+    private EventBus eventBus;
+
     @After
     public void cleanup() {
         String basePath = new TestConfig().mavenConfig().getLocalMavenRepoPath();
         new File(basePath + "/junit/junit/4.12/junit-4.12.path").delete();
         new File(basePath + "/groupId1/mvn_artifact1/1.0/mvn_artifact1-1.0.path").delete();
+        reset(eventBus);
     }
 
     @Test
@@ -95,7 +116,7 @@ public class DependencyServiceTest {
     }
 
     @Test
-    public void testBuildClassPath1() {
+    public void testBuildClassPath1() throws InterruptedException {
         Assume.assumeTrue(shouldRunMaven);
         Set <String> ret = dependencyService.getDependencies(new HashSet<>(Collections.singletonList("groupId1:mvn_artifact1:1.0")));
         final List<File> retFiles = new ArrayList<>();
@@ -109,6 +130,24 @@ public class DependencyServiceTest {
                 new File(basePath + "/org/springframework/spring-core/4.2.5.RELEASE/spring-core-4.2.5.RELEASE.jar"),
                 new File(basePath + "/commons-logging/commons-logging/1.2/commons-logging-1.2.jar"),
                 new File(basePath + "/groupId1/mvn_artifact1/1.0/mvn_artifact1-1.0.jar"));
+
+        final ArgumentCaptor<ScoreEvent> argumentCaptor =
+                ArgumentCaptor.forClass(ScoreEvent.class);
+
+        verify(eventBus, times(2)).dispatch(argumentCaptor.capture());
+
+        List<ScoreEvent> scoreEvents = argumentCaptor.getAllValues();
+
+        assertEquals( "Argument does not match", "MAVEN_DEPENDENCY_BUILD", scoreEvents.get(0).getEventType());
+        Map<String, Serializable> dataBuildEvent = (Map<String, Serializable>) scoreEvents.get(0).getData();
+        assertEquals("Argument does not match", "Downloading artifact with gav: groupId1:mvn_artifact1:1.0 ",
+                dataBuildEvent.get(EventConstants.MAVEN_DEPENDENCY_BUILD));
+
+        assertEquals( "Argument does not match", "MAVEN_DEPENDENCY_BUILD_FINISHED", scoreEvents.get(1).getEventType());
+        Map<String, Serializable> dataBuildFinishedEvent = (Map<String, Serializable>) scoreEvents.get(1).getData();
+        assertEquals("Argument does not match", "Download complete for artifact with gav: groupId1:mvn_artifact1:1.0 ",
+                dataBuildFinishedEvent.get(EventConstants.MAVEN_DEPENDENCY_BUILD_FINISHED));
+
         Assert.assertTrue("Unexpected returned set", retFiles.containsAll(referenceList) && ret.size() == referenceList.size());
     }
 
@@ -167,6 +206,11 @@ public class DependencyServiceTest {
         @Bean
         public DependencyService dependencyService() {
             return new DependencyServiceImpl();
+        }
+
+        @Bean
+        public EventBus eventBus() {
+            return mock(EventBus.class);
         }
 
         @Bean
