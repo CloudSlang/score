@@ -10,7 +10,6 @@
 package io.cloudslang.runtime.impl.java;
 
 import io.cloudslang.runtime.impl.constants.ScoreContentSdk;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLStreamHandlerFactory;
@@ -42,18 +41,14 @@ public class JavaExecutionClassLoader extends URLClassLoader {
     }
 
     public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-        if (isSdkClass(name)) {
-            try {
-                // invoke protected loadClass(String name, boolean resolve) method from ClassLoader class
-                Method loadClassMethod = globalClassLoader.getClass()
-                        .getDeclaredMethod("loadClass", String.class, boolean.class);
-                loadClassMethod.setAccessible(true);
-                return (Class<?>) loadClassMethod.invoke(globalClassLoader, name, resolve);
-            } catch (Exception e) {
-                throw new RuntimeException("Error loading class [" + name + "]: " + e.getMessage(), e);
+        try {
+            if (isSdkClass(name)) {
+                return globalClassLoader.loadClass(name);
+            } else {
+                return super.loadClass(name, resolve);
             }
-        } else {
-            return super.loadClass(name, resolve);
+        } catch (Exception e) {
+            throw new RuntimeException("Error loading class [" + name + "]: " + e.getMessage(), e);
         }
     }
 
