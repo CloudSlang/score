@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 
 /**
@@ -33,17 +34,15 @@ public class JavaExecutionClassLoaderTest {
     @Test
     public void testLoadNonSdkClass() throws Exception {
         Class<?> actualClass = javaExecutionClassLoader.loadClass(NON_SDK_CLASS_NAME);
-        Class<?> expectedClass = executorClassLoader.loadClass(NON_SDK_CLASS_NAME);
 
-        assertEquals(expectedClass, actualClass);
+        assertSame(executorClassLoader, actualClass.getClassLoader());
     }
 
     @Test
     public void testLoadSdkClass() throws Exception {
         Class<?> actualClass = javaExecutionClassLoader.loadClass(SDK_CLASS_NAME);
-        Class<?> expectedClass = globalClassLoader.loadClass(SDK_CLASS_NAME);
 
-        assertEquals(expectedClass, actualClass);
+        assertSame(globalClassLoader, actualClass.getClassLoader());
     }
 
     @Test
