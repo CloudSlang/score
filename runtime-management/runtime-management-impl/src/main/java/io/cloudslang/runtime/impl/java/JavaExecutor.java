@@ -12,6 +12,9 @@ package io.cloudslang.runtime.impl.java;
 
 import io.cloudslang.runtime.api.java.JavaExecutionParametersProvider;
 import io.cloudslang.runtime.impl.Executor;
+import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -25,6 +28,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.Set;
+
+import static io.cloudslang.runtime.impl.constants.ScoreContentSdk.SERIALIZABLE_SESSION_OBJECT_CANONICAL_NAME;
 
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
@@ -90,12 +95,99 @@ public class JavaExecutor implements Executor {
             Thread.currentThread().setContextClassLoader(classLoader);
             Class actionClass = getActionClass(className);
             Method executionMethod = getMethodByName(actionClass, methodName);
-            return executionMethod.invoke(actionClass.newInstance(), parametersProvider.getExecutionParameters(executionMethod));
+
+            Object[] executionParameters = parametersProvider.getExecutionParameters(executionMethod);
+            Object[] transformedExecutionParameters = transformExecutionParameters(executionParameters, executionMethod);
+
+            return executionMethod.invoke(actionClass.newInstance(), transformedExecutionParameters);
         } catch (Exception e) {
-            throw new RuntimeException("Method [" + methodName + "] invocation of class [" + className + "] failed!!!!", e);
+            throw new RuntimeException(
+                    "Method [" + methodName + "] invocation of class [" + className + "] failed: " + e.getMessage(), e);
         } finally {
             Thread.currentThread().setContextClassLoader(origCL);
         }
+    }
+
+    private Object[] transformExecutionParameters(Object[] oldExecutionParameters, Method executionMethod)
+            throws NoSuchFieldException, IllegalAccessException, NoSuchMethodException,
+            InvocationTargetException, InstantiationException {
+        // this method relies on the current SerializableSessionObject from the SDK
+        // if the object changes in the future, we need to align the logic here
+
+        Object[] transformedExecutionParameters = new Object[oldExecutionParameters.length];
+        String stringClassCanonicalName = String.class.getCanonicalName();
+
+        for (int i = 0; i < oldExecutionParameters.length; i++) {
+            Object currentParameter = oldExecutionParameters[i];
+            if (currentParameter != null) {
+                Class<?> currentParameterClass = currentParameter.getClass();
+                Class<?> expectedClass = executionMethod.getParameterTypes()[i];
+
+                // check if it's a string - optimization - most of the parameters for actions are strings
+                if (!currentParameterClass.getCanonicalName().equals(stringClassCanonicalName)) {
+                    if (isSerializableSessionObjectMismatch(expectedClass, currentParameterClass)) {
+                        String valueFieldName = "value";
+                        String nameFieldName = "name";
+
+                        // get the old data
+                        Object valueField = getFieldValue(valueFieldName, currentParameterClass, currentParameter);
+                        Object nameField = getFieldValueFromSuperClass(nameFieldName, currentParameterClass, currentParameter);
+
+                        // set the data in the new object
+                        Object transformedParameter = expectedClass.newInstance();
+                        setValue(valueField, expectedClass, transformedParameter);
+                        setName(nameField, expectedClass, transformedParameter);
+
+                        transformedExecutionParameters[i] = transformedParameter;
+                    } else {
+                        // no transformation
+                        transformedExecutionParameters[i] = currentParameter;
+                    }
+                } else {
+                    // no transformation
+                    transformedExecutionParameters[i] = currentParameter;
+                }
+            } else {
+                // no transformation
+                transformedExecutionParameters[i] = null;
+            }
+        }
+        return transformedExecutionParameters;
+    }
+
+    private Object getFieldValue(String fieldName, Class<?> currentParameterClass, Object currentParameter)
+            throws NoSuchFieldException, IllegalAccessException {
+        Field field = currentParameterClass.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return field.get(currentParameter);
+    }
+
+    private Object getFieldValueFromSuperClass(String fieldName, Class<?> currentParameterClass, Object currentParameter)
+            throws NoSuchFieldException, IllegalAccessException {
+        Class<?> superClass = currentParameterClass.getSuperclass();
+        return getFieldValue(fieldName, superClass, currentParameter);
+    }
+
+    private void setValue(Object value, Class<?> currentParameterClass, Object currentParameter)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        setField("Value", value, Serializable.class, currentParameterClass, currentParameter);
+    }
+
+    private void setName(Object name, Class<?> currentParameterClass, Object currentParameter)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        setField("Name", name, String.class, currentParameterClass, currentParameter);
+    }
+
+    private void setField(String fieldId, Object fieldValue, Class<?> fieldType, Class<?> currentParameterClass, Object currentParameter)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method setterMethod = currentParameterClass.getMethod("set" +  fieldId,fieldType);
+        setterMethod.invoke(currentParameter, fieldValue);
+    }
+
+    private boolean isSerializableSessionObjectMismatch(Class<?> expectedClass, Class<?> currentParameterClass) {
+        // SerializableSessionObject loaded by different classLoaders
+        return SERIALIZABLE_SESSION_OBJECT_CANONICAL_NAME.equals(currentParameterClass.getCanonicalName()) &&
+                 expectedClass != currentParameterClass;
     }
 
     private Class getActionClass(String className) {

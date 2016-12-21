@@ -71,7 +71,7 @@ public class JavaExecutorTest {
     @Test
     public void testJavaExecutorMissingDependency() {
         expectedEx.expect(RuntimeException.class);
-        expectedEx.expectMessage("Method [getVersion] invocation of class [group.artifact.OneClass] failed!!!!");
+        expectedEx.expectMessage("Method [getVersion] invocation of class [group.artifact.OneClass] failed: null");
 
         File one = new File(getClass().getClassLoader().getResource("one1.zip").getFile());
 
