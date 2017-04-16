@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/openscore/score.png?label=ready&title=Ready)](https://waffle.io/openscore/score)
 score 
 =====
 
