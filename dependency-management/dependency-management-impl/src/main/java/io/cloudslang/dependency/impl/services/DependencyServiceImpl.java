@@ -255,7 +255,7 @@ public class DependencyServiceImpl implements DependencyService {
     }
 
     private void dispatchEvent(ScoreEvent eventWrapper) throws InterruptedException {
-        eventBus.dispatch(eventWrapper);
+        eventBus.dispatchEvent(eventWrapper);
     }
 
     private String getPomFilePath(String[] gav) {

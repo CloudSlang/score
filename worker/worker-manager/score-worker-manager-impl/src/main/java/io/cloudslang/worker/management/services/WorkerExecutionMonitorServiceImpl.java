@@ -47,7 +47,7 @@ public class WorkerExecutionMonitorServiceImpl implements WorkerExecutionMonitor
                 logger.debug("Sending Worker Monitors Info:[" + monitorInfo +"]");
             }
             ScoreEvent event = new ScoreEvent(EventConstants.WORKER_EXECUTION_MONITOR, (Serializable) monitorInfo);
-            eventBus.dispatch(event);
+            eventBus.dispatchEvent(event);
         } catch (InterruptedException e) {
             logger.error("Failed to dispatch monitor info event", e);
         }

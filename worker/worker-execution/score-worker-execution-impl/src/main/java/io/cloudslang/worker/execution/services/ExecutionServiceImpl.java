@@ -245,8 +245,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	private void addPauseEvent(SystemContext systemContext) throws InterruptedException {
 		HashMap<String, Serializable> eventData = new HashMap<>();
 		eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, new HashMap<>(systemContext));
-		ScoreEvent eventWrapper = new ScoreEvent(EventConstants.SCORE_PAUSED_EVENT, eventData);
-		eventBus.dispatch(eventWrapper);
+		eventBus.dispatchEvent(new ScoreEvent(EventConstants.SCORE_PAUSED_EVENT, eventData));
 	}
 
 	private PauseReason findPauseReason(Long executionId, String branchId) {
@@ -282,11 +281,11 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
 	private void dumpBusEvents(Execution execution) throws InterruptedException {
 		ArrayDeque<ScoreEvent> eventsQueue = execution.getSystemContext().getEvents();
-		if(eventsQueue == null) {
+		if (eventsQueue == null) {
 			return;
 		}
-		for(ScoreEvent eventWrapper : eventsQueue) {
-			eventBus.dispatch(eventWrapper);
+		for (ScoreEvent eventWrapper : eventsQueue) {
+			eventBus.dispatchEvent(eventWrapper);
 		}
 		eventsQueue.clear();
 	}
@@ -355,8 +354,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 		eventData.put(EventConstants.SCORE_ERROR_MSG, ex);
 		eventData.put(EventConstants.SCORE_ERROR_LOG_MSG, logMessage);
 		eventData.put(EventConstants.SCORE_ERROR_TYPE, errorType);
-		ScoreEvent eventWrapper = new ScoreEvent(EventConstants.SCORE_ERROR_EVENT, eventData);
-		eventBus.dispatch(eventWrapper);
+		eventBus.dispatchEvent(new ScoreEvent(EventConstants.SCORE_ERROR_EVENT, eventData));
 	}
 
 	protected void navigate(Execution execution, ExecutionStep currStep) throws InterruptedException {
