@@ -48,7 +48,7 @@ public class WorkerExecutionMonitorServiceImplTest {
         ScoreEvent scoreEvent = new ScoreEvent(EventConstants.WORKER_EXECUTION_MONITOR, monitorInfo);
 
         workerExecutionMonitorService.collectMonitorInformation();
-        verify(eventBus, times(1)).dispatch(refEq(scoreEvent));
+        verify(eventBus).dispatchEvent(refEq(scoreEvent));
     }
 
     @Configuration

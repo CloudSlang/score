@@ -134,7 +134,7 @@ public class DependencyServiceTest {
         final ArgumentCaptor<ScoreEvent> argumentCaptor =
                 ArgumentCaptor.forClass(ScoreEvent.class);
 
-        verify(eventBus, times(2)).dispatch(argumentCaptor.capture());
+        verify(eventBus, times(2)).dispatchEvent(argumentCaptor.capture());
 
         List<ScoreEvent> scoreEvents = argumentCaptor.getAllValues();
 

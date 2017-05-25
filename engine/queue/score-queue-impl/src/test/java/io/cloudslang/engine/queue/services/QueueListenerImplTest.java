@@ -38,6 +38,7 @@ import java.util.UUID;
 
 import static org.junit.matchers.JUnitMatchers.hasItem;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -82,7 +83,8 @@ public class QueueListenerImplTest {
 		List<ExecutionMessage> messages = new ArrayList<>();
 		queueListener.onTerminated(messages);
 
-		verify(eventBus, never()).dispatch();
+		verify(eventBus, never()).dispatchEvent(any(ScoreEvent.class));
+		verify(eventBus, never()).dispatchEvents(any(ArrayList.class));
 	}
 
 	@Test
@@ -96,7 +98,7 @@ public class QueueListenerImplTest {
 		when(scoreEventFactory.createFinishedEvent(any(Execution.class))).thenReturn(event1, event2);
 		queueListener.onTerminated(messages);
 
-		verify(eventBus, times(1)).dispatch(event1, event2);
+		verify(eventBus, times(1)).dispatchEvents(getExpectedList(event1, event2));
 	}
 
 	@Test
@@ -151,7 +153,8 @@ public class QueueListenerImplTest {
 	public void testOnFailedWhenNoMessages() throws InterruptedException {
 		List<ExecutionMessage> messages = new ArrayList<>();
 		queueListener.onFailed(messages);
-		verify(eventBus, never()).dispatch();
+		verify(eventBus, never()).dispatchEvent(any(ScoreEvent.class));
+		verify(eventBus, never()).dispatchEvents(any(ArrayList.class));
 	}
 
 	@Test
@@ -168,7 +171,7 @@ public class QueueListenerImplTest {
 		when(scoreEventFactory.createFailureEvent(execution2)).thenReturn(event2);
 		queueListener.onFailed(messages);
 
-		verify(eventBus, times(1)).dispatch(event1, event2);
+		verify(eventBus, times(1)).dispatchEvents(getExpectedList(event1, event2));
 	}
 
 	@Test
@@ -233,6 +236,16 @@ public class QueueListenerImplTest {
 		PauseResumeService pauseResumeService() {
 			return mock(PauseResumeService.class);
 		}
+	}
+
+	private ArrayList<ScoreEvent> getExpectedList(ScoreEvent... events) {
+		ArrayList<ScoreEvent> expected = new ArrayList<>();
+		if (events != null) {
+			for (ScoreEvent event : events) {
+				expected.add(event);
+			}
+		}
+		return expected;
 	}
 
 }

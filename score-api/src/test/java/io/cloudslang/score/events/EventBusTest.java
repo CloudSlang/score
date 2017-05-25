@@ -36,12 +36,12 @@ public class EventBusTest {
 		eventBus.registerSubscriberForEvents(eventHandler, handlerTypes);
 
 		ScoreEvent event = new ScoreEvent("type1", "event");
-		eventBus.dispatch(event);
+		eventBus.dispatchEvent(event);
 
 		Mockito.verify(eventHandler, Mockito.times(1)).onEvent(event);
 
 		event = new ScoreEvent("typeX", "event");
-		eventBus.dispatch(event);
+		eventBus.dispatchEvent(event);
 
 		Mockito.verify(eventHandler, Mockito.times(0)).onEvent(event);
 	}
@@ -55,7 +55,7 @@ public class EventBusTest {
 		eventBus.unregisterSubscriberForEvents(eventHandler, handlerTypes);
 
 		ScoreEvent event = new ScoreEvent("type1", "event");
-		eventBus.dispatch(event);
+		eventBus.dispatchEvent(event);
 
 		Mockito.verify(eventHandler, Mockito.times(0)).onEvent(event);
 	}

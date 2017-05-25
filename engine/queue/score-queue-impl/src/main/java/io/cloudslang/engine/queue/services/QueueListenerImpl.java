@@ -14,14 +14,14 @@ package io.cloudslang.engine.queue.services;
 
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
+import io.cloudslang.orchestrator.services.ExecutionStateService;
+import io.cloudslang.orchestrator.services.PauseResumeService;
+import io.cloudslang.orchestrator.services.SplitJoinService;
 import io.cloudslang.score.events.ConfigurationAwareEventBus;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.execution.ExecutionSummary;
 import io.cloudslang.score.facade.execution.PauseReason;
-import io.cloudslang.orchestrator.services.ExecutionStateService;
-import io.cloudslang.orchestrator.services.PauseResumeService;
-import io.cloudslang.orchestrator.services.SplitJoinService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -98,18 +98,18 @@ public class QueueListenerImpl implements QueueListener {
 
     @Override
     public void onTerminated(List<ExecutionMessage> messages) {
-        ScoreEvent[] scoreEvents = handleTerminatedMessages(messages);
-        if (scoreEvents.length > 0) {
+        ArrayList<ScoreEvent> scoreEvents = handleTerminatedMessages(messages);
+        if (CollectionUtils.isNotEmpty(scoreEvents)) {
             try {
-                eventBus.dispatch(scoreEvents);
+                eventBus.dispatchEvents(scoreEvents);
             } catch (InterruptedException e) {
                 logger.error("Thread is interrupted. Ignoring... ", e);
             }
         }
     }
 
-    private ScoreEvent[] handleTerminatedMessages(List<ExecutionMessage> messages) {
-        List<ScoreEvent> scoreEvents = new ArrayList<>(messages.size());
+    private ArrayList<ScoreEvent> handleTerminatedMessages(List<ExecutionMessage> messages) {
+        ArrayList<ScoreEvent> scoreEvents = new ArrayList<>(messages.size());
         List<Execution> branches = new ArrayList<>();
 
         for (ExecutionMessage executionMessage : messages) {
@@ -128,7 +128,7 @@ public class QueueListenerImpl implements QueueListener {
             splitJoinService.endBranch(branches);
         }
 
-        return scoreEvents.toArray(new ScoreEvent[scoreEvents.size()]);
+        return scoreEvents;
     }
 
     /**
@@ -146,10 +146,10 @@ public class QueueListenerImpl implements QueueListener {
     @Override
     public void onFailed(List<ExecutionMessage> messages) {
         deleteExecutionStateObjects(messages);
-        ScoreEvent[] events = createFailureEvents(messages);
-        if (events.length > 0) {
+        ArrayList<ScoreEvent> events = createFailureEvents(messages);
+        if (CollectionUtils.isNotEmpty(events)) {
             try {
-                eventBus.dispatch(events);
+                eventBus.dispatchEvents(events);
             } catch (InterruptedException e) {
                 logger.error("Thread is interrupted. Ignoring... ", e);
             }
@@ -181,9 +181,9 @@ public class QueueListenerImpl implements QueueListener {
         return pauseId;
     }
 
-    private ScoreEvent[] createFailureEvents(List<ExecutionMessage> messages) {
+    private ArrayList<ScoreEvent> createFailureEvents(List<ExecutionMessage> messages) {
         Execution execution;
-        List<ScoreEvent> events = new ArrayList<>(messages.size());
+        ArrayList<ScoreEvent> events = new ArrayList<>(messages.size());
         for (ExecutionMessage executionMessage : messages) {
             execution = extractExecution(executionMessage);
             if (failedBecauseNoWorker(execution)) {
@@ -196,7 +196,7 @@ public class QueueListenerImpl implements QueueListener {
                 events.add(scoreEventFactory.createFailureEvent(execution));
             }
         }
-        return events.toArray(new ScoreEvent[events.size()]);
+        return events;
     }
 
     private void deleteExecutionStateObjects(List<ExecutionMessage> messages) {
