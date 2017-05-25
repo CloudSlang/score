@@ -10,17 +10,14 @@
 
 package io.cloudslang.score.events;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * User: hajyhia
- * Date: 1/19/14
- * Time: 5:51 PM
- */
-public class EventBusImpl implements EventBus {
+public class EventBusImpl implements ConfigurationAwareEventBus {
 
+	private static final String ILLEGAL_SUBSCRIBER_TYPE = "Unknown subscriber type for bus.";
 	private Map<ScoreEventListener, Set<String>> handlers = new ConcurrentHashMap<>();
 
 	public void subscribe(ScoreEventListener eventListener, Set<String> eventTypes) {
@@ -31,13 +28,58 @@ public class EventBusImpl implements EventBus {
 		handlers.remove(eventListener);
 	}
 
-    public void dispatch(ScoreEvent... events)  throws InterruptedException {
-        for (ScoreEventListener eventHandler : handlers.keySet()) {
-            Set<String> eventTypes = handlers.get(eventHandler);
-            for (ScoreEvent eventWrapper : events) {
-                if (eventTypes.contains(eventWrapper.getEventType())) {
-                    eventHandler.onEvent(eventWrapper);
-                }
+	public void dispatch(ScoreEvent... events) throws InterruptedException {
+		for (ScoreEventListener eventHandler : handlers.keySet()) {
+			Set<String> eventTypes = handlers.get(eventHandler);
+			for (ScoreEvent eventWrapper : events) {
+				if (eventTypes.contains(eventWrapper.getEventType())) {
+					eventHandler.onEvent(eventWrapper);
+				}
+			}
+		}
+	}
+
+	@Override
+	public void registerSubscriberForEvents(Object subscriber, Set<String> eventTypes) {
+		if (!(subscriber instanceof ScoreEventListener)) {
+			throw new IllegalStateException(ILLEGAL_SUBSCRIBER_TYPE);
+		}
+		handlers.put(((ScoreEventListener) subscriber), eventTypes);
+	}
+
+	@Override
+	public void unregisterSubscriberForEvents(Object subscriber, Set<String> eventTypes) {
+		if (!(subscriber instanceof ScoreEventListener)) {
+			throw new IllegalStateException(ILLEGAL_SUBSCRIBER_TYPE);
+		}
+		handlers.remove(subscriber);
+	}
+
+	@Override
+	public void dispatchEvent(ScoreEvent scoreEvent) throws InterruptedException {
+		doDispatch(scoreEvent);
+	}
+
+	@Override
+	public void dispatchEvents(ArrayList<ScoreEvent> scoreEvents) throws InterruptedException {
+		for (ScoreEvent scoreEvent : scoreEvents) {
+			doDispatch(scoreEvent);
+		}
+	}
+
+	@Override
+	public void initialize() {
+	}
+
+	@Override
+	public void destroy() {
+	}
+
+	private void doDispatch(ScoreEvent scoreEvent) throws InterruptedException {
+		for (ScoreEventListener eventHandler : handlers.keySet()) {
+			Set<String> eventTypes = handlers.get(eventHandler);
+			if (eventTypes.contains(scoreEvent.getEventType())) {
+				eventHandler.onEvent(scoreEvent);
 			}
 		}
 	}
