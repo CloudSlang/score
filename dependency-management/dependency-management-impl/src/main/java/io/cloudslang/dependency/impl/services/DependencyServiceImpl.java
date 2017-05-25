@@ -11,7 +11,7 @@ package io.cloudslang.dependency.impl.services;
 
 import io.cloudslang.dependency.api.services.DependencyService;
 import io.cloudslang.dependency.api.services.MavenConfig;
-import io.cloudslang.score.events.EventBus;
+import io.cloudslang.score.events.ConfigurationAwareEventBus;
 import io.cloudslang.score.events.EventConstants;
 import io.cloudslang.score.events.ScoreEvent;
 import org.apache.log4j.Appender;
@@ -102,7 +102,7 @@ public class DependencyServiceImpl implements DependencyService {
     private MavenConfig mavenConfig;
 
     @Autowired
-    private EventBus eventBus;
+    private ConfigurationAwareEventBus eventBus;
 
     private final Lock lock = new ReentrantLock();
 

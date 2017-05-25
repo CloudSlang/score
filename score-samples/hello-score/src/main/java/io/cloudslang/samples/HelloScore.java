@@ -15,7 +15,7 @@ import io.cloudslang.score.api.ExecutionPlan;
 import io.cloudslang.score.api.ExecutionStep;
 import io.cloudslang.score.api.Score;
 import io.cloudslang.score.api.TriggeringProperties;
-import io.cloudslang.score.events.EventBus;
+import io.cloudslang.score.events.ConfigurationAwareEventBus;
 import io.cloudslang.score.events.EventConstants;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.events.ScoreEventListener;
@@ -42,7 +42,7 @@ public class HelloScore {
 
     @SuppressWarnings("SpringJavaAutowiringInspection")
     @Autowired
-    private EventBus eventBus;
+    private ConfigurationAwareEventBus eventBus;
 
     private final static Logger logger = Logger.getLogger(HelloScore.class);
     private ApplicationContext context;

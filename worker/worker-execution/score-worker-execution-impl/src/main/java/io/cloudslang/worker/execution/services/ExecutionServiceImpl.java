@@ -15,7 +15,7 @@ import io.cloudslang.score.api.ExecutionStep;
 import io.cloudslang.score.api.StartBranchDataContainer;
 import io.cloudslang.score.api.execution.ExecutionMetadataConsts;
 import io.cloudslang.score.api.execution.ExecutionParametersConsts;
-import io.cloudslang.score.events.EventBus;
+import io.cloudslang.score.events.ConfigurationAwareEventBus;
 import io.cloudslang.score.events.EventConstants;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.facade.TempConstants;
@@ -53,14 +53,18 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
 	@Autowired
 	private PauseResumeService pauseService;
+
 	@Autowired
 	private ReflectionAdapter reflectionAdapter;
+
 	@Autowired
 	private WorkerDbSupportService workerDbSupportService;
+
 	@Autowired
 	private WorkerConfigurationService workerConfigurationService;
+
 	@Autowired
-	private EventBus eventBus;
+	private ConfigurationAwareEventBus eventBus;
 
 	@Override
 	public Execution execute(Execution execution) throws InterruptedException {

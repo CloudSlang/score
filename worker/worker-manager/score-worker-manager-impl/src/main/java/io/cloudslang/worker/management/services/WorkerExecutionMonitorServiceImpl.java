@@ -10,8 +10,8 @@
 
 package io.cloudslang.worker.management.services;
 
+import io.cloudslang.score.events.ConfigurationAwareEventBus;
 import org.apache.log4j.Logger;
-import io.cloudslang.score.events.EventBus;
 import io.cloudslang.score.events.EventConstants;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.worker.management.monitor.ScheduledWorkerMonitor;
@@ -28,7 +28,7 @@ public class WorkerExecutionMonitorServiceImpl implements WorkerExecutionMonitor
     protected static final Logger logger = Logger.getLogger(WorkerExecutionMonitorServiceImpl.class);
 
     @Autowired
-    private EventBus eventBus;
+    private ConfigurationAwareEventBus eventBus;
 
     @Autowired
     private WorkerMonitors workerMonitors;
