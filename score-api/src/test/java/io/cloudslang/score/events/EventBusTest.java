@@ -52,7 +52,7 @@ public class EventBusTest {
 		handlerTypes.add("type1");
 
 		eventBus.registerSubscriberForEvents(eventHandler, handlerTypes);
-		eventBus.unsubscribe(eventHandler);
+		eventBus.unregisterSubscriberForEvents(eventHandler, handlerTypes);
 
 		ScoreEvent event = new ScoreEvent("type1", "event");
 		eventBus.dispatch(event);
