@@ -12,29 +12,32 @@ package io.cloudslang.score.events;
 
 import java.util.Set;
 
-/**
- * User:
- * Date: 09/01/14
- * Time: 12:06
- */
 public interface EventBus {
 
     /**
-     * register listener for event types
+     * Register listener for event types
      * @param eventHandler  - the handler of the events
      * @param eventTypes - the types of events you want to listen to
+     * @deprecated Use io.cloudslang.score.events.ConfigurationAwareEventBus#registerSubscriberForEvents(java.lang.Object, java.util.Set) instead.
      */
+    @Deprecated
 	void subscribe(ScoreEventListener eventHandler, Set<String> eventTypes);
 
     /**
-     * remove the given handler
+     * Remove the given handler
      * @param eventHandler - the listener to remove
+     * @deprecated Use io.cloudslang.score.events.ConfigurationAwareEventBus#unregisterSubscriberForEvents(java.lang.Object, java.util.Set) instead.
      */
+    @Deprecated
 	void unsubscribe(ScoreEventListener eventHandler);
 
+
     /**
-     * dispatch the given events, meaning relevant handlers will be called based on the event types
+     * Dispatch the given events, meaning relevant handlers will be called based on the event types
      * @param eventWrappers one or more score event to dispatch
+     * @deprecated Use either io.cloudslang.score.events.ConfigurationAwareEventBus#dispatchEvent(io.cloudslang.score.events.ScoreEvent) or
+     * io.cloudslang.score.events.ConfigurationAwareEventBus#dispatchEvents(java.util.ArrayList)
      */
-	void dispatch(ScoreEvent... eventWrappers) throws InterruptedException;
+    @Deprecated
+    void dispatch(ScoreEvent... eventWrappers) throws InterruptedException;
 }
