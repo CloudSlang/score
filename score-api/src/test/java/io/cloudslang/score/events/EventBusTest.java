@@ -33,7 +33,7 @@ public class EventBusTest {
 		Set<String> handlerTypes = new HashSet<>();
 		handlerTypes.add("type1");
 
-		eventBus.subscribe(eventHandler, handlerTypes);
+		eventBus.registerSubscriberForEvents(eventHandler, handlerTypes);
 
 		ScoreEvent event = new ScoreEvent("type1", "event");
 		eventBus.dispatch(event);
@@ -51,7 +51,7 @@ public class EventBusTest {
 		Set<String> handlerTypes = new HashSet<>();
 		handlerTypes.add("type1");
 
-		eventBus.subscribe(eventHandler, handlerTypes);
+		eventBus.registerSubscriberForEvents(eventHandler, handlerTypes);
 		eventBus.unsubscribe(eventHandler);
 
 		ScoreEvent event = new ScoreEvent("type1", "event");

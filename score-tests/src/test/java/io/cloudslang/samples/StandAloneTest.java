@@ -366,7 +366,7 @@ public class StandAloneTest {
     private void registerEventListener(String... eventTypes) {
         Set<String> handlerTypes = new HashSet<>();
         Collections.addAll(handlerTypes, eventTypes);
-        eventBus.subscribe(new ScoreEventListener() {
+        eventBus.registerSubscriberForEvents(new ScoreEventListener() {
             @Override
             public void onEvent(ScoreEvent event) {
                 logger.info("Listener " + this.toString() + " invoked on type: " + event.getEventType() + " with data: " + event.getData());
