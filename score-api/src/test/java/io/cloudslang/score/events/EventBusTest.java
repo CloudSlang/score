@@ -13,10 +13,6 @@ package io.cloudslang.score.events;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import io.cloudslang.score.events.EventBus;
-import io.cloudslang.score.events.EventBusImpl;
-import io.cloudslang.score.events.ScoreEvent;
-import io.cloudslang.score.events.ScoreEventListener;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -25,7 +21,7 @@ public class EventBusTest {
 
 	private ScoreEventListener eventHandler = Mockito.mock(ScoreEventListener.class);
 
-	private EventBus eventBus = new EventBusImpl();
+	private ConfigurationAwareEventBus eventBus = new EventBusImpl();
 
 	@Before
 	public void init() {

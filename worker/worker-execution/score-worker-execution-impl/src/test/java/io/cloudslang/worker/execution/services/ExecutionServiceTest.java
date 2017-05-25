@@ -13,7 +13,7 @@ package io.cloudslang.worker.execution.services;
 import io.cloudslang.score.api.ControlActionMetadata;
 import io.cloudslang.score.api.ExecutionPlan;
 import io.cloudslang.score.api.ExecutionStep;
-import io.cloudslang.score.events.EventBus;
+import io.cloudslang.score.events.ConfigurationAwareEventBus;
 import io.cloudslang.score.events.EventConstants;
 import io.cloudslang.score.facade.TempConstants;
 import io.cloudslang.score.facade.entities.Execution;
@@ -243,8 +243,8 @@ public class ExecutionServiceTest {
 	static class ConfigurationForTest {
 
 		@Bean
-		public EventBus getEventBus() {
-			return mock(EventBus.class);
+		public ConfigurationAwareEventBus getEventBus() {
+			return mock(ConfigurationAwareEventBus.class);
 		}
 
 		@Bean

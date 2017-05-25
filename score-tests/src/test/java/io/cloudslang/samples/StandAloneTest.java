@@ -11,12 +11,14 @@
 package io.cloudslang.samples;
 
 import com.google.common.collect.Sets;
+import io.cloudslang.samples.controlactions.BranchActions;
+import io.cloudslang.samples.controlactions.SessionDataActions;
 import io.cloudslang.score.api.ControlActionMetadata;
 import io.cloudslang.score.api.ExecutionPlan;
 import io.cloudslang.score.api.ExecutionStep;
 import io.cloudslang.score.api.Score;
 import io.cloudslang.score.api.TriggeringProperties;
-import io.cloudslang.score.events.EventBus;
+import io.cloudslang.score.events.ConfigurationAwareEventBus;
 import io.cloudslang.score.events.EventConstants;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.events.ScoreEventListener;
@@ -25,8 +27,6 @@ import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import io.cloudslang.samples.controlactions.BranchActions;
-import io.cloudslang.samples.controlactions.SessionDataActions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -56,7 +56,7 @@ public class StandAloneTest {
     private Score score;
 
     @Autowired
-    private EventBus eventBus;
+    private ConfigurationAwareEventBus eventBus;
 
 
     private List<ScoreEvent> eventQueue = Collections.synchronizedList(new ArrayList<ScoreEvent>());

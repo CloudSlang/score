@@ -8,7 +8,7 @@ import io.cloudslang.dependency.impl.services.utils.UnzipUtil;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
-import io.cloudslang.score.events.EventBus;
+import io.cloudslang.score.events.ConfigurationAwareEventBus;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
@@ -311,7 +311,7 @@ public class PythonExecutorTest {
                 return resources;
             }
         };}
-        @Bean public EventBus eventBus() { return mock(EventBus.class);}
+        @Bean public ConfigurationAwareEventBus eventBus() { return mock(ConfigurationAwareEventBus.class);}
         @Bean public MavenConfig mavenConfig() {return new MavenConfigImpl();}
     }
 }

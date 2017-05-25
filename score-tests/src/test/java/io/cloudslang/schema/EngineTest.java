@@ -18,7 +18,7 @@ import io.cloudslang.score.api.ExecutionPlan;
 import io.cloudslang.score.api.ExecutionStep;
 import io.cloudslang.score.api.Score;
 import io.cloudslang.score.api.TriggeringProperties;
-import io.cloudslang.score.events.EventBus;
+import io.cloudslang.score.events.ConfigurationAwareEventBus;
 import liquibase.integration.spring.SpringLiquibase;
 import org.hibernate.ejb.HibernatePersistence;
 import org.junit.Test;
@@ -161,8 +161,8 @@ public class EngineTest {
         }
 
 		@Bean
-		EventBus eventBus() {
-			return mock(EventBus.class);
+        ConfigurationAwareEventBus eventBus() {
+			return mock(ConfigurationAwareEventBus.class);
 		}
 
 	}

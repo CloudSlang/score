@@ -12,14 +12,14 @@ package io.cloudslang.engine.queue.services;
 
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
-import io.cloudslang.score.events.EventBus;
+import io.cloudslang.orchestrator.services.ExecutionStateService;
+import io.cloudslang.orchestrator.services.PauseResumeService;
+import io.cloudslang.orchestrator.services.SplitJoinService;
+import io.cloudslang.score.events.ConfigurationAwareEventBus;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.execution.ExecutionSummary;
 import io.cloudslang.score.lang.SystemContext;
-import io.cloudslang.orchestrator.services.ExecutionStateService;
-import io.cloudslang.orchestrator.services.PauseResumeService;
-import io.cloudslang.orchestrator.services.SplitJoinService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,7 +58,7 @@ public class QueueListenerImplTest {
 	private QueueListener queueListener;
 
 	@Autowired
-	private EventBus eventBus;
+	private ConfigurationAwareEventBus eventBus;
 
 	@Autowired
 	private ExecutionMessageConverter executionMessageConverter;
@@ -215,8 +215,8 @@ public class QueueListenerImplTest {
 		}
 
 		@Bean
-		EventBus eventBus() {
-			return mock(EventBus.class);
+		ConfigurationAwareEventBus eventBus() {
+			return mock(ConfigurationAwareEventBus.class);
 		}
 
 		@Bean

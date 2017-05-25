@@ -10,9 +10,9 @@
 
 package io.cloudslang.worker.management.services;
 
+import io.cloudslang.score.events.ConfigurationAwareEventBus;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import io.cloudslang.score.events.EventBus;
 import io.cloudslang.score.events.EventConstants;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.worker.management.monitor.ScheduledWorkerMonitor;
@@ -35,7 +35,7 @@ public class WorkerExecutionMonitorServiceImplTest {
     WorkerExecutionMonitorService workerExecutionMonitorService;
 
     @Autowired
-    EventBus eventBus;
+    ConfigurationAwareEventBus eventBus;
 
     @Autowired
     WorkerMonitors workerMonitors;
@@ -55,7 +55,7 @@ public class WorkerExecutionMonitorServiceImplTest {
     public static class MyTestConfig {
         @Bean
         public WorkerExecutionMonitorService workerExecutionMonitorService() {return new WorkerExecutionMonitorServiceImpl();}
-        @Bean public EventBus eventBus() {return mock(EventBus.class);}
+        @Bean public ConfigurationAwareEventBus eventBus() {return mock(ConfigurationAwareEventBus.class);}
         @Bean public WorkerMonitors workerMonitors() {return mock(WorkerMonitors.class);}
         @Bean public ScheduledWorkerMonitor scheduledWorkerMonitor() {return mock(ScheduledWorkerMonitor.class);}
     }

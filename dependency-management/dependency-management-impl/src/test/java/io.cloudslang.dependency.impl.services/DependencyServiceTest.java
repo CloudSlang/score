@@ -3,7 +3,7 @@ package io.cloudslang.dependency.impl.services;
 import io.cloudslang.dependency.api.services.DependencyService;
 import io.cloudslang.dependency.api.services.MavenConfig;
 import io.cloudslang.dependency.impl.services.utils.UnzipUtil;
-import io.cloudslang.score.events.EventBus;
+import io.cloudslang.score.events.ConfigurationAwareEventBus;
 import io.cloudslang.score.events.EventConstants;
 import io.cloudslang.score.events.ScoreEvent;
 import org.junit.After;
@@ -73,7 +73,7 @@ public class DependencyServiceTest {
     private DependencyService dependencyService;
 
     @Autowired
-    private EventBus eventBus;
+    private ConfigurationAwareEventBus eventBus;
 
     @After
     public void cleanup() {
@@ -209,8 +209,8 @@ public class DependencyServiceTest {
         }
 
         @Bean
-        public EventBus eventBus() {
-            return mock(EventBus.class);
+        public ConfigurationAwareEventBus eventBus() {
+            return mock(ConfigurationAwareEventBus.class);
         }
 
         @Bean
