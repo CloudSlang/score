@@ -93,6 +93,17 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 
 	@Override
 	@Transactional
+	public void updateWorkerToNotDeleted(String uuid) {
+		WorkerNode worker = workerNodeRepository.findByUuidAndDeleted(uuid, true);;
+		if(worker != null) {
+			worker.setActive(false);
+			worker.setDeleted(false);
+			worker.setStatus(WorkerStatus.IN_RECOVERY);
+		}
+	}
+
+	@Override
+	@Transactional
 	public List<WorkerNode> readAllNotDeletedWorkers() {
 		return workerNodeRepository.findByDeletedOrderByIdAsc(false);
 	}

@@ -52,6 +52,14 @@ public interface WorkerNodeService {
 
     /**
      *
+     * update a worker record to is not deleted state
+     *
+     * @param uuid the uuid of the worker to mark as not deleted
+     */
+    void updateWorkerToNotDeleted(String uuid);
+
+    /**
+     *
      * Reads all of the workers that are not marked with the IS_DELETED flag
      *
      * @return a List of {@link io.cloudslang.engine.node.entities.WorkerNode} that are ont marked with
