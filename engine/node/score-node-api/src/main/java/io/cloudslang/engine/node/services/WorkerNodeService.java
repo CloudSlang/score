@@ -52,7 +52,7 @@ public interface WorkerNodeService {
 
     /**
      *
-     * update a worker record to is not deleted state
+     * update a worker record to it's not deleted state
      *
      * @param uuid the uuid of the worker to mark as not deleted
      */

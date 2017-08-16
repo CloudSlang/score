@@ -161,10 +161,14 @@ public class WorkerNodeServiceTest {
 
 	@Test
 	public void restoreDeletedWorker() {
-		workerNodeService.create("H3", "H3", "tirla.alin", "c:/dir");
+		workerNodeService.create("H3", "H3", "tirla.alin", "m:/y/imaginary/path");
 		WorkerNode worker = workerNodeService.readByUUID("H3");
-		workerNodeService.updateWorkerToDeleted("H3");
+		worker.setActive(false);
+		worker.setDeleted(true);
+		worker.setStatus(WorkerStatus.IN_RECOVERY);
+
 		workerNodeService.updateWorkerToNotDeleted("H3");
+
 		Assert.assertEquals(WorkerStatus.IN_RECOVERY, worker.getStatus());
 		Assert.assertEquals(false, worker.isActive());
 		Assert.assertEquals(false, worker.isDeleted());
