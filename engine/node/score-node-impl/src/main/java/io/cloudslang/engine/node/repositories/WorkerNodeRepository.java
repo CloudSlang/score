@@ -10,8 +10,8 @@
 
 package io.cloudslang.engine.node.repositories;
 
-import io.cloudslang.score.api.nodes.WorkerStatus;
 import io.cloudslang.engine.node.entities.WorkerNode;
+import io.cloudslang.score.api.nodes.WorkerStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -34,6 +34,7 @@ public interface WorkerNodeRepository extends JpaRepository<WorkerNode,Long> {
 
 	List<WorkerNode> findByActiveAndStatusAndDeleted(boolean isActive, WorkerStatus status, boolean deleted);
 
+	@Query("select w from WorkerNode w where (w.active = ?1) and (w.status = ?2) and (w.deleted = ?3) and ((w.versionId = ?4) or (w.versionId is null))")
 	List<WorkerNode> findByActiveAndStatusAndDeletedAndVersionId(boolean isActive, WorkerStatus status, boolean deleted, String versionId);
 
 	List<WorkerNode> findByGroupsAndDeleted(String group, boolean deleted);
