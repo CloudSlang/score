@@ -73,6 +73,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
             <column name="MSG_ID" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
+            <!-- we should use generic type here -->
             <column name="PAYLOAD" type="blob">
                 <constraints nullable="false"/>
             </column>
