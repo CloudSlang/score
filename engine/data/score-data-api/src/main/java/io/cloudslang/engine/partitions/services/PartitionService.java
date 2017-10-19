@@ -15,7 +15,6 @@ import io.cloudslang.engine.partitions.entities.PartitionGroup;
 /**
  * Date: 4/22/12
  *
- * @author
  *
  * This service is responsible for handling tables partiotions.
  * Partition tables are rolled to the next partition when passing a certian treshold

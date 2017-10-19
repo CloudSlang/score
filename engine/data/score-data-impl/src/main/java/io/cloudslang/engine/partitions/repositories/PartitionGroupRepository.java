@@ -22,7 +22,6 @@ import org.springframework.data.repository.query.Param;
 /**
  * Date: 4/23/12
  *
- * @author
  */
 public interface PartitionGroupRepository extends JpaRepository<PartitionGroup,Long> {
 

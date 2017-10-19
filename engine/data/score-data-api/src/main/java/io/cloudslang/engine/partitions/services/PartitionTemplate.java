@@ -15,7 +15,6 @@ import java.util.List;
 /**
  * Date: 4/27/12
  *
- * @author
  *
  * Trmplate class for handling partiotiond tables
  *

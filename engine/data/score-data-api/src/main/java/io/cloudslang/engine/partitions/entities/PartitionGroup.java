@@ -21,7 +21,6 @@ import javax.persistence.Table;
 /**
  * Date: 4/23/12
  *
- * @author
  */
 @Entity
 @Table(name = "OO_PARTITION_GROUPS")

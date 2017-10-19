@@ -19,7 +19,6 @@ import java.util.Map;
 /**
  * Date: 8/1/11
  *
- * @author
  */
 public class Execution implements Serializable {
     private Long executionId;

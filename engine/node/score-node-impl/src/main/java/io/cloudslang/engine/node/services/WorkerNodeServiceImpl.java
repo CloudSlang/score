@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * @author
  * @author Avi Moradi
  * @since 11/11/2012
  * @version $Id$

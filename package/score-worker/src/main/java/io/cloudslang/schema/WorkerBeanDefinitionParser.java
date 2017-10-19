@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author
  * @since 21/01/2014
  */
 public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {

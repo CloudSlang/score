@@ -30,7 +30,6 @@ import static ch.lambdaj.Lambda.filter;
 /**
  * Date: 12/1/13
  *
- * @author
  */
 public final class OrchestratorDispatcherServiceImpl implements OrchestratorDispatcherService {
 	private final Logger logger = Logger.getLogger(getClass());

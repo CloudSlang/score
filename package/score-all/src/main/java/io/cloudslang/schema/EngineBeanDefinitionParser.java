@@ -50,7 +50,6 @@ import java.util.Map;
 /**
  * Date: 1/21/14
  *
- * @author
  */
 @SuppressWarnings("unused")
 public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {

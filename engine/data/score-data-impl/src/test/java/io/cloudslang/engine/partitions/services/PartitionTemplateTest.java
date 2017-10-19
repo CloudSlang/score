@@ -30,7 +30,6 @@ import static org.mockito.Mockito.when;
 /**
  * Date: 4/23/12
  *
- * @author
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration

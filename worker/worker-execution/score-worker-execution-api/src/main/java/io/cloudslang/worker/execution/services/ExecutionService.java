@@ -17,7 +17,6 @@ import java.util.List;
 /**
  * Date: 8/1/11
  *
- * @author
  *
  * Responsible for handling the execution
  *

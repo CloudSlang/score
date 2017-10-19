@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Date: 4/23/12
  *
- * @author
  */
 public final class PartitionServiceImpl implements PartitionService {
 	private final Logger logger = Logger.getLogger(getClass());

@@ -15,7 +15,6 @@ import java.io.Serializable;
 /**
  * Date: 12/23/13
  *
- * @author
  */
 public interface Identifiable extends Serializable {
 	/**
