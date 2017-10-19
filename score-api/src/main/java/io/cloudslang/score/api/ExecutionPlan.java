@@ -24,7 +24,6 @@ import java.util.UUID;
 /**
  * Date: 8/1/11
  *
- * @author
  */
 public class ExecutionPlan implements Serializable {
     private static final long serialVersionUID = -7685110912034208064L;

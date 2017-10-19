@@ -13,7 +13,6 @@ package io.cloudslang.engine.partitions.services;
 /**
  * Date: 4/27/12
  *
- * @author
  */
 public class PartitionUtils {
 	public String tableName(String groupName, int partition){

@@ -20,7 +20,6 @@ import javax.persistence.MappedSuperclass;
 /**
  * Date: 12/23/13
  *
- * @author
  */
 @MappedSuperclass
 public abstract class AbstractIdentifiable implements Identifiable {
