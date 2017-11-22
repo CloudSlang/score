@@ -12,9 +12,6 @@ package io.cloudslang.runtime.impl.java;
 
 import io.cloudslang.runtime.api.java.JavaExecutionParametersProvider;
 import io.cloudslang.runtime.impl.Executor;
-import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -22,6 +19,9 @@ import org.apache.log4j.Logger;
 import org.python.google.common.collect.Sets;
 
 import java.io.File;
+import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -45,7 +45,7 @@ public class JavaExecutor implements Executor {
     static {
         ClassLoader parentClassLoader = JavaExecutor.class.getClassLoader();
 
-        while(parentClassLoader.getParent() != null) {
+        while (parentClassLoader.getParent() != null) {
             parentClassLoader = parentClassLoader.getParent();
         }
 
@@ -54,9 +54,10 @@ public class JavaExecutor implements Executor {
             String appHomeDir = System.getProperty(APP_HOME);
             File appLibDir = new File(appHomeDir, "lib");
 
-            if(appLibDir.exists() && appLibDir.isDirectory()) {
-                Collection<File> foundFiles = FileUtils.listFiles(appLibDir, new WildcardFileFilter(SCORE_CONTENT_SDK_JAR), DirectoryFileFilter.DIRECTORY);
-                if(foundFiles != null && !foundFiles.isEmpty()) {
+            if (appLibDir.exists() && appLibDir.isDirectory()) {
+                Collection<File> foundFiles = FileUtils.listFiles(appLibDir,
+                        new WildcardFileFilter(SCORE_CONTENT_SDK_JAR), DirectoryFileFilter.DIRECTORY);
+                if (foundFiles != null && !foundFiles.isEmpty()) {
                     for (File file : foundFiles) {
                         parentUrls = new URL[]{file.toURI().toURL()};
                     }
@@ -73,7 +74,7 @@ public class JavaExecutor implements Executor {
 
     JavaExecutor(Set<String> filePaths) {
         logger.info("Creating java classloader with [" + filePaths.size() + "] dependencies [" + filePaths + "]");
-        if(!filePaths.isEmpty()) {
+        if (!filePaths.isEmpty()) {
             Set<URL> result = Sets.newHashSet();
             for (String filePath : filePaths) {
                 try {
@@ -89,6 +90,10 @@ public class JavaExecutor implements Executor {
         }
     }
 
+    public static ClassLoader getParentClassLoader() {
+        return PARENT_CLASS_LOADER;
+    }
+
     Object execute(String className, String methodName, JavaExecutionParametersProvider parametersProvider) {
         ClassLoader origCL = Thread.currentThread().getContextClassLoader();
         try {
@@ -97,7 +102,8 @@ public class JavaExecutor implements Executor {
             Method executionMethod = getMethodByName(actionClass, methodName);
 
             Object[] executionParameters = parametersProvider.getExecutionParameters(executionMethod);
-            Object[] transformedExecutionParameters = transformExecutionParameters(executionParameters, executionMethod);
+            Object[] transformedExecutionParameters = transformExecutionParameters(executionParameters,
+                    executionMethod);
 
             return executionMethod.invoke(actionClass.newInstance(), transformedExecutionParameters);
         } catch (Exception e) {
@@ -131,7 +137,8 @@ public class JavaExecutor implements Executor {
 
                         // get the old data
                         Object valueField = getFieldValue(valueFieldName, currentParameterClass, currentParameter);
-                        Object nameField = getFieldValueFromSuperClass(nameFieldName, currentParameterClass, currentParameter);
+                        Object nameField = getFieldValueFromSuperClass(nameFieldName, currentParameterClass,
+                                currentParameter);
 
                         // set the data in the new object
                         Object transformedParameter = expectedClass.newInstance();
@@ -162,7 +169,8 @@ public class JavaExecutor implements Executor {
         return field.get(currentParameter);
     }
 
-    private Object getFieldValueFromSuperClass(String fieldName, Class<?> currentParameterClass, Object currentParameter)
+    private Object getFieldValueFromSuperClass(String fieldName, Class<?> currentParameterClass,
+                                               Object currentParameter)
             throws NoSuchFieldException, IllegalAccessException {
         Class<?> superClass = currentParameterClass.getSuperclass();
         return getFieldValue(fieldName, superClass, currentParameter);
@@ -178,16 +186,17 @@ public class JavaExecutor implements Executor {
         setField("Name", name, String.class, currentParameterClass, currentParameter);
     }
 
-    private void setField(String fieldId, Object fieldValue, Class<?> fieldType, Class<?> currentParameterClass, Object currentParameter)
+    private void setField(String fieldId, Object fieldValue, Class<?> fieldType, Class<?> currentParameterClass,
+                          Object currentParameter)
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Method setterMethod = currentParameterClass.getMethod("set" +  fieldId,fieldType);
+        Method setterMethod = currentParameterClass.getMethod("set" + fieldId, fieldType);
         setterMethod.invoke(currentParameter, fieldValue);
     }
 
     private boolean isSerializableSessionObjectMismatch(Class<?> expectedClass, Class<?> currentParameterClass) {
         // SerializableSessionObject loaded by different classLoaders
         return SERIALIZABLE_SESSION_OBJECT_CANONICAL_NAME.equals(currentParameterClass.getCanonicalName()) &&
-                 expectedClass != currentParameterClass;
+                expectedClass != currentParameterClass;
     }
 
     private Class getActionClass(String className) {
@@ -200,7 +209,7 @@ public class JavaExecutor implements Executor {
         return actionClass;
     }
 
-    private Method getMethodByName(Class actionClass, String methodName)  {
+    private Method getMethodByName(Class actionClass, String methodName) {
         Method[] methods = actionClass.getDeclaredMethods();
         Method actionMethod = null;
         for (Method m : methods) {
@@ -212,10 +221,14 @@ public class JavaExecutor implements Executor {
     }
 
     @Override
-    public void allocate() {}
+    public void allocate() {
+    }
 
     @Override
-    public void release() {}
+    public void release() {
+    }
+
     @Override
-    public void close() {}
+    public void close() {
+    }
 }
