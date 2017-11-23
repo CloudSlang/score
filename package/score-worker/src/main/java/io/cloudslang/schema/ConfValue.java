@@ -55,7 +55,7 @@ class ConfValue {
 			try {
 				return clazz.getConstructor(String.class).newInstance(value);
 			} catch (Exception ex) {
-				throw new RuntimeException("Failed to parse worker configuration attribute [" + name + "] value: " + value, ex);
+				throw new RuntimeException("Failed to parse worker configuration attribute [" + name + "] value: " + value + " "+ ex.getMessage(), ex);
 			}
 		} else {
 			return defaultValue;
