@@ -41,6 +41,7 @@ public class PythonExecutor implements Executor {
      * Meanwhile we execute retries ans will open an issue to the jython.org
      */
     public static final int RETRIES_NUMBER_ON_THREADED_ISSUE = 3;
+    public static final int MAX_LENGTH = Integer.getInteger("input.error.max.length", 1000);
 
     static {
         //here to avoid jython preferring io.cloudslang package over python io package
@@ -149,10 +150,12 @@ public class PythonExecutor implements Executor {
 
             return new PythonEvaluationResult(eval(prepareEnvironmentScript, expr), getPythonLocals());
         } catch (PyException exception) {
-            throw new RuntimeException("Error in running script expression: '" + expr + "',\n\tException is: " +
+            final String exprSubstring = expr.length() > MAX_LENGTH ? expr.substring(0, MAX_LENGTH) + "..." : expr;
+            throw new RuntimeException("Error in running script expression: '" + exprSubstring + "',\n\tException is: " +
                     handleExceptionSpecialCases(exception.value.toString()), exception);
         } catch (Exception exception) {
-            throw new RuntimeException("Error in running script expression: '" + expr + "',\n\tException is: " +
+            final String exprSubstring = expr.length() > MAX_LENGTH ? expr.substring(0, MAX_LENGTH) + "..." : expr;
+            throw new RuntimeException("Error in running script expression: '" + exprSubstring + "',\n\tException is: " +
                     handleExceptionSpecialCases(exception.getMessage()), exception);
         }
     }
