@@ -12,4 +12,4 @@ before_install:
   - if [ ! -d "${M2_HOME}"/bin ]; then curl https://archive.apache.org/dist/maven/maven-3/3.5.0/binaries/apache-maven-3.5.0-bin.tar.gz | tar zxf - -C "${HOME}"; fi
 
 install:
-  - mvn install -T 2.0C -DskipTests=true -DrepoToken=${repoToken} -Dmaven.javadoc.skip=true
+  - mvn install -T 2.0C -DrepoToken=${repoToken}
