@@ -15,7 +15,7 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>package</artifactId>
-        <version>0.3.47-SNAPSHOT</version>
+        <version>0.3.47-RC5</version>
     </parent>
 
     <artifactId>score-all</artifactId>
