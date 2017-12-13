@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+<modelVersion>4.0.0</modelVersion>
+
     <!--
-        (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
-        All rights reserved. This program and the accompanying materials
-        are made available under the terms of the Apache License v2.0 which accompany this distribution.
-        
-        The Apache License is available at
-        http://www.apache.org/licenses/LICENSE-2.0
-    -->
-	<modelVersion>4.0.0</modelVersion>
+    (c) Copyright 2014-2017 Hewlett-Packard Enterprise Development Company, L.P.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Apache License v2.0 which accompany this distribution.
 
-	<parent>
-		<groupId>io.cloudslang</groupId>
-		<artifactId>orchestrator</artifactId>
-		<version>0.3.47-SNAPSHOT</version>
-	</parent>
+    The Apache License is available at
+    http://www.apache.org/licenses/LICENSE-2.0
+-->
 
-	<artifactId>score-orchestrator-api</artifactId>
+    <parent>
+        <groupId>io.cloudslang</groupId>
+        <artifactId>orchestrator</artifactId>
+        <version>0.3.47-SNAPSHOT</version>
+    </parent>
 
-	<dependencies>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>score-facade</artifactId>
-		</dependency>
+    <artifactId>score-orchestrator-api</artifactId>
 
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>score-data-api</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-core</artifactId>
-		</dependency>
-		<dependency>
-             <groupId>com.mysema.querydsl</groupId>
-             <artifactId>querydsl-apt</artifactId>
-             <scope>provided</scope>
-         </dependency>
-	</dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>score-facade</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>score-data-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.mysema.querydsl</groupId>
+            <artifactId>querydsl-apt</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 
 </project>

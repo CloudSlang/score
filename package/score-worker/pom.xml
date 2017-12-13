@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+<modelVersion>4.0.0</modelVersion>
+
     <!--
-        (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
-        All rights reserved. This program and the accompanying materials
-        are made available under the terms of the Apache License v2.0 which accompany this distribution.
-        
-        The Apache License is available at
-        http://www.apache.org/licenses/LICENSE-2.0
-    -->
+    (c) Copyright 2014-2017 Hewlett-Packard Enterprise Development Company, L.P.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Apache License v2.0 which accompany this distribution.
+
+    The Apache License is available at
+    http://www.apache.org/licenses/LICENSE-2.0
+-->
+
     <parent>
         <artifactId>package</artifactId>
         <groupId>io.cloudslang</groupId>
         <version>0.3.47-SNAPSHOT</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
     <artifactId>score-worker</artifactId>
 
@@ -23,17 +26,16 @@
             <artifactId>score-worker-execution-impl</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>score-worker-manager-impl</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>${project.groupId}</groupId>
-			<artifactId>score-api</artifactId>
-			<version>${project.version}</version>
+            <artifactId>score-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
+    
 </project>
