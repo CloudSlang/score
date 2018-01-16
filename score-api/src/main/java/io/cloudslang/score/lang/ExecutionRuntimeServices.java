@@ -74,6 +74,10 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String STEP_PERSIST_ID = "STEP_PERSIST_ID";
 
+    private static final String NODE_NAME = "NODE_NAME";
+
+    private static final String NODE_NAME_WITH_DEPTH = "NODE_NAME_WITH_DEPTH";
+
     protected Map<String, Serializable> contextMap = new HashMap<>();
 
     public ExecutionRuntimeServices(){}
@@ -275,6 +279,22 @@ public class ExecutionRuntimeServices implements Serializable {
     public void setSplitId(String splitId) {
         Validate.isTrue(StringUtils.isEmpty(getSplitId()), "not allowed to overwrite split id");
         contextMap.put(NEW_SPLIT_ID, splitId);
+    }
+
+    public String getNodeName() {
+        return getFromMap(NODE_NAME);
+    }
+
+    public String getNodeNameWithDepth() {
+        return getFromMap(NODE_NAME_WITH_DEPTH);
+    }
+
+    public void setNodeName(String nodeName) {
+        contextMap.put(NODE_NAME, nodeName);
+    }
+
+    public void setNodeNameWithDepth(String nodeNameWithDepth) {
+        contextMap.put(NODE_NAME_WITH_DEPTH, nodeNameWithDepth);
     }
 
     /**

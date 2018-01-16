@@ -24,6 +24,10 @@ public class ExecutionParametersConsts {
 	public static final String EXECUTION = "execution";
 	public static final String EXECUTION_CONTEXT = "executionContext";
 	public static final String SYSTEM_CONTEXT = "systemContext";
+
+	public static final String GLOBAL_SESSION_OBJECT = "globalSessionObject";
+	public static final String SESSION_OBJECT = "sessionObject";
+
 	public static final String EXECUTION_RUNTIME_SERVICES = "executionRuntimeServices";
 	public static final String SERIALIZABLE_SESSION_CONTEXT = "serializableSessionContext"; // sits in PluginParams
 	public static final String NON_SERIALIZABLE_EXECUTION_DATA = "nonSerializableExecutionData";

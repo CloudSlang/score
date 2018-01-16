@@ -148,7 +148,7 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 		List<ExecutionMessage> result = new ArrayList<>();
 		//check if the worker has work before actually polling for work
 		if(busyWorkersService.isWorkerBusy(workerId))
-		result = executionQueueRepository.poll(workerId, maxSize, statuses);
+			result = executionQueueRepository.poll(workerId, maxSize, statuses);
 
 		for (QueueListener listener : listeners) {
 			listener.onPoll(result, result.size());
