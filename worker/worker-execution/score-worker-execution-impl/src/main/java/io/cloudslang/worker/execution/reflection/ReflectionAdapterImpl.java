@@ -67,12 +67,9 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
     }
 
     private static Long getRunningExecutionIdFromActionData(Map<String, ?> actionData) {
-        try {
-            final Long runningExecutionPlanId = (Long) actionData.get(
-                    ExecutionParametersConsts.RUNNING_EXECUTION_PLAN_ID);
-            if (runningExecutionPlanId != null) return getExecutionIdFromActionData(actionData);
-        } catch (Exception ignore) {
-        }
+        ExecutionRuntimeServices executionRuntimeServices = (ExecutionRuntimeServices) actionData.get(
+                ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES);
+        if (executionRuntimeServices != null) return executionRuntimeServices.getParentRunningId();
         return getExecutionIdFromActionData(actionData);
     }
 

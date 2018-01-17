@@ -78,6 +78,8 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String NODE_NAME_WITH_DEPTH = "NODE_NAME_WITH_DEPTH";
 
+    private static final String PARENT_RUNNING_ID = "PARENT_RUNNING_ID";
+
     protected Map<String, Serializable> contextMap = new HashMap<>();
 
     public ExecutionRuntimeServices(){}
@@ -297,6 +299,13 @@ public class ExecutionRuntimeServices implements Serializable {
         contextMap.put(NODE_NAME_WITH_DEPTH, nodeNameWithDepth);
     }
 
+    public Long getParentRunningId() {
+        return getFromMap(PARENT_RUNNING_ID);
+    }
+
+    public void setParentRunningId(Long parentRunningId) {
+        contextMap.put(PARENT_RUNNING_ID, parentRunningId);
+    }
     /**
      * used for asking score to pause your run
      */
