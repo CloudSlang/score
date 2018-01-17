@@ -22,5 +22,4 @@ install:
   - mvn install -T 2.0C -DrepoToken=${repoToken}
 
 after_script:
-  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
-#  - mvn clean -T 2.0C cobertura:cobertura org.eluder.coveralls:coveralls-maven-plugin:report
+  - mvn clean -T 2.0C cobertura:cobertura org.eluder.coveralls:coveralls-maven-plugin:report
