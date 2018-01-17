@@ -2,8 +2,6 @@ version: "2"
 plugins:
   checkstyle:
     enabled: true
-    config:
-      file: "checkstyle.xml"
   sonar-java:
     enabled: true
     config:
