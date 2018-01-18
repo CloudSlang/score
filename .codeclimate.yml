@@ -1,0 +1,12 @@
+version: "2"
+plugins:
+  checkstyle:
+    enabled: true
+  sonar-java:
+    enabled: true
+    config:
+      minimum_severity: critical
+      sonar.java.source: 8
+      tests_patterns:
+        - src/test/**
+        - app/src/test/**
