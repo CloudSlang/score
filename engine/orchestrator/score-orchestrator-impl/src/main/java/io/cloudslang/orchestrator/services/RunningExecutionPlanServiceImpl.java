@@ -30,6 +30,7 @@ import java.lang.Long;
 import java.lang.Override;
 import java.lang.String;
 import java.util.List;
+import java.util.concurrent.RejectedExecutionException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -41,6 +42,9 @@ public final class RunningExecutionPlanServiceImpl implements RunningExecutionPl
 
     @Autowired
     private RunningExecutionPlanRepository runningExecutionPlanRepository;
+
+    @Autowired
+    private org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor updateRunningExecutionPlansExecutor;
 
     @Override
     @Transactional
@@ -60,7 +64,7 @@ public final class RunningExecutionPlanServiceImpl implements RunningExecutionPl
 
     @Override
     @Transactional
-    public Long getOrCreateRunningExecutionPlan(ExecutionPlan executionPlan) {
+    public Long getOrCreateRunningExecutionPlan(final ExecutionPlan executionPlan) {
         List<RunningExecutionPlan> existingRunningPlans = readByFlowId(executionPlan.getFlowUuid());
 
         //If no running execution plan existsByUuid for this UUID - create new
@@ -70,9 +74,28 @@ public final class RunningExecutionPlanServiceImpl implements RunningExecutionPl
         //If existsByUuid - check if the plans are equal
         else {
             for (RunningExecutionPlan existingRunningPlan : existingRunningPlans) {
-                if (existingRunningPlan.getExecutionPlan().getExecutionPlanUuid().equals(executionPlan.getExecutionPlanUuid())){
-                    return existingRunningPlan.getId();
-                }
+                try {
+                    if (existingRunningPlan.getExecutionPlan().getExecutionPlanUuid().equals(executionPlan.getExecutionPlanUuid())) {
+                        //runningExecutionPlanRepository.incrementUseOfExecutionPlan(existingRunningPlan.getId());
+                        //UseExcutionPlanIncrement tr = new UseExcutionPlanIncrement(existingRunningPlan.getId());
+                        //Thread t = new Thread(tr, "UseExecutionPlan-" + existingRunningPlan.getId());
+                        final Long uuid = existingRunningPlan.getId();
+                        try {
+                            updateRunningExecutionPlansExecutor.submit(new Runnable() {
+                                @Override
+                                public void run() {
+                                    runningExecutionPlanRepository.incrementUseOfExecutionPlan(uuid);
+                                }
+                            });
+
+                        } catch (RejectedExecutionException submitException) {
+
+                            throw new RuntimeException("runningExecutionPlan could not update");
+                        }
+                        return existingRunningPlan.getId();
+                    }
+                } catch (Exception e)
+                    {continue;}
             }
             return createNewRunningExecutionPlan(executionPlan);
         }
@@ -99,8 +122,32 @@ public final class RunningExecutionPlanServiceImpl implements RunningExecutionPl
         RunningExecutionPlan runningExecutionPlan = new RunningExecutionPlan();
         runningExecutionPlan.setFlowUUID(executionPlan.getFlowUuid());
         runningExecutionPlan.setExecutionPlan(executionPlan);
+        runningExecutionPlan.setInUseCount(1L);
         runningExecutionPlan = createRunningExecutionPlan(runningExecutionPlan);
 
         return runningExecutionPlan.getId();
+    }
+
+    @Override
+    @Transactional
+    public void deleteRunningExecutionPlan(List<Long> runningPlansId)
+    {
+        runningExecutionPlanRepository.decrementUseOfExecutionPlan(runningPlansId);
+        runningExecutionPlanRepository.deleteFinishedExecPlans(runningPlansId);
+    }
+
+
+    class UseExcutionPlanIncrement implements Runnable {
+
+        private Long execPlanId;
+
+        UseExcutionPlanIncrement(Long execPlanId) {
+            this.execPlanId=execPlanId;
+        }
+
+        public void run() {
+            runningExecutionPlanRepository.incrementUseOfExecutionPlan(execPlanId);
+
+        }
     }
 }

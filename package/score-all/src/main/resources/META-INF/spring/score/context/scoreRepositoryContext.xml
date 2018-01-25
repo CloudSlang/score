@@ -20,4 +20,11 @@
         <repository:include-filter type="regex" expression="io.cloudslang.engine.node.repositories.WorkerLockRepository"/>
 	</jpa:repositories>
 
+	<bean id="updateRunningExecutionPlansExecutor"
+		  class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<property name="corePoolSize" value="10" />
+		<property name="maxPoolSize" value="50" />
+		<property name="queueCapacity" value="100" />
+	</bean>
+
 </beans>
