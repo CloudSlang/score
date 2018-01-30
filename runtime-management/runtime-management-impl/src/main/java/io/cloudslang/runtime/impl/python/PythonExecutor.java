@@ -21,11 +21,27 @@ import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.impl.Executor;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.python.core.*;
+import org.python.core.Py;
+import org.python.core.PyBoolean;
+import org.python.core.PyClass;
+import org.python.core.PyException;
+import org.python.core.PyFile;
+import org.python.core.PyFunction;
+import org.python.core.PyModule;
+import org.python.core.PyObject;
+import org.python.core.PyReflectedFunction;
+import org.python.core.PyString;
+import org.python.core.PyStringMap;
+import org.python.core.PySystemState;
+import org.python.core.PyType;
 import org.python.util.PythonInterpreter;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -297,7 +313,9 @@ public class PythonExecutor implements Executor {
                 value instanceof PyModule ||
                 value instanceof PyFunction ||
                 value instanceof PySystemState ||
-                value instanceof PyClass;
+                value instanceof PyClass ||
+                value instanceof PyType ||
+                value instanceof PyReflectedFunction;
     }
 
     private static class ThreadSafePythonInterpreter extends PythonInterpreter {
