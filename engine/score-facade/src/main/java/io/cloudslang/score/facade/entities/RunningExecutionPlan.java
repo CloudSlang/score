@@ -53,6 +53,9 @@ public class RunningExecutionPlan extends AbstractIdentifiable {
     @Column(name = "UUID", nullable = false)
     private String flowUUID;
 
+    @Column(name = "IN_USE", nullable = true)
+    private Long inUseCount;
+
     public byte[] getExecutionPlanZipped() {
         return executionPlanZipped;
     }
@@ -80,6 +83,14 @@ public class RunningExecutionPlan extends AbstractIdentifiable {
 
     public void setFlowUUID(String flowUUID) {
         this.flowUUID = flowUUID;
+    }
+
+    public Long getInUseCount() {
+        return inUseCount;
+    }
+
+    public void setInUseCount(Long inUseCount) {
+        this.inUseCount = inUseCount;
     }
 
     @Override

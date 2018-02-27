@@ -18,14 +18,20 @@ package io.cloudslang.orchestrator.repositories;
 
 import io.cloudslang.score.facade.entities.RunningExecutionPlan;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.QueryHint;
 import java.lang.Long;
 import java.lang.String;
 import java.util.List;
+
+import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 
 /**
  * Created by IntelliJ IDEA.
@@ -47,4 +53,18 @@ public interface RunningExecutionPlanRepository extends JpaRepository<RunningExe
 
 	@Query("select executionPlanZipped from RunningExecutionPlan r where r.id = :exeId")
 	byte[] getZippedExecutionPlan(@Param("exeId") Long exeId);
+
+    @Query("delete from RunningExecutionPlan r where r.id in (:runningPlansId) AND r.inUseCount = 0")
+    @Modifying
+    int deleteFinishedExecPlans(@Param("runningPlansId") List<Long> runningPlansId);
+
+    @Query("update RunningExecutionPlan r  set r.inUseCount = (r.inUseCount + 1) WHERE r.id = :id")
+    @Modifying
+    @Transactional(isolation=Isolation.READ_COMMITTED,propagation = Propagation.REQUIRES_NEW)
+    int incrementUseOfExecutionPlan(@Param("id") Long id);
+
+    @Query("update RunningExecutionPlan r  set r.inUseCount = (r.inUseCount - 1) WHERE r.id in (:runningPlansId)")
+    @Modifying
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    int decrementUseOfExecutionPlan(@Param("runningPlansId") List<Long> runningPlansId);
 }
