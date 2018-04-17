@@ -88,6 +88,17 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>score-orchestrator-api</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
+
         <!-- end of engine artifacts -->
 
         <!-- test artifacts -->
