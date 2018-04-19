@@ -196,6 +196,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
             <column name="EXECUTION_PLAN" type="${clob.type}" />
             <column name="RESULT" type="${clob.type}" />
             <column name="EXECUTION_PLAN_ZIPPED" type="${blob.type}" />
+            <column name="EXECUTION_ID" type="VARCHAR(64)" />
         </createTable>
     </changeSet>
 

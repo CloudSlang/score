@@ -67,7 +67,7 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
     @Override
     public Long trigger(Long executionId, TriggeringProperties triggeringProperties) {
         SystemContext scoreSystemContext = new SystemContext(triggeringProperties.getRuntimeValues());
-        Long runningExecutionPlanId = saveRunningExecutionPlans(triggeringProperties.getExecutionPlan(), triggeringProperties.getDependencies(), scoreSystemContext);
+        Long runningExecutionPlanId = saveRunningExecutionPlans(triggeringProperties.getExecutionPlan(), triggeringProperties.getDependencies(), scoreSystemContext, String.valueOf(executionId));
         scoreSystemContext.setExecutionId(executionId);
         Map<String,Serializable> executionMetadata = createMetadata(triggeringProperties);
         scoreSystemContext.putMetaData(executionMetadata);
@@ -96,14 +96,14 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
         return executionMetadata;
     }
 
-    private Long saveRunningExecutionPlans(ExecutionPlan executionPlan, Map<String, ExecutionPlan> dependencies, SystemContext systemContext) {
+    private Long saveRunningExecutionPlans(ExecutionPlan executionPlan, Map<String, ExecutionPlan> dependencies, SystemContext systemContext, String executionId) {
         Map<String, Long> runningPlansIds = new HashMap<>();
         Map<String, Long> beginStepsIds = new HashMap<>();
 
         if(dependencies != null) {
             for (ExecutionPlan dependencyExecutionPlan : dependencies.values()) {
                 String subFlowUuid = dependencyExecutionPlan.getFlowUuid();
-                Long subFlowRunningId = runningExecutionPlanService.getOrCreateRunningExecutionPlan(dependencyExecutionPlan);
+                Long subFlowRunningId = runningExecutionPlanService.createRunningExecutionPlan(dependencyExecutionPlan, executionId);
                 runningPlansIds.put(subFlowUuid, subFlowRunningId);
                 beginStepsIds.put(subFlowUuid, dependencyExecutionPlan.getBeginStep());
             }
@@ -111,7 +111,7 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
 
         // Adding the ids of the running execution plan of the parent + its begin step
         // since this map should contain all the ids of the running plans
-        Long runningPlanId =  runningExecutionPlanService.getOrCreateRunningExecutionPlan(executionPlan);
+        Long runningPlanId =  runningExecutionPlanService.createRunningExecutionPlan(executionPlan, executionId);
         runningPlansIds.put(executionPlan.getFlowUuid(), runningPlanId);
         beginStepsIds.put(executionPlan.getFlowUuid(), executionPlan.getBeginStep());
 
