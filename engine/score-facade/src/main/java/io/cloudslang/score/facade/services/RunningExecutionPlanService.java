@@ -19,6 +19,8 @@ package io.cloudslang.score.facade.services;
 import io.cloudslang.score.facade.entities.RunningExecutionPlan;
 import io.cloudslang.score.api.ExecutionPlan;
 
+import java.util.Collection;
+
 /**
  * Created by IntelliJ IDEA.
  * User: lernery
@@ -44,9 +46,10 @@ public interface RunningExecutionPlanService {
     /**
      * check if exist such RunningExecutionPlan if not create it
      * @param executionPlan - the RunningExecutionPlan
+     * @param executionId
      * @return  the id of the exist \ created one
      */
-    Long getOrCreateRunningExecutionPlan(ExecutionPlan executionPlan);
+    Long createRunningExecutionPlan(ExecutionPlan executionPlan, String executionId);
 
     /**
      *  getter of the flow Uuid
@@ -54,4 +57,7 @@ public interface RunningExecutionPlanService {
      * @return  the flow uuid of the runningExecutionPlanId
      */
     String getFlowUuidByRunningExecutionPlanId(Long runningExecutionPlanId);
+
+
+    void deleteRunningExecutionPlans(Collection<String> executionIds);
 }
