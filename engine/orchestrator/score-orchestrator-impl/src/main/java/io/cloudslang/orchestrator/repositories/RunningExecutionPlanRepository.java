@@ -16,6 +16,9 @@
 
 package io.cloudslang.orchestrator.repositories;
 
+import java.util.Collection;
+import java.util.List;
+
 import io.cloudslang.score.facade.entities.RunningExecutionPlan;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -26,8 +29,7 @@ import org.springframework.data.repository.query.Param;
 import javax.persistence.QueryHint;
 import java.lang.Long;
 import java.lang.String;
-import java.util.Collection;
-import java.util.List;
+
 
 /**
  * Created by IntelliJ IDEA.

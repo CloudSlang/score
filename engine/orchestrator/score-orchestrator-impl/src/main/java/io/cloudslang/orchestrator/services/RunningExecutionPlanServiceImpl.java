@@ -22,12 +22,14 @@ import io.cloudslang.score.api.ExecutionPlan;
 import io.cloudslang.score.facade.entities.RunningExecutionPlan;
 import io.cloudslang.score.facade.services.RunningExecutionPlanService;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
 
 /**
  * Created by IntelliJ IDEA.
@@ -51,18 +53,17 @@ public final class RunningExecutionPlanServiceImpl implements RunningExecutionPl
     }
 
     @Override
+    @Transactional
+    public Long createRunningExecutionPlan(ExecutionPlan executionPlan, String executionId) {
+        return createNewRunningExecutionPlan(executionPlan, executionId);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public RunningExecutionPlan readExecutionPlanById(Long id) {
         return runningExecutionPlanRepository.findOne(id);
     }
 
-
-
-    @Override
-    @Transactional
-    public Long createRunningExecutionPlan(ExecutionPlan executionPlan, String executionId) {
-        return createNewRunningExecutionPlan(executionPlan, executionId);
-    }
 
     @Override
     @Transactional(readOnly = true)
@@ -77,6 +78,7 @@ public final class RunningExecutionPlanServiceImpl implements RunningExecutionPl
     @Override
     @Transactional
     public void deleteRunningExecutionPlans(Collection<String> executionIds) {
+
         List<List<String>> executionIdsPartitioned = Lists.partition(new ArrayList<>(executionIds), IN_CLAUSE_LIMIT);
         for (List<String> list : executionIdsPartitioned) {
             runningExecutionPlanRepository.deleteByExecutionIds(list);
