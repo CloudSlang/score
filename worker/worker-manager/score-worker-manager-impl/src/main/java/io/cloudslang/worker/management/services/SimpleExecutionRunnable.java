@@ -132,7 +132,7 @@ public class SimpleExecutionRunnable implements Runnable {
             boolean oldThread = !workerManager.isFromCurrentThreadPool(Thread.currentThread().getName());
             if(!oldThread && isExecutionCancelled(execution)){
                 if (logger.isDebugEnabled())  logger.debug("Execution is interrupted...");
-            }else {
+            } else {
                 logger.error("Execution thread is interrupted!!! Exiting...", interruptedException);
             }
         }

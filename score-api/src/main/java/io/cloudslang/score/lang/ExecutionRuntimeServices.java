@@ -74,6 +74,12 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String STEP_PERSIST_ID = "STEP_PERSIST_ID";
 
+    private static final String NODE_NAME = "NODE_NAME";
+
+    private static final String NODE_NAME_WITH_DEPTH = "NODE_NAME_WITH_DEPTH";
+
+    private static final String PARENT_RUNNING_ID = "PARENT_RUNNING_ID";
+
     protected Map<String, Serializable> contextMap = new HashMap<>();
 
     public ExecutionRuntimeServices(){}
@@ -277,6 +283,29 @@ public class ExecutionRuntimeServices implements Serializable {
         contextMap.put(NEW_SPLIT_ID, splitId);
     }
 
+    public String getNodeName() {
+        return getFromMap(NODE_NAME);
+    }
+
+    public String getNodeNameWithDepth() {
+        return getFromMap(NODE_NAME_WITH_DEPTH);
+    }
+
+    public void setNodeName(String nodeName) {
+        contextMap.put(NODE_NAME, nodeName);
+    }
+
+    public void setNodeNameWithDepth(String nodeNameWithDepth) {
+        contextMap.put(NODE_NAME_WITH_DEPTH, nodeNameWithDepth);
+    }
+
+    public Long getParentRunningId() {
+        return getFromMap(PARENT_RUNNING_ID);
+    }
+
+    public void setParentRunningId(Long parentRunningId) {
+        contextMap.put(PARENT_RUNNING_ID, parentRunningId);
+    }
     /**
      * used for asking score to pause your run
      */

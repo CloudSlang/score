@@ -31,24 +31,49 @@ public interface SessionDataHandler {
     public void sessionTimeOutScheduler();
 
     /**
-     * Retrieved the map of execution session data object
+     * Retrieved the map of global sessions execution data object
      * Also updates the timestamp (touch mechanism) of the session data for the use of the expiration mechanism
      * @param executionId
      * @return the map of execution session data object
      */
-    public Map<String, Object> getNonSerializableExecutionData(Long executionId);
+    public Map<String, Object> getGlobalSessionsExecutionData(Long executionId);
+
+    /**
+     * Retrieved the map of execution session data object
+     * Also updates the timestamp (touch mechanism) of the session data for the use of the expiration mechanism
+     * @param executionId
+     * @param branchId
+     * @return the map of execution session data object
+     */
+    public Map<String, Object> getSessionsExecutionData(Long executionId, Long branchId);
 
     /**
      * Set the session data of the execution as active so that no timeout can occur
      * Should be used before executing an action, so that there will be no timeout in the middle of executing an action
      * @param executionId
      */
-    void setSessionDataActive(Long executionId);
+    void setGlobalSessionDataActive(Long executionId);
 
     /**
      * Set the session data of the execution as inactive
      * Should be used after executing an action, so that timeout might occur if needed
      * @param executionId
      */
-    void setSessionDataInactive(Long executionId);
+    void setGlobalSessionDataInactive(Long executionId);
+
+    /**
+     * Set the session data of the execution as active so that no timeout can occur
+     * Should be used before executing an action, so that there will be no timeout in the middle of executing an action
+     * @param executionId
+     * @param branchId
+     */
+    void setSessionDataActive(Long executionId, Long branchId);
+
+    /**
+     * Set the session data of the execution as inactive
+     * Should be used after executing an action, so that timeout might occur if needed
+     * @param executionId
+     * @param branchId
+     */
+    void setSessionDataInactive(Long executionId, Long branchId);
 }
