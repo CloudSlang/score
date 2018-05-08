@@ -48,6 +48,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static junit.framework.Assert.assertEquals;
+
 /**
  * User: stoneo
  * Date: 22/07/2014
@@ -92,7 +94,7 @@ public class StandAloneTest {
         waitForAllEventsToArrive(1);
         long finishEventExecutionId = (Long)((Map)eventQueue.get(0).getData()).get(EventConstants.EXECUTION_ID_CONTEXT);
         Assert.assertNotNull(finishEventExecutionId);
-        Assert.assertEquals(executionId, finishEventExecutionId);
+        assertEquals(executionId, finishEventExecutionId);
     }
 
     @Test(timeout = 20000)
@@ -128,9 +130,9 @@ public class StandAloneTest {
 
         waitForAllEventsToArrive(5);
 
-        Assert.assertEquals(2,countEvents("Hello score"));
-        Assert.assertEquals(1,countEvents(EventConstants.SCORE_FINISHED_EVENT));
-        Assert.assertEquals(2,countEvents(EventConstants.SCORE_FINISHED_BRANCH_EVENT));
+        assertEquals(2,countEvents("Hello score"));
+        assertEquals(1,countEvents(EventConstants.SCORE_FINISHED_EVENT));
+        assertEquals(2,countEvents(EventConstants.SCORE_FINISHED_BRANCH_EVENT));
     }
 
 
@@ -143,9 +145,9 @@ public class StandAloneTest {
 
         waitForAllEventsToArrive(3);
         ScoreEvent sessionBeforePutEvent = getEventFromQueueByType(SessionDataActions.SESSION_BEFORE_PUT_DATA_EVENT);
-        Assert.assertEquals(sessionBeforePutEvent.getData(), null);
+        assertEquals(sessionBeforePutEvent.getData(), null);
         ScoreEvent sessionGetEvent = getEventFromQueueByType(SessionDataActions.SESSION_GET_DATA_EVENT);
-        Assert.assertEquals(sessionGetEvent.getData(), SessionDataActions.TEST_VALUE);
+        assertEquals(sessionGetEvent.getData(), SessionDataActions.TEST_VALUE);
     }
 
     @Test(timeout = 20000)
@@ -166,9 +168,9 @@ public class StandAloneTest {
 
         waitForAllEventsToArrive(3);
         ScoreEvent sessionBeforePutEvent = getEventFromQueueByType(SessionDataActions.SESSION_BEFORE_PUT_DATA_EVENT);
-        Assert.assertEquals(sessionBeforePutEvent.getData(), null);
+        assertEquals(null, sessionBeforePutEvent.getData());
         ScoreEvent sessionGetEvent = getEventFromQueueByType(SessionDataActions.SESSION_GET_DATA_EVENT);
-        Assert.assertEquals(sessionGetEvent.getData(), SessionDataActions.TEST_VALUE);
+        assertEquals(SessionDataActions.TEST_VALUE, sessionGetEvent.getData());
     }
 
     @Test(timeout = 20000)
@@ -194,9 +196,9 @@ public class StandAloneTest {
         waitForAllEventsToArrive(4);
 
         ScoreEvent sessionBeforePutEvent = getEventFromQueueByType(SessionDataActions.SESSION_BEFORE_PUT_DATA_EVENT);
-        Assert.assertEquals(sessionBeforePutEvent.getData(), null);
+        assertEquals(sessionBeforePutEvent.getData(), null);
         ScoreEvent sessionGetEvent = getEventFromQueueByType(SessionDataActions.SESSION_GET_DATA_EVENT);
-        Assert.assertEquals(sessionGetEvent.getData(), null);
+        assertEquals(sessionGetEvent.getData(), null);
     }
 
     private ScoreEvent getEventFromQueueByType(String eventType){

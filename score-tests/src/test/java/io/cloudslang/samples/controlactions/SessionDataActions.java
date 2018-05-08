@@ -29,22 +29,25 @@ public class SessionDataActions {
 
     public static final String SESSION_BEFORE_PUT_DATA_EVENT = "sessionBeforePutDataEvent";
     public static final String SESSION_GET_DATA_EVENT = "sessionGetDataEvent";
+    private static final String GLOBAL_SESSION_OBJECT = "globalSessionObject";
 
     private static String TEST_KEY = "sessionTestKey";
     public static String TEST_VALUE = "sessionTestValue";
 
     public void putObject(ExecutionRuntimeServices executionRuntimeServices, Map<String, Object> nonSerializableExecutionData){
 
-        String sessionObject = (String) nonSerializableExecutionData.get(TEST_KEY);
+        Map<String, Object> globalSessionObject = (Map<String, Object>) nonSerializableExecutionData.get(GLOBAL_SESSION_OBJECT);
+        String sessionObject = (String) globalSessionObject.get(TEST_KEY);
         String value = sessionObject == null ? null : sessionObject;
         executionRuntimeServices.addEvent(SESSION_BEFORE_PUT_DATA_EVENT, value);
         if (sessionObject == null) {
-            nonSerializableExecutionData.put(TEST_KEY, TEST_VALUE);
+            globalSessionObject.put(TEST_KEY, TEST_VALUE);
         }
     }
 
     public void getObject(ExecutionRuntimeServices executionRuntimeServices, Map<String, Object> nonSerializableExecutionData){
-        String sessionObject = (String) nonSerializableExecutionData.get(TEST_KEY);
+        Map<String, Object> globalSessionObject = (Map<String, Object>) nonSerializableExecutionData.get(GLOBAL_SESSION_OBJECT);
+        String sessionObject = (String) globalSessionObject.get(TEST_KEY);
         String value = sessionObject == null ? null : sessionObject;
         executionRuntimeServices.addEvent(SESSION_GET_DATA_EVENT, value);
     }
