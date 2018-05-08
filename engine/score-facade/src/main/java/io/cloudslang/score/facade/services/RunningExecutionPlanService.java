@@ -19,6 +19,8 @@ package io.cloudslang.score.facade.services;
 import io.cloudslang.score.facade.entities.RunningExecutionPlan;
 import io.cloudslang.score.api.ExecutionPlan;
 
+import java.util.Collection;
+
 /**
  * Created by IntelliJ IDEA.
  * User: lernery
@@ -29,29 +31,38 @@ public interface RunningExecutionPlanService {
 
     /**
      * create a running execution plan
-     * @param runningExecutionPlan  - the plan
-     * @return  the created plan
+     *
+     * @param runningExecutionPlan - the plan
+     * @return the created plan
      */
     RunningExecutionPlan createRunningExecutionPlan(RunningExecutionPlan runningExecutionPlan);
 
     /**
-     *  get Running ExecutionPlan
+     * check if exist such RunningExecutionPlan if not create it
+     *
+     * @param executionPlan - the RunningExecutionPlan
+     * @param executionId   - the flow run id
+     * @return the id of the exist \ created one
+     */
+    Long createRunningExecutionPlan(ExecutionPlan executionPlan, String executionId);
+
+    /**
+     * get Running ExecutionPlan
+     *
      * @param id - the id ofthe required running execution plan
-     * @return  the required plan
+     * @return the required plan
      */
     RunningExecutionPlan readExecutionPlanById(Long id);
 
-    /**
-     * check if exist such RunningExecutionPlan if not create it
-     * @param executionPlan - the RunningExecutionPlan
-     * @return  the id of the exist \ created one
-     */
-    Long getOrCreateRunningExecutionPlan(ExecutionPlan executionPlan);
 
     /**
-     *  getter of the flow Uuid
-     * @param runningExecutionPlanId  - id of the RunningExecutionPlan
-     * @return  the flow uuid of the runningExecutionPlanId
+     * getter of the flow Uuid
+     *
+     * @param runningExecutionPlanId - id of the RunningExecutionPlan
+     * @return the flow uuid of the runningExecutionPlanId
      */
     String getFlowUuidByRunningExecutionPlanId(Long runningExecutionPlanId);
+
+
+    void deleteRunningExecutionPlans(Collection<String> executionIds);
 }

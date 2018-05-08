@@ -79,7 +79,7 @@ public class RunningExecutionPlanServiceTest {
         when(runningExecutionPlanRepository.save(any(RunningExecutionPlan.class))).
                                                                                           thenReturn(runningExecutionPlan);
 
-        Long id = runningExecutionPlanService.getOrCreateRunningExecutionPlan(executionPlan);
+        Long id = runningExecutionPlanService.createRunningExecutionPlan(executionPlan, "11");
         Assert.assertEquals((Long) 5L, id);
     }
 }

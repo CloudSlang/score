@@ -16,20 +16,22 @@
 
 package io.cloudslang.orchestrator.services;
 
-import io.cloudslang.score.facade.entities.RunningExecutionPlan;
-import io.cloudslang.score.api.ExecutionPlan;
 import io.cloudslang.orchestrator.repositories.RunningExecutionPlanRepository;
+import io.cloudslang.score.api.ExecutionPlan;
+import io.cloudslang.score.facade.entities.RunningExecutionPlan;
 import io.cloudslang.score.facade.services.RunningExecutionPlanService;
+
+import com.google.common.collect.Lists;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
-import java.lang.IllegalArgumentException;
-import java.lang.Long;
-import java.lang.Override;
-import java.lang.String;
-import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -38,6 +40,8 @@ import java.util.List;
  * Time: 10:54 AM
  */
 public final class RunningExecutionPlanServiceImpl implements RunningExecutionPlanService {
+
+    private static final int IN_CLAUSE_LIMIT = 250;
 
     @Autowired
     private RunningExecutionPlanRepository runningExecutionPlanRepository;
@@ -51,32 +55,17 @@ public final class RunningExecutionPlanServiceImpl implements RunningExecutionPl
     }
 
     @Override
+    @Transactional
+    public Long createRunningExecutionPlan(ExecutionPlan executionPlan, String executionId) {
+        return createNewRunningExecutionPlan(executionPlan, executionId);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public RunningExecutionPlan readExecutionPlanById(Long id) {
         return runningExecutionPlanRepository.findOne(id);
     }
 
-
-
-    @Override
-    @Transactional
-    public Long getOrCreateRunningExecutionPlan(ExecutionPlan executionPlan) {
-        List<RunningExecutionPlan> existingRunningPlans = readByFlowId(executionPlan.getFlowUuid());
-
-        //If no running execution plan existsByUuid for this UUID - create new
-        if (CollectionUtils.isEmpty(existingRunningPlans)) {
-            return createNewRunningExecutionPlan(executionPlan);
-        }
-        //If existsByUuid - check if the plans are equal
-        else {
-            for (RunningExecutionPlan existingRunningPlan : existingRunningPlans) {
-                if (existingRunningPlan.getExecutionPlan().getExecutionPlanUuid().equals(executionPlan.getExecutionPlanUuid())){
-                    return existingRunningPlan.getId();
-                }
-            }
-            return createNewRunningExecutionPlan(executionPlan);
-        }
-    }
 
     @Override
     @Transactional(readOnly = true)
@@ -88,17 +77,30 @@ public final class RunningExecutionPlanServiceImpl implements RunningExecutionPl
         return runningExecutionPlan.getFlowUUID();
     }
 
+    @Override
+    @Transactional
+    public void deleteRunningExecutionPlans(Collection<String> executionIds) {
+
+        List<List<String>> executionIdsPartitioned = Lists.partition(new ArrayList<>(executionIds), IN_CLAUSE_LIMIT);
+        for (List<String> list : executionIdsPartitioned) {
+            runningExecutionPlanRepository.deleteByExecutionIds(list);
+            runningExecutionPlanRepository.flush();
+        }
+    }
+
     private List<RunningExecutionPlan> readByFlowId(String flowUuid) {
         if (StringUtils.isEmpty(flowUuid))
             throw new IllegalArgumentException("Flow UUID is null or empty");
         return runningExecutionPlanRepository.findByUuidCached(flowUuid);
     }
 
-    private Long createNewRunningExecutionPlan(ExecutionPlan executionPlan) {
+    private Long createNewRunningExecutionPlan(ExecutionPlan executionPlan, String executionId) {
         //Create new and save in DB
         RunningExecutionPlan runningExecutionPlan = new RunningExecutionPlan();
         runningExecutionPlan.setFlowUUID(executionPlan.getFlowUuid());
         runningExecutionPlan.setExecutionPlan(executionPlan);
+        runningExecutionPlan.setExecutionId(executionId);
+
         runningExecutionPlan = createRunningExecutionPlan(runningExecutionPlan);
 
         return runningExecutionPlan.getId();
