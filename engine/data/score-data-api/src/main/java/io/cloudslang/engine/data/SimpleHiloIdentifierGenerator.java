@@ -18,7 +18,7 @@ package io.cloudslang.engine.data;
 
 import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
-import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
@@ -40,15 +40,15 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class SimpleHiloIdentifierGenerator implements IdentifierGenerator, IdentityGenerator {
 
-	private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = Logger.getLogger(getClass());
 
-	static final String TABLE_NAME = "OO_HILO";
-	static final String SQL_SELECT = "SELECT NEXT_HI FROM " + TABLE_NAME;
-	static final String SQL_UPDATE = "UPDATE " + TABLE_NAME + " SET NEXT_HI = NEXT_HI+1";
+    static final String TABLE_NAME = "OO_HILO";
+    static final String SQL_SELECT = "SELECT NEXT_HI FROM " + TABLE_NAME;
+    static final String SQL_UPDATE = "UPDATE " + TABLE_NAME + " SET NEXT_HI = NEXT_HI+1";
     static final String SQL_LOCK = "UPDATE " + TABLE_NAME + " SET NEXT_HI = NEXT_HI";
-	static final long CHUNK_SIZE = 100000L;
+    static final long CHUNK_SIZE = 100000L;
 
-	private static DataSource dataSource;
+    private static DataSource dataSource;
     private int currentChunk;
     private long currentId;
     private Lock lock = new ReentrantLock();
@@ -69,7 +69,7 @@ public class SimpleHiloIdentifierGenerator implements IdentifierGenerator, Ident
 
     @Override
     public List<Long> bulk(int bulkSize) {
-        List <Long> idsList = new ArrayList<>();
+        List<Long> idsList = new ArrayList<>();
         for (int i = 0; i < bulkSize; i++) {
             idsList.add(next());
         }
@@ -77,7 +77,7 @@ public class SimpleHiloIdentifierGenerator implements IdentifierGenerator, Ident
     }
 
     @Override
-    public Serializable generate(SessionImplementor session, Object object) throws HibernateException {
+    public Serializable generate(SharedSessionContractImplementor session, Object object) throws HibernateException {
         lock.lock();
         try {
             long id = ++currentId;

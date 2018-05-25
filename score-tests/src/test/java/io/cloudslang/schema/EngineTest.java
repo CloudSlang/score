@@ -26,10 +26,9 @@ import io.cloudslang.score.api.Score;
 import io.cloudslang.score.api.TriggeringProperties;
 import io.cloudslang.score.events.EventBus;
 import liquibase.integration.spring.SpringLiquibase;
-import org.hibernate.ejb.HibernatePersistence;
+import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -145,11 +144,11 @@ public class EngineTest {
 
         @Bean(name = "entityManagerFactory")
         @DependsOn("liquibase")
-        FactoryBean<EntityManagerFactory> emf(JpaVendorAdapter jpaVendorAdapter, Properties jpaProperties) {
+        LocalContainerEntityManagerFactoryBean emf(JpaVendorAdapter jpaVendorAdapter, Properties jpaProperties) {
             LocalContainerEntityManagerFactoryBean fb = new LocalContainerEntityManagerFactoryBean();
             fb.setDataSource(dataSource());
             fb.setJpaProperties(jpaProperties);
-            fb.setPersistenceProviderClass(HibernatePersistence.class);
+            fb.setPersistenceProviderClass(HibernatePersistenceProvider.class);
             fb.setPackagesToScan("io.cloudslang");
             fb.setJpaVendorAdapter(jpaVendorAdapter);
             return fb;
@@ -165,11 +164,11 @@ public class EngineTest {
             return new TransactionTemplate(transactionManager);
         }
 
-		@Bean
-		EventBus eventBus() {
-			return mock(EventBus.class);
-		}
+        @Bean
+        EventBus eventBus() {
+            return mock(EventBus.class);
+        }
 
-	}
+    }
 
 }

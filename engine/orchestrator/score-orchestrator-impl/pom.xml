@@ -67,11 +67,11 @@
             <artifactId>commons-collections</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.mysema.querydsl</groupId>
+            <groupId>com.querydsl</groupId>
             <artifactId>querydsl-jpa</artifactId>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+         <groupId>${project.groupId}</groupId>
             <artifactId>score-api</artifactId>
             <version>${project.version}</version>
         </dependency>
