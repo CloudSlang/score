@@ -35,7 +35,7 @@ import java.util.Properties;
 /**
  * User:
  * Date: 01/07/2014
- * <p>
+ *
  * This context is used for the case when score does not receive any outside beans related
  * to the database. In which case score itself will create the datasource (H2) and the schema and
  * anything else related to hibernate, bean management and transaction management

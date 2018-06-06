@@ -33,7 +33,8 @@ public abstract class AbstractIdentifiable implements Identifiable {
 
 	@Id
 	@GeneratedValue(generator = "cs-hilo")
-	@GenericGenerator(name = "cs-hilo", strategy = "io.cloudslang.engine.data.SimpleHiloIdentifierGenerator")
+	@GenericGenerator(name = "cs-hilo",
+			strategy = "io.cloudslang.engine.data.SimpleHiloIdentifierGenerator")
 	@Column(unique = true, nullable = false, name = "ID")
 	protected Long id;
 

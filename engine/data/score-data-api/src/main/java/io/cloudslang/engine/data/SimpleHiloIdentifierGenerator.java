@@ -77,7 +77,8 @@ public class SimpleHiloIdentifierGenerator implements IdentifierGenerator, Ident
     }
 
     @Override
-    public Serializable generate(SharedSessionContractImplementor session, Object object) throws HibernateException {
+    public Serializable generate(SharedSessionContractImplementor session, Object object)
+            throws HibernateException {
         lock.lock();
         try {
             long id = ++currentId;
