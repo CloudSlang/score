@@ -14,7 +14,7 @@ http://www.springframework.org/schema/tx http://www.springframework.org/schema/t
     <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
           p:jpaProperties-ref="test-hibernateProperties"
           p:dataSource-ref="dataSource"
-          p:persistenceProviderClass="org.hibernate.ejb.HibernatePersistence"
+          p:persistenceProviderClass="org.hibernate.jpa.HibernatePersistenceProvider"
           p:packagesToScan="io.cloudslang.engine.node"
           depends-on="liquibase,scoreHiloFactoryBean">
         <property name="jpaVendorAdapter">

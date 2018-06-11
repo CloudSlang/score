@@ -17,7 +17,7 @@
 package io.cloudslang.schema.context;
 
 import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
-import org.hibernate.ejb.HibernatePersistence;
+import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -63,38 +63,38 @@ public class ScoreDatabaseContext {
 
     @Bean
     @DependsOn("liquibase")
-	LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
-		//Init the IdentityManager
-		SimpleHiloIdentifierGenerator.setDataSource(dataSource);
+    LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
+        //Init the IdentityManager
+        SimpleHiloIdentifierGenerator.setDataSource(dataSource);
 
         //Now create the bean
         LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
-		emf.setDataSource(dataSource);
-		emf.setJpaProperties(jpaProperties());
+        emf.setDataSource(dataSource);
+        emf.setJpaProperties(jpaProperties());
         emf.setJpaVendorAdapter(jpaVendorAdapter());
-        emf.setPersistenceProviderClass(HibernatePersistence.class);
+        emf.setPersistenceProviderClass(HibernatePersistenceProvider.class);
         emf.setPackagesToScan("io.cloudslang");
         return emf;
     }
 
     @Bean
-	JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
-		JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
-		jpaTransactionManager.setEntityManagerFactory(entityManagerFactory);
-		return jpaTransactionManager;
+    JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
+        JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
+        jpaTransactionManager.setEntityManagerFactory(entityManagerFactory);
+        return jpaTransactionManager;
     }
 
     @Bean
-	JdbcTemplate jdbcTemplate(DataSource dataSource) {
-		JdbcTemplate jdbcTemplate = new JdbcTemplate();
-		jdbcTemplate.setDataSource(dataSource);
-		return jdbcTemplate;
+    JdbcTemplate jdbcTemplate(DataSource dataSource) {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate();
+        jdbcTemplate.setDataSource(dataSource);
+        return jdbcTemplate;
     }
 
     @Bean
-	TransactionTemplate transactionTemplate(PlatformTransactionManager transactionManager) {
-		TransactionTemplate transactionTemplate = new TransactionTemplate();
-		transactionTemplate.setTransactionManager(transactionManager);
-		return transactionTemplate;
+    TransactionTemplate transactionTemplate(PlatformTransactionManager transactionManager) {
+        TransactionTemplate transactionTemplate = new TransactionTemplate();
+        transactionTemplate.setTransactionManager(transactionManager);
+        return transactionTemplate;
     }
 }

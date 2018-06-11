@@ -16,15 +16,14 @@
 
 package io.cloudslang.orchestrator.repositories;
 
-import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
 import io.cloudslang.orchestrator.entities.ExecutionState;
+import io.cloudslang.score.facade.execution.ExecutionStatus;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
-import org.hibernate.ejb.HibernatePersistence;
+import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -83,7 +82,7 @@ public class ExecutionStateRepositoryTest {
     static class ExecutionStateRepositoryTestContext {
 
         @Bean
-        DataSource dataSource(){
+        DataSource dataSource() {
             BasicDataSource ds = new BasicDataSource();
             ds.setDriverClassName("org.h2.Driver");
             ds.setUrl("jdbc:h2:mem:test");
@@ -93,14 +92,14 @@ public class ExecutionStateRepositoryTest {
             return ds;
         }
 
-        @Bean(name="entityManagerFactory")
+        @Bean(name = "entityManagerFactory")
         @DependsOn({"liquibase", "dataSource"})
-        FactoryBean<EntityManagerFactory> emf(JpaVendorAdapter jpaVendorAdapter) {
+        LocalContainerEntityManagerFactoryBean emf(JpaVendorAdapter jpaVendorAdapter) {
             SimpleHiloIdentifierGenerator.setDataSource(dataSource());
             LocalContainerEntityManagerFactoryBean fb = new LocalContainerEntityManagerFactoryBean();
             fb.setJpaProperties(hibernateProperties());
             fb.setDataSource(dataSource());
-            fb.setPersistenceProviderClass(HibernatePersistence.class);
+            fb.setPersistenceProviderClass(HibernatePersistenceProvider.class);
             fb.setPackagesToScan("io.cloudslang");
             fb.setJpaVendorAdapter(jpaVendorAdapter);
             return fb;
@@ -108,7 +107,7 @@ public class ExecutionStateRepositoryTest {
 
         @Bean
         Properties hibernateProperties() {
-            return new Properties(){{
+            return new Properties() {{
                 setProperty("hibernate.format_sql", "true");
                 setProperty("hibernate.hbm2ddl.auto", "create-drop");
                 setProperty("hibernate.cache.use_query_cache", "false");
@@ -128,7 +127,7 @@ public class ExecutionStateRepositoryTest {
         }
 
         @Bean
-        SpringLiquibase liquibase(){
+        SpringLiquibase liquibase() {
             SpringLiquibase liquibase = new SpringLiquibase();
             liquibase.setDataSource(dataSource());
             liquibase.setChangeLog("classpath:/META-INF/database/test-changes.xml");
