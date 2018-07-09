@@ -55,6 +55,6 @@ public interface RunningExecutionPlanRepository extends JpaRepository<RunningExe
 
     @Modifying
     @Query("delete from RunningExecutionPlan r where r.executionId in :ids")
-    void deleteByExecutionIds(@Param("ids") Collection<String> ids);
+    int deleteByExecutionIds(@Param("ids") Collection<String> ids);
 
 }
