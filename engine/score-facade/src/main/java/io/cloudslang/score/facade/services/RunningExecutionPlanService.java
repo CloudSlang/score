@@ -64,5 +64,5 @@ public interface RunningExecutionPlanService {
     String getFlowUuidByRunningExecutionPlanId(Long runningExecutionPlanId);
 
 
-    void deleteRunningExecutionPlans(Collection<String> executionIds);
+    int deleteRunningExecutionPlans(Collection<String> executionIds);
 }

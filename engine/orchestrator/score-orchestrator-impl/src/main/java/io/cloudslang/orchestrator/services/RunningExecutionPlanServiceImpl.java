@@ -79,13 +79,14 @@ public final class RunningExecutionPlanServiceImpl implements RunningExecutionPl
 
     @Override
     @Transactional
-    public void deleteRunningExecutionPlans(Collection<String> executionIds) {
-
+    public int deleteRunningExecutionPlans(Collection<String> executionIds) {
+        int count = 0;
         List<List<String>> executionIdsPartitioned = Lists.partition(new ArrayList<>(executionIds), IN_CLAUSE_LIMIT);
         for (List<String> list : executionIdsPartitioned) {
-            runningExecutionPlanRepository.deleteByExecutionIds(list);
+            count += runningExecutionPlanRepository.deleteByExecutionIds(list);
             runningExecutionPlanRepository.flush();
         }
+        return count;
     }
 
     private List<RunningExecutionPlan> readByFlowId(String flowUuid) {
