@@ -57,7 +57,7 @@
         <mysql.connector.version>5.1.35</mysql.connector.version>
         <postgres.driver.version>9.1-901.jdbc4</postgres.driver.version>
         <spring.version>4.3.17.RELEASE</spring.version>
-        <hibernate.version>5.2.15.Final</hibernate.version>
+        <hibernate.version>5.0.12.Final</hibernate.version>
         <querydsl.version>4.2.1</querydsl.version>
         <!--Project properties-->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
