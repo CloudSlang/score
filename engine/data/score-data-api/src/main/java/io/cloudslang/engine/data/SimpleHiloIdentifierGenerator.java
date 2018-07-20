@@ -18,7 +18,7 @@ package io.cloudslang.engine.data;
 
 import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
-import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.id.IdentifierGenerator;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
@@ -77,7 +77,7 @@ public class SimpleHiloIdentifierGenerator implements IdentifierGenerator, Ident
     }
 
     @Override
-    public Serializable generate(SharedSessionContractImplementor session, Object object)
+    public Serializable generate(SessionImplementor session, Object object)
             throws HibernateException {
         lock.lock();
         try {
