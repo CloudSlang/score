@@ -56,6 +56,8 @@ import java.util.Set;
 @TransactionConfiguration(defaultRollback = true)
 public class ExecutionQueueRepositoryTest {
 
+    private static final int WORKER_FREE_MEMORY = 100000000;
+
     @Autowired
     private ExecutionQueueRepository executionQueueRepository;
 
@@ -215,7 +217,7 @@ public class ExecutionQueueRepositoryTest {
         msg.add(execMsg);
         executionQueueRepository.insertExecutionQueue(msg,1L);
         executionQueueRepository.insertExecutionStates(msg);
-        List<ExecutionMessage> result = executionQueueRepository.poll("worker1", 10, ExecStatus.IN_PROGRESS);
+        List<ExecutionMessage> result = executionQueueRepository.poll("worker1", 10, WORKER_FREE_MEMORY, ExecStatus.IN_PROGRESS);
 
         Assert.assertNotNull(result);
         Assert.assertFalse(result.isEmpty());

@@ -34,11 +34,11 @@ import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -101,24 +101,34 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
 
 	final private String QUERY_WORKER_SQL =
-			"SELECT EXEC_STATE_ID,      " +
-					"       ASSIGNED_WORKER,      " +
-					"       EXEC_GROUP ,       " +
-					"       STATUS,       " +
-					"       PAYLOAD,       " +
-					"       MSG_SEQ_ID ,      " +
-					"       MSG_ID," +
-					"       q.CREATE_TIME " +
-					" FROM  OO_EXECUTION_QUEUES q,  " +
-					"      OO_EXECUTION_STATES s   " +
-					" WHERE  " +
-					"      (q.ASSIGNED_WORKER =  ?)  AND " +
-					"      (q.STATUS IN (:status)) AND " +
-					" (q.EXEC_STATE_ID = s.ID) AND " +
-					" (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
-					"              FROM OO_EXECUTION_QUEUES qq " +
-					"              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
-					" ORDER BY q.CREATE_TIME  ";
+			"WITH cte AS (" +
+					"SELECT EXEC_STATE_ID, " +
+					"    ASSIGNED_WORKER, " +
+					"    EXEC_GROUP, " +
+					"    STATUS, " +
+					"    PAYLOAD, " +
+					"    MSG_SEQ_ID, " +
+					"    MSG_ID, " +
+					"    q.CREATE_TIME, " +
+					"    SUM(PAYLOAD_SIZE) OVER (ORDER BY q.CREATE_TIME ASC) AS total " +
+					"FROM OO_EXECUTION_QUEUES q, " +
+					"    OO_EXECUTION_STATES s " +
+					"WHERE (q.ASSIGNED_WORKER = ?)  AND " +
+					"    (q.STATUS IN (:status)) AND " +
+					"    (q.EXEC_STATE_ID = s.ID) AND " +
+					"    (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
+					"                 FROM  OO_EXECUTION_QUEUES qq " +
+					"                 WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID))  ORDER BY q.CREATE_TIME) " +
+					"SELECT EXEC_STATE_ID, " +
+					"    ASSIGNED_WORKER, " +
+					"    EXEC_GROUP, " +
+					"    STATUS, " +
+					"    PAYLOAD, " +
+					"    MSG_SEQ_ID, " +
+					"    MSG_ID, " +
+					"    CREATE_TIME " +
+					"FROM cte " +
+					"WHERE total < ? ";
 
 	final private String QUERY_WORKER_RECOVERY_SQL =
 			"SELECT         EXEC_STATE_ID,      " +
@@ -166,7 +176,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					" GROUP BY ASSIGNED_WORKER";
 
 
-	final private String INSERT_EXEC_STATE = "INSERT INTO OO_EXECUTION_STATES  (ID, MSG_ID,  PAYLOAD, CREATE_TIME) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
+	final private String INSERT_EXEC_STATE = "INSERT INTO OO_EXECUTION_STATES  (ID, MSG_ID,  PAYLOAD, PAYLOAD_SIZE, CREATE_TIME) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)";
 
 	final private String INSERT_QUEUE = "INSERT INTO OO_EXECUTION_QUEUES (ID, EXEC_STATE_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS,MSG_SEQ_ID, CREATE_TIME,MSG_VERSION) VALUES (?, ?, ?, ?, ?, ?,?,?)";
 
@@ -223,6 +233,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 				ps.setLong(1, msg.getExecStateId());
 				ps.setString(2, msg.getMsgId());
 				ps.setBytes(3, msg.getPayload().getData());
+				ps.setLong(4, msg.getPayloadSize());
 			}
 
 			@Override
@@ -281,32 +292,28 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 		for (ExecStatus status : statuses) {
 			values[i++] = status.getNumber();
 		}
-
 		return doSelectWithTemplate(pollForRecoveryJDBCTemplate, sqlStatPrvTable, new ExecutionMessageRowMapper(), values);
 	}
 
 
 	@Override
-	public List<ExecutionMessage> poll(String workerId, int maxSize, ExecStatus... statuses) {
+	public List<ExecutionMessage> poll(String workerId, int maxSize, long workerPollingMemory, ExecStatus... statuses) {
 
-		pollJDBCTemplate.setMaxRows(maxSize);
-		pollJDBCTemplate.setFetchSize(maxSize);
+		pollJDBCTemplate.setMaxRows(200);
+		pollJDBCTemplate.setFetchSize(200);
 
 		// prepare the sql statement
 		String sqlStat = QUERY_WORKER_SQL
 				.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
 
-		// prepare the argument
-		java.lang.Object[] values;
-		values = new Object[statuses.length + 1];
-		values[0] = workerId;
-		int i = 1;
-
+		// prepare the arguments
+		List<Object> argsList = new LinkedList<>();
+		argsList.add(workerId);
 		for (ExecStatus status : statuses) {
-			values[i++] = status.getNumber();
+			argsList.add(status.getNumber());
 		}
-
-		return doSelectWithTemplate(pollJDBCTemplate, sqlStat, new ExecutionMessageRowMapper(), values);
+		argsList.add(workerPollingMemory);
+		return doSelectWithTemplate(pollJDBCTemplate, sqlStat, new ExecutionMessageRowMapper(), argsList.toArray());
 	}
 
 	@Override
