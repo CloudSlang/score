@@ -44,9 +44,10 @@ public interface QueueDispatcherService {
      *
      * @param uuid the worker id
      * @param maxSize max size of the poll bulk
+     * @param workerPollingMemory max memory size of the poll bulk (in bytes)
      * @return a list of {@link io.cloudslang.engine.queue.entities.ExecutionMessage}
      */
-	List<ExecutionMessage> poll(String uuid, int maxSize);
+	List<ExecutionMessage> poll(String uuid, int maxSize, long workerPollingMemory);
 
     /**
      *

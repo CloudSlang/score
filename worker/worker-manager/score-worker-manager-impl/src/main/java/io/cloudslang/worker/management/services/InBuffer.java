@@ -45,8 +45,11 @@ import static ch.lambdaj.Lambda.on;
 public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Runnable{
     private static final Logger logger = Logger.getLogger(InBuffer.class);
 
-    private final static long MEMORY_THRESHOLD = 50000000; // 50 Mega byte
+//    private final static long MEMORY_THRESHOLD = 50000000; // 50 Mega byte
     private final static int MINIMUM_GC_DELTA = 10000; // minimum delta between garbage collections in milliseconds
+    private static final double POLLING_MEM_RATIO = 0.2; //memory ratio out of worker free memory that'll be used for polling new messages
+    private static final double START_POLL_MEM_RATIO = 0.3; //ratio out of max memory with which workers can start polling for messages
+    private static final double WORKER_QUEUE_POLLING_THRESHOLD = 0.2;
 
     @Autowired
     private QueueDispatcherService queueDispatcher;
@@ -86,10 +89,10 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     private ExecutionsActivityListener executionsActivityListener;
 
     @PostConstruct
-    private void init(){
-        capacity = Integer.getInteger("worker.inbuffer.capacity",capacity);
-        coolDownPollingMillis = Integer.getInteger("worker.inbuffer.coolDownPollingMillis",coolDownPollingMillis);
-        logger.info("InBuffer capacity is set to :" + capacity + ", coolDownPollingMillis is set to :"+ coolDownPollingMillis);
+    private void init() {
+        capacity = Integer.getInteger("worker.inbuffer.capacity", capacity);
+        coolDownPollingMillis = Integer.getInteger("worker.inbuffer.coolDownPollingMillis", coolDownPollingMillis);
+        logger.info("InBuffer capacity is set to :" + capacity + ", coolDownPollingMillis is set to :" + coolDownPollingMillis);
     }
 
 
@@ -112,10 +115,11 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
                     }
 
                     if (needToPoll()) {
-                        int messagesToGet = capacity - workerManager.getInBufferSize();
+                        int maxMessagesToGet = capacity - workerManager.getInBufferSize();
+                        long memoryForPolling = (long)(workerManager.getFreeMemory() * POLLING_MEM_RATIO);
 
-                        if (logger.isDebugEnabled()) logger.debug("Polling messages from queue (max " + messagesToGet + ")");
-                        List<ExecutionMessage> newMessages = queueDispatcher.poll(workerUuid, messagesToGet);
+                        if (logger.isDebugEnabled()) logger.debug("Polling messages from queue (max " + maxMessagesToGet + ")");
+                        List<ExecutionMessage> newMessages = queueDispatcher.poll(workerUuid, maxMessagesToGet, memoryForPolling);
                         if (executionsActivityListener != null) {
                             executionsActivityListener.onActivate(extract(newMessages, on(ExecutionMessage.class).getExecStateId()));
                         }
@@ -161,10 +165,15 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
     private boolean needToPoll(){
         int bufferSize = workerManager.getInBufferSize();
+        if (logger.isDebugEnabled()) {
+            logger.debug("InBuffer size: " + bufferSize);
+            logger.debug("Worker free memory: " + workerManager.getFreeMemory() + " bytes");
+        }
+        return bufferCanTakeMoreExecutions(bufferSize) && workerMemoryOverPollingThreshold(START_POLL_MEM_RATIO);
+    }
 
-        if (logger.isDebugEnabled()) logger.debug("InBuffer size: " + bufferSize);
-
-        return bufferSize < (capacity * 0.2) && checkFreeMemorySpace(MEMORY_THRESHOLD);
+    private boolean bufferCanTakeMoreExecutions(final int bufferSize) {
+        return bufferSize < (capacity * WORKER_QUEUE_POLLING_THRESHOLD);
     }
 
     private void ackMessages(List<ExecutionMessage> newMessages) throws InterruptedException {
@@ -173,11 +182,10 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
             // create a unique id for this lane in this specific worker to be used in out buffer optimization
             //logger.error("ACK FOR MESSAGE: " + message.getMsgId() + " : " + message.getExecStateId());
             message.setWorkerKey(message.getMsgId() + " : " + message.getExecStateId());
-            cloned = (ExecutionMessage) message.clone();
+            cloned = (ExecutionMessage) message.cloneWithoutPayload(); //payload is not needed in ack - make it null in order to minimize the data that is being sent
             cloned.setStatus(ExecStatus.IN_PROGRESS);
             cloned.incMsgSeqId();
             message.incMsgSeqId(); // increment the original message seq too in order to preserve the order of all messages of entire step
-            cloned.setPayload(null); //payload is not needed in ack - make it null in order to minimize the data that is being sent
             outBuffer.put(cloned);
         }
     }
@@ -224,19 +232,22 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
         fillBufferPeriodically();
     }
 
-    public boolean checkFreeMemorySpace(long threshold){
-        double allocatedMemory      = Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
-        double presumableFreeMemory = Runtime.getRuntime().maxMemory() - allocatedMemory;
-        boolean result = presumableFreeMemory > threshold;
-        if (! result) {
+    public boolean workerMemoryOverPollingThreshold(final double startPollingMemoryRatio){
+        final long maxMemory = workerManager.getMaxMemory();
+        final long freeMemory = workerManager.getFreeMemory();
+        final boolean canPoll = freeMemory > (maxMemory * startPollingMemoryRatio);
+        if (!canPoll) {
             logger.warn("InBuffer would not poll messages, because there is not enough free memory.");
-            if (System.currentTimeMillis() > (gcTimer + MINIMUM_GC_DELTA)){
+            logger.warn("Worker free memory is: " + freeMemory);
+            logger.warn("Worker inBuffer size is: " + workerManager.getInBufferSize());
+            logger.warn("Worker executionThreadCount is: " + workerManager.getExecutionThreadsCount());
+            if (System.currentTimeMillis() > (gcTimer + MINIMUM_GC_DELTA)) {
                 logger.warn("Trying to initiate garbage collection");
                 System.gc();
                 gcTimer = System.currentTimeMillis();
             }
         }
-        return result;
+        return canPoll;
     }
 
     @Override

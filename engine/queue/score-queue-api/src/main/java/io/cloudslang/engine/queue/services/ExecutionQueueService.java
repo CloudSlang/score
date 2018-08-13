@@ -46,10 +46,11 @@ public interface ExecutionQueueService {
      *
      * @param workerId the id of the worker
      * @param maxSize max size of the poll bulk
+     * @param workerPollingMemory max memory size of the poll bulk (in bytes)
      * @param statuses requested messages statuses
      * @return a List of {@link io.cloudslang.engine.queue.entities.ExecutionMessage} requested
      */
-    List<ExecutionMessage> poll(String workerId, int maxSize, ExecStatus... statuses);
+    List<ExecutionMessage> poll(String workerId, int maxSize, long workerPollingMemory, ExecStatus... statuses);
 
     /**
      *
