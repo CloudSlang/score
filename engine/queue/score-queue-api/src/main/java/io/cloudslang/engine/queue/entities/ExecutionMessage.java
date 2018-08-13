@@ -35,6 +35,9 @@ import java.util.Objects;
 public class ExecutionMessage implements Message, Cloneable {
 
     private static final long serialVersionUID = 3523623124812765964L;
+    private static final int JVM_OBJECT_HEADER = 16;
+    private static final int ARRAY_LENGTH_FIELD = 4;
+    private static final int PADDING_LENGTH = 4;
 
 	public static final long EMPTY_EXEC_STATE_ID = -1L;
 	public static final String EMPTY_WORKER = "EMPTY";
@@ -44,6 +47,7 @@ public class ExecutionMessage implements Message, Cloneable {
 	private String workerGroup;
 	private ExecStatus status;
 	private Payload payload;
+	private long payloadSize; //in bytes
 	private int msgSeqId;
 	private String msgId;
     private Long createDate;
@@ -61,6 +65,7 @@ public class ExecutionMessage implements Message, Cloneable {
 		workerGroup = "";
 		status = ExecStatus.INIT;
 		payload = null;
+		payloadSize = 0;
 		msgSeqId = -1;
 		msgId = "";
         createDate = null;
@@ -73,6 +78,7 @@ public class ExecutionMessage implements Message, Cloneable {
         this.msgId = String.valueOf(executionId);
         this.status = ExecStatus.PENDING;
         this.payload = payload;
+        this.payloadSize = payload != null ? payload.getData().length : 0;
         this.msgSeqId = 0;
     }
 
@@ -90,6 +96,7 @@ public class ExecutionMessage implements Message, Cloneable {
     		this.msgId = msgId;
     		this.status = status;
     		this.payload = payload;
+			this.payloadSize = payload != null ? payload.getData().length : 0;
     		this.msgSeqId = msgSeqId;
             this.createDate = createDate;
    }
@@ -107,6 +114,7 @@ public class ExecutionMessage implements Message, Cloneable {
 		this.msgId = msgId;
 		this.status = status;
 		this.payload = payload;
+		this.payloadSize = payload != null ? payload.getData().length : 0;
 		this.msgSeqId = msgSeqId;
 	}
 
@@ -125,6 +133,7 @@ public class ExecutionMessage implements Message, Cloneable {
         this.status = status;
         this.executionObject = executionObject;
         this.payload = payload;
+        this.payloadSize = payload != null ? payload.getData().length : 0;
         this.msgSeqId = msgSeqId;
     }
 
@@ -203,9 +212,22 @@ public class ExecutionMessage implements Message, Cloneable {
 
     public void setPayload(Payload payload) {
         this.payload = payload;
-    }
+		if (payload != null) {
+			setPayloadSize(payload.getData().length + JVM_OBJECT_HEADER + ARRAY_LENGTH_FIELD + PADDING_LENGTH); //or use instrumentation to be more accurate
+		} else {
+			setPayloadSize(0);
+		}
+	}
 
-    public int getMsgSeqId() {
+	public void setPayloadSize(long payloadSize) {
+		this.payloadSize = payloadSize;
+	}
+
+	public long getPayloadSize() {
+		return payloadSize;
+	}
+
+	public int getMsgSeqId() {
 		return msgSeqId;
 	}
 
@@ -326,6 +348,16 @@ public class ExecutionMessage implements Message, Cloneable {
 		}
 	}
 
+	public Object cloneWithoutPayload() {
+		try {
+			Object clone = super.clone();
+			((ExecutionMessage) clone).setPayload(null);
+			return clone;
+		} catch (CloneNotSupportedException e) {
+			throw new RuntimeException("Failed to clone message", e);
+		}
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -337,6 +369,7 @@ public class ExecutionMessage implements Message, Cloneable {
 				.append(this.msgSeqId, that.msgSeqId)
 				.append(this.msgId, that.msgId)
 				.append(this.payload, that.payload)
+				.append(this.payloadSize, that.payloadSize)
 				.append(this.status, that.status)
 				.append(this.workerGroup, that.workerGroup)
 				.append(this.workerId, that.workerId)
@@ -352,6 +385,7 @@ public class ExecutionMessage implements Message, Cloneable {
 				msgId,
 				status,
 				payload,
+				payloadSize,
 				msgSeqId,
 				execStateId,
                 createDate
