@@ -11,25 +11,30 @@
 package io.cloudslang.orchestrator.services;
 
 import ch.lambdaj.function.convert.Converter;
-import io.cloudslang.score.api.EndBranchDataContainer;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
-import io.cloudslang.score.facade.entities.Execution;
-import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.orchestrator.entities.BranchContexts;
 import io.cloudslang.orchestrator.entities.FinishedBranch;
 import io.cloudslang.orchestrator.entities.SplitMessage;
 import io.cloudslang.orchestrator.entities.SuspendedExecution;
+import io.cloudslang.orchestrator.repositories.FinishedBranchJdbcRepository;
 import io.cloudslang.orchestrator.repositories.FinishedBranchRepository;
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
-import org.apache.commons.lang.Validate;
+import io.cloudslang.score.api.EndBranchDataContainer;
+import io.cloudslang.score.facade.entities.Execution;
+import io.cloudslang.score.facade.execution.ExecutionStatus;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.Serializable;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,11 +42,17 @@ import java.util.Map;
 import static ch.lambdaj.Lambda.convert;
 import static ch.lambdaj.Lambda.extract;
 import static ch.lambdaj.Lambda.on;
+import static com.google.common.collect.Lists.newArrayList;
+import static org.apache.commons.lang.StringUtils.equalsIgnoreCase;
+import static org.apache.commons.lang.Validate.isTrue;
+import static org.apache.commons.lang.Validate.notNull;
 
 public final class SplitJoinServiceImpl implements SplitJoinService {
+    public static final int MEGA_BYTE_IN_BYTES = 1024 * 1024;
     private final Logger logger = Logger.getLogger(getClass());
 
-    private final Integer BULK_SIZE = Integer.getInteger("splitjoin.job.bulk.size", 200);
+    private final int BULK_SIZE = Integer.getInteger("splitjoin.job.bulk.size", 200);
+    private final long FACTOR_MULTI_INSTANCE = Long.getLong("splitjoin.multiinstance.factor", 125L);
 
     @Autowired
     private SuspendedExecutionsRepository suspendedExecutionsRepository;
@@ -51,6 +62,9 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
     @Autowired
     private QueueDispatcherService queueDispatcherService;
+
+    @Autowired
+    private FinishedBranchJdbcRepository finishedBranchJdbcRepository;
 
     @Autowired
     private ExecutionMessageConverter converter;
@@ -80,7 +94,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     @Override
     @Transactional
     public void split(List<SplitMessage> splitMessages) {
-        Validate.notNull(splitMessages, "split messages cannot be null");
+        notNull(splitMessages, "split messages cannot be null");
 
         if (splitMessages.isEmpty())
             return;
@@ -116,7 +130,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     @Override
     @Transactional
     public void endBranch(List<Execution> executions) {
-        Validate.notNull(executions, "executions cannot be null");
+        notNull(executions, "executions cannot be null");
 
         if (executions.isEmpty())
             return;
@@ -184,10 +198,15 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     public int joinFinishedSplits(int bulkSize) {
 
         // 1. Find all suspended executions that have all their branches ended
-        PageRequest pageRequest = new PageRequest(0, bulkSize);
-        List<SuspendedExecution> suspendedExecutions = suspendedExecutionsRepository.findFinishedSuspendedExecutions(pageRequest);
+        int sum = 0;
+        for (int i = 0; i < bulkSize; i++) {
+            PageRequest pageRequest = new PageRequest(0, 1);
+            List<SuspendedExecution> suspendedExecutions = suspendedExecutionsRepository.findFinishedSuspendedExecutions(pageRequest);
+            sum += joinAndSendToQueue(suspendedExecutions);
 
-        return joinAndSendToQueue(suspendedExecutions);
+        }
+        return sum;
+
     }
 
     @Override
@@ -201,57 +220,90 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     }
 
     private int joinAndSendToQueue(List<SuspendedExecution> suspendedExecutions) {
-        List<ExecutionMessage> messages = new ArrayList<>();
-
-        if (logger.isDebugEnabled())
+        if (logger.isDebugEnabled()) {
             logger.debug("Joining finished branches, found " + suspendedExecutions.size() + " suspended executions with all branches finished");
+        }
 
         // nothing to do here
-        if (suspendedExecutions.isEmpty())
+        if (suspendedExecutions.isEmpty()) {
             return 0;
+        }
+
 
         for (SuspendedExecution se : suspendedExecutions) {
             Execution exec = joinSplit(se);
-            messages.add(executionToStartExecutionMessage.convert(exec));
+            List<ExecutionMessage> message = new ArrayList<>(1);
+
+            // 3. send the suspended execution back to the queue one by one
+            message.add(executionToStartExecutionMessage.convert(exec));
+
+            queueDispatcherService.dispatch(message);
         }
 
-        // 3. send the suspended execution back to the queue
-        queueDispatcherService.dispatch(messages);
-
-        // 4. delete the suspended execution from the suspended table
+        // 4. delete the suspended executions from the suspended table
         suspendedExecutionsRepository.delete(suspendedExecutions);
-
         return suspendedExecutions.size();
     }
 
     private Execution joinSplit(SuspendedExecution suspendedExecution) {
-
-        List<FinishedBranch> finishedBranches = suspendedExecution.getFinishedBranches();
         Execution exec = suspendedExecution.getExecutionObj();
+        notNull(exec);
+        int countOfFinishedBranchesForExecutionId = (int) finishedBranchRepository.getCountOfFinishedBranchesForExecutionId(suspendedExecution.getExecutionId());
+        isTrue(suspendedExecution.getNumberOfBranches().equals(countOfFinishedBranchesForExecutionId),
+                "Expected suspended execution "
+                        + exec.getExecutionId() + " to have "
+                        + suspendedExecution.getNumberOfBranches()
+                        + "finished branches, but found " + countOfFinishedBranchesForExecutionId);
 
-        Validate.isTrue(suspendedExecution.getNumberOfBranches().equals(finishedBranches.size()),
-                "Expected suspended execution " + exec.getExecutionId() + " to have " + suspendedExecution.getNumberOfBranches() + "finished branches, but found " + finishedBranches.size());
+        final String suspendedExecutionId = suspendedExecution.getExecutionId();
 
-        if (logger.isDebugEnabled())
-            logger.debug("Joining execution " + exec.getExecutionId());
 
-        boolean wasExecutionCancelled = false;
-        ArrayList<EndBranchDataContainer> finishedContexts = new ArrayList<>();
-        for (FinishedBranch fb : finishedBranches) {
-                finishedContexts.add(new EndBranchDataContainer(fb.getBranchContexts().getContexts(), fb.getBranchContexts().getSystemContext(), fb.getBranchException()));
-            if (fb.getBranchContexts().isBranchCancelled()) {
-                wasExecutionCancelled = true;
+        Collection<Long> sizeOfBlobs = finishedBranchJdbcRepository.getSizeOfBlob(newArrayList(suspendedExecutionId));
+        long sizeOfBlob = getSizeOfFinishedBranches(sizeOfBlobs);
+
+        MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+
+        MemoryUsage heapUsage = memoryBean.getHeapMemoryUsage();
+        long maxMemory = heapUsage.getMax() / MEGA_BYTE_IN_BYTES;
+        long usedMemory = heapUsage.getUsed() / MEGA_BYTE_IN_BYTES;
+
+
+        Serializable stepTypeValue = exec.getSystemContext().get("STEP_TYPE");
+        boolean isMultiInstance = equalsIgnoreCase(((stepTypeValue != null) ? stepTypeValue.toString() : null),
+                "MULTI_INSTANCE");
+
+        // For multi instance check memory else proceed as usual
+        if (!isMultiInstance || (((FACTOR_MULTI_INSTANCE * sizeOfBlob) / MEGA_BYTE_IN_BYTES) < (maxMemory - usedMemory))) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Joining execution " + exec.getExecutionId());
             }
-        }
+            List<FinishedBranch> finishedBranches = suspendedExecution.getFinishedBranches();
+            boolean wasExecutionCancelled = false;
+            ArrayList<EndBranchDataContainer> finishedContexts = new ArrayList<>(finishedBranches.size());
+            for (FinishedBranch fb : finishedBranches) {
+                finishedContexts.add(new EndBranchDataContainer(fb.getBranchContexts().getContexts(), fb.getBranchContexts().getSystemContext(), fb.getBranchException()));
+                if (fb.getBranchContexts().isBranchCancelled()) {
+                    wasExecutionCancelled = true;
+                }
+            }
 
-        // 2. insert all of the branches into the parent execution
-        exec.getSystemContext().setFinishedChildBranchesData(finishedContexts);
-
-        //mark cancelled on parent
-        if (wasExecutionCancelled) {
+            // 2. insert all of the branches into the parent execution
+            exec.getSystemContext().setFinishedChildBranchesData(finishedContexts);
+            //mark cancelled on parent
+            if (wasExecutionCancelled) {
+                exec.getSystemContext().setFlowTerminationType(ExecutionStatus.CANCELED);
+            }
+        } else {
             exec.getSystemContext().setFlowTerminationType(ExecutionStatus.CANCELED);
         }
-
         return exec;
+    }
+
+    private long getSizeOfFinishedBranches(Collection<Long> sizeOfBlobs) {
+        long sizeOfBlob = 0L;
+        for (Long value : sizeOfBlobs) {
+            sizeOfBlob += value;
+        }
+        return sizeOfBlob;
     }
 }
