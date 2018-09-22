@@ -29,6 +29,7 @@ import java.util.Map;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -84,7 +85,7 @@ public class ScoreTriggeringTest {
         TriggeringProperties triggeringProperties = TriggeringProperties.create(ep);
         scoreTrigger.trigger(triggeringProperties);
 
-        verify(runningExecutionPlanService, times(1)).getOrCreateRunningExecutionPlan(any(ExecutionPlan.class));
+        verify(runningExecutionPlanService, times(1)).createRunningExecutionPlan(any(ExecutionPlan.class), anyString());
     }
 
     @Test
@@ -96,7 +97,7 @@ public class ScoreTriggeringTest {
         TriggeringProperties triggeringProperties = TriggeringProperties.create(ep).setDependencies(dep);
         scoreTrigger.trigger(triggeringProperties);
 
-        verify(runningExecutionPlanService, times(2)).getOrCreateRunningExecutionPlan(any(ExecutionPlan.class));
+        verify(runningExecutionPlanService, times(2)).createRunningExecutionPlan(any(ExecutionPlan.class), anyString());
     }
 
 }

@@ -47,6 +47,9 @@ public class RunningExecutionPlan extends AbstractIdentifiable {
     @Column(name = "UUID", nullable = false)
     private String flowUUID;
 
+    @Column(name = "EXECUTION_ID")
+    private String executionId;
+
     public byte[] getExecutionPlanZipped() {
         return executionPlanZipped;
     }
@@ -74,6 +77,14 @@ public class RunningExecutionPlan extends AbstractIdentifiable {
 
     public void setFlowUUID(String flowUUID) {
         this.flowUUID = flowUUID;
+    }
+
+    public String getExecutionId() {
+        return executionId;
+    }
+
+    public void setExecutionId(String executionId) {
+        this.executionId = executionId;
     }
 
     @Override
