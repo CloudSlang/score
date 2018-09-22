@@ -355,11 +355,11 @@ public class ExecutionRuntimeServices implements Serializable {
         }
         List<StartBranchDataContainer> branchesData = getFromMap(BRANCH_DATA);
 
-        Map<String, Serializable> contextMapForBranch = new HashMap<>(executionRuntimeServices.contextMap);
-        contextMapForBranch.remove(BRANCH_DATA);
-        contextMapForBranch.put(SCORE_EVENTS_QUEUE, (ArrayDeque) new ArrayDeque<>());
+        SystemContext branchSystemContext = new SystemContext(executionRuntimeServices.contextMap);
+        branchSystemContext.remove(BRANCH_DATA);
+        branchSystemContext.put(SCORE_EVENTS_QUEUE, new ArrayDeque<>());
 
-        branchesData.add(new StartBranchDataContainer(startPosition, executionPlanId, context, new SystemContext(contextMapForBranch)));
+        branchesData.add(new StartBranchDataContainer(startPosition, executionPlanId, context, branchSystemContext));
     }
 
 	/**

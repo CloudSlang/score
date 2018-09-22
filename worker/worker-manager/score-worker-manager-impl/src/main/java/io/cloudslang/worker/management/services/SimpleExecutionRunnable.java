@@ -144,6 +144,29 @@ public class SimpleExecutionRunnable implements Runnable {
             } catch (InterruptedException e) {
                 logger.warn("Thread was interrupted! Exiting the execution... ", ex);
             }
+        } catch (OutOfMemoryError ooo) {
+            try {
+                for (int i = 0; i < 10; i++) {
+                    System.gc();
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ignore) {
+
+                    }
+                }
+            } catch (Throwable ignore) {
+
+            }
+            logger.error("OOM Error during execution!!!", ooo);
+            //set status FAILED
+            executionMessage.setStatus(ExecStatus.FAILED);
+            executionMessage.incMsgSeqId();
+            try {
+                executionMessage.setPayload(null);
+                outBuffer.put(executionMessage);
+            } catch (Throwable t2) {
+                logger.warn("Thread was interrupted! Exiting the execution... ", t2);
+            }
         } finally {
             if (logger.isDebugEnabled()) {
                 logger.debug("Worker has finished to work on execution: " + executionId);

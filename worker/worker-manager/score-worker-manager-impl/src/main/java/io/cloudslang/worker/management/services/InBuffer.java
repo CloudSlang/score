@@ -12,6 +12,7 @@ package io.cloudslang.worker.management.services;
 
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
+import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import io.cloudslang.worker.management.ExecutionsActivityListener;
 import org.apache.commons.lang.StringUtils;
@@ -107,9 +108,10 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
                     if (needToPoll()) {
                         int messagesToGet = capacity - workerManager.getInBufferSize();
+                        int actualMessagesToGet = Math.min(messagesToGet, 10);
 
-                        if (logger.isDebugEnabled()) logger.debug("Polling messages from queue (max " + messagesToGet + ")");
-                        List<ExecutionMessage> newMessages = queueDispatcher.poll(workerUuid, messagesToGet);
+                        if (logger.isDebugEnabled()) logger.debug("Polling messages from queue (max " + actualMessagesToGet + ")");
+                        List<ExecutionMessage> newMessages = queueDispatcher.poll(workerUuid, actualMessagesToGet);
                         if (executionsActivityListener != null) {
                             executionsActivityListener.onActivate(extract(newMessages, on(ExecutionMessage.class).getExecStateId()));
                         }
@@ -163,13 +165,20 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
     private void ackMessages(List<ExecutionMessage> newMessages) throws InterruptedException {
         ExecutionMessage cloned;
+
         for (ExecutionMessage message : newMessages) {
             // create a unique id for this lane in this specific worker to be used in out buffer optimization
             //logger.error("ACK FOR MESSAGE: " + message.getMsgId() + " : " + message.getExecStateId());
+
             message.setWorkerKey(message.getMsgId() + " : " + message.getExecStateId());
+            Payload originalPayload = message.getPayload();
+            message.setPayload(null);
+
             cloned = (ExecutionMessage) message.clone();
             cloned.setStatus(ExecStatus.IN_PROGRESS);
             cloned.incMsgSeqId();
+
+            message.setPayload(originalPayload);
             message.incMsgSeqId(); // increment the original message seq too in order to preserve the order of all messages of entire step
             cloned.setPayload(null); //payload is not needed in ack - make it null in order to minimize the data that is being sent
             outBuffer.put(cloned);
@@ -218,13 +227,14 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
         fillBufferPeriodically();
     }
 
-    public boolean checkFreeMemorySpace(long threshold){
-        double allocatedMemory      = Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
-        double presumableFreeMemory = Runtime.getRuntime().maxMemory() - allocatedMemory;
-        boolean result = presumableFreeMemory > threshold;
-        if (! result) {
+    public boolean checkFreeMemorySpace(long threshold) {
+//        double allocatedMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+//        double presumableFreeMemory = Runtime.getRuntime().maxMemory() - allocatedMemory;
+//        long actualThreshold = (long) ((Runtime.getRuntime().maxMemory() * 0.2f));
+        boolean result = Runtime.getRuntime().freeMemory() > (0.125f * Runtime.getRuntime().maxMemory());
+        if (!result) {
             logger.warn("InBuffer would not poll messages, because there is not enough free memory.");
-            if (System.currentTimeMillis() > (gcTimer + MINIMUM_GC_DELTA)){
+            if (System.currentTimeMillis() > (gcTimer + MINIMUM_GC_DELTA)) {
                 logger.warn("Trying to initiate garbage collection");
                 System.gc();
                 gcTimer = System.currentTimeMillis();

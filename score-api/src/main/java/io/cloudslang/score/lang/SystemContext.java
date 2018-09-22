@@ -31,6 +31,10 @@ public class SystemContext extends ExecutionRuntimeServices implements Map<Strin
         this.contextMap = new HashMap<>(map);
     }
 
+    public SystemContext(HashMap<String, Serializable> map, boolean inline) {
+        this.contextMap = map;
+    }
+
     @Override
     public int size() {
         return contextMap.size();

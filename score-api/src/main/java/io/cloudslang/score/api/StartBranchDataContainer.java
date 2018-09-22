@@ -29,20 +29,16 @@ public class StartBranchDataContainer implements Serializable{
     private final Map<String, Serializable> contexts;
     private final SystemContext systemContext;
 
-    public StartBranchDataContainer(Long startPosition, Long executionPlanId, Map<String, Serializable> contexts, SystemContext systemContext) {
+    public StartBranchDataContainer(Long startPosition, Long executionPlanId, Map<String, Serializable> localContexts, SystemContext systemContext) {
         Validate.notNull(startPosition);
         Validate.notNull(executionPlanId);
-        Validate.notNull(contexts);
+        Validate.notNull(localContexts);
         Validate.notNull(systemContext);
 
         this.startPosition = startPosition;
         this.executionPlanId = executionPlanId;
-        this.systemContext = new SystemContext(systemContext);
-        this.contexts = new HashMap<>();
-
-        for (String name : contexts.keySet()) {
-            this.contexts.put(name, contexts.get(name));
-        }
+        this.systemContext = systemContext;
+        this.contexts = new HashMap<>(localContexts);
     }
 
     public Long getStartPosition() {
