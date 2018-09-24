@@ -90,12 +90,15 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
     @PostConstruct
     private void init() {
-        capacity = Integer.getInteger("worker.inbuffer.capacity", capacity);
-        coolDownPollingMillis = Integer.getInteger("worker.inbuffer.coolDownPollingMillis", coolDownPollingMillis);
-        logger.info("InBuffer capacity is set to :" + capacity + ", coolDownPollingMillis is set to :" + coolDownPollingMillis);
-    }
-
-
+    capacity = Integer.getInteger("worker.inbuffer.capacity", capacity);
+    coolDownPollingMillis =
+        Integer.getInteger("worker.inbuffer.coolDownPollingMillis", coolDownPollingMillis);
+    logger.info(
+        "InBuffer capacity is set to :"
+            + capacity
+            + ", coolDownPollingMillis is set to :"
+            + coolDownPollingMillis);
+  }
 
     private void fillBufferPeriodically() {
 
@@ -237,6 +240,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
         final long freeMemory = workerManager.getFreeMemory();
         final boolean canPoll = freeMemory > (maxMemory * startPollingMemoryRatio);
         if (!canPoll) {
+            //TODO clear this logging
             logger.warn("InBuffer would not poll messages, because there is not enough free memory.");
             logger.warn("Worker free memory is: " + freeMemory);
             logger.warn("Worker inBuffer size is: " + workerManager.getInBufferSize());

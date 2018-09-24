@@ -78,7 +78,7 @@ public class ExecutionMessage implements Message, Cloneable {
         this.msgId = String.valueOf(executionId);
         this.status = ExecStatus.PENDING;
         this.payload = payload;
-        this.payloadSize = payload != null ? payload.getData().length : 0;
+        this.payloadSize = getPayloadSize(payload);
         this.msgSeqId = 0;
     }
 
@@ -96,7 +96,7 @@ public class ExecutionMessage implements Message, Cloneable {
     		this.msgId = msgId;
     		this.status = status;
     		this.payload = payload;
-			this.payloadSize = payload != null ? payload.getData().length : 0;
+				this.payloadSize = getPayloadSize(payload);
     		this.msgSeqId = msgSeqId;
             this.createDate = createDate;
    }
@@ -114,7 +114,7 @@ public class ExecutionMessage implements Message, Cloneable {
 		this.msgId = msgId;
 		this.status = status;
 		this.payload = payload;
-		this.payloadSize = payload != null ? payload.getData().length : 0;
+		this.payloadSize = getPayloadSize(payload);
 		this.msgSeqId = msgSeqId;
 	}
 
@@ -133,7 +133,7 @@ public class ExecutionMessage implements Message, Cloneable {
         this.status = status;
         this.executionObject = executionObject;
         this.payload = payload;
-        this.payloadSize = payload != null ? payload.getData().length : 0;
+        this.payloadSize = getPayloadSize(payload);
         this.msgSeqId = msgSeqId;
     }
 
@@ -390,5 +390,9 @@ public class ExecutionMessage implements Message, Cloneable {
 				execStateId,
                 createDate
 		);
+	}
+
+	private int getPayloadSize(Payload payload) {
+		return payload != null ? payload.getData().length : 0;
 	}
 }
