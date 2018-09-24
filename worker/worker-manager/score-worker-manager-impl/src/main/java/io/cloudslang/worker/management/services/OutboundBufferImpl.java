@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ch.lambdaj.Lambda.*;
@@ -60,7 +61,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
     @Autowired(required = false)
     private ExecutionsActivityListener executionsActivityListener;
 
-	private List<Message> buffer = new ArrayList<>();
+	private LinkedBlockingQueue<Message> buffer = new LinkedBlockingQueue();
 
 	private int currentWeight;
 
@@ -112,32 +113,32 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 		}
 	}
 
-	@Override
-	public void drain() {
-		List<Message> bufferToDrain;
-		try{
-            syncManager.startDrain();
-			while (buffer.isEmpty()){
-				if (logger.isDebugEnabled()){
-                    logger.debug("buffer is empty. Waiting to drain...");
-                }
-				syncManager.waitForMessages();
+  @Override
+  public void drain() {
+    List<Message> drainedMessages = new ArrayList<>();
+    try {
+      syncManager.startDrain();
+      while (buffer.isEmpty()) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("buffer is empty. Waiting to drain...");
+        }
+        syncManager.waitForMessages();
+      }
+
+      if (logger.isDebugEnabled()) {
+      	logger.debug("buffer is going to be drained. " + getStatus());
 			}
 
-			if (logger.isDebugEnabled()) logger.debug("buffer is going to be drained. " + getStatus());
+      buffer.drainTo(drainedMessages);
+      currentWeight = 0;
+    } catch (InterruptedException e) {
+      logger.warn("Drain outgoing buffer was interrupted while waiting for messages on the buffer");
+    } finally {
+      syncManager.finishDrain();
+    }
 
-			bufferToDrain = buffer;
-			buffer = new ArrayList<>();
-			currentWeight = 0;
-		} catch (InterruptedException e) {
-			logger.warn("Drain outgoing buffer was interrupted while waiting for messages on the buffer");
-			return;
-		} finally{
-			syncManager.finishDrain();
-		}
-
-		drainInternal(bufferToDrain);
-	}
+    drainInternal(drainedMessages);
+  }
 
 	private void drainInternal(List<Message> bufferToDrain){
 		List<Message> bulk = new ArrayList<>();
