@@ -73,6 +73,8 @@ public class EngineTest {
     @Autowired
     private QueueDispatcherService dispatcherService;
 
+    private static final int WORKER_FREE_MEMORY = 200000000; //bytes
+
     @Test
     public void baseEngineTest() throws InterruptedException {
         // register worker
@@ -84,7 +86,7 @@ public class EngineTest {
         TriggeringProperties triggeringProperties = TriggeringProperties.create(executionPlan);
         score.trigger(triggeringProperties);
         Thread.sleep(300);
-        List<ExecutionMessage> messages = dispatcherService.poll("uuid", 10);
+        List<ExecutionMessage> messages = dispatcherService.poll("uuid", 10, WORKER_FREE_MEMORY);
 
         assertThat(messages).hasSize(1);
     }

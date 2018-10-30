@@ -16,25 +16,21 @@
 
 package io.cloudslang.engine.queue.repositories;
 
+import static io.cloudslang.engine.queue.utils.CustomRowMappers.BUSY_WORKER;
+import static io.cloudslang.engine.queue.utils.CustomRowMappers.EXECUTION_MESSAGE;
+import static io.cloudslang.engine.queue.utils.CustomRowMappers.EXECUTION_MESSAGE_WITHOUT_PAYLOAD;
+import static io.cloudslang.engine.queue.utils.QueryRunner.doSelectWithTemplate;
+import static io.cloudslang.engine.queue.utils.QueryRunner.logSQL;
+
 import io.cloudslang.engine.data.IdentityGenerator;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowCallbackHandler;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.SingleColumnRowMapper;
-
-import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
+import io.cloudslang.engine.queue.services.assigner.MonitoredMessages;
+import io.cloudslang.engine.queue.utils.CustomRowMapperFactory;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,6 +38,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.jdbc.core.SingleColumnRowMapper;
 
 /**
  * User:
@@ -130,6 +137,38 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					"FROM cte " +
 					"WHERE total < ? ";
 
+	final private String QUERY_WORKER_SQL_SKIP_LARGE_MSG =
+			"WITH cte AS (" +
+					"SELECT EXEC_STATE_ID, " +
+					"    ASSIGNED_WORKER, " +
+					"    EXEC_GROUP, " +
+					"    STATUS, " +
+					"    PAYLOAD, " +
+					"    MSG_SEQ_ID, " +
+					"    MSG_ID, " +
+					"    q.CREATE_TIME, " +
+					"    SUM(PAYLOAD_SIZE) OVER (ORDER BY q.CREATE_TIME ASC) AS total " +
+					"FROM OO_EXECUTION_QUEUES q, " +
+					"    OO_EXECUTION_STATES s " +
+					"WHERE (q.ASSIGNED_WORKER = ?)  AND " +
+					"    (q.STATUS IN (:status)) AND " +
+					"    (s.PAYLOAD_SIZE < ?) AND " +
+					"    (q.EXEC_STATE_ID = s.ID) AND " +
+					"    (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
+					"                 FROM  OO_EXECUTION_QUEUES qq " +
+					"                 WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID))  ORDER BY q.CREATE_TIME) " +
+					"SELECT EXEC_STATE_ID, " +
+					"    ASSIGNED_WORKER, " +
+					"    EXEC_GROUP, " +
+					"    STATUS, " +
+					"    PAYLOAD, " +
+					"    MSG_SEQ_ID, " +
+					"    MSG_ID, " +
+					"    CREATE_TIME " +
+					"FROM cte " +
+					"WHERE total < ? ";
+
+
 	final private String QUERY_WORKER_RECOVERY_SQL =
 			"SELECT         EXEC_STATE_ID,      " +
 					"       ASSIGNED_WORKER,      " +
@@ -195,12 +234,14 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 	private JdbcTemplate findByStatusesJDBCTemplate;
 	private JdbcTemplate getBusyWorkersTemplate;
 
-
 	@Autowired
 	private IdentityGenerator idGen;
 
 	@Autowired
 	private DataSource dataSource;
+
+	@Autowired
+	private ExecutionReassignerRepository reassignerRepository;
 
 	@PostConstruct
 	public void init() {
@@ -292,29 +333,67 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 		for (ExecStatus status : statuses) {
 			values[i++] = status.getNumber();
 		}
-		return doSelectWithTemplate(pollForRecoveryJDBCTemplate, sqlStatPrvTable, new ExecutionMessageRowMapper(), values);
+		return doSelectWithTemplate(pollForRecoveryJDBCTemplate, sqlStatPrvTable,
+				new CustomRowMapperFactory().create(EXECUTION_MESSAGE), values);
 	}
 
+  @Override
+  public List<ExecutionMessage> poll(
+      String workerId, int maxSize, long workerPollingMemory, ExecStatus... statuses) {
 
-	@Override
-	public List<ExecutionMessage> poll(String workerId, int maxSize, long workerPollingMemory, ExecStatus... statuses) {
+    pollJDBCTemplate.setMaxRows(200);
+    pollJDBCTemplate.setFetchSize(200);
 
-		pollJDBCTemplate.setMaxRows(200);
-		pollJDBCTemplate.setFetchSize(200);
+    // prepare the sql statement
+    String sqlStat =
+        QUERY_WORKER_SQL.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
 
-		// prepare the sql statement
-		String sqlStat = QUERY_WORKER_SQL
-				.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
+    // prepare the arguments
+    List<Object> argsList = new LinkedList<>();
+    argsList.add(workerId);
+    for (ExecStatus status : statuses) {
+      argsList.add(status.getNumber());
+    }
+    argsList.add(workerPollingMemory);
+    List<ExecutionMessage> executionMessages =
+				doSelectWithTemplate(
+            pollJDBCTemplate, sqlStat, new CustomRowMapperFactory().create(EXECUTION_MESSAGE), argsList.toArray());
+    if (executionMessages.isEmpty()) {
+      executionMessages =
+          retryPollingSkippingLargePayloads(argsList, statuses, workerPollingMemory);
+    }
+    // monitor and handle messages with large payloads in different thread
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+    executor.submit(() -> {
+			List<ExecutionMessage> largeMessages =
+					reassignerRepository.findLargeMessages(workerId, workerPollingMemory);
+			if (!largeMessages.isEmpty()) {
+				MonitoredMessages.getInstance();
+				MonitoredMessages
+						.addNewMessagesToMap(largeMessages);
+			}
+		});
+    return executionMessages;
+  }
 
-		// prepare the arguments
-		List<Object> argsList = new LinkedList<>();
-		argsList.add(workerId);
-		for (ExecStatus status : statuses) {
-			argsList.add(status.getNumber());
-		}
-		argsList.add(workerPollingMemory);
-		return doSelectWithTemplate(pollJDBCTemplate, sqlStat, new ExecutionMessageRowMapper(), argsList.toArray());
-	}
+  /**
+   * This polling method will skip execution messages with payloads larger then the worker's
+   * available memory for polling.
+   *
+   * @param argsList
+   * @param statuses
+   * @param workerPollingMemory
+   * @return
+   */
+  private List<ExecutionMessage> retryPollingSkippingLargePayloads(
+      List<Object> argsList, ExecStatus[] statuses, long workerPollingMemory) {
+    argsList.add(workerPollingMemory);
+    String sqlStat =
+        QUERY_WORKER_SQL_SKIP_LARGE_MSG.replaceAll(
+            ":status", StringUtils.repeat("?", ",", statuses.length));
+    return doSelectWithTemplate(
+        pollJDBCTemplate, sqlStat, new CustomRowMapperFactory().create(EXECUTION_MESSAGE), argsList.toArray());
+  }
 
 	@Override
 	public void deleteFinishedSteps(Set<Long> ids) {
@@ -368,7 +447,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 		};
 
 		long time = System.currentTimeMillis();
-		List<ExecutionMessage> result = pollMessagesWithoutAckJDBCTemplate.query(sqlStat, values, new ExecutionMessageWithoutPayloadRowMapper());
+		List<ExecutionMessage> result = pollMessagesWithoutAckJDBCTemplate.query(sqlStat, values,
+				new CustomRowMapperFactory().create(EXECUTION_MESSAGE_WITHOUT_PAYLOAD));
 
 		if (result.size() > 0) {
 			logger.warn("Pool " + result.size() + " messages without ack, version = " + minVersionAllowed);
@@ -444,7 +524,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 		}
 
 		try {
-			return doSelectWithTemplate(findByStatusesJDBCTemplate, sqlStat, new ExecutionMessageWithoutPayloadRowMapper(), values);
+			return doSelectWithTemplate(findByStatusesJDBCTemplate, sqlStat,
+					new CustomRowMapperFactory().create(EXECUTION_MESSAGE_WITHOUT_PAYLOAD), values);
 		} catch (RuntimeException ex) {
 			logger.error(sqlStat, ex);
 			throw ex;
@@ -462,64 +543,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 		for (ExecStatus status : statuses) {
 			values[i] = status.getNumber();
 		}
-		return doSelectWithTemplate(getBusyWorkersTemplate, sqlStat, new BusyWorkerRowMapper(), values);
-	}
-
-	private class BusyWorkerRowMapper implements RowMapper<String> {
-		@Override
-		public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-			return rs.getString("ASSIGNED_WORKER");
-		}
-	}
-
-
-
-	private class ExecutionMessageRowMapper implements RowMapper<ExecutionMessage> {
-		@Override
-		public ExecutionMessage mapRow(ResultSet rs, int rowNum) throws SQLException {
-			return new ExecutionMessage(rs.getLong("EXEC_STATE_ID"),
-					rs.getString("ASSIGNED_WORKER"),
-					rs.getString("EXEC_GROUP"),
-					rs.getString("MSG_ID"),
-					ExecStatus.find(rs.getInt("STATUS")),
-					new Payload(rs.getBytes("PAYLOAD")),
-					rs.getInt("MSG_SEQ_ID"),
-					rs.getLong("CREATE_TIME"));
-		}
-	}
-
-	private class ExecutionMessageWithoutPayloadRowMapper implements RowMapper<ExecutionMessage> {
-		@Override
-		public ExecutionMessage mapRow(ResultSet rs, int rowNum) throws SQLException {
-			return new ExecutionMessage(rs.getLong("EXEC_STATE_ID"),
-					rs.getString("ASSIGNED_WORKER"),
-					rs.getString("EXEC_GROUP"),
-					"-1",
-					ExecStatus.find(rs.getInt("STATUS")),
-					null,
-					rs.getInt("MSG_SEQ_ID"),
-					rs.getLong("CREATE_TIME"));
-		}
-	}
-
-	private <T> List<T> doSelectWithTemplate(JdbcTemplate jdbcTemplate, String sql, RowMapper<T> rowMapper, Object... params) {
-		logSQL(sql,params);
-		try {
-			long t = System.currentTimeMillis();
-			List<T> result = jdbcTemplate.query(sql, params, rowMapper);
-			if (logger.isDebugEnabled())
-				logger.debug("Fetched result: " + result.size() + '/' + (System.currentTimeMillis() - t) + " rows/ms");
-			return result;
-		} catch (RuntimeException ex) {
-			logger.error("Failed to execute query: " + sql, ex);
-			throw ex;
-		}
-	}
-
-	private void logSQL(String query, Object... params) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Execute SQL: " + query);
-			if (params != null && params.length > 1) logger.debug("Parameters : " + Arrays.toString(params));
-		}
+		return doSelectWithTemplate(getBusyWorkersTemplate, sqlStat, new CustomRowMapperFactory().create(
+				BUSY_WORKER), values);
 	}
 }

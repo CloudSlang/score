@@ -16,6 +16,7 @@
 
 package io.cloudslang.job;
 
+import io.cloudslang.engine.queue.services.assigner.ExecutionReassignerService;
 import io.cloudslang.engine.queue.services.cleaner.QueueCleanerService;
 import io.cloudslang.engine.queue.services.recovery.ExecutionRecoveryService;
 import io.cloudslang.engine.versioning.services.VersionService;
@@ -47,6 +48,9 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
 
     @Autowired
     private ExecutionRecoveryService executionRecoveryService;
+
+    @Autowired
+    private ExecutionReassignerService executionReassignerService;
 
     private final Logger logger = Logger.getLogger(getClass());
 
@@ -135,4 +139,13 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
         }
     }
 
+  @Override
+  public void reassignLargeMessagesJob() {
+    logger.debug("Running execution messages reassignation service");
+    try {
+      executionReassignerService.monitorAndReassignLargeMessages();
+    } catch (Exception e) {
+      logger.error("Large message couldn't be reassigned", e);
+    }
+  }
 }

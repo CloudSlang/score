@@ -13,35 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.cloudslang.engine.queue.services.assigner;
 
-package io.cloudslang.engine.queue.services.cleaner;
-
-import java.util.Set;
-
-/**
- * Created by IntelliJ IDEA. User: Date: 14/10/13
- *
- * <p>A service that is responsible for cleaning the queue tables
- */
-public interface QueueCleanerService {
-
-  /**
-   * get a set of ids of finished executions
-   *
-   * @return Set of ids of finished executions
-   */
-  Set<Long> getFinishedExecStateIds();
-
-  /**
-   * clean queues data for the given ids
-   *
-   * @param ids the ids to clean data for
-   */
-  void cleanFinishedSteps(Set<Long> ids);
+public interface ExecutionReassignerService {
 
   /**
    * This method monitors the queue for large messages that can't be processed and removes their
    * assigned worker in oder for messages to 'get lucky' on other workers.
    */
   void monitorAndReassignLargeMessages();
+
 }

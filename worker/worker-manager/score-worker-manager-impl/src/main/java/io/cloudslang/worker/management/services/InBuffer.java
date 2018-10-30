@@ -47,7 +47,6 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
 //    private final static long MEMORY_THRESHOLD = 50000000; // 50 Mega byte
     private final static int MINIMUM_GC_DELTA = 10000; // minimum delta between garbage collections in milliseconds
-    private static final double POLLING_MEM_RATIO = 0.2; //memory ratio out of worker free memory that'll be used for polling new messages
     private static final double START_POLL_MEM_RATIO = 0.3; //ratio out of max memory with which workers can start polling for messages
     private static final double WORKER_QUEUE_POLLING_THRESHOLD = 0.2;
 
@@ -119,7 +118,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
                     if (needToPoll()) {
                         int maxMessagesToGet = capacity - workerManager.getInBufferSize();
-                        long memoryForPolling = (long)(workerManager.getFreeMemory() * POLLING_MEM_RATIO);
+                        long memoryForPolling = workerManager.getMemoryForPolling();
 
                         if (logger.isDebugEnabled()) logger.debug("Polling messages from queue (max " + maxMessagesToGet + ")");
                         List<ExecutionMessage> newMessages = queueDispatcher.poll(workerUuid, maxMessagesToGet, memoryForPolling);

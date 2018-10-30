@@ -21,8 +21,10 @@ import io.cloudslang.engine.node.services.WorkerNodeServiceImpl;
 import io.cloudslang.engine.node.services.WorkersMBean;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepositoryImpl;
+import io.cloudslang.engine.queue.repositories.ExecutionReassignerRepositoryImpl;
 import io.cloudslang.engine.queue.services.*;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerServiceImpl;
+import io.cloudslang.engine.queue.services.assigner.ExecutionReassignerServiceImpl;
 import io.cloudslang.engine.queue.services.cleaner.QueueCleanerServiceImpl;
 import io.cloudslang.engine.queue.services.recovery.ExecutionRecoveryServiceImpl;
 import io.cloudslang.engine.queue.services.recovery.MessageRecoveryServiceImpl;
@@ -53,135 +55,143 @@ import org.w3c.dom.Element;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Date: 1/21/14
- *
- */
+/** Date: 1/21/14 */
 @SuppressWarnings("unused")
 public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
-    private final static String ENGINE_JOBS_CONTEXT_LOCATION = "META-INF/spring/score/context/scoreEngineSchedulerContext.xml";
+  private static final String ENGINE_JOBS_CONTEXT_LOCATION =
+      "META-INF/spring/score/context/scoreEngineSchedulerContext.xml";
 
-	private Map<Class<?>,String> beans = new HashMap<Class<?>,String>(){{
-		put(ScorePauseResumeImpl.class, null);
-        put(OrchestratorDispatcherServiceImpl.class, "orchestratorDispatcherService");
-        put(ExecutionStateServiceImpl.class, null);
-		put(QueueDispatcherServiceImpl.class, "queueDispatcherService");
-		put(ExecutionQueueServiceImpl.class, "executionQueueService");
-		put(ExecutionAssignerServiceImpl.class, "executionAssignerService");
-		put(PartitionServiceImpl.class, null);
-		put(RunningExecutionPlanServiceImpl.class, "runningEP");
-		put(VersionServiceImpl.class, null);
-		put(CancelExecutionServiceImpl.class, "cancelExecutionService");
-		put(ScoreEventFactoryImpl.class, "scoreEventFactory");
-		put(QueueListenerImpl.class, "scoreQueueListenenerImpl");
-		put(SplitJoinServiceImpl.class, "splitJoinService");
-		put(ExecutionRecoveryServiceImpl.class, null);
-		put(WorkerRecoveryServiceImpl.class, null);
-        put(MessageRecoveryServiceImpl.class, null);
-        put(WorkerLockServiceImpl.class, null);
-		put(QueueCleanerServiceImpl.class, null);
-		put(QueueStateIdGeneratorServiceImpl.class, null);
-        put(ScoreTriggeringImpl.class,null);
+  private Map<Class<?>, String> beans =
+      new HashMap<Class<?>, String>() {
+        {
+          put(ScorePauseResumeImpl.class, null);
+          put(OrchestratorDispatcherServiceImpl.class, "orchestratorDispatcherService");
+          put(ExecutionStateServiceImpl.class, null);
+          put(QueueDispatcherServiceImpl.class, "queueDispatcherService");
+          put(ExecutionQueueServiceImpl.class, "executionQueueService");
+          put(ExecutionAssignerServiceImpl.class, "executionAssignerService");
+          put(PartitionServiceImpl.class, null);
+          put(RunningExecutionPlanServiceImpl.class, "runningEP");
+          put(VersionServiceImpl.class, null);
+          put(CancelExecutionServiceImpl.class, "cancelExecutionService");
+          put(ScoreEventFactoryImpl.class, "scoreEventFactory");
+          put(QueueListenerImpl.class, "scoreQueueListenenerImpl");
+          put(SplitJoinServiceImpl.class, "splitJoinService");
+          put(ExecutionRecoveryServiceImpl.class, null);
+          put(WorkerRecoveryServiceImpl.class, null);
+          put(MessageRecoveryServiceImpl.class, null);
+          put(WorkerLockServiceImpl.class, null);
+          put(QueueCleanerServiceImpl.class, null);
+          put(QueueStateIdGeneratorServiceImpl.class, null);
+          put(ScoreTriggeringImpl.class, null);
 
-		put(PartitionUtils.class, null);
-		put(ExecutionMessageConverter.class, null);
-		put(ExecutionSerializationUtil.class, null);
-		put(SqlUtils.class, null);
-		put(SqlInQueryReader.class, null);
-		put(DataBaseDetector.class, null);
-		put(ExecutionQueueRepositoryImpl.class, null);
-		put(HiloFactoryBean.class, "scoreHiloFactoryBean");
-		put(WorkersMBean.class, "io.cloudslang.engine.node.services.WorkersMBean");
-        put(WorkerDbSupportServiceImpl.class, null);
-        put(ScoreDeprecatedImpl.class, null);
-        put(ScoreEngineJobsImpl.class,"scoreEngineJobs");
-		put(BusyWorkersServiceImpl.class,"busyWorkersService");
-		put(MergedConfigurationServiceImpl.class,"MergedConfigurationService");
-	}};
-
-	@Override
-	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
-		registerBeans(parserContext);
-
-        loadContexts(element, parserContext.getRegistry());
-
-		registerSpecialBeans(element, parserContext);
-
-		return BeanDefinitionBuilder.genericBeanDefinition(ScoreImpl.class).getBeanDefinition();
-	}
-
-    private void loadContexts(Element element, BeanDefinitionRegistry beanDefinitionRegistry) {
-        String externalDatabase = element.getAttribute("externalDatabase");
-        if (StringUtils.isBlank(externalDatabase) || externalDatabase.equals(Boolean.FALSE.toString())) {
-            AnnotatedBeanDefinitionReader definitionReader = new AnnotatedBeanDefinitionReader(beanDefinitionRegistry);
-            definitionReader.register(ScoreDefaultDatasourceContext.class);
-            definitionReader.register(ScoreDatabaseContext.class);
+          put(PartitionUtils.class, null);
+          put(ExecutionMessageConverter.class, null);
+          put(ExecutionSerializationUtil.class, null);
+          put(SqlUtils.class, null);
+          put(SqlInQueryReader.class, null);
+          put(DataBaseDetector.class, null);
+          put(ExecutionQueueRepositoryImpl.class, null);
+          put(ExecutionReassignerRepositoryImpl.class, "executionReassignerRepository");
+          put(ExecutionReassignerServiceImpl.class, "executionReassignerService");
+          put(HiloFactoryBean.class, "scoreHiloFactoryBean");
+          put(WorkersMBean.class, "io.cloudslang.engine.node.services.WorkersMBean");
+          put(WorkerDbSupportServiceImpl.class, null);
+          put(ScoreDeprecatedImpl.class, null);
+          put(ScoreEngineJobsImpl.class, "scoreEngineJobs");
+          put(BusyWorkersServiceImpl.class, "busyWorkersService");
+          put(MergedConfigurationServiceImpl.class, "MergedConfigurationService");
         }
+      };
 
-        String repositoriesContextPath = "META-INF/spring/score/context/scoreRepositoryContext.xml";
+  @Override
+  protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
+    registerBeans(parserContext);
 
-        String ignoreEngineJobs = element.getAttribute("ignoreEngineJobs");
-        if(StringUtils.isNotBlank(ignoreEngineJobs) && ignoreEngineJobs.equals(Boolean.TRUE.toString())){
-            new XmlBeanDefinitionReader(beanDefinitionRegistry).loadBeanDefinitions(repositoriesContextPath);
-        }
-        else{
-            new XmlBeanDefinitionReader(beanDefinitionRegistry).loadBeanDefinitions(repositoriesContextPath,ENGINE_JOBS_CONTEXT_LOCATION);
-        }
+    loadContexts(element, parserContext.getRegistry());
+
+    registerSpecialBeans(element, parserContext);
+
+    return BeanDefinitionBuilder.genericBeanDefinition(ScoreImpl.class).getBeanDefinition();
+  }
+
+  private void loadContexts(Element element, BeanDefinitionRegistry beanDefinitionRegistry) {
+    String externalDatabase = element.getAttribute("externalDatabase");
+    if (StringUtils.isBlank(externalDatabase)
+        || externalDatabase.equals(Boolean.FALSE.toString())) {
+      AnnotatedBeanDefinitionReader definitionReader =
+          new AnnotatedBeanDefinitionReader(beanDefinitionRegistry);
+      definitionReader.register(ScoreDefaultDatasourceContext.class);
+      definitionReader.register(ScoreDatabaseContext.class);
     }
 
-    private void registerBeans(ParserContext parserContext) {
-        BeanRegistrator beanRegistrator = new BeanRegistrator(parserContext);
-        for (Map.Entry<Class<?>, String> entry : beans.entrySet()) {
-            beanRegistrator
-					.NAME(entry.getValue())
-					.CLASS(entry.getKey())
-					.register();
-		}
-	}
+    String repositoriesContextPath = "META-INF/spring/score/context/scoreRepositoryContext.xml";
 
-    private void registerSpecialBeans(Element element, ParserContext parserContext) {
-        registerPauseResume(element,parserContext);
-		registerWorkerNodeService(element, parserContext);
-		registerEngineVersionService(element, parserContext);
+    String ignoreEngineJobs = element.getAttribute("ignoreEngineJobs");
+    if (StringUtils.isNotBlank(ignoreEngineJobs)
+        && ignoreEngineJobs.equals(Boolean.TRUE.toString())) {
+      new XmlBeanDefinitionReader(beanDefinitionRegistry)
+          .loadBeanDefinitions(repositoriesContextPath);
+    } else {
+      new XmlBeanDefinitionReader(beanDefinitionRegistry)
+          .loadBeanDefinitions(repositoriesContextPath, ENGINE_JOBS_CONTEXT_LOCATION);
     }
+  }
 
-    private void registerPauseResume(Element element, ParserContext parserContext){
-        String registerPauseResumeService = element.getAttribute("registerPauseResumeService");
-        if(!registerPauseResumeService.equals(Boolean.FALSE.toString())){
-            new BeanRegistrator(parserContext).CLASS(StubPauseResumeServiceImpl.class).register();
-        }
+  private void registerBeans(ParserContext parserContext) {
+    BeanRegistrator beanRegistrator = new BeanRegistrator(parserContext);
+    for (Map.Entry<Class<?>, String> entry : beans.entrySet()) {
+      beanRegistrator.NAME(entry.getValue()).CLASS(entry.getKey()).register();
     }
+  }
 
-	private void registerWorkerNodeService(Element element, ParserContext parserContext){
-		String registerWorkerNodeService = element.getAttribute("registerWorkerNodeService");
-		if(!registerWorkerNodeService.equals(Boolean.FALSE.toString())){
-			new BeanRegistrator(parserContext).CLASS(WorkerNodeServiceImpl.class).register();
-		}
-	}
+  private void registerSpecialBeans(Element element, ParserContext parserContext) {
+    registerPauseResume(element, parserContext);
+    registerWorkerNodeService(element, parserContext);
+    registerEngineVersionService(element, parserContext);
+  }
 
-	private void registerEngineVersionService(Element element, ParserContext parserContext){
-		String registerEngineVersionService = element.getAttribute("registerEngineVersionService");
-		if(!registerEngineVersionService.equals(Boolean.FALSE.toString())){
-			new BeanRegistrator(parserContext).CLASS(EngineVersionServiceImpl.class).register();
-		}
-	}
+  private void registerPauseResume(Element element, ParserContext parserContext) {
+    String registerPauseResumeService = element.getAttribute("registerPauseResumeService");
+    if (!registerPauseResumeService.equals(Boolean.FALSE.toString())) {
+      new BeanRegistrator(parserContext).CLASS(StubPauseResumeServiceImpl.class).register();
+    }
+  }
 
-	private void registerPartitionTemplate(String name, int groupSize, long sizeThreshold, long timeThreshold,
-                                           ParserContext parserContext,
-                                           Class<? extends PartitionCallback> callbackClass){
-		new BeanRegistrator(parserContext)
-				.NAME(name)
-				.CLASS(PartitionTemplateImpl.class)
-				.addPropertyValue("groupSize", groupSize)
-				.addPropertyValue("sizeThreshold", sizeThreshold)
-				.addPropertyValue("timeThreshold", timeThreshold)
-                .addPropertyValue("callbackClass",callbackClass)
-				.register();
-	}
+  private void registerWorkerNodeService(Element element, ParserContext parserContext) {
+    String registerWorkerNodeService = element.getAttribute("registerWorkerNodeService");
+    if (!registerWorkerNodeService.equals(Boolean.FALSE.toString())) {
+      new BeanRegistrator(parserContext).CLASS(WorkerNodeServiceImpl.class).register();
+    }
+  }
 
-	@Override
-	protected boolean shouldGenerateId() {
-		return true;
-	}
+  private void registerEngineVersionService(Element element, ParserContext parserContext) {
+    String registerEngineVersionService = element.getAttribute("registerEngineVersionService");
+    if (!registerEngineVersionService.equals(Boolean.FALSE.toString())) {
+      new BeanRegistrator(parserContext).CLASS(EngineVersionServiceImpl.class).register();
+    }
+  }
+
+  private void registerPartitionTemplate(
+      String name,
+      int groupSize,
+      long sizeThreshold,
+      long timeThreshold,
+      ParserContext parserContext,
+      Class<? extends PartitionCallback> callbackClass) {
+    new BeanRegistrator(parserContext)
+        .NAME(name)
+        .CLASS(PartitionTemplateImpl.class)
+        .addPropertyValue("groupSize", groupSize)
+        .addPropertyValue("sizeThreshold", sizeThreshold)
+        .addPropertyValue("timeThreshold", timeThreshold)
+        .addPropertyValue("callbackClass", callbackClass)
+        .register();
+  }
+
+  @Override
+  protected boolean shouldGenerateId() {
+    return true;
+  }
 }

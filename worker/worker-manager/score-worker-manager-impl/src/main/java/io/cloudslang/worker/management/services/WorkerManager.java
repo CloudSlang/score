@@ -57,6 +57,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 	private static final int KEEP_ALIVE_FAIL_LIMIT = 5;
 	private static final String DOTNET_PATH = System.getenv("WINDIR") + "/Microsoft.NET/Framework";
 	private static final Logger logger = Logger.getLogger(WorkerManager.class);
+	private static final double POLLING_MEM_RATIO = 0.2; //memory ratio out of worker free memory that'll be used for polling new messages
 
 	@Resource
 	private String workerUuid;
@@ -142,6 +143,14 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 	 */
 	public long getFreeMemory() {
 		return Runtime.getRuntime().freeMemory();
+	}
+
+	/**
+	 * This method computes the amount of memory the worker can use to poll new messages
+	 * @return amount of memory available for polling, measured in bytes.
+	 */
+	public long getMemoryForPolling() {
+		return (long) (getFreeMemory() * POLLING_MEM_RATIO);
 	}
 
 	/**

@@ -17,6 +17,7 @@
 package io.cloudslang.engine.queue.services.cleaner;
 
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
+import io.cloudslang.engine.queue.services.assigner.ExecutionReassignerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +35,9 @@ final public class QueueCleanerServiceImpl  implements QueueCleanerService {
     @Autowired
    	private ExecutionQueueRepository executionQueueRepository;
 
+    @Autowired
+    private ExecutionReassignerService executionReassignerService;
+
     @Override
     @Transactional
     public Set<Long> getFinishedExecStateIds() {
@@ -46,4 +50,9 @@ final public class QueueCleanerServiceImpl  implements QueueCleanerService {
         executionQueueRepository.deleteFinishedSteps(ids);
     }
 
+    @Override
+    @Transactional
+    public void monitorAndReassignLargeMessages() {
+        executionReassignerService.monitorAndReassignLargeMessages();
+    }
 }
