@@ -43,24 +43,23 @@ public final class ExecutionReassignerServiceImpl implements ExecutionReassigner
   }
 
   public void monitorAndReassignLargeMessages() {
-    if (messages.isEmpty()) {
-      return;
+    if (!messages.isEmpty()) {
+      messages
+          .keySet()
+          .forEach(
+              (msgId) -> {
+                if (MonitoredMessages.messageShouldBeReassigned(msgId)) {
+                  reassignMessage(msgId);
+                  logger.debug(String.format(TRY_REASSIGN_EXEC_MESSAGE, msgId));
+                }
+                if (MonitoredMessages.executionShouldBeCanceled(msgId)) {
+                  cancelExecution(msgId);
+                }
+                if (reassignerRepository.isMessageSentToWorker(msgId)) {
+                  deleteMessage(msgId);
+                }
+              });
     }
-    messages
-        .keySet()
-        .forEach(
-            (msgId) -> {
-              if (MonitoredMessages.messageShouldBeReassigned(msgId)) {
-                reassignMessage(msgId);
-                logger.debug(String.format(TRY_REASSIGN_EXEC_MESSAGE, msgId));
-              }
-              if (MonitoredMessages.executionShouldBeCanceled(msgId)) {
-                cancelExecution(msgId);
-              }
-              if (reassignerRepository.isMessageSentToWorker(msgId)) {
-                deleteMessage(msgId);
-              }
-            });
   }
 
   private void reassignMessage(Long msgId) {

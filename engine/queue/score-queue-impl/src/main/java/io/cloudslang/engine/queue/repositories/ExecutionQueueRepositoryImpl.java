@@ -21,6 +21,7 @@ import static io.cloudslang.engine.queue.utils.CustomRowMappers.EXECUTION_MESSAG
 import static io.cloudslang.engine.queue.utils.CustomRowMappers.EXECUTION_MESSAGE_WITHOUT_PAYLOAD;
 import static io.cloudslang.engine.queue.utils.QueryRunner.doSelectWithTemplate;
 import static io.cloudslang.engine.queue.utils.QueryRunner.logSQL;
+import static org.apache.commons.lang.StringUtils.EMPTY;
 
 import io.cloudslang.engine.data.IdentityGenerator;
 import io.cloudslang.engine.queue.entities.ExecStatus;
@@ -59,6 +60,8 @@ import org.springframework.jdbc.core.SingleColumnRowMapper;
 @SuppressWarnings("FieldCanBeLocal")
 public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
+	private static final String SKIP_LARGE_PAYLOADS_KEY = ":skipLargePayloads";
+  private static final String SKIP_LARGE_PAYLOADS_VALUE = "(s.PAYLOAD_SIZE < ?) AND ";
 	private Logger logger = Logger.getLogger(getClass());
 
 	final private String SELECT_FINISHED_STEPS_IDS =  " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES " +
@@ -122,6 +125,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					"    OO_EXECUTION_STATES s " +
 					"WHERE (q.ASSIGNED_WORKER = ?)  AND " +
 					"    (q.STATUS IN (:status)) AND " +
+					SKIP_LARGE_PAYLOADS_KEY +
 					"    (q.EXEC_STATE_ID = s.ID) AND " +
 					"    (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
 					"                 FROM  OO_EXECUTION_QUEUES qq " +
@@ -136,38 +140,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					"    CREATE_TIME " +
 					"FROM cte " +
 					"WHERE total < ? ";
-
-	final private String QUERY_WORKER_SQL_SKIP_LARGE_MSG =
-			"WITH cte AS (" +
-					"SELECT EXEC_STATE_ID, " +
-					"    ASSIGNED_WORKER, " +
-					"    EXEC_GROUP, " +
-					"    STATUS, " +
-					"    PAYLOAD, " +
-					"    MSG_SEQ_ID, " +
-					"    MSG_ID, " +
-					"    q.CREATE_TIME, " +
-					"    SUM(PAYLOAD_SIZE) OVER (ORDER BY q.CREATE_TIME ASC) AS total " +
-					"FROM OO_EXECUTION_QUEUES q, " +
-					"    OO_EXECUTION_STATES s " +
-					"WHERE (q.ASSIGNED_WORKER = ?)  AND " +
-					"    (q.STATUS IN (:status)) AND " +
-					"    (s.PAYLOAD_SIZE < ?) AND " +
-					"    (q.EXEC_STATE_ID = s.ID) AND " +
-					"    (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
-					"                 FROM  OO_EXECUTION_QUEUES qq " +
-					"                 WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID))  ORDER BY q.CREATE_TIME) " +
-					"SELECT EXEC_STATE_ID, " +
-					"    ASSIGNED_WORKER, " +
-					"    EXEC_GROUP, " +
-					"    STATUS, " +
-					"    PAYLOAD, " +
-					"    MSG_SEQ_ID, " +
-					"    MSG_ID, " +
-					"    CREATE_TIME " +
-					"FROM cte " +
-					"WHERE total < ? ";
-
 
 	final private String QUERY_WORKER_RECOVERY_SQL =
 			"SELECT         EXEC_STATE_ID,      " +
@@ -242,6 +214,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
 	@Autowired
 	private ExecutionReassignerRepository reassignerRepository;
+	private ExecutorService executor;
 
 	@PostConstruct
 	public void init() {
@@ -256,6 +229,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 		this.findPayloadByExecutionIdsJDBCTemplate = new JdbcTemplate(dataSource);
 		this.findByStatusesJDBCTemplate = new JdbcTemplate(dataSource);
 		this.getBusyWorkersTemplate = new JdbcTemplate(dataSource);
+		executor = Executors.newSingleThreadExecutor();
 	}
 
 	@Override
@@ -345,8 +319,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     pollJDBCTemplate.setFetchSize(200);
 
     // prepare the sql statement
-    String sqlStat =
-        QUERY_WORKER_SQL.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
+    String sqlStat = QUERY_WORKER_SQL.replace(SKIP_LARGE_PAYLOADS_KEY, EMPTY);
+    sqlStat = sqlStat.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
 
     // prepare the arguments
     List<Object> argsList = new LinkedList<>();
@@ -363,7 +337,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
           retryPollingSkippingLargePayloads(argsList, statuses, workerPollingMemory);
     }
     // monitor and handle messages with large payloads in different thread
-    ExecutorService executor = Executors.newSingleThreadExecutor();
     executor.submit(() -> {
 			List<ExecutionMessage> largeMessages =
 					reassignerRepository.findLargeMessages(workerId, workerPollingMemory);
@@ -388,11 +361,13 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
   private List<ExecutionMessage> retryPollingSkippingLargePayloads(
       List<Object> argsList, ExecStatus[] statuses, long workerPollingMemory) {
     argsList.add(workerPollingMemory);
-    String sqlStat =
-        QUERY_WORKER_SQL_SKIP_LARGE_MSG.replaceAll(
-            ":status", StringUtils.repeat("?", ",", statuses.length));
+    String sqlStat = QUERY_WORKER_SQL.replace(SKIP_LARGE_PAYLOADS_KEY, SKIP_LARGE_PAYLOADS_VALUE);
+    sqlStat = sqlStat.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
     return doSelectWithTemplate(
-        pollJDBCTemplate, sqlStat, new CustomRowMapperFactory().create(EXECUTION_MESSAGE), argsList.toArray());
+        pollJDBCTemplate,
+        sqlStat,
+        new CustomRowMapperFactory().create(EXECUTION_MESSAGE),
+        argsList.toArray());
   }
 
 	@Override
