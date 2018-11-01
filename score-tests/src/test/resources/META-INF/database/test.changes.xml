@@ -26,6 +26,7 @@
 				<constraints nullable="false"/>
 			</column>
 			<column name="CREATE_TIME" type="timestamp"/>
+			<column name="PAYLOAD_SIZE" type="BIGINT"/>
 		</createTable>
 	</changeSet>
 

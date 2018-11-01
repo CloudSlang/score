@@ -25,13 +25,19 @@ import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepositoryImpl;
+import io.cloudslang.engine.queue.repositories.ExecutionReassignerRepository;
+import io.cloudslang.engine.queue.repositories.ExecutionReassignerRepositoryImpl;
 import io.cloudslang.engine.queue.services.BusyWorkersService;
 import io.cloudslang.engine.queue.services.ExecutionQueueService;
 import io.cloudslang.engine.queue.services.ExecutionQueueServiceImpl;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerService;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerServiceImpl;
+import io.cloudslang.engine.queue.services.assigner.ExecutionReassignerService;
+import io.cloudslang.engine.queue.services.assigner.ExecutionReassignerServiceImpl;
 import io.cloudslang.engine.versioning.services.VersionService;
+import io.cloudslang.orchestrator.services.CancelExecutionService;
 import io.cloudslang.orchestrator.services.EngineVersionService;
+import io.cloudslang.score.facade.execution.ExecutionActionResult;
 import junit.framework.Assert;
 import liquibase.integration.spring.SpringLiquibase;
 import org.junit.Before;
@@ -227,6 +233,36 @@ public class QueueCleanerServiceTest {
 		@Bean
 		EngineVersionService engineVersionService(){
 			return mock(EngineVersionService.class);
+		}
+
+		@Bean
+		ExecutionReassignerRepository executionReassignerRepository() {
+			return new ExecutionReassignerRepositoryImpl();
+		}
+
+		@Bean
+		ExecutionReassignerService executionReassignerService() {
+			return new ExecutionReassignerServiceImpl();
+		}
+
+		@Bean
+		CancelExecutionService executionService() {
+			return new CancelExecutionService() {
+				@Override
+				public ExecutionActionResult requestCancelExecution(Long executionId) {
+					return null;
+				}
+
+				@Override
+				public List<Long> readCanceledExecutionsIds() {
+					return null;
+				}
+
+				@Override
+				public boolean isCanceledExecution(Long executionId) {
+					return false;
+				}
+			};
 		}
 	}
 }

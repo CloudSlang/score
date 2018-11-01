@@ -27,6 +27,8 @@ import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepositoryImpl;
+import io.cloudslang.engine.queue.repositories.ExecutionReassignerRepository;
+import io.cloudslang.engine.queue.repositories.ExecutionReassignerRepositoryImpl;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerService;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerServiceImpl;
 import io.cloudslang.engine.versioning.services.VersionService;
@@ -347,6 +349,11 @@ public class ExecutionQueueServiceTest {
 		@Bean
 		ExecutionAssignerService executionAssignerService(){
 			return new ExecutionAssignerServiceImpl();
+		}
+
+		@Bean
+		ExecutionReassignerRepository executionReassignerRepository() {
+			return new ExecutionReassignerRepositoryImpl();
 		}
 
 		@Bean
