@@ -20,24 +20,32 @@ import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.log4j.Logger;
 
 public class MonitoredMessages {
 
+  private static final String MSG_RETRY_NUMBER =
+      "Execution Message value for number of times it will try to be reassigned is set to %s";
+  private static final String MSG_MAX_LIFETIME = "Execution Message maximum lifetime in the queue is se to %s";
   private static final int ONE = 1;
   private static MonitoredMessages monitoredMessages = null;
-  private static Integer noRetries = Integer.getInteger("queue.message.reassign.number", 5);
-  private static Integer messageMaxLifetime =
-      Integer.getInteger("queue.message.lifetime", 30); // in minutes
-
+  private static Integer noRetries;
+  private static Integer messageMaxLifetime; // in minutes
   /**
    * Map of pair objects where the map key is the messageId and the pairs consist of (retries,
-   * msgCreateTime) Map(msgId, (msgCreateTime, retries))
+   * msgCreateTime) Map(msgId, (retries, msgCreateTime))
    */
   private static ConcurrentHashMap<Long, Pair<Integer, Long>> messagesMap;
 
+  private Logger logger = Logger.getLogger(getClass());
+
   private MonitoredMessages() {
     this.messagesMap = new ConcurrentHashMap();
+    noRetries = Integer.getInteger("queue.message.reassign.number", 5);
+    messageMaxLifetime = Integer.getInteger("queue.message.lifetime", 30);
+    logger.info(String.format(MSG_RETRY_NUMBER, noRetries));
+    logger.info(String.format(MSG_MAX_LIFETIME, messageMaxLifetime));
   }
 
   public static MonitoredMessages getInstance() {
@@ -51,7 +59,7 @@ public class MonitoredMessages {
     messages.forEach(
         msg -> {
           if (!messagesMap.containsKey(msg.getExecStateId())) {
-            messagesMap.put(msg.getExecStateId(), new Pair<>(ONE, msg.getCreateDate()));
+            messagesMap.put(msg.getExecStateId(), Pair.of(ONE, msg.getCreateDate()));
           }
         });
   }
@@ -71,7 +79,7 @@ public class MonitoredMessages {
 
   static void incrementRetryCount(Long msgId) {
     Integer retries = getMessageRetries(msgId);
-    retries++;
+    setMessageRetries(msgId, retries + 1);
   }
 
   /**
@@ -90,12 +98,17 @@ public class MonitoredMessages {
    * @param msgId
    * @return
    */
-  private static Long getMessageCreateTime(Long msgId) {
-    return messagesMap.get(msgId).getValue();
+  private static Long getMessageCreateTime(final Long msgId) {
+    return messagesMap.get(msgId).getRight();
   }
 
-  private static Integer getMessageRetries(Long msgId) {
-    return messagesMap.get(msgId).getKey();
+  private static Integer getMessageRetries(final Long msgId) {
+    return messagesMap.get(msgId).getLeft();
+  }
+
+  private static void setMessageRetries(final Long msgId, final Integer retries) {
+    Pair<Integer, Long> pair = messagesMap.get(msgId);
+    messagesMap.put(msgId, Pair.of(retries, pair.getRight()));
   }
 
   private static boolean messageExceededRetriesCount(long msgId) {

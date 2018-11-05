@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public final class ExecutionReassignerServiceImpl implements ExecutionReassignerService {
 
-  private static final String TRY_REASSIGN_EXEC_MESSAGE =
+  public static final String TRYING_TO_REASSIGN_MESSAGE =
       "Trying to reassign execution message with id %s to another worker.";
   private static final String CANCELING_EXECUTION_MESSAGE =
       "Canceling execution with id %s. Reason: execution message with id %s could not be processed by any of the available workers.";
@@ -48,15 +48,16 @@ public final class ExecutionReassignerServiceImpl implements ExecutionReassigner
           .keySet()
           .forEach(
               (msgId) -> {
-                if (MonitoredMessages.messageShouldBeReassigned(msgId)) {
-                  reassignMessage(msgId);
-                  logger.debug(String.format(TRY_REASSIGN_EXEC_MESSAGE, msgId));
+                if (reassignerRepository.isMessageSentToWorker(msgId)) {
+                  deleteMessage(msgId);
+                  return;
                 }
                 if (MonitoredMessages.executionShouldBeCanceled(msgId)) {
                   cancelExecution(msgId);
+                  return;
                 }
-                if (reassignerRepository.isMessageSentToWorker(msgId)) {
-                  deleteMessage(msgId);
+                if (MonitoredMessages.messageShouldBeReassigned(msgId)) {
+                  reassignMessage(msgId);
                 }
               });
     }
@@ -65,14 +66,17 @@ public final class ExecutionReassignerServiceImpl implements ExecutionReassigner
   private void reassignMessage(Long msgId) {
     reassignerRepository.reassignMessage(msgId);
     MonitoredMessages.incrementRetryCount(msgId);
+    logger.info(String.format(TRYING_TO_REASSIGN_MESSAGE, msgId));
   }
 
   private void cancelExecution(long execStateId) {
     long executionId = reassignerRepository.getMessageRunningExecutionId(execStateId);
-    cancelExecutionService.requestCancelExecution(
-        executionId); // sets the given execution with status PENDING_CANCEL
-    //      executionSummaryServiceImpl.updateStatusSystemFailure()
-    deleteMessage(execStateId);
-    logger.info(String.format(CANCELING_EXECUTION_MESSAGE, executionId, execStateId));
+    if (executionId != -1) {
+      cancelExecutionService.requestCancelExecution(
+          executionId); // sets the given execution with status PENDING_CANCEL
+//      executionSummaryServiceImpl.updateStatusSystemFailure();
+      logger.info(String.format(CANCELING_EXECUTION_MESSAGE, executionId, execStateId));
+      deleteMessage(execStateId);
+    }
   }
 }

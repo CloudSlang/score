@@ -92,15 +92,17 @@ public class ExecutionReassignerRepositoryImpl implements ExecutionReassignerRep
             GET_RUN_ID,
             new SingleColumnRowMapper<>(Long.class),
             execStateId);
-    return runIDs.iterator().next();
+    return runIDs.iterator().hasNext() ? runIDs.iterator().next() : -1;
   }
 
   public boolean isMessageSentToWorker(long execStateId) {
-    return doSelectWithTemplate(
+    List<Long> result =
+        doSelectWithTemplate(
             findSentMessageTemplate,
             COUNT_SENT_MESSAGES,
             new SingleColumnRowMapper<>(),
-            execStateId)
-        .isEmpty();
+            execStateId,
+            ExecStatus.SENT.getNumber());
+    return result.iterator().next() == 0;
   }
 }
