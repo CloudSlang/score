@@ -339,7 +339,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     // monitor and handle messages with large payloads in different thread
     executor.submit(() -> {
 			List<ExecutionMessage> largeMessages =
-					reassignerRepository.findLargeMessages(workerId, 9000);
+					reassignerRepository.findLargeMessages(workerId, workerPollingMemory);
 			if (!largeMessages.isEmpty()) {
 				MonitoredMessages
 						.addNewMessagesToMap(largeMessages);

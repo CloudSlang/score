@@ -27,7 +27,7 @@ public class MonitoredMessages {
 
   private static final String MSG_RETRY_NUMBER =
       "Execution Message value for number of times it will try to be reassigned is set to %s";
-  private static final String MSG_MAX_LIFETIME = "Execution Message maximum lifetime in the queue is se to %s";
+  private static final String MSG_MAX_LIFETIME = "Execution Message maximum lifetime in the queue is set to %s";
   private static final int ONE = 1;
   private static MonitoredMessages monitoredMessages = null;
   private static Integer noRetries;

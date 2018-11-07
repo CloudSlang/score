@@ -47,8 +47,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
 //    private final static long MEMORY_THRESHOLD = 50000000; // 50 Mega byte
     private final static int MINIMUM_GC_DELTA = 10000; // minimum delta between garbage collections in milliseconds
-    private static final double WORKER_QUEUE_POLLING_THRESHOLD = 0.2;
-    private static double startPollMemoryRatio; //ratio out of max memory with which workers can start polling for messages
+    private static final double WORKER_QUEUE_POLLING_THRESHOLD = 0.3;
 
     @Autowired
     private QueueDispatcherService queueDispatcher;
@@ -63,6 +62,10 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     @Autowired(required = false)
     @Qualifier("coolDownPollingMillis")
     private Integer coolDownPollingMillis = 200;
+
+    @Autowired
+    @Qualifier("startPollMemoryRatio")
+    private static double startPollMemoryRatio = 0.2; //ratio out of max memory with which workers can start polling for messages
 
     private Thread fillBufferThread = new Thread(this);
 
@@ -93,7 +96,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     coolDownPollingMillis =
         Integer.getInteger("worker.inbuffer.coolDownPollingMillis", coolDownPollingMillis);
     startPollMemoryRatio =
-        Double.valueOf(System.getProperty("worker.inbuffer.startPollingMemoryRatio", "0.2"));
+        Double.valueOf(System.getProperty("worker.inbuffer.startPollingMemoryRatio", String.valueOf(startPollMemoryRatio)));
     logger.info(
         "InBuffer capacity is set to :"
             + capacity
@@ -244,11 +247,15 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
         final long freeMemory = workerManager.getFreeMemory();
         final boolean canPoll = freeMemory > (maxMemory * startPollingMemoryRatio);
         if (!canPoll) {
-            logger.warn("InBuffer would not poll messages, because there is not enough free memory.");
-            //TODO clear this logging
-            logger.warn("Worker free memory is: " + freeMemory);
-            logger.warn("Worker inBuffer size is: " + workerManager.getInBufferSize());
-            logger.warn("Worker executionThreadCount is: " + workerManager.getExecutionThreadsCount());
+      logger.warn(
+          "InBuffer would not poll messages, because there is not enough free memory. Worker free memory is "
+              + freeMemory
+              + " out of "
+              + maxMemory
+              + " maxMemory. Worker inBuffer size is "
+              + workerManager.getInBufferSize()
+              + " and executionThreadCount is "
+              + workerManager.getExecutionThreadsCount());
             if (System.currentTimeMillis() > (gcTimer + MINIMUM_GC_DELTA)) {
                 logger.warn("Trying to initiate garbage collection");
                 System.gc();
