@@ -12,6 +12,7 @@
 		<score:configuration
 				inBufferCapacity="1"
 				coolDownPollingMillis="2"
+			  startPollingMemoryRatio="0"
 		/>
 	</score:worker>
 </beans>

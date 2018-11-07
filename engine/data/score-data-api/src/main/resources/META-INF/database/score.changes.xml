@@ -78,6 +78,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
                 <constraints nullable="false"/>
             </column>
             <column name="CREATE_TIME" type="${timestamp.type}"/>
+            <column name="PAYLOAD_SIZE" type="BIGINT"/>
         </createTable>
 
     </changeSet>

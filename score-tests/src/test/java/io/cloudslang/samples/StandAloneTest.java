@@ -29,6 +29,7 @@ import io.cloudslang.score.events.ScoreEventListener;
 import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import io.cloudslang.samples.controlactions.BranchActions;
@@ -73,6 +74,14 @@ public class StandAloneTest {
 
     private final static String simpleNavigationMethodName = "simpleNavigation";
     private final static String navigationActionClassName = "io.cloudslang.samples.controlactions.NavigationActions";
+
+    @BeforeClass
+    public static void setUp() {
+    System.setProperty(
+        "worker.inbuffer.startPollingMemoryRatio",
+        "0"); // Cause it uses the current jvm's runtime memory values and a loop can
+              // be obtained when polling if free memory condition is not met
+    }
 
     @Before
     public void init(){
