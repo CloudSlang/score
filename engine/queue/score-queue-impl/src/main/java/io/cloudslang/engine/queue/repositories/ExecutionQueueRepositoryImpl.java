@@ -44,12 +44,15 @@ import java.util.concurrent.Executors;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
+import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.jdbc.support.MetaDataAccessException;
 
 /**
  * User:
@@ -62,6 +65,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
 	private static final String SKIP_LARGE_PAYLOADS_KEY = ":skipLargePayloads";
   private static final String SKIP_LARGE_PAYLOADS_VALUE = "(s.PAYLOAD_SIZE < ?) AND ";
+	private static final String H2 = "H2";
 	private Logger logger = Logger.getLogger(getClass());
 
 	final private String SELECT_FINISHED_STEPS_IDS =  " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES " +
@@ -109,8 +113,27 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					"      ) AND " +
 					"      (q.MSG_VERSION < ?)  ";
 
-
 	final private String QUERY_WORKER_SQL =
+			"SELECT EXEC_STATE_ID,      " +
+					"       ASSIGNED_WORKER,      " +
+					"       EXEC_GROUP ,       " +
+					"       STATUS,       " +
+					"       PAYLOAD,       " +
+					"       MSG_SEQ_ID ,      " +
+					"       MSG_ID," +
+					"       q.CREATE_TIME " +
+					" FROM  OO_EXECUTION_QUEUES q,  " +
+					"      OO_EXECUTION_STATES s   " +
+					" WHERE  " +
+					"      (q.ASSIGNED_WORKER =  ?)  AND " +
+					"      (q.STATUS IN (:status)) AND " +
+					" (q.EXEC_STATE_ID = s.ID) AND " +
+					" (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
+					"              FROM OO_EXECUTION_QUEUES qq " +
+					"              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
+					" ORDER BY q.CREATE_TIME  ";
+
+	final private String QUERY_WORKER_WITH_PAYLOAD_SQL =
 			"WITH cte AS (" +
 					"SELECT EXEC_STATE_ID, " +
 					"    ASSIGNED_WORKER, " +
@@ -314,9 +337,40 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
   @Override
   public List<ExecutionMessage> poll(
       String workerId, int maxSize, long workerPollingMemory, ExecStatus... statuses) {
+    return isH2Db(dataSource)
+        ? pollForH2(workerId, maxSize, statuses)
+        : pollConsideringAvailableMemory(workerId, maxSize, workerPollingMemory, statuses);
+  }
 
-    pollJDBCTemplate.setMaxRows(200);
-    pollJDBCTemplate.setFetchSize(200);
+  private List<ExecutionMessage> pollForH2(String workerId, int maxSize, ExecStatus... statuses) {
+
+    pollJDBCTemplate.setMaxRows(maxSize);
+    pollJDBCTemplate.setFetchSize(maxSize);
+
+    // prepare the sql statement
+    String sqlStat =
+        QUERY_WORKER_SQL.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
+
+    // prepare the argument
+    java.lang.Object[] values;
+    values = new Object[statuses.length + 1];
+    values[0] = workerId;
+    int i = 1;
+
+    for (ExecStatus status : statuses) {
+      values[i++] = status.getNumber();
+    }
+
+    return doSelectWithTemplate(
+        pollJDBCTemplate, sqlStat, new CustomRowMapperFactory().create(EXECUTION_MESSAGE), values);
+  }
+
+
+  private List<ExecutionMessage> pollConsideringAvailableMemory(
+      String workerId, int maxSize, long workerPollingMemory, ExecStatus... statuses) {
+
+    pollJDBCTemplate.setMaxRows(maxSize);
+    pollJDBCTemplate.setFetchSize(maxSize);
 
     // prepare the sql statement
     String sqlStat = QUERY_WORKER_SQL.replace(SKIP_LARGE_PAYLOADS_KEY, EMPTY);
@@ -330,25 +384,43 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     }
     argsList.add(workerPollingMemory);
     List<ExecutionMessage> executionMessages =
-				doSelectWithTemplate(
-            pollJDBCTemplate, sqlStat, new CustomRowMapperFactory().create(EXECUTION_MESSAGE), argsList.toArray());
+        doSelectWithTemplate(
+            pollJDBCTemplate,
+            sqlStat,
+            new CustomRowMapperFactory().create(EXECUTION_MESSAGE),
+            argsList.toArray());
     if (executionMessages.isEmpty()) {
       executionMessages =
           retryPollingSkippingLargePayloads(argsList, statuses, workerPollingMemory);
     }
     // monitor and handle messages with large payloads in different thread
-    executor.submit(() -> {
-			List<ExecutionMessage> largeMessages =
-					reassignerRepository.findLargeMessages(workerId, workerPollingMemory);
-			if (!largeMessages.isEmpty()) {
-				MonitoredMessages
-						.addNewMessagesToMap(largeMessages);
-			}
-		});
+    executor.submit(
+        () -> {
+          List<ExecutionMessage> largeMessages =
+              reassignerRepository.findLargeMessages(workerId, workerPollingMemory);
+          if (!largeMessages.isEmpty()) {
+            MonitoredMessages.addNewMessagesToMap(largeMessages);
+          }
+        });
     return executionMessages;
   }
 
-  /**
+	/**
+	 * @param dataSource
+	 * @return true if the database for the given DataSource is H2
+	 */
+  private boolean isH2Db(final DataSource dataSource) {
+    try {
+      return StringUtils.equals(
+          H2,
+          (String) JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName"));
+    } catch (MetaDataAccessException e) {
+      logger.info("Database type could not be determined!\n" + ExceptionUtils.getMessage(e));
+      return false;
+    }
+  }
+
+	/**
    * This polling method will skip execution messages with payloads larger then the worker's
    * available memory for polling.
    *
@@ -360,7 +432,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
   private List<ExecutionMessage> retryPollingSkippingLargePayloads(
       List<Object> argsList, ExecStatus[] statuses, long workerPollingMemory) {
     argsList.add(workerPollingMemory);
-    String sqlStat = QUERY_WORKER_SQL.replace(SKIP_LARGE_PAYLOADS_KEY, SKIP_LARGE_PAYLOADS_VALUE);
+    String sqlStat = QUERY_WORKER_WITH_PAYLOAD_SQL
+				.replace(SKIP_LARGE_PAYLOADS_KEY, SKIP_LARGE_PAYLOADS_VALUE);
     sqlStat = sqlStat.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
     return doSelectWithTemplate(
         pollJDBCTemplate,

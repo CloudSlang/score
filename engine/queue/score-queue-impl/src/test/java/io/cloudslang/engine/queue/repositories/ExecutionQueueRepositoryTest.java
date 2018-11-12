@@ -210,7 +210,6 @@ public class ExecutionQueueRepositoryTest {
     }
 
     @Test
-    @Ignore
     public void testPoll(){
         List<ExecutionMessage> msg = new ArrayList<>();
         ExecutionMessage execMsg = generateMessage("group1","msg1", 1);
