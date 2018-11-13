@@ -27,9 +27,13 @@
          <constructor-arg type="int" value="500"/>
      </bean>
 
-  <bean id="startPollMemoryRatio" class="java.lang.Double">
-    <constructor-arg type="double" value="0"/>
-  </bean>
+    <bean id="startPollingMemoryRatio" class="java.lang.Double">
+      <constructor-arg type="double" value="0"/>
+    </bean>
+
+    <bean id="pollingMemoryRatio" class="java.lang.Double">
+      <constructor-arg type="double" value="0.2"/>
+    </bean>
 
     <task:scheduler id="testScheduler" pool-size="10"/>
 

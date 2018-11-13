@@ -221,6 +221,11 @@ public class WorkerManagerTest {
 		}
 
 		@Bean
+		Double pollingMemoryRatio() {
+			return 0.2D;
+		}
+
+		@Bean
 		Long initStartUpSleep() {
 			return 10L;
 		}

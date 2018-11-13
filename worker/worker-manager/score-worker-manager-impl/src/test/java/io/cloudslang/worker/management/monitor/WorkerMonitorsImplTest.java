@@ -120,7 +120,8 @@ public class WorkerMonitorsImplTest {
         @Bean public QueueDispatcherService queueDispatcherService() {return mock(QueueDispatcherService.class);}
         @Bean public Integer inBufferCapacity() {return 1;}
         @Bean public Integer coolDownPollingMillis() {return 1;}
-        @Bean public Integer startPollMemoryRatio() {return 0;}
+        @Bean public Double startPollingMemoryRatio() {return 0D;}
+        @Bean public Double pollingMemoryRatio() {return 0.2D;}
 
         @Bean public SimpleExecutionRunnableFactory simpleExecutionRunnableFactory() {return mock(SimpleExecutionRunnableFactory.class);}
         @Bean public SynchronizationManager synchronizationManager() {return mock(SynchronizationManager.class);}

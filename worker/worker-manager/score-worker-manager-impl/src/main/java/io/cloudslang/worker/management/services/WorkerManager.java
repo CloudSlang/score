@@ -57,7 +57,6 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 	private static final int KEEP_ALIVE_FAIL_LIMIT = 5;
 	private static final String DOTNET_PATH = System.getenv("WINDIR") + "/Microsoft.NET/Framework";
 	private static final Logger logger = Logger.getLogger(WorkerManager.class);
-	private static final double POLLING_MEM_RATIO = 0.2; //memory ratio out of worker free memory that'll be used for polling new messages
 
 	@Resource
 	private String workerUuid;
@@ -81,20 +80,26 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 	@Autowired
 	@Qualifier("numberOfExecutionThreads")
 	private Integer numberOfThreads;
+
 	@Autowired(required = false)
 	@Qualifier("initStartUpSleep")
 	private Long initStartUpSleep = 15*1000L; // by default 15 seconds
+
 	@Autowired(required = false)
 	@Qualifier("maxStartUpSleep")
 	private Long maxStartUpSleep = 10*60*1000L; // by default 10 minutes
-    private int keepAliveFailCount = 0;
+
+	@Autowired
+	@Qualifier("pollingMemoryRatio")
+	private Double pollingMemoryRatio = 0.2D; //memory ratio out of worker free memory that'll be used for polling new messages
+
+  private int keepAliveFailCount = 0;
 	private ExecutorService executorService;
 	private Map<Long, ConcurrentLinkedQueue<Future>> mapOfRunningTasks;
 	private volatile boolean endOfInit = false;
-    private volatile boolean initStarted = false;
+  private volatile boolean initStarted = false;
 	private boolean up = false;
-
-    private volatile int threadPoolVersion = 0;
+  private volatile int threadPoolVersion = 0;
 
 
 	@PostConstruct
@@ -110,6 +115,9 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
                 new WorkerThreadFactory((++threadPoolVersion) + "_WorkerExecutionThread"));
 
 		mapOfRunningTasks = new ConcurrentHashMap<>(numberOfThreads);
+		pollingMemoryRatio =
+				Double.valueOf(System.getProperty("worker.inbuffer.pollingMemoryRatio", String.valueOf(
+						pollingMemoryRatio)));
 	}
 
 	public void addExecution(Long executionId, Runnable runnable) {
@@ -150,7 +158,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 	 * @return amount of memory available for polling, measured in bytes.
 	 */
 	public long getMemoryForPolling() {
-		return (long) (getFreeMemory() * POLLING_MEM_RATIO);
+		return (long) (getFreeMemory() * pollingMemoryRatio);
 	}
 
 	/**

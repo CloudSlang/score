@@ -64,8 +64,8 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     private Integer coolDownPollingMillis = 200;
 
     @Autowired
-    @Qualifier("startPollMemoryRatio")
-    private static double startPollMemoryRatio = 0.2; //ratio out of max memory with which workers can start polling for messages
+    @Qualifier("startPollingMemoryRatio")
+    private double startPollingMemoryRatio = 0.2D; //ratio out of max memory with which workers can start polling for messages
 
     private Thread fillBufferThread = new Thread(this);
 
@@ -95,15 +95,16 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     capacity = Integer.getInteger("worker.inbuffer.capacity", capacity);
     coolDownPollingMillis =
         Integer.getInteger("worker.inbuffer.coolDownPollingMillis", coolDownPollingMillis);
-    startPollMemoryRatio =
-        Double.valueOf(System.getProperty("worker.inbuffer.startPollingMemoryRatio", String.valueOf(startPollMemoryRatio)));
+    startPollingMemoryRatio =
+        Double.valueOf(System.getProperty("worker.inbuffer.startPollingMemoryRatio", String.valueOf(
+            startPollingMemoryRatio)));
     logger.info(
         "InBuffer capacity is set to :"
             + capacity
             + ", coolDownPollingMillis is set to :"
             + coolDownPollingMillis
             + ", startPollingMemoryRatio is set to: "
-            + startPollMemoryRatio);
+            + startPollingMemoryRatio);
   }
 
     private void fillBufferPeriodically() {
@@ -178,8 +179,8 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
             logger.debug("InBuffer size: " + bufferSize);
             logger.debug("Worker free memory: " + workerManager.getFreeMemory() + " bytes");
         }
-        return bufferCanTakeMoreExecutions(bufferSize) && workerMemoryOverPollingThreshold(
-            startPollMemoryRatio);
+        return bufferCanTakeMoreExecutions(bufferSize) && isWorkerMemoryOverPollingThreshold(
+            startPollingMemoryRatio);
     }
 
     private boolean bufferCanTakeMoreExecutions(final int bufferSize) {
@@ -242,7 +243,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
         fillBufferPeriodically();
     }
 
-    public boolean workerMemoryOverPollingThreshold(final double startPollingMemoryRatio){
+    public boolean isWorkerMemoryOverPollingThreshold(final double startPollingMemoryRatio){
         final long maxMemory = workerManager.getMaxMemory();
         final long freeMemory = workerManager.getFreeMemory();
         final boolean canPoll = freeMemory > (maxMemory * startPollingMemoryRatio);
