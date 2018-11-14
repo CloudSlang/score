@@ -373,7 +373,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     pollJDBCTemplate.setFetchSize(maxSize);
 
     // prepare the sql statement
-    String sqlStat = QUERY_WORKER_SQL.replace(SKIP_LARGE_PAYLOADS_KEY, EMPTY);
+    String sqlStat = QUERY_WORKER_WITH_PAYLOAD_SQL.replace(SKIP_LARGE_PAYLOADS_KEY, EMPTY);
     sqlStat = sqlStat.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
 
     // prepare the arguments
