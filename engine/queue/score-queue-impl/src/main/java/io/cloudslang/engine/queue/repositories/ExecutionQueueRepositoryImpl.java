@@ -252,7 +252,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 		this.findPayloadByExecutionIdsJDBCTemplate = new JdbcTemplate(dataSource);
 		this.findByStatusesJDBCTemplate = new JdbcTemplate(dataSource);
 		this.getBusyWorkersTemplate = new JdbcTemplate(dataSource);
-		executor = Executors.newSingleThreadExecutor();
+		this.executor = Executors.newSingleThreadExecutor();
 	}
 
 	@Override

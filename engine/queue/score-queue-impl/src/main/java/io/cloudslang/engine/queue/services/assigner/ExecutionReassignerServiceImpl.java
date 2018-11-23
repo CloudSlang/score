@@ -20,8 +20,8 @@ import static io.cloudslang.engine.queue.services.assigner.MonitoredMessages.del
 import io.cloudslang.engine.queue.repositories.ExecutionReassignerRepository;
 import io.cloudslang.orchestrator.services.CancelExecutionService;
 import java.util.concurrent.ConcurrentMap;
-import javafx.util.Pair;
 import javax.annotation.PostConstruct;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
