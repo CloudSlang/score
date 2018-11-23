@@ -48,7 +48,7 @@ public class MonitoredMessages {
     logger.info(String.format(MSG_MAX_LIFETIME, messageMaxLifetime));
   }
 
-  public static MonitoredMessages getInstance() {
+  public synchronized static MonitoredMessages getInstance() {
     if (monitoredMessages == null) {
       monitoredMessages = new MonitoredMessages();
     }
