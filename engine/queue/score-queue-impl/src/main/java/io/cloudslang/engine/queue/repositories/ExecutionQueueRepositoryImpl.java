@@ -21,6 +21,7 @@ import static io.cloudslang.engine.queue.utils.CustomRowMappers.EXECUTION_MESSAG
 import static io.cloudslang.engine.queue.utils.CustomRowMappers.EXECUTION_MESSAGE_WITHOUT_PAYLOAD;
 import static io.cloudslang.engine.queue.utils.QueryRunner.doSelectWithTemplate;
 import static io.cloudslang.engine.queue.utils.QueryRunner.logSQL;
+import static java.lang.Boolean.TRUE;
 import static org.apache.commons.lang.StringUtils.EMPTY;
 
 import io.cloudslang.engine.data.IdentityGenerator;
@@ -252,7 +253,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 		this.findPayloadByExecutionIdsJDBCTemplate = new JdbcTemplate(dataSource);
 		this.findByStatusesJDBCTemplate = new JdbcTemplate(dataSource);
 		this.getBusyWorkersTemplate = new JdbcTemplate(dataSource);
-		this.executor = Executors.newSingleThreadExecutor();
+		this.executor = Executors.newFixedThreadPool(3);
 	}
 
 	@Override
@@ -393,17 +394,27 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
       executionMessages =
           retryPollingSkippingLargePayloads(argsList, statuses, workerPollingMemory);
     }
-    // monitor and handle messages with large payloads in different thread
-    executor.submit(
-        () -> {
-          List<ExecutionMessage> largeMessages =
-              reassignerRepository.findLargeMessages(workerId, workerPollingMemory);
-          if (!largeMessages.isEmpty()) {
-            MonitoredMessages.addNewMessagesToMap(largeMessages);
-          }
-        });
+    if (Boolean.valueOf(
+        System.getProperty("worker.polling.monitorLargeMessages", TRUE.toString()))) {
+      findLargeMessages(workerId, workerPollingMemory);
+    }
     return executionMessages;
   }
+
+	/**
+	 * This method searches and adds messages with large payloads to the monitored messages map.
+	 */
+	private void findLargeMessages(final String workerId, final long workerPollingMemory) {
+		executor.submit(
+				() -> {
+					List<ExecutionMessage> largeMessages =
+							reassignerRepository.findLargeMessages(workerId, workerPollingMemory);
+					if (!largeMessages.isEmpty()) {
+						MonitoredMessages.addNewMessagesToMap(largeMessages);
+					}
+				});
+	}
+
 
 	/**
 	 * @param dataSource
