@@ -19,6 +19,7 @@ package io.cloudslang.worker.management.services;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
+import io.cloudslang.orchestrator.entities.MessageType;
 import io.cloudslang.worker.management.ExecutionsActivityListener;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -85,6 +86,12 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     @Autowired(required = false)
     private ExecutionsActivityListener executionsActivityListener;
 
+    @Autowired
+    private ItpaMessageHandler itpaMessageHandler;
+
+    @Autowired
+    private RpaMessageHandler rpaMessageHandler;
+
     @PostConstruct
     private void init(){
         capacity = Integer.getInteger("worker.inbuffer.capacity",capacity);
@@ -125,7 +132,15 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
                             //we must acknowledge the messages that we took from the queue
                             ackMessages(newMessages);
                             for(ExecutionMessage msg :newMessages){
-                                addExecutionMessageInner(msg);
+                                //addExecutionMessageInner(msg);
+                                //TODO INVERT CONDITION
+                                rpaMessageHandler.handle(msg);
+//                                if(msg.getMessageType().equals(MessageType.ITPA)) {
+//                                    //addExecutionMessageInner(msg);
+//                                    itpaMessageHandler.handle(msg);
+//                                } else if(msg.getMessageType().equals(MessageType.RPA)) {
+//                                    rpaMessageHandler.handle(msg);
+//                                }
                             }
 
                             syncManager.finishGetMessages(); //release all locks before going to sleep!!!
@@ -178,6 +193,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
             cloned.incMsgSeqId();
             message.incMsgSeqId(); // increment the original message seq too in order to preserve the order of all messages of entire step
             cloned.setPayload(null); //payload is not needed in ack - make it null in order to minimize the data that is being sent
+            cloned.setMessageType(message.getMessageType());
             outBuffer.put(cloned);
         }
     }
@@ -190,22 +206,29 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
             if(Thread.currentThread().isInterrupted()){
                 throw new InterruptedException("Thread was interrupted while waiting on the lock in fillBufferPeriodically()!");
             }
-            addExecutionMessageInner(msg);
+            rpaMessageHandler.handle(msg);
+//            if(msg.getMessageType().equals(MessageType.ITPA)) {
+//                //addExecutionMessageInner(msg);
+//                itpaMessageHandler.handle(msg);
+//            } else if(msg.getMessageType().equals(MessageType.RPA)) {
+//                rpaMessageHandler.handle(msg);
+//            }
         }
         finally {
             syncManager.finishGetMessages();
         }
     }
 
-    private void addExecutionMessageInner(ExecutionMessage msg) {
-        SimpleExecutionRunnable simpleExecutionRunnable = simpleExecutionRunnableFactory.getObject();
-        simpleExecutionRunnable.setExecutionMessage(msg);
-        Long executionId = null;
-        if (!StringUtils.isEmpty(msg.getMsgId())) {
-            executionId = Long.valueOf(msg.getMsgId());
-        }
-        workerManager.addExecution(executionId, simpleExecutionRunnable);
-    }
+    //TODO remove this
+//    private void addExecutionMessageInner(ExecutionMessage msg) {
+//        SimpleExecutionRunnable simpleExecutionRunnable = simpleExecutionRunnableFactory.getObject();
+//        simpleExecutionRunnable.setExecutionMessage(msg);
+//        Long executionId = null;
+//        if (!StringUtils.isEmpty(msg.getMsgId())) {
+//            executionId = Long.valueOf(msg.getMsgId());
+//        }
+//        workerManager.addExecution(executionId, simpleExecutionRunnable);
+//    }
 
     @Override
     public void onApplicationEvent(ApplicationEvent applicationEvent) {

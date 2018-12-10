@@ -89,6 +89,9 @@ public interface ExecutionQueueService {
      */
 	List<ExecutionMessage> readMessagesByStatus(int maxSize, ExecStatus... statuses);
 
+	//TODO add doc
+    List<ExecutionMessage> findLatestMessageByExecutionStateId(long execStateId);
+
     /**
      *
      * polls the count of messages that didn't receive ack for a number of recovery versions

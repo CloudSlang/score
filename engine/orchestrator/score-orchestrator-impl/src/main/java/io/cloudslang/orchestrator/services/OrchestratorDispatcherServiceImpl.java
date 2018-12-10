@@ -91,7 +91,7 @@ public final class OrchestratorDispatcherServiceImpl implements OrchestratorDisp
                 queueDispatcher.dispatch(messages);
             }
         });
-
+        // TODO find messageType for splitMessage
         dispatch(messages, SplitMessage.class, new Handler<SplitMessage>() {
             @Override
             public void handle(List<SplitMessage> messages) {

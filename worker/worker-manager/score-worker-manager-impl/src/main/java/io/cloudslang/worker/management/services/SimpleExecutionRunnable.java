@@ -465,7 +465,8 @@ public class SimpleExecutionRunnable implements Runnable {
                 executionMessage.getMsgId(),
                 ExecStatus.PENDING,
                 converter.createPayload(nextStepExecution),
-                0).setWorkerKey(executionMessage.getWorkerKey());
+                0,
+                executionMessage.getMessageType()).setWorkerKey(executionMessage.getWorkerKey());
     }
 
     // Creates InProgress execution message for the next step, base on current execution message - used for short cut!
@@ -485,7 +486,8 @@ public class SimpleExecutionRunnable implements Runnable {
                 ExecStatus.IN_PROGRESS,
                 nextStepExecution,
                 converter.createPayload(nextStepExecution),
-                0).setWorkerKey(executionMessage.getWorkerKey());
+                0,
+                executionMessage.getMessageType()).setWorkerKey(executionMessage.getWorkerKey());
     }
 
 

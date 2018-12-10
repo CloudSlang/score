@@ -20,6 +20,7 @@ import io.cloudslang.engine.data.IdentityGenerator;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
+import io.cloudslang.orchestrator.entities.MessageType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +73,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					"       EXEC_GROUP ,       " +
 					"       STATUS,       " +
 					"       MSG_SEQ_ID,   " +
-					"      CREATE_TIME " +
+					"      CREATE_TIME, " +
+					"      MESSAGE_TYPE " +
 					"  FROM  OO_EXECUTION_QUEUES q  " +
 					"  WHERE " +
 					"      (q.STATUS  = ? ) AND " +
@@ -108,7 +110,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					"       PAYLOAD,       " +
 					"       MSG_SEQ_ID ,      " +
 					"       MSG_ID," +
-					"       q.CREATE_TIME " +
+					"       q.CREATE_TIME, " +
+					"      MESSAGE_TYPE " +
 					" FROM  OO_EXECUTION_QUEUES q,  " +
 					"      OO_EXECUTION_STATES s   " +
 					" WHERE  " +
@@ -128,7 +131,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					"       PAYLOAD,       " +
 					"       MSG_SEQ_ID,      " +
 					"       MSG_ID," +
-					"       q.CREATE_TIME " +
+					"       q.CREATE_TIME, " +
+					"      MESSAGE_TYPE " +
 					" FROM  OO_EXECUTION_QUEUES q,  " +
 					"       OO_EXECUTION_STATES s1   " +
 					" WHERE  " +
@@ -145,7 +149,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					"  EXEC_GROUP , " +
 					"  STATUS, " +
 					"  MSG_SEQ_ID, " +
-					"  CREATE_TIME " +
+					"  CREATE_TIME, " +
+					"      MESSAGE_TYPE " +
 					"FROM  OO_EXECUTION_QUEUES q  " +
 					"WHERE STATUS IN (:status) AND " +
 					"  NOT EXISTS (" +
@@ -164,11 +169,28 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					"              FROM OO_EXECUTION_QUEUES qq " +
 					"              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
 					" GROUP BY ASSIGNED_WORKER";
+	final private String SELECT_LATEST_EXECUTION_MESSAGE =
+			"SELECT EXEC_STATE_ID, " +
+					"  ASSIGNED_WORKER, " +
+					"  EXEC_GROUP , " +
+					"  STATUS, " +
+					"  MSG_SEQ_ID, " +
+					"  CREATE_TIME, " +
+					"  MESSAGE_TYPE " +
+					"FROM  OO_EXECUTION_QUEUES q  " +
+					"WHERE EXEC_STATE_ID = :execStateId AND " +
+					"  NOT EXISTS (" +
+					"     SELECT qq.MSG_SEQ_ID " +
+					"     FROM OO_EXECUTION_QUEUES qq " +
+					"     WHERE" +
+					"         qq.EXEC_STATE_ID = q.EXEC_STATE_ID" +
+					"         AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID" +
+					"  )";
 
 
 	final private String INSERT_EXEC_STATE = "INSERT INTO OO_EXECUTION_STATES  (ID, MSG_ID,  PAYLOAD, CREATE_TIME) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
 
-	final private String INSERT_QUEUE = "INSERT INTO OO_EXECUTION_QUEUES (ID, EXEC_STATE_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS,MSG_SEQ_ID, CREATE_TIME,MSG_VERSION) VALUES (?, ?, ?, ?, ?, ?,?,?)";
+	final private String INSERT_QUEUE = "INSERT INTO OO_EXECUTION_QUEUES (ID, EXEC_STATE_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS,MSG_SEQ_ID, CREATE_TIME,MSG_VERSION, MESSAGE_TYPE) VALUES (?, ?, ?, ?, ?, ?,?,?, ?)";
 
 	private static final String QUERY_PAYLOAD_BY_EXECUTION_IDS = "SELECT ID, PAYLOAD FROM OO_EXECUTION_STATES WHERE ID IN (:IDS)";
 
@@ -184,6 +206,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 	private JdbcTemplate findPayloadByExecutionIdsJDBCTemplate;
 	private JdbcTemplate findByStatusesJDBCTemplate;
 	private JdbcTemplate getBusyWorkersTemplate;
+	private JdbcTemplate findLatestMessageByExecutionStateIdTemplate;
 
 
 	@Autowired
@@ -205,6 +228,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 		this.findPayloadByExecutionIdsJDBCTemplate = new JdbcTemplate(dataSource);
 		this.findByStatusesJDBCTemplate = new JdbcTemplate(dataSource);
 		this.getBusyWorkersTemplate = new JdbcTemplate(dataSource);
+		this.findLatestMessageByExecutionStateIdTemplate = new JdbcTemplate(dataSource);
 	}
 
 	@Override
@@ -251,6 +275,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 				ps.setInt(6, msg.getMsgSeqId());
 				ps.setLong(7, Calendar.getInstance().getTimeInMillis());
 				ps.setLong(8, version);
+				ps.setInt(9, msg.getMessageType().getIndexNumber());
 			}
 
 			@Override
@@ -445,6 +470,16 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 	}
 
 	@Override
+	public List<ExecutionMessage> findLatestMessageByExecutionStateId(long execStateId) {
+		// prepare the sql statement
+		String sql = SELECT_LATEST_EXECUTION_MESSAGE
+				.replaceAll(":execStateId", "?");
+		Object[] values = new Object[1];
+		values[0] = execStateId;
+		return doSelectWithTemplate(findLatestMessageByExecutionStateIdTemplate, sql, new ExecutionMessageWithoutPayloadRowMapper(), values);
+	}
+
+	@Override
 	public List<String> getBusyWorkers(ExecStatus... statuses) {
 		// prepare the sql statement
 		String sqlStat = BUSY_WORKERS_SQL
@@ -477,7 +512,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					ExecStatus.find(rs.getInt("STATUS")),
 					new Payload(rs.getBytes("PAYLOAD")),
 					rs.getInt("MSG_SEQ_ID"),
-					rs.getLong("CREATE_TIME"));
+					rs.getLong("CREATE_TIME"),
+					MessageType.values()[rs.getInt("MESSAGE_TYPE") ]);
 		}
 	}
 
@@ -491,7 +527,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					ExecStatus.find(rs.getInt("STATUS")),
 					null,
 					rs.getInt("MSG_SEQ_ID"),
-					rs.getLong("CREATE_TIME"));
+					rs.getLong("CREATE_TIME"),
+					MessageType.values()[rs.getInt("MESSAGE_TYPE")]);
 		}
 	}
 

@@ -17,6 +17,8 @@
 package io.cloudslang.schema;
 
 import io.cloudslang.orchestrator.services.*;
+import io.cloudslang.worker.management.services.ItpaMessageHandler;
+import io.cloudslang.worker.management.services.RpaMessageHandler;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,6 +114,12 @@ public class WorkerTest {
 		QueueStateIdGeneratorService queueStateIdGeneratorService(){
 			return mock(QueueStateIdGeneratorService.class);
 		}
+
+		@Bean
+		ItpaMessageHandler itpaMessageHandler() { return mock(ItpaMessageHandler.class);}
+
+		@Bean
+		RpaMessageHandler rpaMessageHandler() { return mock(RpaMessageHandler.class);}
 	}
 
 }

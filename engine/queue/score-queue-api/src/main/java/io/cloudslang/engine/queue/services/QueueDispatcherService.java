@@ -19,6 +19,7 @@ package io.cloudslang.engine.queue.services;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
+import io.cloudslang.orchestrator.entities.MessageType;
 
 import java.util.List;
 
@@ -51,11 +52,11 @@ public interface QueueDispatcherService {
     /**
      *
      * Dispatch one message to the queue
-     *
-     * @param messageId the id of the message
+     *  @param messageId the id of the message
      * @param group the group associated with the message
      * @param status the message status
      * @param payload the message payload
+     * @param messageType
      */
-	void dispatch(String messageId, String group, ExecStatus status, Payload payload);
+	void dispatch(String messageId, String group, ExecStatus status, Payload payload, MessageType messageType);
 }

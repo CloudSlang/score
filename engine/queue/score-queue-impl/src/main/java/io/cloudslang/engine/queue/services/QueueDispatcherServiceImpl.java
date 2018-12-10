@@ -20,6 +20,7 @@ import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
+import io.cloudslang.orchestrator.entities.MessageType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
@@ -91,7 +92,7 @@ public final class QueueDispatcherServiceImpl implements QueueDispatcherService 
 
 	@Transactional
 	@Override
-	public void dispatch(String messageId, String group, ExecStatus status, Payload payload) {
+	public void dispatch(String messageId, String group, ExecStatus status, Payload payload, MessageType messageType) {
 		Validate.notEmpty(messageId, "Message ID is null or empty");
 		Validate.notNull(status, "Status is null");
 
@@ -103,7 +104,8 @@ public final class QueueDispatcherServiceImpl implements QueueDispatcherService 
 				messageId,
 				status,
 				payload,
-				0);
+				0,
+				messageType);
 		dispatch(Arrays.asList(message));
 	}
 }

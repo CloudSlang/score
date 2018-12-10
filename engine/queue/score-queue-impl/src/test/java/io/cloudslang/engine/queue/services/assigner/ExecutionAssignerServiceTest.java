@@ -24,6 +24,7 @@ import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.ExecutionQueueService;
+import io.cloudslang.orchestrator.entities.MessageType;
 import io.cloudslang.orchestrator.services.EngineVersionService;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.lang.SystemContext;
@@ -78,8 +79,8 @@ public class ExecutionAssignerServiceTest {
         groupWorkersMap.put("DefaultGroup", "worker2");
 
         List<ExecutionMessage> assignMessages = new ArrayList<>();
-        ExecutionMessage msg1 = new ExecutionMessage(1, ExecutionMessage.EMPTY_WORKER, "DefaultGroup", "msg1", ExecStatus.PENDING, null, 0, (new Date(0)).getTime());
-        ExecutionMessage msg2 = new ExecutionMessage(2, ExecutionMessage.EMPTY_WORKER, "DefaultGroup", "msg2", ExecStatus.PENDING, null, 0, (new Date(0)).getTime());
+        ExecutionMessage msg1 = new ExecutionMessage(1, ExecutionMessage.EMPTY_WORKER, "DefaultGroup", "msg1", ExecStatus.PENDING, null, 0, (new Date(0)).getTime(), MessageType.ITPA);
+        ExecutionMessage msg2 = new ExecutionMessage(2, ExecutionMessage.EMPTY_WORKER, "DefaultGroup", "msg2", ExecStatus.PENDING, null, 0, (new Date(0)).getTime(), MessageType.ITPA);
         assignMessages.add(msg1);
         assignMessages.add(msg2);
 
@@ -106,7 +107,7 @@ public class ExecutionAssignerServiceTest {
         groupWorkersMap.put("DefaultGroup", "worker2");
 
         List<ExecutionMessage> assignMessages = new ArrayList<>();
-        ExecutionMessage msg1 = new ExecutionMessage(1, ExecutionMessage.EMPTY_WORKER, "GroupX", "msg1", ExecStatus.PENDING, null, 0, (new Date(0)).getTime());
+        ExecutionMessage msg1 = new ExecutionMessage(1, ExecutionMessage.EMPTY_WORKER, "GroupX", "msg1", ExecStatus.PENDING, null, 0, (new Date(0)).getTime(), MessageType.ITPA);
         assignMessages.add(msg1);
 
         Mockito.reset(executionQueueService);

@@ -190,6 +190,12 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 		return executionQueueRepository.findByStatuses(maxSize, statuses);
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public List<ExecutionMessage> findLatestMessageByExecutionStateId(long execStateId) {
+		return executionQueueRepository.findLatestMessageByExecutionStateId(execStateId);
+	}
+
     @Override
     @Transactional(readOnly = true)
     public int countMessagesWithoutAckForWorker(int maxSize, long minVersionAllowed, String workerUuid) {

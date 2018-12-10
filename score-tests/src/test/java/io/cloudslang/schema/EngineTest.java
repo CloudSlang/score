@@ -25,6 +25,9 @@ import io.cloudslang.score.api.ExecutionStep;
 import io.cloudslang.score.api.Score;
 import io.cloudslang.score.api.TriggeringProperties;
 import io.cloudslang.score.events.EventBus;
+import io.cloudslang.worker.management.services.ItpaMessageHandler;
+import io.cloudslang.worker.management.services.RpaMessageHandler;
+import io.cloudslang.worker.management.services.WorkerManager;
 import liquibase.integration.spring.SpringLiquibase;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.junit.Test;
@@ -168,6 +171,17 @@ public class EngineTest {
         EventBus eventBus() {
             return mock(EventBus.class);
         }
+
+        @Bean
+        WorkerManager workerManager() {
+            return mock(WorkerManager.class);
+        }
+
+        @Bean
+        ItpaMessageHandler itpaMessageHandler() { return mock(ItpaMessageHandler.class);}
+
+        @Bean
+        RpaMessageHandler rpaMessageHandler() { return mock(RpaMessageHandler.class);}
 
     }
 

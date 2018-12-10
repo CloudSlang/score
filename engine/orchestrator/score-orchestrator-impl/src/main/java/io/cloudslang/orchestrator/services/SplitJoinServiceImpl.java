@@ -64,6 +64,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     /*
         converts an execution to a fresh execution message for triggering a new flow
      */
+    // TODO find messageType for fresh execution message
     private final Converter<Execution, ExecutionMessage> executionToStartExecutionMessage = new Converter<Execution, ExecutionMessage>() {
         @Override
         public ExecutionMessage convert(Execution execution) {

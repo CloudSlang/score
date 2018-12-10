@@ -16,6 +16,7 @@
 
 package io.cloudslang.orchestrator.services;
 
+import io.cloudslang.orchestrator.entities.MessageType;
 import io.cloudslang.score.api.ExecutionPlan;
 import io.cloudslang.score.api.TriggeringProperties;
 import io.cloudslang.engine.data.IdentityGenerator;
@@ -77,7 +78,12 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
         executionStateService.createParentExecution(execution.getExecutionId());
 
         // create execution message
-        ExecutionMessage message = createExecutionMessage(execution);
+        //TODO DO REAL IMPL LATER
+        MessageType messageType = MessageType.ITPA;
+        /*if(triggeringProperties.getExecutionPlan().getFlowUuid().equals("06fe8531-868b-4e79-aa7a-13a5e30a66ec")) {
+            messageType = MessageType.RPA;
+        }*/
+        ExecutionMessage message = createExecutionMessage(execution, messageType);
         enqueue(message);
         return executionId;
     }
@@ -124,7 +130,7 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
         queueDispatcher.dispatch(Arrays.asList(messages));
     }
 
-    private ExecutionMessage createExecutionMessage(Execution execution) {
+    private ExecutionMessage createExecutionMessage(Execution execution, MessageType messageType) {
         Payload payload = executionMessageConverter.createPayload(execution);
 
         return new ExecutionMessage(ExecutionMessage.EMPTY_EXEC_STATE_ID,
@@ -133,6 +139,7 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
                 String.valueOf(execution.getExecutionId()),
                 ExecStatus.PENDING, //start new flow also in PENDING
                 payload,
-                0);
+                0,
+                messageType);
     }
 }

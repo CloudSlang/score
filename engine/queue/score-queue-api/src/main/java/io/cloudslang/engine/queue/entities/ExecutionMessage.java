@@ -20,6 +20,7 @@ package io.cloudslang.engine.queue.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.orchestrator.entities.Message;
+import io.cloudslang.orchestrator.entities.MessageType;
 import io.cloudslang.score.facade.entities.Execution;
 import org.apache.commons.lang.builder.EqualsBuilder;
 
@@ -52,8 +53,10 @@ public class ExecutionMessage implements Message, Cloneable {
 	private String stepPersistId;
 
 	private transient String workerKey;
+	// TODO convert executionObject to payload before serialization?
+    private Execution executionObject;
 
-    private transient Execution executionObject;
+    private MessageType messageType;
 
 	public ExecutionMessage() {
 		execStateId = EMPTY_EXEC_STATE_ID;
@@ -74,6 +77,7 @@ public class ExecutionMessage implements Message, Cloneable {
         this.status = ExecStatus.PENDING;
         this.payload = payload;
         this.msgSeqId = 0;
+		messageType = MessageType.ITPA;
     }
 
     public ExecutionMessage(long execStateId,
@@ -83,7 +87,8 @@ public class ExecutionMessage implements Message, Cloneable {
     	                        ExecStatus status,
     	                        Payload payload,
     	                        int msgSeqId,
-                                Long createDate) {
+                                Long createDate,
+								MessageType messageType) {
     		this.execStateId = execStateId;
     		this.workerId = workerId;
     		this.workerGroup = workerGroup;
@@ -92,6 +97,7 @@ public class ExecutionMessage implements Message, Cloneable {
     		this.payload = payload;
     		this.msgSeqId = msgSeqId;
             this.createDate = createDate;
+            this.messageType = messageType;
    }
 
 	public ExecutionMessage(long execStateId,
@@ -100,7 +106,25 @@ public class ExecutionMessage implements Message, Cloneable {
 	                        String msgId,
 	                        ExecStatus status,
 	                        Payload payload,
-	                        int msgSeqId) {
+	                        int msgSeqId,
+							MessageType messageType) {
+		this.execStateId = execStateId;
+		this.workerId = workerId;
+		this.workerGroup = workerGroup;
+		this.msgId = msgId;
+		this.status = status;
+		this.payload = payload;
+		this.msgSeqId = msgSeqId;
+		this.messageType = messageType;
+	}
+
+	public ExecutionMessage(long execStateId,
+							String workerId,
+							String workerGroup,
+							String msgId,
+							ExecStatus status,
+							Payload payload,
+							int msgSeqId) {
 		this.execStateId = execStateId;
 		this.workerId = workerId;
 		this.workerGroup = workerGroup;
@@ -117,7 +141,8 @@ public class ExecutionMessage implements Message, Cloneable {
                             ExecStatus status,
                             Execution executionObject,
                             Payload payload,
-                            int msgSeqId) {
+                            int msgSeqId,
+							MessageType messageType) {
         this.execStateId = execStateId;
         this.workerId = workerId;
         this.workerGroup = workerGroup;
@@ -126,6 +151,7 @@ public class ExecutionMessage implements Message, Cloneable {
         this.executionObject = executionObject;
         this.payload = payload;
         this.msgSeqId = msgSeqId;
+		this.messageType = messageType;
     }
 
 	public boolean isStepPersist() {
@@ -233,6 +259,14 @@ public class ExecutionMessage implements Message, Cloneable {
 
 	public String getWorkerKey() {
 		return workerKey;
+	}
+
+	public MessageType getMessageType() {
+		return messageType;
+	}
+
+	public void setMessageType(MessageType messageType) {
+		this.messageType = messageType;
 	}
 
 	public ExecutionMessage setWorkerKey(String workerKey) {
@@ -354,7 +388,8 @@ public class ExecutionMessage implements Message, Cloneable {
 				payload,
 				msgSeqId,
 				execStateId,
-                createDate
+                createDate,
+				messageType
 		);
 	}
 }

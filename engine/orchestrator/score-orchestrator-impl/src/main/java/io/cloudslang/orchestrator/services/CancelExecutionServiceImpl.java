@@ -16,6 +16,9 @@
 
 package io.cloudslang.orchestrator.services;
 
+import io.cloudslang.engine.queue.entities.ExecutionMessage;
+import io.cloudslang.engine.queue.services.ExecutionQueueService;
+import io.cloudslang.orchestrator.entities.MessageType;
 import org.apache.log4j.Logger;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
@@ -53,6 +56,9 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
 
     @Autowired
     private ExecutionStateService executionStateService;
+
+    @Autowired
+    private ExecutionQueueService executionQueueService;
 
     @Override
     @Transactional
@@ -99,23 +105,32 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
     //      If it doesn't - just cancel it straight away - extract the Run Object, set its context accordingly and put into the queue.
     private void cancelPausedRun(ExecutionState executionStateToCancel) {
         final List<ExecutionState> branches = executionStateService.readByExecutionId(executionStateToCancel.getExecutionId());
-
+        MessageType messageType = getMessageType(executionStateToCancel);
         // If the parent is paused because one of the branches is paused, OR, it was paused by the user / no-workers-in-group, but has branches that were not finished (and thus, were paused) -
         // The parent itself will return to the queue after all the branches are ended (due to this cancellation), and then it'll be canceled as well.
         if (branches.size() > 1) { // more than 1 means that it has paused branches (branches is at least 1 - the parent)
             for (ExecutionState branch : branches) {
                 if (!EMPTY_BRANCH.equals(branch.getBranchId())) { // exclude the base execution
-                    returnCanceledRunToQueue(branch);
+                    returnCanceledRunToQueue(branch, messageType);
                     executionStateService.deleteExecutionState(branch.getExecutionId(), branch.getBranchId());
                 }
             }
             executionStateToCancel.setStatus(ExecutionStatus.PENDING_CANCEL); // when the parent will return to queue - should have the correct status
         } else {
-            returnCanceledRunToQueue(executionStateToCancel);
+            returnCanceledRunToQueue(executionStateToCancel, messageType);
         }
     }
 
-    private void returnCanceledRunToQueue(ExecutionState executionStateToCancel) {
+    private MessageType getMessageType(ExecutionState executionStateToCancel) {
+        MessageType messageType = MessageType.ITPA;
+        final List<ExecutionMessage> executionMessages = executionQueueService.findLatestMessageByExecutionStateId(executionStateToCancel.getExecutionId());
+        if (!executionMessages.isEmpty()) {
+            messageType = executionMessages.get(0).getMessageType();
+        }
+        return messageType;
+    }
+
+    private void returnCanceledRunToQueue(ExecutionState executionStateToCancel, MessageType messageType) {
         // set the context and return the run to the queue. It will be handled on "finishFlow" (QueueEventListener).
         Execution executionObj = executionSerializationUtil.objFromBytes(executionStateToCancel.getExecutionObject());
         if (executionObj == null) {
@@ -135,7 +150,8 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
                 String.valueOf(executionObj.getExecutionId()),
                 executionObj.getGroupName(),
                 ExecStatus.TERMINATED,
-                executionMessageConverter.createPayload(executionObj)
+                executionMessageConverter.createPayload(executionObj),
+                messageType
         );
     }
 
