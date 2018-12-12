@@ -40,12 +40,11 @@ public class StatementAwareJdbcTemplateWrapper extends JdbcTemplate {
     @Override
     protected void applyStatementSettings(Statement stmt) throws SQLException {
         Integer batchSize = this.statementBatchSizeThreadLocal.get();
-        int batchSizeValue = (batchSize != null) ? batchSize : -1;
-        if (batchSizeValue != -1) {
-            stmt.setMaxRows(batchSizeValue);
-            stmt.setFetchSize(batchSizeValue);
+        if ((batchSize != null) && (batchSize > 0)) {
+            stmt.setMaxRows(batchSize);
+            stmt.setFetchSize(batchSize);
             if (log.isDebugEnabled()) {
-                log.debug("For name " + name + " identified  batch size " + batchSizeValue + " for statement '" + stmt.toString() + "'");
+                log.debug("For name " + name + " identified  batch size " + batchSize + " for statement '" + stmt.toString() + "'");
             }
         }
         DataSourceUtils.applyTimeout(stmt, this.getDataSource(), this.getQueryTimeout());

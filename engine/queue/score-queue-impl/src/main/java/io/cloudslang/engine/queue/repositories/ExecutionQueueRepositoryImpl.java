@@ -341,7 +341,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
 	@Override
 	public Set<Long> getFinishedExecStateIds() {
-		getFinishedExecStateIdsJdbcTemplate.setStatementBatchSize(1000_000);
+		getFinishedExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
         try {
             List<Long> result = doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, SELECT_FINISHED_STEPS_IDS, new SingleColumnRowMapper<>(Long.class));
 
