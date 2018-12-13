@@ -37,8 +37,7 @@ public class BusyWorkersServiceImpl implements BusyWorkersService {
     @Override
     @Transactional(readOnly = true)
     public boolean isWorkerBusy(String workerId) {
-        boolean busyWorkerContained = busyWorkersMap.containsKey(workerId);
-        return busyWorkerContained;
+        return busyWorkersMap.containsKey(workerId);
     }
 
     @Override
@@ -50,6 +49,7 @@ public class BusyWorkersServiceImpl implements BusyWorkersService {
         }
 
         List<String> busyWorkers = executionQueueRepository.getBusyWorkers(ExecStatus.ASSIGNED);
+        this.busyWorkersMap.clear();
         for (String bw : busyWorkers) {
             this.busyWorkersMap.put(bw, bw);
         }
