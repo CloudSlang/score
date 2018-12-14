@@ -35,9 +35,9 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -95,7 +95,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 
 	private ExecutorService executorService;
 
-	private Map<Long, Queue<Future>> mapOfRunningTasks;
+	private ConcurrentMap<Long, Queue<Future>> mapOfRunningTasks;
 
 	private volatile boolean endOfInit = false;
 
