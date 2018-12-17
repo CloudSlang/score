@@ -53,8 +53,7 @@ public class ExecutionMessage implements Message, Cloneable {
 	private String stepPersistId;
 
 	private transient String workerKey;
-	// TODO convert executionObject to payload before serialization?
-    private Execution executionObject;
+    private transient Execution executionObject;
 
     private MessageType messageType;
 

@@ -19,9 +19,10 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
-import org.apache.commons.pool.PoolableObjectFactory;
+import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.SerializationUtils;
 
 import javax.annotation.PostConstruct;
@@ -38,13 +39,19 @@ public class RpaMessageProducer {
     private static final String ROUTING_KEY = "rpa.routing.key";
     private static GenericObjectPool<Channel> channelPool;
 
+    @Autowired
+    private ExecutionMessageConverter converter;
+    @Autowired
+    private RpaConnectionPoolFactory rpaConnectionPoolFactory;
+
     @PostConstruct
     private void init() throws Exception {
         factory = new ConnectionFactory();
         factory.setHost("localhost");
         connection = factory.newConnection();
 
-        channelPool = new GenericObjectPool<>(getChannelPoolableObjectFactory());
+        channelPool = new GenericObjectPool<>(rpaConnectionPoolFactory
+                .getChannelPoolableObjectFactory(connection, EXCHANGE_NAME, TOPIC));
         channelPool.addObject();
         channelPool.addObject();
         channelPool.addObject();
@@ -53,53 +60,28 @@ public class RpaMessageProducer {
     }
 
     @PreDestroy
-    private void destruct() throws IOException {
-        //TODO close all stuff (i.e. channels)
+    private void destruct() throws Exception {
+        channelPool.close();
         connection.close();
     }
 
     public void produce(ExecutionMessage executionMessage) {
         try {
             Channel channel = channelPool.borrowObject();
-            channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, null, SerializationUtils.serialize(executionMessage));
+            channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, null,
+                    SerializationUtils.serialize(handleTransientExecutionObject(executionMessage)));
+            channelPool.returnObject(channel);
         } catch (Exception e) {
-            // TODO
             logger.error(e);
         }
         // TODO change to debug or remove log
         logger.error(" [x] Sent '" + ROUTING_KEY + "':'" + executionMessage.getMsgId() + "'");
     }
 
-    private PoolableObjectFactory<Channel> getChannelPoolableObjectFactory() {
-        return new PoolableObjectFactory<Channel>() {
-                @Override
-                public Channel makeObject() throws Exception {
-                    Channel channel = connection.createChannel();
-                    channel.exchangeDeclare(EXCHANGE_NAME, TOPIC);
-                    return channel;
-                }
-
-                @Override
-                public void destroyObject(Channel obj) throws Exception {
-                    //obj.close();
-                }
-
-                @Override
-                public boolean validateObject(Channel obj) {
-                    return obj.isOpen();
-                }
-
-                @Override
-                public void activateObject(Channel obj) throws Exception {
-                    obj = connection.createChannel();
-                    obj.exchangeDeclare(EXCHANGE_NAME, TOPIC);
-                }
-
-                @Override
-                public void passivateObject(Channel obj) throws Exception {
-                    //obj.abort();
-                }
-            };
+    private ExecutionMessage handleTransientExecutionObject(ExecutionMessage executionMessage) {
+        if(executionMessage.getExecutionObject() != null) {
+            executionMessage.setPayload(converter.createPayload(executionMessage.getExecutionObject()));
+        }
+        return executionMessage;
     }
-
 }

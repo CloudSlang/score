@@ -79,7 +79,7 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
 
         // create execution message
         //TODO DO REAL IMPL LATER
-        MessageType messageType = MessageType.ITPA;
+        MessageType messageType = MessageType.RPA;
         /*if(triggeringProperties.getExecutionPlan().getFlowUuid().equals("06fe8531-868b-4e79-aa7a-13a5e30a66ec")) {
             messageType = MessageType.RPA;
         }*/

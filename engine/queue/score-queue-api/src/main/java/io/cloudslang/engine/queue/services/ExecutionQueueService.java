@@ -89,7 +89,12 @@ public interface ExecutionQueueService {
      */
 	List<ExecutionMessage> readMessagesByStatus(int maxSize, ExecStatus... statuses);
 
-	//TODO add doc
+    /**
+     *
+     * @param execStateId execution id
+     * @return a List of {@link io.cloudslang.engine.queue.entities.ExecutionMessage} containing latest message
+     * having the provided execStateId
+     */
     List<ExecutionMessage> findLatestMessageByExecutionStateId(long execStateId);
 
     /**

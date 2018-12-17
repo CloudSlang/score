@@ -219,17 +219,6 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
         }
     }
 
-    //TODO remove this
-//    private void addExecutionMessageInner(ExecutionMessage msg) {
-//        SimpleExecutionRunnable simpleExecutionRunnable = simpleExecutionRunnableFactory.getObject();
-//        simpleExecutionRunnable.setExecutionMessage(msg);
-//        Long executionId = null;
-//        if (!StringUtils.isEmpty(msg.getMsgId())) {
-//            executionId = Long.valueOf(msg.getMsgId());
-//        }
-//        workerManager.addExecution(executionId, simpleExecutionRunnable);
-//    }
-
     @Override
     public void onApplicationEvent(ApplicationEvent applicationEvent) {
         if (applicationEvent instanceof ContextRefreshedEvent && ! endOfInit) {

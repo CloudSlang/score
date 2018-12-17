@@ -41,10 +41,10 @@ import io.cloudslang.job.ScoreEngineJobsImpl;
 import io.cloudslang.schema.context.ScoreDatabaseContext;
 import io.cloudslang.schema.context.ScoreDefaultDatasourceContext;
 import io.cloudslang.worker.management.services.ItpaMessageHandler;
+import io.cloudslang.worker.management.services.RpaConnectionPoolFactory;
 import io.cloudslang.worker.management.services.RpaMessageConsumer;
 import io.cloudslang.worker.management.services.RpaMessageHandler;
 import io.cloudslang.worker.management.services.RpaMessageProducer;
-import io.cloudslang.worker.management.services.WorkerManager;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -107,6 +107,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(RpaMessageHandler.class, "rpaMessageHandler");
 		put(RpaMessageProducer.class, "rpaMessageProducer");
 		put(RpaMessageConsumer.class, "rpaMessageConsumer");
+		put(RpaConnectionPoolFactory.class, "rpaConnectionPoolFactory");
 	}};
 
 	@Override
