@@ -34,12 +34,10 @@ import java.util.Objects;
  * Time: 11:11
  */
 public class ExecutionMessage implements Message, Cloneable {
-
-    private static final long serialVersionUID = 3523623124812765964L;
+	private static final long serialVersionUID = -8729879085947419135L;
 
 	public static final long EMPTY_EXEC_STATE_ID = -1L;
 	public static final String EMPTY_WORKER = "EMPTY";
-
 	private long execStateId;
 	private String workerId;
 	private String workerGroup;
