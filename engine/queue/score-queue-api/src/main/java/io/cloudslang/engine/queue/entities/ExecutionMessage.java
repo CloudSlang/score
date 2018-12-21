@@ -372,6 +372,7 @@ public class ExecutionMessage implements Message, Cloneable {
 				.append(this.workerGroup, that.workerGroup)
 				.append(this.workerId, that.workerId)
                 .append(this.createDate, that.createDate)
+				.append(this.messageType, that.messageType)
 				.isEquals();
 	}
 
