@@ -88,7 +88,6 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(QueueCleanerServiceImpl.class, null);
 		put(QueueStateIdGeneratorServiceImpl.class, null);
         put(ScoreTriggeringImpl.class,null);
-
 		put(PartitionUtils.class, null);
 		put(ExecutionMessageConverter.class, null);
 		put(ExecutionSerializationUtil.class, null);
@@ -103,11 +102,6 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
         put(ScoreEngineJobsImpl.class,"scoreEngineJobs");
 		put(BusyWorkersServiceImpl.class,"busyWorkersService");
 		put(MergedConfigurationServiceImpl.class,"MergedConfigurationService");
-		put(ItpaMessageHandler.class, "itpaMessageHandler");
-		put(RpaMessageHandler.class, "rpaMessageHandler");
-		put(RpaMessageProducer.class, "rpaMessageProducer");
-		put(RpaMessageConsumer.class, "rpaMessageConsumer");
-		put(RpaConnectionPoolFactory.class, "rpaConnectionPoolFactory");
 	}};
 
 	@Override
