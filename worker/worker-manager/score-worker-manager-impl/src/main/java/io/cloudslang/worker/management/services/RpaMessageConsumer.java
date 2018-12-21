@@ -86,7 +86,6 @@ public class RpaMessageConsumer implements SmartLifecycle {
                 public void handleDelivery(String consumerTag, Envelope envelope,
                                            AMQP.BasicProperties properties, byte[] body) {
                     ExecutionMessage executionMessage = (ExecutionMessage) SerializationUtils.deserialize(body);
-                    logger.error(" [x] Received '" + envelope.getRoutingKey() + "':'" + executionMessage.getMsgId() + "'");
                     itpaMessageHandler.handle(executionMessage);
                 }
             };

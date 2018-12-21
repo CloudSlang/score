@@ -74,8 +74,6 @@ public class RpaMessageProducer {
         } catch (Exception e) {
             logger.error(e);
         }
-        // TODO change to debug or remove log
-        logger.error(" [x] Sent '" + ROUTING_KEY + "':'" + executionMessage.getMsgId() + "'");
     }
 
     private ExecutionMessage handleTransientExecutionObject(ExecutionMessage executionMessage) {
