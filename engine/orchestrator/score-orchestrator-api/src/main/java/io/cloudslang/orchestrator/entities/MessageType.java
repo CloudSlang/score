@@ -17,7 +17,8 @@ package io.cloudslang.orchestrator.entities;
 
 public enum MessageType {
     ITPA(0),
-    RPA(1);
+    RPA(1),
+    RPA_OUT(2);
 
     private final int indexNumber;
 

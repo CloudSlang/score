@@ -16,6 +16,7 @@
 
 package io.cloudslang.orchestrator.services;
 
+import io.cloudslang.orchestrator.entities.MessageType;
 import io.cloudslang.score.api.EndBranchDataContainer;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
@@ -229,7 +230,7 @@ public class SplitJoinServiceTest {
     }
 
     private SplitMessage createSplitMessage(String splitId) {
-        return new SplitMessage(splitId, createExecution(1L), Arrays.asList(createExecution(2L)));
+        return new SplitMessage(splitId, createExecution(1L), Arrays.asList(createExecution(2L)), MessageType.ITPA);
     }
 
     private SuspendedExecution createSuspendedExecution(String splitId, int numOfBranches) {

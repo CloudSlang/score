@@ -19,9 +19,7 @@ package io.cloudslang.worker.management.services;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
-import io.cloudslang.orchestrator.entities.MessageType;
 import io.cloudslang.worker.management.ExecutionsActivityListener;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -131,16 +129,14 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
                         if (!newMessages.isEmpty()) {
                             //we must acknowledge the messages that we took from the queue
                             ackMessages(newMessages);
-                            for(ExecutionMessage msg :newMessages){
-                                //addExecutionMessageInner(msg);
-                                //TODO INVERT CONDITION
-                                rpaMessageHandler.handle(msg);
-//                                if(msg.getMessageType().equals(MessageType.ITPA)) {
-//                                    //addExecutionMessageInner(msg);
-//                                    itpaMessageHandler.handle(msg);
-//                                } else if(msg.getMessageType().equals(MessageType.RPA)) {
-//                                    rpaMessageHandler.handle(msg);
-//                                }
+                            for(ExecutionMessage msg :newMessages) {
+                                switch (msg.getMessageType()) {
+                                    case RPA: rpaMessageHandler.handle(msg);
+                                        break;
+                                    case ITPA: itpaMessageHandler.handle(msg);
+                                        break;
+                                    default: break;
+                                }
                             }
 
                             syncManager.finishGetMessages(); //release all locks before going to sleep!!!
@@ -200,19 +196,19 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
 
     public void addExecutionMessage(ExecutionMessage msg) throws InterruptedException {
-        try{
+        try {
             syncManager.startGetMessages(); //this is a public method that can push new executions from outside - from execution threads
             //We need to check if the current execution thread was interrupted while waiting for the lock
-            if(Thread.currentThread().isInterrupted()){
+            if(Thread.currentThread().isInterrupted()) {
                 throw new InterruptedException("Thread was interrupted while waiting on the lock in fillBufferPeriodically()!");
             }
-            rpaMessageHandler.handle(msg);
-//            if(msg.getMessageType().equals(MessageType.ITPA)) {
-//                //addExecutionMessageInner(msg);
-//                itpaMessageHandler.handle(msg);
-//            } else if(msg.getMessageType().equals(MessageType.RPA)) {
-//                rpaMessageHandler.handle(msg);
-//            }
+            switch (msg.getMessageType()) {
+                case RPA: rpaMessageHandler.handle(msg);
+                    break;
+                case ITPA: itpaMessageHandler.handle(msg);
+                    break;
+                default: break;
+            }
         }
         finally {
             syncManager.finishGetMessages();
@@ -236,7 +232,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
         fillBufferPeriodically();
     }
 
-    public boolean checkFreeMemorySpace(long threshold){
+    public boolean checkFreeMemorySpace(long threshold) {
         double allocatedMemory      = Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
         double presumableFreeMemory = Runtime.getRuntime().maxMemory() - allocatedMemory;
         boolean result = presumableFreeMemory > threshold;

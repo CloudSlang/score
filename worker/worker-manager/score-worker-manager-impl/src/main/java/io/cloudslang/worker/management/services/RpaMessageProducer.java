@@ -27,16 +27,18 @@ import org.springframework.util.SerializationUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.io.IOException;
 
 public class RpaMessageProducer {
     private static final Logger logger = Logger.getLogger(RpaMessageProducer.class);
 
+    // TODO get all properties from installer/property file
     private static final String EXCHANGE_NAME = "topic_rpa";
     private static final String TOPIC = "topic";
+    private static final String HOST = "localhost";
+    private static final String ROUTING_KEY = "rpa.routing.key.rasx.in";
+
     private static ConnectionFactory factory;
     private static Connection connection;
-    private static final String ROUTING_KEY = "rpa.routing.key";
     private static GenericObjectPool<Channel> channelPool;
 
     @Autowired
@@ -47,7 +49,7 @@ public class RpaMessageProducer {
     @PostConstruct
     private void init() throws Exception {
         factory = new ConnectionFactory();
-        factory.setHost("localhost");
+        factory.setHost(HOST);
         connection = factory.newConnection();
 
         channelPool = new GenericObjectPool<>(rpaConnectionPoolFactory

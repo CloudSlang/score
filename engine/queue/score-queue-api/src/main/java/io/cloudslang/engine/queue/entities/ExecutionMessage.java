@@ -64,6 +64,7 @@ public class ExecutionMessage implements Message, Cloneable {
 		msgSeqId = -1;
 		msgId = "";
         createDate = null;
+        messageType = MessageType.ITPA;
 	}
 
     public ExecutionMessage(String executionId, Payload payload) {
@@ -74,7 +75,7 @@ public class ExecutionMessage implements Message, Cloneable {
         this.status = ExecStatus.PENDING;
         this.payload = payload;
         this.msgSeqId = 0;
-		messageType = MessageType.ITPA;
+		this.messageType = MessageType.ITPA;
     }
 
     public ExecutionMessage(long execStateId,

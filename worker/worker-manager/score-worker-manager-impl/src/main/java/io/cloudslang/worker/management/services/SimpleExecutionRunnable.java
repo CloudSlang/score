@@ -500,7 +500,7 @@ public class SimpleExecutionRunnable implements Runnable {
         executionMessage.incMsgSeqId();
         executionMessage.setPayload(null);
         String splitId = getSplitId(newExecutions);
-        SplitMessage splitMessage = new SplitMessage(splitId, execution, newExecutions);
+        SplitMessage splitMessage = new SplitMessage(splitId, execution, newExecutions, executionMessage.getMessageType());
         try {
             outBuffer.put(executionMessage, splitMessage);
         } catch (InterruptedException e) {
