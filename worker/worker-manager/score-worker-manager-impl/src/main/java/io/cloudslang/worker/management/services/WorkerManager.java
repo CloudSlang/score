@@ -30,13 +30,14 @@ import org.springframework.context.event.ContextRefreshedEvent;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Collection;
-import java.util.Map;
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -77,24 +78,32 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 	protected WorkerVersionService workerVersionService;
 
 	private LinkedBlockingQueue<Runnable> inBuffer;
+
 	@Autowired
 	@Qualifier("numberOfExecutionThreads")
 	private Integer numberOfThreads;
+
 	@Autowired(required = false)
 	@Qualifier("initStartUpSleep")
 	private Long initStartUpSleep = 15*1000L; // by default 15 seconds
+
 	@Autowired(required = false)
 	@Qualifier("maxStartUpSleep")
 	private Long maxStartUpSleep = 10*60*1000L; // by default 10 minutes
+
     private int keepAliveFailCount = 0;
+
 	private ExecutorService executorService;
-	private Map<Long, ConcurrentLinkedQueue<Future>> mapOfRunningTasks;
+
+	private ConcurrentMap<Long, Queue<Future>> mapOfRunningTasks;
+
 	private volatile boolean endOfInit = false;
+
     private volatile boolean initStarted = false;
+
 	private boolean up = false;
 
     private volatile int threadPoolVersion = 0;
-
 
 	@PostConstruct
 	private void init() {
@@ -114,22 +123,28 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 	public void addExecution(Long executionId, Runnable runnable) {
 		//It is possible that in linear flow we will have step 2 that is already running, but step 1 that still did not clean itself from the table (race condition)
         Future future = executorService.submit(runnable);
-
-		if( mapOfRunningTasks.get(executionId) == null){
-			mapOfRunningTasks.put(executionId, new ConcurrentLinkedQueue<Future>());
-		}
-		mapOfRunningTasks.get(executionId).add(future);
+        mapOfRunningTasks.merge(executionId, newQueue(future), this::addLists);
 	}
+
+	private Queue<Future> newQueue(Future future) {
+        Queue<Future> queue = new LinkedList<>();
+        queue.offer(future);
+        return queue;
+    }
+
+    private Queue<Future> addLists(Queue<Future> oldValue, Queue<Future> newValue) {
+        oldValue.offer(newValue.poll()); // there is only one value in newValue
+        return oldValue;
+    }
 
 	@Override
 	public void endExecution(Long executionId) {
-		Queue queue = mapOfRunningTasks.get(executionId);
-		queue.poll(); //also removes the element
-
-		//If we removed the last future for this execution - remove the whole entry
-		if(queue.isEmpty()){
-			mapOfRunningTasks.remove(executionId);
-		}
+        mapOfRunningTasks.merge(executionId, new LinkedList<>(),
+                (queue, newValue) -> {
+                    queue.poll();
+                    return !queue.isEmpty() ? queue : null;
+                }
+        );
 	}
 
 	public int getInBufferSize() {
