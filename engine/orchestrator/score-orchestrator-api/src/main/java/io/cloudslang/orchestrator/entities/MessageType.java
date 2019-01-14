@@ -28,4 +28,19 @@ public enum MessageType {
     public int getIndexNumber() {
         return indexNumber;
     }
+
+    public static MessageType find(int indexNumber) {
+        MessageType messageType = null;
+
+        switch (indexNumber) {
+            case 0:
+                messageType = MessageType.ITPA;
+                break;
+            case 1:
+                messageType = MessageType.RPA;
+                break;
+        }
+
+        return messageType;
+    }
 }

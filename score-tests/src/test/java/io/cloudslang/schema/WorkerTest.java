@@ -16,9 +16,18 @@
 
 package io.cloudslang.schema;
 
-import io.cloudslang.orchestrator.services.*;
-import io.cloudslang.worker.management.services.ItpaMessageHandler;
-import io.cloudslang.worker.management.services.RpaMessageHandler;
+import io.cloudslang.engine.node.services.WorkerNodeService;
+import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
+import io.cloudslang.engine.queue.services.QueueDispatcherService;
+import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
+import io.cloudslang.engine.queue.services.ScoreEventFactory;
+import io.cloudslang.orchestrator.services.CancelExecutionService;
+import io.cloudslang.orchestrator.services.EngineVersionService;
+import io.cloudslang.orchestrator.services.MergedConfigurationService;
+import io.cloudslang.orchestrator.services.OrchestratorDispatcherService;
+import io.cloudslang.orchestrator.services.PauseResumeService;
+import io.cloudslang.worker.management.services.WorkerManager;
+import io.cloudslang.worker.management.services.dbsupport.WorkerDbSupportService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,14 +37,6 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import io.cloudslang.engine.node.services.WorkerNodeService;
-import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
-import io.cloudslang.engine.queue.services.QueueDispatcherService;
-import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
-import io.cloudslang.engine.queue.services.ScoreEventFactory;
-import io.cloudslang.worker.management.services.WorkerManager;
-import io.cloudslang.worker.management.services.dbsupport.WorkerDbSupportService;
 
 import static org.mockito.Mockito.mock;
 
@@ -114,12 +115,6 @@ public class WorkerTest {
 		QueueStateIdGeneratorService queueStateIdGeneratorService(){
 			return mock(QueueStateIdGeneratorService.class);
 		}
-
-		@Bean
-		ItpaMessageHandler itpaMessageHandler() { return mock(ItpaMessageHandler.class);}
-
-		@Bean
-		RpaMessageHandler rpaMessageHandler() { return mock(RpaMessageHandler.class);}
 	}
 
 }

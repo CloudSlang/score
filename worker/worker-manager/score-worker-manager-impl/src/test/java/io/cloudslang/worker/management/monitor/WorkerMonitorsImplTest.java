@@ -130,7 +130,5 @@ public class WorkerMonitorsImplTest {
         @Bean public EngineVersionService engineVersionService() {return mock(EngineVersionService.class);}
         @Bean public EndExecutionCallback endExecutionCallback() {return mock(EndExecutionCallback.class);}
         @Bean public QueueStateIdGeneratorService queueStateIdGeneratorService() {return mock(QueueStateIdGeneratorService.class);}
-        @Bean public ItpaMessageHandler itpaMessageHandler() {return mock(ItpaMessageHandler.class);}
-        @Bean public RpaMessageHandler rpaMessageHandler() {return mock(RpaMessageHandler.class);}
     }
 }

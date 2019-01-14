@@ -19,9 +19,7 @@ package io.cloudslang.worker.management.services;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
-import io.cloudslang.orchestrator.entities.MessageType;
 import io.cloudslang.worker.management.ExecutionsActivityListener;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -87,10 +85,8 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     private ExecutionsActivityListener executionsActivityListener;
 
     @Autowired
-    private ItpaMessageHandler itpaMessageHandler;
-
-    @Autowired
-    private RpaMessageHandler rpaMessageHandler;
+    @Qualifier("rpaMessageHandlerImpl")
+    private MessageHandler rpaMessageHandler;
 
     @PostConstruct
     private void init(){
@@ -132,15 +128,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
                             //we must acknowledge the messages that we took from the queue
                             ackMessages(newMessages);
                             for(ExecutionMessage msg :newMessages){
-                                //addExecutionMessageInner(msg);
-                                //TODO INVERT CONDITION
-                                rpaMessageHandler.handle(msg);
-//                                if(msg.getMessageType().equals(MessageType.ITPA)) {
-//                                    //addExecutionMessageInner(msg);
-//                                    itpaMessageHandler.handle(msg);
-//                                } else if(msg.getMessageType().equals(MessageType.RPA)) {
-//                                    rpaMessageHandler.handle(msg);
-//                                }
+                                handleMessage(msg);
                             }
 
                             syncManager.finishGetMessages(); //release all locks before going to sleep!!!
@@ -206,16 +194,27 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
             if(Thread.currentThread().isInterrupted()){
                 throw new InterruptedException("Thread was interrupted while waiting on the lock in fillBufferPeriodically()!");
             }
-            rpaMessageHandler.handle(msg);
-//            if(msg.getMessageType().equals(MessageType.ITPA)) {
-//                //addExecutionMessageInner(msg);
-//                itpaMessageHandler.handle(msg);
-//            } else if(msg.getMessageType().equals(MessageType.RPA)) {
-//                rpaMessageHandler.handle(msg);
-//            }
+            handleMessage(msg);
         }
         finally {
             syncManager.finishGetMessages();
+        }
+    }
+
+    private void addExecutionMessageInner(ExecutionMessage msg) {
+        SimpleExecutionRunnable simpleExecutionRunnable = simpleExecutionRunnableFactory.getObject();
+        simpleExecutionRunnable.setExecutionMessage(msg);
+        Long executionId = Long.valueOf(msg.getMsgId());
+        workerManager.addExecution(executionId, simpleExecutionRunnable);
+    }
+
+    private void handleMessage(ExecutionMessage msg) {
+        switch (msg.getMessageType()) {
+            case RPA: rpaMessageHandler.handle(msg);
+                break;
+            case ITPA: addExecutionMessageInner(msg);
+                break;
+            default: addExecutionMessageInner(msg);
         }
     }
 

@@ -16,25 +16,10 @@
 package io.cloudslang.worker.management.services;
 
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
-public class ItpaMessageHandler implements MessageHandler {
-
-    @Autowired
-    private WorkerManager workerManager;
-
-    @Autowired
-    private SimpleExecutionRunnableFactory simpleExecutionRunnableFactory;
+public class StubMessageHandlerImpl implements MessageHandler {
 
     @Override
     public void handle(ExecutionMessage executionMessage) {
-        SimpleExecutionRunnable simpleExecutionRunnable = simpleExecutionRunnableFactory.getObject();
-        simpleExecutionRunnable.setExecutionMessage(executionMessage);
-        Long executionId = null;
-        if (!StringUtils.isEmpty(executionMessage.getMsgId())) {
-            executionId = Long.valueOf(executionMessage.getMsgId());
-        }
-        workerManager.addExecution(executionId, simpleExecutionRunnable);
     }
 }

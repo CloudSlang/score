@@ -45,11 +45,6 @@ import java.util.Map;
 public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	private Map<Class<?>,String> beans = new HashMap<Class<?>,String>(){{
-		put(ItpaMessageHandler.class, "itpaMessageHandler");
-		put(RpaMessageHandler.class, "rpaMessageHandler");
-		put(RpaMessageProducer.class, "rpaMessageProducer");
-		put(RpaMessageConsumer.class, "rpaMessageConsumer");
-		put(RpaConnectionPoolFactory.class, "rpaConnectionPoolFactory");
 		put(WorkerManager.class, "workerManager");
 		put(EventBusImpl.class, null);
 		put(ExecutionServiceImpl.class, "agent");

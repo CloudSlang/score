@@ -470,16 +470,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 	}
 
 	@Override
-	public List<ExecutionMessage> findLatestMessageByExecutionStateId(long execStateId) {
-		// prepare the sql statement
-		String sql = SELECT_LATEST_EXECUTION_MESSAGE
-				.replaceAll(":execStateId", "?");
-		Object[] values = new Object[1];
-		values[0] = execStateId;
-		return doSelectWithTemplate(findLatestMessageByExecutionStateIdTemplate, sql, new ExecutionMessageWithoutPayloadRowMapper(), values);
-	}
-
-	@Override
 	public List<String> getBusyWorkers(ExecStatus... statuses) {
 		// prepare the sql statement
 		String sqlStat = BUSY_WORKERS_SQL
@@ -513,7 +503,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					new Payload(rs.getBytes("PAYLOAD")),
 					rs.getInt("MSG_SEQ_ID"),
 					rs.getLong("CREATE_TIME"),
-					MessageType.values()[rs.getInt("MESSAGE_TYPE") ]);
+					MessageType.find(rs.getInt("MESSAGE_TYPE")));
 		}
 	}
 
@@ -528,7 +518,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					null,
 					rs.getInt("MSG_SEQ_ID"),
 					rs.getLong("CREATE_TIME"),
-					MessageType.values()[rs.getInt("MESSAGE_TYPE")]);
+					MessageType.find(rs.getInt("MESSAGE_TYPE")));
 		}
 	}
 

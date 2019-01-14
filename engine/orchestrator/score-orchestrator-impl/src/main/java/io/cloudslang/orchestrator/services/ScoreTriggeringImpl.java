@@ -68,6 +68,10 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
     @Override
     public Long trigger(Long executionId, TriggeringProperties triggeringProperties) {
         SystemContext scoreSystemContext = new SystemContext(triggeringProperties.getRuntimeValues());
+        //Distinguish between RPA and ITPA messages
+        //TODO REAL IMPL LATER
+        scoreSystemContext.put("messageType", MessageType.RPA);
+
         Long runningExecutionPlanId = saveRunningExecutionPlans(triggeringProperties.getExecutionPlan(), triggeringProperties.getDependencies(), scoreSystemContext, String.valueOf(executionId));
         scoreSystemContext.setExecutionId(executionId);
         Map<String,Serializable> executionMetadata = createMetadata(triggeringProperties);
@@ -80,9 +84,7 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
         // create execution message
         //TODO DO REAL IMPL LATER
         MessageType messageType = MessageType.RPA;
-        /*if(triggeringProperties.getExecutionPlan().getFlowUuid().equals("06fe8531-868b-4e79-aa7a-13a5e30a66ec")) {
-            messageType = MessageType.RPA;
-        }*/
+
         ExecutionMessage message = createExecutionMessage(execution, messageType);
         enqueue(message);
         return executionId;

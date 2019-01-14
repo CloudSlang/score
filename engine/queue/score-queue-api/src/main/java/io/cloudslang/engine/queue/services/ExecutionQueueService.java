@@ -91,14 +91,6 @@ public interface ExecutionQueueService {
 
     /**
      *
-     * @param execStateId execution id
-     * @return a List of {@link io.cloudslang.engine.queue.entities.ExecutionMessage} containing latest message
-     * having the provided execStateId
-     */
-    List<ExecutionMessage> findLatestMessageByExecutionStateId(long execStateId);
-
-    /**
-     *
      * polls the count of messages that didn't receive ack for a number of recovery versions
      *
      * @param maxSize max size of the poll bulk
