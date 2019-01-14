@@ -81,6 +81,10 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>score-worker-manager-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.cloudslang</groupId>
+            <artifactId>runtime-management-api</artifactId>
+        </dependency>
         <!-- end of engine artifacts -->
     </dependencies>
     

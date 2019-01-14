@@ -16,6 +16,8 @@
 
 package io.cloudslang.worker.execution.services;
 
+import io.cloudslang.runtime.api.rpa.RpaExecutionParametersProvider;
+import io.cloudslang.runtime.api.rpa.RpaExecutionService;
 import io.cloudslang.score.api.ExecutionPlan;
 import io.cloudslang.score.api.ExecutionStep;
 import io.cloudslang.score.api.StartBranchDataContainer;
@@ -55,6 +57,7 @@ import java.util.UUID;
 public final class ExecutionServiceImpl implements ExecutionService {
 
 	private static final Logger logger = Logger.getLogger(ExecutionServiceImpl.class);
+    private static final String ACTION_TYPE = "actionType";
 
 	@Autowired
 	private PauseResumeService pauseService;
@@ -66,6 +69,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	private WorkerConfigurationService workerConfigurationService;
 	@Autowired
 	private EventBus eventBus;
+    @Autowired
+    private RpaExecutionService rpaExecutionService;
+    @Autowired
+    private RpaExecutionParametersProvider rpaExecutionParametersProvider;
 
 	@Override
 	public Execution execute(Execution execution) throws InterruptedException {
@@ -82,7 +89,11 @@ public final class ExecutionServiceImpl implements ExecutionService {
 			// dum bus event
 			dumpBusEvents(execution);
 			// Run the execution step
-			executeStep(execution, currStep);
+            if (isRpaStep(currStep)) {
+                executeRpaStep(currStep);
+            } else {
+                executeStep(execution, currStep);
+            }
 			// Run the navigation
 			navigate(execution, currStep);
 			// currently handles groups and jms optimizations
@@ -110,6 +121,18 @@ public final class ExecutionServiceImpl implements ExecutionService {
             execution.setPosition(null); // this ends the flow!!!
             return execution;
         }
+    }
+
+    private void executeRpaStep(ExecutionStep currStep) {
+        String dependency = (String) currStep.getActionData().get("gav");
+        rpaExecutionService.execute(dependency, rpaExecutionParametersProvider);
+    }
+
+    private boolean isRpaStep(ExecutionStep currStep) {
+        if (currStep.getActionData().get(ACTION_TYPE) != null) {
+            return "rpa".equalsIgnoreCase(currStep.getActionData().get(ACTION_TYPE).toString());
+        }
+        return false;
     }
 
 	@Override
