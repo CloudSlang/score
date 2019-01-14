@@ -100,6 +100,9 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         for (SplitMessage splitMessage : splitMessages) {
             // 1. trigger all the child branches
             List<ExecutionMessage> childExecutionMessages = convert(splitMessage.getChildren(), executionToStartExecutionMessage);
+            for (ExecutionMessage childExecutionMessage : childExecutionMessages) {
+                childExecutionMessage.setMessageType(splitMessage.getMessageType());
+            }
             branchTriggerMessages.addAll(childExecutionMessages);
 
             // 2. suspend the parent

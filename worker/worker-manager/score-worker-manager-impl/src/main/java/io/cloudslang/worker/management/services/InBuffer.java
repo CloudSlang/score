@@ -188,10 +188,10 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
 
     public void addExecutionMessage(ExecutionMessage msg) throws InterruptedException {
-        try{
+        try {
             syncManager.startGetMessages(); //this is a public method that can push new executions from outside - from execution threads
             //We need to check if the current execution thread was interrupted while waiting for the lock
-            if(Thread.currentThread().isInterrupted()){
+            if(Thread.currentThread().isInterrupted()) {
                 throw new InterruptedException("Thread was interrupted while waiting on the lock in fillBufferPeriodically()!");
             }
             handleMessage(msg);
@@ -235,7 +235,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
         fillBufferPeriodically();
     }
 
-    public boolean checkFreeMemorySpace(long threshold){
+    public boolean checkFreeMemorySpace(long threshold) {
         double allocatedMemory      = Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
         double presumableFreeMemory = Runtime.getRuntime().maxMemory() - allocatedMemory;
         boolean result = presumableFreeMemory > threshold;
