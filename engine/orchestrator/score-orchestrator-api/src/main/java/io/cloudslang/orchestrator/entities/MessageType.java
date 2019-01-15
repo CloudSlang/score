@@ -40,6 +40,9 @@ public enum MessageType {
             case 1:
                 messageType = MessageType.RPA;
                 break;
+            case 2:
+                messageType = MessageType.RPA_OUT;
+                break;
         }
 
         return messageType;

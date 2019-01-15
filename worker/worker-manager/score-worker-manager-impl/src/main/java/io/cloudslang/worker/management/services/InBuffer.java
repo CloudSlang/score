@@ -84,10 +84,6 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     @Autowired(required = false)
     private ExecutionsActivityListener executionsActivityListener;
 
-    @Autowired
-    @Qualifier("rpaMessageHandlerImpl")
-    private MessageHandler rpaMessageHandler;
-
     @PostConstruct
     private void init(){
         capacity = Integer.getInteger("worker.inbuffer.capacity",capacity);
@@ -128,7 +124,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
                             //we must acknowledge the messages that we took from the queue
                             ackMessages(newMessages);
                             for(ExecutionMessage msg :newMessages){
-                                handleMessage(msg);
+                                addExecutionMessageInner(msg);
                             }
 
                             syncManager.finishGetMessages(); //release all locks before going to sleep!!!
@@ -194,7 +190,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
             if(Thread.currentThread().isInterrupted()) {
                 throw new InterruptedException("Thread was interrupted while waiting on the lock in fillBufferPeriodically()!");
             }
-            handleMessage(msg);
+            addExecutionMessageInner(msg);
         }
         finally {
             syncManager.finishGetMessages();
@@ -206,16 +202,6 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
         simpleExecutionRunnable.setExecutionMessage(msg);
         Long executionId = Long.valueOf(msg.getMsgId());
         workerManager.addExecution(executionId, simpleExecutionRunnable);
-    }
-
-    private void handleMessage(ExecutionMessage msg) {
-        switch (msg.getMessageType()) {
-            case RPA: rpaMessageHandler.handle(msg);
-                break;
-            case ITPA: addExecutionMessageInner(msg);
-                break;
-            default: addExecutionMessageInner(msg);
-        }
     }
 
     @Override
