@@ -16,8 +16,6 @@
 
 package io.cloudslang.worker.execution.services;
 
-import io.cloudslang.runtime.api.rpa.RpaExecutionParametersProvider;
-import io.cloudslang.runtime.api.rpa.RpaExecutionService;
 import io.cloudslang.score.api.ExecutionPlan;
 import io.cloudslang.score.api.ExecutionStep;
 import io.cloudslang.score.api.StartBranchDataContainer;
@@ -69,8 +67,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	private WorkerConfigurationService workerConfigurationService;
 	@Autowired
 	private EventBus eventBus;
-    @Autowired
-    private RpaExecutionService rpaExecutionService;
 
 	@Override
 	public Execution execute(Execution execution) throws InterruptedException {
