@@ -71,8 +71,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
 	private EventBus eventBus;
     @Autowired
     private RpaExecutionService rpaExecutionService;
-    @Autowired
-    private RpaExecutionParametersProvider rpaExecutionParametersProvider;
 
 	@Override
 	public Execution execute(Execution execution) throws InterruptedException {
@@ -89,11 +87,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 			// dum bus event
 			dumpBusEvents(execution);
 			// Run the execution step
-            if (isRpaStep(currStep)) {
-                executeRpaStep(currStep);
-            } else {
-                executeStep(execution, currStep);
-            }
+			executeStep(execution, currStep);
 			// Run the navigation
 			navigate(execution, currStep);
 			// currently handles groups and jms optimizations
@@ -121,18 +115,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
             execution.setPosition(null); // this ends the flow!!!
             return execution;
         }
-    }
-
-    private void executeRpaStep(ExecutionStep currStep) {
-        String dependency = (String) currStep.getActionData().get("gav");
-        rpaExecutionService.execute(dependency, rpaExecutionParametersProvider);
-    }
-
-    private boolean isRpaStep(ExecutionStep currStep) {
-        if (currStep.getActionData().get(ACTION_TYPE) != null) {
-            return "rpa".equalsIgnoreCase(currStep.getActionData().get(ACTION_TYPE).toString());
-        }
-        return false;
     }
 
 	@Override

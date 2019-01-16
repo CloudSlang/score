@@ -15,8 +15,6 @@
  */
 package io.cloudslang.runtime.api.rpa;
 
-import java.lang.reflect.Method;
-
 public interface RpaExecutionParametersProvider {
-    Object [] getExecutionParameters(Method executionMethod);
+    Object [] getExecutionParameters();
 }
