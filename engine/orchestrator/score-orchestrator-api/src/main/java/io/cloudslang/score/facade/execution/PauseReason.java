@@ -32,5 +32,6 @@ public enum PauseReason {
     HAND_OFF,
     INTERRUPT,
     NO_WORKERS_IN_GROUP,
-    BRANCH_PAUSED
+    BRANCH_PAUSED,
+    RPA_EXECUTION
 }
