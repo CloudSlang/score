@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static io.cloudslang.score.api.execution.ExecutionParametersConsts.EXECUTION;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.GLOBAL_SESSION_OBJECT;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SESSION_OBJECT;
 
@@ -174,10 +175,12 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
                         .getGlobalSessionsExecutionData(executionId);
                 final Map<String, Object> sessionObjectExecutionData = sessionDataHandler
                         .getSessionsExecutionData(executionId, runningId);
+                final Map<String, Object> executionMap = (Map<String, Object>) actionData.get(EXECUTION);
 
                 final Map<String, Map<String, Object>> nonSerializableExecutionData = new HashMap<>(2);
                 nonSerializableExecutionData.put(GLOBAL_SESSION_OBJECT, globalSessionsExecutionData);
                 nonSerializableExecutionData.put(SESSION_OBJECT, sessionObjectExecutionData);
+                nonSerializableExecutionData.put(EXECUTION, executionMap);
 
                 args.add(nonSerializableExecutionData);
                 // If the control action requires non-serializable session data, we add it to the arguments array

@@ -35,7 +35,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static ch.lambdaj.Lambda.*;
+import static ch.lambdaj.Lambda.by;
+import static ch.lambdaj.Lambda.extract;
+import static ch.lambdaj.Lambda.group;
+import static ch.lambdaj.Lambda.on;
 
 public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListener {
 	private final Logger logger = Logger.getLogger(this.getClass());
