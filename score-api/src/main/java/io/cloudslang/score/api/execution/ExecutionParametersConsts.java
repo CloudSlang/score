@@ -22,6 +22,7 @@ package io.cloudslang.score.api.execution;
 public class ExecutionParametersConsts {
 
 	public static final String EXECUTION = "execution";
+	public static final String ACTION_TYPE = "actionType";
 	public static final String EXECUTION_CONTEXT = "executionContext";
 	public static final String SYSTEM_CONTEXT = "systemContext";
 

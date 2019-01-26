@@ -204,7 +204,7 @@ public class ExecutionServiceTest {
 	}
 
 	@Test
-	public void executeStepTest() {
+	public void executeStepTest() throws InterruptedException {
 		//Test no exception is thrown - all is caught inside
 		ExecutionStep executionStep = new ExecutionStep(EXECUTION_STEP_1_ID);
 		executionStep.setActionData(new HashMap<String, Serializable>());

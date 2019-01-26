@@ -17,7 +17,6 @@
 package io.cloudslang.worker.execution.services;
 
 import io.cloudslang.orchestrator.services.PauseResumeService;
-import io.cloudslang.orchestrator.services.PauseResumeService;
 import io.cloudslang.score.api.ControlActionMetadata;
 import io.cloudslang.score.api.ExecutionPlan;
 import io.cloudslang.score.api.ExecutionStep;
@@ -52,6 +51,8 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeoutException;
 
+import static io.cloudslang.score.api.execution.ExecutionParametersConsts.ACTION_TYPE;
+import static io.cloudslang.score.api.execution.ExecutionParametersConsts.EXECUTION;
 import static io.cloudslang.score.facade.TempConstants.EXECUTE_CONTENT_ACTION;
 import static io.cloudslang.score.facade.TempConstants.EXECUTE_CONTENT_ACTION_CLASSNAME;
 import static io.cloudslang.score.facade.TempConstants.SC_TIMEOUT_MINS;
@@ -81,24 +82,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
     @Autowired
     private EventBus eventBus;
 
-    @Autowired
-    private PauseResumeService pauseService;
-
-    @Autowired
-    private ReflectionAdapter reflectionAdapter;
-
-    @Autowired
-    private WorkerDbSupportService workerDbSupportService;
-
-    @Autowired
-    private WorkerConfigurationService workerConfigurationService;
-
-    @Autowired
-    private EventBus eventBus;
-
-    public static final int DEFAULT_PLATFORM_LEVEL_OPERATION_TIMEOUT_IN_SECONDS = 24 * 60 * 60; // seconds in a day
-    public static final int DEFAULT_PLATFORM_LEVEL_WAIT_PERIOD_FOR_TIMEOUT_IN_SECONDS = 5 * 60; // 5 minutes
-    public static final long DEFAULT_PLATFORM_LEVEL_WAIT_PAUSE_FOR_TIMEOUT_IN_MILLIS = 200; // 200 milliseconds
+    private static final int DEFAULT_PLATFORM_LEVEL_OPERATION_TIMEOUT_IN_SECONDS = 24 * 60 * 60; // seconds in a day
+    private static final int DEFAULT_PLATFORM_LEVEL_WAIT_PERIOD_FOR_TIMEOUT_IN_SECONDS = 5 * 60; // 5 minutes
+    private static final long DEFAULT_PLATFORM_LEVEL_WAIT_PAUSE_FOR_TIMEOUT_IN_MILLIS = 200; // 200 milliseconds
 
     private final long operationTimeoutMillis;
     private final long waitPauseForTimeoutMillis;
@@ -140,52 +126,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
             // dum bus event
             dumpBusEvents(execution);
             // Run the execution step
-
-            String timeoutMessage = executeStep(execution, currStep);
-            if (timeoutMessage != null) { // Timeout of run
-                try {
-                    return doWaitForCancel(execution);
-                } catch (TimeoutException timeout) {
-                    logger.error("Timed out waiting for cancel for execution id " + execution.getExecutionId());
-                    execution.getSystemContext().setStepErrorKey(timeoutMessage);
-                }
-            }
-            // Run the navigation
-            navigate(execution, currStep);
-            // currently handles groups and jms optimizations
-            postExecutionSettings(execution);
-            // If execution was paused in language - to avoid delay of configuration
-            if (execution.getSystemContext().isPaused()) {
-                if (handlePausedFlowAfterStep(execution)) {
-                    return null;
-                }
-            }
-            // dum bus event
-            dumpBusEvents(execution);
-            if (logger.isDebugEnabled()) {
-                logger.debug(
-                        "End of step: " + execution.getPosition() + " in execution id: " + execution.getExecutionId());
-            }
-            return execution;
-        } catch (InterruptedException ex) {
-    @Override
-    public Execution execute(Execution execution) throws InterruptedException {
-        try {
-            // handle flow cancellation
-            if (handleCancelledFlow(execution)) {
-                return execution;
-            }
-            ExecutionStep currStep = loadExecutionStep(execution);
-            // Check if this execution was paused
-            if (!isDebuggerMode(execution.getSystemContext()) && handlePausedFlow(execution)) {
-                return null;
-            }
-            // dum bus event
-            dumpBusEvents(execution);
-            // Run the execution step
             executeStep(execution, currStep);
-            if (currStep.getActionData().get("actionType") != null &&
-                    currStep.getActionData().get("actionType").toString().equalsIgnoreCase("rpa")) {
+            if (currStep.getActionData().get(ACTION_TYPE) != null &&
+                    currStep.getActionData().get(ACTION_TYPE).toString().equalsIgnoreCase("rpa")) {
                 pauseFlow(PauseReason.RPA_EXECUTION, execution);
                 return null;
             }
@@ -342,7 +285,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         return false;
     }
 
-    private void pauseFlow(PauseReason reason, Execution execution) throws InterruptedException {
+    public void pauseFlow(PauseReason reason, Execution execution) throws InterruptedException {
         SystemContext systemContext = execution.getSystemContext();
         Long executionId = execution.getExecutionId();
         String branchId = systemContext.getBranchId();
@@ -403,7 +346,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         return isDebuggerMode;
     }
 
-    private void dumpBusEvents(Execution execution) throws InterruptedException {
+    public void dumpBusEvents(Execution execution) throws InterruptedException {
         ArrayDeque<ScoreEvent> eventsQueue = execution.getSystemContext().getEvents();
         if (eventsQueue == null) {
             return;
@@ -414,7 +357,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         eventsQueue.clear();
     }
 
-    protected ExecutionStep loadExecutionStep(Execution execution) {
+    public ExecutionStep loadExecutionStep(Execution execution) {
         RunningExecutionPlan runningExecutionPlan;
         if (execution != null) {
             // Optimization for external workers - run the content only without loading the execution plan
@@ -547,8 +490,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
         // We add all the contexts to the step data - so inside of each control action we will have access to all contexts
         addContextData(stepData, execution);
         Map<String, Object> executionMap = new HashMap<>();
-        executionMap.put("execution", execution);
-        stepData.put("execution", executionMap);
+        executionMap.put(EXECUTION, execution);
+        stepData.put(EXECUTION, executionMap);
         return stepData;
     }
 
@@ -563,7 +506,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         eventBus.dispatch(eventWrapper);
     }
 
-    protected void navigate(Execution execution, ExecutionStep currStep) throws InterruptedException {
+    public void navigate(Execution execution, ExecutionStep currStep) throws InterruptedException {
         Long position;
         try {
             if (currStep.getNavigation() != null) {
@@ -600,7 +543,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         return useDefaultGroup;
     }
 
-    protected static void postExecutionSettings(Execution execution) {
+    public static void postExecutionSettings(Execution execution) {
         // Decide on Group
         String group = (String) execution.getSystemContext().get(TempConstants.ACTUALLY_OPERATION_GROUP);
 
@@ -622,7 +565,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         data.putAll(execution.getContexts());
         data.put(ExecutionParametersConsts.SYSTEM_CONTEXT, execution.getSystemContext());
         data.put(ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES, execution.getSystemContext());
-        data.put(ExecutionParametersConsts.EXECUTION, execution);
+        data.put(EXECUTION, execution);
         data.put(ExecutionParametersConsts.EXECUTION_CONTEXT, execution.getContexts());
         data.put(ExecutionParametersConsts.RUNNING_EXECUTION_PLAN_ID, execution.getRunningExecutionPlanId());
     }

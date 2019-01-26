@@ -40,6 +40,7 @@ import io.cloudslang.engine.data.SqlUtils;
 import io.cloudslang.job.ScoreEngineJobsImpl;
 import io.cloudslang.schema.context.ScoreDatabaseContext;
 import io.cloudslang.schema.context.ScoreDefaultDatasourceContext;
+import io.cloudslang.worker.execution.services.ExternalExecutionServiceImpl;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -65,7 +66,8 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private Map<Class<?>,String> beans = new HashMap<Class<?>,String>(){{
 		put(ScorePauseResumeImpl.class, null);
         put(OrchestratorDispatcherServiceImpl.class, "orchestratorDispatcherService");
-        put(ExecutionStateServiceImpl.class, null);
+        put(ExecutionStateServiceImpl.class, "executionStateService");
+		put(ExternalExecutionServiceImpl.class, "externalExecutionService");
 		put(QueueDispatcherServiceImpl.class, "queueDispatcherService");
 		put(ExecutionQueueServiceImpl.class, "executionQueueService");
 		put(ExecutionAssignerServiceImpl.class, "executionAssignerService");
