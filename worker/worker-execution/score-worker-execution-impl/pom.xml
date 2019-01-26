@@ -23,7 +23,7 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>worker-execution</artifactId>
-        <version>0.3.59-SNAPSHOT</version>
+        <version>0.3.62-SNAPSHOT</version>
     </parent>
 
 
@@ -85,6 +85,12 @@
             <groupId>io.cloudslang</groupId>
             <artifactId>runtime-management-api</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+
         <!-- end of engine artifacts -->
     </dependencies>
     

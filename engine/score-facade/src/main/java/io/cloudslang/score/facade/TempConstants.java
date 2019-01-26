@@ -41,4 +41,10 @@ public class TempConstants {
 
     public static final String USE_DEFAULT_GROUP = "USE_DEFAULT_GROUP";
 
+    public static final String SC_TIMEOUT_START_TIME = "SC_TIMEOUT_START_TIME";
+    public static final String SC_TIMEOUT_MINS = "SC_TIMEOUT_MINS";
+
+    public static final String EXECUTE_CONTENT_ACTION_CLASSNAME = "ContentExecutionActions";
+    public static final String EXECUTE_CONTENT_ACTION = "executeContentAction";
+
 }
