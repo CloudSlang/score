@@ -15,6 +15,7 @@
  */
 package io.cloudslang.worker.execution.services;
 
+import io.cloudslang.orchestrator.services.ExecutionStateService;
 import io.cloudslang.orchestrator.services.PauseResumeService;
 import io.cloudslang.score.facade.entities.Execution;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +27,23 @@ public final class ExternalExecutionServiceImpl implements ExternalExecutionServ
     @Autowired
     private PauseResumeService pauseService;
 
+    @Autowired
+    private ExecutionStateService stateService;
+
     @Override
     public void resumeExternalExecution(Execution execution) {
         pauseService.resumeExecution(execution.getExecutionId(),
                 execution.getSystemContext().getBranchId(), new HashMap<>());
     }
+
+    @Override
+    public Execution readExecutionObject(Long executionId, String branchId) {
+        return stateService.readExecutionObject(executionId, branchId);
+    }
+
+    @Override
+    public void updateExecutionObject(Long executionId, String branchId, Execution execution) {
+        stateService.updateExecutionObject(executionId, branchId, execution);
+    }
+
 }

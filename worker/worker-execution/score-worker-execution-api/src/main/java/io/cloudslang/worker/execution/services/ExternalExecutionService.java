@@ -20,4 +20,8 @@ import io.cloudslang.score.facade.entities.Execution;
 public interface ExternalExecutionService {
 
     void resumeExternalExecution(Execution execution) throws InterruptedException;
+
+    Execution readExecutionObject(Long executionId, String branchId);
+
+    void updateExecutionObject(Long executionId, String branchId, Execution execution);
 }
