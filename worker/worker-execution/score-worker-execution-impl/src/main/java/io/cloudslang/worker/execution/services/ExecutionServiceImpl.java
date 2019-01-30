@@ -489,9 +489,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
         }
         // We add all the contexts to the step data - so inside of each control action we will have access to all contexts
         addContextData(stepData, execution);
-        Map<String, Object> executionMap = new HashMap<>();
-        executionMap.put(EXECUTION, execution);
-        stepData.put(EXECUTION, executionMap);
         return stepData;
     }
 
