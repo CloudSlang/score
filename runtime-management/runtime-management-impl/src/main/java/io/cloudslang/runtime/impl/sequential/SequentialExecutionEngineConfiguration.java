@@ -13,22 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.runtime.impl.rpa;
+package io.cloudslang.runtime.impl.sequential;
 
 import io.cloudslang.dependency.impl.services.DependenciesManagementConfiguration;
-import io.cloudslang.runtime.api.rpa.RpaExecutionService;
+import io.cloudslang.runtime.api.sequential.SequentialExecutionService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@ComponentScan("io.cloudslang.runtime.impl.rpa")
+@ComponentScan("io.cloudslang.runtime.impl.sequential")
 @Import({DependenciesManagementConfiguration.class})
-public class RpaExecutionEngineConfiguration {
+public class SequentialExecutionEngineConfiguration {
 
     @Bean
-    public RpaExecutionService rpaExecutionService() {
-        return new DefaultRpaExecutionServiceImpl();
+    public SequentialExecutionService seqExecutionService() {
+        return new DefaultSequentialExecutionServiceImpl();
     }
 }

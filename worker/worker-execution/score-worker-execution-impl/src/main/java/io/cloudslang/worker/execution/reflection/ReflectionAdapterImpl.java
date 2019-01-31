@@ -183,7 +183,7 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
                 nonSerializableExecutionData.put(SESSION_OBJECT, sessionObjectExecutionData);
 
                 if (actionData.get("actionType") != null &&
-                        actionData.get("actionType").toString().equalsIgnoreCase("rpa")) {
+                        actionData.get("actionType").toString().equalsIgnoreCase("sequential")) {
                     final Execution execution = (Execution) actionData.get(EXECUTION);
                     Map<String, Object> executionMap = new HashMap<>();
                     executionMap.put(EXECUTION, execution);

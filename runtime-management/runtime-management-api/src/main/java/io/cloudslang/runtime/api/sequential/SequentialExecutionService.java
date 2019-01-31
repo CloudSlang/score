@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.runtime.impl.rpa;
+package io.cloudslang.runtime.api.sequential;
 
-import io.cloudslang.runtime.api.rpa.RpaExecutionParametersProvider;
-import io.cloudslang.runtime.api.rpa.RpaExecutionService;
+public interface SequentialExecutionService {
 
-public class DefaultRpaExecutionServiceImpl implements RpaExecutionService {
-
-    private static final String RPA_OPS_NOT_SUPPORTED = "CloudSlang does not support" +
-            " executing rpa operations. To provide this functionality, you must extend all necessary classes.";
-
-    @Override
-    public Object execute(String dependency, RpaExecutionParametersProvider parametersProvider) {
-        throw new UnsupportedOperationException(RPA_OPS_NOT_SUPPORTED);
-    }
+  /**
+   * This will execute the sequential action.
+   *
+   * @param dependency resource with maven GAV notation 'groupId:artifactId:version' which
+   *     references the sequential activity to execute
+   * @param parametersProvider parameters provider of sequential activity to be executed
+   * @return
+   */
+  Object execute(String dependency, SequentialExecutionParametersProvider parametersProvider);
 }

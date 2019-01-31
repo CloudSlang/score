@@ -13,17 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.runtime.api.rpa;
+package io.cloudslang.runtime.api.sequential;
 
-public interface RpaExecutionService {
-
-  /**
-   * This will execute the RPA action.
-   *
-   * @param dependency resource with maven GAV notation 'groupId:artifactId:version' which
-   *     references the RPA activity to execute
-   * @param parametersProvider parameters provider of RPA activity to be executed
-   * @return
-   */
-  Object execute(String dependency, RpaExecutionParametersProvider parametersProvider);
+public interface SequentialExecutionParametersProvider {
+    Object [] getExecutionParameters();
 }

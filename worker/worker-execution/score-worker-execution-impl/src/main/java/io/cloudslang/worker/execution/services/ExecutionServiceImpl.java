@@ -128,8 +128,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
             // Run the execution step
             executeStep(execution, currStep);
             if (currStep.getActionData().get(ACTION_TYPE) != null &&
-                    currStep.getActionData().get(ACTION_TYPE).toString().equalsIgnoreCase("rpa")) {
-                pauseFlow(PauseReason.RPA_EXECUTION, execution);
+                    currStep.getActionData().get(ACTION_TYPE).toString().equalsIgnoreCase("sequential")) {
+                pauseFlow(PauseReason.SEQUENTIAL_EXECUTION, execution);
                 return null;
             }
             // Run the navigation
@@ -295,7 +295,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 // we pause the branch because the Parent was user-paused (see findPauseReason)
                 pauseService.pauseExecution(executionId, branchId, reason); // this creates a DB record for this branch, as Pending-paused
             }
-        } else if (reason.equals(PauseReason.RPA_EXECUTION)) {
+        } else if (reason.equals(PauseReason.SEQUENTIAL_EXECUTION)) {
             pauseService.pauseExecution(executionId, branchId, reason);
         }
         addPauseEvent(systemContext);
