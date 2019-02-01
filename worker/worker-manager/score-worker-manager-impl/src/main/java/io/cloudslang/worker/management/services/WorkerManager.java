@@ -56,7 +56,7 @@ import static ch.lambdaj.Lambda.on;
 public class WorkerManager implements ApplicationListener, EndExecutionCallback, WorkerRecoveryListener {
 
 	private static final int KEEP_ALIVE_FAIL_LIMIT = 5;
-	private static final String DOTNET_PATH = System.getenv("WINDIR") + "/Microsoft.NET/Framework";
+	private static final String DOT_NET_PATH = System.getenv("WINDIR") + "/Microsoft.NET/Framework";
 	private static final Logger logger = Logger.getLogger(WorkerManager.class);
 
 	@Resource
@@ -110,14 +110,19 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 		logger.info("Initialize worker with UUID: " + workerUuid);
 		System.setProperty("worker.uuid", workerUuid); //do not remove!!!
         inBuffer = new LinkedBlockingQueue<>();
+        threadPoolVersion++;
 
+		createExecutorService();
+
+		mapOfRunningTasks = new ConcurrentHashMap<>(numberOfThreads);
+	}
+
+	private void createExecutorService() {
 		executorService = new ThreadPoolExecutor(numberOfThreads,
 				numberOfThreads,
 				Long.MAX_VALUE, TimeUnit.NANOSECONDS,
 				inBuffer,
-                new WorkerThreadFactory((++threadPoolVersion) + "_WorkerExecutionThread"));
-
-		mapOfRunningTasks = new ConcurrentHashMap<>(numberOfThreads);
+				new WorkerThreadFactory((threadPoolVersion) + "_WorkerExecutionThread"));
 	}
 
 	public void addExecution(Long executionId, Runnable runnable) {
@@ -273,7 +278,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 	}
 
 	protected static String resolveDotNetVersion() {
-		File dotNetHome = new File(DOTNET_PATH);
+		File dotNetHome = new File(DOT_NET_PATH);
 		if(dotNetHome.isDirectory()) {
 			File[] versionFolders = dotNetHome.listFiles(new FileFilter() {
 
@@ -342,10 +347,6 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
         mapOfRunningTasks.clear();
 
         //Make new executor
-        executorService = new ThreadPoolExecutor(numberOfThreads,
-                numberOfThreads,
-                Long.MAX_VALUE, TimeUnit.NANOSECONDS,
-                inBuffer,
-                new WorkerThreadFactory((threadPoolVersion) + "_WorkerExecutionThread"));
-    }
+		createExecutorService();
+	}
 }
