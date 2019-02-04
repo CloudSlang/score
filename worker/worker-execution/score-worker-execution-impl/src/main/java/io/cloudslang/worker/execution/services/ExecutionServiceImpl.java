@@ -150,8 +150,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             return execution;
         } catch (InterruptedException ex) {
             throw ex;
-        }
-        catch(Exception ex) {
+        } catch (Exception ex) {
             logger.error("Error during execution: ", ex);
             execution.getSystemContext().setStepErrorKey(ex.getMessage()); // this is done only fo reporting
             execution.getSystemContext().setFlowTerminationType(ExecutionStatus.SYSTEM_FAILURE);
@@ -476,15 +475,15 @@ public final class ExecutionServiceImpl implements ExecutionService {
         }
     }
 
-	private static void handleStepExecutionException(Execution execution, RuntimeException ex) {
-		logger.error("Error occurred during operation execution.  Execution id: " + execution.getExecutionId(), ex);
-		execution.getSystemContext().setStepErrorKey(ex.getMessage());
-	}
+    private static void handleStepExecutionException(Execution execution, RuntimeException ex) {
+        logger.error("Error occurred during operation execution.  Execution id: " + execution.getExecutionId(), ex);
+        execution.getSystemContext().setStepErrorKey(ex.getMessage());
+    }
 
-	private Map<String, Object> prepareStepData(Execution execution, ExecutionStep currStep) {
+    private Map<String, Object> prepareStepData(Execution execution, ExecutionStep currStep) {
         Map<String, ?> actionData = currStep.getActionData();
         Map<String, Object> stepData = new HashMap<>();
-        if (actionData != null){
+        if (actionData != null) {
             stepData.putAll(actionData);
         }
         // We add all the contexts to the step data - so inside of each control action we will have access to all contexts
@@ -544,13 +543,13 @@ public final class ExecutionServiceImpl implements ExecutionService {
         // Decide on Group
         String group = (String) execution.getSystemContext().get(TempConstants.ACTUALLY_OPERATION_GROUP);
 
-		execution.setGroupName(group);
+        execution.setGroupName(group);
 
-		if(isDebuggerMode(execution.getSystemContext())) {
-			if(!StringUtils.isEmpty(group) && useDefaultGroup(execution)) {
-				execution.setGroupName(null);
-			}
-		}
+        if (isDebuggerMode(execution.getSystemContext())) {
+            if (!StringUtils.isEmpty(group) && useDefaultGroup(execution)) {
+                execution.setGroupName(null);
+            }
+        }
         //if there is a request to change the running execution plan id, we update the execution to the new execution plan ID
         Long requestForChangingExecutionPlan = execution.getSystemContext().pullRequestForChangingExecutionPlan();
         if (requestForChangingExecutionPlan != null) {
