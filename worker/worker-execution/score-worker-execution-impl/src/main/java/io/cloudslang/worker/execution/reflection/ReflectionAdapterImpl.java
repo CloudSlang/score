@@ -17,7 +17,6 @@
 package io.cloudslang.worker.execution.reflection;
 
 import io.cloudslang.score.api.ControlActionMetadata;
-import io.cloudslang.score.api.execution.ExecutionParametersConsts;
 import io.cloudslang.score.exceptions.FlowExecutionException;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.lang.ExecutionRuntimeServices;
@@ -41,7 +40,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.ACTION_TYPE;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.EXECUTION;
+import static io.cloudslang.score.api.execution.ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.GLOBAL_SESSION_OBJECT;
+import static io.cloudslang.score.api.execution.ExecutionParametersConsts.NON_SERIALIZABLE_EXECUTION_DATA;
+import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SEQUENTIAL;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SESSION_OBJECT;
 
 /**
@@ -64,14 +66,14 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 
     private static Long getExecutionIdFromActionData(Map<String, ?> actionData) {
         ExecutionRuntimeServices executionRuntimeServices = (ExecutionRuntimeServices) actionData.get(
-                ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES);
+                EXECUTION_RUNTIME_SERVICES);
         if (executionRuntimeServices != null) return executionRuntimeServices.getExecutionId();
         return null;
     }
 
     private static Long getRunningExecutionIdFromActionData(Map<String, ?> actionData) {
         ExecutionRuntimeServices executionRuntimeServices = (ExecutionRuntimeServices) actionData.get(
-                ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES);
+                EXECUTION_RUNTIME_SERVICES);
         if (executionRuntimeServices != null) return executionRuntimeServices.getParentRunningId();
         return getExecutionIdFromActionData(actionData);
     }
@@ -170,7 +172,7 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
         }
         List<Object> args = new ArrayList<>(paramNames.length);
         for (String paramName : paramNames) {
-            if (ExecutionParametersConsts.NON_SERIALIZABLE_EXECUTION_DATA.equals(paramName)) {
+            if (NON_SERIALIZABLE_EXECUTION_DATA.equals(paramName)) {
                 final Long executionId = getExecutionIdFromActionData(actionData);
                 final Long runningId = getRunningExecutionIdFromActionData(actionData);
                 final Map<String, Object> globalSessionsExecutionData = sessionDataHandler
@@ -183,7 +185,7 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
                 nonSerializableExecutionData.put(SESSION_OBJECT, sessionObjectExecutionData);
 
                 if (actionData.get(ACTION_TYPE) != null &&
-                        actionData.get(ACTION_TYPE).toString().equalsIgnoreCase("sequential")) {
+                        actionData.get(ACTION_TYPE).toString().equalsIgnoreCase(SEQUENTIAL)) {
                     final Execution execution = (Execution) actionData.get(EXECUTION);
                     Map<String, Object> executionMap = new HashMap<>();
                     executionMap.put(EXECUTION, execution);
