@@ -60,7 +60,6 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 
 	private static final int KEEP_ALIVE_FAIL_LIMIT = 5;
 	private static final String DOT_NET_PATH = getenv("WINDIR") + "/Microsoft.NET/Framework";
-	private static final int DEFAULT_BURST_THREADS = 5;
 	private static final int DEFAULT_QUEUE_SHRINK_INTERVAL_MILLIS = 200;
 	private static final Logger logger = Logger.getLogger(WorkerManager.class);
 	private static final int DEFAULT_THREAD_TIMEOUT_MINS = 1;
@@ -111,23 +110,15 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 
     private volatile int threadPoolVersion = 0;
 
-    private int burstThreadCount;
-    private int threadTimeoutMinutes;
     private int waitForQueueToShrinkMillis;
+    private int queueSize;
 
 	@PostConstruct
 	private void init() {
 		logger.info("Initialize worker with UUID: " + workerUuid);
 		System.setProperty("worker.uuid", workerUuid); //do not remove!!!
 
-		// Ability to grow the the thread pool with additional burstThreadCount threads in case of spikes.
-		int burstThreadCountLocal = getInteger("cloudslang.worker.burstExecutionThreads", DEFAULT_BURST_THREADS);
-		burstThreadCount = (burstThreadCountLocal > 0) ? burstThreadCountLocal : DEFAULT_BURST_THREADS;
-
-		// Max idle time after a thread pool releases a thread. (This thread will be recreated when needed).
-		// The number of threads will never decrease below numberOfThreads since we don't allow core thread to time out.
-		int localThreadTimeout = getInteger("cloudslang.worker.threadTimeoutMins", DEFAULT_THREAD_TIMEOUT_MINS);
-		threadTimeoutMinutes = (localThreadTimeout > 0) ? localThreadTimeout : DEFAULT_THREAD_TIMEOUT_MINS;
+		logger.info("Executor number of threads " + numberOfThreads);
 
 		// Time to wait at polling for queue to shrink under 2 * (burstThreadCount + numberOfThreads) + 1. Default is 200 millis.
 		int localWaitForQueueToShrinkMillis = getInteger("cloudslang.worker.waitForQueueToShrinkMillis",
@@ -136,18 +127,23 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 
 		inBuffer = new LinkedBlockingQueue<>(); // infinite queue for thread pool
 
+		int defaultQueueSize = ((5 * numberOfThreads) / 2) + 1;
+		int minSize = numberOfThreads + 1;
+		int localQueueSize = getInteger("cloudslang.worker.queueSize", defaultQueueSize);
+		queueSize = (localQueueSize > minSize) ? localQueueSize : defaultQueueSize;
+		logger.info("Executor queue size " + queueSize);
+
 		// To make thread-pool version start from 1
 		threadPoolVersion++;
 		createExecutorService();
 
-		// Max number of threads is burstThreadCount + numberOfThreads
-		mapOfRunningTasks = new ConcurrentHashMap<>(burstThreadCount + numberOfThreads);
+		mapOfRunningTasks = new ConcurrentHashMap<>(numberOfThreads);
 	}
 
 	private void createExecutorService() {
 		ThreadPoolExecutor localExecutorService = new ThreadPoolExecutor(numberOfThreads,
-				numberOfThreads + burstThreadCount,
-				threadTimeoutMinutes, MINUTES,
+				numberOfThreads,
+				Long.MAX_VALUE, TimeUnit.NANOSECONDS,
 				inBuffer,
 				new WorkerThreadFactory((threadPoolVersion) + "_WorkerExecutionThread"));
 
@@ -169,14 +165,14 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 	}
 
 	public void addExecutionForPolling(Runnable runnable, long executionId, Runnable lockRunnable, Runnable unlockRunnable) throws InterruptedException {
-		int maxQueueSize = 2 * (numberOfThreads + burstThreadCount) + 1;
+		int localDesiredQueueSize = queueSize;
 
 		boolean wasUnlocked = false;
 		final BlockingQueue<Runnable> executorServiceQueue = executorService.getQueue();
-		if (executorServiceQueue.size() > maxQueueSize) {
+		if (executorServiceQueue.size() > localDesiredQueueSize) {
 			unlockRunnable.run();
 			wasUnlocked = true;
-			while (executorServiceQueue.size() > maxQueueSize) {
+			while (executorServiceQueue.size() > localDesiredQueueSize) {
 				Thread.sleep(waitForQueueToShrinkMillis);
 			}
 		}
