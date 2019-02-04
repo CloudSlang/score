@@ -127,7 +127,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             dumpBusEvents(execution);
             // Run the execution step
             executeStep(execution, currStep);
-            if (currStep.getActionData().get(ACTION_TYPE) != null &&
+            if ((!execution.getSystemContext().hasStepErrorKey()) && currStep.getActionData().get(ACTION_TYPE) != null &&
                     currStep.getActionData().get(ACTION_TYPE).toString().equalsIgnoreCase("sequential")) {
                 pauseFlow(PauseReason.SEQUENTIAL_EXECUTION, execution);
                 return null;
