@@ -36,9 +36,9 @@ import java.io.FileFilter;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -46,6 +46,9 @@ import java.util.concurrent.TimeUnit;
 
 import static ch.lambdaj.Lambda.max;
 import static ch.lambdaj.Lambda.on;
+import static java.lang.Integer.getInteger;
+import static java.lang.System.getenv;
+import static java.util.concurrent.TimeUnit.MINUTES;
 
 /**
  * Created with IntelliJ IDEA.
@@ -56,8 +59,11 @@ import static ch.lambdaj.Lambda.on;
 public class WorkerManager implements ApplicationListener, EndExecutionCallback, WorkerRecoveryListener {
 
 	private static final int KEEP_ALIVE_FAIL_LIMIT = 5;
-	private static final String DOT_NET_PATH = System.getenv("WINDIR") + "/Microsoft.NET/Framework";
+	private static final String DOT_NET_PATH = getenv("WINDIR") + "/Microsoft.NET/Framework";
+	private static final int DEFAULT_BURST_THREADS = 5;
+	private static final int DEFAULT_QUEUE_SHRINK_INTERVAL_MILLIS = 200;
 	private static final Logger logger = Logger.getLogger(WorkerManager.class);
+	private static final int DEFAULT_THREAD_TIMEOUT_MINS = 1;
 
 	@Resource
 	private String workerUuid;
@@ -93,7 +99,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 
     private int keepAliveFailCount = 0;
 
-	private ExecutorService executorService;
+	private ThreadPoolExecutor executorService;
 
 	private ConcurrentMap<Long, Queue<Future>> mapOfRunningTasks;
 
@@ -105,30 +111,84 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 
     private volatile int threadPoolVersion = 0;
 
+    private int burstThreadCount;
+    private int threadTimeoutMinutes;
+    private int waitForQueueToShrinkMillis;
+
 	@PostConstruct
 	private void init() {
 		logger.info("Initialize worker with UUID: " + workerUuid);
 		System.setProperty("worker.uuid", workerUuid); //do not remove!!!
-        inBuffer = new LinkedBlockingQueue<>();
-        threadPoolVersion++;
 
+		// Ability to grow the the thread pool with additional burstThreadCount threads in case of spikes.
+		int burstThreadCountLocal = getInteger("cloudslang.worker.burstExecutionThreads", DEFAULT_BURST_THREADS);
+		burstThreadCount = (burstThreadCountLocal > 0) ? burstThreadCountLocal : DEFAULT_BURST_THREADS;
+
+		// Max idle time after a thread pool releases a thread. (This thread will be recreated when needed).
+		// The number of threads will never decrease below numberOfThreads since we don't allow core thread to time out.
+		int localThreadTimeout = getInteger("cloudslang.worker.threadTimeoutMins", DEFAULT_THREAD_TIMEOUT_MINS);
+		threadTimeoutMinutes = (localThreadTimeout > 0) ? localThreadTimeout : DEFAULT_THREAD_TIMEOUT_MINS;
+
+		// Time to wait at polling for queue to shrink under 2 * (burstThreadCount + numberOfThreads) + 1. Default is 200 millis.
+		int localWaitForQueueToShrinkMillis = getInteger("cloudslang.worker.waitForQueueToShrinkMillis",
+				DEFAULT_QUEUE_SHRINK_INTERVAL_MILLIS);
+		waitForQueueToShrinkMillis = (localWaitForQueueToShrinkMillis > 0) ? localWaitForQueueToShrinkMillis : DEFAULT_QUEUE_SHRINK_INTERVAL_MILLIS;
+
+		inBuffer = new LinkedBlockingQueue<>(); // infinite queue for thread pool
+
+		// To make thread-pool version start from 1
+		threadPoolVersion++;
 		createExecutorService();
 
-		mapOfRunningTasks = new ConcurrentHashMap<>(numberOfThreads);
+		// Max number of threads is burstThreadCount + numberOfThreads
+		mapOfRunningTasks = new ConcurrentHashMap<>(burstThreadCount + numberOfThreads);
 	}
 
 	private void createExecutorService() {
-		executorService = new ThreadPoolExecutor(numberOfThreads,
-				numberOfThreads,
-				Long.MAX_VALUE, TimeUnit.NANOSECONDS,
+		ThreadPoolExecutor localExecutorService = new ThreadPoolExecutor(numberOfThreads,
+				numberOfThreads + burstThreadCount,
+				threadTimeoutMinutes, MINUTES,
 				inBuffer,
 				new WorkerThreadFactory((threadPoolVersion) + "_WorkerExecutionThread"));
+
+		localExecutorService.allowCoreThreadTimeOut(false);
+		executorService = localExecutorService;
 	}
 
-	public void addExecution(Long executionId, Runnable runnable) {
-		//It is possible that in linear flow we will have step 2 that is already running, but step 1 that still did not clean itself from the table (race condition)
-        Future future = executorService.submit(runnable);
-        mapOfRunningTasks.merge(executionId, newQueue(future), this::addLists);
+	public void addExecution(long executionId, Runnable runnable) {
+		// It is possible that step 2 is already running, but step 1 that still did not clean itself from the map
+		// This is because of the fact that before finishing the run in SimpleExecutionRunnable we have an in buffer shortcut
+		// to resubmit unfinished SimpleExecutionRunnable to the thread pool.
+
+		doAddExecution(executionId, runnable);
+	}
+
+	private void doAddExecution(long executionId, Runnable runnable) {
+		Future future = executorService.submit(runnable);
+		mapOfRunningTasks.merge(executionId, newQueue(future), this::addLists);
+	}
+
+	public void addExecutionForPolling(Runnable runnable, long executionId, Runnable lockRunnable, Runnable unlockRunnable) throws InterruptedException {
+		int maxQueueSize = 2 * (numberOfThreads + burstThreadCount) + 1;
+
+		boolean wasUnlocked = false;
+		final BlockingQueue<Runnable> executorServiceQueue = executorService.getQueue();
+		if (executorServiceQueue.size() > maxQueueSize) {
+			unlockRunnable.run();
+			wasUnlocked = true;
+			while (executorServiceQueue.size() > maxQueueSize) {
+				Thread.sleep(waitForQueueToShrinkMillis);
+			}
+		}
+
+		if (wasUnlocked) { // lock again
+			lockRunnable.run();
+		}
+
+		// It is possible that step 2 is already running, but step 1 that still did not clean itself from the map
+		// This is because of the fact that before finishing the run in SimpleExecutionRunnable we have an in buffer shortcut
+		// to resubmit unfinished SimpleExecutionRunnable to the thread pool.
+		doAddExecution(executionId, runnable);
 	}
 
 	private Queue<Future> newQueue(Future future) {
