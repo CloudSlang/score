@@ -20,7 +20,6 @@ import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import io.cloudslang.worker.management.ExecutionsActivityListener;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -37,6 +36,7 @@ import java.util.List;
 import static ch.lambdaj.Lambda.extract;
 import static ch.lambdaj.Lambda.on;
 import static java.lang.Integer.getInteger;
+import static java.lang.Long.parseLong;
 import static java.lang.String.format;
 
 
@@ -44,8 +44,8 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
     private static final Logger logger = Logger.getLogger(InBuffer.class);
 
-    private final static long MEMORY_THRESHOLD = 50000000; // 50 Mega byte
-    private final static int MINIMUM_GC_DELTA = 10000; // minimum delta between garbage collections in milliseconds
+    private static final long MEMORY_THRESHOLD = 50000000; // 50 Mega byte
+    private static final int MINIMUM_GC_DELTA = 10000; // Minimum delta between garbage collections in milliseconds
     private static final String WORKER_INBUFFER_SIZE = "worker.inbuffer.size";
     private static final String WORKER_INBUFFER_MIN_SIZE = "worker.inbuffer.minSize";
 
@@ -91,8 +91,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     private void init() {
         capacity = getInteger("worker.inbuffer.capacity", capacity);
         coolDownPollingMillis = getInteger("worker.inbuffer.coolDownPollingMillis", coolDownPollingMillis);
-        logger.info("InBuffer capacity is set to :" + capacity + ", coolDownPollingMillis is set to :"
-                + coolDownPollingMillis);
+        logger.info("InBuffer capacity is set to :" + capacity + ", coolDownPollingMillis is set to :" + coolDownPollingMillis);
 
         newInBufferBehaviour = Boolean.getBoolean("enable.new.inbuffer");
         logger.info("new inbuffer behaviour enabled: " + newInBufferBehaviour);
@@ -235,10 +234,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     private void addExecutionMessageInner(ExecutionMessage msg) {
         SimpleExecutionRunnable simpleExecutionRunnable = simpleExecutionRunnableFactory.getObject();
         simpleExecutionRunnable.setExecutionMessage(msg);
-        Long executionId = null;
-        if (!StringUtils.isEmpty(msg.getMsgId())) {
-            executionId = Long.valueOf(msg.getMsgId());
-        }
+        long executionId = parseLong(msg.getMsgId());
         workerManager.addExecution(executionId, simpleExecutionRunnable);
     }
 
