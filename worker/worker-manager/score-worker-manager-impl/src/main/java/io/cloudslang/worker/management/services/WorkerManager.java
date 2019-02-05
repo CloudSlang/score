@@ -120,8 +120,10 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 		mapOfRunningTasks = new ConcurrentHashMap<>(numberOfThreads);
 	}
 
-	public void addExecution(Long executionId, Runnable runnable) {
-		//It is possible that in linear flow we will have step 2 that is already running, but step 1 that still did not clean itself from the table (race condition)
+	public void addExecution(long executionId, Runnable runnable) {
+		// Since we can offer to thread pool queue from SimpleExecutionRunnable run method
+        // it is possible we will have step x + 1 of an execution plan that is in the map of running tasks,
+        // but step x did not yet clean itself from the map
         Future future = executorService.submit(runnable);
         mapOfRunningTasks.merge(executionId, newQueue(future), this::addLists);
 	}
@@ -133,7 +135,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
     }
 
     private Queue<Future> addLists(Queue<Future> oldValue, Queue<Future> newValue) {
-        oldValue.offer(newValue.poll()); // there is only one value in newValue
+        oldValue.offer(newValue.poll()); // There is only one value in newValue
         return oldValue;
     }
 
