@@ -570,7 +570,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
         data.putAll(execution.getContexts());
         data.put(ExecutionParametersConsts.SYSTEM_CONTEXT, execution.getSystemContext());
         data.put(ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES, execution.getSystemContext());
-        data.put(EXECUTION, execution);
+        if (data.get(ACTION_TYPE) != null &&
+                data.get(ACTION_TYPE).toString().equalsIgnoreCase(SEQUENTIAL)) {
+            data.put(EXECUTION, execution);
+        }
         data.put(ExecutionParametersConsts.EXECUTION_CONTEXT, execution.getContexts());
         data.put(ExecutionParametersConsts.RUNNING_EXECUTION_PLAN_ID, execution.getRunningExecutionPlanId());
     }

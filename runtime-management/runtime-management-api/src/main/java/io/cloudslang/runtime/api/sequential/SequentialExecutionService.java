@@ -15,6 +15,8 @@
  */
 package io.cloudslang.runtime.api.sequential;
 
+import java.io.Serializable;
+
 public interface SequentialExecutionService {
 
   /**
@@ -23,7 +25,8 @@ public interface SequentialExecutionService {
    * @param dependency resource with maven GAV notation 'groupId:artifactId:version' which
    *     references the sequential activity to execute
    * @param parametersProvider parameters provider of sequential activity to be executed
+   * @param execution the execution object
    * @return
    */
-  Object execute(String dependency, SequentialExecutionParametersProvider parametersProvider);
+  Object execute(String dependency, SequentialExecutionParametersProvider parametersProvider, Serializable execution);
 }

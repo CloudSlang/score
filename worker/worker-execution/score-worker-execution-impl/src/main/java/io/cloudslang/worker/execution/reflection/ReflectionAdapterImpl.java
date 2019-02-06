@@ -18,7 +18,6 @@ package io.cloudslang.worker.execution.reflection;
 
 import io.cloudslang.score.api.ControlActionMetadata;
 import io.cloudslang.score.exceptions.FlowExecutionException;
-import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.lang.ExecutionRuntimeServices;
 import io.cloudslang.worker.execution.services.SessionDataHandler;
 import org.apache.commons.lang.Validate;
@@ -38,12 +37,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.cloudslang.score.api.execution.ExecutionParametersConsts.ACTION_TYPE;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.EXECUTION;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.GLOBAL_SESSION_OBJECT;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.NON_SERIALIZABLE_EXECUTION_DATA;
-import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SEQUENTIAL;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SESSION_OBJECT;
 
 /**
@@ -184,13 +181,16 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
                 nonSerializableExecutionData.put(GLOBAL_SESSION_OBJECT, globalSessionsExecutionData);
                 nonSerializableExecutionData.put(SESSION_OBJECT, sessionObjectExecutionData);
 
-                nonSerializableExecutionData = handleSequentialExecutionData(actionData, nonSerializableExecutionData);
-
                 args.add(nonSerializableExecutionData);
+
                 // If the control action requires non-serializable session data, we add it to the arguments array
                 // and set the session data as active, so that it won't be cleared
                 sessionDataHandler.setGlobalSessionDataActive(executionId);
                 sessionDataHandler.setSessionDataActive(executionId, runningId);
+                continue;
+            } else if (EXECUTION.equals(paramName)) {
+                Object seqExecution = actionData.remove(EXECUTION);
+                args.add(seqExecution);
                 continue;
             }
             Object param = actionData.get(paramName);
@@ -204,17 +204,5 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
         this.applicationContext = applicationContext;
     }
 
-
-    private Map<String, Map<String, Object>> handleSequentialExecutionData(Map<String, ?> actionData, Map<String, Map<String, Object>> nonSerializableExecutionData) {
-        if (actionData.get(ACTION_TYPE) != null &&
-                actionData.get(ACTION_TYPE).toString().equalsIgnoreCase(SEQUENTIAL)) {
-            final Execution execution = (Execution) actionData.get(EXECUTION);
-            Map<String, Object> executionMap = new HashMap<>();
-            executionMap.put(EXECUTION, execution);
-            nonSerializableExecutionData.put(EXECUTION, executionMap);
-        }
-
-        return nonSerializableExecutionData;
-    }
 
 }

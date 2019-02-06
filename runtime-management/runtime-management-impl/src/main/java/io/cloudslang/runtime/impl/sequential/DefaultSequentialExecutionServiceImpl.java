@@ -18,13 +18,16 @@ package io.cloudslang.runtime.impl.sequential;
 import io.cloudslang.runtime.api.sequential.SequentialExecutionParametersProvider;
 import io.cloudslang.runtime.api.sequential.SequentialExecutionService;
 
+import java.io.Serializable;
+
 public class DefaultSequentialExecutionServiceImpl implements SequentialExecutionService {
 
     private static final String SEQ_OPS_NOT_SUPPORTED = "CloudSlang does not support" +
             " executing sequential operations. To provide this functionality, you must extend all necessary classes.";
 
     @Override
-    public Object execute(String dependency, SequentialExecutionParametersProvider parametersProvider) {
+    public Object execute(String dependency, SequentialExecutionParametersProvider parametersProvider,
+                          Serializable execution) {
         throw new UnsupportedOperationException(SEQ_OPS_NOT_SUPPORTED);
     }
 }
