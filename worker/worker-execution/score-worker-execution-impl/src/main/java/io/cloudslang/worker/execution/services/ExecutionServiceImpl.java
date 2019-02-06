@@ -127,7 +127,15 @@ public final class ExecutionServiceImpl implements ExecutionService {
             // dum bus event
             dumpBusEvents(execution);
             // Run the execution step
-            executeStep(execution, currStep);
+            String timeoutMessage = executeStep(execution, currStep);
+            if (timeoutMessage != null) { // Timeout of run
+                try {
+                    return doWaitForCancel(execution);
+                } catch (TimeoutException timeout) {
+                    logger.error("Timed out waiting for cancel for execution id " + execution.getExecutionId());
+                    execution.getSystemContext().setStepErrorKey(timeoutMessage);
+                }
+            }
             if ((!execution.getSystemContext().hasStepErrorKey()) && currStep.getActionData().get(ACTION_TYPE) != null &&
                     currStep.getActionData().get(ACTION_TYPE).toString().equalsIgnoreCase(SEQUENTIAL)) {
                 pauseFlow(PauseReason.SEQUENTIAL_EXECUTION, execution);
