@@ -17,7 +17,6 @@
 package io.cloudslang.worker.execution.reflection;
 
 import io.cloudslang.score.api.ControlActionMetadata;
-import io.cloudslang.score.api.execution.ExecutionParametersConsts;
 import io.cloudslang.score.exceptions.FlowExecutionException;
 import io.cloudslang.score.lang.ExecutionRuntimeServices;
 import io.cloudslang.worker.execution.services.SessionDataHandler;
@@ -38,7 +37,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static io.cloudslang.score.api.execution.ExecutionParametersConsts.EXECUTION;
+import static io.cloudslang.score.api.execution.ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.GLOBAL_SESSION_OBJECT;
+import static io.cloudslang.score.api.execution.ExecutionParametersConsts.NON_SERIALIZABLE_EXECUTION_DATA;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SESSION_OBJECT;
 
 /**
@@ -61,14 +63,14 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 
     private static Long getExecutionIdFromActionData(Map<String, ?> actionData) {
         ExecutionRuntimeServices executionRuntimeServices = (ExecutionRuntimeServices) actionData.get(
-                ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES);
+                EXECUTION_RUNTIME_SERVICES);
         if (executionRuntimeServices != null) return executionRuntimeServices.getExecutionId();
         return null;
     }
 
     private static Long getRunningExecutionIdFromActionData(Map<String, ?> actionData) {
         ExecutionRuntimeServices executionRuntimeServices = (ExecutionRuntimeServices) actionData.get(
-                ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES);
+                EXECUTION_RUNTIME_SERVICES);
         if (executionRuntimeServices != null) return executionRuntimeServices.getParentRunningId();
         return getExecutionIdFromActionData(actionData);
     }
@@ -167,7 +169,7 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
         }
         List<Object> args = new ArrayList<>(paramNames.length);
         for (String paramName : paramNames) {
-            if (ExecutionParametersConsts.NON_SERIALIZABLE_EXECUTION_DATA.equals(paramName)) {
+            if (NON_SERIALIZABLE_EXECUTION_DATA.equals(paramName)) {
                 final Long executionId = getExecutionIdFromActionData(actionData);
                 final Long runningId = getRunningExecutionIdFromActionData(actionData);
                 final Map<String, Object> globalSessionsExecutionData = sessionDataHandler
@@ -175,15 +177,20 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
                 final Map<String, Object> sessionObjectExecutionData = sessionDataHandler
                         .getSessionsExecutionData(executionId, runningId);
 
-                final Map<String, Map<String, Object>> nonSerializableExecutionData = new HashMap<>(2);
+                Map<String, Map<String, Object>> nonSerializableExecutionData = new HashMap<>(2);
                 nonSerializableExecutionData.put(GLOBAL_SESSION_OBJECT, globalSessionsExecutionData);
                 nonSerializableExecutionData.put(SESSION_OBJECT, sessionObjectExecutionData);
 
                 args.add(nonSerializableExecutionData);
+
                 // If the control action requires non-serializable session data, we add it to the arguments array
                 // and set the session data as active, so that it won't be cleared
                 sessionDataHandler.setGlobalSessionDataActive(executionId);
                 sessionDataHandler.setSessionDataActive(executionId, runningId);
+                continue;
+            } else if (EXECUTION.equals(paramName)) {
+                Object seqExecution = actionData.remove(EXECUTION);
+                args.add(seqExecution);
                 continue;
             }
             Object param = actionData.get(paramName);
@@ -196,5 +203,6 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
+
 
 }

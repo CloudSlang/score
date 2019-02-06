@@ -13,25 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.cloudslang.runtime.api.sequential;
 
-package io.cloudslang.score.facade.execution;
+import java.io.Serializable;
 
-/**
- * Created with IntelliJ IDEA.
- * User: kravtsov
- * Date: 20/12/12
- * Time: 11:55
- */
-public enum PauseReason {
-    USER_PAUSED,
-    INPUT_REQUIRED,
-    INPUT_REQUIRED_MANUAL_OP,
-	SELECT_TRANSITION,
-    DISPLAY,
-    GATED_TRANSITION,
-    HAND_OFF,
-    INTERRUPT,
-    NO_WORKERS_IN_GROUP,
-    BRANCH_PAUSED,
-    SEQUENTIAL_EXECUTION
+public interface SequentialExecutionService {
+
+  /**
+   * This will execute the sequential action.
+   *
+   * @param dependency resource with maven GAV notation 'groupId:artifactId:version' which
+   *     references the sequential activity to execute
+   * @param parametersProvider parameters provider of sequential activity to be executed
+   * @param execution the execution object
+   * @return
+   */
+  Object execute(String dependency, SequentialExecutionParametersProvider parametersProvider, Serializable execution);
 }

@@ -22,6 +22,7 @@ package io.cloudslang.score.api.execution;
 public class ExecutionParametersConsts {
 
 	public static final String EXECUTION = "execution";
+	public static final String ACTION_TYPE = "actionType";
 	public static final String EXECUTION_CONTEXT = "executionContext";
 	public static final String SYSTEM_CONTEXT = "systemContext";
 
@@ -33,4 +34,5 @@ public class ExecutionParametersConsts {
 	public static final String NON_SERIALIZABLE_EXECUTION_DATA = "nonSerializableExecutionData";
 	public static final String RUNNING_EXECUTION_PLAN_ID = "RUNNING_EXECUTION_PLAN_ID";
 	public static final String FINISHED_CHILD_BRANCHES_DATA = "FINISHED_CHILD_BRANCHES_DATA";
+	public static final String SEQUENTIAL = "sequential";
 }

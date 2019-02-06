@@ -48,6 +48,11 @@
                 <artifactId>score-worker-manager-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.cloudslang</groupId>
+                <artifactId>runtime-management-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

@@ -51,6 +51,9 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeoutException;
 
+import static io.cloudslang.score.api.execution.ExecutionParametersConsts.ACTION_TYPE;
+import static io.cloudslang.score.api.execution.ExecutionParametersConsts.EXECUTION;
+import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SEQUENTIAL;
 import static io.cloudslang.score.facade.TempConstants.EXECUTE_CONTENT_ACTION;
 import static io.cloudslang.score.facade.TempConstants.EXECUTE_CONTENT_ACTION_CLASSNAME;
 import static io.cloudslang.score.facade.TempConstants.SC_TIMEOUT_MINS;
@@ -64,10 +67,6 @@ import static java.lang.String.valueOf;
 public final class ExecutionServiceImpl implements ExecutionService {
 
     private static final Logger logger = Logger.getLogger(ExecutionServiceImpl.class);
-
-    public static final int DEFAULT_PLATFORM_LEVEL_OPERATION_TIMEOUT_IN_SECONDS = 24 * 60 * 60; // seconds in a day
-    public static final int DEFAULT_PLATFORM_LEVEL_WAIT_PERIOD_FOR_TIMEOUT_IN_SECONDS = 5 * 60; // 5 minutes
-    public static final long DEFAULT_PLATFORM_LEVEL_WAIT_PAUSE_FOR_TIMEOUT_IN_MILLIS = 200; // 200 milliseconds
 
     @Autowired
     private PauseResumeService pauseService;
@@ -83,6 +82,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     @Autowired
     private EventBus eventBus;
+
+    private static final int DEFAULT_PLATFORM_LEVEL_OPERATION_TIMEOUT_IN_SECONDS = 24 * 60 * 60; // seconds in a day
+    private static final int DEFAULT_PLATFORM_LEVEL_WAIT_PERIOD_FOR_TIMEOUT_IN_SECONDS = 5 * 60; // 5 minutes
+    private static final long DEFAULT_PLATFORM_LEVEL_WAIT_PAUSE_FOR_TIMEOUT_IN_MILLIS = 200; // 200 milliseconds
 
     private final long operationTimeoutMillis;
     private final long waitPauseForTimeoutMillis;
@@ -124,7 +127,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
             // dum bus event
             dumpBusEvents(execution);
             // Run the execution step
-
             String timeoutMessage = executeStep(execution, currStep);
             if (timeoutMessage != null) { // Timeout of run
                 try {
@@ -133,6 +135,11 @@ public final class ExecutionServiceImpl implements ExecutionService {
                     logger.error("Timed out waiting for cancel for execution id " + execution.getExecutionId());
                     execution.getSystemContext().setStepErrorKey(timeoutMessage);
                 }
+            }
+            if ((!execution.getSystemContext().hasStepErrorKey()) && currStep.getActionData().get(ACTION_TYPE) != null &&
+                    currStep.getActionData().get(ACTION_TYPE).toString().equalsIgnoreCase(SEQUENTIAL)) {
+                pauseFlow(PauseReason.SEQUENTIAL_EXECUTION, execution);
+                return null;
             }
             // Run the navigation
             navigate(execution, currStep);
@@ -147,8 +154,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             // dum bus event
             dumpBusEvents(execution);
             if (logger.isDebugEnabled()) {
-                logger.debug(
-                        "End of step: " + execution.getPosition() + " in execution id: " + execution.getExecutionId());
+                logger.debug("End of step: " + execution.getPosition() + " in execution id: " + execution.getExecutionId());
             }
             return execution;
         } catch (InterruptedException ex) {
@@ -287,7 +293,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         return false;
     }
 
-    private void pauseFlow(PauseReason reason, Execution execution) throws InterruptedException {
+    public void pauseFlow(PauseReason reason, Execution execution) throws InterruptedException {
         SystemContext systemContext = execution.getSystemContext();
         Long executionId = execution.getExecutionId();
         String branchId = systemContext.getBranchId();
@@ -295,9 +301,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
         if (!isDebuggerMode(execution.getSystemContext()) && reason.equals(PauseReason.USER_PAUSED)) {
             if (branchId != null) {
                 // we pause the branch because the Parent was user-paused (see findPauseReason)
-                pauseService.pauseExecution(executionId, branchId,
-                        reason); // this creates a DB record for this branch, as Pending-paused
+                pauseService.pauseExecution(executionId, branchId, reason); // this creates a DB record for this branch, as Pending-paused
             }
+        } else if (reason.equals(PauseReason.SEQUENTIAL_EXECUTION)) {
+            pauseService.pauseExecution(executionId, branchId, reason);
         }
         addPauseEvent(systemContext);
         // dump bus events here because out side is too late
@@ -347,7 +354,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         return isDebuggerMode;
     }
 
-    private void dumpBusEvents(Execution execution) throws InterruptedException {
+    public void dumpBusEvents(Execution execution) throws InterruptedException {
         ArrayDeque<ScoreEvent> eventsQueue = execution.getSystemContext().getEvents();
         if (eventsQueue == null) {
             return;
@@ -358,7 +365,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         eventsQueue.clear();
     }
 
-    protected ExecutionStep loadExecutionStep(Execution execution) {
+    public ExecutionStep loadExecutionStep(Execution execution) {
         RunningExecutionPlan runningExecutionPlan;
         if (execution != null) {
             // Optimization for external workers - run the content only without loading the execution plan
@@ -504,7 +511,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         eventBus.dispatch(eventWrapper);
     }
 
-    protected void navigate(Execution execution, ExecutionStep currStep) throws InterruptedException {
+    public void navigate(Execution execution, ExecutionStep currStep) throws InterruptedException {
         Long position;
         try {
             if (currStep.getNavigation() != null) {
@@ -541,7 +548,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         return useDefaultGroup;
     }
 
-    protected static void postExecutionSettings(Execution execution) {
+    public static void postExecutionSettings(Execution execution) {
         // Decide on Group
         String group = (String) execution.getSystemContext().get(TempConstants.ACTUALLY_OPERATION_GROUP);
 
@@ -563,7 +570,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
         data.putAll(execution.getContexts());
         data.put(ExecutionParametersConsts.SYSTEM_CONTEXT, execution.getSystemContext());
         data.put(ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES, execution.getSystemContext());
-        data.put(ExecutionParametersConsts.EXECUTION, execution);
+        if (data.get(ACTION_TYPE) != null &&
+                data.get(ACTION_TYPE).toString().equalsIgnoreCase(SEQUENTIAL)) {
+            data.put(EXECUTION, execution);
+        }
         data.put(ExecutionParametersConsts.EXECUTION_CONTEXT, execution.getContexts());
         data.put(ExecutionParametersConsts.RUNNING_EXECUTION_PLAN_ID, execution.getRunningExecutionPlanId());
     }

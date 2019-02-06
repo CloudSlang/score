@@ -13,25 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.cloudslang.worker.execution.services;
 
-package io.cloudslang.score.facade.execution;
+import io.cloudslang.score.facade.entities.Execution;
 
-/**
- * Created with IntelliJ IDEA.
- * User: kravtsov
- * Date: 20/12/12
- * Time: 11:55
- */
-public enum PauseReason {
-    USER_PAUSED,
-    INPUT_REQUIRED,
-    INPUT_REQUIRED_MANUAL_OP,
-	SELECT_TRANSITION,
-    DISPLAY,
-    GATED_TRANSITION,
-    HAND_OFF,
-    INTERRUPT,
-    NO_WORKERS_IN_GROUP,
-    BRANCH_PAUSED,
-    SEQUENTIAL_EXECUTION
+public interface ExternalExecutionService {
+
+    void resumeExternalExecution(Execution execution) throws InterruptedException;
+
+    Execution readExecutionObject(Long executionId, String branchId);
+
+    void updateExecutionObject(Long executionId, String branchId, Execution execution);
 }
