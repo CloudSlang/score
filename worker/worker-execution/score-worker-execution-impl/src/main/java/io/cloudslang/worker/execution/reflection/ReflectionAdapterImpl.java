@@ -180,17 +180,11 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
                 final Map<String, Object> sessionObjectExecutionData = sessionDataHandler
                         .getSessionsExecutionData(executionId, runningId);
 
-                final Map<String, Map<String, Object>> nonSerializableExecutionData = new HashMap<>(2);
+                Map<String, Map<String, Object>> nonSerializableExecutionData = new HashMap<>(2);
                 nonSerializableExecutionData.put(GLOBAL_SESSION_OBJECT, globalSessionsExecutionData);
                 nonSerializableExecutionData.put(SESSION_OBJECT, sessionObjectExecutionData);
 
-                if (actionData.get(ACTION_TYPE) != null &&
-                        actionData.get(ACTION_TYPE).toString().equalsIgnoreCase(SEQUENTIAL)) {
-                    final Execution execution = (Execution) actionData.get(EXECUTION);
-                    Map<String, Object> executionMap = new HashMap<>();
-                    executionMap.put(EXECUTION, execution);
-                    nonSerializableExecutionData.put(EXECUTION, executionMap);
-                }
+                nonSerializableExecutionData = handleSequentialExecutionData(actionData, nonSerializableExecutionData);
 
                 args.add(nonSerializableExecutionData);
                 // If the control action requires non-serializable session data, we add it to the arguments array
@@ -208,6 +202,19 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+    }
+
+
+    private Map<String, Map<String, Object>> handleSequentialExecutionData(Map<String, ?> actionData, Map<String, Map<String, Object>> nonSerializableExecutionData) {
+        if (actionData.get(ACTION_TYPE) != null &&
+                actionData.get(ACTION_TYPE).toString().equalsIgnoreCase(SEQUENTIAL)) {
+            final Execution execution = (Execution) actionData.get(EXECUTION);
+            Map<String, Object> executionMap = new HashMap<>();
+            executionMap.put(EXECUTION, execution);
+            nonSerializableExecutionData.put(EXECUTION, executionMap);
+        }
+
+        return nonSerializableExecutionData;
     }
 
 }
