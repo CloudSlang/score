@@ -277,6 +277,6 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     }
 
     public int getCapacity() {
-        return capacity;
+        return (!newInBufferBehaviour) ? capacity : newInBufferSize;
     }
 }
