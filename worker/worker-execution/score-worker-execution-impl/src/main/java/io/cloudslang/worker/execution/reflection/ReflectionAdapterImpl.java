@@ -40,7 +40,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.GLOBAL_SESSION_OBJECT;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.NON_SERIALIZABLE_EXECUTION_DATA;
-import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SEQ_EXECUTION_MARKER;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SESSION_OBJECT;
 
 /**
@@ -187,10 +186,6 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
                 // and set the session data as active, so that it won't be cleared
                 sessionDataHandler.setGlobalSessionDataActive(executionId);
                 sessionDataHandler.setSessionDataActive(executionId, runningId);
-                continue;
-            } else if (SEQ_EXECUTION_MARKER.equals(paramName)) {
-                Object seqExecution = actionData.remove(SEQ_EXECUTION_MARKER);
-                args.add(seqExecution);
                 continue;
             }
             Object param = actionData.get(paramName);
