@@ -75,6 +75,10 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     @Autowired
     private SynchronizationManager syncManager;
 
+    @Autowired
+    @Qualifier("numberOfExecutionThreads")
+    private Integer numberOfThreads;
+
     @Autowired(required = false)
     private ExecutionsActivityListener executionsActivityListener;
 
@@ -104,7 +108,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
         // Min buffer size is the size at which the WorkerFillBufferThread thread starts polling if memory > MEMORY_THRESHOLD
         if (newInBufferBehaviour) {
-            int executionThreadsCount = workerManager.getExecutionThreadsCount();
+            int executionThreadsCount = numberOfThreads;
             int minInBufferSizeLocal = getInteger(WORKER_INBUFFER_MIN_SIZE, executionThreadsCount);
             minInBufferSize = (minInBufferSizeLocal > 0) ? minInBufferSizeLocal : executionThreadsCount;
 
