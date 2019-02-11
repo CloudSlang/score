@@ -21,6 +21,7 @@ package io.cloudslang.score.api.execution;
  */
 public class ExecutionParametersConsts {
 
+	public static final String SEQ_EXECUTION_MARKER = "seqExecObj";
 	public static final String EXECUTION = "execution";
 	public static final String ACTION_TYPE = "actionType";
 	public static final String EXECUTION_CONTEXT = "executionContext";

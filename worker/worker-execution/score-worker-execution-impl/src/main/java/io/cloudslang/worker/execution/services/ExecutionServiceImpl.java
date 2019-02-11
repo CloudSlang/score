@@ -52,8 +52,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeoutException;
 
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.ACTION_TYPE;
-import static io.cloudslang.score.api.execution.ExecutionParametersConsts.EXECUTION;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SEQUENTIAL;
+import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SEQ_EXECUTION_MARKER;
 import static io.cloudslang.score.facade.TempConstants.EXECUTE_CONTENT_ACTION;
 import static io.cloudslang.score.facade.TempConstants.EXECUTE_CONTENT_ACTION_CLASSNAME;
 import static io.cloudslang.score.facade.TempConstants.SC_TIMEOUT_MINS;
@@ -572,8 +572,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
         data.put(ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES, execution.getSystemContext());
         if (data.get(ACTION_TYPE) != null &&
                 data.get(ACTION_TYPE).toString().equalsIgnoreCase(SEQUENTIAL)) {
-            data.put(EXECUTION, execution);
+            data.put(SEQ_EXECUTION_MARKER, execution);
         }
+        data.put(ExecutionParametersConsts.EXECUTION, execution);
         data.put(ExecutionParametersConsts.EXECUTION_CONTEXT, execution.getContexts());
         data.put(ExecutionParametersConsts.RUNNING_EXECUTION_PLAN_ID, execution.getRunningExecutionPlanId());
     }
