@@ -53,7 +53,6 @@ import java.util.concurrent.TimeoutException;
 
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.ACTION_TYPE;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SEQUENTIAL;
-import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SEQ_EXECUTION_MARKER;
 import static io.cloudslang.score.facade.TempConstants.EXECUTE_CONTENT_ACTION;
 import static io.cloudslang.score.facade.TempConstants.EXECUTE_CONTENT_ACTION_CLASSNAME;
 import static io.cloudslang.score.facade.TempConstants.SC_TIMEOUT_MINS;
