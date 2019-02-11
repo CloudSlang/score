@@ -82,27 +82,24 @@ public final class OrchestratorDispatcherServiceImpl implements OrchestratorDisp
         if (logger.isDebugEnabled()) {
             logger.debug("Dispatching " + messages.size() + " messages");
         }
-        long t = System.currentTimeMillis();
 
-        queueDispatcher.dispatch(messages.stream()
+        long t = System.currentTimeMillis();
+        final List<ExecutionMessage> toDispatchMessages = messages.stream()
                 .filter(ExecutionMessage.class::isInstance)
                 .map(ExecutionMessage.class::cast)
-                .collect(toList())
-        );
+                .collect(toList());
+        queueDispatcher.dispatch(toDispatchMessages);
 
-        splitJoinService.split(messages.stream()
+        final List<SplitMessage> toSplitMessages = messages.stream()
                 .filter(SplitMessage.class::isInstance)
                 .map(SplitMessage.class::cast)
-                .collect(toList())
-        );
+                .collect(toList());
+        splitJoinService.split(toSplitMessages);
 
-        int count = (int) messages.stream()
-                .filter(message -> !(message instanceof SplitMessage) && !(message instanceof ExecutionMessage))
-                .count();
-
-        int dispatched = messages.size() - count;
-
+        int dispatched = toDispatchMessages.size() + toSplitMessages.size();
+        int count = messages.size() - dispatched;
         t = System.currentTimeMillis() - t;
+
         if (logger.isDebugEnabled()) {
             logger.debug("Dispatching " + dispatched + " messages is done in " + t + " ms");
         }
