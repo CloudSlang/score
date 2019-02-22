@@ -16,6 +16,7 @@
 
 package io.cloudslang.schema;
 
+import io.cloudslang.runtime.impl.sequential.DefaultSequentialExecutionServiceImpl;
 import io.cloudslang.score.events.EventBusImpl;
 import io.cloudslang.worker.execution.reflection.ReflectionAdapterImpl;
 import io.cloudslang.worker.execution.services.ExecutionServiceImpl;
@@ -120,7 +121,16 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		}
 
 		registerWorkerVersionService(element, parserContext);
+		registerSequentialExecution(element,parserContext);
 	}
+
+	private static void registerSequentialExecution(Element element, ParserContext parserContext){
+		String registerSequentialExecutionService = element.getAttribute("registerSequentialExecutionService");
+		if(!registerSequentialExecutionService.equals(Boolean.FALSE.toString())){
+			new BeanRegistrator(parserContext).CLASS(DefaultSequentialExecutionServiceImpl.class).register();
+		}
+	}
+
 
 	private static void registerWorkerVersionService(Element element, ParserContext parserContext){
 		String registerWorkerVersionService = element.getAttribute("registerWorkerVersionService");

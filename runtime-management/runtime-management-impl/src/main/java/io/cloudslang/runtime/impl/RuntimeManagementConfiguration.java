@@ -18,7 +18,6 @@ package io.cloudslang.runtime.impl;
 
 import io.cloudslang.runtime.impl.java.JavaExecutionEngineConfiguration;
 import io.cloudslang.runtime.impl.python.PythonExecutionEngineConfiguration;
-import io.cloudslang.runtime.impl.sequential.SequentialExecutionEngineConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -28,8 +27,7 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import({
         JavaExecutionEngineConfiguration.class,
-        PythonExecutionEngineConfiguration.class,
-        SequentialExecutionEngineConfiguration.class
+        PythonExecutionEngineConfiguration.class
 })
 public class RuntimeManagementConfiguration {
 }
