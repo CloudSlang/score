@@ -121,12 +121,12 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		}
 
 		registerWorkerVersionService(element, parserContext);
-		registerSequentialExecution(element,parserContext);
+		registerSequentialExecution(element, parserContext);
 	}
 
 	private static void registerSequentialExecution(Element element, ParserContext parserContext){
 		String registerSequentialExecutionService = element.getAttribute("registerSequentialExecutionService");
-		if(!registerSequentialExecutionService.equals(Boolean.FALSE.toString())){
+		if(!Boolean.FALSE.toString().equals(registerSequentialExecutionService)){
 			new BeanRegistrator(parserContext).CLASS(DefaultSequentialExecutionServiceImpl.class).register();
 		}
 	}
