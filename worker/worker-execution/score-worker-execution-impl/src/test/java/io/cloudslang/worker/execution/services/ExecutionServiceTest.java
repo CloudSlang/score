@@ -95,7 +95,7 @@ public class ExecutionServiceTest {
 
 	@Test
 	public void handlePausedFlow_NotPausedExecutionTest() throws InterruptedException {
-		Execution exe = new Execution(111L,0L, 0L, new HashMap<String,String>(), null);
+		Execution exe = new Execution(111L, 0L, 0L, new HashMap<String, String>(), null);
 		exe.getSystemContext().setBranchId("branch_id");
 		exe.getSystemContext().put(EventConstants.FLOW_UUID, "flow_uuid");
 
@@ -152,7 +152,7 @@ public class ExecutionServiceTest {
 	}
 
 	private Execution getExecutionObjToPause(Long executionId, String branch_id) {
-		Execution exe = new Execution(executionId,0L, 0L, new HashMap<String,String>(), null);
+		Execution exe = new Execution(executionId, 0L, 0L, new HashMap<String, String>(), null);
 		exe.getSystemContext().setBranchId(branch_id);
 		exe.getSystemContext().put(EventConstants.FLOW_UUID, "flow_uuid");
 		//for events
@@ -162,19 +162,19 @@ public class ExecutionServiceTest {
 
 	@Test
 	public void handleCancelledFlowsTest() {
-		Execution exe = new Execution(EXECUTION_ID_1,0L, 0L, new HashMap<String,String>(), null);
+		Execution exe = new Execution(EXECUTION_ID_1, 0L, 0L, new HashMap<String, String>(), null);
 
 		boolean result = executionService.handleCancelledFlow(exe);
 
 		assertNull(exe.getPosition());
 		assertTrue(result);
 
-		exe = new Execution(EXECUTION_ID_2,0L, 0L, new HashMap<String,String>(), null);
+		exe = new Execution(EXECUTION_ID_2, 0L, 0L, new HashMap<String, String>(), null);
 
 		result = executionService.handleCancelledFlow(exe);
 
-        	assertNull(exe.getPosition());
-        	assertTrue(result);
+		assertNull(exe.getPosition());
+		assertTrue(result);
 
 	}
 
@@ -182,59 +182,59 @@ public class ExecutionServiceTest {
 	// branch is running and execution reaches sequential operation -> branch should be paused
 	public void handlePausedFlow_sequentialOperationReached() throws InterruptedException {
 
-        ExecutionStep executionStep = createExecutionStep();
-        Execution execution = createExecution(executionStep);
-        RunningExecutionPlan runningExecutionPlan = createRunningExecutionPlan(executionStep, execution);
+		ExecutionStep executionStep = createExecutionStep();
+		Execution execution = createExecution(executionStep);
+		RunningExecutionPlan runningExecutionPlan = createRunningExecutionPlan(executionStep, execution);
 
-        when(workerDbSupportService.readExecutionPlanById(RUNNING_EXE_PLAN_ID)).thenReturn(runningExecutionPlan);
-        when(workerConfigurationService.isExecutionCancelled(EXECUTION_ID_1)).thenReturn(false);
+		when(workerDbSupportService.readExecutionPlanById(RUNNING_EXE_PLAN_ID)).thenReturn(runningExecutionPlan);
+		when(workerConfigurationService.isExecutionCancelled(EXECUTION_ID_1)).thenReturn(false);
 
-        executionService.execute(execution);
-        //position is still 0
-        Assert.assertEquals(0, execution.getPosition().longValue());
+		executionService.execute(execution);
+		//position is still 0
+		Assert.assertEquals(0, execution.getPosition().longValue());
 
-        //running execution plan id has not changed as result of not navigating
-        Assert.assertEquals(RUNNING_EXE_PLAN_ID, execution.getRunningExecutionPlanId());
-        Mockito.verify(pauseResumeService, VerificationModeFactory.times(1)).pauseExecution(any(Long.class), any(String.class), eq(SEQUENTIAL_EXECUTION));
+		//running execution plan id has not changed as result of not navigating
+		Assert.assertEquals(RUNNING_EXE_PLAN_ID, execution.getRunningExecutionPlanId());
+		Mockito.verify(pauseResumeService, VerificationModeFactory.times(1)).pauseExecution(any(Long.class), any(String.class), eq(SEQUENTIAL_EXECUTION));
 	}
 
-    private Execution createExecution(ExecutionStep executionStep) {
-        Execution execution = new Execution(EXECUTION_ID_1,0L, 0L, new HashMap<String,String>(), null);
-        execution.getSystemContext().put(TempConstants.CONTENT_EXECUTION_STEP, executionStep);
-        Map<String, Serializable> metadata = new HashMap<>();
-        execution.getSystemContext().putMetaData(metadata);
-        return execution;
-    }
+	private Execution createExecution(ExecutionStep executionStep) {
+		Execution execution = new Execution(EXECUTION_ID_1, 0L, 0L, new HashMap<String, String>(), null);
+		execution.getSystemContext().put(TempConstants.CONTENT_EXECUTION_STEP, executionStep);
+		Map<String, Serializable> metadata = new HashMap<>();
+		execution.getSystemContext().putMetaData(metadata);
+		return execution;
+	}
 
-    private RunningExecutionPlan createRunningExecutionPlan(ExecutionStep executionStep, Execution execution) {
-        ExecutionPlan executionPlan = new ExecutionPlan();
-        executionPlan.addStep(executionStep);
-        RunningExecutionPlan runningExecutionPlan = new RunningExecutionPlan();
-        runningExecutionPlan.setId(RUNNING_EXE_PLAN_ID);
-        runningExecutionPlan.setExecutionPlan(executionPlan);
-        execution.setRunningExecutionPlanId(runningExecutionPlan.getId());
-        return runningExecutionPlan;
-    }
+	private RunningExecutionPlan createRunningExecutionPlan(ExecutionStep executionStep, Execution execution) {
+		ExecutionPlan executionPlan = new ExecutionPlan();
+		executionPlan.addStep(executionStep);
+		RunningExecutionPlan runningExecutionPlan = new RunningExecutionPlan();
+		runningExecutionPlan.setId(RUNNING_EXE_PLAN_ID);
+		runningExecutionPlan.setExecutionPlan(executionPlan);
+		execution.setRunningExecutionPlanId(runningExecutionPlan.getId());
+		return runningExecutionPlan;
+	}
 
-    private ExecutionStep createExecutionStep() {
-        ExecutionStep executionStep = new ExecutionStep(EXECUTION_STEP_1_ID);
-        HashMap<String, Serializable> actionData = new HashMap<>();
-        actionData.put(ACTION_TYPE, SEQUENTIAL);
-        ControlActionMetadata controlActionMetadata = new ControlActionMetadata("className", "methodName");
-        executionStep.setActionData(actionData);
-        executionStep.setAction(controlActionMetadata);
-        return executionStep;
-    }
+	private ExecutionStep createExecutionStep() {
+		ExecutionStep executionStep = new ExecutionStep(EXECUTION_STEP_1_ID);
+		HashMap<String, Serializable> actionData = new HashMap<>();
+		actionData.put(ACTION_TYPE, SEQUENTIAL);
+		ControlActionMetadata controlActionMetadata = new ControlActionMetadata("className", "methodName");
+		executionStep.setActionData(actionData);
+		executionStep.setAction(controlActionMetadata);
+		return executionStep;
+	}
 
-    @Test
+	@Test
 	public void loadStepTest() {
 		//FromSystemContext
 		ExecutionStep executionStep = new ExecutionStep(EXECUTION_STEP_1_ID);
 
-		Execution exe = new Execution(EXECUTION_ID_1,0L, 0L, new HashMap<String,String>(), null);
+		Execution exe = new Execution(EXECUTION_ID_1, 0L, 0L, new HashMap<String, String>(), null);
 
 		exe.getSystemContext().put(TempConstants.CONTENT_EXECUTION_STEP, executionStep);
-		Map<String,Serializable> metadata = new HashMap<>();
+		Map<String, Serializable> metadata = new HashMap<>();
 		exe.getSystemContext().putMetaData(metadata);
 		ExecutionStep loadedStep = executionService.loadExecutionStep(exe);
 
@@ -251,11 +251,11 @@ public class ExecutionServiceTest {
 
 		executionStep = new ExecutionStep(EXECUTION_STEP_2_ID);
 
-		exe = new Execution(RUNNING_EXE_PLAN_ID, EXECUTION_STEP_2_ID, new HashMap<String,String>());
+		exe = new Execution(RUNNING_EXE_PLAN_ID, EXECUTION_STEP_2_ID, new HashMap<String, String>());
 		exe.getSystemContext().putMetaData(metadata);
 		loadedStep = executionService.loadExecutionStep(exe);
 
-        Assert.assertEquals(executionStep.getExecStepId(), loadedStep.getExecStepId());
+		Assert.assertEquals(executionStep.getExecStepId(), loadedStep.getExecStepId());
 	}
 
 	@Test
@@ -264,12 +264,12 @@ public class ExecutionServiceTest {
 		ExecutionStep executionStep = new ExecutionStep(EXECUTION_STEP_1_ID);
 		executionStep.setActionData(new HashMap<String, Serializable>());
 
-		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
+		Execution exe = new Execution(0L, 0L, new HashMap<String, String>());
 
 		executionService.executeStep(exe, executionStep);
 
 		Assert.assertEquals(0, exe.getPosition().longValue()); //position is still 0
-        assertTrue(exe.getSystemContext().hasStepErrorKey()); //there is error in context
+		assertTrue(exe.getSystemContext().hasStepErrorKey()); //there is error in context
 	}
 
 	@Test
@@ -279,17 +279,17 @@ public class ExecutionServiceTest {
 		executionStep.setNavigation(RUNTIME_EXCEPTION_METADATA);
 		executionStep.setNavigationData(new HashMap<String, Serializable>());
 
-		Execution exe = new Execution(0L, 0L, new HashMap<String,String>());
+		Execution exe = new Execution(0L, 0L, new HashMap<String, String>());
 
 		executionService.navigate(exe, executionStep);
 
-        assertNull(exe.getPosition()); //position was changed to NULL due to exception
-        assertTrue(exe.getSystemContext().hasStepErrorKey()); //there is error in context
+		assertNull(exe.getPosition()); //position was changed to NULL due to exception
+		assertTrue(exe.getSystemContext().hasStepErrorKey()); //there is error in context
 	}
 
 	@Test
 	public void postExecutionSettingsTest() {
-		Execution exe = new Execution(1111111L,0L, 0L, new HashMap<String,String>(), null);
+		Execution exe = new Execution(1111111L, 0L, 0L, new HashMap<String, String>(), null);
 
 		exe.getSystemContext().put(TempConstants.ACTUALLY_OPERATION_GROUP, "Real_Group");
 		//for events
