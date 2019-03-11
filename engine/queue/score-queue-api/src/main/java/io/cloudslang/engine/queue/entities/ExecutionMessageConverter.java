@@ -111,7 +111,7 @@ public class ExecutionMessageConverter {
 
     private byte[] objToBytes(Object obj) {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(SIZE)) {
-            initPayloadMetaData(byteArrayOutputStream);
+            addPayloadMetadataBytes(byteArrayOutputStream);
             addEncryptionMarker(byteArrayOutputStream);
             byteArrayOutputStream.write(getCompressedObjectBytes(obj));
 
@@ -189,7 +189,7 @@ public class ExecutionMessageConverter {
         }
     }
 
-    private void initPayloadMetaData(ByteArrayOutputStream baos) throws IOException {
+    private void addPayloadMetadataBytes(ByteArrayOutputStream baos) throws IOException {
         baos.write(PAYLOAD_META_DATA_INIT_BYTES);
     }
 
