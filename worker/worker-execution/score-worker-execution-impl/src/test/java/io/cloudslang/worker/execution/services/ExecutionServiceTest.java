@@ -182,37 +182,51 @@ public class ExecutionServiceTest {
 	// branch is running and execution reaches sequential operation -> branch should be paused
 	public void handlePausedFlow_sequentialOperationReached() throws InterruptedException {
 
-		ExecutionStep executionStep = new ExecutionStep(EXECUTION_STEP_1_ID);
-		HashMap<String, Serializable> actionData = new HashMap<>();
-		actionData.put(ACTION_TYPE, SEQUENTIAL);
-		ControlActionMetadata controlActionMetadata = new ControlActionMetadata("className", "methodName");
-		executionStep.setActionData(actionData);
-		executionStep.setAction(controlActionMetadata);
-		Execution execution = new Execution(EXECUTION_ID_1,0L, 0L, new HashMap<String,String>(), null);
-		execution.getSystemContext().put(TempConstants.CONTENT_EXECUTION_STEP, executionStep);
-		Map<String,Serializable> metadata = new HashMap<>();
-		execution.getSystemContext().putMetaData(metadata);
+        ExecutionStep executionStep = createExecutionStep();
+        Execution execution = createExecution(executionStep);
+        RunningExecutionPlan runningExecutionPlan = createRunningExecutionPlan(executionStep, execution);
 
+        when(workerDbSupportService.readExecutionPlanById(RUNNING_EXE_PLAN_ID)).thenReturn(runningExecutionPlan);
+        when(workerConfigurationService.isExecutionCancelled(EXECUTION_ID_1)).thenReturn(false);
 
-		ExecutionPlan executionPlan = new ExecutionPlan();
-		executionPlan.addStep(executionStep);
-		RunningExecutionPlan runningExecutionPlan = new RunningExecutionPlan();
-		runningExecutionPlan.setId(RUNNING_EXE_PLAN_ID);
-		runningExecutionPlan.setExecutionPlan(executionPlan);
-		execution.setRunningExecutionPlanId(runningExecutionPlan.getId());
-		when(workerDbSupportService.readExecutionPlanById(RUNNING_EXE_PLAN_ID)).thenReturn(runningExecutionPlan);
-		when(workerConfigurationService.isExecutionCancelled(EXECUTION_ID_1)).thenReturn(false);
+        executionService.execute(execution);
+        //position is still 0
+        Assert.assertEquals(0, execution.getPosition().longValue());
 
-		executionService.execute(execution);
-		//position is still 0
-		Assert.assertEquals(0, execution.getPosition().longValue());
-
-		//running execution plan id has not changed as result of not navigating
-		Assert.assertEquals(RUNNING_EXE_PLAN_ID, execution.getRunningExecutionPlanId());
-		Mockito.verify(pauseResumeService, VerificationModeFactory.times(1)).pauseExecution(any(Long.class), any(String.class), eq(SEQUENTIAL_EXECUTION));
+        //running execution plan id has not changed as result of not navigating
+        Assert.assertEquals(RUNNING_EXE_PLAN_ID, execution.getRunningExecutionPlanId());
+        Mockito.verify(pauseResumeService, VerificationModeFactory.times(1)).pauseExecution(any(Long.class), any(String.class), eq(SEQUENTIAL_EXECUTION));
 	}
 
-	@Test
+    private Execution createExecution(ExecutionStep executionStep) {
+        Execution execution = new Execution(EXECUTION_ID_1,0L, 0L, new HashMap<String,String>(), null);
+        execution.getSystemContext().put(TempConstants.CONTENT_EXECUTION_STEP, executionStep);
+        Map<String, Serializable> metadata = new HashMap<>();
+        execution.getSystemContext().putMetaData(metadata);
+        return execution;
+    }
+
+    private RunningExecutionPlan createRunningExecutionPlan(ExecutionStep executionStep, Execution execution) {
+        ExecutionPlan executionPlan = new ExecutionPlan();
+        executionPlan.addStep(executionStep);
+        RunningExecutionPlan runningExecutionPlan = new RunningExecutionPlan();
+        runningExecutionPlan.setId(RUNNING_EXE_PLAN_ID);
+        runningExecutionPlan.setExecutionPlan(executionPlan);
+        execution.setRunningExecutionPlanId(runningExecutionPlan.getId());
+        return runningExecutionPlan;
+    }
+
+    private ExecutionStep createExecutionStep() {
+        ExecutionStep executionStep = new ExecutionStep(EXECUTION_STEP_1_ID);
+        HashMap<String, Serializable> actionData = new HashMap<>();
+        actionData.put(ACTION_TYPE, SEQUENTIAL);
+        ControlActionMetadata controlActionMetadata = new ControlActionMetadata("className", "methodName");
+        executionStep.setActionData(actionData);
+        executionStep.setAction(controlActionMetadata);
+        return executionStep;
+    }
+
+    @Test
 	public void loadStepTest() {
 		//FromSystemContext
 		ExecutionStep executionStep = new ExecutionStep(EXECUTION_STEP_1_ID);
@@ -241,7 +255,7 @@ public class ExecutionServiceTest {
 		exe.getSystemContext().putMetaData(metadata);
 		loadedStep = executionService.loadExecutionStep(exe);
 
-		Assert.assertEquals(executionStep.getExecStepId(), loadedStep.getExecStepId());
+        Assert.assertEquals(executionStep.getExecStepId(), loadedStep.getExecStepId());
 	}
 
 	@Test
@@ -255,7 +269,7 @@ public class ExecutionServiceTest {
 		executionService.executeStep(exe, executionStep);
 
 		Assert.assertEquals(0, exe.getPosition().longValue()); //position is still 0
-		assertTrue(exe.getSystemContext().hasStepErrorKey()); //there is error in context
+        assertTrue(exe.getSystemContext().hasStepErrorKey()); //there is error in context
 	}
 
 	@Test
@@ -270,7 +284,7 @@ public class ExecutionServiceTest {
 		executionService.navigate(exe, executionStep);
 
         assertNull(exe.getPosition()); //position was changed to NULL due to exception
-		assertTrue(exe.getSystemContext().hasStepErrorKey()); //there is error in context
+        assertTrue(exe.getSystemContext().hasStepErrorKey()); //there is error in context
 	}
 
 	@Test
