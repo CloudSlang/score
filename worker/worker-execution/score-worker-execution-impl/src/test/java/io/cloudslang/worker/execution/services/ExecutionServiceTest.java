@@ -173,8 +173,8 @@ public class ExecutionServiceTest {
 
 		result = executionService.handleCancelledFlow(exe);
 
-        assertNull(exe.getPosition());
-        assertTrue(result);
+        	assertNull(exe.getPosition());
+        	assertTrue(result);
 
 	}
 
