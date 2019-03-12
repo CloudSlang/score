@@ -86,18 +86,16 @@ public class ExecutionMessageConverter {
                 skipPayloadMetaData(is);
                 skipEncryptionMarker(is);
 
-                byte[] uncompressedBytes = gzipUncompress(is);
-                ois = new ObjectInputStream(new ByteArrayInputStream(uncompressedBytes));
+                ois = new ObjectInputStream(new GZIPInputStream(is));
 
                 // noinspection unchecked
                 return (T) ois.readObject();
-            } else {
+            } else { // Uncompressed object, use legacy implementation
                 // 2 buffers are added to increase performance
                 ByteArrayInputStream is = new ByteArrayInputStream(bytes);
                 skipPayloadMetaData(is);
 
-                BufferedInputStream bis = new BufferedInputStream(is);
-                ois = new ObjectInputStream(bis);
+                ois = new ObjectInputStream(new BufferedInputStream(is));
 
                 // noinspection unchecked
                 return (T) ois.readObject();
@@ -113,51 +111,20 @@ public class ExecutionMessageConverter {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(SIZE)) {
             addPayloadMetadataBytes(byteArrayOutputStream);
             addEncryptionMarker(byteArrayOutputStream);
-            byteArrayOutputStream.write(getCompressedObjectBytes(obj));
 
+            try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new GZIPOutputStream(byteArrayOutputStream))) {
+                objectOutputStream.writeObject(obj);
+                objectOutputStream.flush();
+            }
+            // After close of gzip stream to make sure all bytes are flushed
             return byteArrayOutputStream.toByteArray();
         } catch (IOException ex) {
             throw new RuntimeException("Failed to serialize execution plan. Error: ", ex);
         }
     }
 
-    private byte[] getCompressedObjectBytes(Object obj) throws IOException {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(SIZE);
-                ObjectOutputStream objectOutputStream = new ObjectOutputStream(baos)) {
-            objectOutputStream.writeObject(obj);
-            objectOutputStream.flush();
-
-            return gzipCompress(baos.toByteArray());
-        }
-    }
-
     private void addEncryptionMarker(ByteArrayOutputStream bout) {
         bout.write(ENCRYPTION_MARKER, 0, ENCRYPTION_MARKER.length);
-    }
-
-    private static byte[] gzipCompress(byte[] uncompressedBytes) {
-        // In order to call close() from try with resources
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(uncompressedBytes.length);
-        try (GZIPOutputStream gzipOs = new GZIPOutputStream(baos)) {
-            gzipOs.write(uncompressedBytes);
-        } catch (IOException gzipExc) {
-            throw new RuntimeException("Failed to compress byte array: ", gzipExc);
-        }
-        // In order to call close() from try with resources
-        return baos.toByteArray();
-    }
-
-    private static byte[] gzipUncompress(ByteArrayInputStream bis) {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); GZIPInputStream gzipIs = new GZIPInputStream(bis)) {
-            byte[] buffer = new byte[SIZE];
-            int len;
-            while ((len = gzipIs.read(buffer)) != -1) {
-                baos.write(buffer, 0, len);
-            }
-            return baos.toByteArray();
-        } catch (IOException gzipExc) {
-            throw new RuntimeException("Failed to uncompress byte array: ", gzipExc);
-        }
     }
 
     /***************************************************************************************/
