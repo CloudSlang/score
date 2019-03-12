@@ -16,12 +16,10 @@
 
 package io.cloudslang.engine.queue.entities;
 
-import static org.junit.Assert.*;
-
 import io.cloudslang.score.facade.entities.Execution;
+import io.cloudslang.score.lang.SystemContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import io.cloudslang.score.lang.SystemContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,16 +33,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.zip.GZIPOutputStream;
 
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyMapOf;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-/**
- * Created with IntelliJ IDEA.
- * User: kravtsov
- * Date: 20/11/12
- * Time: 14:35
- */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = ExecutionMessageConverterTest.ConfigurationForTest.class)
 public class ExecutionMessageConverterTest {
@@ -91,14 +88,7 @@ public class ExecutionMessageConverterTest {
 
         MyExecutionForTest execution = new MyExecutionForTest(222L, 9L, 500L, names);
 
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024);
-        byteArrayOutputStream.write(0);
-        try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)) {
-            objectOutputStream.writeObject(execution);
-            objectOutputStream.flush();
-        }
-
-        Payload payload = new Payload(byteArrayOutputStream.toByteArray());
+        Payload payload = createLegacyPayload(execution);
 
         MyExecutionForTest afterConvert = executionMessageConverter.extractExecution(payload);
 
@@ -113,14 +103,7 @@ public class ExecutionMessageConverterTest {
         Execution execution = new Execution(576767600L, 1L, new HashMap<>());
         execution.setExecutionId(2L);
 
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024);
-        byteArrayOutputStream.write(0);
-        try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)) {
-            objectOutputStream.writeObject(execution);
-            objectOutputStream.flush();
-        }
-
-        Payload payload = new Payload(byteArrayOutputStream.toByteArray());
+        Payload payload = createLegacyPayload(execution);
 
         Execution afterConvert = executionMessageConverter.extractExecution(payload);
 
@@ -138,19 +121,19 @@ public class ExecutionMessageConverterTest {
 
         Payload payload = executionMessageConverter.createPayload(execution);
         assertFalse(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 0);
+        assertEquals(0, payload.getData()[0]);
 
         payload = executionMessageConverter.createPayload(execution);
         assertFalse(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 0);
+        assertEquals(0, payload.getData()[0]);
 
         payload = executionMessageConverter.createPayload(execution, false);
         assertFalse(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 0);
+        assertEquals(0, payload.getData()[0]);
 
         payload = executionMessageConverter.createPayload(execution, true);
         assertTrue(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 1);
+        assertEquals(1, payload.getData()[0]);
     }
 
     @Test
@@ -162,19 +145,19 @@ public class ExecutionMessageConverterTest {
 
         Payload payload = executionMessageConverter.createPayload(execution);
         assertTrue(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 1);
+        assertEquals(1, payload.getData()[0]);
 
         payload = executionMessageConverter.createPayload(execution);
         assertTrue(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 1);
+        assertEquals(1, payload.getData()[0]);
 
         payload = executionMessageConverter.createPayload(execution, false);
         assertTrue(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 1);
+        assertEquals(1, payload.getData()[0]);
 
         payload = executionMessageConverter.createPayload(execution, true);
         assertTrue(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 1);
+        assertEquals(1, payload.getData()[0]);
     }
 
     @Test
@@ -186,6 +169,17 @@ public class ExecutionMessageConverterTest {
         p = new Payload();
         p.setData(new byte[]{1, 0, 0});
         assertTrue(executionMessageConverter.containsSensitiveData(p));
+    }
+
+    private Payload createLegacyPayload(Serializable serializable) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024);
+        byteArrayOutputStream.write(0);
+        try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)) {
+            objectOutputStream.writeObject(serializable);
+            objectOutputStream.flush();
+        }
+
+        return new Payload(byteArrayOutputStream.toByteArray());
     }
 
     @Configuration
