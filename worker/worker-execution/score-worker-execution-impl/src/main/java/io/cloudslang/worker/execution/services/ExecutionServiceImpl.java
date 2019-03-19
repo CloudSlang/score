@@ -527,7 +527,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             // terminating...
             logger.error("Error occurred during navigation execution. Execution id: " + execution.getExecutionId(),
                     navEx);
-            execution.getSystemContext().setStepErrorKey(navEx.getMessage()); // this is done only fo reporting
+            execution.getSystemContext().setStepErrorKey(navEx.getMessage()); // this is done only for reporting
             execution.getSystemContext().setFlowTerminationType(ExecutionStatus.SYSTEM_FAILURE);
             execution.setPosition(null); // this ends the flow!!!
             try {
@@ -547,10 +547,28 @@ public final class ExecutionServiceImpl implements ExecutionService {
         return useDefaultGroup;
     }
 
-    public static void postExecutionSettings(Execution execution) {
-        // Decide on Group
+    public void postExecutionSettings(Execution execution) {
+        setWorkerGroup(execution);
+
+        //if there is a request to change the running execution plan id, we update the execution to the new execution plan ID
+        Long requestForChangingExecutionPlan = execution.getSystemContext().pullRequestForChangingExecutionPlan();
+        if (requestForChangingExecutionPlan != null) {
+            execution.setRunningExecutionPlanId(requestForChangingExecutionPlan);
+        }
+    }
+
+    private void setWorkerGroup(Execution execution) {
+        //get group from system context
         String group = (String) execution.getSystemContext().get(TempConstants.ACTUALLY_OPERATION_GROUP);
 
+        //if not overridden get the group from the step
+        if (group == null) {
+            ExecutionStep nextStep = getNextStep(execution);
+            if (nextStep != null && nextStep.getActionData().get("workerGroup") != null) {
+                group = nextStep.getActionData().get("workerGroup").toString();
+                execution.getSystemContext().put(TempConstants.SHOULD_CHECK_GROUP, true);
+            }
+        }
         execution.setGroupName(group);
 
         if (isDebuggerMode(execution.getSystemContext())) {
@@ -558,11 +576,19 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 execution.setGroupName(null);
             }
         }
-        //if there is a request to change the running execution plan id, we update the execution to the new execution plan ID
-        Long requestForChangingExecutionPlan = execution.getSystemContext().pullRequestForChangingExecutionPlan();
-        if (requestForChangingExecutionPlan != null) {
-            execution.setRunningExecutionPlanId(requestForChangingExecutionPlan);
+    }
+
+    private ExecutionStep getNextStep(Execution execution) {
+        ExecutionStep nextStep = null;
+        Long position = execution.getPosition();
+        if (position != null) {
+            RunningExecutionPlan runningExecutionPlan = workerDbSupportService
+                    .readExecutionPlanById(execution.getRunningExecutionPlanId());
+            if (runningExecutionPlan != null) {
+                nextStep = runningExecutionPlan.getExecutionPlan().getStep(position);
+            }
         }
+        return nextStep;
     }
 
     private static void addContextData(Map<String, Object> data, Execution execution) {
