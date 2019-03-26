@@ -296,9 +296,12 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
         long maxMemory = getRuntime().maxMemory();
         double presumableFreeMemory = maxMemory - allocatedMemory;
         double crtFreeMemoryRatio = presumableFreeMemory / maxMemory;
-        boolean result = crtFreeMemoryRatio > getWorkerFreeMemoryRatio();
+        double configuredWorkerFreeMemoryRatio = getWorkerFreeMemoryRatio();
+        boolean result = crtFreeMemoryRatio > configuredWorkerFreeMemoryRatio;
         if (!result) {
-            logger.warn("InBuffer would not poll messages, because there is not enough free memory. Free memory is " + String.format("%.0f", presumableFreeMemory));
+            logger.warn("InBuffer would not poll messages, because there is not enough free memory. Free memory is "
+                    + String.format("%.0f", presumableFreeMemory) + ". Worker free memory ratio is "
+                    + String.format("%.2f", configuredWorkerFreeMemoryRatio));
             if (System.currentTimeMillis() > (gcTimer + MINIMUM_GC_DELTA)) {
                 logger.warn("Trying to initiate garbage collection");
                 System.gc();
