@@ -134,7 +134,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
         String workerMemoryRatioAsString = System.getProperty(WORKER_MEMORY_RATIO);
         double localWorkerMemoryRatio;
-        // New behaviour for polling memory ratio is activated by setting this system property
+        // New behaviour for polling memory ratio is activated by setting "worker.freeMemoryRatio" system property
         if (isNotBlank(workerMemoryRatioAsString)) {
             try {
                 localWorkerMemoryRatio = parseDouble(workerMemoryRatioAsString);
