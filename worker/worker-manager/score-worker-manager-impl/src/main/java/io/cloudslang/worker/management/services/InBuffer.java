@@ -35,9 +35,13 @@ import java.util.List;
 
 import static ch.lambdaj.Lambda.extract;
 import static ch.lambdaj.Lambda.on;
+import static java.lang.Double.compare;
+import static java.lang.Double.parseDouble;
 import static java.lang.Integer.getInteger;
 import static java.lang.Long.parseLong;
+import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 
 public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Runnable {
@@ -48,6 +52,8 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     private static final int MINIMUM_GC_DELTA = 10000; // Minimum delta between garbage collections in milliseconds
     private static final String WORKER_INBUFFER_SIZE = "worker.inbuffer.size";
     private static final String WORKER_INBUFFER_MIN_SIZE = "worker.inbuffer.minSize";
+    private static final String WORKER_MEMORY_RATIO = "worker.freeMemoryRatio";
+    private static final double NEW_DEFAULT_WORKER_MEMORY_RATIO = 0.1; // 10 percent of Xmx
 
     @Autowired
     private QueueDispatcherService queueDispatcher;
@@ -90,12 +96,14 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     private boolean newInBufferBehaviour;
     private int newInBufferSize;
     private int minInBufferSize;
+    private double workerFreeMemoryRatio;
 
     @PostConstruct
     private void init() {
         capacity = getInteger("worker.inbuffer.capacity", capacity);
         coolDownPollingMillis = getInteger("worker.inbuffer.coolDownPollingMillis", coolDownPollingMillis);
-        logger.info("InBuffer capacity is set to :" + capacity + ", coolDownPollingMillis is set to :" + coolDownPollingMillis);
+        logger.info("InBuffer capacity is set to :" + capacity
+                + ", coolDownPollingMillis is set to :" + coolDownPollingMillis);
 
         newInBufferBehaviour = Boolean.getBoolean("enable.new.inbuffer");
         logger.info("new inbuffer behaviour enabled: " + newInBufferBehaviour);
@@ -106,7 +114,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
         // Buffer size is the capacity that is desired (it is not enforced right now) since we can offer to queue from inside SimpleExecutionRunnable,
         // and buffer size is infinite (Integer.MAX_VALUE)
 
-        // Min buffer size is the size at which the WorkerFillBufferThread thread starts polling if memory > MEMORY_THRESHOLD
+        // Min buffer size is the size at which the WorkerFillBufferThread thread starts polling if free memory conditions are met.
         if (newInBufferBehaviour) {
             int executionThreadsCount = numberOfThreads;
             int minInBufferSizeLocal = getInteger(WORKER_INBUFFER_MIN_SIZE, executionThreadsCount);
@@ -125,8 +133,34 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
             logger.info("new inbuffer size: " + newInBufferSize);
             logger.info("new inbuffer minimum size: " + minInBufferSize);
         }
+
+        String workerMemoryRatioAsString = System.getProperty(WORKER_MEMORY_RATIO);
+        double localWorkerMemoryRatio;
+        // New behaviour for polling memory ratio is activated by setting "worker.freeMemoryRatio" system property
+        if (isNotBlank(workerMemoryRatioAsString)) {
+            try {
+                localWorkerMemoryRatio = parseDouble(workerMemoryRatioAsString);
+            } catch (NumberFormatException e) {
+                localWorkerMemoryRatio = NEW_DEFAULT_WORKER_MEMORY_RATIO;
+            }
+            // Ignore values that are definitely wrong and use default free memory ratio
+            if ((localWorkerMemoryRatio > 0.99) || (localWorkerMemoryRatio < 0.01)) {
+                localWorkerMemoryRatio = NEW_DEFAULT_WORKER_MEMORY_RATIO;
+            }
+        } else { // Backward compatibility
+            // To keep equivalence with old code, we don't do any validation
+            localWorkerMemoryRatio = ((double) MEMORY_THRESHOLD) / getRuntime().maxMemory();
+        }
+
+        workerFreeMemoryRatio = localWorkerMemoryRatio;
+        logger.info("Worker free memory ratio is: " + String.format("%.2f", workerFreeMemoryRatio));
     }
 
+    private double getWorkerFreeMemoryRatio() {
+        double localWorkerFreeMemoryRatio = workerFreeMemoryRatio;
+        return (compare(0, localWorkerFreeMemoryRatio) == 0) ? NEW_DEFAULT_WORKER_MEMORY_RATIO
+                : localWorkerFreeMemoryRatio;
+    }
 
     private void fillBufferPeriodically() {
         while (!inShutdown) {
@@ -200,9 +234,9 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
             logger.debug("InBuffer size: " + bufferSize);
         }
         if (!newInBufferBehaviour) {
-            return bufferSize < (capacity * 0.2) && checkFreeMemorySpace(MEMORY_THRESHOLD);
+            return bufferSize < (capacity * 0.2) && checkFreeMemorySpace();
         } else {
-            return (bufferSize < minInBufferSize) && checkFreeMemorySpace(MEMORY_THRESHOLD);
+            return (bufferSize < minInBufferSize) && checkFreeMemorySpace();
         }
     }
 
@@ -259,12 +293,17 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
         fillBufferPeriodically();
     }
 
-    public boolean checkFreeMemorySpace(long threshold) {
-        double allocatedMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-        double presumableFreeMemory = Runtime.getRuntime().maxMemory() - allocatedMemory;
-        boolean result = presumableFreeMemory > threshold;
+    private boolean checkFreeMemorySpace() {
+        double allocatedMemory = getRuntime().totalMemory() - getRuntime().freeMemory();
+        long maxMemory = getRuntime().maxMemory();
+        double presumableFreeMemory = maxMemory - allocatedMemory;
+        double crtFreeMemoryRatio = presumableFreeMemory / maxMemory;
+        double configuredWorkerFreeMemoryRatio = getWorkerFreeMemoryRatio();
+        boolean result = crtFreeMemoryRatio > configuredWorkerFreeMemoryRatio;
         if (!result) {
-            logger.warn("InBuffer would not poll messages, because there is not enough free memory.");
+            logger.warn("InBuffer would not poll messages, because there is not enough free memory. Free memory is "
+                    + String.format("%.0f", presumableFreeMemory) + ". Worker free memory ratio is "
+                    + String.format("%.2f", configuredWorkerFreeMemoryRatio));
             if (System.currentTimeMillis() > (gcTimer + MINIMUM_GC_DELTA)) {
                 logger.warn("Trying to initiate garbage collection");
                 System.gc();
