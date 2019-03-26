@@ -156,7 +156,8 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     }
 
     private double getWorkerFreeMemoryRatio() {
-        return (compare(0, workerFreeMemoryRatio) == 0) ? NEW_DEFAULT_WORKER_MEMORY_RATIO : workerFreeMemoryRatio;
+        double localWorkerFreeMemoryRatio = workerFreeMemoryRatio;
+        return (compare(0, localWorkerFreeMemoryRatio) == 0) ? NEW_DEFAULT_WORKER_MEMORY_RATIO : localWorkerFreeMemoryRatio;
     }
 
     private void fillBufferPeriodically() {
