@@ -39,6 +39,7 @@ import static java.lang.Double.compare;
 import static java.lang.Double.parseDouble;
 import static java.lang.Integer.getInteger;
 import static java.lang.Long.parseLong;
+import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
@@ -147,7 +148,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
             }
         } else { // Backward compatibility
             // To keep equivalence with old code, we don't do any validation
-            localWorkerMemoryRatio = ((double)MEMORY_THRESHOLD) / Runtime.getRuntime().maxMemory();
+            localWorkerMemoryRatio = ((double)MEMORY_THRESHOLD) / getRuntime().maxMemory();
         }
 
         workerFreeMemoryRatio = localWorkerMemoryRatio;
@@ -290,8 +291,8 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     }
 
     public boolean checkFreeMemorySpace() {
-        double allocatedMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-        long maxMemory = Runtime.getRuntime().maxMemory();
+        double allocatedMemory = getRuntime().totalMemory() - getRuntime().freeMemory();
+        long maxMemory = getRuntime().maxMemory();
         double presumableFreeMemory = maxMemory - allocatedMemory;
         double crtFreeMemoryRatio = presumableFreeMemory / maxMemory;
         boolean result = crtFreeMemoryRatio > getWorkerFreeMemoryRatio();
