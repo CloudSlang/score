@@ -291,7 +291,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
         fillBufferPeriodically();
     }
 
-    public boolean checkFreeMemorySpace() {
+    private boolean checkFreeMemorySpace() {
         double allocatedMemory = getRuntime().totalMemory() - getRuntime().freeMemory();
         long maxMemory = getRuntime().maxMemory();
         double presumableFreeMemory = maxMemory - allocatedMemory;
