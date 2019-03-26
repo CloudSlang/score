@@ -102,7 +102,8 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     private void init() {
         capacity = getInteger("worker.inbuffer.capacity", capacity);
         coolDownPollingMillis = getInteger("worker.inbuffer.coolDownPollingMillis", coolDownPollingMillis);
-        logger.info("InBuffer capacity is set to :" + capacity + ", coolDownPollingMillis is set to :" + coolDownPollingMillis);
+        logger.info("InBuffer capacity is set to :" + capacity
+                + ", coolDownPollingMillis is set to :" + coolDownPollingMillis);
 
         newInBufferBehaviour = Boolean.getBoolean("enable.new.inbuffer");
         logger.info("new inbuffer behaviour enabled: " + newInBufferBehaviour);
@@ -148,7 +149,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
             }
         } else { // Backward compatibility
             // To keep equivalence with old code, we don't do any validation
-            localWorkerMemoryRatio = ((double)MEMORY_THRESHOLD) / getRuntime().maxMemory();
+            localWorkerMemoryRatio = ((double) MEMORY_THRESHOLD) / getRuntime().maxMemory();
         }
 
         workerFreeMemoryRatio = localWorkerMemoryRatio;
@@ -157,7 +158,8 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
     private double getWorkerFreeMemoryRatio() {
         double localWorkerFreeMemoryRatio = workerFreeMemoryRatio;
-        return (compare(0, localWorkerFreeMemoryRatio) == 0) ? NEW_DEFAULT_WORKER_MEMORY_RATIO : localWorkerFreeMemoryRatio;
+        return (compare(0, localWorkerFreeMemoryRatio) == 0) ? NEW_DEFAULT_WORKER_MEMORY_RATIO
+                : localWorkerFreeMemoryRatio;
     }
 
     private void fillBufferPeriodically() {
