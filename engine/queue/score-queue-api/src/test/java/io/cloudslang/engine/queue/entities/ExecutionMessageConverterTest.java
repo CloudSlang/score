@@ -16,28 +16,32 @@
 
 package io.cloudslang.engine.queue.entities;
 
-import static org.junit.Assert.*;
+import io.cloudslang.score.facade.entities.Execution;
+import io.cloudslang.score.lang.SystemContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import io.cloudslang.score.lang.SystemContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyMapOf;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-/**
- * Created with IntelliJ IDEA.
- * User: kravtsov
- * Date: 20/11/12
- * Time: 14:35
- */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = ExecutionMessageConverterTest.ConfigurationForTest.class)
 public class ExecutionMessageConverterTest {
@@ -47,7 +51,7 @@ public class ExecutionMessageConverterTest {
     private SensitiveDataHandler sensitiveDataHandler;
 
     @Test
-    public void testConverter() throws IOException {
+    public void testConverterCompressed() {
         List<String> names = new ArrayList<>();
         names.add("lala");
         MyExecutionForTest execution = new MyExecutionForTest(111L, 999L, 0L, names);
@@ -62,51 +66,98 @@ public class ExecutionMessageConverterTest {
     }
 
     @Test
+    public void testConverterCompressedWithExecution() {
+
+        Execution execution = new Execution(123L, 1L, new HashMap<>());
+        execution.setExecutionId(1L);
+        Payload payload = executionMessageConverter.createPayload(execution);
+
+        Execution afterConvert = executionMessageConverter.extractExecution(payload);
+
+        assertEquals(execution.getPosition(), afterConvert.getPosition());
+        assertEquals(execution.getExecutionId(), afterConvert.getExecutionId());
+        assertEquals(execution.getRunningExecutionPlanId(), afterConvert.getRunningExecutionPlanId());
+    }
+
+    @Test
+    public void testConverterLegacyCaseUncompressed() throws IOException {
+        List<String> names = new ArrayList<>();
+        names.add("1");
+        names.add("2");
+        names.add("3");
+
+        MyExecutionForTest execution = new MyExecutionForTest(222L, 9L, 500L, names);
+
+        Payload payload = createLegacyPayload(execution);
+
+        MyExecutionForTest afterConvert = executionMessageConverter.extractExecution(payload);
+
+        assertEquals(execution.getPosition(), afterConvert.getPosition());
+        assertEquals(execution.getExecutionId(), afterConvert.getExecutionId());
+        assertEquals(execution.getRunningExecutionPlanId(), afterConvert.getRunningExecutionPlanId());
+    }
+
+    @Test
+    public void testConverterLegacyCaseWithExecution() throws IOException {
+
+        Execution execution = new Execution(576767600L, 1L, new HashMap<>());
+        execution.setExecutionId(2L);
+
+        Payload payload = createLegacyPayload(execution);
+
+        Execution afterConvert = executionMessageConverter.extractExecution(payload);
+
+        assertEquals(execution.getPosition(), afterConvert.getPosition());
+        assertEquals(execution.getExecutionId(), afterConvert.getExecutionId());
+        assertEquals(execution.getRunningExecutionPlanId(), afterConvert.getRunningExecutionPlanId());
+    }
+
+    @Test
     public void testCreatePayloadAndSensitiveDataHandlerReturnsFalse() {
-        when(sensitiveDataHandler.containsSensitiveData(any(SystemContext.class), anyMap())).thenReturn(false);
+        when(sensitiveDataHandler.containsSensitiveData(any(SystemContext.class), anyMapOf(String.class, Serializable.class))).thenReturn(false);
         List<String> names = new ArrayList<>();
         names.add("lala");
         MyExecutionForTest execution = new MyExecutionForTest(111L, 999L, 0L, names);
 
         Payload payload = executionMessageConverter.createPayload(execution);
         assertFalse(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 0);
+        assertEquals(0, payload.getData()[0]);
 
         payload = executionMessageConverter.createPayload(execution);
         assertFalse(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 0);
+        assertEquals(0, payload.getData()[0]);
 
         payload = executionMessageConverter.createPayload(execution, false);
         assertFalse(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 0);
+        assertEquals(0, payload.getData()[0]);
 
         payload = executionMessageConverter.createPayload(execution, true);
         assertTrue(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 1);
+        assertEquals(1, payload.getData()[0]);
     }
 
     @Test
     public void testCreatePayloadAndSensitiveDataHandlerReturnsTrue() {
-        when(sensitiveDataHandler.containsSensitiveData(any(SystemContext.class), anyMap())).thenReturn(true);
+        when(sensitiveDataHandler.containsSensitiveData(any(SystemContext.class), anyMapOf(String.class, Serializable.class))).thenReturn(true);
         List<String> names = new ArrayList<>();
         names.add("lala");
         MyExecutionForTest execution = new MyExecutionForTest(111L, 999L, 0L, names);
 
         Payload payload = executionMessageConverter.createPayload(execution);
         assertTrue(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 1);
+        assertEquals(1, payload.getData()[0]);
 
         payload = executionMessageConverter.createPayload(execution);
         assertTrue(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 1);
+        assertEquals(1, payload.getData()[0]);
 
         payload = executionMessageConverter.createPayload(execution, false);
         assertTrue(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 1);
+        assertEquals(1, payload.getData()[0]);
 
         payload = executionMessageConverter.createPayload(execution, true);
         assertTrue(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 1);
+        assertEquals(1, payload.getData()[0]);
     }
 
     @Test
@@ -120,26 +171,16 @@ public class ExecutionMessageConverterTest {
         assertTrue(executionMessageConverter.containsSensitiveData(p));
     }
 
-//    @Test
-//    public void testConverterWithSession() throws IOException {
-//        List<String> names = new ArrayList<>();
-//        names.add("serializableSessionContext");
-//        Execution execution = new Execution(999L, 0L, names);
-//
-//        StepSerializableSessionObject stepSerializableObject = new StepSerializableSessionObject("sessionCounter_1bbd31ec-0531-4180-8b70-a592355ea043");
-//        stepSerializableObject.setValue(1);
-//
-//        execution.getSerializableSessionContext().put("sessionCounter_1bbd31ec-0531-4180-8b70-a592355ea043", stepSerializableObject);
-//
-//        Payload payload = converter.createPayload(execution);
-//
-//        Execution afterConvert = converter.extractExecution(payload);
-//
-//        Assert.assertEquals(execution.getPosition(), afterConvert.getPosition());
-//        Assert.assertEquals(execution.getExecutionId(), afterConvert.getExecutionId());
-//        Assert.assertEquals(execution.getSerializableSessionContext().get("sessionCounter_1bbd31ec-0531-4180-8b70-a592355ea043").getName(), afterConvert.getSerializableSessionContext().get("sessionCounter_1bbd31ec-0531-4180-8b70-a592355ea043").getName());
-//    }
+    private Payload createLegacyPayload(Serializable serializable) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024);
+        byteArrayOutputStream.write(0);
+        try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)) {
+            objectOutputStream.writeObject(serializable);
+            objectOutputStream.flush();
+        }
 
+        return new Payload(byteArrayOutputStream.toByteArray());
+    }
 
     @Configuration
     static class ConfigurationForTest {
