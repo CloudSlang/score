@@ -20,6 +20,7 @@ import io.cloudslang.engine.data.IdentityGenerator;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
+import io.cloudslang.engine.queue.services.StatementAwareJdbcTemplateWrapper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +32,10 @@ import org.springframework.jdbc.core.SingleColumnRowMapper;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -173,18 +174,18 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 	private static final String QUERY_PAYLOAD_BY_EXECUTION_IDS = "SELECT ID, PAYLOAD FROM OO_EXECUTION_STATES WHERE ID IN (:IDS)";
 
 
-	//We use dedicated JDBCTemplates for each query since JDBCTemplate is state-full object and we have different settings for each query.
-	private JdbcTemplate insertExecutionJDBCTemplate;
-	private JdbcTemplate pollJDBCTemplate;
-	private JdbcTemplate pollForRecoveryJDBCTemplate;
-	private JdbcTemplate getFinishedExecStateIdsJDBCTemplate;
-	private JdbcTemplate deleteFinishedStepsJDBCTemplate;
-	private JdbcTemplate pollMessagesWithoutAckJDBCTemplate;
-	private JdbcTemplate countMessagesWithoutAckForWorkerJDBCTemplate;
-	private JdbcTemplate findPayloadByExecutionIdsJDBCTemplate;
-	private JdbcTemplate findByStatusesJDBCTemplate;
-	private JdbcTemplate getBusyWorkersTemplate;
+	//We use dedicated JDBC templates for each query since JDBCTemplate is state-full object and we have different settings for each query.
+	private StatementAwareJdbcTemplateWrapper pollJdbcTemplate;
+	private StatementAwareJdbcTemplateWrapper pollForRecoveryJdbcTemplate;
+	private StatementAwareJdbcTemplateWrapper pollMessagesWithoutAckJdbcTemplate;
+	private StatementAwareJdbcTemplateWrapper getFinishedExecStateIdsJdbcTemplate;
+	private StatementAwareJdbcTemplateWrapper countMessagesWithoutAckForWorkerJdbcTemplate;
+	private StatementAwareJdbcTemplateWrapper findByStatusesJdbcTemplate;
 
+	private JdbcTemplate insertExecutionJdbcTemplate;
+	private JdbcTemplate deleteFinishedStepsJdbcTemplate;
+	private JdbcTemplate findPayloadByExecutionIdsJdbcTemplate;
+	private JdbcTemplate getBusyWorkersJdbcTemplate;
 
 	@Autowired
 	private IdentityGenerator idGen;
@@ -195,16 +196,17 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 	@PostConstruct
 	public void init() {
 		//We use dedicated JDBCTemplates for each query since JDBCTemplate is state-full object and we have different settings for each query.
-		this.insertExecutionJDBCTemplate = new JdbcTemplate(dataSource);
-		this.pollJDBCTemplate = new JdbcTemplate(dataSource);
-		this.pollForRecoveryJDBCTemplate = new JdbcTemplate(dataSource);
-		this.getFinishedExecStateIdsJDBCTemplate = new JdbcTemplate(dataSource);
-		this.deleteFinishedStepsJDBCTemplate = new JdbcTemplate(dataSource);
-		this.pollMessagesWithoutAckJDBCTemplate = new JdbcTemplate(dataSource);
-		this.countMessagesWithoutAckForWorkerJDBCTemplate = new JdbcTemplate(dataSource);
-		this.findPayloadByExecutionIdsJDBCTemplate = new JdbcTemplate(dataSource);
-		this.findByStatusesJDBCTemplate = new JdbcTemplate(dataSource);
-		this.getBusyWorkersTemplate = new JdbcTemplate(dataSource);
+		pollJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "pollJdbcTemplate");
+		pollForRecoveryJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "pollForRecoveryJdbcTemplate");
+		pollMessagesWithoutAckJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "pollMessagesWithoutAckJdbcTemplate");
+		getFinishedExecStateIdsJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "getFinishedExecStateIdsJdbcTemplate");
+		countMessagesWithoutAckForWorkerJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "countMessagesWithoutAckForWorkerJdbcTemplate");
+		findByStatusesJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "findByStatusesJdbcTemplate");
+
+		insertExecutionJdbcTemplate = new JdbcTemplate(dataSource);
+		deleteFinishedStepsJdbcTemplate = new JdbcTemplate(dataSource);
+		findPayloadByExecutionIdsJdbcTemplate = new JdbcTemplate(dataSource);
+		getBusyWorkersJdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
 	@Override
@@ -215,7 +217,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 	@Override
 	public void insertExecutionStates(final List<ExecutionMessage> stateMessages) {
 		String insertExecStateSQL = INSERT_EXEC_STATE;
-		insertExecutionJDBCTemplate.batchUpdate(insertExecStateSQL, new BatchPreparedStatementSetter() {
+		insertExecutionJdbcTemplate.batchUpdate(insertExecStateSQL, new BatchPreparedStatementSetter() {
 
 			@Override
 			public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -239,7 +241,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 		String insertQueueSQL = INSERT_QUEUE;
 
 		long t = System.currentTimeMillis();
-		insertExecutionJDBCTemplate.batchUpdate(insertQueueSQL, new BatchPreparedStatementSetter() {
+		insertExecutionJdbcTemplate.batchUpdate(insertQueueSQL, new BatchPreparedStatementSetter() {
 			@Override
 			public void setValues(PreparedStatement ps, int i) throws SQLException {
 				ExecutionMessage msg = messages.get(i);
@@ -264,63 +266,64 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
 	@Override
 	public List<ExecutionMessage> pollRecovery(String workerId, int maxSize, ExecStatus... statuses) {
+		pollForRecoveryJdbcTemplate.setStatementBatchSize(maxSize);
+        try {
+            // prepare the sql statement
+            String sqlStatPrvTable = QUERY_WORKER_RECOVERY_SQL
+                    .replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
 
-		pollForRecoveryJDBCTemplate.setMaxRows(maxSize);
-		pollForRecoveryJDBCTemplate.setFetchSize(maxSize);
+            // prepare the argument
+            Object[] values = new Object[statuses.length + 1];
+            values[0] = workerId;
+            int i = 1;
 
-		// prepare the sql statement
-		String sqlStatPrvTable = QUERY_WORKER_RECOVERY_SQL
-				.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
+            for (ExecStatus status : statuses) {
+                values[i++] = status.getNumber();
+            }
 
-		// prepare the argument
-		java.lang.Object[] values;
-		values = new Object[statuses.length + 1];
-		values[0] = workerId;
-		int i = 1;
-
-		for (ExecStatus status : statuses) {
-			values[i++] = status.getNumber();
-		}
-
-		return doSelectWithTemplate(pollForRecoveryJDBCTemplate, sqlStatPrvTable, new ExecutionMessageRowMapper(), values);
-	}
+            return doSelectWithTemplate(pollForRecoveryJdbcTemplate, sqlStatPrvTable, new ExecutionMessageRowMapper(), values);
+        } finally {
+            pollForRecoveryJdbcTemplate.clearStatementBatchSize();
+        }
+    }
 
 
 	@Override
 	public List<ExecutionMessage> poll(String workerId, int maxSize, ExecStatus... statuses) {
+		pollJdbcTemplate.setStatementBatchSize(maxSize);
 
-		pollJDBCTemplate.setMaxRows(maxSize);
-		pollJDBCTemplate.setFetchSize(maxSize);
+        try {
+            // prepare the sql statement
+            String sqlStat = QUERY_WORKER_SQL
+                    .replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
 
-		// prepare the sql statement
-		String sqlStat = QUERY_WORKER_SQL
-				.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
+            // prepare the argument
+            Object[] values = new Object[statuses.length + 1];
+            values[0] = workerId;
+            int i = 1;
+            for (ExecStatus status : statuses) {
+                values[i++] = status.getNumber();
+            }
 
-		// prepare the argument
-		java.lang.Object[] values;
-		values = new Object[statuses.length + 1];
-		values[0] = workerId;
-		int i = 1;
-
-		for (ExecStatus status : statuses) {
-			values[i++] = status.getNumber();
-		}
-
-		return doSelectWithTemplate(pollJDBCTemplate, sqlStat, new ExecutionMessageRowMapper(), values);
-	}
+            return doSelectWithTemplate(pollJdbcTemplate, sqlStat, new ExecutionMessageRowMapper(), values);
+        } finally {
+            pollJdbcTemplate.clearStatementBatchSize();
+        }
+    }
 
 	@Override
 	public void deleteFinishedSteps(Set<Long> ids) {
-		if (ids == null || ids.size() == 0)
+		if (ids == null || ids.size() == 0) {
 			return;
+		}
 
 		// Access STATES first and then QUEUES - same order as ExecutionQueueService#enqueue (prevents deadlocks on MSSQL)
 		String query = QUERY_DELETE_FINISHED_STEPS_FROM_STATES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
 
 		Object[] args = ids.toArray(new Object[ids.size()]);
-		logSQL(query,args);
+		logSQL(query, args);
 
-		int deletedRows = deleteFinishedStepsJDBCTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
+		int deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
 
 		if(logger.isDebugEnabled()){
 			logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_STATES table.");
@@ -329,7 +332,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 		query = QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
 		logSQL(query,args);
 
-		deletedRows = deleteFinishedStepsJDBCTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
+		deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
 
 		if(logger.isDebugEnabled()){
 			logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_QUEUES table.");
@@ -338,69 +341,66 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
 	@Override
 	public Set<Long> getFinishedExecStateIds() {
-		getFinishedExecStateIdsJDBCTemplate.setMaxRows(1000000);
-		getFinishedExecStateIdsJDBCTemplate.setFetchSize(1000000);
+		getFinishedExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
+        try {
+            List<Long> result = doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, SELECT_FINISHED_STEPS_IDS, new SingleColumnRowMapper<>(Long.class));
 
-		List<Long> result = doSelectWithTemplate(getFinishedExecStateIdsJDBCTemplate, SELECT_FINISHED_STEPS_IDS, new SingleColumnRowMapper<>(Long.class));
-
-		return new HashSet<>(result);
-	}
+            return new HashSet<>(result);
+        } finally {
+            getFinishedExecStateIdsJdbcTemplate.clearStatementBatchSize();
+        }
+    }
 
 
 	public List<ExecutionMessage> pollMessagesWithoutAck(int maxSize, long minVersionAllowed) {
+        pollMessagesWithoutAckJdbcTemplate.setStatementBatchSize(maxSize);
 
-		String sqlStat = QUERY_MESSAGES_WITHOUT_ACK_SQL;
+        try {
+            String sqlStat = QUERY_MESSAGES_WITHOUT_ACK_SQL;
+            Object[] values = {ExecStatus.SENT.getNumber(), minVersionAllowed};
 
-		pollMessagesWithoutAckJDBCTemplate.setMaxRows(maxSize);
-		pollMessagesWithoutAckJDBCTemplate.setFetchSize(maxSize);
+            long time = System.currentTimeMillis();
+            List<ExecutionMessage> result = pollMessagesWithoutAckJdbcTemplate.query(sqlStat, values, new ExecutionMessageWithoutPayloadRowMapper());
 
-		Object[] values = {
-				ExecStatus.SENT.getNumber(),
-				minVersionAllowed,
+            if (!result.isEmpty()) {
+                logger.warn("Pool " + result.size() + " messages without ack, version = " + minVersionAllowed);
+                if (logger.isDebugEnabled()) {
+                    for (ExecutionMessage msg : result) {
+                        logger.debug("Recovery msg [" + msg.getExecStateId() + "," + msg.getStatus() + "," + msg.getCreateDate() + "]");
+                    }
+                }
+            }
+            if (logger.isTraceEnabled())
+                logger.trace("Query [" + sqlStat + "] took " + (System.currentTimeMillis() - time) + " ms");
 
-		};
-
-		long time = System.currentTimeMillis();
-		List<ExecutionMessage> result = pollMessagesWithoutAckJDBCTemplate.query(sqlStat, values, new ExecutionMessageWithoutPayloadRowMapper());
-
-		if (result.size() > 0) {
-			logger.warn("Pool " + result.size() + " messages without ack, version = " + minVersionAllowed);
-			if(logger.isDebugEnabled()){
-				for (ExecutionMessage msg : result) {
-					logger.debug("Recovery msg [" + msg.getExecStateId() + "," + msg.getStatus() + "," + msg.getCreateDate() + "]");
-				}}
-		}
-		if (logger.isTraceEnabled())
-			logger.trace("Query [" + sqlStat + "] took " + (System.currentTimeMillis() - time) + " ms");
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("Got msg without ack :" + result.size() + ",for version:" + minVersionAllowed);
-		}
-		return result;
-	}
+            if (logger.isDebugEnabled()) {
+                logger.debug("Got msg without ack :" + result.size() + ",for version:" + minVersionAllowed);
+            }
+            return result;
+        } finally {
+            pollMessagesWithoutAckJdbcTemplate.clearStatementBatchSize();
+        }
+    }
 
 	public Integer countMessagesWithoutAckForWorker(int maxSize, long minVersionAllowed, String workerUuid) {
-		countMessagesWithoutAckForWorkerJDBCTemplate.setMaxRows(maxSize);
-		countMessagesWithoutAckForWorkerJDBCTemplate.setFetchSize(maxSize);
+		countMessagesWithoutAckForWorkerJdbcTemplate.setStatementBatchSize(maxSize);
+        try {
+            Object[] values = {workerUuid, ExecStatus.SENT.getNumber(), minVersionAllowed};
 
-		Object[] values = {
-				workerUuid,
-				ExecStatus.SENT.getNumber(),
-				minVersionAllowed,
+            long time = System.currentTimeMillis();
+            Integer result = countMessagesWithoutAckForWorkerJdbcTemplate.queryForObject(QUERY_COUNT_MESSAGES_WITHOUT_ACK_FOR_WORKER_SQL, values,Integer.class);
 
-		};
+            if (logger.isTraceEnabled())
+                logger.trace("Query [" + QUERY_COUNT_MESSAGES_WITHOUT_ACK_FOR_WORKER_SQL + "] took " + (System.currentTimeMillis() - time) + " ms");
 
-		long time = System.currentTimeMillis();
-		Integer result = countMessagesWithoutAckForWorkerJDBCTemplate.queryForObject(QUERY_COUNT_MESSAGES_WITHOUT_ACK_FOR_WORKER_SQL, values,Integer.class);
-
-		if (logger.isTraceEnabled())
-			logger.trace("Query [" + QUERY_COUNT_MESSAGES_WITHOUT_ACK_FOR_WORKER_SQL + "] took " + (System.currentTimeMillis() - time) + " ms");
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("Got msg without ack :" + result + ",for version:" + minVersionAllowed + ",for worker:" + workerUuid);
-		}
-		return result;
-	}
+            if (logger.isDebugEnabled()) {
+                logger.debug("Got msg without ack :" + result + ",for version:" + minVersionAllowed + ",for worker:" + workerUuid);
+            }
+            return result;
+        } finally {
+            countMessagesWithoutAckForWorkerJdbcTemplate.clearStatementBatchSize();
+        }
+    }
 
 	@Override
 	public Map<Long, Payload> findPayloadByExecutionIds(Long... ids) {
@@ -408,7 +408,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 		String sqlStat = QUERY_PAYLOAD_BY_EXECUTION_IDS.replace(":IDS", qMarks);
 
 		final Map<Long, Payload> result = new HashMap<>();
-		findPayloadByExecutionIdsJDBCTemplate.query(sqlStat, ids, new RowCallbackHandler() {
+		findPayloadByExecutionIdsJdbcTemplate.query(sqlStat, ids, new RowCallbackHandler() {
 			@Override
 			public void processRow(ResultSet resultSet) throws SQLException {
 				result.put(
@@ -423,8 +423,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
 	@Override
 	public List<ExecutionMessage> findByStatuses(int maxSize, ExecStatus... statuses) {
-		findByStatusesJDBCTemplate.setMaxRows(maxSize);
-		findByStatusesJDBCTemplate.setFetchSize(maxSize);
+		findByStatusesJdbcTemplate.setStatementBatchSize(maxSize);
 
 		// prepare the sql statement
 		String sqlStat = QUERY_MESSAGES_BY_STATUSES
@@ -437,11 +436,13 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 		}
 
 		try {
-			return doSelectWithTemplate(findByStatusesJDBCTemplate, sqlStat, new ExecutionMessageWithoutPayloadRowMapper(), values);
+			return doSelectWithTemplate(findByStatusesJdbcTemplate, sqlStat, new ExecutionMessageWithoutPayloadRowMapper(), values);
 		} catch (RuntimeException ex) {
 			logger.error(sqlStat, ex);
 			throw ex;
-		}
+		} finally {
+            findByStatusesJdbcTemplate.clearStatementBatchSize();
+        }
 	}
 
 	@Override
@@ -455,7 +456,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 		for (ExecStatus status : statuses) {
 			values[i] = status.getNumber();
 		}
-		return doSelectWithTemplate(getBusyWorkersTemplate, sqlStat, new BusyWorkerRowMapper(), values);
+		return doSelectWithTemplate(getBusyWorkersJdbcTemplate, sqlStat, new BusyWorkerRowMapper(), values);
 	}
 
 	private class BusyWorkerRowMapper implements RowMapper<String> {
