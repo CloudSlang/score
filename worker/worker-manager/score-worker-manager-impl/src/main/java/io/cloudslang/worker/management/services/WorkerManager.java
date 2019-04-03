@@ -48,6 +48,7 @@ import static ch.lambdaj.Lambda.max;
 import static ch.lambdaj.Lambda.on;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.parseBoolean;
+import static java.lang.Integer.getInteger;
 import static java.lang.System.getProperty;
 
 
@@ -222,7 +223,8 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
     }
 
     public int getExecutionThreadsCount() {
-        return numberOfThreads;
+        return (numberOfThreads != null) ? numberOfThreads
+                : getInteger("cloudslang.worker.numberOfExecutionThreads", 30);
     }
 
     @Override
