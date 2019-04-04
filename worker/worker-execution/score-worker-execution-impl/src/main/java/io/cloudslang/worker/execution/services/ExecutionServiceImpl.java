@@ -82,6 +82,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
     @Autowired
     private EventBus eventBus;
 
+    @Autowired
+    private RobotConnectionState robotConnectionState;
+
     private static final int DEFAULT_PLATFORM_LEVEL_OPERATION_TIMEOUT_IN_SECONDS = 24 * 60 * 60; // seconds in a day
     private static final int DEFAULT_PLATFORM_LEVEL_WAIT_PERIOD_FOR_TIMEOUT_IN_SECONDS = 5 * 60; // 5 minutes
     private static final long DEFAULT_PLATFORM_LEVEL_WAIT_PAUSE_FOR_TIMEOUT_IN_MILLIS = 200; // 200 milliseconds
@@ -137,7 +140,11 @@ public final class ExecutionServiceImpl implements ExecutionService {
             }
             if ((!execution.getSystemContext().hasStepErrorKey()) && currStep.getActionData().get(ACTION_TYPE) != null &&
                     currStep.getActionData().get(ACTION_TYPE).toString().equalsIgnoreCase(SEQUENTIAL)) {
-                pauseFlow(PauseReason.SEQUENTIAL_EXECUTION, execution);
+                if (!robotConnectionState.isRobotRunning(execution.getGroupName())) {
+                    pauseFlow(PauseReason.ROBOT_NOT_AVAILABLE, execution);
+                } else {
+                    pauseFlow(PauseReason.SEQUENTIAL_EXECUTION, execution);
+                }
                 return null;
             }
             // Run the navigation
