@@ -121,7 +121,7 @@ public final class ExecutionAssignerServiceImpl implements ExecutionAssignerServ
         List<ExecutionMessage> assignMessages = new ArrayList<>(messages.size());
         Multimap<String, String> groupWorkersMap = null;
 
-        ChooseWorkerStrategy chooseWorkerStrategy = createChooseWorkerStrategy(workerAssignStrategy);
+        ChooseWorkerStrategy chooseWorkerStrategy = createChooseWorkerStrategy();
         for (ExecutionMessage msg : messages) {
 
             if (msg.getWorkerId().equals(ExecutionMessage.EMPTY_WORKER) && msg.getStatus() == ExecStatus.PENDING) {
@@ -170,8 +170,8 @@ public final class ExecutionAssignerServiceImpl implements ExecutionAssignerServ
         return assignMessages;
     }
 
-    private ChooseWorkerStrategy createChooseWorkerStrategy(AssignStrategy strategy) {
-        switch (strategy) {
+    private ChooseWorkerStrategy createChooseWorkerStrategy() {
+        switch (workerAssignStrategy) {
             case RANDOM:
                 return new RandomStrategy();
 

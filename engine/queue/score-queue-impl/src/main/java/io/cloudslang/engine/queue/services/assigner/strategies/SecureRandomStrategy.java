@@ -22,15 +22,15 @@ import java.security.SecureRandom;
 
 public class SecureRandomStrategy implements ChooseWorkerStrategy {
 
-    private SecureRandom secureRandomGenerator;
+    private final SecureRandom secureRandomGenerator;
 
     public SecureRandomStrategy() {
         secureRandomGenerator = new SecureRandom();
     }
 
     @Override
-    public int getNextWorkerFromGroup(String group, int groupLength) {
-        return secureRandomGenerator.nextInt(groupLength) % groupLength;
+    public int getNextWorkerFromGroup(String groupAlias, int numberOfWorkersInGroup) {
+        return secureRandomGenerator.nextInt(numberOfWorkersInGroup) % numberOfWorkersInGroup;
     }
 
 }

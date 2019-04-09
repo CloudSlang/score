@@ -17,5 +17,5 @@ package io.cloudslang.engine.queue.services.assigner;
 
 
 public interface ChooseWorkerStrategy {
-    int getNextWorkerFromGroup(String group, int groupLength);
+    int getNextWorkerFromGroup(String groupAlias, int numberOfWorkersInGroup);
 }

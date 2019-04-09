@@ -18,6 +18,7 @@ package io.cloudslang.engine.queue.services.assigner.strategies;
 import io.cloudslang.engine.queue.services.assigner.ChooseWorkerStrategy;
 
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 
 import static com.google.common.cache.CacheBuilder.newBuilder;
 import static io.cloudslang.engine.queue.enums.AssignStrategy.RANDOM;
@@ -34,14 +35,15 @@ public class RoundRobinStrategy implements ChooseWorkerStrategy {
     private static final ConcurrentMap<String, Integer> groupAliasLatestWorkerMap = newBuilder()
             .maximumSize(isStrategyInUse() ? CACHE_MAX_ENTRIES : 0)
             .concurrencyLevel(MAX_CONCURRENCY_LEVEL)
+            .expireAfterAccess(7, TimeUnit.DAYS)
             .<String, Integer>build().asMap();
 
     @Override
-    public int getNextWorkerFromGroup(String group, int groupLength) {
-        return groupAliasLatestWorkerMap.merge(group, 0,
+    public int getNextWorkerFromGroup(String groupAlias, int numberOfWorkersInGroup) {
+        return groupAliasLatestWorkerMap.merge(groupAlias, 0,
                 (oldValue, newValue) -> {
                     int nextOldValue = oldValue + 1;
-                    return nextOldValue < groupLength ? nextOldValue : 0;
+                    return nextOldValue < numberOfWorkersInGroup ? nextOldValue : 0;
                 });
     }
 

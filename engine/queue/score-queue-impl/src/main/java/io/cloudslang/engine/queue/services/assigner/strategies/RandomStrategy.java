@@ -22,14 +22,14 @@ import java.util.Random;
 
 public class RandomStrategy implements ChooseWorkerStrategy {
 
-    private Random randomGenerator;
+    private final Random randomGenerator;
 
     public RandomStrategy() {
         this.randomGenerator = new Random(System.currentTimeMillis());
     }
 
     @Override
-    public int getNextWorkerFromGroup(String group, int groupLength) {
-        return randomGenerator.nextInt(groupLength) % groupLength;
+    public int getNextWorkerFromGroup(String groupAlias, int numberOfWorkersInGroup) {
+        return randomGenerator.nextInt(numberOfWorkersInGroup) % numberOfWorkersInGroup;
     }
 }
