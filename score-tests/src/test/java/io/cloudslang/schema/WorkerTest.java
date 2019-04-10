@@ -17,6 +17,7 @@
 package io.cloudslang.schema;
 
 import io.cloudslang.orchestrator.services.*;
+import io.cloudslang.worker.execution.services.RobotConnectionState;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,6 +112,11 @@ public class WorkerTest {
 		@Bean
 		QueueStateIdGeneratorService queueStateIdGeneratorService(){
 			return mock(QueueStateIdGeneratorService.class);
+		}
+
+		@Bean
+		public RobotConnectionState robotConnectionState() {
+			return mock(RobotConnectionState.class);
 		}
 	}
 

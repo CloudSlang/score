@@ -26,6 +26,7 @@ import io.cloudslang.score.events.EventBus;
 import io.cloudslang.score.events.EventConstants;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.events.ScoreEventListener;
+import io.cloudslang.worker.execution.services.RobotConnectionState;
 import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.Before;
@@ -34,6 +35,9 @@ import org.junit.runner.RunWith;
 import io.cloudslang.samples.controlactions.BranchActions;
 import io.cloudslang.samples.controlactions.SessionDataActions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -49,6 +53,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static junit.framework.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 /**
  * User: stoneo
@@ -56,7 +61,7 @@ import static junit.framework.Assert.assertEquals;
  * Time: 14:42
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = "classpath:/META-INF/spring/samples/schemaAllTestContext.xml")
+@ContextConfiguration
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class StandAloneTest {
 
@@ -381,5 +386,14 @@ public class StandAloneTest {
                 eventQueue.add(event);
             }
         }, handlerTypes);
+    }
+
+    @Configuration
+    @ImportResource("classpath:/META-INF/spring/samples/schemaAllTestContext.xml")
+    static class Context {
+        @Bean
+        public RobotConnectionState robotConnectionState() {
+            return mock(RobotConnectionState.class);
+        }
     }
 }
