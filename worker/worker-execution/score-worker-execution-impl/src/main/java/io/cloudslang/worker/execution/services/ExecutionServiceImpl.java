@@ -140,7 +140,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             }
             if ((!execution.getSystemContext().hasStepErrorKey()) && currStep.getActionData().get(ACTION_TYPE) != null &&
                     currStep.getActionData().get(ACTION_TYPE).toString().equalsIgnoreCase(SEQUENTIAL)) {
-                if (!robotConnectionState.isRobotRunning(execution.getGroupName())) {
+                if (!robotConnectionState.isRobotRunning("Default")) {
                     pauseFlow(PauseReason.ROBOT_NOT_AVAILABLE, execution);
                 } else {
                     pauseFlow(PauseReason.SEQUENTIAL_EXECUTION, execution);
@@ -309,7 +309,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 // we pause the branch because the Parent was user-paused (see findPauseReason)
                 pauseService.pauseExecution(executionId, branchId, reason); // this creates a DB record for this branch, as Pending-paused
             }
-        } else if (reason.equals(PauseReason.SEQUENTIAL_EXECUTION)) {
+        } else if (reason.equals(PauseReason.SEQUENTIAL_EXECUTION) || reason.equals(PauseReason.ROBOT_NOT_AVAILABLE)) {
             pauseService.pauseExecution(executionId, branchId, reason);
         }
         addPauseEvent(systemContext);
