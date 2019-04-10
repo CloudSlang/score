@@ -88,6 +88,9 @@ public class ExecutionServiceTest {
 	@Autowired
 	private WorkerConfigurationService workerConfigurationService;
 
+	@Autowired
+	private RobotConnectionState robotConnectionState;
+
 	@Before
 	public void init() {
 		Mockito.reset(workerDbSupportService, pauseResumeService);
@@ -188,6 +191,7 @@ public class ExecutionServiceTest {
 
 		when(workerDbSupportService.readExecutionPlanById(RUNNING_EXE_PLAN_ID)).thenReturn(runningExecutionPlan);
 		when(workerConfigurationService.isExecutionCancelled(EXECUTION_ID_1)).thenReturn(false);
+		when(robotConnectionState.isRobotRunning(any(String.class))).thenReturn(true);
 
 		executionService.execute(execution);
 		//position is still 0
@@ -351,6 +355,11 @@ public class ExecutionServiceTest {
 		@Bean
 		public WorkerRecoveryManager workerRecoveryManager() {
 			return mock(WorkerRecoveryManager.class);
+		}
+
+		@Bean
+		public RobotConnectionState robotConnectionState() {
+			return mock(RobotConnectionState.class);
 		}
 
 	}
