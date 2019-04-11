@@ -40,8 +40,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.internal.verification.VerificationModeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -52,7 +55,11 @@ import java.util.Map;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.ACTION_TYPE;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SEQUENTIAL;
 import static io.cloudslang.score.facade.execution.PauseReason.SEQUENTIAL_EXECUTION;
+import static java.lang.Boolean.TRUE;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -67,6 +74,7 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class ExecutionServiceTest {
 
 	private static final Long RUNNING_EXE_PLAN_ID = 333L;
@@ -75,9 +83,15 @@ public class ExecutionServiceTest {
 	private static final Long EXECUTION_ID_1 = 1111L;
 	private static final Long EXECUTION_ID_2 = 2222L;
 	private static final ControlActionMetadata RUNTIME_EXCEPTION_METADATA = new ControlActionMetadata("classForFailure", "method");
+	private static final ControlActionMetadata CONTENT_EXEC_CONTROL_ACTION_METADATA = new ControlActionMetadata("ContentExecutionActions", "executeContentAction");
 
 	@Autowired
+    @Qualifier("executionService")
 	private ExecutionServiceImpl executionService;
+
+    @Autowired
+    @Qualifier("timeoutExecutionService")
+    private ExecutionServiceImpl timeoutExecutionService;
 
 	@Autowired
 	private WorkerDbSupportService workerDbSupportService;
@@ -87,6 +101,9 @@ public class ExecutionServiceTest {
 
 	@Autowired
 	private WorkerConfigurationService workerConfigurationService;
+
+	@Autowired
+    private ReflectionAdapter reflectionAdapter;
 
 	@Before
 	public void init() {
@@ -191,10 +208,10 @@ public class ExecutionServiceTest {
 
 		executionService.execute(execution);
 		//position is still 0
-		Assert.assertEquals(0, execution.getPosition().longValue());
+		assertEquals(0, execution.getPosition().longValue());
 
 		//running execution plan id has not changed as result of not navigating
-		Assert.assertEquals(RUNNING_EXE_PLAN_ID, execution.getRunningExecutionPlanId());
+		assertEquals(RUNNING_EXE_PLAN_ID, execution.getRunningExecutionPlanId());
 		Mockito.verify(pauseResumeService, VerificationModeFactory.times(1)).pauseExecution(any(Long.class), any(String.class), eq(SEQUENTIAL_EXECUTION));
 		Mockito.verify(pauseResumeService, VerificationModeFactory.times(1)).writeExecutionObject(any(Long.class), any(String.class), eq(execution));
 		Mockito.verifyNoMoreInteractions(pauseResumeService);
@@ -240,7 +257,7 @@ public class ExecutionServiceTest {
 		exe.getSystemContext().putMetaData(metadata);
 		ExecutionStep loadedStep = executionService.loadExecutionStep(exe);
 
-		Assert.assertEquals(executionStep.getExecStepId(), loadedStep.getExecStepId());
+		assertEquals(executionStep.getExecStepId(), loadedStep.getExecStepId());
 
 		//From DB
 		executionStep = new ExecutionStep(EXECUTION_STEP_2_ID);
@@ -257,7 +274,7 @@ public class ExecutionServiceTest {
 		exe.getSystemContext().putMetaData(metadata);
 		loadedStep = executionService.loadExecutionStep(exe);
 
-		Assert.assertEquals(executionStep.getExecStepId(), loadedStep.getExecStepId());
+		assertEquals(executionStep.getExecStepId(), loadedStep.getExecStepId());
 	}
 
 	@Test
@@ -268,11 +285,62 @@ public class ExecutionServiceTest {
 
 		Execution exe = new Execution(0L, 0L, new HashMap<String, String>());
 
+        HashMap<String, Serializable> actionData = new HashMap<>();
+        actionData.put("actionType", "content");
+        executionStep.setActionData(actionData);
+        executionStep.setAction(RUNTIME_EXCEPTION_METADATA);
+        executionStep.setActionData(new HashMap<String, Serializable>());
+
 		executionService.executeStep(exe, executionStep);
 
-		Assert.assertEquals(0, exe.getPosition().longValue()); //position is still 0
+		assertEquals(0, exe.getPosition().longValue()); //position is still 0
 		assertTrue(exe.getSystemContext().hasStepErrorKey()); //there is error in context
 	}
+
+    @Test
+    public void executeStepTestWithEnabledTimeoutGoesWellWithoutExceptionOrTimeout() throws InterruptedException {
+        //Test no exception is thrown - all is caught inside
+        ExecutionStep executionStep = new ExecutionStep(EXECUTION_STEP_1_ID);
+
+        HashMap<String, Serializable> actionData = new HashMap<>();
+        actionData.put("actionType", "content");
+        executionStep.setActionData(actionData);
+        executionStep.setAction(CONTENT_EXEC_CONTROL_ACTION_METADATA);
+        executionStep.setActionData(new HashMap<String, Serializable>());
+
+        when(reflectionAdapter.executeControlAction(eq(CONTENT_EXEC_CONTROL_ACTION_METADATA), any(Map.class))).thenReturn(null);
+
+        Execution exe = new Execution(0L, 0L, new HashMap<String, String>());
+        exe.getSystemContext().put("SC_TIMEOUT_START_TIME", System.currentTimeMillis());
+        exe.getSystemContext().put("SC_TIMEOUT_MINS", 3);
+
+        timeoutExecutionService.executeStep(exe, executionStep);
+
+        assertEquals(0, exe.getPosition().longValue()); //position is still 0
+    }
+
+    @Test
+    public void executeStepTestWithEnabledTimeoutWithExceptionDuringCallable() throws InterruptedException {
+        //Test no exception is thrown - all is caught inside
+        ExecutionStep executionStep = new ExecutionStep(EXECUTION_STEP_1_ID);
+
+        HashMap<String, Serializable> actionData = new HashMap<>();
+        actionData.put("actionType", "content");
+        executionStep.setActionData(actionData);
+        executionStep.setAction(CONTENT_EXEC_CONTROL_ACTION_METADATA);
+        executionStep.setActionData(new HashMap<String, Serializable>());
+
+        Execution exe = new Execution(0L, 0L, new HashMap<String, String>());
+        exe.getSystemContext().put("SC_TIMEOUT_START_TIME", System.currentTimeMillis());
+        exe.getSystemContext().put("SC_TIMEOUT_MINS", 3);
+
+        when(reflectionAdapter.executeControlAction(eq(CONTENT_EXEC_CONTROL_ACTION_METADATA), any(Map.class))).thenThrow(new RuntimeException("ABC message"));
+        timeoutExecutionService.executeStep(exe, executionStep);
+
+        assertEquals(0, exe.getPosition().longValue()); // position is still 0
+        assertTrue(exe.getSystemContext().hasStepErrorKey()); // there is error in context
+        assertThat(exe.getSystemContext().getStepErrorKey(), containsString("ABC message")); // error message is present at step error key
+    }
 
 	@Test
 	public void executeNavigationTest() throws InterruptedException {
@@ -299,7 +367,7 @@ public class ExecutionServiceTest {
 
 		executionService.postExecutionSettings(exe);
 
-		Assert.assertEquals("Real_Group", exe.getGroupName());
+		assertEquals("Real_Group", exe.getGroupName());
 	}
 
 	@Configuration
@@ -311,10 +379,18 @@ public class ExecutionServiceTest {
 		}
 
 		@Bean
-		public ExecutionServiceImpl getExecutionService() {
+		public ExecutionServiceImpl executionService() {
 			return new ExecutionServiceImpl();
 		}
 
+        @Bean
+        public ExecutionServiceImpl timeoutExecutionService() {
+            System.setProperty("enable.new.timeout", TRUE.toString());
+            ExecutionServiceImpl executionService = new ExecutionServiceImpl();
+            System.clearProperty("enable.new.timeout");
+            return executionService;
+        }
+        
 		@Bean
 		public WorkerConfigurationService getWorkerConfigurationService() {
 			WorkerConfigurationService serviceMock = mock(WorkerConfigurationService.class);

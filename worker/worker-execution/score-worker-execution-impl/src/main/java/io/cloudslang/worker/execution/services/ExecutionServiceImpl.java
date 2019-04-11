@@ -415,9 +415,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 if ((startTime != null) && (timeoutMins != null)) {
                     long now = System.currentTimeMillis();
                     Callable<Object> operationCallable = () -> reflectionAdapter.executeControlAction(action, stepData);
-                    Thread operationExecutionThread = new Thread(
-                            new SandboxExecutionRunnable<>(Thread.currentThread().getContextClassLoader(),
-                                    operationCallable));
+                    SandboxExecutionRunnable<Object> sandboxExecutionRunnable =
+                            new SandboxExecutionRunnable<>(Thread.currentThread().getContextClassLoader(), operationCallable);
+                    Thread operationExecutionThread = new Thread(sandboxExecutionRunnable);
 
                     long dynamicTimeout = getDynamicTimeout(startTime, timeoutMins, now);
                     if (dynamicTimeout == -1L) { // execution time exceeded for this execution
@@ -433,7 +433,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
                     operationExecutionThread.start();
                     operationExecutionThread.join(dynamicTimeout);
 
-                    if (operationExecutionThread.isAlive()) {
+                    if (operationExecutionThread.isAlive()) { // Timeout exceeded
                         String timeoutErrorMessageDuringStep = String
                                 .format("Timeout (%d minutes) exceeded for execution id %s having start time %s (current time %s) when running step %s",
                                         timeoutMins, valueOf(execution.getExecutionId()), valueOf(startTime),
@@ -441,10 +441,11 @@ public final class ExecutionServiceImpl implements ExecutionService {
                         logger.error(timeoutErrorMessageDuringStep);
 
                         if (interruptOperationExecution) {
-                            operationExecutionThread
-                                    .interrupt(); // interrupt the execution of the content operation
+                            operationExecutionThread.interrupt(); // interrupt the execution of the content operation
                         }
                         return timeoutErrorMessageDuringStep;
+                    } else { // Thread was finished
+                        sandboxExecutionRunnable.afterExecute();
                     }
                 } else { // Execute on regular executor as usual if no timeout information is present
                     reflectionAdapter.executeControlAction(action, stepData);
@@ -460,7 +461,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     private boolean isContentOperationStep(ControlActionMetadata action) {
-        return StringUtils.equals(action.getMethodName(), EXECUTE_CONTENT_ACTION) && StringUtils.endsWith(action.getClassName(), EXECUTE_CONTENT_ACTION_CLASSNAME);
+        return (action != null) && StringUtils.equals(action.getMethodName(), EXECUTE_CONTENT_ACTION) &&
+                StringUtils.endsWith(action.getClassName(), EXECUTE_CONTENT_ACTION_CLASSNAME);
     }
 
     private long getDynamicTimeout(long startTime, int timeoutMins, long now) {
