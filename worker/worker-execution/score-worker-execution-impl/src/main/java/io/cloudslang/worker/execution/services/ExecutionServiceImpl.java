@@ -90,6 +90,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     private final long waitPauseForTimeoutMillis;
     private final long waitPeriodForTimeoutMillis;
     private final boolean interruptOperationExecution;
+    private final boolean enableNewTimeoutMechanism;
 
     public ExecutionServiceImpl() {
         this.operationTimeoutMillis = getSafeIntProperty("execution.operationTimeoutInSeconds",
@@ -99,6 +100,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         this.waitPauseForTimeoutMillis = getSafeLongProperty("execution.waitPauseForTimeoutInMillis",
                 DEFAULT_PLATFORM_LEVEL_WAIT_PAUSE_FOR_TIMEOUT_IN_MILLIS);
         this.interruptOperationExecution = getBoolean("execution.interruptOperation");
+        this.enableNewTimeoutMechanism = getBoolean("enable.new.timeout");
     }
 
     private int getSafeIntProperty(String property, int defaultValue) {
@@ -405,11 +407,12 @@ public final class ExecutionServiceImpl implements ExecutionService {
             final Map<String, Object> stepData = prepareStepData(execution, currStep);
             final ControlActionMetadata action = currStep.getAction();
 
-            if (isContentOperationStep(action)) {
+            if (enableNewTimeoutMechanism && isContentOperationStep(action)) {
                 Long startTime = (Long) execution.getSystemContext().get(SC_TIMEOUT_START_TIME);
                 Integer timeoutMins = (Integer) execution.getSystemContext().get(SC_TIMEOUT_MINS);
 
-                if ((startTime != null) && (timeoutMins != null)) { // Timeout information is available, we use it
+                // New Timeout is enabled and timeout information is available for this run
+                if ((startTime != null) && (timeoutMins != null)) {
                     long now = System.currentTimeMillis();
                     Callable<Object> operationCallable = () -> reflectionAdapter.executeControlAction(action, stepData);
                     Thread operationExecutionThread = new Thread(
@@ -443,10 +446,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
                         }
                         return timeoutErrorMessageDuringStep;
                     }
-                } else { // Execute on regular executor as usual if no timeout is present
+                } else { // Execute on regular executor as usual if no timeout information is present
                     reflectionAdapter.executeControlAction(action, stepData);
                 }
-            } else { // Execute on regular executor as this is not an operation
+            } else { // Execute on regular executor as this is not an operation or new mechanism is not enabled
                 reflectionAdapter.executeControlAction(action, stepData);
             }
         } catch (RuntimeException ex) {
