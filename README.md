@@ -64,7 +64,7 @@ The Score project uses Maven to build and test.
 ###### Prerequisites:
 
 1. Maven version >=3.0.3
-2. Java JDK version >=7
+2. Java JDK version >=8
 
 ###### Steps:
 
