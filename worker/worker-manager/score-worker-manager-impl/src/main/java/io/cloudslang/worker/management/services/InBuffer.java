@@ -20,6 +20,7 @@ import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import io.cloudslang.worker.management.ExecutionsActivityListener;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -40,7 +41,6 @@ import static java.lang.Double.parseDouble;
 import static java.lang.Integer.getInteger;
 import static java.lang.Long.parseLong;
 import static java.lang.Runtime.getRuntime;
-import static java.lang.String.format;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 
@@ -50,8 +50,6 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
     private static final long MEMORY_THRESHOLD = 50000000; // 50 Mega byte
     private static final int MINIMUM_GC_DELTA = 10000; // Minimum delta between garbage collections in milliseconds
-    private static final String WORKER_INBUFFER_SIZE = "worker.inbuffer.size";
-    private static final String WORKER_INBUFFER_MIN_SIZE = "worker.inbuffer.minSize";
     private static final String WORKER_MEMORY_RATIO = "worker.freeMemoryRatio";
     private static final double NEW_DEFAULT_WORKER_MEMORY_RATIO = 0.1; // 10 percent of Xmx
 
@@ -88,6 +86,9 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     @Autowired(required = false)
     private ExecutionsActivityListener executionsActivityListener;
 
+    @Autowired
+    private InbufferUtils inbufferUtils;
+
     private Thread fillBufferThread = new Thread(this);
     private boolean inShutdown;
     private boolean endOfInit = false;
@@ -105,7 +106,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
         logger.info("InBuffer capacity is set to :" + capacity
                 + ", coolDownPollingMillis is set to :" + coolDownPollingMillis);
 
-        newInBufferBehaviour = Boolean.getBoolean("enable.new.inbuffer");
+        newInBufferBehaviour = inbufferUtils.isNewInbuffer();
         logger.info("new inbuffer behaviour enabled: " + newInBufferBehaviour);
 
         // Simplify out of the box worker configuration settings, to only set thread pool number of threads.
@@ -116,19 +117,9 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
         // Min buffer size is the size at which the WorkerFillBufferThread thread starts polling if free memory conditions are met.
         if (newInBufferBehaviour) {
-            int executionThreadsCount = numberOfThreads;
-            int minInBufferSizeLocal = getInteger(WORKER_INBUFFER_MIN_SIZE, executionThreadsCount);
-            minInBufferSize = (minInBufferSizeLocal > 0) ? minInBufferSizeLocal : executionThreadsCount;
-
-            int defaultNewInBufferSize = 2 * executionThreadsCount;
-            int newInBufferSizeLocal = getInteger(WORKER_INBUFFER_SIZE, defaultNewInBufferSize);
-            newInBufferSize = (newInBufferSizeLocal > minInBufferSize) ? newInBufferSizeLocal : defaultNewInBufferSize;
-
-            if (newInBufferSize <= minInBufferSize) {
-                throw new IllegalStateException(
-                        format("Value of property \"%s\" must be greater than the value of property \"%s\".",
-                                WORKER_INBUFFER_SIZE, WORKER_INBUFFER_MIN_SIZE));
-            }
+            Pair<Integer, Integer> minSizeAndSizeOfInBuffer = inbufferUtils.getMinSizeAndSizeOfInBuffer(numberOfThreads);
+            minInBufferSize = minSizeAndSizeOfInBuffer.getLeft();
+            newInBufferSize = minSizeAndSizeOfInBuffer.getRight();
 
             logger.info("new inbuffer size: " + newInBufferSize);
             logger.info("new inbuffer minimum size: " + minInBufferSize);

@@ -351,6 +351,12 @@
                 <version>${h2.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.conversantmedia</groupId>
+                <artifactId>disruptor</artifactId>
+                <version>1.2.14</version>
+            </dependency>
+
             <!--DB drivers for tests-->
             <dependency>
                 <groupId>net.sourceforge.jtds</groupId>
