@@ -18,6 +18,7 @@ package io.cloudslang.worker.management.services;
 
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
+import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import io.cloudslang.worker.management.ExecutionsActivityListener;
 import org.apache.commons.lang3.tuple.Pair;
@@ -211,13 +212,18 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
         ExecutionMessage cloned;
         for (ExecutionMessage message : newMessages) {
             // create a unique id for this lane in this specific worker to be used in out buffer optimization
-            //logger.error("ACK FOR MESSAGE: " + message.getMsgId() + " : " + message.getExecStateId());
             message.setWorkerKey(message.getMsgId() + " : " + message.getExecStateId());
-            cloned = (ExecutionMessage) message.clone();
+
+            Payload payload = message.getPayload(); // store payload
+            message.setPayload(null);
+
+            cloned = (ExecutionMessage) message.clone(); // To clone without payload, payload is not needed in ack - make it null in order to minimize the data that is being sent
             cloned.setStatus(ExecStatus.IN_PROGRESS);
             cloned.incMsgSeqId();
+
+            message.setPayload(payload); // Fix payload again in original message
             message.incMsgSeqId(); // Increment the original message seq too in order to preserve the order of all messages of entire step
-            cloned.setPayload(null); // Payload is not needed in ack - make it null in order to minimize the data that is being sent
+
             outBuffer.put(cloned);
         }
     }
