@@ -58,6 +58,7 @@ import static io.cloudslang.score.facade.execution.PauseReason.SEQUENTIAL_EXECUT
 import static java.lang.Boolean.TRUE;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -317,6 +318,7 @@ public class ExecutionServiceTest {
         timeoutExecutionService.executeStep(exe, executionStep);
 
         assertEquals(0, exe.getPosition().longValue()); //position is still 0
+        assertFalse(exe.getSystemContext().hasStepErrorKey()); //there is error in context
     }
 
     @Test
