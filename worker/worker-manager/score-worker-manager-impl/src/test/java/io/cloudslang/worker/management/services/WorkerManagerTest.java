@@ -16,12 +16,13 @@
 
 package io.cloudslang.worker.management.services;
 
+import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.orchestrator.services.EngineVersionService;
+import io.cloudslang.worker.management.WorkerConfigurationService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import io.cloudslang.worker.management.WorkerConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,12 +31,19 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import io.cloudslang.engine.node.services.WorkerNodeService;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.Fail.fail;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 /**
@@ -228,6 +236,18 @@ public class WorkerManagerTest {
 		@Bean
 		Long maxStartUpSleep() {
 			return 100L;
+		}
+
+		@Bean
+		WorkerConfigurationUtils workerConfigurationUtils() {
+			WorkerConfigurationUtils workerConfigurationUtils = mock(WorkerConfigurationUtils.class);
+			doReturn(mock(LinkedBlockingQueue.class)).when(workerConfigurationUtils).getBlockingQueue(anyInt(), anyInt());
+			return workerConfigurationUtils;
+		}
+
+		@Bean
+		Integer inBufferCapacity() {
+			return 20;
 		}
 
 		@Bean
