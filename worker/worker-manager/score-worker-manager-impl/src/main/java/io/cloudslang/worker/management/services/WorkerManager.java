@@ -16,12 +16,10 @@
 
 package io.cloudslang.worker.management.services;
 
-import com.conversantmedia.util.concurrent.DisruptorBlockingQueue;
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.orchestrator.services.EngineVersionService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -43,7 +41,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -51,9 +48,7 @@ import static ch.lambdaj.Lambda.max;
 import static ch.lambdaj.Lambda.on;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.parseBoolean;
-import static java.lang.Integer.getInteger;
 import static java.lang.System.getProperty;
-import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 
 public class WorkerManager implements ApplicationListener, EndExecutionCallback, WorkerRecoveryListener {
@@ -61,10 +56,6 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
     private static final Logger logger = Logger.getLogger(WorkerManager.class);
     private static final int KEEP_ALIVE_FAIL_LIMIT = 5;
     private static final String DOTNET_PATH = System.getenv("WINDIR") + "/Microsoft.NET/Framework";
-
-    private static final String INBUFFER_IMPLEMENTATION_KEY = "worker.inbuffer.strategy";
-    private static final String LINKED = "linked";
-    private static final String DISRUPTOR = "disruptor";
 
     @Resource
     private String workerUuid;
@@ -99,7 +90,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
     private Long maxStartUpSleep = 10 * 60 * 1000L; // by default 10 minutes
 
     @Autowired
-    private InbufferUtils inbufferUtils;
+    private WorkerConfigurationUtils workerConfigurationUtils;
 
     @Autowired
     @Qualifier("inBufferCapacity")
@@ -126,22 +117,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
         logger.info("Initialize worker with UUID: " + workerUuid);
         System.setProperty("worker.uuid", workerUuid); //do not remove!!!
 
-        String workerInBufferQueuePolicy = System.getProperty(INBUFFER_IMPLEMENTATION_KEY, LINKED);
-        if (equalsIgnoreCase(workerInBufferQueuePolicy, LINKED)) {
-            inBuffer = new LinkedBlockingQueue<>();
-        } else if (equalsIgnoreCase(workerInBufferQueuePolicy, DISRUPTOR)) {
-            int disruptorCapacity;
-            if (inbufferUtils.isNewInbuffer()) {
-                Pair<Integer, Integer> minSizeAndSizeOfInBuffer = inbufferUtils.getMinSizeAndSizeOfInBuffer(numberOfThreads);
-                disruptorCapacity = minSizeAndSizeOfInBuffer.getRight();
-            } else {
-                disruptorCapacity = getInteger("worker.inbuffer.capacity", capacity);
-            }
-            inBuffer = new DisruptorBlockingQueue<>(2 * disruptorCapacity);
-        } else {
-            throw new IllegalArgumentException(String.format("Illegal value %s for property %s",
-                    workerInBufferQueuePolicy, INBUFFER_IMPLEMENTATION_KEY));
-        }
+        inBuffer = workerConfigurationUtils.getBlockingQueue(numberOfThreads, capacity);
 
         executorService = new ThreadPoolExecutor(numberOfThreads,
                 numberOfThreads,

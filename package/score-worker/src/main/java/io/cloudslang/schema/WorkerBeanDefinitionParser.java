@@ -50,7 +50,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(EventBusImpl.class, null);
 		put(ExecutionServiceImpl.class, "agent");
 		put(InBuffer.class, null);
-		put(InbufferUtils.class, null);
+		put(WorkerConfigurationUtils.class, null);
 		put(OutboundBufferImpl.class, "outBuffer");
 		put(RetryTemplate.class, null);
 		put(SimpleExecutionRunnableFactory.class, null);
