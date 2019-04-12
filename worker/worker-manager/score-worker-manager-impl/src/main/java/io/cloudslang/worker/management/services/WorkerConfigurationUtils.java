@@ -19,6 +19,7 @@ package io.cloudslang.worker.management.services;
 import com.conversantmedia.util.concurrent.DisruptorBlockingQueue;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.log4j.Logger;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -33,6 +34,8 @@ import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 public class WorkerConfigurationUtils {
 
+    private static final Logger logger = Logger.getLogger(WorkerConfigurationUtils.class);
+
     private static final long MEMORY_THRESHOLD = 50_000_000; // 50 Mega byte
 
     private static final String WORKER_INBUFFER_SIZE = "worker.inbuffer.size";
@@ -43,6 +46,8 @@ public class WorkerConfigurationUtils {
     private static final String LINKED = "linked";
     private static final String DISRUPTOR = "disruptor";
     private static final String ARRAY = "array";
+
+    private static final String WORKER_BLOCKING_QUEUE_IMPLEMENTATION = "Worker blocking queue implementation: %s";
 
     private static final String WORKER_MEMORY_RATIO = "worker.freeMemoryRatio";
     public static final double NEW_DEFAULT_WORKER_MEMORY_RATIO = 0.1; // 10 percent of Xmx
@@ -74,9 +79,12 @@ public class WorkerConfigurationUtils {
         String workerInBufferQueuePolicy = System.getProperty(INBUFFER_IMPLEMENTATION_KEY, LINKED);
         if (equalsIgnoreCase(workerInBufferQueuePolicy, LINKED)) {
             blockingQueue = getLinkedQueue();
+            logger.info(String.format(WORKER_BLOCKING_QUEUE_IMPLEMENTATION, LINKED));
         } else if (equalsIgnoreCase(workerInBufferQueuePolicy, DISRUPTOR)) {
             blockingQueue = getDisruptorQueue(executionThreadsCount, capacity);
+            logger.info(String.format(WORKER_BLOCKING_QUEUE_IMPLEMENTATION, DISRUPTOR));
         } else if (equalsIgnoreCase(workerInBufferQueuePolicy, ARRAY)) {
+            logger.info(String.format(WORKER_BLOCKING_QUEUE_IMPLEMENTATION, ARRAY));
             blockingQueue = getArrayQueue(executionThreadsCount, capacity);
         } else {
             throw new IllegalArgumentException(String.format("Illegal value %s for property %s",
