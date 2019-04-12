@@ -282,32 +282,28 @@ public class ExecutionServiceTest {
 	public void executeStepTest() throws InterruptedException {
 		//Test no exception is thrown - all is caught inside
 		ExecutionStep executionStep = new ExecutionStep(EXECUTION_STEP_1_ID);
-		executionStep.setActionData(new HashMap<String, Serializable>());
+		Map<String, Serializable> actionData = new HashMap<>();
+		actionData.put("actionType", "content");
+		executionStep.setActionData(actionData);
+		executionStep.setAction(RUNTIME_EXCEPTION_METADATA);
 
 		Execution exe = new Execution(0L, 0L, new HashMap<String, String>());
 
-        HashMap<String, Serializable> actionData = new HashMap<>();
-        actionData.put("actionType", "content");
-        executionStep.setActionData(actionData);
-        executionStep.setAction(RUNTIME_EXCEPTION_METADATA);
-        executionStep.setActionData(new HashMap<String, Serializable>());
-
 		executionService.executeStep(exe, executionStep);
 
-		assertEquals(0, exe.getPosition().longValue()); //position is still 0
+		assertEquals(0, exe.getPosition().longValue()); // position is still 0
 		assertTrue(exe.getSystemContext().hasStepErrorKey()); //there is error in context
 	}
 
     @Test
     public void executeStepTestWithEnabledTimeoutGoesWellWithoutExceptionOrTimeout() throws InterruptedException {
-        //Test no exception is thrown - all is caught inside
+        // Test no exception is thrown - all is caught inside
         ExecutionStep executionStep = new ExecutionStep(EXECUTION_STEP_1_ID);
 
-        HashMap<String, Serializable> actionData = new HashMap<>();
+        Map<String, Serializable> actionData = new HashMap<>();
         actionData.put("actionType", "content");
         executionStep.setActionData(actionData);
         executionStep.setAction(CONTENT_EXEC_CONTROL_ACTION_METADATA);
-        executionStep.setActionData(new HashMap<String, Serializable>());
 
         when(reflectionAdapter.executeControlAction(eq(CONTENT_EXEC_CONTROL_ACTION_METADATA), any(Map.class))).thenReturn(null);
 
@@ -317,8 +313,8 @@ public class ExecutionServiceTest {
 
         timeoutExecutionService.executeStep(exe, executionStep);
 
-        assertEquals(0, exe.getPosition().longValue()); //position is still 0
-        assertFalse(exe.getSystemContext().hasStepErrorKey()); //there is error in context
+        assertEquals(0, exe.getPosition().longValue()); // position is still 0
+        assertFalse(exe.getSystemContext().hasStepErrorKey());
     }
 
     @Test
@@ -326,11 +322,10 @@ public class ExecutionServiceTest {
         //Test no exception is thrown - all is caught inside
         ExecutionStep executionStep = new ExecutionStep(EXECUTION_STEP_1_ID);
 
-        HashMap<String, Serializable> actionData = new HashMap<>();
+        Map<String, Serializable> actionData = new HashMap<>();
         actionData.put("actionType", "content");
         executionStep.setActionData(actionData);
         executionStep.setAction(CONTENT_EXEC_CONTROL_ACTION_METADATA);
-        executionStep.setActionData(new HashMap<String, Serializable>());
 
         Execution exe = new Execution(0L, 0L, new HashMap<String, String>());
         exe.getSystemContext().put("SC_TIMEOUT_START_TIME", System.currentTimeMillis());

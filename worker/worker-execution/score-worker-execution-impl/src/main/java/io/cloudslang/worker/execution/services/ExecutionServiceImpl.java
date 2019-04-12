@@ -61,6 +61,8 @@ import static java.lang.Boolean.getBoolean;
 import static java.lang.Integer.getInteger;
 import static java.lang.Long.getLong;
 import static java.lang.String.valueOf;
+import static java.lang.Thread.currentThread;
+import static org.apache.commons.lang.StringUtils.endsWith;
 
 
 public final class ExecutionServiceImpl implements ExecutionService {
@@ -416,7 +418,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
                     long now = System.currentTimeMillis();
                     Callable<Object> operationCallable = () -> reflectionAdapter.executeControlAction(action, stepData);
                     SandboxExecutionRunnable<Object> sandboxExecutionRunnable =
-                            new SandboxExecutionRunnable<>(Thread.currentThread().getContextClassLoader(), operationCallable);
+                            new SandboxExecutionRunnable<>(currentThread().getContextClassLoader(), operationCallable);
                     Thread operationExecutionThread = new Thread(sandboxExecutionRunnable);
 
                     long dynamicTimeout = getDynamicTimeout(startTime, timeoutMins, now);
@@ -462,7 +464,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     private boolean isContentOperationStep(ControlActionMetadata action) {
         return (action != null) && StringUtils.equals(action.getMethodName(), EXECUTE_CONTENT_ACTION) &&
-                StringUtils.endsWith(action.getClassName(), EXECUTE_CONTENT_ACTION_CLASSNAME);
+                endsWith(action.getClassName(), EXECUTE_CONTENT_ACTION_CLASSNAME);
     }
 
     private long getDynamicTimeout(long startTime, int timeoutMins, long now) {
