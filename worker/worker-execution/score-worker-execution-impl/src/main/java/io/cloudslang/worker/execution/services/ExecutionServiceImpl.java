@@ -309,7 +309,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 pauseService.pauseExecution(executionId, branchId, reason); // this creates a DB record for this branch, as Pending-paused
             }
         } else if (reason.isSequential()) {
-                pauseService.pauseExecution(executionId, branchId, reason);
+            pauseService.pauseExecution(executionId, branchId, reason);
         }
         addPauseEvent(systemContext);
         // dump bus events here because out side is too late
