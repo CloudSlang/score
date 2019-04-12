@@ -50,4 +50,11 @@ public class SandboxExecutionRunnable<T> implements Runnable {
 
         bundle.set(new ImmutablePair<>(processingResult, processingException));
     }
+
+    public void afterExecute() {
+        final Pair<T, RuntimeException> localBundle = bundle.get();
+        if (localBundle.getRight() != null) {
+            throw localBundle.getRight();
+        }
+    }
 }

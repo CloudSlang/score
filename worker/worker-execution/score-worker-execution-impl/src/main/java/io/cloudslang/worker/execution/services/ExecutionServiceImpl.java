@@ -61,6 +61,8 @@ import static java.lang.Boolean.getBoolean;
 import static java.lang.Integer.getInteger;
 import static java.lang.Long.getLong;
 import static java.lang.String.valueOf;
+import static java.lang.Thread.currentThread;
+import static org.apache.commons.lang.StringUtils.endsWith;
 
 
 public final class ExecutionServiceImpl implements ExecutionService {
@@ -90,6 +92,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     private final long waitPauseForTimeoutMillis;
     private final long waitPeriodForTimeoutMillis;
     private final boolean interruptOperationExecution;
+    private final boolean enableNewTimeoutMechanism;
 
     public ExecutionServiceImpl() {
         this.operationTimeoutMillis = getSafeIntProperty("execution.operationTimeoutInSeconds",
@@ -99,6 +102,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         this.waitPauseForTimeoutMillis = getSafeLongProperty("execution.waitPauseForTimeoutInMillis",
                 DEFAULT_PLATFORM_LEVEL_WAIT_PAUSE_FOR_TIMEOUT_IN_MILLIS);
         this.interruptOperationExecution = getBoolean("execution.interruptOperation");
+        this.enableNewTimeoutMechanism = getBoolean("enable.new.timeout");
     }
 
     private int getSafeIntProperty(String property, int defaultValue) {
@@ -405,16 +409,17 @@ public final class ExecutionServiceImpl implements ExecutionService {
             final Map<String, Object> stepData = prepareStepData(execution, currStep);
             final ControlActionMetadata action = currStep.getAction();
 
-            if (isContentOperationStep(action)) {
+            if (enableNewTimeoutMechanism && isContentOperationStep(action)) {
                 Long startTime = (Long) execution.getSystemContext().get(SC_TIMEOUT_START_TIME);
                 Integer timeoutMins = (Integer) execution.getSystemContext().get(SC_TIMEOUT_MINS);
 
-                if ((startTime != null) && (timeoutMins != null)) { // Timeout information is available, we use it
+                // New Timeout is enabled and timeout information is available for this run
+                if ((startTime != null) && (timeoutMins != null)) {
                     long now = System.currentTimeMillis();
                     Callable<Object> operationCallable = () -> reflectionAdapter.executeControlAction(action, stepData);
-                    Thread operationExecutionThread = new Thread(
-                            new SandboxExecutionRunnable<>(Thread.currentThread().getContextClassLoader(),
-                                    operationCallable));
+                    SandboxExecutionRunnable<Object> sandboxExecutionRunnable =
+                            new SandboxExecutionRunnable<>(currentThread().getContextClassLoader(), operationCallable);
+                    Thread operationExecutionThread = new Thread(sandboxExecutionRunnable);
 
                     long dynamicTimeout = getDynamicTimeout(startTime, timeoutMins, now);
                     if (dynamicTimeout == -1L) { // execution time exceeded for this execution
@@ -430,7 +435,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
                     operationExecutionThread.start();
                     operationExecutionThread.join(dynamicTimeout);
 
-                    if (operationExecutionThread.isAlive()) {
+                    if (operationExecutionThread.isAlive()) { // Timeout exceeded
                         String timeoutErrorMessageDuringStep = String
                                 .format("Timeout (%d minutes) exceeded for execution id %s having start time %s (current time %s) when running step %s",
                                         timeoutMins, valueOf(execution.getExecutionId()), valueOf(startTime),
@@ -438,15 +443,16 @@ public final class ExecutionServiceImpl implements ExecutionService {
                         logger.error(timeoutErrorMessageDuringStep);
 
                         if (interruptOperationExecution) {
-                            operationExecutionThread
-                                    .interrupt(); // interrupt the execution of the content operation
+                            operationExecutionThread.interrupt(); // interrupt the execution of the content operation
                         }
                         return timeoutErrorMessageDuringStep;
+                    } else { // Thread was finished
+                        sandboxExecutionRunnable.afterExecute();
                     }
-                } else { // Execute on regular executor as usual if no timeout is present
+                } else { // Execute on regular executor as usual if no timeout information is present
                     reflectionAdapter.executeControlAction(action, stepData);
                 }
-            } else { // Execute on regular executor as this is not an operation
+            } else { // Execute on regular executor as this is not an operation or new mechanism is not enabled
                 reflectionAdapter.executeControlAction(action, stepData);
             }
         } catch (RuntimeException ex) {
@@ -457,7 +463,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     private boolean isContentOperationStep(ControlActionMetadata action) {
-        return StringUtils.equals(action.getMethodName(), EXECUTE_CONTENT_ACTION) && StringUtils.endsWith(action.getClassName(), EXECUTE_CONTENT_ACTION_CLASSNAME);
+        return (action != null) && StringUtils.equals(action.getMethodName(), EXECUTE_CONTENT_ACTION) &&
+                endsWith(action.getClassName(), EXECUTE_CONTENT_ACTION_CLASSNAME);
     }
 
     private long getDynamicTimeout(long startTime, int timeoutMins, long now) {
