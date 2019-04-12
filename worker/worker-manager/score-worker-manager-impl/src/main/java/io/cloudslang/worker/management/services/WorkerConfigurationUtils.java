@@ -36,7 +36,7 @@ public class WorkerConfigurationUtils {
 
     private static final Logger logger = Logger.getLogger(WorkerConfigurationUtils.class);
 
-    private static final long MEMORY_THRESHOLD = 50_000_000; // 50 Mega byte
+    private static final long MEMORY_THRESHOLD = 50_000_000L; // 50 Mega byte
 
     private static final String WORKER_INBUFFER_SIZE = "worker.inbuffer.size";
     private static final String WORKER_INBUFFER_MIN_SIZE = "worker.inbuffer.minSize";
