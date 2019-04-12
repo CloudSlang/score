@@ -140,7 +140,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             }
             if ((!execution.getSystemContext().hasStepErrorKey()) && currStep.getActionData().get(ACTION_TYPE) != null &&
                     currStep.getActionData().get(ACTION_TYPE).toString().equalsIgnoreCase(SEQUENTIAL)) {
-                if (!robotConnectionState.isRobotRunning("Default")) {
+                if (!robotConnectionState.hasRunningRobot("Default")) {
                     pauseFlow(PauseReason.ROBOT_NOT_AVAILABLE, execution);
                 } else {
                     pauseFlow(PauseReason.SEQUENTIAL_EXECUTION, execution);
@@ -299,6 +299,12 @@ public final class ExecutionServiceImpl implements ExecutionService {
         return false;
     }
 
+    private void pauseIfSequentialExecutions (Long executionId, String branchId,PauseReason reason) {
+        if (reason.equals(PauseReason.SEQUENTIAL_EXECUTION) || reason.equals(PauseReason.ROBOT_NOT_AVAILABLE)) {
+            pauseService.pauseExecution(executionId, branchId, reason);
+        }
+    }
+
     public void pauseFlow(PauseReason reason, Execution execution) throws InterruptedException {
         SystemContext systemContext = execution.getSystemContext();
         Long executionId = execution.getExecutionId();
@@ -309,8 +315,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 // we pause the branch because the Parent was user-paused (see findPauseReason)
                 pauseService.pauseExecution(executionId, branchId, reason); // this creates a DB record for this branch, as Pending-paused
             }
-        } else if (reason.equals(PauseReason.SEQUENTIAL_EXECUTION) || reason.equals(PauseReason.ROBOT_NOT_AVAILABLE)) {
-            pauseService.pauseExecution(executionId, branchId, reason);
+        } else {
+            pauseIfSequentialExecutions(executionId, branchId, reason);
         }
         addPauseEvent(systemContext);
         // dump bus events here because out side is too late

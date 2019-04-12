@@ -16,5 +16,5 @@
 package io.cloudslang.worker.execution.services;
 
 public interface RobotConnectionState {
-    boolean isRobotRunning(String group);
+    boolean hasRunningRobot(String group);
 }
