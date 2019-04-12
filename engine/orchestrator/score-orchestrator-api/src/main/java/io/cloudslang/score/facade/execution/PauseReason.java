@@ -34,5 +34,9 @@ public enum PauseReason {
     NO_WORKERS_IN_GROUP,
     BRANCH_PAUSED,
     SEQUENTIAL_EXECUTION,
-    ROBOT_NOT_AVAILABLE
+    ROBOT_NOT_AVAILABLE;
+
+    public boolean isSequential() {
+        return this == SEQUENTIAL_EXECUTION || this == ROBOT_NOT_AVAILABLE;
+    }
 }

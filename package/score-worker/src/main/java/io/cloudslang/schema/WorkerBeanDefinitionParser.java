@@ -21,6 +21,7 @@ import io.cloudslang.score.events.EventBusImpl;
 import io.cloudslang.worker.execution.reflection.ReflectionAdapterImpl;
 import io.cloudslang.worker.execution.services.ExecutionServiceImpl;
 import io.cloudslang.worker.execution.services.SessionDataHandlerImpl;
+import io.cloudslang.worker.execution.services.StubConnectionStateImpl;
 import io.cloudslang.worker.management.WorkerConfigurationServiceImpl;
 import io.cloudslang.worker.management.WorkerRegistration;
 import io.cloudslang.worker.management.monitor.ScheduledWorkerLoadMonitor;
@@ -64,6 +65,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
         put(WorkerExecutionMonitorServiceImpl.class, "workerExecutionMonitorService");
         put(WorkerMonitorsImpl.class, "workerMonitorsImpl");
         put(ScheduledWorkerLoadMonitor.class, "scheduledWorkerLoadMonitor");
+        put(StubConnectionStateImpl.class, "stubConnectionStateImpl");
 	}};
 
 	private List<ConfValue> configurationValues = Arrays.asList(
