@@ -48,6 +48,7 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = ScheduledWorkerLoadMonitorTest.MyTestConfig.class)
 public class ScheduledWorkerLoadMonitorTest {
+
     @Autowired
     WorkerManager workerManager;
 
