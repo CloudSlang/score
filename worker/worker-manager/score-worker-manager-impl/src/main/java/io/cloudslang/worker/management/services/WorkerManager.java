@@ -36,11 +36,11 @@ import java.io.FileFilter;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -75,7 +75,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
     @Autowired
     protected WorkerVersionService workerVersionService;
 
-    private LinkedBlockingQueue<Runnable> inBuffer;
+    private BlockingQueue<Runnable> inBuffer;
 
     @Autowired
     @Qualifier("numberOfExecutionThreads")
@@ -88,6 +88,13 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
     @Autowired(required = false)
     @Qualifier("maxStartUpSleep")
     private Long maxStartUpSleep = 10 * 60 * 1000L; // by default 10 minutes
+
+    @Autowired
+    private WorkerConfigurationUtils workerConfigurationUtils;
+
+    @Autowired
+    @Qualifier("inBufferCapacity")
+    private Integer capacity;
 
     private int keepAliveFailCount = 0;
 
@@ -109,7 +116,8 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
     private void init() {
         logger.info("Initialize worker with UUID: " + workerUuid);
         System.setProperty("worker.uuid", workerUuid); //do not remove!!!
-        inBuffer = new LinkedBlockingQueue<>();
+
+        inBuffer = workerConfigurationUtils.getBlockingQueue(numberOfThreads, capacity);
 
         executorService = new ThreadPoolExecutor(numberOfThreads,
                 numberOfThreads,

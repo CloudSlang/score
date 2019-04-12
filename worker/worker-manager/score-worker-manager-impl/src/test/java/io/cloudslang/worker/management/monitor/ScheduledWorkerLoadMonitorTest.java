@@ -16,15 +16,18 @@
 
 package io.cloudslang.worker.management.monitor;
 
-import static org.junit.Assert.*;
-
+import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.orchestrator.services.EngineVersionService;
+import io.cloudslang.worker.management.WorkerConfigurationService;
+import io.cloudslang.worker.management.services.OutboundBuffer;
+import io.cloudslang.worker.management.services.WorkerConfigurationUtils;
+import io.cloudslang.worker.management.services.WorkerManager;
+import io.cloudslang.worker.management.services.WorkerMonitorInfoEnum;
+import io.cloudslang.worker.management.services.WorkerRecoveryManager;
+import io.cloudslang.worker.management.services.WorkerVersionService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import io.cloudslang.engine.node.services.WorkerNodeService;
-import io.cloudslang.worker.management.WorkerConfigurationService;
-import io.cloudslang.worker.management.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,7 +36,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.concurrent.LinkedBlockingQueue;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
@@ -41,6 +48,7 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = ScheduledWorkerLoadMonitorTest.MyTestConfig.class)
 public class ScheduledWorkerLoadMonitorTest {
+
     @Autowired
     WorkerManager workerManager;
 
@@ -108,17 +116,78 @@ public class ScheduledWorkerLoadMonitorTest {
 
     @Configuration
     public static class MyTestConfig {
-        @Bean public ScheduledWorkerLoadMonitor scheduledWorkerLoadMonitor() {return new ScheduledWorkerLoadMonitor();}
-        @Bean public WorkerManager workerManager() {return mock(WorkerManager.class);}
-        @Bean public EngineVersionService EngineVersionService() {return mock(EngineVersionService.class);}
-        @Bean public OutboundBuffer outboundBuffer() {return mock(OutboundBuffer.class);}
-        @Bean public WorkerNodeService workerNodeService() {return mock(WorkerNodeService.class);}
-        @Bean public WorkerConfigurationService workerConfigurationService() {return mock(WorkerConfigurationService.class);}
-        @Bean public WorkerRecoveryManager workerRecoveryManager() {return mock(WorkerRecoveryManager.class);}
-        @Bean public WorkerVersionService workerVersionService() {return mock(WorkerVersionService.class);}
-        @Bean public Integer numberOfExecutionThreads() {return 1;}
-        @Bean public Long initStartUpSleep() {return 1L;}
-        @Bean public Long maxStartUpSleep() {return 2L;}
-        @Bean public String workerUuid() {return "1";}
+
+        @Bean
+        public ScheduledWorkerLoadMonitor scheduledWorkerLoadMonitor() {
+            return new ScheduledWorkerLoadMonitor();
+        }
+
+        @Bean
+        public WorkerManager workerManager() {
+            return mock(WorkerManager.class);
+        }
+
+        @Bean
+        public EngineVersionService EngineVersionService() {
+            return mock(EngineVersionService.class);
+        }
+
+        @Bean
+        public OutboundBuffer outboundBuffer() {
+            return mock(OutboundBuffer.class);
+        }
+
+        @Bean
+        public WorkerNodeService workerNodeService() {
+            return mock(WorkerNodeService.class);
+        }
+
+        @Bean
+        public WorkerConfigurationService workerConfigurationService() {
+            return mock(WorkerConfigurationService.class);
+        }
+
+        @Bean
+        public WorkerRecoveryManager workerRecoveryManager() {
+            return mock(WorkerRecoveryManager.class);
+        }
+
+        @Bean
+        public WorkerVersionService workerVersionService() {
+            return mock(WorkerVersionService.class);
+        }
+
+        @Bean
+        public Integer numberOfExecutionThreads() {
+            return 1;
+        }
+
+        @Bean
+        public Long initStartUpSleep() {
+            return 1L;
+        }
+
+        @Bean
+        public Long maxStartUpSleep() {
+            return 2L;
+        }
+
+        @Bean
+        public String workerUuid() {
+            return "1";
+        }
+
+        @Bean
+        public Integer inBufferCapacity() {
+            return 1;
+        }
+
+        @Bean
+        public WorkerConfigurationUtils workerConfigurationUtils() {
+            WorkerConfigurationUtils workerConfigurationUtils = mock(WorkerConfigurationUtils.class);
+            doReturn(mock(LinkedBlockingQueue.class)).when(workerConfigurationUtils)
+                    .getBlockingQueue(anyInt(), anyInt());
+            return workerConfigurationUtils;
+        }
     }
 }
