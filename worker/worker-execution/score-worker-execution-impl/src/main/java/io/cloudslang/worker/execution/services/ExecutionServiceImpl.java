@@ -140,11 +140,11 @@ public final class ExecutionServiceImpl implements ExecutionService {
             }
             if ((!execution.getSystemContext().hasStepErrorKey()) && currStep.getActionData().get(ACTION_TYPE) != null &&
                     currStep.getActionData().get(ACTION_TYPE).toString().equalsIgnoreCase(SEQUENTIAL)) {
-                if (!robotConnectionState.hasRunningRobot("Default")) {
-                    pauseFlow(PauseReason.ROBOT_NOT_AVAILABLE, execution);
-                } else {
-                    pauseFlow(PauseReason.SEQUENTIAL_EXECUTION, execution);
-                }
+                pauseFlow(
+                        (robotConnectionState.hasRunningRobot("Default") ?
+                                PauseReason.SEQUENTIAL_EXECUTION :
+                                PauseReason.ROBOT_NOT_AVAILABLE),
+                        execution);
                 return null;
             }
             // Run the navigation
