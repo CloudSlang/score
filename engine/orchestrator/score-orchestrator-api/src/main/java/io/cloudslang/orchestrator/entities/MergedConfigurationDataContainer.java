@@ -17,27 +17,23 @@
 package io.cloudslang.orchestrator.entities;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 
-public class MergedConfigurationDataContainer implements Serializable{
-    private volatile List<Long> cancelledExecutions;
+public class MergedConfigurationDataContainer implements Serializable {
+
+    private volatile Set<Long> cancelledExecutions;
     private volatile Set<String> pausedExecutions;
-    private volatile List<String> workerGroups;
+    private volatile Set<String> workerGroups;
 
     public MergedConfigurationDataContainer() {
     }
 
-
-
-    public List<Long> getCancelledExecutions() {
+    public Set<Long> getCancelledExecutions() {
         return cancelledExecutions;
     }
 
-    public void setCancelledExecutions(List<Long> cancelledExecutions) {
+    public void setCancelledExecutions(Set<Long> cancelledExecutions) {
         this.cancelledExecutions = cancelledExecutions;
     }
 
@@ -49,11 +45,11 @@ public class MergedConfigurationDataContainer implements Serializable{
         this.pausedExecutions = pausedExecutions;
     }
 
-    public List<String> getWorkerGroups() {
+    public Set<String> getWorkerGroups() {
         return workerGroups;
     }
 
-    public void setWorkerGroups(List<String> workerGroups) {
+    public void setWorkerGroups(Set<String> workerGroups) {
         this.workerGroups = workerGroups;
     }
 

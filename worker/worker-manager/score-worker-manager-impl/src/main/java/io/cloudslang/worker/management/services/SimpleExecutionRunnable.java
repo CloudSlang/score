@@ -28,10 +28,11 @@ import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.worker.execution.services.ExecutionService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.util.List;
+
+import static java.lang.Long.parseLong;
 
 /**
  * Created by IntelliJ IDEA.
@@ -42,27 +43,27 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private final Logger logger = Logger.getLogger(this.getClass());
 
-    private ExecutionService executionService;
+    private final ExecutionService executionService;
 
-    private OutboundBuffer outBuffer;
+    private final OutboundBuffer outBuffer;
 
-    private InBuffer inBuffer;
+    private final InBuffer inBuffer;
 
-    private ExecutionMessageConverter converter;
+    private final ExecutionMessageConverter converter;
 
-    private EndExecutionCallback endExecutionCallback;
+    private final EndExecutionCallback endExecutionCallback;
 
     private ExecutionMessage executionMessage;
 
-    private QueueStateIdGeneratorService queueStateIdGeneratorService;
+    private final QueueStateIdGeneratorService queueStateIdGeneratorService;
 
-    private String workerUUID;
+    private final String workerUUID;
 
-    private WorkerConfigurationService workerConfigurationService;
+    private final WorkerConfigurationService workerConfigurationService;
 
-    private boolean isRecoveryDisabled; //System property - whether the executions are recoverable in case of restart/failure.
+    private final boolean isRecoveryDisabled; //System property - whether the executions are recoverable in case of restart/failure.
 
-    private WorkerManager workerManager;
+    private final WorkerManager workerManager;
 
     public SimpleExecutionRunnable(ExecutionService executionService,
                                    OutboundBuffer outBuffer,
@@ -103,21 +104,15 @@ public class SimpleExecutionRunnable implements Runnable {
         Thread.currentThread().setName(origThreadName + "_" + executionId);
         Execution execution = null;
         try {
-            //If we got here because of te shortcut we have the object
-            if(executionMessage.getExecutionObject() != null){
-                execution = executionMessage.getExecutionObject();
-
-            }
-            //If we got here form DB - we need to extract the object from bytes
-            else {
-                execution = converter.extractExecution(executionMessage.getPayload());
-            }
+            // If we got here because of te shortcut we have the object
+            // If we got here form DB - we need to extract the object from bytes
+            execution = (executionMessage.getExecutionObject() != null) ? executionMessage.getExecutionObject()
+                    : converter.extractExecution(executionMessage.getPayload());
 
             String branchId = execution.getSystemContext().getBranchId();
-            if(logger.isDebugEnabled()){
+            if (logger.isDebugEnabled()) {
                 logger.debug("Worker starts to work on execution: " + executionId + " branch: " + branchId);
             }
-
 
             //Check which logic to trigger - regular execution or split
             if (executionService.isSplitStep(execution)) {
@@ -130,8 +125,10 @@ public class SimpleExecutionRunnable implements Runnable {
 
             // not old thread and interrupted by cancel
             boolean oldThread = !workerManager.isFromCurrentThreadPool(Thread.currentThread().getName());
-            if(!oldThread && isExecutionCancelled(execution)){
-                if (logger.isDebugEnabled())  logger.debug("Execution is interrupted...");
+            if (!oldThread && isExecutionCancelled(execution)) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Execution is interrupted...");
+                }
             } else {
                 logger.error("Execution thread is interrupted!!! Exiting...", interruptedException);
             }
@@ -143,8 +140,9 @@ public class SimpleExecutionRunnable implements Runnable {
             executionMessage.incMsgSeqId();    //new status must be with incremented msg_seq_id - otherwise will be recovered and we will get duplications
             //send only one execution message back - the new one was not created because of error
             try {
-                if(executionMessage.getPayload() == null){
-                    executionMessage.setPayload(converter.createPayload(execution)); //this is done since we could get here from InBuffer shortcut - so no payload... and for FAILED message we need to set the payload
+                if (executionMessage.getPayload() == null) {
+                    // This is done since we could get here from InBuffer shortcut - so no payload... and for FAILED message we need to set the payload
+                    executionMessage.setPayload(converter.createPayload(execution));
                 }
                 outBuffer.put(executionMessage);
             } catch (InterruptedException e) {
@@ -154,11 +152,7 @@ public class SimpleExecutionRunnable implements Runnable {
             if (logger.isDebugEnabled()) {
                 logger.debug("Worker has finished to work on execution: " + executionId);
             }
-            Long executionIdL = null;
-            if (!StringUtils.isEmpty(executionId)) {
-                executionIdL = Long.valueOf(executionId);
-            }
-            endExecutionCallback.endExecution(executionIdL);
+            endExecutionCallback.endExecution(parseLong(executionId));
             //Rename the thread back
             Thread.currentThread().setName(origThreadName);
         }

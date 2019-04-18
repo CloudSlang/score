@@ -32,5 +32,5 @@ public interface EndExecutionCallback {
      *
      * @param executionId the executionId of the execution.
      */
-    void endExecution(Long executionId);
+    void endExecution(long executionId);
 }

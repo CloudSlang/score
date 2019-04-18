@@ -132,7 +132,9 @@ public class SimpleExecutionRunnableTest {
         SimpleExecutionRunnable simpleExecutionRunnable = new SimpleExecutionRunnable(executionService, outBuffer,
                 inBuffer, converter, endExecutionCallback, queueStateIdGenerator, "stam",workerConfigurationService, workerManager);
 
-        simpleExecutionRunnable.setExecutionMessage(new ExecutionMessage());
+        ExecutionMessage executionMessage = new ExecutionMessage();
+        executionMessage.setMsgId(String.valueOf(100L));
+        simpleExecutionRunnable.setExecutionMessage(executionMessage);
         simpleExecutionRunnable.run();
         verify(executionService, times(1)).execute(execution);
 
@@ -140,6 +142,6 @@ public class SimpleExecutionRunnableTest {
         Assert.assertEquals(ExecStatus.FINISHED, buffer.get(0).getStatus());
 
         Assert.assertEquals(ExecStatus.FINISHED, buffer.get(0).getStatus());
-        Assert.assertEquals(0, executionMessage.getMsgSeqId());
+        Assert.assertEquals(0, this.executionMessage.getMsgSeqId());
     }
 }

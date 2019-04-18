@@ -30,7 +30,7 @@ public interface WorkerConfigurationService {
      * @param executionId the execution id to check
      * @return true if the execution is pending cancel
      */
-	public boolean isExecutionCancelled(Long executionId);
+    boolean isExecutionCancelled(Long executionId);
 
     /**
      * checks if the given execution is pending pause
@@ -38,7 +38,7 @@ public interface WorkerConfigurationService {
      * @param executionId the execution id to check
      * @return true if the execution is pending pause
      */
-	public boolean isExecutionPaused(Long executionId, String branchId);
+    boolean isExecutionPaused(Long executionId, String branchId);
 
     /**
      *
@@ -47,7 +47,7 @@ public interface WorkerConfigurationService {
      * @param group the group to check
      * @return true if the worker is part of the group
      */
-	public boolean isMemberOf(String group);
+    boolean isMemberOf(String group);
 
     /**
      * Sets the current worker enabled state
@@ -55,6 +55,6 @@ public interface WorkerConfigurationService {
      *
      * @param enabled the edibility state to set
      */
-	public void setEnabled(boolean enabled);
+    void setEnabled(boolean enabled);
 
 }

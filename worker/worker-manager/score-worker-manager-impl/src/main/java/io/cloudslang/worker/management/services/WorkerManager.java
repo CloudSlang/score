@@ -150,7 +150,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
     }
 
     @Override
-    public void endExecution(Long executionId) {
+    public void endExecution(long executionId) {
         mapOfRunningTasks.merge(executionId, new LinkedList<>(),
                 (queue, newValue) -> {
                     queue.poll();
