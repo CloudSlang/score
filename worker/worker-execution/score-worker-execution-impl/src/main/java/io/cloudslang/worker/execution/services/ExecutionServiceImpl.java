@@ -254,20 +254,19 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     protected boolean handleCancelledFlow(Execution execution) {
-        boolean executionIsCancelled = workerConfigurationService.isExecutionCancelled(execution
-                .getExecutionId()); // in this case - just check if need to cancel. It will set as cancelled later on QueueEventListener
-        // Another scenario of getting canceled - it was cancelled from the SplitJoinService (the configuration can still be not updated). Defect #:22060
-        if (ExecutionStatus.CANCELED.equals(execution.getSystemContext().getFlowTerminationType())) {
-            executionIsCancelled = true;
-        }
-        if (executionIsCancelled) {
+        // In this case - just check if need to cancel. It will set as cancelled later on QueueEventListener
+        // Another scenario of getting canceled - it was cancelled from the SplitJoinService
+        // The configuration can still be not updated)
+        if (workerConfigurationService.isExecutionCancelled(execution.getExecutionId())
+                || (execution.getSystemContext().getFlowTerminationType() == ExecutionStatus.CANCELED)) {
             // NOTE: an execution can be cancelled directly from CancelExecutionService, if it's currently paused.
             // Thus, if you change the code here, please check CancelExecutionService as well.
             execution.getSystemContext().setFlowTerminationType(ExecutionStatus.CANCELED);
             execution.setPosition(null);
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
     // check if the execution should be Paused, and pause it if needed
@@ -350,11 +349,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     private static boolean isDebuggerMode(Map<String, Serializable> systemContext) {
-        Boolean isDebuggerMode = (Boolean) systemContext.get(TempConstants.DEBUGGER_MODE);
-        if (isDebuggerMode == null) {
-            return false;
-        }
-        return isDebuggerMode;
+        final Boolean isDebuggerMode = (Boolean) systemContext.get(TempConstants.DEBUGGER_MODE);
+        return (isDebuggerMode != null) && isDebuggerMode;
     }
 
     public void dumpBusEvents(Execution execution) throws InterruptedException {

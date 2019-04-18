@@ -361,15 +361,8 @@ public class ExecutionRuntimeServices implements Serializable {
 	}
 
 	protected <T> T getFromMap(String key) {
-		if (contextMap.containsKey(key)) {
-			Serializable value = contextMap.get(key);
-			if (value != null) {
-				@SuppressWarnings("unchecked")
-				T retVal = (T) value;
-				return retVal;
-			}
-		}
-		return null;
+        //noinspection unchecked
+        return (T) contextMap.get(key);
 	}
 
     /**
@@ -420,15 +413,8 @@ public class ExecutionRuntimeServices implements Serializable {
     }
 
 	private <T> T removeFromMap(String key) {
-		if (contextMap.containsKey(key)) {
-			Serializable value = contextMap.remove(key);
-			if (value != null) {
-				@SuppressWarnings("unchecked")
-				T retVal = (T) value;
-				return retVal;
-			}
-		}
-		return null;
+        //noinspection unchecked
+        return (T) contextMap.remove(key);
 	}
 
 	@Override
