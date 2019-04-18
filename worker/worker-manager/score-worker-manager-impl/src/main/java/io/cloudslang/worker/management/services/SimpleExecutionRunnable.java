@@ -114,7 +114,6 @@ public class SimpleExecutionRunnable implements Runnable {
                 logger.debug("Worker starts to work on execution: " + executionId + " branch: " + branchId);
             }
 
-
             //Check which logic to trigger - regular execution or split
             if (executionService.isSplitStep(execution)) {
                 executeSplitStep(execution);

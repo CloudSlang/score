@@ -20,6 +20,7 @@ import io.cloudslang.orchestrator.entities.MergedConfigurationDataContainer;
 
 
 public interface MergedConfigurationService {
+
     MergedConfigurationDataContainer fetchMergedConfiguration(String workerUuid);
 
 }

@@ -21,15 +21,19 @@ import io.cloudslang.orchestrator.entities.MergedConfigurationDataContainer;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashSet;
+
 
 public class MergedConfigurationServiceImpl implements MergedConfigurationService {
 
-    private final Logger log = Logger.getLogger(getClass());
+    private static final Logger log = Logger.getLogger(MergedConfigurationServiceImpl.class);
 
     @Autowired
     private CancelExecutionService cancelExecutionService;
+
     @Autowired
     private PauseResumeService pauseResumeService;
+
     @Autowired
     private WorkerNodeService workerNodeService;
 
@@ -37,20 +41,20 @@ public class MergedConfigurationServiceImpl implements MergedConfigurationServic
     public MergedConfigurationDataContainer fetchMergedConfiguration(String workerUuid) {
         MergedConfigurationDataContainer mergedConfigurationDataContainer = new MergedConfigurationDataContainer();
         try {
-            mergedConfigurationDataContainer.setCancelledExecutions(cancelExecutionService.readCanceledExecutionsIds());
-        } catch(Exception ex) {
+            mergedConfigurationDataContainer.setCancelledExecutions(new HashSet<>(cancelExecutionService.readCanceledExecutionsIds()));
+        } catch (Exception ex) {
             log.error("Failed to fetch cancelled information: ", ex);
         }
 
         try {
             mergedConfigurationDataContainer.setPausedExecutions(pauseResumeService.readAllPausedExecutionBranchIds());
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             log.error("Failed to read paused flows information: ", ex);
         }
 
         try {
-            mergedConfigurationDataContainer.setWorkerGroups(workerNodeService.readWorkerGroups(workerUuid));
-        } catch(Exception ex) {
+            mergedConfigurationDataContainer.setWorkerGroups(new HashSet<>(workerNodeService.readWorkerGroups(workerUuid)));
+        } catch (Exception ex) {
             log.error("Failed to fetch worker group information: ", ex);
         }
 

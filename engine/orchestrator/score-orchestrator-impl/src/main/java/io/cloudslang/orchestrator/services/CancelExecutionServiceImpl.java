@@ -27,6 +27,7 @@ import io.cloudslang.orchestrator.entities.ExecutionState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -149,10 +150,7 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
     @Transactional(readOnly = true)
     public List<Long> readCanceledExecutionsIds() {
         List<Long> result = executionStateService.readExecutionIdByStatuses(getCancelStatuses());
-        if (result == null) {
-            result = Arrays.asList();
-        }
-        return result;
+        return (result != null) ? result : new ArrayList<>(0);
     }
 
     private List<ExecutionStatus> getCancelStatuses() {
