@@ -256,7 +256,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     protected boolean handleCancelledFlow(Execution execution) {
         // In this case - just check if need to cancel. It will set as cancelled later on QueueEventListener
         // Another scenario of getting canceled - it was cancelled from the SplitJoinService
-        // The configuration can still be not updated)
+        // The configuration can still be not updated
         if (workerConfigurationService.isExecutionCancelled(execution.getExecutionId())
                 || (execution.getSystemContext().getFlowTerminationType() == ExecutionStatus.CANCELED)) {
             // NOTE: an execution can be cancelled directly from CancelExecutionService, if it's currently paused.
