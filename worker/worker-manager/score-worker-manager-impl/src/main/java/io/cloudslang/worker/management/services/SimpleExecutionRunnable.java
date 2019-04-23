@@ -32,16 +32,14 @@ import org.apache.log4j.Logger;
 
 import java.util.List;
 
+import static java.lang.Boolean.getBoolean;
 import static java.lang.Long.parseLong;
+import static java.lang.Thread.currentThread;
 
-/**
- * Created by IntelliJ IDEA.
- * User:
- * Date: 19/12/12
- */
+
 public class SimpleExecutionRunnable implements Runnable {
 
-    private final Logger logger = Logger.getLogger(this.getClass());
+    private static final Logger logger = Logger.getLogger(SimpleExecutionRunnable.class);
 
     private final ExecutionService executionService;
 
@@ -66,14 +64,14 @@ public class SimpleExecutionRunnable implements Runnable {
     private final WorkerManager workerManager;
 
     public SimpleExecutionRunnable(ExecutionService executionService,
-                                   OutboundBuffer outBuffer,
-                                   InBuffer inBuffer,
-                                   ExecutionMessageConverter converter,
-                                   EndExecutionCallback endExecutionCallback,
-                                   QueueStateIdGeneratorService queueStateIdGeneratorService,
-                                   String workerUUID,
-                                   WorkerConfigurationService workerConfigurationService,
-                                   WorkerManager workerManager
+            OutboundBuffer outBuffer,
+            InBuffer inBuffer,
+            ExecutionMessageConverter converter,
+            EndExecutionCallback endExecutionCallback,
+            QueueStateIdGeneratorService queueStateIdGeneratorService,
+            String workerUUID,
+            WorkerConfigurationService workerConfigurationService,
+            WorkerManager workerManager
     ) {
         this.executionService = executionService;
         this.outBuffer = outBuffer;
@@ -84,7 +82,7 @@ public class SimpleExecutionRunnable implements Runnable {
         this.workerUUID = workerUUID;
         this.workerConfigurationService = workerConfigurationService;
         this.workerManager = workerManager;
-        this.isRecoveryDisabled = Boolean.getBoolean("is.recovery.disabled");
+        this.isRecoveryDisabled = getBoolean("is.recovery.disabled");
     }
 
     public ExecutionMessage getExecutionMessage() {
@@ -100,8 +98,8 @@ public class SimpleExecutionRunnable implements Runnable {
         String executionId = executionMessage.getMsgId();
 
         //We are renaming the thread for logging/monitoring purposes
-        String origThreadName = Thread.currentThread().getName();
-        Thread.currentThread().setName(origThreadName + "_" + executionId);
+        String origThreadName = currentThread().getName();
+        currentThread().setName(origThreadName + "_" + executionId);
         Execution execution = null;
         try {
             // If we got here because of te shortcut we have the object
@@ -109,36 +107,28 @@ public class SimpleExecutionRunnable implements Runnable {
             execution = (executionMessage.getExecutionObject() != null) ? executionMessage.getExecutionObject()
                     : converter.extractExecution(executionMessage.getPayload());
 
-            String branchId = execution.getSystemContext().getBranchId();
-            if (logger.isDebugEnabled()) {
-                logger.debug("Worker starts to work on execution: " + executionId + " branch: " + branchId);
-            }
-
-            //Check which logic to trigger - regular execution or split
+            // Check which logic to trigger - regular execution or split
             if (executionService.isSplitStep(execution)) {
                 executeSplitStep(execution);
             } else {
                 executeRegularStep(execution);
             }
-        }
-        catch (InterruptedException interruptedException){
+        } catch (InterruptedException interruptedException) {
 
-            // not old thread and interrupted by cancel
-            boolean oldThread = !workerManager.isFromCurrentThreadPool(Thread.currentThread().getName());
-            if (!oldThread && isExecutionCancelled(execution)) {
+            // Not old thread and interrupted by cancel
+            if (workerManager.isFromCurrentThreadPool(currentThread().getName()) && isExecutionCancelled(execution)) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Execution is interrupted...");
                 }
             } else {
                 logger.error("Execution thread is interrupted!!! Exiting...", interruptedException);
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             logger.error("Error during execution!!!", ex);
             //set status FAILED
             executionMessage.setStatus(ExecStatus.FAILED);
-            executionMessage.incMsgSeqId();    //new status must be with incremented msg_seq_id - otherwise will be recovered and we will get duplications
-            //send only one execution message back - the new one was not created because of error
+            executionMessage.incMsgSeqId();    // New status must be with incremented msg_seq_id - otherwise will be recovered and we will get duplications
+            // Send only one execution message back - the new one was not created because of error
             try {
                 if (executionMessage.getPayload() == null) {
                     // This is done since we could get here from InBuffer shortcut - so no payload... and for FAILED message we need to set the payload
@@ -154,13 +144,13 @@ public class SimpleExecutionRunnable implements Runnable {
             }
             endExecutionCallback.endExecution(parseLong(executionId));
             //Rename the thread back
-            Thread.currentThread().setName(origThreadName);
+            currentThread().setName(origThreadName);
         }
     }
 
     private void executeRegularStep(Execution execution) throws InterruptedException {
         Execution nextStepExecution;
-        Long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
 
         do {
             //Actually execute the step and get the execution object of the next step
@@ -169,16 +159,16 @@ public class SimpleExecutionRunnable implements Runnable {
         while (!shouldStop(nextStepExecution, startTime));
     }
 
-    private boolean shouldStop(Execution nextStepExecution, Long startTime) {
-        //We should stop if
-        //1. Thread was interrupted
-        //2. execution was paused
-        //3. we should stop and go to queue
-        //4. The execution is terminating
-        //5. The nextStepExecution is a splitStep
-        //6. Running too long
+    private boolean shouldStop(Execution nextStepExecution, long startTime) {
+        // We should stop if
+        // 1. Thread was interrupted
+        // 2. execution was paused
+        // 3. we should stop and go to queue
+        // 4. The execution is terminating
+        // 5. The nextStepExecution is a splitStep
+        // 6. Running too long
 
-        //The order is important!!!
+        // The order is important
         return isOldThread() ||
                 isExecutionCancelled(nextStepExecution) ||
                 isExecutionPaused(nextStepExecution) ||
@@ -190,10 +180,10 @@ public class SimpleExecutionRunnable implements Runnable {
                 isRunningTooLong(startTime, nextStepExecution);
     }
 
-    //If execution was paused it sends the current step with status FINISHED and that is all...
+    // If execution was paused it sends the current step with status FINISHED and that is all...
     private boolean isExecutionPaused(Execution nextStepExecution) {
-        //If execution was paused
-        if(nextStepExecution == null){
+        // If execution was paused
+        if (nextStepExecution == null) {
             //set current step to finished
             executionMessage.setStatus(ExecStatus.FINISHED);
             executionMessage.incMsgSeqId();
@@ -205,15 +195,15 @@ public class SimpleExecutionRunnable implements Runnable {
                 logger.warn("Thread was interrupted! Exiting the execution... ", e);
             }
             return true;
-        }
-        else {
+        } else {
             return false;
         }
     }
 
     private boolean isRecoveryCheckpoint(Execution nextStepExecution) {
         //Here we check if we need to go to queue to persist - we can do it with shortcut to InBuffer!!!!!!!!
-        if (!isRecoveryDisabled && nextStepExecution.getSystemContext().containsKey(TempConstants.IS_RECOVERY_CHECKPOINT)) {
+        if (!isRecoveryDisabled && nextStepExecution.getSystemContext()
+                .containsKey(TempConstants.IS_RECOVERY_CHECKPOINT)) {
             //clean key
             nextStepExecution.getSystemContext().remove(TempConstants.IS_RECOVERY_CHECKPOINT);
 
@@ -222,9 +212,9 @@ public class SimpleExecutionRunnable implements Runnable {
             executionMessage.incMsgSeqId();
             executionMessage.setPayload(null);
 
-
             ExecutionMessage inProgressMessage = createInProgressExecutionMessage(nextStepExecution);
-            ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage, inProgressMessage}; //for the outBuffer
+            ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage,
+                    inProgressMessage}; //for the outBuffer
 
             ExecutionMessage inProgressMessageForInBuffer = (ExecutionMessage) inProgressMessage.clone();
             inProgressMessageForInBuffer.setPayload(null); //we do not need the payload for the inBuffer shortcut
@@ -238,8 +228,7 @@ public class SimpleExecutionRunnable implements Runnable {
                 return true; //exiting... in shutdown...
             }
             return true;
-        }
-        else {
+        } else {
             return false;
         }
     }
@@ -263,10 +252,12 @@ public class SimpleExecutionRunnable implements Runnable {
             executionMessage.setPayload(converter.createPayload(nextStepExecution));
 
             ExecutionMessage inProgressMessage = createInProgressExecutionMessage(nextStepExecution);
-            ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage, inProgressMessage}; //for the outBuffer
+            ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage,
+                    inProgressMessage}; //for the outBuffer
 
             ExecutionMessage inProgressMessageForInBuffer = (ExecutionMessage) inProgressMessage.clone();
-            inProgressMessageForInBuffer.setPayload(null); //we do not need the payload for the inBuffer shortcut, we have execution there
+            inProgressMessageForInBuffer
+                    .setPayload(null); //we do not need the payload for the inBuffer shortcut, we have execution there
 
             try {
                 //The order is important!!!!!
@@ -277,21 +268,21 @@ public class SimpleExecutionRunnable implements Runnable {
                 return true; //exiting... in shutdown...
             }
             return true;
-        }
-        else {
+        } else {
             return false;
         }
     }
 
-    private boolean isSplitStep(Execution nextStepExecution){
-        if(executionService.isSplitStep(nextStepExecution)){
+    private boolean isSplitStep(Execution nextStepExecution) {
+        if (executionService.isSplitStep(nextStepExecution)) {
             //set current step to finished
             executionMessage.setStatus(ExecStatus.FINISHED);
             executionMessage.incMsgSeqId();
             executionMessage.setPayload(null);
 
             ExecutionMessage pendingMessage = createPendingExecutionMessage(nextStepExecution);
-            ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage, pendingMessage};//Messages that we will send to OutBuffer
+            ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage,
+                    pendingMessage};//Messages that we will send to OutBuffer
             try {
                 outBuffer.put(executionMessagesToSend);
             } catch (InterruptedException e) {
@@ -299,8 +290,7 @@ public class SimpleExecutionRunnable implements Runnable {
                 return true;
             }
             return true;
-        }
-        else {
+        } else {
             return false;
         }
     }
@@ -314,18 +304,21 @@ public class SimpleExecutionRunnable implements Runnable {
             //clean key
             nextStepExecution.getSystemContext().remove(TempConstants.SHOULD_CHECK_GROUP);
 
-            boolean canRunInThisWorker = groupName== null || //does not really matter on what worker to run
-                                         workerConfigurationService.isMemberOf(groupName) || //this worker is member of the group
-                                         isStickyToThisWorker(groupName); //next step should run in this worker because of "sticky worker" feature
+            // Does not really matter on what worker to run
+            // This worker is member of the group
+            // Next step should run in this worker because of "sticky worker" feature
+            boolean canRunInThisWorker = (groupName == null)
+                    || workerConfigurationService.isMemberOf(groupName) || isStickyToThisWorker(groupName);
 
-            if(!canRunInThisWorker){
+            if (!canRunInThisWorker) {
                 //set current step to finished
                 executionMessage.setStatus(ExecStatus.FINISHED);
                 executionMessage.incMsgSeqId();
                 executionMessage.setPayload(null);
 
                 ExecutionMessage pendingMessage = createPendingExecutionMessage(nextStepExecution);
-                ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage, pendingMessage};//Messages that we will send to OutBuffer
+                ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage,
+                        pendingMessage};//Messages that we will send to OutBuffer
                 try {
                     outBuffer.put(executionMessagesToSend);
                 } catch (InterruptedException e) {
@@ -338,31 +331,16 @@ public class SimpleExecutionRunnable implements Runnable {
         return false;
     }
 
-    private boolean isStickyToThisWorker(String groupName){
+    private boolean isStickyToThisWorker(String groupName) {
         return (workerUUID != null && groupName.endsWith(workerUUID));
     }
 
     private boolean isOldThread() {
-
-        boolean oldThread = !workerManager.isFromCurrentThreadPool(Thread.currentThread().getName());
-        if(oldThread){ // interrupted old (recovery) thread
-            if(logger.isDebugEnabled()) {
-                logger.debug("This thread is from old thread pool...");
-            }
-            return true;
-        }else {
-            if(logger.isDebugEnabled()) {
-                logger.debug("Execution was not interrupted and is in current thread pool! Continue... ");
-            }
-            return false;
-        }
+        return !workerManager.isFromCurrentThreadPool(currentThread().getName());
     }
 
     private boolean isExecutionCancelled(Execution execution) {
-
-        if(isCancelledExecution(execution)) {
-            if (logger.isDebugEnabled())  logger.debug("Execution is interrupted by Cancel");
-
+        if (isCancelledExecution(execution)) {
             // NOTE: an execution can be cancelled directly from CancelExecutionService, if it's currently paused.
             // Thus, if you change the code here, please check CancelExecutionService as well.
             execution.getSystemContext().setFlowTerminationType(ExecutionStatus.CANCELED);
@@ -375,7 +353,8 @@ public class SimpleExecutionRunnable implements Runnable {
 
             //Flow is finished - does not matter if successfully or not
             ExecutionMessage terminationMessage = createTerminatedExecutionMessage(execution);
-            ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage, terminationMessage}; //Messages that we will send to OutBuffer
+            ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage,
+                    terminationMessage}; //Messages that we will send to OutBuffer
 
             try {
                 outBuffer.put(executionMessagesToSend);
@@ -383,46 +362,39 @@ public class SimpleExecutionRunnable implements Runnable {
                 logger.warn("Thread was interrupted While canceling! Exiting the execution... ", e);
             }
             return true;
+        } else {
+            return false;
         }
-
-        return false;
     }
 
     private boolean isCancelledExecution(Execution execution) {
-
-        if(execution==null) return false;
-
-        boolean executionIsCancelled = workerConfigurationService.isExecutionCancelled(execution.getExecutionId()); // in this case - just check if need to cancel. It will set as cancelled later on QueueEventListener
+        // in this case - just check if need to cancel. It will set as cancelled later on QueueEventListener
         // Another scenario of getting canceled - it was cancelled from the SplitJoinService (the configuration can still be not updated). Defect #:22060
-        if(ExecutionStatus.CANCELED.equals(execution.getSystemContext().getFlowTerminationType())) {
-            executionIsCancelled = true;
-        }
-
-        return executionIsCancelled;
+        return (execution != null) && (workerConfigurationService.isExecutionCancelled(execution.getExecutionId())
+                || (execution.getSystemContext().getFlowTerminationType() == ExecutionStatus.CANCELED));
     }
 
 
+    private boolean isRunningTooLong(long startTime, Execution nextStepExecution) {
 
+        // Return true if running more than 60 seconds. (this is not enforced, just a weak check)
+        // to prevent starvation of other executions
 
-    private boolean isRunningTooLong(Long startTime, Execution nextStepExecution) {
-        Long currentTime = System.currentTimeMillis();
-
-        //Return true if running more than 60 seconds.
-        //We want to exit after 60 seconds from this thread in order to prevent starvation of other tasks.
-        if ((currentTime - startTime) > 60 * 1000) {
+        if ((System.currentTimeMillis() - startTime) > 60_000) {
             //set current step to finished
             executionMessage.setStatus(ExecStatus.FINISHED);
             executionMessage.incMsgSeqId();
             executionMessage.setPayload(null);
 
             ExecutionMessage inProgressMessage = createInProgressExecutionMessage(nextStepExecution);
-            ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage, inProgressMessage}; //for the outBuffer
+            ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage,
+                    inProgressMessage}; //for the outBuffer
 
             ExecutionMessage inProgressMessageForInBuffer = (ExecutionMessage) inProgressMessage.clone();
-            inProgressMessageForInBuffer.setPayload(null); //we do not need the payload for the inBuffer shortcut
+            inProgressMessageForInBuffer.setPayload(null); // We do not need the payload for the inBuffer shortcut
 
             try {
-                //The order is important!!!!!
+                // The order is important
                 outBuffer.put(executionMessagesToSend);
                 inBuffer.addExecutionMessage(inProgressMessageForInBuffer);
             } catch (InterruptedException e) {
@@ -448,7 +420,7 @@ public class SimpleExecutionRunnable implements Runnable {
 
     // Creates pending execution message for the next step, base on current execution message
     private ExecutionMessage createPendingExecutionMessage(Execution nextStepExecution) {
-        //take care of worker group
+        // Take care of worker group
         String groupName = nextStepExecution.getGroupName();
         if (groupName == null) {
             groupName = WorkerNode.DEFAULT_WORKER_GROUPS[0];
@@ -464,14 +436,14 @@ public class SimpleExecutionRunnable implements Runnable {
 
     // Creates InProgress execution message for the next step, base on current execution message - used for short cut!
     private ExecutionMessage createInProgressExecutionMessage(Execution nextStepExecution) {
-        //take care of worker group
+        // Take care of worker group
         String groupName = nextStepExecution.getGroupName();
         if (groupName == null) {
             groupName = WorkerNode.DEFAULT_WORKER_GROUPS[0];
         }
 
         Long id = queueStateIdGeneratorService.generateStateId();
-        // stay in the same worker in the next step
+        // Stay in the same worker in the next step
         return new ExecutionMessage(id,
                 executionMessage.getWorkerId(),
                 groupName,
@@ -484,10 +456,10 @@ public class SimpleExecutionRunnable implements Runnable {
 
 
     private void executeSplitStep(Execution execution) throws InterruptedException {
-        //If execution is paused or cancelled it will return false
+        // If execution is paused or cancelled it will return false
         List<Execution> newExecutions = executionService.executeSplit(execution);
 
-        //set current step to finished
+        // Set current step to finished
         executionMessage.setStatus(ExecStatus.FINISHED);
         executionMessage.incMsgSeqId();
         executionMessage.setPayload(null);
@@ -501,7 +473,7 @@ public class SimpleExecutionRunnable implements Runnable {
     }
 
     private boolean isExecutionTerminating(Execution nextStepExecution) {
-        if(nextStepExecution.getPosition() == null) {
+        if (nextStepExecution.getPosition() == null) {
             //set current step to finished
             executionMessage.setStatus(ExecStatus.FINISHED);
             executionMessage.incMsgSeqId();
@@ -509,7 +481,8 @@ public class SimpleExecutionRunnable implements Runnable {
 
             //Flow is finished - does not matter if successfully or not
             ExecutionMessage terminationMessage = createTerminatedExecutionMessage(nextStepExecution);
-            ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage, terminationMessage}; //Messages that we will send to OutBuffer
+            ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage,
+                    terminationMessage}; //Messages that we will send to OutBuffer
 
             try {
                 outBuffer.put(executionMessagesToSend);
@@ -518,8 +491,7 @@ public class SimpleExecutionRunnable implements Runnable {
                 return true;
             }
             return true;
-        }
-        else {
+        } else {
             return false;
         }
     }

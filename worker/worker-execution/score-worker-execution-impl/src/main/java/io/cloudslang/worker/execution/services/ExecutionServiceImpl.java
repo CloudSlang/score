@@ -156,9 +156,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
             }
             // dum bus event
             dumpBusEvents(execution);
-            if (logger.isDebugEnabled()) {
-                logger.debug("End of step: " + execution.getPosition() + " in execution id: " + execution.getExecutionId());
-            }
             return execution;
         } catch (InterruptedException ex) {
             throw ex;

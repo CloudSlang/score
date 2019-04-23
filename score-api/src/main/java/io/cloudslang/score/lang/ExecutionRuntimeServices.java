@@ -17,9 +17,9 @@
 package io.cloudslang.score.lang;
 
 import io.cloudslang.score.api.EndBranchDataContainer;
+import io.cloudslang.score.api.StartBranchDataContainer;
 import io.cloudslang.score.api.execution.ExecutionParametersConsts;
 import io.cloudslang.score.events.ScoreEvent;
-import io.cloudslang.score.api.StartBranchDataContainer;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
@@ -34,21 +34,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+import static java.lang.Boolean.TRUE;
+
 /**
- * User:
- * Date: 11/06/2014
+ * User: Date: 11/06/2014
  */
 public class ExecutionRuntimeServices implements Serializable {
 
-	private static final long serialVersionUID = 2557429503280678353L;
+    private static final long serialVersionUID = 2557429503280678353L;
 
-	protected static final String EXECUTION_PAUSED = "EXECUTION_PAUSED";
+    protected static final String EXECUTION_PAUSED = "EXECUTION_PAUSED";
 
     private static final String BRANCH_DATA = "BRANCH_DATA";
 
-	protected static final String SCORE_EVENTS_QUEUE = "SCORE_EVENTS_QUEUE";
+    protected static final String SCORE_EVENTS_QUEUE = "SCORE_EVENTS_QUEUE";
 
-	protected static final String NO_WORKERS_IN_GROUP = "NO_WORKERS_IN_GROUP";
+    protected static final String NO_WORKERS_IN_GROUP = "NO_WORKERS_IN_GROUP";
 
     private static final String NEW_SPLIT_ID = "NEW_SPLIT_ID";
 
@@ -82,73 +83,73 @@ public class ExecutionRuntimeServices implements Serializable {
 
     protected Map<String, Serializable> contextMap = new HashMap<>();
 
-    public ExecutionRuntimeServices(){}
+    public ExecutionRuntimeServices() {
+    }
 
     /**
      * copy constructor that clean the NEW_SPLIT_ID & BRANCH_ID keys
-     * @param executionRuntimeServices
      */
-    public ExecutionRuntimeServices(ExecutionRuntimeServices executionRuntimeServices){
+    public ExecutionRuntimeServices(ExecutionRuntimeServices executionRuntimeServices) {
         contextMap.putAll(executionRuntimeServices.contextMap);
         contextMap.remove(NEW_SPLIT_ID);
         contextMap.remove(BRANCH_ID);
     }
 
     /**
-     *  setter for the finished child brunches data
-     * @param data  - list of EndBranchDataContainer
+     * setter for the finished child brunches data
+     *
+     * @param data - list of EndBranchDataContainer
      */
-    public void setFinishedChildBranchesData(ArrayList<EndBranchDataContainer> data){
-        Validate.isTrue(!contextMap.containsKey(ExecutionParametersConsts.FINISHED_CHILD_BRANCHES_DATA), "not allowed to overwrite finished branches data");
+    public void setFinishedChildBranchesData(ArrayList<EndBranchDataContainer> data) {
+        Validate.isTrue(!contextMap.containsKey(ExecutionParametersConsts.FINISHED_CHILD_BRANCHES_DATA),
+                "not allowed to overwrite finished branches data");
         contextMap.put(ExecutionParametersConsts.FINISHED_CHILD_BRANCHES_DATA, data);
     }
 
     /**
      * put all the data relevant for sub flows: map of runningPlanIds and list of BeginStepIds
-     * @param runningPlansIds  - map of flowUUID to runningPlanId
-     * @param beginStepsIds   -  map of flowUUID to beginStepId
+     *
+     * @param runningPlansIds - map of flowUUID to runningPlanId
+     * @param beginStepsIds -  map of flowUUID to beginStepId
      */
-    public void setSubFlowsData(Map<String, Long> runningPlansIds,Map<String, Long> beginStepsIds ) {
+    public void setSubFlowsData(Map<String, Long> runningPlansIds, Map<String, Long> beginStepsIds) {
         contextMap.put(RUNNING_PLANS_MAP, (Serializable) runningPlansIds);
         contextMap.put(BEGIN_STEPS_MAP, (Serializable) beginStepsIds);
     }
 
     /**
-     *
      * @param subFlowUuid - the required sub flow UUID
-     * @return  the id of the runningPlan of the given flow
+     * @return the id of the runningPlan of the given flow
      */
-    public Long getSubFlowRunningExecutionPlan(String subFlowUuid){
+    public Long getSubFlowRunningExecutionPlan(String subFlowUuid) {
         return ((Map<String, Long>) contextMap.get(RUNNING_PLANS_MAP)).get(subFlowUuid);
     }
 
     /**
-     *
      * @param subFlowUuid - the required sub flow UUID
      * @return the begin step of the given flow
      */
-    public Long getSubFlowBeginStep(String subFlowUuid){
+    public Long getSubFlowBeginStep(String subFlowUuid) {
         return ((Map<String, Long>) contextMap.get(BEGIN_STEPS_MAP)).get(subFlowUuid);
     }
 
-    public String getLanguageName(){
+    public String getLanguageName() {
         return ((String) contextMap.get(LANGUAGE_TYPE));
     }
 
-    public void setLanguageName(String languageName){
+    public void setLanguageName(String languageName) {
         contextMap.put(LANGUAGE_TYPE, languageName);
     }
+
     /**
-     *
      * @return the brunchId of the current execution
      */
-    public String getBranchId(){
+    public String getBranchId() {
         return getFromMap(BRANCH_ID);
     }
 
     /**
      * setter for the brunch id of the current Execution
-     * @param brunchId
      */
     public void setBranchId(String brunchId) {
         Validate.isTrue(StringUtils.isEmpty(getBranchId()), "not allowed to overwrite branch id");
@@ -156,15 +157,15 @@ public class ExecutionRuntimeServices implements Serializable {
     }
 
     /**
-     *
      * @return the flow termination type : one of ExecutionStatus values
      */
-    public ExecutionStatus getFlowTerminationType(){
+    public ExecutionStatus getFlowTerminationType() {
         return getFromMap(FLOW_TERMINATION_TYPE);
     }
 
     /**
      * set the flow termination type
+     *
      * @param flowTerminationType - from ExecutionStatus
      */
     public void setFlowTerminationType(ExecutionStatus flowTerminationType) {
@@ -172,8 +173,9 @@ public class ExecutionRuntimeServices implements Serializable {
     }
 
     /**
-     * Request the engine to change the running execution plan to a new one
-     * The engine will deal with the request after finishing to execute the curretn step
+     * Request the engine to change the running execution plan to a new one The engine will deal with the request after
+     * finishing to execute the curretn step
+     *
      * @param runningExecutionPlanId the new running execution plan id
      */
     public void requestToChangeExecutionPlan(Long runningExecutionPlanId) {
@@ -181,102 +183,96 @@ public class ExecutionRuntimeServices implements Serializable {
     }
 
     /**
-     * This method should be used by score engine once it finishes executing a step, and checks
-     * if the running execution plan should be changed
+     * This method should be used by score engine once it finishes executing a step, and checks if the running execution
+     * plan should be changed
+     *
      * @return the id of the requested running execution plan
      */
-    public Long pullRequestForChangingExecutionPlan(){
+    public Long pullRequestForChangingExecutionPlan() {
         return removeFromMap(REQUESTED_EXECUTION_PLAN_ID);
     }
 
     /**
-     *
      * @return the error key of the step
      */
-    public String getStepErrorKey(){
+    public String getStepErrorKey() {
         return getFromMap(EXECUTION_STEP_ERROR_KEY);
     }
 
     /**
      * set the step error key
-     * @param stepErrorKey
      */
     public void setStepErrorKey(String stepErrorKey) {
         contextMap.put(EXECUTION_STEP_ERROR_KEY, stepErrorKey);
     }
 
     /**
-     *
-     * @return  true if there is step error
+     * @return true if there is step error
      */
-    public boolean hasStepErrorKey(){
+    public boolean hasStepErrorKey() {
         return contextMap.containsKey(EXECUTION_STEP_ERROR_KEY);
     }
 
     /**
      * clean step error key
+     *
      * @return the values cleaned
      */
-    public String removeStepErrorKey(){
-        return (String)removeFromMap(EXECUTION_STEP_ERROR_KEY);
+    public String removeStepErrorKey() {
+        return (String) removeFromMap(EXECUTION_STEP_ERROR_KEY);
     }
 
-    public void setStepPersist(boolean stepPersist){
+    public void setStepPersist(boolean stepPersist) {
         contextMap.put(STEP_PERSIST, stepPersist);
     }
 
-    public boolean isStepPersist(){
-        if (getFromMap(STEP_PERSIST) == null){
+    public boolean isStepPersist() {
+        if (getFromMap(STEP_PERSIST) == null) {
             return false;
-        }
-        else {
+        } else {
             return getFromMap(STEP_PERSIST);
         }
     }
 
-    public void removeStepPersist(){
+    public void removeStepPersist() {
         removeFromMap(STEP_PERSIST);
     }
 
-    public void setStepPersistId(String stepPersistId){
+    public void setStepPersistId(String stepPersistId) {
         contextMap.put(STEP_PERSIST_ID, stepPersistId);
     }
 
-    public String getStepPersistId(){
+    public String getStepPersistId() {
         return getFromMap(STEP_PERSIST_ID);
     }
 
-    public void removeStepPersistID(){
+    public void removeStepPersistID() {
         removeFromMap(STEP_PERSIST_ID);
     }
 
     /**
-     *
      * @return the execution id
      */
-    public Long getExecutionId(){
+    public Long getExecutionId() {
         return getFromMap(EXECUTION_ID_CONTEXT);
     }
 
     /**
      * set the execution id - should be called only once in score triggering!
-     * @param executionId
      */
     public void setExecutionId(Long executionId) {
         contextMap.put(EXECUTION_ID_CONTEXT, executionId);
     }
 
     /**
-     *
      * @return the split id
      */
-    public String getSplitId(){
+    public String getSplitId() {
         return getFromMap(NEW_SPLIT_ID);
     }
 
     /**
      * set teh split id
-     * @param splitId
      */
     public void setSplitId(String splitId) {
         Validate.isTrue(StringUtils.isEmpty(getSplitId()), "not allowed to overwrite split id");
@@ -306,78 +302,81 @@ public class ExecutionRuntimeServices implements Serializable {
     public void setParentRunningId(Long parentRunningId) {
         contextMap.put(PARENT_RUNNING_ID, parentRunningId);
     }
+
     /**
      * used for asking score to pause your run
      */
     public void pause() {
-		contextMap.put(EXECUTION_PAUSED, Boolean.TRUE);
-	}
+        contextMap.put(EXECUTION_PAUSED, TRUE);
+    }
 
     /**
-     *
-     * @return  true if the execution should be paused
+     * @return true if the execution should be paused
      */
-	public boolean isPaused() {
-		return contextMap.containsKey(EXECUTION_PAUSED) && contextMap.get(EXECUTION_PAUSED).equals(Boolean.TRUE);
-	}
+    public boolean isPaused() {
+        // This is called lots of times, the flipped order is for performance considerations
+        return TRUE.equals(contextMap.get(EXECUTION_PAUSED));
+    }
 
     /**
-     *  add event - for score to fire
-     * @param eventType  - string which is the key you can listen to
-     * @param eventData  - the event data
-     */
-	public void addEvent(String eventType, Serializable eventData) {
-		@SuppressWarnings("unchecked")
-		Queue<ScoreEvent> eventsQueue = getFromMap(SCORE_EVENTS_QUEUE);
-		if (eventsQueue == null) {
-			eventsQueue = new ArrayDeque<>();
-			contextMap.put(SCORE_EVENTS_QUEUE, (ArrayDeque) eventsQueue);
-		}
-		eventsQueue.add(new ScoreEvent(eventType,getLanguageName(), eventData, getMetaData()));
-	}
-
-    /**
+     * add event - for score to fire
      *
+     * @param eventType - string which is the key you can listen to
+     * @param eventData - the event data
+     */
+    public void addEvent(String eventType, Serializable eventData) {
+        @SuppressWarnings("unchecked")
+        Queue<ScoreEvent> eventsQueue = getFromMap(SCORE_EVENTS_QUEUE);
+        if (eventsQueue == null) {
+            eventsQueue = new ArrayDeque<>();
+            contextMap.put(SCORE_EVENTS_QUEUE, (ArrayDeque) eventsQueue);
+        }
+        eventsQueue.add(new ScoreEvent(eventType, getLanguageName(), eventData, getMetaData()));
+    }
+
+    /**
      * @return all the added events
      */
-	public ArrayDeque<ScoreEvent> getEvents() {
-		return getFromMap(SCORE_EVENTS_QUEUE);
-	}
+    public ArrayDeque<ScoreEvent> getEvents() {
+        return getFromMap(SCORE_EVENTS_QUEUE);
+    }
 
     /**
-     *  means we dont have worker with the required group
+     * means we dont have worker with the required group
+     *
      * @param groupName - the name of the missing group
      */
-	public void setNoWorkerInGroup(String groupName) {
-		contextMap.put(NO_WORKERS_IN_GROUP, groupName);
-	}
+    public void setNoWorkerInGroup(String groupName) {
+        contextMap.put(NO_WORKERS_IN_GROUP, groupName);
+    }
 
     /**
-     *
      * @return the missing group name
      */
-	public String getNoWorkerInGroupName() {
-		return getFromMap(NO_WORKERS_IN_GROUP);
-	}
+    public String getNoWorkerInGroupName() {
+        return getFromMap(NO_WORKERS_IN_GROUP);
+    }
 
-	protected <T> T getFromMap(String key) {
+    protected <T> T getFromMap(String key) {
         //noinspection unchecked
         return (T) contextMap.get(key);
-	}
+    }
 
     /**
      * add brunch - means you want to split your execution
-     * @param startPosition  - the position in the execution plan the new brunch will point to
+     *
+     * @param startPosition - the position in the execution plan the new brunch will point to
      * @param flowUuid - the flow uuid
      * @param context - the context of the created brunch
      */
-    public void addBranch(Long startPosition, String flowUuid, Map<String, Serializable> context){
+    public void addBranch(Long startPosition, String flowUuid, Map<String, Serializable> context) {
         Map<String, Long> runningPlansIds = getFromMap(RUNNING_PLANS_MAP);
         Long runningPlanId = runningPlansIds.get(flowUuid);
         addBranch(startPosition, runningPlanId, context, new ExecutionRuntimeServices(this));
     }
 
-    protected void addBranch(Long startPosition, Long executionPlanId, Map<String, Serializable> context, ExecutionRuntimeServices executionRuntimeServices) {
+    protected void addBranch(Long startPosition, Long executionPlanId, Map<String, Serializable> context,
+            ExecutionRuntimeServices executionRuntimeServices) {
         if (!contextMap.containsKey(BRANCH_DATA)) {
             contextMap.put(BRANCH_DATA, new ArrayList<StartBranchDataContainer>());
         }
@@ -387,15 +386,16 @@ public class ExecutionRuntimeServices implements Serializable {
         contextMapForBranch.remove(BRANCH_DATA);
         contextMapForBranch.put(SCORE_EVENTS_QUEUE, (ArrayDeque) new ArrayDeque<>());
 
-        branchesData.add(new StartBranchDataContainer(startPosition, executionPlanId, context, new SystemContext(contextMapForBranch)));
+        branchesData.add(new StartBranchDataContainer(startPosition, executionPlanId, context,
+                new SystemContext(contextMapForBranch)));
     }
 
-	/**
-	 * Removes the branches data and returns it
-	 */
-	public List<StartBranchDataContainer> removeBranchesData() {
-		return removeFromMap(BRANCH_DATA);
-	}
+    /**
+     * Removes the branches data and returns it
+     */
+    public List<StartBranchDataContainer> removeBranchesData() {
+        return removeFromMap(BRANCH_DATA);
+    }
 
     /**
      * @return a list of all branches ended.
@@ -404,39 +404,39 @@ public class ExecutionRuntimeServices implements Serializable {
         return (List<EndBranchDataContainer>) removeFromMap(ExecutionParametersConsts.FINISHED_CHILD_BRANCHES_DATA);
     }
 
-    public void putMetaData(Map<String,? extends  Serializable> metadata){
-        contextMap.put(METADATA, (Serializable)metadata);
+    public void putMetaData(Map<String, ? extends Serializable> metadata) {
+        contextMap.put(METADATA, (Serializable) metadata);
     }
 
-    public Map<String,? extends Serializable> getMetaData(){
-        return (Map<String,Serializable>)contextMap.get(METADATA);
+    public Map<String, ? extends Serializable> getMetaData() {
+        return (Map<String, Serializable>) contextMap.get(METADATA);
     }
 
-	private <T> T removeFromMap(String key) {
+    private <T> T removeFromMap(String key) {
         //noinspection unchecked
         return (T) contextMap.remove(key);
-	}
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-		ExecutionRuntimeServices that = (ExecutionRuntimeServices) o;
+        ExecutionRuntimeServices that = (ExecutionRuntimeServices) o;
 
-		return new EqualsBuilder()
-				.append(this.contextMap, that.contextMap)
-				.isEquals();
-	}
+        return new EqualsBuilder()
+                .append(this.contextMap, that.contextMap)
+                .isEquals();
+    }
 
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder()
-				.append(this.contextMap)
-				.toHashCode();
-	}
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder()
+                .append(this.contextMap)
+                .toHashCode();
+    }
 }
