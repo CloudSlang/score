@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+import static java.lang.Boolean.TRUE;
+
 /**
  * User:
  * Date: 11/06/2014
@@ -310,7 +312,7 @@ public class ExecutionRuntimeServices implements Serializable {
      * used for asking score to pause your run
      */
     public void pause() {
-		contextMap.put(EXECUTION_PAUSED, Boolean.TRUE);
+		contextMap.put(EXECUTION_PAUSED, TRUE);
 	}
 
     /**
@@ -318,7 +320,8 @@ public class ExecutionRuntimeServices implements Serializable {
      * @return  true if the execution should be paused
      */
 	public boolean isPaused() {
-		return contextMap.containsKey(EXECUTION_PAUSED) && contextMap.get(EXECUTION_PAUSED).equals(Boolean.TRUE);
+	    // This is called lots of times, the flipped order is for performance considerations
+		return TRUE.equals(contextMap.get(EXECUTION_PAUSED));
 	}
 
     /**
