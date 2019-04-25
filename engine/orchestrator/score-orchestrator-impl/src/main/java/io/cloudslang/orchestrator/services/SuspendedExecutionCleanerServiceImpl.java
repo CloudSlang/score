@@ -42,10 +42,10 @@ public class SuspendedExecutionCleanerServiceImpl implements SuspendedExecutionC
         }
     }
 
-    public void cleanSuspendedExecutions(Integer bulkSize) {
+    private void cleanSuspendedExecutions(Integer bulkSize) {
         PageRequest pageRequest = new PageRequest(0, bulkSize);
 
-        suspendedExecutionsRepository.collectCompletedSuspendedExecutions(pageRequest);
+        suspendedExecutionsRepository.delete(suspendedExecutionsRepository.collectCompletedSuspendedExecutions(pageRequest));
     }
 }
 
