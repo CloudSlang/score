@@ -173,6 +173,23 @@ public class SuspendedExecutionsRepositoryTest {
     }
 
 
+    @Test
+    public void collectCompletedSuspendedTest(){
+
+        Map<String, String> contexts = new HashMap<>();
+        contexts.put("flowContext", "");
+
+        Execution exec = new Execution(2L, 0L, contexts);
+        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec);
+
+        repository.save(suspendedExecution);
+
+        List<SuspendedExecution> read = repository.collectCompletedSuspendedExecutions(new PageRequest(0, 100));
+
+        Assert.assertTrue(read != null);
+        Assert.assertTrue(read.get(0).getExecutionId().equals("111"));
+    }
+
     @Configuration
     @EnableJpaRepositories("io.cloudslang.orchestrator")
     @EnableTransactionManagement
