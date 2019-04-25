@@ -17,8 +17,8 @@
 package io.cloudslang.engine.node.services;
 
 import com.google.common.collect.Multimap;
-import io.cloudslang.score.api.nodes.WorkerStatus;
 import io.cloudslang.engine.node.entities.WorkerNode;
+import io.cloudslang.score.api.nodes.WorkerStatus;
 
 import java.util.List;
 
@@ -101,6 +101,13 @@ public interface WorkerNodeService {
      * @return a {@link io.cloudslang.engine.node.entities.WorkerNode} of the requested worker
      */
 	WorkerNode readByUUID(String uuid);
+
+    /**
+     * Returns active status of the worker according to the worker UUID
+     * @param workerUuid
+     * @return
+     */
+    boolean isActive(String workerUuid);
 
     /**
      *

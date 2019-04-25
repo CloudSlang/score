@@ -165,6 +165,16 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 
 	@Override
 	@Transactional(readOnly = true)
+	public boolean isActive(String uuid) {
+		WorkerNode worker = workerNodeRepository.findByUuidAndDeleted(uuid, false);
+		if(worker == null) {
+			throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
+		}
+		return worker.isActive();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
 	public WorkerNode findByUuid(String uuid) {
 		WorkerNode worker = workerNodeRepository.findByUuid(uuid);
 		if(worker == null) {
