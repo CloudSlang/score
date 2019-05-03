@@ -16,7 +16,6 @@
 package io.cloudslang.worker.management.services;
 
 
-import com.conversantmedia.util.concurrent.DisruptorBlockingQueue;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
@@ -44,7 +43,6 @@ public class WorkerConfigurationUtils {
 
     private static final String INBUFFER_IMPLEMENTATION_KEY = "worker.inbuffer.strategy";
     private static final String LINKED = "linked";
-    private static final String DISRUPTOR = "disruptor";
     private static final String ARRAY = "array";
 
     private static final String WORKER_BLOCKING_QUEUE_IMPLEMENTATION = "Worker blocking queue implementation: %s";
@@ -80,9 +78,6 @@ public class WorkerConfigurationUtils {
         if (equalsIgnoreCase(workerInBufferQueuePolicy, LINKED)) {
             blockingQueue = getLinkedQueue();
             logger.info(String.format(WORKER_BLOCKING_QUEUE_IMPLEMENTATION, LINKED));
-        } else if (equalsIgnoreCase(workerInBufferQueuePolicy, DISRUPTOR)) {
-            blockingQueue = getDisruptorQueue(executionThreadsCount, capacity);
-            logger.info(String.format(WORKER_BLOCKING_QUEUE_IMPLEMENTATION, DISRUPTOR));
         } else if (equalsIgnoreCase(workerInBufferQueuePolicy, ARRAY)) {
             logger.info(String.format(WORKER_BLOCKING_QUEUE_IMPLEMENTATION, ARRAY));
             blockingQueue = getArrayQueue(executionThreadsCount, capacity);
@@ -96,10 +91,6 @@ public class WorkerConfigurationUtils {
 
     private LinkedBlockingQueue<Runnable> getLinkedQueue() {
         return new LinkedBlockingQueue<>();
-    }
-
-    private BlockingQueue<Runnable> getDisruptorQueue(int executionThreadsCount, int capacity) {
-        return new DisruptorBlockingQueue<>(doGetFixedSizeQueueCapacity(executionThreadsCount, capacity));
     }
 
     private BlockingQueue<Runnable> getArrayQueue(int executionThreadsCount, int capacity) {
