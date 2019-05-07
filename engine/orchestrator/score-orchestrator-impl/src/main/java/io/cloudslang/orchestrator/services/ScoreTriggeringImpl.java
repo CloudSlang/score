@@ -72,6 +72,7 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
         Map<String,Serializable> executionMetadata = createMetadata(triggeringProperties);
         scoreSystemContext.putMetaData(executionMetadata);
         Execution execution = new Execution(executionId, runningExecutionPlanId, triggeringProperties.getStartStep(), triggeringProperties.getContext(), scoreSystemContext);
+        execution.setGroupName(triggeringProperties.getExecutionPlan().getWorkerGroup());
 
         // create execution record in ExecutionSummary table
         executionStateService.createParentExecution(execution.getExecutionId());
@@ -129,7 +130,7 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
 
         return new ExecutionMessage(ExecutionMessage.EMPTY_EXEC_STATE_ID,
                 ExecutionMessage.EMPTY_WORKER,
-                WorkerNode.DEFAULT_WORKER_GROUPS[0],
+                execution.getGroupName() != null ? execution.getGroupName() : WorkerNode.DEFAULT_WORKER_GROUPS[0],
                 String.valueOf(execution.getExecutionId()),
                 ExecStatus.PENDING, //start new flow also in PENDING
                 payload,

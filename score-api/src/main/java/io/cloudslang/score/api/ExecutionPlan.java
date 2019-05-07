@@ -16,7 +16,6 @@
 
 package io.cloudslang.score.api;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import java.io.Serializable;
@@ -43,6 +42,8 @@ public class ExecutionPlan implements Serializable {
     protected String name;
     //the name of the flow language this execution plan  represents, such as afl
     protected String language;
+
+    private String workerGroup;
 
     public ExecutionPlan() {
         this.executionPlanUuid= UUID.randomUUID().toString();
@@ -129,12 +130,21 @@ public class ExecutionPlan implements Serializable {
         this.name = name;
     }
 
+    public String getWorkerGroup() {
+        return workerGroup;
+    }
+
+    public void setWorkerGroup(String workerGroup) {
+        this.workerGroup = workerGroup;
+    }
+
     @Override
     public String toString() {
         return "ExecutionPlan: \n" +
                 "FlowUuid= '" + flowUuid + '\'' +
                 "\n BeginStep= " + beginStep +
                 "\n Name= '" + name + '\'' +
+                "\n Worker Group= '" + workerGroup + '\'' +
                 "\n Steps: \n" + printSteps();
     }
 
@@ -168,6 +178,7 @@ public class ExecutionPlan implements Serializable {
         hashCodeBuilder.append(this.getSubflowsUUIDs());
         hashCodeBuilder.append(this.getSysAccPaths());
         hashCodeBuilder.append(this.getSteps());
+        hashCodeBuilder.append(this.getWorkerGroup());
 
         return new HashCodeBuilder().toHashCode();
     }
