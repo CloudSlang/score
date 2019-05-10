@@ -24,4 +24,6 @@ public interface ExternalExecutionService {
     Execution readExecutionObject(Long executionId, String branchId);
 
     void updateExecutionObject(Long executionId, String branchId, Execution execution);
+
+    void postExecutionWork(Execution execution) throws InterruptedException;
 }

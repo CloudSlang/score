@@ -168,6 +168,13 @@ public final class ExecutionServiceImpl implements ExecutionService {
         }
     }
 
+    @Override
+    public void postExecutionWork(Execution execution) throws InterruptedException {
+        navigate(execution, loadExecutionStep(execution));
+        postExecutionSettings(execution);
+        dumpBusEvents(execution);
+    }
+
     private Execution doWaitForCancel(Execution execution) throws InterruptedException, TimeoutException {
         int iterations = ((int) (waitPeriodForTimeoutMillis / waitPauseForTimeoutMillis)) + 1; // at least one iteration
         for (int i = 0; i < iterations; i++) {
@@ -349,8 +356,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
         final Boolean isDebuggerMode = (Boolean) systemContext.get(TempConstants.DEBUGGER_MODE);
         return (isDebuggerMode != null) && isDebuggerMode;
     }
-
-    public void dumpBusEvents(Execution execution) throws InterruptedException {
+    
+    private void dumpBusEvents(Execution execution) throws InterruptedException {
         ArrayDeque<ScoreEvent> eventsQueue = execution.getSystemContext().getEvents();
         if (eventsQueue == null) {
             return;
@@ -361,7 +368,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         eventsQueue.clear();
     }
 
-    public ExecutionStep loadExecutionStep(Execution execution) {
+    protected ExecutionStep loadExecutionStep(Execution execution) {
         RunningExecutionPlan runningExecutionPlan;
         if (execution != null) {
             // Optimization for external workers - run the content only without loading the execution plan
@@ -510,7 +517,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         eventBus.dispatch(eventWrapper);
     }
 
-    public void navigate(Execution execution, ExecutionStep currStep) throws InterruptedException {
+    protected void navigate(Execution execution, ExecutionStep currStep) throws InterruptedException {
         Long position;
         try {
             if (currStep.getNavigation() != null) {
@@ -547,7 +554,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         return useDefaultGroup;
     }
 
-    public void postExecutionSettings(Execution execution) {
+    protected void postExecutionSettings(Execution execution) {
         setWorkerGroup(execution);
 
         //if there is a request to change the running execution plan id, we update the execution to the new execution plan ID

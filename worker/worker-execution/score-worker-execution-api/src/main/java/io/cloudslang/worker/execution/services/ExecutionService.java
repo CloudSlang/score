@@ -39,6 +39,8 @@ public interface ExecutionService {
      */
 	Execution execute(Execution execution) throws InterruptedException;
 
+    void postExecutionWork(Execution execution) throws InterruptedException;
+
     /**
      *
      * Handles execution of split step
