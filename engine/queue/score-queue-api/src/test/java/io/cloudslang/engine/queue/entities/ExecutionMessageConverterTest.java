@@ -70,19 +70,19 @@ public class ExecutionMessageConverterTest {
 
         Payload payload = executionMessageConverter.createPayload(execution);
         assertFalse(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 0);
+        assertEquals(0, payload.getData()[0]);
 
         payload = executionMessageConverter.createPayload(execution);
         assertFalse(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 0);
+        assertEquals(0, payload.getData()[0]);
 
         payload = executionMessageConverter.createPayload(execution, false);
         assertFalse(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 0);
+        assertEquals(0, payload.getData()[0]);
 
         payload = executionMessageConverter.createPayload(execution, true);
         assertTrue(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 1);
+        assertEquals(1, payload.getData()[0]);
     }
 
     @Test
@@ -94,19 +94,19 @@ public class ExecutionMessageConverterTest {
 
         Payload payload = executionMessageConverter.createPayload(execution);
         assertTrue(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 1);
+        assertEquals(1, payload.getData()[0]);
 
         payload = executionMessageConverter.createPayload(execution);
         assertTrue(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 1);
+        assertEquals(1, payload.getData()[0]);
 
         payload = executionMessageConverter.createPayload(execution, false);
         assertTrue(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 1);
+        assertEquals(1, payload.getData()[0]);
 
         payload = executionMessageConverter.createPayload(execution, true);
         assertTrue(executionMessageConverter.containsSensitiveData(payload));
-        assertTrue(payload.getData()[0] == 1);
+        assertEquals(1, payload.getData()[0]);
     }
 
     @Test
@@ -119,27 +119,6 @@ public class ExecutionMessageConverterTest {
         p.setData(new byte[]{1, 0, 0});
         assertTrue(executionMessageConverter.containsSensitiveData(p));
     }
-
-//    @Test
-//    public void testConverterWithSession() throws IOException {
-//        List<String> names = new ArrayList<>();
-//        names.add("serializableSessionContext");
-//        Execution execution = new Execution(999L, 0L, names);
-//
-//        StepSerializableSessionObject stepSerializableObject = new StepSerializableSessionObject("sessionCounter_1bbd31ec-0531-4180-8b70-a592355ea043");
-//        stepSerializableObject.setValue(1);
-//
-//        execution.getSerializableSessionContext().put("sessionCounter_1bbd31ec-0531-4180-8b70-a592355ea043", stepSerializableObject);
-//
-//        Payload payload = converter.createPayload(execution);
-//
-//        Execution afterConvert = converter.extractExecution(payload);
-//
-//        Assert.assertEquals(execution.getPosition(), afterConvert.getPosition());
-//        Assert.assertEquals(execution.getExecutionId(), afterConvert.getExecutionId());
-//        Assert.assertEquals(execution.getSerializableSessionContext().get("sessionCounter_1bbd31ec-0531-4180-8b70-a592355ea043").getName(), afterConvert.getSerializableSessionContext().get("sessionCounter_1bbd31ec-0531-4180-8b70-a592355ea043").getName());
-//    }
-
 
     @Configuration
     static class ConfigurationForTest {
