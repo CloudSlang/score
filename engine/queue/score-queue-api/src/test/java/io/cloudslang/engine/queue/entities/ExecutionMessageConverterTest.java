@@ -16,7 +16,6 @@
 
 package io.cloudslang.engine.queue.entities;
 
-import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.lang.SystemContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,32 +25,32 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyMapOf;
+import static org.mockito.Mockito.anyMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+/**
+ * Created with IntelliJ IDEA. User: kravtsov Date: 20/11/12 Time: 14:35
+ */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = ExecutionMessageConverterTest.ConfigurationForTest.class)
 public class ExecutionMessageConverterTest {
+
     @Autowired
     private ExecutionMessageConverter executionMessageConverter;
     @Autowired
     private SensitiveDataHandler sensitiveDataHandler;
 
     @Test
-    public void testConverterCompressed() {
+    public void testConverter() throws IOException {
         List<String> names = new ArrayList<>();
         names.add("lala");
         MyExecutionForTest execution = new MyExecutionForTest(111L, 999L, 0L, names);
@@ -66,55 +65,8 @@ public class ExecutionMessageConverterTest {
     }
 
     @Test
-    public void testConverterCompressedWithExecution() {
-
-        Execution execution = new Execution(123L, 1L, new HashMap<>());
-        execution.setExecutionId(1L);
-        Payload payload = executionMessageConverter.createPayload(execution);
-
-        Execution afterConvert = executionMessageConverter.extractExecution(payload);
-
-        assertEquals(execution.getPosition(), afterConvert.getPosition());
-        assertEquals(execution.getExecutionId(), afterConvert.getExecutionId());
-        assertEquals(execution.getRunningExecutionPlanId(), afterConvert.getRunningExecutionPlanId());
-    }
-
-    @Test
-    public void testConverterLegacyCaseUncompressed() throws IOException {
-        List<String> names = new ArrayList<>();
-        names.add("1");
-        names.add("2");
-        names.add("3");
-
-        MyExecutionForTest execution = new MyExecutionForTest(222L, 9L, 500L, names);
-
-        Payload payload = createLegacyPayload(execution);
-
-        MyExecutionForTest afterConvert = executionMessageConverter.extractExecution(payload);
-
-        assertEquals(execution.getPosition(), afterConvert.getPosition());
-        assertEquals(execution.getExecutionId(), afterConvert.getExecutionId());
-        assertEquals(execution.getRunningExecutionPlanId(), afterConvert.getRunningExecutionPlanId());
-    }
-
-    @Test
-    public void testConverterLegacyCaseWithExecution() throws IOException {
-
-        Execution execution = new Execution(576767600L, 1L, new HashMap<>());
-        execution.setExecutionId(2L);
-
-        Payload payload = createLegacyPayload(execution);
-
-        Execution afterConvert = executionMessageConverter.extractExecution(payload);
-
-        assertEquals(execution.getPosition(), afterConvert.getPosition());
-        assertEquals(execution.getExecutionId(), afterConvert.getExecutionId());
-        assertEquals(execution.getRunningExecutionPlanId(), afterConvert.getRunningExecutionPlanId());
-    }
-
-    @Test
     public void testCreatePayloadAndSensitiveDataHandlerReturnsFalse() {
-        when(sensitiveDataHandler.containsSensitiveData(any(SystemContext.class), anyMapOf(String.class, Serializable.class))).thenReturn(false);
+        when(sensitiveDataHandler.containsSensitiveData(any(SystemContext.class), anyMap())).thenReturn(false);
         List<String> names = new ArrayList<>();
         names.add("lala");
         MyExecutionForTest execution = new MyExecutionForTest(111L, 999L, 0L, names);
@@ -138,7 +90,7 @@ public class ExecutionMessageConverterTest {
 
     @Test
     public void testCreatePayloadAndSensitiveDataHandlerReturnsTrue() {
-        when(sensitiveDataHandler.containsSensitiveData(any(SystemContext.class), anyMapOf(String.class, Serializable.class))).thenReturn(true);
+        when(sensitiveDataHandler.containsSensitiveData(any(SystemContext.class), anyMap())).thenReturn(true);
         List<String> names = new ArrayList<>();
         names.add("lala");
         MyExecutionForTest execution = new MyExecutionForTest(111L, 999L, 0L, names);
@@ -169,17 +121,6 @@ public class ExecutionMessageConverterTest {
         p = new Payload();
         p.setData(new byte[]{1, 0, 0});
         assertTrue(executionMessageConverter.containsSensitiveData(p));
-    }
-
-    private Payload createLegacyPayload(Serializable serializable) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024);
-        byteArrayOutputStream.write(0);
-        try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)) {
-            objectOutputStream.writeObject(serializable);
-            objectOutputStream.flush();
-        }
-
-        return new Payload(byteArrayOutputStream.toByteArray());
     }
 
     @Configuration
