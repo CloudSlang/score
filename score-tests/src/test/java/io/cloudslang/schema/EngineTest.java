@@ -25,6 +25,9 @@ import io.cloudslang.score.api.ExecutionStep;
 import io.cloudslang.score.api.Score;
 import io.cloudslang.score.api.TriggeringProperties;
 import io.cloudslang.score.events.EventBus;
+import io.cloudslang.worker.execution.reflection.ReflectionAdapter;
+import io.cloudslang.worker.execution.services.ExecutionServiceImpl;
+import io.cloudslang.worker.management.WorkerConfigurationService;
 import liquibase.integration.spring.SpringLiquibase;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.junit.Test;
@@ -169,6 +172,20 @@ public class EngineTest {
             return mock(EventBus.class);
         }
 
+        @Bean
+        public ExecutionServiceImpl executionService() {
+            return new ExecutionServiceImpl();
+        }
+
+        @Bean
+        public ReflectionAdapter getReflectionAdapter() {
+            return mock(ReflectionAdapter.class);
+        }
+
+        @Bean
+        public WorkerConfigurationService getWorkerConfigurationService() {
+            return mock(WorkerConfigurationService.class);
+        }
     }
 
 }

@@ -30,6 +30,9 @@ public final class ExternalExecutionServiceImpl implements ExternalExecutionServ
     @Autowired
     private ExecutionStateService stateService;
 
+    @Autowired
+    private ExecutionService executionService;
+
     @Override
     public void resumeExternalExecution(Execution execution) {
         pauseService.resumeExecution(execution.getExecutionId(),
@@ -44,6 +47,11 @@ public final class ExternalExecutionServiceImpl implements ExternalExecutionServ
     @Override
     public void updateExecutionObject(Long executionId, String branchId, Execution execution) {
         stateService.updateExecutionObject(executionId, branchId, execution);
+    }
+
+    @Override
+    public void postExecutionWork(Execution execution) throws InterruptedException {
+        executionService.postExecutionWork(execution);
     }
 
 }
