@@ -16,10 +16,9 @@
 
 package io.cloudslang.engine.queue.entities;
 
-import static org.junit.Assert.*;
+import io.cloudslang.score.lang.SystemContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import io.cloudslang.score.lang.SystemContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,17 +29,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyMap;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
- * Created with IntelliJ IDEA.
- * User: kravtsov
- * Date: 20/11/12
- * Time: 14:35
+ * Created with IntelliJ IDEA. User: kravtsov Date: 20/11/12 Time: 14:35
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = ExecutionMessageConverterTest.ConfigurationForTest.class)
 public class ExecutionMessageConverterTest {
+
     @Autowired
     private ExecutionMessageConverter executionMessageConverter;
     @Autowired
