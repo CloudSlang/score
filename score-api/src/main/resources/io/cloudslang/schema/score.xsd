@@ -23,7 +23,7 @@
             <xsd:attribute type="xsd:boolean" name="registerPauseResumeService"/>
             <xsd:attribute type="xsd:boolean" name="registerWorkerNodeService"/>
             <xsd:attribute type="xsd:boolean" name="registerEngineVersionService"/>
-		</xsd:complexType>
+        </xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="worker">
