@@ -20,12 +20,23 @@ import io.cloudslang.runtime.impl.sequential.DefaultSequentialExecutionServiceIm
 import io.cloudslang.score.events.EventBusImpl;
 import io.cloudslang.worker.execution.reflection.ReflectionAdapterImpl;
 import io.cloudslang.worker.execution.services.ExecutionServiceImpl;
+import io.cloudslang.worker.execution.services.ScoreRobotAvailabilityServiceImpl;
 import io.cloudslang.worker.execution.services.SessionDataHandlerImpl;
 import io.cloudslang.worker.management.WorkerConfigurationServiceImpl;
 import io.cloudslang.worker.management.WorkerRegistration;
 import io.cloudslang.worker.management.monitor.ScheduledWorkerLoadMonitor;
 import io.cloudslang.worker.management.monitor.WorkerMonitorsImpl;
-import io.cloudslang.worker.management.services.*;
+import io.cloudslang.worker.management.services.InBuffer;
+import io.cloudslang.worker.management.services.OutboundBufferImpl;
+import io.cloudslang.worker.management.services.RetryTemplate;
+import io.cloudslang.worker.management.services.SimpleExecutionRunnableFactory;
+import io.cloudslang.worker.management.services.SynchronizationManagerImpl;
+import io.cloudslang.worker.management.services.WorkerConfigurationUtils;
+import io.cloudslang.worker.management.services.WorkerExecutionMonitorServiceImpl;
+import io.cloudslang.worker.management.services.WorkerManager;
+import io.cloudslang.worker.management.services.WorkerManagerMBean;
+import io.cloudslang.worker.management.services.WorkerRecoveryManagerImpl;
+import io.cloudslang.worker.management.services.WorkerVersionServiceImpl;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
@@ -116,27 +127,34 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		}
 	}
 
-	private static void registerSpecialBeans(Element element, ParserContext parserContext) {
+	private void registerSpecialBeans(Element element, ParserContext parserContext) {
 		if(!"false".equalsIgnoreCase(element.getAttribute("register"))) {
 			new BeanRegistrator(parserContext).CLASS(WorkerRegistration.class).register();
 		}
 
 		registerWorkerVersionService(element, parserContext);
 		registerSequentialExecution(element, parserContext);
+		registerRobotAvailabilityService(element, parserContext);
 	}
 
-	private static void registerSequentialExecution(Element element, ParserContext parserContext){
+	private void registerSequentialExecution(Element element, ParserContext parserContext){
 		String registerSequentialExecutionService = element.getAttribute("registerSequentialExecutionService");
 		if(!Boolean.FALSE.toString().equals(registerSequentialExecutionService)){
 			new BeanRegistrator(parserContext).CLASS(DefaultSequentialExecutionServiceImpl.class).register();
 		}
 	}
 
-
-	private static void registerWorkerVersionService(Element element, ParserContext parserContext){
+	private void registerWorkerVersionService(Element element, ParserContext parserContext){
 		String registerWorkerVersionService = element.getAttribute("registerWorkerVersionService");
 		if(!registerWorkerVersionService.equals(Boolean.FALSE.toString())){
 			new BeanRegistrator(parserContext).CLASS(WorkerVersionServiceImpl.class).register();
+		}
+	}
+
+	private void registerRobotAvailabilityService(Element element, ParserContext parserContext){
+		String registerRobotAvailabilityService = element.getAttribute("registerRobotAvailabilityService");
+		if(!Boolean.FALSE.toString().equals(registerRobotAvailabilityService)){
+			new BeanRegistrator(parserContext).CLASS(ScoreRobotAvailabilityServiceImpl.class).register();
 		}
 	}
 

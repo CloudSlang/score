@@ -57,6 +57,8 @@ import static io.cloudslang.score.facade.TempConstants.EXECUTE_CONTENT_ACTION;
 import static io.cloudslang.score.facade.TempConstants.EXECUTE_CONTENT_ACTION_CLASSNAME;
 import static io.cloudslang.score.facade.TempConstants.SC_TIMEOUT_MINS;
 import static io.cloudslang.score.facade.TempConstants.SC_TIMEOUT_START_TIME;
+import static io.cloudslang.score.facade.execution.PauseReason.NO_ROBOTS_IN_GROUP;
+import static io.cloudslang.score.facade.execution.PauseReason.PENDING_ROBOT;
 import static java.lang.Boolean.getBoolean;
 import static java.lang.Integer.getInteger;
 import static java.lang.Long.getLong;
@@ -83,6 +85,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     @Autowired
     private EventBus eventBus;
+
+    @Autowired
+    private RobotAvailabilityService robotAvailabilityService;
 
     private static final int DEFAULT_PLATFORM_LEVEL_OPERATION_TIMEOUT_IN_SECONDS = 24 * 60 * 60; // seconds in a day
     private static final int DEFAULT_PLATFORM_LEVEL_WAIT_PERIOD_FOR_TIMEOUT_IN_SECONDS = 5 * 60; // 5 minutes
@@ -141,7 +146,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             }
             if ((!execution.getSystemContext().hasStepErrorKey()) && currStep.getActionData().get(ACTION_TYPE) != null &&
                     currStep.getActionData().get(ACTION_TYPE).toString().equalsIgnoreCase(SEQUENTIAL)) {
-                pauseFlow(PauseReason.SEQUENTIAL_EXECUTION, execution);
+                pauseFlow(execution, robotAvailabilityService.isRobotAvailable("Default") ? PENDING_ROBOT : NO_ROBOTS_IN_GROUP);
                 return null;
             }
             // Run the navigation
@@ -278,7 +283,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         String branchId = execution.getSystemContext().getBranchId();
         PauseReason reason = findPauseReason(execution.getExecutionId(), branchId);
         if (reason != null) { // need to pause the execution
-            pauseFlow(reason, execution);
+            pauseFlow(execution, reason);
             return true;
         }
         return false;
@@ -292,14 +297,15 @@ public final class ExecutionServiceImpl implements ExecutionService {
         if (execSummary != null && execSummary.getStatus().equals(ExecutionStatus.PENDING_PAUSE)) {
             reason = execSummary.getPauseReason();
         }
-        if (reason != null) { // need to pause the execution
-            pauseFlow(reason, execution);
+        if (reason != null) {
+            // need to pause the execution
+            pauseFlow(execution, reason);
             return true;
         }
         return false;
     }
 
-    public void pauseFlow(PauseReason reason, Execution execution) throws InterruptedException {
+    private void pauseFlow(Execution execution, PauseReason reason) throws InterruptedException {
         SystemContext systemContext = execution.getSystemContext();
         Long executionId = execution.getExecutionId();
         String branchId = systemContext.getBranchId();
@@ -309,7 +315,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 // we pause the branch because the Parent was user-paused (see findPauseReason)
                 pauseService.pauseExecution(executionId, branchId, reason); // this creates a DB record for this branch, as Pending-paused
             }
-        } else if (reason.equals(PauseReason.SEQUENTIAL_EXECUTION)) {
+        } else if (reason == NO_ROBOTS_IN_GROUP || reason == PENDING_ROBOT) {
             pauseService.pauseExecution(executionId, branchId, reason);
         }
         addPauseEvent(systemContext);
