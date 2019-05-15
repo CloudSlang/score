@@ -54,7 +54,7 @@ import java.util.Map;
 
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.ACTION_TYPE;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SEQUENTIAL;
-import static io.cloudslang.score.facade.execution.PauseReason.SEQUENTIAL_EXECUTION;
+import static io.cloudslang.score.facade.execution.PauseReason.NO_ROBOTS_IN_GROUP;
 import static java.lang.Boolean.TRUE;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
@@ -213,7 +213,7 @@ public class ExecutionServiceTest {
 
 		//running execution plan id has not changed as result of not navigating
 		assertEquals(RUNNING_EXE_PLAN_ID, execution.getRunningExecutionPlanId());
-		Mockito.verify(pauseResumeService, VerificationModeFactory.times(1)).pauseExecution(any(Long.class), any(String.class), eq(SEQUENTIAL_EXECUTION));
+		Mockito.verify(pauseResumeService, VerificationModeFactory.times(1)).pauseExecution(any(Long.class), any(String.class), eq(NO_ROBOTS_IN_GROUP));
 		Mockito.verify(pauseResumeService, VerificationModeFactory.times(1)).writeExecutionObject(any(Long.class), any(String.class), eq(execution));
 		Mockito.verifyNoMoreInteractions(pauseResumeService);
 	}
@@ -424,6 +424,11 @@ public class ExecutionServiceTest {
 		@Bean
 		public WorkerRecoveryManager workerRecoveryManager() {
 			return mock(WorkerRecoveryManager.class);
+		}
+
+		@Bean
+		public RobotAvailabilityService robotAvailabilityService() {
+			return mock(RobotAvailabilityService.class);
 		}
 
 	}

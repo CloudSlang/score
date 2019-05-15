@@ -27,6 +27,7 @@ import io.cloudslang.score.api.TriggeringProperties;
 import io.cloudslang.score.events.EventBus;
 import io.cloudslang.worker.execution.reflection.ReflectionAdapter;
 import io.cloudslang.worker.execution.services.ExecutionServiceImpl;
+import io.cloudslang.worker.execution.services.RobotAvailabilityService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
 import liquibase.integration.spring.SpringLiquibase;
 import org.hibernate.jpa.HibernatePersistenceProvider;
@@ -185,6 +186,11 @@ public class EngineTest {
         @Bean
         public WorkerConfigurationService getWorkerConfigurationService() {
             return mock(WorkerConfigurationService.class);
+        }
+
+        @Bean
+        public RobotAvailabilityService robotAvailabilityService() {
+            return mock(RobotAvailabilityService.class);
         }
     }
 
