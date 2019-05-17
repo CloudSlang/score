@@ -184,10 +184,10 @@ public class SuspendedExecutionsRepositoryTest {
 
         repository.save(suspendedExecution);
 
-        List<SuspendedExecution> read = repository.collectCompletedSuspendedExecutions(new PageRequest(0, 100));
+        List<String> read = repository.collectCompletedSuspendedExecutions(new PageRequest(0, 100));
 
-        Assert.assertTrue(read != null);
-        Assert.assertTrue(read.get(0).getExecutionId().equals("111"));
+        Assert.assertNotNull(read);
+        Assert.assertEquals(read.get(0),"111");
     }
 
     @Configuration

@@ -17,5 +17,5 @@ package io.cloudslang.orchestrator.services;
 
 
 public interface SuspendedExecutionCleanerService {
-    void cleanSuspendedExecutions();
+    void cleanupSuspendedExecutions();
 }

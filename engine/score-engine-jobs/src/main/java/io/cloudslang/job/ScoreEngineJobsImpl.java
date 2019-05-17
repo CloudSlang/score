@@ -150,7 +150,7 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
         }
 
         try {
-            suspendedExecutionCleanerService.cleanSuspendedExecutions();
+            suspendedExecutionCleanerService.cleanupSuspendedExecutions();
         } catch (Exception e) {
             logger.error("Can't run suspended execution cleaner job.", e);
         }
