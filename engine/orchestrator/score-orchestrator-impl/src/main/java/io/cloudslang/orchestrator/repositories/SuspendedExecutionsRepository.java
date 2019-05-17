@@ -19,8 +19,11 @@ package io.cloudslang.orchestrator.repositories;
 import io.cloudslang.orchestrator.entities.SuspendedExecution;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -41,7 +44,8 @@ public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedEx
     List<String> collectCompletedSuspendedExecutions(Pageable pageable);
 
     @Query("delete from SuspendedExecution se where se.executionId in :ids")
-    int deleteByIds(List<String> ids);
+    @Modifying
+    int deleteByIds(@Param("ids") Collection<String> ids);
 
 
 }
