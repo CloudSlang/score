@@ -6,9 +6,8 @@
 				"http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 				http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
 
-	<task:scheduler id="scoreWorkerScheduler" pool-size="5"/>
+	<task:scheduler id="scoreWorkerScheduler" pool-size="5" />
 	<task:scheduled-tasks scheduler="scoreWorkerScheduler">
-		<task:scheduled ref="outBuffer" method="drain" fixed-delay="#{outBufferInterval}"/>
 		<task:scheduled ref="workerManager" method="workerKeepAlive" fixed-rate="#{keepAliveInterval}"/>
 		<task:scheduled ref="workerManager" method="interruptCanceledExecutions" fixed-rate="#{interruptCanceledInterval}"/>
         <task:scheduled ref="workerConfiguration" method="refresh" fixed-delay="#{configRefreshInterval}"/>
@@ -17,6 +16,15 @@
         <task:scheduled ref="workerExecutionMonitorService" method="executeScheduledWorkerMonitors" fixed-delay="#{scheduledWorkerMonitorInterval}"/>
         <task:scheduled ref="workerExecutionMonitorService" method="collectMonitorInformation" fixed-delay="#{workerMonitorRefreshInterval}"/>
 	</task:scheduled-tasks>
+
+    <!--
+    This is a dedicated scheduler with fixed pool size of 1
+    that handles draining of outbound buffer in order to prevent long waits of execution threads.
+    -->
+    <task:scheduler id="scoreOutboundBufferDrainer" pool-size="1" />
+    <task:scheduled-tasks scheduler="scoreOutboundBufferDrainer">
+        <task:scheduled ref="outBuffer" method="drain" fixed-delay="#{outBufferInterval}"/>
+    </task:scheduled-tasks>
 
     <!--Session timeout job-->
     <bean id="scoreSessionTimeout" class="java.lang.Long">
