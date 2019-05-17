@@ -25,7 +25,8 @@ import javax.transaction.Transactional;
 
 public class SuspendedExecutionCleanerServiceImpl implements SuspendedExecutionCleanerService {
 
-    private final int BULK_SIZE = Integer.getInteger("suspendedexecution.job.bulk.size", 200);
+    private final int MAX_BULK_SIZE = Integer.getInteger("suspendedexecution.job.bulk.size", 200);
+    private final int SPLIT_SIZE = 200;
 
     @Autowired
     private SuspendedExecutionsRepository suspendedExecutionsRepository;
@@ -36,16 +37,17 @@ public class SuspendedExecutionCleanerServiceImpl implements SuspendedExecutionC
     @Transactional
     public void cleanupSuspendedExecutions() {
         try {
-            cleanupSuspendedExecutions(BULK_SIZE);
+            cleanupSuspendedExecutions(MAX_BULK_SIZE);
         } catch (Exception e) {
-            logger.error("suspended execution cleaner job failed!");
+            logger.error("suspended execution cleaner job failed!", e);
         }
     }
 
     private void cleanupSuspendedExecutions(Integer bulkSize) {
-        PageRequest pageRequest = new PageRequest(0, bulkSize);
-
-        suspendedExecutionsRepository.deleteByIds(suspendedExecutionsRepository.collectCompletedSuspendedExecutions(pageRequest));
+        for (int i = 1; i <= bulkSize / SPLIT_SIZE; i++) {
+            PageRequest pageRequest = new PageRequest(0, SPLIT_SIZE);
+            suspendedExecutionsRepository.deleteByIds(suspendedExecutionsRepository.collectCompletedSuspendedExecutions(pageRequest));
+        }
     }
 }
 
