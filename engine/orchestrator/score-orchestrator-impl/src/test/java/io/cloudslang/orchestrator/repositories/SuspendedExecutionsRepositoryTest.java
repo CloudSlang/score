@@ -66,7 +66,7 @@ public class SuspendedExecutionsRepositoryTest {
     ExecutionSerializationUtil executionSerializationUtil;
 
     @Test
-    public void simpleCreateAndReadTest(){
+    public void simpleCreateAndReadTest() {
 
         Map<String, String> contexts = new HashMap<>();
         contexts.put("flowContext", "");
@@ -77,11 +77,11 @@ public class SuspendedExecutionsRepositoryTest {
 
         List<SuspendedExecution> read = repository.findAll();
 
-        Assert.assertTrue(read.size()==1);
+        Assert.assertTrue(read.size() == 1);
     }
 
     @Test
-    public void simpleCreateAndReadWithFinishedBranchesTest(){
+    public void simpleCreateAndReadWithFinishedBranchesTest() {
 
         Map<String, String> contexts = new HashMap<>();
         contexts.put("flowContext", "");
@@ -100,7 +100,7 @@ public class SuspendedExecutionsRepositoryTest {
 
         List<SuspendedExecution> read = repository.findAll();
 
-        Assert.assertTrue(read.size()==1);
+        Assert.assertTrue(read.size() == 1);
 
         SuspendedExecution suspendedExecutionRead = read.get(0);
         Assert.assertTrue(suspendedExecutionRead.getFinishedBranches().size() == 1);
@@ -108,7 +108,7 @@ public class SuspendedExecutionsRepositoryTest {
     }
 
     @Test
-    public void findBySplitIdsTest(){
+    public void findBySplitIdsTest() {
 
         Map<String, String> contexts = new HashMap<>();
         contexts.put("flowContext", "");
@@ -128,7 +128,7 @@ public class SuspendedExecutionsRepositoryTest {
     }
 
     @Test
-    public void findFinishedSuspendedExecutionsTest(){
+    public void findFinishedSuspendedExecutionsTest() {
 
         Map<String, String> contexts = new HashMap<>();
         contexts.put("flowContext", "");
@@ -146,12 +146,12 @@ public class SuspendedExecutionsRepositoryTest {
 
         List<SuspendedExecution> read = repository.findFinishedSuspendedExecutions(new PageRequest(0, 100));
 
-        Assert.assertTrue(read.size()==1);
+        Assert.assertTrue(read.size() == 1);
         Assert.assertEquals(read.get(0).getFinishedBranches().size(), 1);
     }
 
     @Test
-    public void findFinishedSuspendedExecutionsNegativeTest(){
+    public void findFinishedSuspendedExecutionsNegativeTest() {
 
         Map<String, String> contexts = new HashMap<>();
         contexts.put("flowContext", "");
@@ -169,12 +169,12 @@ public class SuspendedExecutionsRepositoryTest {
 
         List<SuspendedExecution> read = repository.findFinishedSuspendedExecutions(new PageRequest(0, 100));
 
-        Assert.assertTrue(read.size()==0);
+        Assert.assertTrue(read.size() == 0);
     }
 
 
     @Test
-    public void collectCompletedSuspendedTest(){
+    public void deleteCompletedSuspendedTest() {
 
         Map<String, String> contexts = new HashMap<>();
         contexts.put("flowContext", "");
@@ -187,8 +187,13 @@ public class SuspendedExecutionsRepositoryTest {
         List<String> read = repository.collectCompletedSuspendedExecutions(new PageRequest(0, 100));
 
         Assert.assertNotNull(read);
-        Assert.assertEquals(read.get(0),"111");
+        Assert.assertEquals(read.get(0), "111");
+
+        repository.deleteByIds(read);
+
+        Assert.assertEquals(repository.collectCompletedSuspendedExecutions(new PageRequest(0, 100)).size(), 0);
     }
+
 
     @Configuration
     @EnableJpaRepositories("io.cloudslang.orchestrator")
@@ -196,18 +201,18 @@ public class SuspendedExecutionsRepositoryTest {
     @ImportResource("META-INF/spring/orchestratorEmfContext.xml")
     static class Configurator {
         @Bean
-        public ExecutionSerializationUtil executionSerializationUtil(){
+        public ExecutionSerializationUtil executionSerializationUtil() {
             return new ExecutionSerializationUtil();
         }
 
-	    @Bean
-	    SqlUtils sqlUtils() {
-		    return new SqlUtils();
-	    }
+        @Bean
+        SqlUtils sqlUtils() {
+            return new SqlUtils();
+        }
 
-	    @Bean
-	    DataBaseDetector dataBaseDetector() {
-		    return new DataBaseDetector();
-	    }
+        @Bean
+        DataBaseDetector dataBaseDetector() {
+            return new DataBaseDetector();
+        }
     }
 }
