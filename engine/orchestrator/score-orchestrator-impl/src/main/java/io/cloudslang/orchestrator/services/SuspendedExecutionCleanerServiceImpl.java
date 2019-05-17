@@ -25,27 +25,27 @@ import javax.transaction.Transactional;
 
 public class SuspendedExecutionCleanerServiceImpl implements SuspendedExecutionCleanerService {
 
-    private final Integer BULK_SIZE = Integer.getInteger("suspendedexecution.job.bulk.size", 200);
+    private final int BULK_SIZE = Integer.getInteger("suspendedexecution.job.bulk.size", 200);
 
     @Autowired
     private SuspendedExecutionsRepository suspendedExecutionsRepository;
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private static final Logger logger = Logger.getLogger(SuspendedExecutionCleanerServiceImpl.class);
 
     @Override
     @Transactional
-    public void cleanSuspendedExecutions() {
+    public void cleanupSuspendedExecutions() {
         try {
-            cleanSuspendedExecutions(BULK_SIZE);
+            cleanupSuspendedExecutions(BULK_SIZE);
         } catch (Exception e) {
             logger.error("suspended execution cleaner job failed!");
         }
     }
 
-    private void cleanSuspendedExecutions(Integer bulkSize) {
+    private void cleanupSuspendedExecutions(Integer bulkSize) {
         PageRequest pageRequest = new PageRequest(0, bulkSize);
 
-        suspendedExecutionsRepository.delete(suspendedExecutionsRepository.collectCompletedSuspendedExecutions(pageRequest));
+        suspendedExecutionsRepository.deleteByIds(suspendedExecutionsRepository.collectCompletedSuspendedExecutions(pageRequest));
     }
 }
 

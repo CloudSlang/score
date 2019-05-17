@@ -35,8 +35,13 @@ public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedEx
     @Query("from SuspendedExecution se where se.numberOfBranches=size(se.finishedBranches)")
     public List<SuspendedExecution> findFinishedSuspendedExecutions(Pageable pageRequest);
 
-    @Query("select  se from SuspendedExecution se " +
+    @Query("select se.executionId from SuspendedExecution se " +
             "left join io.cloudslang.orchestrator.entities.ExecutionState es " +
-            "on se.executionId=es.executionId")
-    List<SuspendedExecution> collectCompletedSuspendedExecutions(Pageable pageable);
+            "on se.executionId = es.executionId")
+    List<String> collectCompletedSuspendedExecutions(Pageable pageable);
+
+    @Query("delete from SuspendedExecution se where se.executionId in :ids")
+    int deleteByIds(List<String> ids);
+
+
 }
