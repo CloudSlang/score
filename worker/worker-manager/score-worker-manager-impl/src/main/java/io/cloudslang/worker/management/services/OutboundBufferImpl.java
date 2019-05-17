@@ -97,7 +97,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
             while (currentWeight >= maxBufferWeight) {
                 logger.info("Outbound buffer is full. Waiting...");
                 syncManager.waitForDrain();
-                logger.info("Outbound buffer was drained. Finished waiting.");
+                logger.info("Outbound buffer drained. Finished waiting.");
             }
 
             // In case of multiple messages create a single compound message
