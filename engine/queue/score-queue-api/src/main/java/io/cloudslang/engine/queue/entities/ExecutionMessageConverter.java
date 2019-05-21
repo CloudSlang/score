@@ -86,7 +86,6 @@ public class ExecutionMessageConverter {
             ois.writeObject(obj);
             ois.flush();
 
-            // After close of gzip stream to make sure all bytes are flushed
             return baos.toByteArray();
         } catch (IOException ex) {
             throw new RuntimeException("Failed to serialize execution plan. Error: ", ex);
