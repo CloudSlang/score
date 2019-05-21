@@ -77,20 +77,20 @@ public class ExecutionMessageConverter {
     }
 
     private byte[] objToBytes(Object obj) {
-        ObjectOutputStream ois = null;
+        ObjectOutputStream oos = null;
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream(SIZE);
             initPayloadMetaData(baos);
 
-            ois = new ObjectOutputStream(new LZ4FrameOutputStream(baos));
-            ois.writeObject(obj);
-            ois.flush();
+            oos = new ObjectOutputStream(new LZ4FrameOutputStream(baos));
+            oos.writeObject(obj);
+            oos.flush();
 
             return baos.toByteArray();
         } catch (IOException ex) {
             throw new RuntimeException("Failed to serialize execution plan. Error: ", ex);
         } finally {
-            IOUtils.closeQuietly(ois);
+            IOUtils.closeQuietly(oos);
         }
     }
 
