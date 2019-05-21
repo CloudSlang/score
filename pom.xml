@@ -401,6 +401,12 @@
                 <version>3.5</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.lz4</groupId>
+                <artifactId>lz4-java</artifactId>
+                <version>1.5.1</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
