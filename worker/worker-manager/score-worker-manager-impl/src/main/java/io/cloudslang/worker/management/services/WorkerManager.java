@@ -319,6 +319,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
     }
 
     public synchronized boolean isFromCurrentThreadPool(String threadName) {
+        // Since this is executed in the score threadpool, making code simpler to avoid unnecessary contention
         return threadName.startsWith(valueOf(threadPoolVersion));
     }
 
