@@ -48,6 +48,7 @@ import static ch.lambdaj.Lambda.max;
 import static ch.lambdaj.Lambda.on;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.parseBoolean;
+import static java.lang.String.valueOf;
 import static java.lang.System.getProperty;
 
 
@@ -318,15 +319,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
     }
 
     public synchronized boolean isFromCurrentThreadPool(String threadName) {
-        if (threadName.startsWith(String.valueOf(threadPoolVersion))) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Current thread is from current thread pool");
-            }
-            return true;
-        } else {
-            logger.warn("Current thread is NOT from current thread pool!!!");
-            return false;
-        }
+        return threadName.startsWith(valueOf(threadPoolVersion));
     }
 
     //Must clean the buffer that holds Runnables that wait for execution and also drop all the executions that currently run
