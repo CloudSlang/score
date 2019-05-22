@@ -109,7 +109,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 
     private boolean up = false;
 
-    private volatile int threadPoolVersion = 0;
+    private int threadPoolVersion = 0;
 
     private boolean newCancelBehaviour;
 
@@ -124,10 +124,9 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
                 numberOfThreads,
                 Long.MAX_VALUE, TimeUnit.NANOSECONDS,
                 inBuffer,
-                new WorkerThreadFactory((++threadPoolVersion) + "_WorkerExecutionThread"));
+                new WorkerThreadFactory(valueOf(incrementAndGetTreadPoolVersion()) + "_WorkerExecutionThread"));
 
         mapOfRunningTasks = new ConcurrentHashMap<>(numberOfThreads);
-
         newCancelBehaviour = parseBoolean(getProperty("enable.new.cancel.execution", FALSE.toString()));
     }
 
@@ -361,6 +360,15 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
                 numberOfThreads,
                 Long.MAX_VALUE, TimeUnit.NANOSECONDS,
                 inBuffer,
-                new WorkerThreadFactory((threadPoolVersion) + "_WorkerExecutionThread"));
+                new WorkerThreadFactory(valueOf(getTreadPoolVersion()) + "_WorkerExecutionThread"));
     }
+
+    private synchronized int getTreadPoolVersion() {
+        return threadPoolVersion;
+    }
+
+    private synchronized int incrementAndGetTreadPoolVersion() {
+        return (++threadPoolVersion);
+    }
+
 }
