@@ -77,7 +77,7 @@ public class SimpleExecutionRunnable implements Runnable {
             String workerUUID,
             WorkerConfigurationService workerConfigurationService,
             WorkerManager workerManager,
-            SimpleRunnableContinuation simpleRunnableContinuation
+            SimpleRunnableContinuation continuationDelegate
     ) {
         this.executionService = executionService;
         this.outBuffer = outBuffer;
@@ -88,7 +88,7 @@ public class SimpleExecutionRunnable implements Runnable {
         this.workerUUID = workerUUID;
         this.workerConfigurationService = workerConfigurationService;
         this.workerManager = workerManager;
-        this.continuationDelegate = simpleRunnableContinuation;
+        this.continuationDelegate = continuationDelegate;
         this.isRecoveryDisabled = getBoolean("is.recovery.disabled");
     }
 
