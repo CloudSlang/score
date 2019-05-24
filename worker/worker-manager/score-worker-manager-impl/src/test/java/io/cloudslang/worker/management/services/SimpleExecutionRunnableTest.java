@@ -30,14 +30,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.mockito.Matchers.any;
@@ -47,9 +46,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * Created with IntelliJ IDEA. User: wahnonm Date: 8/13/13 Time: 10:24 AM
- */
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 public class SimpleExecutionRunnableTest {
@@ -115,14 +112,11 @@ public class SimpleExecutionRunnableTest {
 
         final List<ExecutionMessage> buffer = new ArrayList<>();
 
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                for (Object message : invocation.getArguments()) {
-                    buffer.add((ExecutionMessage) message);
-                }
-                return null;
+        doAnswer(invocation -> {
+            for (Object message : invocation.getArguments()) {
+                buffer.add((ExecutionMessage) message);
             }
+            return null;
         }).when(outBuffer).put(any(ExecutionMessage[].class));
 
         when(workerManager.isFromCurrentThreadPool(anyString())).thenReturn(true);
@@ -138,7 +132,8 @@ public class SimpleExecutionRunnableTest {
         simpleExecutionRunnable.run();
         verify(executionService, times(1)).execute(execution);
 
-        simpleRunnableContinuation.continueAsync(() -> {});
+        Future<?> future = simpleRunnableContinuation.continueAsync(() -> {});
+        future.get();
 
         Assert.assertFalse(buffer.isEmpty());
         Assert.assertEquals(ExecStatus.FINISHED, buffer.get(0).getStatus());

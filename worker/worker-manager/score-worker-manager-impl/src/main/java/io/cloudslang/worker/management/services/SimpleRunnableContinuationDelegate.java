@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.DisposableBean;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
@@ -39,12 +40,13 @@ public class SimpleRunnableContinuationDelegate implements SimpleRunnableContinu
     }
 
     @Override
-    public void continueAsync(Runnable runnable) {
+    public Future<?> continueAsync(Runnable runnable) {
         try {
-            threadPoolExecutor.submit(runnable);
+            return threadPoolExecutor.submit(runnable);
         } catch (Exception ex) {
             logger.error("Cannot continue : ", ex);
         }
+        return null;
     }
 
     @Override

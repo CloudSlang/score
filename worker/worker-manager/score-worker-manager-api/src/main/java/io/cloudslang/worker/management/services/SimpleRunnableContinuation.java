@@ -16,8 +16,10 @@
 package io.cloudslang.worker.management.services;
 
 
+import java.util.concurrent.Future;
+
 public interface SimpleRunnableContinuation {
 
-    void continueAsync(Runnable runnable);
+    Future<?> continueAsync(Runnable runnable);
 
 }
