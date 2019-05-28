@@ -19,8 +19,11 @@ package io.cloudslang.orchestrator.repositories;
 import io.cloudslang.orchestrator.entities.SuspendedExecution;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -30,8 +33,20 @@ import java.util.List;
  * Time: 10:01
  */
 public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedExecution, Long> {
-    public List<SuspendedExecution> findBySplitIdIn(List<String> splitIds);
+    List<SuspendedExecution> findBySplitIdIn(List<String> splitIds);
 
     @Query("from SuspendedExecution se where se.numberOfBranches=size(se.finishedBranches)")
-    public List<SuspendedExecution> findFinishedSuspendedExecutions(Pageable pageRequest);
+    List<SuspendedExecution> findFinishedSuspendedExecutions(Pageable pageRequest);
+
+    @Query("select se.executionId from SuspendedExecution se " +
+            "left join io.cloudslang.orchestrator.entities.ExecutionState es " +
+            "on se.executionId = es.executionId " +
+            "where es.executionId IS NULL")
+    List<String> collectCompletedSuspendedExecutions(Pageable pageable);
+
+    @Query("delete from SuspendedExecution se where se.executionId in :ids")
+    @Modifying
+    int deleteByIds(@Param("ids") Collection<String> ids);
+
+
 }

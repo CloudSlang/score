@@ -20,6 +20,7 @@ import io.cloudslang.engine.queue.services.cleaner.QueueCleanerService;
 import io.cloudslang.engine.queue.services.recovery.ExecutionRecoveryService;
 import io.cloudslang.engine.versioning.services.VersionService;
 import io.cloudslang.orchestrator.services.SplitJoinService;
+import io.cloudslang.orchestrator.services.SuspendedExecutionCleanerService;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,9 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
     @Autowired
     private ExecutionRecoveryService executionRecoveryService;
 
+    @Autowired
+    private SuspendedExecutionCleanerService suspendedExecutionCleanerService;
+
     private final Logger logger = Logger.getLogger(getClass());
 
     final private int QUEUE_BULK_SIZE = 500;
@@ -60,10 +64,11 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
      * Job that will handle the cleaning of queue table.
      */
     @Override
-    public void cleanQueueJob(){
+    public void cleanQueueJob() {
         try {
             Set<Long> ids = queueCleanerService.getFinishedExecStateIds();
-            if(logger.isDebugEnabled()) logger.debug("Will clean from queue the next Exec state ids amount:"+ids.size());
+            if (logger.isDebugEnabled())
+                logger.debug("Will clean from queue the next Exec state ids amount:" + ids.size());
 
             Set<Long> execIds = new HashSet<>();
 
@@ -87,7 +92,7 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
      * Job that will handle the joining of finished branches.
      */
     @Override
-    public void joinFinishedSplitsJob(){
+    public void joinFinishedSplitsJob() {
         try {
             if (logger.isDebugEnabled()) logger.debug("SplitJoinJob woke up at " + new Date());
             StopWatch stopWatch = new StopWatch();
@@ -112,7 +117,7 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
      * Job that will increment the recovery version
      */
     @Override
-    public void recoveryVersionJob(){
+    public void recoveryVersionJob() {
         logger.debug("increment MSG_RECOVERY_VERSION Version");
 
         versionService.incrementVersion(VersionService.MSG_RECOVERY_VERSION_COUNTER_NAME);
@@ -122,17 +127,32 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
      * Job to execute the recovery check.
      */
     @Override
-    public void executionRecoveryJob(){
+    public void executionRecoveryJob() {
         if (logger.isDebugEnabled()) {
             logger.debug("ExecutionRecoveryJob woke up at " + new Date());
         }
 
         try {
             executionRecoveryService.doRecovery();
-        }
-        catch (Exception e){
-            logger.error("Can't run queue recovery job.",e);
+        } catch (Exception e) {
+            logger.error("Can't run queue recovery job.", e);
         }
     }
 
+    /**
+     * clean suspended executions
+     */
+    @Override
+    public void cleanSuspendedExecutionsJob() {
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("CleanSuspendedExecutionJob woke up at " + new Date());
+        }
+
+        try {
+            suspendedExecutionCleanerService.cleanupSuspendedExecutions();
+        } catch (Exception e) {
+            logger.error("Can't run suspended execution cleaner job.", e);
+        }
+    }
 }
