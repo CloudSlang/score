@@ -33,10 +33,10 @@ import java.util.List;
  * Time: 10:01
  */
 public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedExecution, Long> {
-    public List<SuspendedExecution> findBySplitIdIn(List<String> splitIds);
+    List<SuspendedExecution> findBySplitIdIn(List<String> splitIds);
 
     @Query("from SuspendedExecution se where se.numberOfBranches=size(se.finishedBranches)")
-    public List<SuspendedExecution> findFinishedSuspendedExecutions(Pageable pageRequest);
+    List<SuspendedExecution> findFinishedSuspendedExecutions(Pageable pageRequest);
 
     @Query("select se.executionId from SuspendedExecution se " +
             "left join io.cloudslang.orchestrator.entities.ExecutionState es " +

@@ -103,7 +103,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
         put(WorkerLockServiceImpl.class, null);
 		put(QueueCleanerServiceImpl.class, null);
 		put(QueueStateIdGeneratorServiceImpl.class, null);
-        put(ScoreTriggeringImpl.class,null);
+		put(ScoreTriggeringImpl.class,null);
 		put(SuspendedExecutionCleanerServiceImpl.class, null);
 
 		put(PartitionUtils.class, null);
