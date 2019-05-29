@@ -19,6 +19,7 @@ package io.cloudslang.engine.queue.entities;
 import io.cloudslang.score.facade.entities.Execution;
 import net.jpountz.lz4.LZ4FrameInputStream;
 import net.jpountz.lz4.LZ4FrameOutputStream;
+import net.jpountz.lz4.LZ4FrameOutputStream.BLOCKSIZE;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -82,7 +83,7 @@ public class ExecutionMessageConverter {
             ByteArrayOutputStream baos = new ByteArrayOutputStream(SIZE);
             initPayloadMetaData(baos);
 
-            oos = new ObjectOutputStream(new LZ4FrameOutputStream(baos));
+            oos = new ObjectOutputStream(new LZ4FrameOutputStream(baos, BLOCKSIZE.SIZE_256KB));
             oos.writeObject(obj);
             oos.flush();
 
