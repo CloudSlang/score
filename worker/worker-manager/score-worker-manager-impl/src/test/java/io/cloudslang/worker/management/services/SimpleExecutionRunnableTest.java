@@ -16,31 +16,29 @@
 
 package io.cloudslang.worker.management.services;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import io.cloudslang.worker.execution.services.ExecutionService;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import io.cloudslang.worker.management.WorkerConfigurationService;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
 import io.cloudslang.score.facade.entities.Execution;
+import io.cloudslang.worker.execution.services.ExecutionService;
+import io.cloudslang.worker.management.WorkerConfigurationService;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -48,12 +46,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * Created with IntelliJ IDEA.
- * User: wahnonm
- * Date: 8/13/13
- * Time: 10:24 AM
- */
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 public class SimpleExecutionRunnableTest {
@@ -82,8 +75,8 @@ public class SimpleExecutionRunnableTest {
     @Mock
     private QueueStateIdGeneratorService queueStateIdGenerator;
 
-	@Mock
-	private WorkerConfigurationService workerConfigurationService;
+    @Mock
+    private WorkerConfigurationService workerConfigurationService;
 
     @Mock
     private WorkerManager workerManager;
@@ -95,12 +88,14 @@ public class SimpleExecutionRunnableTest {
 
     @Configuration
     static class EmptyConfig {
+
     }
 
     @Test
     public void testGetExecutionMessage() throws Exception {
         SimpleExecutionRunnable simpleExecutionRunnable = new SimpleExecutionRunnable(executionService, outBuffer,
-                inBuffer, converter, endExecutionCallback, queueStateIdGenerator, "stam",workerConfigurationService, workerManager);
+                inBuffer, converter, endExecutionCallback, queueStateIdGenerator, "stam", workerConfigurationService,
+                workerManager);
         ExecutionMessage executionMessage = simpleExecutionRunnable.getExecutionMessage();
         Assert.assertNull(executionMessage);
 
@@ -115,22 +110,20 @@ public class SimpleExecutionRunnableTest {
         Execution execution = new Execution();
         when(converter.extractExecution(any(Payload.class))).thenReturn(execution);
 
-	    final List<ExecutionMessage> buffer = new ArrayList<>();
+        final List<ExecutionMessage> buffer = new ArrayList<>();
 
-	    doAnswer(new Answer() {
-		    @Override
-		    public Object answer(InvocationOnMock invocation) throws Throwable {
-			    for (Object message: invocation.getArguments()){
-			        buffer.add((ExecutionMessage) message);
-			    }
-			    return null;
-		    }
-	    }).when(outBuffer).put(any(ExecutionMessage[].class));
+        doAnswer(invocation -> {
+            for (Object message : invocation.getArguments()) {
+                buffer.add((ExecutionMessage) message);
+            }
+            return null;
+        }).when(outBuffer).put(any(ExecutionMessage[].class));
 
         when(workerManager.isFromCurrentThreadPool(anyString())).thenReturn(true);
 
         SimpleExecutionRunnable simpleExecutionRunnable = new SimpleExecutionRunnable(executionService, outBuffer,
-                inBuffer, converter, endExecutionCallback, queueStateIdGenerator, "stam",workerConfigurationService, workerManager);
+                inBuffer, converter, endExecutionCallback, queueStateIdGenerator, "stam", workerConfigurationService,
+                workerManager);
 
         ExecutionMessage executionMessage = new ExecutionMessage();
         executionMessage.setMsgId(String.valueOf(100L));
@@ -139,9 +132,9 @@ public class SimpleExecutionRunnableTest {
         verify(executionService, times(1)).execute(execution);
 
         Assert.assertFalse(buffer.isEmpty());
-        Assert.assertEquals(ExecStatus.FINISHED, buffer.get(0).getStatus());
+        assertEquals(ExecStatus.FINISHED, buffer.get(0).getStatus());
 
-        Assert.assertEquals(ExecStatus.FINISHED, buffer.get(0).getStatus());
-        Assert.assertEquals(0, this.executionMessage.getMsgSeqId());
+        assertEquals(ExecStatus.FINISHED, buffer.get(0).getStatus());
+        assertEquals(0, this.executionMessage.getMsgSeqId());
     }
 }
