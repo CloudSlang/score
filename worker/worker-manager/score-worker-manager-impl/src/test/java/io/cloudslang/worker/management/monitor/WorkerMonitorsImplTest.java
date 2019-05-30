@@ -27,8 +27,6 @@ import io.cloudslang.worker.management.services.EndExecutionCallback;
 import io.cloudslang.worker.management.services.InBuffer;
 import io.cloudslang.worker.management.services.OutboundBuffer;
 import io.cloudslang.worker.management.services.SimpleExecutionRunnableFactory;
-import io.cloudslang.worker.management.services.SimpleRunnableContinuation;
-import io.cloudslang.worker.management.services.SimpleRunnableContinuationDelegate;
 import io.cloudslang.worker.management.services.SynchronizationManager;
 import io.cloudslang.worker.management.services.WorkerConfigurationUtils;
 import io.cloudslang.worker.management.services.WorkerManager;
@@ -243,9 +241,5 @@ public class WorkerMonitorsImplTest {
             return workerConfigurationUtils;
         }
 
-        @Bean
-        public SimpleRunnableContinuation simpleRunnableContinuationDelegate() {
-            return mock(SimpleRunnableContinuationDelegate.class);
-        }
     }
 }
