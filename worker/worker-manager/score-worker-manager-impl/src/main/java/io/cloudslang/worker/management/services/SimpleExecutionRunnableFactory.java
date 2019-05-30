@@ -16,37 +16,31 @@
 
 package io.cloudslang.worker.management.services;
 
-import io.cloudslang.worker.execution.services.ExecutionService;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
-
+import io.cloudslang.worker.execution.services.ExecutionService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Resource;
 
-/**
- * Created by IntelliJ IDEA.
- * User:
- * Date: 19/12/12
- */
 public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecutionRunnable> {
 
-	@Autowired
-	private ExecutionService executionService;
-
-	@Autowired
-	private OutboundBuffer outBuffer;
+    @Autowired
+    private ExecutionService executionService;
 
     @Autowired
-   	private InBuffer inBuffer;
+    private OutboundBuffer outBuffer;
 
-	@Autowired
-	private ExecutionMessageConverter converter;
+    @Autowired
+    private InBuffer inBuffer;
 
-	@Autowired
-	private EndExecutionCallback endExecutionCallback;
+    @Autowired
+    private ExecutionMessageConverter converter;
+
+    @Autowired
+    private EndExecutionCallback endExecutionCallback;
 
     @Autowired
     private QueueStateIdGeneratorService queueStateIdGeneratorService;
@@ -58,11 +52,11 @@ public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecuti
     private WorkerManager workerManager;
 
     @Resource
-	private String workerUuid;
+    private String workerUuid;
 
-	@Override
-	public SimpleExecutionRunnable getObject() {
-		return new SimpleExecutionRunnable(
+    @Override
+    public SimpleExecutionRunnable getObject() {
+        return new SimpleExecutionRunnable(
                 executionService,
                 outBuffer,
                 inBuffer,
@@ -73,15 +67,15 @@ public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecuti
                 workerConfigurationService,
                 workerManager
         );
-	}
+    }
 
-	@Override
-	public Class<?> getObjectType() {
-		return SimpleExecutionRunnable.class;
-	}
+    @Override
+    public Class<?> getObjectType() {
+        return SimpleExecutionRunnable.class;
+    }
 
-	@Override
-	public boolean isSingleton() {
-		return false;
-	}
+    @Override
+    public boolean isSingleton() {
+        return false;
+    }
 }

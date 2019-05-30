@@ -127,7 +127,8 @@ public class SimpleExecutionRunnable implements Runnable {
             logger.error("Error during execution!!!", ex);
             //set status FAILED
             executionMessage.setStatus(ExecStatus.FAILED);
-            executionMessage.incMsgSeqId();    // New status must be with incremented msg_seq_id - otherwise will be recovered and we will get duplications
+            executionMessage
+                    .incMsgSeqId();    // New status must be with incremented msg_seq_id - otherwise will be recovered and we will get duplications
             // Send only one execution message back - the new one was not created because of error
             try {
                 if (executionMessage.getPayload() == null) {
