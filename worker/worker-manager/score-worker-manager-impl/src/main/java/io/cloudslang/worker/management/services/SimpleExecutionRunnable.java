@@ -140,9 +140,6 @@ public class SimpleExecutionRunnable implements Runnable {
                 logger.warn("Thread was interrupted! Exiting the execution... ", ex);
             }
         } finally {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Worker has finished to work on execution: " + executionId);
-            }
             endExecutionCallback.endExecution(parseLong(executionId));
             //Rename the thread back
             currentThread().setName(origThreadName);
