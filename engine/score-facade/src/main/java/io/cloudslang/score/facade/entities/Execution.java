@@ -30,7 +30,6 @@ public class Execution implements Serializable {
     private Long executionId;
     private Long runningExecutionPlanId;
     private Long position;
-    private String groupName;
 
     protected Map<String, Serializable> contexts;
     protected SystemContext systemContext = new SystemContext();
@@ -57,11 +56,11 @@ public class Execution implements Serializable {
     }
 
     public String getGroupName() {
-        return groupName;
+        return systemContext.getWorkerGroupName();
     }
 
     public void setGroupName(String groupName) {
-        this.groupName = groupName;
+        systemContext.setWorkerGroupName(groupName);
     }
 
     public Long getExecutionId() {

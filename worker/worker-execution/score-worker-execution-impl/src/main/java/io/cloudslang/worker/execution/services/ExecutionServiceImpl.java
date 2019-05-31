@@ -579,10 +579,12 @@ public final class ExecutionServiceImpl implements ExecutionService {
             ExecutionStep nextStep = getNextStep(execution);
             if (nextStep != null && nextStep.getActionData().get("workerGroup") != null) {
                 group = nextStep.getActionData().get("workerGroup").toString();
+                execution.setGroupName(group);
                 execution.getSystemContext().put(TempConstants.SHOULD_CHECK_GROUP, true);
             }
+        } else {
+            execution.setGroupName(group);
         }
-        execution.setGroupName(group);
 
         if (isDebuggerMode(execution.getSystemContext())) {
             if (!StringUtils.isEmpty(group) && useDefaultGroup(execution)) {
