@@ -36,9 +36,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -94,8 +94,8 @@ public class SimpleExecutionRunnableTest {
     @Test
     public void testGetExecutionMessage() throws Exception {
         SimpleExecutionRunnable simpleExecutionRunnable = new SimpleExecutionRunnable(executionService, outBuffer,
-                inBuffer, converter, endExecutionCallback, queueStateIdGenerator,
-                "stam", workerConfigurationService, workerManager, new SimpleRunnableContinuationDelegate());
+                inBuffer, converter, endExecutionCallback, queueStateIdGenerator, "stam", workerConfigurationService,
+                workerManager);
         ExecutionMessage executionMessage = simpleExecutionRunnable.getExecutionMessage();
         Assert.assertNull(executionMessage);
 
@@ -121,10 +121,9 @@ public class SimpleExecutionRunnableTest {
 
         when(workerManager.isFromCurrentThreadPool(anyString())).thenReturn(true);
 
-        SimpleRunnableContinuationDelegate simpleRunnableContinuation = new SimpleRunnableContinuationDelegate();
         SimpleExecutionRunnable simpleExecutionRunnable = new SimpleExecutionRunnable(executionService, outBuffer,
-                inBuffer, converter, endExecutionCallback, queueStateIdGenerator,
-                "stam", workerConfigurationService, workerManager, simpleRunnableContinuation);
+                inBuffer, converter, endExecutionCallback, queueStateIdGenerator, "stam", workerConfigurationService,
+                workerManager);
 
         ExecutionMessage executionMessage = new ExecutionMessage();
         executionMessage.setMsgId(String.valueOf(100L));
@@ -132,13 +131,10 @@ public class SimpleExecutionRunnableTest {
         simpleExecutionRunnable.run();
         verify(executionService, times(1)).execute(execution);
 
-        Future<?> future = simpleRunnableContinuation.continueAsync(() -> {});
-        future.get();
-
         Assert.assertFalse(buffer.isEmpty());
-        Assert.assertEquals(ExecStatus.FINISHED, buffer.get(0).getStatus());
+        assertEquals(ExecStatus.FINISHED, buffer.get(0).getStatus());
 
-        Assert.assertEquals(ExecStatus.FINISHED, buffer.get(0).getStatus());
-        Assert.assertEquals(0, this.executionMessage.getMsgSeqId());
+        assertEquals(ExecStatus.FINISHED, buffer.get(0).getStatus());
+        assertEquals(0, this.executionMessage.getMsgSeqId());
     }
 }

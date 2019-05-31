@@ -51,9 +51,6 @@ public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecuti
     @Autowired
     private WorkerManager workerManager;
 
-    @Autowired
-    private SimpleRunnableContinuation simpleRunnableContinuation;
-
     @Resource
     private String workerUuid;
 
@@ -68,8 +65,7 @@ public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecuti
                 queueStateIdGeneratorService,
                 workerUuid,
                 workerConfigurationService,
-                workerManager,
-                simpleRunnableContinuation
+                workerManager
         );
     }
 

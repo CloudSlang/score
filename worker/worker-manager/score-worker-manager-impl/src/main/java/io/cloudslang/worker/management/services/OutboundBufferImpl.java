@@ -67,7 +67,6 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
     private List<Message> buffer = new ArrayList<>();
 
     private int currentWeight;
-
     private int maxBufferWeight = Integer.getInteger("out.buffer.max.buffer.weight", 30000);
     private int maxBulkWeight = Integer.getInteger("out.buffer.max.bulk.weight", 1500);
     private int retryAmount = Integer.getInteger("out.buffer.retry.number", 5);
@@ -81,17 +80,13 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 
     @Override
     public void put(final Message... messages) throws InterruptedException {
-        notEmpty(messages, "The array of messages is null or empty");
+        notEmpty(messages, "messages is null or empty");
         try {
             syncManager.startPutMessages();
 
             // We need to check if the current thread was interrupted while waiting for the lock (ExecutionThread or InBufferThread in ackMessages)
             if (Thread.currentThread().isInterrupted()) {
                 throw new InterruptedException("Thread was interrupted while waiting on the lock! Exiting...");
-            } else {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Current thread was not interrupted! Proceeding to put messages to OutBuffer...");
-                }
             }
 
             while (currentWeight >= maxBufferWeight) {
@@ -108,9 +103,6 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
             buffer.add(message);
 
             currentWeight += message.getWeight();
-            if (logger.isTraceEnabled()) {
-                logger.trace(message.getClass().getSimpleName() + " added to the buffer. " + getStatus());
-            }
         } catch (InterruptedException ex) {
             logger.warn("Buffer put action was interrupted", ex);
             throw ex;
