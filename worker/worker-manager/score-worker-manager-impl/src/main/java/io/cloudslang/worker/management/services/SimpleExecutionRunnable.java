@@ -226,7 +226,6 @@ public class SimpleExecutionRunnable implements Runnable {
                 inBuffer.addExecutionMessage(inProgressMessageForInBuffer);
             } catch (InterruptedException e) {
                 logger.warn("Thread was interrupted! Exiting the execution... ", e);
-                return true; //exiting... in shutdown...
             }
             return true;
         } else {
@@ -266,7 +265,6 @@ public class SimpleExecutionRunnable implements Runnable {
                 inBuffer.addExecutionMessage(inProgressMessageForInBuffer);
             } catch (InterruptedException e) {
                 logger.warn("Thread was interrupted! Exiting the execution... ", e);
-                return true; //exiting... in shutdown...
             }
             return true;
         } else {
@@ -288,7 +286,6 @@ public class SimpleExecutionRunnable implements Runnable {
                 outBuffer.put(executionMessagesToSend);
             } catch (InterruptedException e) {
                 logger.warn("Thread was interrupted! Exiting the execution... ", e);
-                return true;
             }
             return true;
         } else {
@@ -324,7 +321,6 @@ public class SimpleExecutionRunnable implements Runnable {
                     outBuffer.put(executionMessagesToSend);
                 } catch (InterruptedException e) {
                     logger.warn("Thread was interrupted! Exiting the execution... ", e);
-                    return true;
                 }
                 return true;
             }
@@ -400,7 +396,6 @@ public class SimpleExecutionRunnable implements Runnable {
                 inBuffer.addExecutionMessage(inProgressMessageForInBuffer);
             } catch (InterruptedException e) {
                 logger.warn("Thread was interrupted! Exiting the execution... ", e);
-                return true; //exiting... in shutdown...
             }
             return true;
 
@@ -489,7 +484,6 @@ public class SimpleExecutionRunnable implements Runnable {
                 outBuffer.put(executionMessagesToSend);
             } catch (InterruptedException e) {
                 logger.warn("Thread was interrupted! Exiting the execution... ", e);
-                return true;
             }
             return true;
         } else {
