@@ -81,6 +81,8 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String PARENT_RUNNING_ID = "PARENT_RUNNING_ID";
 
+    private static final String WORKER_GROUP_NAME = "WORKER_GROUP_NAME";
+
     protected Map<String, Serializable> contextMap = new HashMap<>();
 
     public ExecutionRuntimeServices() {
@@ -277,6 +279,14 @@ public class ExecutionRuntimeServices implements Serializable {
     public void setSplitId(String splitId) {
         Validate.isTrue(StringUtils.isEmpty(getSplitId()), "not allowed to overwrite split id");
         contextMap.put(NEW_SPLIT_ID, splitId);
+    }
+
+    public String getWorkerGroupName() {
+        return getFromMap(WORKER_GROUP_NAME);
+    }
+
+    public void setWorkerGroupName(String workerGroupName) {
+        contextMap.put(WORKER_GROUP_NAME, workerGroupName);
     }
 
     public String getNodeName() {
