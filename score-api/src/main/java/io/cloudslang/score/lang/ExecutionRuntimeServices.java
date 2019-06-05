@@ -83,6 +83,14 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String WORKER_GROUP_NAME = "WORKER_GROUP_NAME";
 
+    private static final String CONSUMER_WORKER_ID = "CONSUMER_WORKER_ID";
+
+    private static final String PRODUCER_WORKER_ID = "PRODUCER_WORKER_ID";
+
+    private static final String ROBOT_ID = "ROBOT_ID";
+
+    private static final String ACTIVITY_GROUP = "ACTIVITY_GROUP";
+
     protected Map<String, Serializable> contextMap = new HashMap<>();
 
     public ExecutionRuntimeServices() {
@@ -420,6 +428,38 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public Map<String, ? extends Serializable> getMetaData() {
         return (Map<String, Serializable>) contextMap.get(METADATA);
+    }
+
+    public void setConsumerWorkerId(String consumerWorkerId) {
+        contextMap.put(CONSUMER_WORKER_ID, consumerWorkerId);
+    }
+
+    public String removeConsumerWorkerId() {
+        return removeFromMap(CONSUMER_WORKER_ID);
+    }
+
+    public void setProducerWorkerId(String producerWorkerId) {
+        contextMap.put(PRODUCER_WORKER_ID, producerWorkerId);
+    }
+
+    public String removeProducerWorkerId() {
+        return removeFromMap(PRODUCER_WORKER_ID);
+    }
+
+    public void setRobotId(String robotId) {
+        contextMap.put(ROBOT_ID, robotId);
+    }
+
+    public String removeRobotId() {
+        return removeFromMap(ROBOT_ID);
+    }
+
+    public void setActivityGroup(String activityGroup) {
+        contextMap.put(ACTIVITY_GROUP, activityGroup);
+    }
+
+    public String removeActivityGroup() {
+        return removeFromMap(ACTIVITY_GROUP);
     }
 
     private <T> T removeFromMap(String key) {
