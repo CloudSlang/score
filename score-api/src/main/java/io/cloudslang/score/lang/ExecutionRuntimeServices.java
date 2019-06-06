@@ -89,7 +89,7 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String ROBOT_ID = "ROBOT_ID";
 
-    private static final String ACTIVITY_GROUP = "ACTIVITY_GROUP";
+    private static final String ROBOT_GROUP_NAME = "ROBOT_GROUP_NAME";
 
     protected Map<String, Serializable> contextMap = new HashMap<>();
 
@@ -454,12 +454,12 @@ public class ExecutionRuntimeServices implements Serializable {
         return removeFromMap(ROBOT_ID);
     }
 
-    public void setActivityGroup(String activityGroup) {
-        contextMap.put(ACTIVITY_GROUP, activityGroup);
+    public void setRobotGroupName(String robotGroupName) {
+        contextMap.put(ROBOT_GROUP_NAME, robotGroupName);
     }
 
-    public String removeActivityGroup() {
-        return removeFromMap(ACTIVITY_GROUP);
+    public String removeRobotGroupName() {
+        return removeFromMap(ROBOT_GROUP_NAME);
     }
 
     private <T> T removeFromMap(String key) {
