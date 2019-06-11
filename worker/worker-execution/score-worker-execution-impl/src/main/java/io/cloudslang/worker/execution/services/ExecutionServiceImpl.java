@@ -561,7 +561,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     protected void postExecutionSettings(Execution execution) {
-        setWorkerGroup(execution);
+        // setWorkerGroup(execution);
 
         //if there is a request to change the running execution plan id, we update the execution to the new execution plan ID
         Long requestForChangingExecutionPlan = execution.getSystemContext().pullRequestForChangingExecutionPlan();

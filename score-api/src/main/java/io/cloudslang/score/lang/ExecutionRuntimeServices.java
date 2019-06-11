@@ -83,6 +83,8 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String WORKER_GROUP_NAME = "WORKER_GROUP_NAME";
 
+    private static final String SHOULD_CHECK_GROUP = "SHOULD_CHECK_GROUP";
+
     private static final String CONSUMER_WORKER_ID = "CONSUMER_WORKER_ID";
 
     private static final String PRODUCER_WORKER_ID = "PRODUCER_WORKER_ID";
@@ -295,6 +297,10 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public void setWorkerGroupName(String workerGroupName) {
         contextMap.put(WORKER_GROUP_NAME, workerGroupName);
+    }
+
+    public void setShouldCheckGroup(boolean shouldCheckGroup) {
+        contextMap.put(SHOULD_CHECK_GROUP, shouldCheckGroup);
     }
 
     public String getNodeName() {
