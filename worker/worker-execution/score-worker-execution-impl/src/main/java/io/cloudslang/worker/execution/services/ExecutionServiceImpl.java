@@ -72,6 +72,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     private static final Logger logger = Logger.getLogger(ExecutionServiceImpl.class);
 
+    public static final String CLOUD_SLANG = "CloudSlang";
+
     @Autowired
     private PauseResumeService pauseService;
 
@@ -574,7 +576,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     private void setWorkerGroup(Execution execution) {
         //get group from system context
         String group = null;
-        if ("AFL".equals(execution.getSystemContext().get(ExecutionRuntimeServices.LANGUAGE_TYPE))) {
+        if (!CLOUD_SLANG.equals(execution.getSystemContext().get(ExecutionRuntimeServices.LANGUAGE_TYPE))) {
             group = (String) execution.getSystemContext().get(TempConstants.ACTUALLY_OPERATION_GROUP);
             execution.setGroupName(group);
         }
@@ -584,19 +586,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 execution.setGroupName(null);
             }
         }
-    }
-
-    private ExecutionStep getNextStep(Execution execution) {
-        ExecutionStep nextStep = null;
-        Long position = execution.getPosition();
-        if (position != null) {
-            RunningExecutionPlan runningExecutionPlan = workerDbSupportService
-                    .readExecutionPlanById(execution.getRunningExecutionPlanId());
-            if (runningExecutionPlan != null) {
-                nextStep = runningExecutionPlan.getExecutionPlan().getStep(position);
-            }
-        }
-        return nextStep;
     }
 
     private static void addContextData(Map<String, Object> data, Execution execution) {
