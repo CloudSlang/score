@@ -32,6 +32,7 @@ import io.cloudslang.score.facade.entities.RunningExecutionPlan;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.score.facade.execution.ExecutionSummary;
 import io.cloudslang.score.facade.execution.PauseReason;
+import io.cloudslang.score.lang.ExecutionRuntimeServices;
 import io.cloudslang.score.lang.SystemContext;
 import io.cloudslang.worker.execution.model.SandboxExecutionRunnable;
 import io.cloudslang.worker.execution.reflection.ReflectionAdapter;
@@ -561,7 +562,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     protected void postExecutionSettings(Execution execution) {
-        // setWorkerGroup(execution);
+        setWorkerGroup(execution);
 
         //if there is a request to change the running execution plan id, we update the execution to the new execution plan ID
         Long requestForChangingExecutionPlan = execution.getSystemContext().pullRequestForChangingExecutionPlan();
@@ -572,17 +573,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     private void setWorkerGroup(Execution execution) {
         //get group from system context
-        String group = (String) execution.getSystemContext().get(TempConstants.ACTUALLY_OPERATION_GROUP);
-
-        //if not overridden get the group from the step
-        if (group == null) {
-            ExecutionStep nextStep = getNextStep(execution);
-            if (nextStep != null && nextStep.getActionData().get("workerGroup") != null) {
-                group = nextStep.getActionData().get("workerGroup").toString();
-                execution.setGroupName(group);
-                execution.getSystemContext().put(TempConstants.SHOULD_CHECK_GROUP, true);
-            }
-        } else {
+        String group = null;
+        if ("AFL".equals(execution.getSystemContext().get(ExecutionRuntimeServices.LANGUAGE_TYPE))) {
+            group = (String) execution.getSystemContext().get(TempConstants.ACTUALLY_OPERATION_GROUP);
             execution.setGroupName(group);
         }
 
