@@ -69,7 +69,7 @@ import static org.apache.commons.lang.StringUtils.endsWith;
 
 public final class ExecutionServiceImpl implements ExecutionService {
 
-    private static final Logger logger = Logger.getLogger(ExecutionServiceImpl.class);
+    private static final Logger loggerr = Logger.getLogger(ExecutionServiceImpl.class);
 
     @Autowired
     private PauseResumeService pauseService;
