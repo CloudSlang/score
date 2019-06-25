@@ -18,6 +18,7 @@ package io.cloudslang.worker.execution.services;
 import io.cloudslang.score.facade.entities.Execution;
 
 public interface ExternalExecutionService {
+    void pauseExternalExecution(Execution execution) throws InterruptedException;
 
     void resumeExternalExecution(Execution execution) throws InterruptedException;
 
