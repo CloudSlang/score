@@ -34,6 +34,11 @@ public final class ExternalExecutionServiceImpl implements ExternalExecutionServ
     private ExecutionService executionService;
 
     @Override
+    public void pauseExternalExecution(Execution execution) throws InterruptedException {
+        executionService.pauseSequentialExecution(execution);
+    }
+
+    @Override
     public void resumeExternalExecution(Execution execution) {
         pauseService.resumeExecution(execution.getExecutionId(),
                 execution.getSystemContext().getBranchId(), new HashMap<>());

@@ -146,7 +146,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             }
             if ((!execution.getSystemContext().hasStepErrorKey()) && currStep.getActionData().get(ACTION_TYPE) != null &&
                     currStep.getActionData().get(ACTION_TYPE).toString().equalsIgnoreCase(SEQUENTIAL)) {
-                pauseFlow(execution, robotAvailabilityService.isRobotAvailable("Default") ? PENDING_ROBOT : NO_ROBOTS_IN_GROUP);
+                // Stop the execution here, the rest of the steps are done by the Sequential Message Handler
                 return null;
             }
             // Run the navigation
@@ -171,6 +171,13 @@ public final class ExecutionServiceImpl implements ExecutionService {
             execution.setPosition(null); // this ends the flow!!!
             return execution;
         }
+    }
+
+    @Override
+    public void pauseSequentialExecution(Execution execution) throws InterruptedException {
+        final PauseReason pauseReason =
+                robotAvailabilityService.isRobotAvailable("Default") ? PENDING_ROBOT : NO_ROBOTS_IN_GROUP;
+        pauseFlow(execution, pauseReason);
     }
 
     @Override

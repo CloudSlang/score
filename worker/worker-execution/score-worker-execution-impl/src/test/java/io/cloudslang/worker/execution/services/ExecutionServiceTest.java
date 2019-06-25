@@ -213,8 +213,6 @@ public class ExecutionServiceTest {
 
 		//running execution plan id has not changed as result of not navigating
 		assertEquals(RUNNING_EXE_PLAN_ID, execution.getRunningExecutionPlanId());
-		Mockito.verify(pauseResumeService, VerificationModeFactory.times(1)).pauseExecution(any(Long.class), any(String.class), eq(NO_ROBOTS_IN_GROUP));
-		Mockito.verify(pauseResumeService, VerificationModeFactory.times(1)).writeExecutionObject(any(Long.class), any(String.class), eq(execution));
 		Mockito.verifyNoMoreInteractions(pauseResumeService);
 	}
 

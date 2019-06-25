@@ -39,6 +39,13 @@ public interface ExecutionService {
      */
 	Execution execute(Execution execution) throws InterruptedException;
 
+    /**
+     * This method MUST be used ONLY for pausing sequential executions.
+     * @param execution the {@link io.cloudslang.score.facade.entities.Execution} to pause
+     * @throws InterruptedException
+     */
+	void pauseSequentialExecution(Execution execution) throws InterruptedException;
+
     void postExecutionWork(Execution execution) throws InterruptedException;
 
     /**
