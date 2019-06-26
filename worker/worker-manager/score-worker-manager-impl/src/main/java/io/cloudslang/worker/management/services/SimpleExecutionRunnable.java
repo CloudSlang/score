@@ -294,12 +294,12 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private boolean shouldChangeWorkerGroup(Execution nextStepExecution) {
         // Here we check if we can continue to run in current thread - depends on the group
-        if (nextStepExecution.getSystemContext().containsKey(TempConstants.SHOULD_CHECK_GROUP)) {
+        if (nextStepExecution.getSystemContext().shouldCheckGroup()) {
             // Take care of worker group id
             String groupName = nextStepExecution.getGroupName();
 
             // Clean key
-            nextStepExecution.getSystemContext().remove(TempConstants.SHOULD_CHECK_GROUP);
+            nextStepExecution.getSystemContext().removeShouldCheckGroup();
 
             // Does not really matter on what worker to run
             // This worker is member of the group

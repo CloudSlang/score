@@ -299,8 +299,17 @@ public class ExecutionRuntimeServices implements Serializable {
         contextMap.put(WORKER_GROUP_NAME, workerGroupName);
     }
 
-    public void setShouldCheckGroup(boolean shouldCheckGroup) {
-        contextMap.put(SHOULD_CHECK_GROUP, shouldCheckGroup);
+    /** This flag is set if the current execution step needs to go through group resolving */
+    public void setShouldCheckGroup() {
+        contextMap.put(SHOULD_CHECK_GROUP, true);
+    }
+
+    public void removeShouldCheckGroup() {
+        contextMap.remove(SHOULD_CHECK_GROUP);
+    }
+
+    public boolean shouldCheckGroup() {
+        return contextMap.containsKey(SHOULD_CHECK_GROUP);
     }
 
     public String getNodeName() {

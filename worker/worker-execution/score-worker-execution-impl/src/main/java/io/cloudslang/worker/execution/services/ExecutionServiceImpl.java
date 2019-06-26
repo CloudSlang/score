@@ -32,7 +32,6 @@ import io.cloudslang.score.facade.entities.RunningExecutionPlan;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.score.facade.execution.ExecutionSummary;
 import io.cloudslang.score.facade.execution.PauseReason;
-import io.cloudslang.score.lang.ExecutionRuntimeServices;
 import io.cloudslang.score.lang.SystemContext;
 import io.cloudslang.worker.execution.model.SandboxExecutionRunnable;
 import io.cloudslang.worker.execution.reflection.ReflectionAdapter;
@@ -71,8 +70,6 @@ import static org.apache.commons.lang.StringUtils.endsWith;
 public final class ExecutionServiceImpl implements ExecutionService {
 
     private static final Logger logger = Logger.getLogger(ExecutionServiceImpl.class);
-
-    public static final String CLOUD_SLANG = "CloudSlang";
 
     @Autowired
     private PauseResumeService pauseService;
@@ -574,10 +571,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     private void setWorkerGroup(Execution execution) {
-        //get group from system context
-        String group = null;
-        if (!CLOUD_SLANG.equals(execution.getSystemContext().get(ExecutionRuntimeServices.LANGUAGE_TYPE))) {
-            group = (String) execution.getSystemContext().get(TempConstants.ACTUALLY_OPERATION_GROUP);
+        String group = (String) execution.getSystemContext().get(TempConstants.ACTUALLY_OPERATION_GROUP);
+
+        if (group != null) {
             execution.setGroupName(group);
         }
 
