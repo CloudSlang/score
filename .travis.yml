@@ -17,3 +17,6 @@ install:
 
 after_success:
   - mvn clean -T 2.0C cobertura:cobertura org.eluder.coveralls:coveralls-maven-plugin:report
+
+jdk:
+  - openjdk8
