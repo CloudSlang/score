@@ -33,9 +33,6 @@ public class TempConstants {
     //This flag is set if the current execution step is important and must be persisted
     public static final String IS_RECOVERY_CHECKPOINT = "IS_RECOVERY_CHECKPOINT";
 
-    // This flag is set if the current execution step needs to go through group resolving
-    public static final String SHOULD_CHECK_GROUP = "SHOULD_CHECK_GROUP";
-
     // For the studio debugger events
     public static final String DEBUGGER_MODE = "DEBUGGER_MODE";
 

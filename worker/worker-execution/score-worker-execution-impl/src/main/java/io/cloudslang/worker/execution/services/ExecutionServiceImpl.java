@@ -578,18 +578,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     private void setWorkerGroup(Execution execution) {
-        //get group from system context
         String group = (String) execution.getSystemContext().get(TempConstants.ACTUALLY_OPERATION_GROUP);
 
-        //if not overridden get the group from the step
-        if (group == null) {
-            ExecutionStep nextStep = getNextStep(execution);
-            if (nextStep != null && nextStep.getActionData().get("workerGroup") != null) {
-                group = nextStep.getActionData().get("workerGroup").toString();
-                execution.setGroupName(group);
-                execution.getSystemContext().put(TempConstants.SHOULD_CHECK_GROUP, true);
-            }
-        } else {
+        if (group != null) {
             execution.setGroupName(group);
         }
 
@@ -598,19 +589,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 execution.setGroupName(null);
             }
         }
-    }
-
-    private ExecutionStep getNextStep(Execution execution) {
-        ExecutionStep nextStep = null;
-        Long position = execution.getPosition();
-        if (position != null) {
-            RunningExecutionPlan runningExecutionPlan = workerDbSupportService
-                    .readExecutionPlanById(execution.getRunningExecutionPlanId());
-            if (runningExecutionPlan != null) {
-                nextStep = runningExecutionPlan.getExecutionPlan().getStep(position);
-            }
-        }
-        return nextStep;
     }
 
     private static void addContextData(Map<String, Object> data, Execution execution) {

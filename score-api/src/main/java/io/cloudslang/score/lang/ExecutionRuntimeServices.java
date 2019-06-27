@@ -83,6 +83,8 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String WORKER_GROUP_NAME = "WORKER_GROUP_NAME";
 
+    private static final String SHOULD_CHECK_GROUP = "SHOULD_CHECK_GROUP";
+
     private static final String CONSUMER_WORKER_ID = "CONSUMER_WORKER_ID";
 
     private static final String PRODUCER_WORKER_ID = "PRODUCER_WORKER_ID";
@@ -295,6 +297,19 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public void setWorkerGroupName(String workerGroupName) {
         contextMap.put(WORKER_GROUP_NAME, workerGroupName);
+    }
+
+    /** This flag is set if the current execution step needs to go through group resolving */
+    public void setShouldCheckGroup() {
+        contextMap.put(SHOULD_CHECK_GROUP, true);
+    }
+
+    public void removeShouldCheckGroup() {
+        contextMap.remove(SHOULD_CHECK_GROUP);
+    }
+
+    public boolean shouldCheckGroup() {
+        return contextMap.containsKey(SHOULD_CHECK_GROUP);
     }
 
     public String getNodeName() {
