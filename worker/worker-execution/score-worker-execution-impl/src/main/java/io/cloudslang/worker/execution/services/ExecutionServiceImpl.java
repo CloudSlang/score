@@ -134,6 +134,14 @@ public final class ExecutionServiceImpl implements ExecutionService {
             }
             // dum bus event
             dumpBusEvents(execution);
+            if(execution.getPosition().equals(1L)) {
+                Map<String, Serializable> eventData = new HashMap<>();
+                eventData.put(EventConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
+                String eventType = EventConstants.SCORE_STARTED_EVENT;
+                SystemContext systemContext = execution.getSystemContext();
+                ScoreEvent startFlowScoreEvent = new ScoreEvent(eventType, systemContext.getLanguageName(), (Serializable) eventData, systemContext.getMetaData());;
+                eventBus.dispatch(startFlowScoreEvent);
+            }
             // Run the execution step
             String timeoutMessage = executeStep(execution, currStep);
             if (timeoutMessage != null) { // Timeout of run

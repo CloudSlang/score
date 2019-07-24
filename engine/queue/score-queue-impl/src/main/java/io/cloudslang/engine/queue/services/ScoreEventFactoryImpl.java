@@ -40,11 +40,29 @@ public class ScoreEventFactoryImpl implements ScoreEventFactory {
 	@Autowired
 	private RunningExecutionPlanService runningExecutionPlanService;
 
+	public ScoreEvent createStartedEvent(Execution execution) {
+		String eventType = EventConstants.SCORE_STARTED_EVENT;
+		Serializable eventData = createStartedEventData(execution);
+		SystemContext systemContext = execution.getSystemContext();
+		return new ScoreEvent(eventType, systemContext.getLanguageName(), eventData, systemContext.getMetaData());
+	}
+
 	public ScoreEvent createFinishedEvent(Execution execution) {
 		String eventType = EventConstants.SCORE_FINISHED_EVENT;
 		Serializable eventData = createFinishedEventData(execution);
 		SystemContext systemContext = execution.getSystemContext();
 	    return new ScoreEvent(eventType, systemContext.getLanguageName(), eventData, systemContext.getMetaData());
+	}
+
+	private Serializable createStartedEventData(Execution execution) {
+		Map<String, Serializable> eventData = new HashMap<>();
+//		ExecutionRuntimeServices runtimeServices = execution.getSystemContext();
+
+//		eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, runtimeServices);
+		eventData.put(EventConstants.EXECUTION_ID_CONTEXT, execution.getExecutionId());
+//		eventData.put(EventConstants.EXECUTION_CONTEXT, (Serializable) execution.getContexts());
+//		eventData.put(EventConstants.IS_BRANCH, !StringUtils.isEmpty(runtimeServices.getBranchId()));
+		return (Serializable) eventData;
 	}
 
 	private Serializable createFinishedEventData(Execution execution) {
