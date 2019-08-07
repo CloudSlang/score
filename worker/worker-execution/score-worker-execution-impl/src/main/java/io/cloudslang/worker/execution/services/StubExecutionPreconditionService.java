@@ -1,8 +1,8 @@
 package io.cloudslang.worker.execution.services;
 
-import io.cloudslang.score.api.execution.precondition.ExecutionPreconditionsService;
+import io.cloudslang.score.api.execution.precondition.ExecutionPreconditionService;
 
-public class StubExecutionPreconditionsService implements ExecutionPreconditionsService {
+public class StubExecutionPreconditionService implements ExecutionPreconditionService {
 
     @Override
     public boolean canExecute() {

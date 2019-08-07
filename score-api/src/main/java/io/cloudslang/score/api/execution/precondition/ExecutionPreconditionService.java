@@ -20,7 +20,7 @@ package io.cloudslang.score.api.execution.precondition;
  *
  * @author platon
  */
-public interface ExecutionPreconditionsService {
+public interface ExecutionPreconditionService {
 
     boolean canExecute();
 }

@@ -23,7 +23,7 @@ import java.util.Map;
  *
  * @author platon
  */
-public interface ExecutionPostconditionsService {
+public interface ExecutionPostconditionService {
 
     void postExecutionWork(Map<String, Serializable> context, Map<String, Serializable> runtimeValues);
 }

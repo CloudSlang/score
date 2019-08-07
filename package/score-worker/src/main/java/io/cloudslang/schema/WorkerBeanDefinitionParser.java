@@ -22,8 +22,8 @@ import io.cloudslang.worker.execution.reflection.ReflectionAdapterImpl;
 import io.cloudslang.worker.execution.services.ExecutionServiceImpl;
 import io.cloudslang.worker.execution.services.ScoreRobotAvailabilityServiceImpl;
 import io.cloudslang.worker.execution.services.SessionDataHandlerImpl;
-import io.cloudslang.worker.execution.services.StubExecutionPostconditionsService;
-import io.cloudslang.worker.execution.services.StubExecutionPreconditionsService;
+import io.cloudslang.worker.execution.services.StubExecutionPostconditionService;
+import io.cloudslang.worker.execution.services.StubExecutionPreconditionService;
 import io.cloudslang.worker.management.WorkerConfigurationServiceImpl;
 import io.cloudslang.worker.management.WorkerRegistration;
 import io.cloudslang.worker.management.monitor.ScheduledWorkerLoadMonitor;
@@ -167,7 +167,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private void registerExecutionPreconditionService(Element element, ParserContext parserContext){
 		String registerEPS = element.getAttribute("registerExecutionPreconditionService");
 		if(!registerEPS.equals(FALSE.toString())){
-			new BeanRegistrator(parserContext).CLASS(StubExecutionPreconditionsService.class).register();
+			new BeanRegistrator(parserContext).CLASS(StubExecutionPreconditionService.class).register();
 		}
 	}
 
@@ -175,7 +175,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private void registerExecutionPostconditionService(Element element, ParserContext parserContext){
 		String registerEPS = element.getAttribute("registerExecutionPostconditionService");
 		if(!registerEPS.equals(FALSE.toString())){
-			new BeanRegistrator(parserContext).CLASS(StubExecutionPostconditionsService.class).register();
+			new BeanRegistrator(parserContext).CLASS(StubExecutionPostconditionService.class).register();
 		}
 	}
 
