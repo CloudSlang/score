@@ -1,12 +1,12 @@
 /*******************************************************************************
-* (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
-* All rights reserved. This program and the accompanying materials
-* are made available under the terms of the Apache License v2.0 which accompany this distribution.
-*
-* The Apache License is available at
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-*******************************************************************************/
+ * (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Apache License v2.0 which accompany this distribution.
+ *
+ * The Apache License is available at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *******************************************************************************/
 
 package io.cloudslang.worker.management.services;
 
@@ -85,12 +85,14 @@ public class SimpleExecutionRunnable implements Runnable {
     }
 
     public void setExecutionMessage(ExecutionMessage executionMessage) {
+        logger.info(String.format("--- DEBUG --- Runnable assigned for execution id: %s", executionMessage.getMsgId()));
         this.executionMessage = executionMessage;
     }
 
     @Override
     public void run() {
         String executionId = executionMessage.getMsgId();
+        logger.info(String.format("--- DEBUG --- Execution started for id: %s", executionId));
 
         //We are renaming the thread for logging/monitoring purposes
         String origThreadName = Thread.currentThread().getName();
@@ -98,7 +100,7 @@ public class SimpleExecutionRunnable implements Runnable {
         Execution execution = null;
         try {
             //If we got here because of te shortcut we have the object
-            if(executionMessage.getExecutionObject() != null){
+            if (executionMessage.getExecutionObject() != null) {
                 execution = executionMessage.getExecutionObject();
 
             }
@@ -108,7 +110,7 @@ public class SimpleExecutionRunnable implements Runnable {
             }
 
             String branchId = execution.getSystemContext().getBranchId();
-            if(logger.isDebugEnabled()){
+            if (logger.isDebugEnabled()) {
                 logger.debug("Worker starts to work on execution: " + executionId + " branch: " + branchId);
             }
 
@@ -119,25 +121,24 @@ public class SimpleExecutionRunnable implements Runnable {
             } else {
                 executeRegularStep(execution);
             }
-        }
-        catch (InterruptedException interruptedException){
+            logger.info(String.format("--- DEBUG --- Execution ended for id: %s", executionId));
+        } catch (InterruptedException interruptedException) {
 
             // not old thread and interrupted by cancel
             boolean oldThread = !workerManager.isFromCurrentThreadPool(Thread.currentThread().getName());
-            if(!oldThread && isExecutionCancelled(execution)){
-                if (logger.isDebugEnabled())  logger.debug("Execution is interrupted...");
-            }else {
+            if (!oldThread && isExecutionCancelled(execution)) {
+                if (logger.isDebugEnabled()) logger.debug("Execution is interrupted...");
+            } else {
                 logger.error("Execution thread is interrupted!!! Exiting...", interruptedException);
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             logger.error("Error during execution!!!", ex);
             //set status FAILED
             executionMessage.setStatus(ExecStatus.FAILED);
             executionMessage.incMsgSeqId();    //new status must be with incremented msg_seq_id - otherwise will be recovered and we will get duplications
             //send only one execution message back - the new one was not created because of error
             try {
-                if(executionMessage.getPayload() == null){
+                if (executionMessage.getPayload() == null) {
                     executionMessage.setPayload(converter.createPayload(execution)); //this is done since we could get here from InBuffer shortcut - so no payload... and for FAILED message we need to set the payload
                 }
                 outBuffer.put(executionMessage);
@@ -193,7 +194,7 @@ public class SimpleExecutionRunnable implements Runnable {
     //If execution was paused it sends the current step with status FINISHED and that is all...
     private boolean isExecutionPaused(Execution nextStepExecution) {
         //If execution was paused
-        if(nextStepExecution == null){
+        if (nextStepExecution == null) {
             //set current step to finished
             executionMessage.setStatus(ExecStatus.FINISHED);
             executionMessage.incMsgSeqId();
@@ -205,8 +206,7 @@ public class SimpleExecutionRunnable implements Runnable {
                 logger.warn("Thread was interrupted! Exiting the execution... ", e);
             }
             return true;
-        }
-        else {
+        } else {
             return false;
         }
     }
@@ -238,8 +238,7 @@ public class SimpleExecutionRunnable implements Runnable {
                 return true; //exiting... in shutdown...
             }
             return true;
-        }
-        else {
+        } else {
             return false;
         }
     }
@@ -277,14 +276,13 @@ public class SimpleExecutionRunnable implements Runnable {
                 return true; //exiting... in shutdown...
             }
             return true;
-        }
-        else {
+        } else {
             return false;
         }
     }
 
-    private boolean isSplitStep(Execution nextStepExecution){
-        if(executionService.isSplitStep(nextStepExecution)){
+    private boolean isSplitStep(Execution nextStepExecution) {
+        if (executionService.isSplitStep(nextStepExecution)) {
             //set current step to finished
             executionMessage.setStatus(ExecStatus.FINISHED);
             executionMessage.incMsgSeqId();
@@ -299,8 +297,7 @@ public class SimpleExecutionRunnable implements Runnable {
                 return true;
             }
             return true;
-        }
-        else {
+        } else {
             return false;
         }
     }
@@ -314,11 +311,11 @@ public class SimpleExecutionRunnable implements Runnable {
             //clean key
             nextStepExecution.getSystemContext().remove(TempConstants.SHOULD_CHECK_GROUP);
 
-            boolean canRunInThisWorker = groupName== null || //does not really matter on what worker to run
-                                         workerConfigurationService.isMemberOf(groupName) || //this worker is member of the group
-                                         isStickyToThisWorker(groupName); //next step should run in this worker because of "sticky worker" feature
+            boolean canRunInThisWorker = groupName == null || //does not really matter on what worker to run
+                    workerConfigurationService.isMemberOf(groupName) || //this worker is member of the group
+                    isStickyToThisWorker(groupName); //next step should run in this worker because of "sticky worker" feature
 
-            if(!canRunInThisWorker){
+            if (!canRunInThisWorker) {
                 //set current step to finished
                 executionMessage.setStatus(ExecStatus.FINISHED);
                 executionMessage.incMsgSeqId();
@@ -338,20 +335,20 @@ public class SimpleExecutionRunnable implements Runnable {
         return false;
     }
 
-    private boolean isStickyToThisWorker(String groupName){
+    private boolean isStickyToThisWorker(String groupName) {
         return (workerUUID != null && groupName.endsWith(workerUUID));
     }
 
     private boolean isOldThread() {
 
         boolean oldThread = !workerManager.isFromCurrentThreadPool(Thread.currentThread().getName());
-        if(oldThread){ // interrupted old (recovery) thread
-            if(logger.isDebugEnabled()) {
+        if (oldThread) { // interrupted old (recovery) thread
+            if (logger.isDebugEnabled()) {
                 logger.debug("This thread is from old thread pool...");
             }
             return true;
-        }else {
-            if(logger.isDebugEnabled()) {
+        } else {
+            if (logger.isDebugEnabled()) {
                 logger.debug("Execution was not interrupted and is in current thread pool! Continue... ");
             }
             return false;
@@ -360,8 +357,8 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private boolean isExecutionCancelled(Execution execution) {
 
-        if(isCancelledExecution(execution)) {
-            if (logger.isDebugEnabled())  logger.debug("Execution is interrupted by Cancel");
+        if (isCancelledExecution(execution)) {
+            if (logger.isDebugEnabled()) logger.debug("Execution is interrupted by Cancel");
 
             // NOTE: an execution can be cancelled directly from CancelExecutionService, if it's currently paused.
             // Thus, if you change the code here, please check CancelExecutionService as well.
@@ -390,18 +387,16 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private boolean isCancelledExecution(Execution execution) {
 
-        if(execution==null) return false;
+        if (execution == null) return false;
 
         boolean executionIsCancelled = workerConfigurationService.isExecutionCancelled(execution.getExecutionId()); // in this case - just check if need to cancel. It will set as cancelled later on QueueEventListener
         // Another scenario of getting canceled - it was cancelled from the SplitJoinService (the configuration can still be not updated). Defect #:22060
-        if(ExecutionStatus.CANCELED.equals(execution.getSystemContext().getFlowTerminationType())) {
+        if (ExecutionStatus.CANCELED.equals(execution.getSystemContext().getFlowTerminationType())) {
             executionIsCancelled = true;
         }
 
         return executionIsCancelled;
     }
-
-
 
 
     private boolean isRunningTooLong(Long startTime, Execution nextStepExecution) {
@@ -501,7 +496,7 @@ public class SimpleExecutionRunnable implements Runnable {
     }
 
     private boolean isExecutionTerminating(Execution nextStepExecution) {
-        if(nextStepExecution.getPosition() == null) {
+        if (nextStepExecution.getPosition() == null) {
             //set current step to finished
             executionMessage.setStatus(ExecStatus.FINISHED);
             executionMessage.incMsgSeqId();
@@ -518,8 +513,7 @@ public class SimpleExecutionRunnable implements Runnable {
                 return true;
             }
             return true;
-        }
-        else {
+        } else {
             return false;
         }
     }
