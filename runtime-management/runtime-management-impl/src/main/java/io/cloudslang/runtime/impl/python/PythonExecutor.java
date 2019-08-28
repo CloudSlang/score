@@ -67,7 +67,12 @@ public class PythonExecutor implements Executor {
 
     static {
         //here to avoid jython preferring io.cloudslang package over python io package
-        GLOBAL_INTERPRETER.exec("import io");
+        try {
+            GLOBAL_INTERPRETER.exec("import io");
+        } catch (RuntimeException rex) {
+            logger.error("Rex occurred: ", rex);
+            throw rex;
+        }
     }
 
     private final PythonInterpreter interpreter;
