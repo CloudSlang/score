@@ -55,7 +55,7 @@ public class PythonExecutor implements Executor {
     private static final String TRUE = "true";
     private static final String FALSE = "false";
 
-    private static final PythonInterpreter GLOBAL_INTERPRETER = new ThreadSafePythonInterpreter(null);
+    private static final PythonInterpreter GLOBAL_INTERPRETER;
 
     /**
      * There is an issue in loaded environment - existing python module not found in PySystem.modules.table
@@ -68,6 +68,7 @@ public class PythonExecutor implements Executor {
     static {
         //here to avoid jython preferring io.cloudslang package over python io package
         try {
+            GLOBAL_INTERPRETER = new ThreadSafePythonInterpreter(null);
             GLOBAL_INTERPRETER.exec("import io");
         } catch (RuntimeException rex) {
             logger.error("Rex occurred: ", rex);
