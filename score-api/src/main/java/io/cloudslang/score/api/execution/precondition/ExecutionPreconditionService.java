@@ -22,5 +22,5 @@ package io.cloudslang.score.api.execution.precondition;
  */
 public interface ExecutionPreconditionService {
 
-    boolean canExecute();
+    boolean canExecute(String executionId);
 }

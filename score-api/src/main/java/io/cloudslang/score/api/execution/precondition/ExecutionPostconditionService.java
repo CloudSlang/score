@@ -25,5 +25,5 @@ import java.util.Map;
  */
 public interface ExecutionPostconditionService {
 
-    void postExecutionWork(Map<String, Serializable> context, Map<String, Serializable> runtimeValues);
+    void postExecutionWork(String executionId);
 }
