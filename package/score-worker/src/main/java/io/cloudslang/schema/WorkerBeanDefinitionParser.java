@@ -146,7 +146,10 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private void registerSequentialExecution(Element element, ParserContext parserContext){
 		String registerSequentialExecutionService = element.getAttribute("registerSequentialExecutionService");
 		if(!FALSE.toString().equals(registerSequentialExecutionService)){
-			new BeanRegistrator(parserContext).CLASS(DefaultSequentialExecutionServiceImpl.class).register();
+			new BeanRegistrator(parserContext)
+					.NAME("sequentialExecutionService")
+					.CLASS(DefaultSequentialExecutionServiceImpl.class)
+					.register();
 		}
 	}
 
@@ -160,14 +163,20 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private void registerRobotAvailabilityService(Element element, ParserContext parserContext){
 		String registerRobotAvailabilityService = element.getAttribute("registerRobotAvailabilityService");
 		if(!FALSE.toString().equals(registerRobotAvailabilityService)){
-			new BeanRegistrator(parserContext).CLASS(ScoreRobotAvailabilityServiceImpl.class).register();
+			new BeanRegistrator(parserContext)
+					.NAME("robotAvailabilityService")
+					.CLASS(ScoreRobotAvailabilityServiceImpl.class)
+					.register();
 		}
 	}
 
 	private void registerExecutionPreconditionService(Element element, ParserContext parserContext){
 		String registerEPS = element.getAttribute("registerExecutionPreconditionService");
 		if(!registerEPS.equals(FALSE.toString())){
-			new BeanRegistrator(parserContext).CLASS(StubExecutionPreconditionService.class).register();
+			new BeanRegistrator(parserContext)
+					.NAME("executionPreconditionService")
+					.CLASS(StubExecutionPreconditionService.class)
+					.register();
 		}
 	}
 
@@ -175,7 +184,10 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private void registerExecutionPostconditionService(Element element, ParserContext parserContext){
 		String registerEPS = element.getAttribute("registerExecutionPostconditionService");
 		if(!registerEPS.equals(FALSE.toString())){
-			new BeanRegistrator(parserContext).CLASS(StubExecutionPostconditionService.class).register();
+			new BeanRegistrator(parserContext)
+					.NAME("executionPostconditionService")
+					.CLASS(StubExecutionPostconditionService.class)
+					.register();
 		}
 	}
 
