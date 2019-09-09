@@ -70,23 +70,25 @@ public class PythonExecutor implements Executor {
         ThreadSafePythonInterpreter globalInterpreter;
         try {
             globalInterpreter = new ThreadSafePythonInterpreter(null);
-        } catch (RuntimeException rex) {
-            rex.printStackTrace();
+        } catch (Throwable rex) {
+            logger.error("Rex1 occurred");
             logger.error("Rex1 class: " + rex.getClass().getSimpleName());
             logger.error("Rex1 message: " + rex.getMessage());
             logger.error("Rex1: ", rex);
             logger.error("Rex1 retry");
+            rex.printStackTrace();
             globalInterpreter = new ThreadSafePythonInterpreter(null);
         }
         GLOBAL_INTERPRETER = globalInterpreter;
         try {
             GLOBAL_INTERPRETER.exec("import io");
-        } catch (RuntimeException rex) {
-            rex.printStackTrace();
+        } catch (Throwable rex) {
+            logger.error("Rex2 occurred");
             logger.error("Rex2 class: " + rex.getClass().getSimpleName());
             logger.error("Rex2 message: " + rex.getMessage());
             logger.error("Rex2: ", rex);
             logger.error("Rex2 retry");
+            rex.printStackTrace();
             GLOBAL_INTERPRETER.exec("import io");
         }
     }
