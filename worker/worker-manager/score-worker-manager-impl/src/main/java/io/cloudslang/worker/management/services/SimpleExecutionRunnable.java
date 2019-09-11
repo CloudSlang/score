@@ -21,6 +21,7 @@ import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
+import io.cloudslang.engine.queue.services.ExecutionQueueService;
 import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
 import io.cloudslang.orchestrator.entities.SplitMessage;
 import io.cloudslang.score.facade.TempConstants;
@@ -29,8 +30,10 @@ import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.worker.execution.services.ExecutionService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Map;
 
 import static java.lang.Boolean.getBoolean;
 import static java.lang.Long.parseLong;
@@ -63,6 +66,8 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private final WorkerManager workerManager;
 
+    private ExecutionQueueService executionQueueService;
+
     public SimpleExecutionRunnable(ExecutionService executionService,
             OutboundBuffer outBuffer,
             InBuffer inBuffer,
@@ -71,7 +76,8 @@ public class SimpleExecutionRunnable implements Runnable {
             QueueStateIdGeneratorService queueStateIdGeneratorService,
             String workerUUID,
             WorkerConfigurationService workerConfigurationService,
-            WorkerManager workerManager
+            WorkerManager workerManager,
+            ExecutionQueueService executionQueueService
     ) {
         this.executionService = executionService;
         this.outBuffer = outBuffer;
@@ -82,6 +88,7 @@ public class SimpleExecutionRunnable implements Runnable {
         this.workerUUID = workerUUID;
         this.workerConfigurationService = workerConfigurationService;
         this.workerManager = workerManager;
+        this.executionQueueService = executionQueueService;
 
         // System property - whether the executions are recoverable in case of restart/failure.
         this.isRecoveryDisabled = getBoolean("is.recovery.disabled");
@@ -177,7 +184,43 @@ public class SimpleExecutionRunnable implements Runnable {
                 shouldChangeWorkerGroup(nextStepExecution) ||
                 isPersistStep(nextStepExecution) ||
                 isRecoveryCheckpoint(nextStepExecution) ||
+                hasNoLicenseAvailable(nextStepExecution) ||
                 isRunningTooLong(startTime, nextStepExecution);
+    }
+
+    private boolean hasNoLicenseAvailable(Execution nextStepExecution) {
+        if (nextStepExecution.getSystemContext().getNoLicenseAvailable()) {
+            executionMessage.setStatus(ExecStatus.FINISHED);
+            executionMessage.incMsgSeqId();
+            executionMessage.setPayload(null);
+
+            ExecutionMessage flowFailedMessage = (ExecutionMessage) executionMessage.clone();
+            flowFailedMessage.setStatus(ExecStatus.FAILED);
+            flowFailedMessage.incMsgSeqId();
+
+            ExecutionMessage pendingExecMessage = createPendingExecutionMessage(nextStepExecution);
+            ExecutionMessage[] messages = new ExecutionMessage[]{executionMessage, pendingExecMessage, flowFailedMessage};
+
+            Map<Long, Payload> payloadMap = executionQueueService.readPayloadByExecutionIds(flowFailedMessage.getExecStateId());
+            Payload payload = payloadMap.get(flowFailedMessage.getExecStateId());
+            flowFailedMessage.setPayload(payload);
+
+                Execution execution = converter.extractExecution(flowFailedMessage.getPayload());
+                execution.getSystemContext().setNoLicenseAvailable();
+
+                Payload payload2 = converter.createPayload(execution);
+            flowFailedMessage.setPayload(payload2);
+
+            try {
+                outBuffer.put(messages);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     // If execution was paused it sends the current step with status FINISHED and that is all...

@@ -93,6 +93,8 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String ROBOT_GROUP_NAME = "ROBOT_GROUP_NAME";
 
+    private static final String NO_LICENSE_AVAILABLE = "NO_LICENSE_AVAILABLE";
+
     protected Map<String, Serializable> contextMap = new HashMap<>();
 
     public ExecutionRuntimeServices() {
@@ -475,6 +477,18 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public String removeRobotGroupName() {
         return removeFromMap(ROBOT_GROUP_NAME);
+    }
+
+    public void setNoLicenseAvailable() {
+        contextMap.put(NO_LICENSE_AVAILABLE, true);
+    }
+
+    public void removeNoLicenseAvailable() {
+        removeFromMap(NO_LICENSE_AVAILABLE);
+    }
+
+    public boolean getNoLicenseAvailable() {
+        return getFromMap(NO_LICENSE_AVAILABLE) != null;
     }
 
     private <T> T removeFromMap(String key) {

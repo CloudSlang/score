@@ -165,7 +165,7 @@ public class QueueListenerImpl implements QueueListener {
         //do nothing
     }
 
-    private Long pauseExecution(Execution execution) {
+    private Long pauseExecution(Execution execution, PauseReason pauseReason) {
         String branchId = execution.getSystemContext().getBranchId();
 
         ExecutionSummary pe = pauseResumeService.readPausedExecution(execution.getExecutionId(), branchId);
@@ -175,7 +175,7 @@ public class QueueListenerImpl implements QueueListener {
         if (pe == null) {
             // When cancel execution and no worker in group it should return to be paused without any termination type
             execution.getSystemContext().setFlowTerminationType(null);
-            pauseId = pauseResumeService.pauseExecution(execution.getExecutionId(), branchId, PauseReason.NO_WORKERS_IN_GROUP);
+            pauseId = pauseResumeService.pauseExecution(execution.getExecutionId(), branchId, pauseReason);
             pauseResumeService.writeExecutionObject(execution.getExecutionId(), branchId, execution);
         } else {
             pauseId = null;
@@ -191,8 +191,11 @@ public class QueueListenerImpl implements QueueListener {
         for (ExecutionMessage executionMessage : messages) {
             execution = extractExecution(executionMessage);
             if (failedBecauseNoWorker(execution)) {
-                Long pauseID = pauseExecution(execution);
+                Long pauseID = pauseExecution(execution, PauseReason.NO_WORKERS_IN_GROUP);
                 events.add(scoreEventFactory.createNoWorkerEvent(execution, pauseID));
+            } else if (failedBecauseNoLicenseAvailable(execution)) {
+                Long pauseID = pauseExecution(execution, PauseReason.NO_LICENSE_AVAILABLE);
+//                events.add(scoreEventFactory.createNoWorkerEvent(execution, pauseID));
             } else if (isBranch(execution)) {
                 splitJoinService.endBranch(Arrays.asList(execution));
                 events.add(scoreEventFactory.createFailedBranchEvent(execution));
@@ -205,7 +208,7 @@ public class QueueListenerImpl implements QueueListener {
 
     private void deleteExecutionStateObjects(List<ExecutionMessage> messages) {
         for (ExecutionMessage executionMessage : messages) {
-            if (!failedBecauseNoWorker(extractExecution(executionMessage))) {
+            if (!failedBecauseNoWorker(extractExecution(executionMessage)) && !failedBecauseNoLicenseAvailable(extractExecution(executionMessage))) {
                 executionStateService.deleteExecutionState(Long.valueOf(executionMessage.getMsgId()), ExecutionSummary.EMPTY_BRANCH);
             }
         }
@@ -213,6 +216,10 @@ public class QueueListenerImpl implements QueueListener {
 
     private boolean failedBecauseNoWorker(Execution execution) {
         return execution != null && !StringUtils.isEmpty(execution.getSystemContext().getNoWorkerInGroupName());
+    }
+
+    private boolean failedBecauseNoLicenseAvailable(Execution execution) {
+        return execution != null && execution.getSystemContext().getNoLicenseAvailable();
     }
 
 }
