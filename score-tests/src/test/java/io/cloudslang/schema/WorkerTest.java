@@ -16,6 +16,7 @@
 
 package io.cloudslang.schema;
 
+import io.cloudslang.engine.queue.services.ExecutionQueueService;
 import io.cloudslang.orchestrator.services.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -111,6 +112,11 @@ public class WorkerTest {
 		@Bean
 		QueueStateIdGeneratorService queueStateIdGeneratorService(){
 			return mock(QueueStateIdGeneratorService.class);
+		}
+
+		@Bean
+		ExecutionQueueService executionQueueService() {
+			return mock(ExecutionQueueService.class);
 		}
 	}
 

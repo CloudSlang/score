@@ -18,6 +18,7 @@ package io.cloudslang.worker.management.monitor;
 
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
+import io.cloudslang.engine.queue.services.ExecutionQueueService;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
 import io.cloudslang.orchestrator.services.EngineVersionService;
@@ -239,6 +240,11 @@ public class WorkerMonitorsImplTest {
             doReturn(mock(LinkedBlockingQueue.class)).when(workerConfigurationUtils)
                     .getBlockingQueue(anyInt(), anyInt());
             return workerConfigurationUtils;
+        }
+
+        @Bean
+        public ExecutionQueueService executionQueueService() {
+            return mock(ExecutionQueueService.class);
         }
 
     }

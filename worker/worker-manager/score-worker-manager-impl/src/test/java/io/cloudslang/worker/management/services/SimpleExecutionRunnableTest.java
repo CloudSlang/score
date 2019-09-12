@@ -20,6 +20,7 @@ import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
+import io.cloudslang.engine.queue.services.ExecutionQueueService;
 import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.worker.execution.services.ExecutionService;
@@ -81,6 +82,9 @@ public class SimpleExecutionRunnableTest {
     @Mock
     private WorkerManager workerManager;
 
+    @Mock
+    private ExecutionQueueService executionQueueService;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -95,7 +99,7 @@ public class SimpleExecutionRunnableTest {
     public void testGetExecutionMessage() throws Exception {
         SimpleExecutionRunnable simpleExecutionRunnable = new SimpleExecutionRunnable(executionService, outBuffer,
                 inBuffer, converter, endExecutionCallback, queueStateIdGenerator, "stam", workerConfigurationService,
-                workerManager);
+                workerManager, executionQueueService);
         ExecutionMessage executionMessage = simpleExecutionRunnable.getExecutionMessage();
         Assert.assertNull(executionMessage);
 
@@ -123,7 +127,7 @@ public class SimpleExecutionRunnableTest {
 
         SimpleExecutionRunnable simpleExecutionRunnable = new SimpleExecutionRunnable(executionService, outBuffer,
                 inBuffer, converter, endExecutionCallback, queueStateIdGenerator, "stam", workerConfigurationService,
-                workerManager);
+                workerManager, executionQueueService);
 
         ExecutionMessage executionMessage = new ExecutionMessage();
         executionMessage.setMsgId(String.valueOf(100L));
