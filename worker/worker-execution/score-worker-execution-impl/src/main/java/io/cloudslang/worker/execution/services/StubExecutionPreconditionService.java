@@ -21,10 +21,6 @@ public class StubExecutionPreconditionService implements ExecutionPreconditionSe
 
     @Override
     public boolean canExecute(String executionId) {
-        /*
-         * If there is no actual implementation for the interface and we end up using this stub,
-         * it means the execution has no preconditions and can be executed.
-         */
         return true;
     }
 }
