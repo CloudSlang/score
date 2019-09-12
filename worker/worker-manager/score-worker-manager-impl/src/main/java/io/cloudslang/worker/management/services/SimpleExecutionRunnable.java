@@ -30,10 +30,8 @@ import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.worker.execution.services.ExecutionService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.Map;
 
 import static java.lang.Boolean.getBoolean;
 import static java.lang.Long.parseLong;
@@ -66,18 +64,18 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private final WorkerManager workerManager;
 
-    private ExecutionQueueService executionQueueService;
+    private final ExecutionQueueService executionQueueService;
 
     public SimpleExecutionRunnable(ExecutionService executionService,
-            OutboundBuffer outBuffer,
-            InBuffer inBuffer,
-            ExecutionMessageConverter converter,
-            EndExecutionCallback endExecutionCallback,
-            QueueStateIdGeneratorService queueStateIdGeneratorService,
-            String workerUUID,
-            WorkerConfigurationService workerConfigurationService,
-            WorkerManager workerManager,
-            ExecutionQueueService executionQueueService
+                                   OutboundBuffer outBuffer,
+                                   InBuffer inBuffer,
+                                   ExecutionMessageConverter converter,
+                                   EndExecutionCallback endExecutionCallback,
+                                   QueueStateIdGeneratorService queueStateIdGeneratorService,
+                                   String workerUUID,
+                                   WorkerConfigurationService workerConfigurationService,
+                                   WorkerManager workerManager,
+                                   ExecutionQueueService executionQueueService
     ) {
         this.executionService = executionService;
         this.outBuffer = outBuffer;
@@ -194,32 +192,24 @@ public class SimpleExecutionRunnable implements Runnable {
             executionMessage.incMsgSeqId();
             executionMessage.setPayload(null);
 
-            ExecutionMessage flowFailedMessage = (ExecutionMessage) executionMessage.clone();
-            flowFailedMessage.setStatus(ExecStatus.FAILED);
-            flowFailedMessage.incMsgSeqId();
+            ExecutionMessage noLicenseMessage = (ExecutionMessage) executionMessage.clone();
+            noLicenseMessage.setStatus(ExecStatus.FAILED);
+            noLicenseMessage.incMsgSeqId();
 
-            ExecutionMessage pendingExecMessage = createPendingExecutionMessage(nextStepExecution);
-            ExecutionMessage[] messages = new ExecutionMessage[]{executionMessage, pendingExecMessage, flowFailedMessage};
+            long execStateId = noLicenseMessage.getExecStateId();
+            Payload payload = executionQueueService.readPayloadByExecutionIds(execStateId).get(execStateId);
+            Execution execution = converter.extractExecution(payload);
+            execution.getSystemContext().setNoLicenseAvailable();
+            noLicenseMessage.setPayload(converter.createPayload(execution));
 
-            Map<Long, Payload> payloadMap = executionQueueService.readPayloadByExecutionIds(flowFailedMessage.getExecStateId());
-            Payload payload = payloadMap.get(flowFailedMessage.getExecStateId());
-            flowFailedMessage.setPayload(payload);
-
-                Execution execution = converter.extractExecution(flowFailedMessage.getPayload());
-                execution.getSystemContext().setNoLicenseAvailable();
-
-                Payload payload2 = converter.createPayload(execution);
-            flowFailedMessage.setPayload(payload2);
-
+            ExecutionMessage[] messages = new ExecutionMessage[]{executionMessage, noLicenseMessage};
             try {
                 outBuffer.put(messages);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
             return true;
         }
-
         return false;
     }
 

@@ -18,14 +18,14 @@ package io.cloudslang.engine.queue.services;
 
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
+import io.cloudslang.orchestrator.services.ExecutionStateService;
+import io.cloudslang.orchestrator.services.PauseResumeService;
+import io.cloudslang.orchestrator.services.SplitJoinService;
 import io.cloudslang.score.events.EventBus;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.execution.ExecutionSummary;
 import io.cloudslang.score.facade.execution.PauseReason;
-import io.cloudslang.orchestrator.services.ExecutionStateService;
-import io.cloudslang.orchestrator.services.PauseResumeService;
-import io.cloudslang.orchestrator.services.SplitJoinService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -194,8 +194,7 @@ public class QueueListenerImpl implements QueueListener {
                 Long pauseID = pauseExecution(execution, PauseReason.NO_WORKERS_IN_GROUP);
                 events.add(scoreEventFactory.createNoWorkerEvent(execution, pauseID));
             } else if (failedBecauseNoLicenseAvailable(execution)) {
-                Long pauseID = pauseExecution(execution, PauseReason.NO_LICENSE_AVAILABLE);
-//                events.add(scoreEventFactory.createNoWorkerEvent(execution, pauseID));
+                pauseExecution(execution, PauseReason.NO_LICENSE_AVAILABLE);
             } else if (isBranch(execution)) {
                 splitJoinService.endBranch(Arrays.asList(execution));
                 events.add(scoreEventFactory.createFailedBranchEvent(execution));
@@ -221,5 +220,4 @@ public class QueueListenerImpl implements QueueListener {
     private boolean failedBecauseNoLicenseAvailable(Execution execution) {
         return execution != null && execution.getSystemContext().getNoLicenseAvailable();
     }
-
 }

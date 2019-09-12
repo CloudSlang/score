@@ -52,11 +52,11 @@ public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecuti
     @Autowired
     private WorkerManager workerManager;
 
-    @Resource
-    private String workerUuid;
-
     @Autowired
     private ExecutionQueueService executionQueueService;
+
+    @Resource
+    private String workerUuid;
 
     @Override
     public SimpleExecutionRunnable getObject() {
