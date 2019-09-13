@@ -369,7 +369,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         final Boolean isDebuggerMode = (Boolean) systemContext.get(TempConstants.DEBUGGER_MODE);
         return (isDebuggerMode != null) && isDebuggerMode;
     }
-    
+
     private void dumpBusEvents(Execution execution) throws InterruptedException {
         ArrayDeque<ScoreEvent> eventsQueue = execution.getSystemContext().getEvents();
         if (eventsQueue == null) {
