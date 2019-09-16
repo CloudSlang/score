@@ -182,27 +182,27 @@ public class SimpleExecutionRunnable implements Runnable {
                 shouldChangeWorkerGroup(nextStepExecution) ||
                 isPersistStep(nextStepExecution) ||
                 isRecoveryCheckpoint(nextStepExecution) ||
-                hasNoLicenseAvailable(nextStepExecution) ||
+                preconditionNotFulfilled(nextStepExecution) ||
                 isRunningTooLong(startTime, nextStepExecution);
     }
 
-    private boolean hasNoLicenseAvailable(Execution nextStepExecution) {
-        if (nextStepExecution.getSystemContext().getNoLicenseAvailable()) {
+    private boolean preconditionNotFulfilled(Execution nextStepExecution) {
+        if (nextStepExecution.getSystemContext().getPreconditionNotFulfilled()) {
             executionMessage.setStatus(ExecStatus.FINISHED);
             executionMessage.incMsgSeqId();
             executionMessage.setPayload(null);
 
-            ExecutionMessage noLicenseMessage = (ExecutionMessage) executionMessage.clone();
-            noLicenseMessage.setStatus(ExecStatus.FAILED);
-            noLicenseMessage.incMsgSeqId();
+            ExecutionMessage preconditionNotFulfilledMessage = (ExecutionMessage) executionMessage.clone();
+            preconditionNotFulfilledMessage.setStatus(ExecStatus.FAILED);
+            preconditionNotFulfilledMessage.incMsgSeqId();
 
-            long execStateId = noLicenseMessage.getExecStateId();
+            long execStateId = preconditionNotFulfilledMessage.getExecStateId();
             Payload payload = executionQueueService.readPayloadByExecutionIds(execStateId).get(execStateId);
             Execution execution = converter.extractExecution(payload);
-            execution.getSystemContext().setNoLicenseAvailable();
-            noLicenseMessage.setPayload(converter.createPayload(execution));
+            execution.getSystemContext().setPreconditionNotFulfilled();
+            preconditionNotFulfilledMessage.setPayload(converter.createPayload(execution));
 
-            ExecutionMessage[] messages = new ExecutionMessage[]{executionMessage, noLicenseMessage};
+            ExecutionMessage[] messages = new ExecutionMessage[]{executionMessage, preconditionNotFulfilledMessage};
             try {
                 outBuffer.put(messages);
             } catch (InterruptedException e) {

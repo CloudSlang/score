@@ -193,8 +193,8 @@ public class QueueListenerImpl implements QueueListener {
             if (failedBecauseNoWorker(execution)) {
                 Long pauseID = pauseExecution(execution, PauseReason.NO_WORKERS_IN_GROUP);
                 events.add(scoreEventFactory.createNoWorkerEvent(execution, pauseID));
-            } else if (failedBecauseNoLicenseAvailable(execution)) {
-                pauseExecution(execution, PauseReason.NO_LICENSE_AVAILABLE);
+            } else if (failedBecausePreconditionNotFulfilled(execution)) {
+                pauseExecution(execution, PauseReason.PRECONDITION_NOT_FULFILLED);
             } else if (isBranch(execution)) {
                 splitJoinService.endBranch(Arrays.asList(execution));
                 events.add(scoreEventFactory.createFailedBranchEvent(execution));
@@ -207,7 +207,7 @@ public class QueueListenerImpl implements QueueListener {
 
     private void deleteExecutionStateObjects(List<ExecutionMessage> messages) {
         for (ExecutionMessage executionMessage : messages) {
-            if (!failedBecauseNoWorker(extractExecution(executionMessage)) && !failedBecauseNoLicenseAvailable(extractExecution(executionMessage))) {
+            if (!failedBecauseNoWorker(extractExecution(executionMessage)) && !failedBecausePreconditionNotFulfilled(extractExecution(executionMessage))) {
                 executionStateService.deleteExecutionState(Long.valueOf(executionMessage.getMsgId()), ExecutionSummary.EMPTY_BRANCH);
             }
         }
@@ -217,7 +217,7 @@ public class QueueListenerImpl implements QueueListener {
         return execution != null && !StringUtils.isEmpty(execution.getSystemContext().getNoWorkerInGroupName());
     }
 
-    private boolean failedBecauseNoLicenseAvailable(Execution execution) {
-        return execution != null && execution.getSystemContext().getNoLicenseAvailable();
+    private boolean failedBecausePreconditionNotFulfilled(Execution execution) {
+        return execution != null && execution.getSystemContext().getPreconditionNotFulfilled();
     }
 }

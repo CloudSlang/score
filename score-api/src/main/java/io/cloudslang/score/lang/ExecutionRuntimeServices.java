@@ -93,7 +93,7 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String ROBOT_GROUP_NAME = "ROBOT_GROUP_NAME";
 
-    private static final String NO_LICENSE_AVAILABLE = "NO_LICENSE_AVAILABLE";
+    private static final String PRECONDITION_NOT_FULFILLED = "PRECONDITION_NOT_FULFILLED";
 
     protected Map<String, Serializable> contextMap = new HashMap<>();
 
@@ -479,16 +479,16 @@ public class ExecutionRuntimeServices implements Serializable {
         return removeFromMap(ROBOT_GROUP_NAME);
     }
 
-    public void setNoLicenseAvailable() {
-        contextMap.put(NO_LICENSE_AVAILABLE, true);
+    public void setPreconditionNotFulfilled() {
+        contextMap.put(PRECONDITION_NOT_FULFILLED, true);
     }
 
-    public void removeNoLicenseAvailable() {
-        removeFromMap(NO_LICENSE_AVAILABLE);
+    public void removePreconditionNotFulfilled() {
+        removeFromMap(PRECONDITION_NOT_FULFILLED);
     }
 
-    public boolean getNoLicenseAvailable() {
-        return getFromMap(NO_LICENSE_AVAILABLE) != null;
+    public boolean getPreconditionNotFulfilled() {
+        return getFromMap(PRECONDITION_NOT_FULFILLED) != null;
     }
 
     private <T> T removeFromMap(String key) {
