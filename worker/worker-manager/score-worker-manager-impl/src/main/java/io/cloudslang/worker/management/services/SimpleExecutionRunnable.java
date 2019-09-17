@@ -171,7 +171,8 @@ public class SimpleExecutionRunnable implements Runnable {
         // 3. we should stop and go to queue
         // 4. The execution is terminating
         // 5. The nextStepExecution is a splitStep
-        // 6. Running too long
+        // 6. The precondition was not fulfilled
+        // 7. Running too long
 
         // The order is important
         return isOldThread() ||
