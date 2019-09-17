@@ -17,6 +17,7 @@
 package io.cloudslang.worker.management.services;
 
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
+import io.cloudslang.engine.queue.services.ExecutionQueueService;
 import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
 import io.cloudslang.worker.execution.services.ExecutionService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
@@ -51,6 +52,9 @@ public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecuti
     @Autowired
     private WorkerManager workerManager;
 
+    @Autowired
+    private ExecutionQueueService executionQueueService;
+
     @Resource
     private String workerUuid;
 
@@ -65,7 +69,8 @@ public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecuti
                 queueStateIdGeneratorService,
                 workerUuid,
                 workerConfigurationService,
-                workerManager
+                workerManager,
+                executionQueueService
         );
     }
 

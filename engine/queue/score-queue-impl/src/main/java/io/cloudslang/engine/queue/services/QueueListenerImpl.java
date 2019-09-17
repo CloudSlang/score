@@ -18,14 +18,14 @@ package io.cloudslang.engine.queue.services;
 
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
+import io.cloudslang.orchestrator.services.ExecutionStateService;
+import io.cloudslang.orchestrator.services.PauseResumeService;
+import io.cloudslang.orchestrator.services.SplitJoinService;
 import io.cloudslang.score.events.EventBus;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.execution.ExecutionSummary;
 import io.cloudslang.score.facade.execution.PauseReason;
-import io.cloudslang.orchestrator.services.ExecutionStateService;
-import io.cloudslang.orchestrator.services.PauseResumeService;
-import io.cloudslang.orchestrator.services.SplitJoinService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -165,7 +165,7 @@ public class QueueListenerImpl implements QueueListener {
         //do nothing
     }
 
-    private Long pauseExecution(Execution execution) {
+    private Long pauseExecution(Execution execution, PauseReason pauseReason) {
         String branchId = execution.getSystemContext().getBranchId();
 
         ExecutionSummary pe = pauseResumeService.readPausedExecution(execution.getExecutionId(), branchId);
@@ -175,7 +175,7 @@ public class QueueListenerImpl implements QueueListener {
         if (pe == null) {
             // When cancel execution and no worker in group it should return to be paused without any termination type
             execution.getSystemContext().setFlowTerminationType(null);
-            pauseId = pauseResumeService.pauseExecution(execution.getExecutionId(), branchId, PauseReason.NO_WORKERS_IN_GROUP);
+            pauseId = pauseResumeService.pauseExecution(execution.getExecutionId(), branchId, pauseReason);
             pauseResumeService.writeExecutionObject(execution.getExecutionId(), branchId, execution);
         } else {
             pauseId = null;
@@ -191,8 +191,10 @@ public class QueueListenerImpl implements QueueListener {
         for (ExecutionMessage executionMessage : messages) {
             execution = extractExecution(executionMessage);
             if (failedBecauseNoWorker(execution)) {
-                Long pauseID = pauseExecution(execution);
+                Long pauseID = pauseExecution(execution, PauseReason.NO_WORKERS_IN_GROUP);
                 events.add(scoreEventFactory.createNoWorkerEvent(execution, pauseID));
+            } else if (failedBecausePreconditionNotFulfilled(execution)) {
+                pauseExecution(execution, PauseReason.PRECONDITION_NOT_FULFILLED);
             } else if (isBranch(execution)) {
                 splitJoinService.endBranch(Arrays.asList(execution));
                 events.add(scoreEventFactory.createFailedBranchEvent(execution));
@@ -205,7 +207,7 @@ public class QueueListenerImpl implements QueueListener {
 
     private void deleteExecutionStateObjects(List<ExecutionMessage> messages) {
         for (ExecutionMessage executionMessage : messages) {
-            if (!failedBecauseNoWorker(extractExecution(executionMessage))) {
+            if (!failedBecauseNoWorker(extractExecution(executionMessage)) && !failedBecausePreconditionNotFulfilled(extractExecution(executionMessage))) {
                 executionStateService.deleteExecutionState(Long.valueOf(executionMessage.getMsgId()), ExecutionSummary.EMPTY_BRANCH);
             }
         }
@@ -215,4 +217,7 @@ public class QueueListenerImpl implements QueueListener {
         return execution != null && !StringUtils.isEmpty(execution.getSystemContext().getNoWorkerInGroupName());
     }
 
+    private boolean failedBecausePreconditionNotFulfilled(Execution execution) {
+        return execution != null && execution.getSystemContext().getPreconditionNotFulfilled();
+    }
 }

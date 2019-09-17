@@ -93,6 +93,8 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String ROBOT_GROUP_NAME = "ROBOT_GROUP_NAME";
 
+    private static final String PRECONDITION_NOT_FULFILLED = "PRECONDITION_NOT_FULFILLED";
+
     protected Map<String, Serializable> contextMap = new HashMap<>();
 
     public ExecutionRuntimeServices() {
@@ -475,6 +477,18 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public String removeRobotGroupName() {
         return removeFromMap(ROBOT_GROUP_NAME);
+    }
+
+    public void setPreconditionNotFulfilled() {
+        contextMap.put(PRECONDITION_NOT_FULFILLED, true);
+    }
+
+    public void removePreconditionNotFulfilled() {
+        removeFromMap(PRECONDITION_NOT_FULFILLED);
+    }
+
+    public boolean getPreconditionNotFulfilled() {
+        return getFromMap(PRECONDITION_NOT_FULFILLED) != null;
     }
 
     private <T> T removeFromMap(String key) {
