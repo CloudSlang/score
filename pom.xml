@@ -39,7 +39,7 @@
         <connection>scm:git:https://github.com/CloudSlang/score.git</connection>
         <developerConnection>scm:git:git@github.com:CloudSlang/score.git</developerConnection>
         <url>https://github.com/CloudSlang/score.git</url>
-        <tag>score-parent-0.3.85-SNAPSHOT</tag>
+        <tag>score-parent-0.3.97-SNAPSHOT</tag>
     </scm>
 
     <properties>
