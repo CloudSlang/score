@@ -89,7 +89,7 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
     }
 
     /**
-     * Job that will handle the joining of finished branches.
+     * Job that will handle the joining of finished branches for parallel and non-blocking steps.
      */
     @Override
     public void joinFinishedSplitsJob() {
@@ -154,5 +154,10 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
         } catch (Exception e) {
             logger.error("Can't run suspended execution cleaner job.", e);
         }
+    }
+
+    @Override
+    public void miMergeBranchesContexts() {
+        int derp = 4;
     }
 }

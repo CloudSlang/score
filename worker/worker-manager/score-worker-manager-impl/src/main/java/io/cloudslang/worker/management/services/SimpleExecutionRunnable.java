@@ -459,9 +459,20 @@ public class SimpleExecutionRunnable implements Runnable {
         executionMessage.incMsgSeqId();
         executionMessage.setPayload(null);
         String splitId = getSplitId(newExecutions);
-        SplitMessage splitMessage = new SplitMessage(splitId, execution, newExecutions);
+
+        SplitMessage splitMessage1 = new SplitMessage(splitId, execution, newExecutions.subList(0, Integer.parseInt(execution.getSystemContext().get("MI_POOL_SIZE").toString())), true);
+        List<Execution> secondMessageChildren = newExecutions.subList(Integer.parseInt(execution.getSystemContext().get("MI_POOL_SIZE").toString()), newExecutions.size());
+        SplitMessage splitMessage2 = null;
+        if (secondMessageChildren.size() != 0) {
+            splitMessage2 = new SplitMessage(splitId, execution, secondMessageChildren, false);
+        }
+
         try {
-            outBuffer.put(executionMessage, splitMessage);
+            if (splitMessage2 != null) {
+                outBuffer.put(executionMessage, splitMessage1, splitMessage2);
+            } else {
+                outBuffer.put(executionMessage, splitMessage1);
+            }
         } catch (InterruptedException e) {
             logger.warn("Thread was interrupted! Exiting the execution... ", e);
         }

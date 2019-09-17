@@ -34,6 +34,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.stream.Collectors.toList;
+
 /**
  * User:
  * Date: 20/09/12
@@ -93,8 +95,12 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
         }
 
 		stopWatch.split();
-		if (stateMessages.size() > 0)
+		if (stateMessages.size() > 0) {
 			executionQueueRepository.insertExecutionStates(stateMessages);
+			executionQueueRepository.saveNotActiveExecutionsQueues(stateMessages.stream()
+					.filter(executionMessage -> !executionMessage.isActive())
+					.collect(toList()));
+		}
 
 		long msgVersion = versionService.getCurrentVersion(VersionService.MSG_RECOVERY_VERSION_COUNTER_NAME);
 		executionQueueRepository.insertExecutionQueue(messages, msgVersion);

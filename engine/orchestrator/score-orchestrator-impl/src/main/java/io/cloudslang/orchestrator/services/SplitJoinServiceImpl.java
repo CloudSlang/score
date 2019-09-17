@@ -17,6 +17,8 @@
 package io.cloudslang.orchestrator.services;
 
 import ch.lambdaj.function.convert.Converter;
+import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
+import io.cloudslang.orchestrator.enums.SuspendedExecutionReason;
 import io.cloudslang.score.api.EndBranchDataContainer;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
@@ -30,6 +32,7 @@ import io.cloudslang.orchestrator.entities.SuspendedExecution;
 import io.cloudslang.orchestrator.repositories.FinishedBranchRepository;
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -39,10 +42,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static ch.lambdaj.Lambda.convert;
 import static ch.lambdaj.Lambda.extract;
 import static ch.lambdaj.Lambda.on;
+import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.NON_BLOCKING;
+import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL;
+import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.valueOf;
+import static java.lang.Integer.parseInt;
+import static java.lang.Long.parseLong;
+import static java.util.EnumSet.of;
+import static java.util.stream.Collectors.toList;
 
 public final class SplitJoinServiceImpl implements SplitJoinService {
     private final Logger logger = Logger.getLogger(getClass());
@@ -60,6 +71,9 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
     @Autowired
     private ExecutionMessageConverter converter;
+
+    @Autowired
+    private ExecutionQueueRepository executionQueueRepository;
 
     /*
         converts an execution to a fresh execution message for triggering a new flow
@@ -97,15 +111,21 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         List<SuspendedExecution> suspendedParents = new ArrayList<>();
 
         for (SplitMessage splitMessage : splitMessages) {
-            // 1. trigger all the child branches
-            List<ExecutionMessage> childExecutionMessages = convert(splitMessage.getChildren(), executionToStartExecutionMessage);
+            List<ExecutionMessage> childExecutionMessages = new ArrayList<>();
+            if (splitMessage.isExecute()) {
+                // 1. trigger all the child branches
+                childExecutionMessages.addAll(prepareExecutionMessages(splitMessage.getChildren(), true, splitMessage.getParent().getExecutionId()));
+                // 2. suspend the parent
+                final SuspendedExecutionReason stepType = valueOf(splitMessage.getParent().getSystemContext().get("STEP_TYPE").toString());
+                suspendedParents.add(new SuspendedExecution(splitMessage.getParent().getExecutionId().toString(),
+                        splitMessage.getSplitId(),
+                        splitMessage.getChildren().size(),
+                        splitMessage.getParent(),
+                        stepType));
+            } else {
+                childExecutionMessages.addAll(prepareExecutionMessages(splitMessage.getChildren(), false, splitMessage.getParent().getExecutionId()));
+            }
             branchTriggerMessages.addAll(childExecutionMessages);
-
-            // 2. suspend the parent
-            suspendedParents.add(new SuspendedExecution(splitMessage.getParent().getExecutionId().toString(),
-                    splitMessage.getSplitId(),
-                    splitMessage.getChildren().size(),
-                    splitMessage.getParent()));
         }
 
         List<ExecutionMessage> queueMessages = new ArrayList<>();
@@ -117,6 +137,18 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
         // save the suspended parent entities
         suspendedExecutionsRepository.save(suspendedParents);
+    }
+
+    private List<ExecutionMessage> prepareExecutionMessages(List<Execution> executions, boolean active, long executionId) {
+        return executions.stream()
+                .map(execution -> {
+                    ExecutionMessage executionMessage = new ExecutionMessage(execution.getExecutionId().toString(),
+                            converter.createPayload(execution));
+                    executionMessage.setActive(active);
+                    executionMessage.setExecutionId(executionId);
+                    return executionMessage;
+                })
+                .collect(toList());
     }
 
     @Override
@@ -161,6 +193,8 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             SuspendedExecution suspendedExecution = suspendedMap.get(finishedBranch.getSplitId());
             if (suspendedExecution != null) {
                 finishedBranch.connectToSuspendedExecution(suspendedExecution);
+                // start a new branch
+                startNewBranch(suspendedExecution);
 
                 //this is an optimization for subflow (also works for MI with one branch :) )
                 if (suspendedExecution.getNumberOfBranches() == 1) {
@@ -173,6 +207,14 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
         if (!suspendedExecutionsWithOneBranch.isEmpty()) {
             joinAndSendToQueue(suspendedExecutionsWithOneBranch);
+        }
+    }
+
+    private void startNewBranch(final SuspendedExecution suspendedExecution) {
+        Pair<Long, Long> pair = executionQueueRepository.getFirstPendingBranch(parseInt(suspendedExecution.getExecutionId()));
+        if (pair != null) {
+            executionQueueRepository.activatePendingExecutionStateForAnExecution((pair.getRight()));
+            executionQueueRepository.deletePendingExecutionState(pair.getLeft());
         }
     }
 
@@ -191,7 +233,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
         // 1. Find all suspended executions that have all their branches ended
         PageRequest pageRequest = new PageRequest(0, bulkSize);
-        List<SuspendedExecution> suspendedExecutions = suspendedExecutionsRepository.findFinishedSuspendedExecutions(pageRequest);
+        List<SuspendedExecution> suspendedExecutions = suspendedExecutionsRepository.findFinishedSuspendedExecutions(of(PARALLEL, NON_BLOCKING), pageRequest);
 
         return joinAndSendToQueue(suspendedExecutions);
     }

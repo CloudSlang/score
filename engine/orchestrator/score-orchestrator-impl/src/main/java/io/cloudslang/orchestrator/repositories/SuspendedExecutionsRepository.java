@@ -17,6 +17,7 @@
 package io.cloudslang.orchestrator.repositories;
 
 import io.cloudslang.orchestrator.entities.SuspendedExecution;
+import io.cloudslang.orchestrator.enums.SuspendedExecutionReason;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -24,6 +25,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
 
 /**
@@ -35,8 +37,10 @@ import java.util.List;
 public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedExecution, Long> {
     List<SuspendedExecution> findBySplitIdIn(List<String> splitIds);
 
-    @Query("from SuspendedExecution se where se.numberOfBranches=size(se.finishedBranches)")
-    List<SuspendedExecution> findFinishedSuspendedExecutions(Pageable pageRequest);
+    @Query("from SuspendedExecution se where se.numberOfBranches=size(se.finishedBranches) and se.suspensionReason in :suspensionReasons")
+    List<SuspendedExecution> findFinishedSuspendedExecutions(
+            @Param("suspensionReasons") EnumSet<SuspendedExecutionReason> suspensionReasons,
+            Pageable pageRequest);
 
     @Query("select se.executionId from SuspendedExecution se " +
             "left join io.cloudslang.orchestrator.entities.ExecutionState es " +

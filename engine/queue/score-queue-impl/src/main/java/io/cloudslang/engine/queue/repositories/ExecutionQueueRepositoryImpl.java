@@ -22,8 +22,11 @@ import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.StatementAwareJdbcTemplateWrapper;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -115,6 +118,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					" WHERE  " +
 					"      (q.ASSIGNED_WORKER =  ?)  AND " +
 					"      (q.STATUS IN (:status)) AND " +
+					" 	   (s.ACTIVE = TRUE) AND " +
 					" (q.EXEC_STATE_ID = s.ID) AND " +
 					" (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
 					"              FROM OO_EXECUTION_QUEUES qq " +
@@ -167,12 +171,13 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					" GROUP BY ASSIGNED_WORKER";
 
 
-	final private String INSERT_EXEC_STATE = "INSERT INTO OO_EXECUTION_STATES  (ID, MSG_ID,  PAYLOAD, CREATE_TIME) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
+	final private String INSERT_EXEC_STATE = "INSERT INTO OO_EXECUTION_STATES  (ID, MSG_ID,  PAYLOAD, CREATE_TIME, ACTIVE) VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?)";
 
 	final private String INSERT_QUEUE = "INSERT INTO OO_EXECUTION_QUEUES (ID, EXEC_STATE_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS,MSG_SEQ_ID, CREATE_TIME,MSG_VERSION) VALUES (?, ?, ?, ?, ?, ?,?,?)";
 
-	private static final String QUERY_PAYLOAD_BY_EXECUTION_IDS = "SELECT ID, PAYLOAD FROM OO_EXECUTION_STATES WHERE ID IN (:IDS)";
+	final private String INSERT_EXECUTION_STATE_MAPPING = "INSERT INTO OO_EXECUTIONS_STATES_EXECUTIONS (ID, EXEC_STATE_ID, EXEC_ID) VALUES (?, ?, ?)";
 
+	private static final String QUERY_PAYLOAD_BY_EXECUTION_IDS = "SELECT ID, PAYLOAD FROM OO_EXECUTION_STATES WHERE ID IN (:IDS)";
 
 	//We use dedicated JDBC templates for each query since JDBCTemplate is state-full object and we have different settings for each query.
 	private StatementAwareJdbcTemplateWrapper pollJdbcTemplate;
@@ -186,6 +191,9 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 	private JdbcTemplate deleteFinishedStepsJdbcTemplate;
 	private JdbcTemplate findPayloadByExecutionIdsJdbcTemplate;
 	private JdbcTemplate getBusyWorkersJdbcTemplate;
+	private JdbcTemplate getFirstPendingBranchJdbcTemplate;
+	private JdbcTemplate updateExecutionStateStatusJdbcTemplate;
+	private JdbcTemplate deletePendignExecutionStateJdbcTemplate;
 
 	@Autowired
 	private IdentityGenerator idGen;
@@ -207,6 +215,9 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 		deleteFinishedStepsJdbcTemplate = new JdbcTemplate(dataSource);
 		findPayloadByExecutionIdsJdbcTemplate = new JdbcTemplate(dataSource);
 		getBusyWorkersJdbcTemplate = new JdbcTemplate(dataSource);
+		getFirstPendingBranchJdbcTemplate = new JdbcTemplate(dataSource);
+		updateExecutionStateStatusJdbcTemplate = new JdbcTemplate(dataSource);
+		deletePendignExecutionStateJdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
 	@Override
@@ -225,6 +236,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 				ps.setLong(1, msg.getExecStateId());
 				ps.setString(2, msg.getMsgId());
 				ps.setBytes(3, msg.getPayload().getData());
+				ps.setBoolean(4, msg.isActive());
 			}
 
 			@Override
@@ -262,6 +274,56 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 		});
 		t = System.currentTimeMillis() - t;
 		if (logger.isDebugEnabled()) logger.debug("Insert to queue: " + messages.size() + "/" + t + " messages/ms");
+	}
+
+	@Override
+    public void saveNotActiveExecutionsQueues(List<ExecutionMessage> notActiveMessages) {
+        insertExecutionJdbcTemplate.batchUpdate(INSERT_EXECUTION_STATE_MAPPING, new BatchPreparedStatementSetter() {
+			@Override
+			public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
+				ExecutionMessage executionMessage = notActiveMessages.get(i);
+				preparedStatement.setLong(1, idGen.next());
+				preparedStatement.setLong(2, executionMessage.getExecStateId());
+				preparedStatement.setLong(3, executionMessage.getExecutionId());
+			}
+
+			@Override
+			public int getBatchSize() {
+				return notActiveMessages.size();
+			}
+		});
+    }
+
+	@Override
+	public Pair<Long, Long> getFirstPendingBranch(final long executionId) {
+		final String sql = "SELECT ID, EXEC_STATE_ID FROM OO_EXECUTIONS_STATES_EXECUTIONS WHERE EXEC_ID = ?";
+		getFirstPendingBranchJdbcTemplate.setMaxRows(1);
+		Object[] inputs = {executionId};
+		MutablePair<Long, Long> longLongMutablePair = null;
+		try {
+			longLongMutablePair = getFirstPendingBranchJdbcTemplate.queryForObject(sql, inputs, (resultSet, rowNumber) -> {
+				MutablePair<Long, Long> pair = new MutablePair<>();
+				pair.setLeft(resultSet.getLong("ID"));
+				pair.setRight(resultSet.getLong("EXEC_STATE_ID"));
+				return pair;
+			});
+		} catch (EmptyResultDataAccessException ignored) {
+		}
+		return longLongMutablePair;
+	}
+
+	@Override
+	public void activatePendingExecutionStateForAnExecution(long executionId) {
+		final String sql = "UPDATE OO_EXECUTION_STATES SET ACTIVE = TRUE WHERE ID = ?";
+		Object[] args = {executionId};
+		updateExecutionStateStatusJdbcTemplate.update(sql, args);
+	}
+
+	@Override
+	public void deletePendingExecutionState(long executionStatesId) {
+		final String sql = "DELETE FROM OO_EXECUTIONS_STATES_EXECUTIONS WHERE ID = ?";
+		Object[] args = {executionStatesId};
+		deletePendignExecutionStateJdbcTemplate.update(sql, args);
 	}
 
 	@Override

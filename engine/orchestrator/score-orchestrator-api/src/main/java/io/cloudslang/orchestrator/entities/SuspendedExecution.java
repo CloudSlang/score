@@ -16,12 +16,15 @@
 
 package io.cloudslang.orchestrator.entities;
 
+import io.cloudslang.orchestrator.enums.SuspendedExecutionReason;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.engine.data.AbstractIdentifiable;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import static javax.persistence.EnumType.STRING;
 
 /**
  * Created with IntelliJ IDEA.
@@ -44,6 +47,10 @@ public class SuspendedExecution extends AbstractIdentifiable {
     @Column(name= "NUMBER_OF_BRANCHES", nullable = false)
     private Integer numberOfBranches;
 
+    @Enumerated(STRING)
+    @Column(name = "SUSPENSION_REASON")
+    private SuspendedExecutionReason suspensionReason;
+
     @Basic(fetch = FetchType.LAZY)
     @Embedded
     private ExecutionObjEntity executionObj;
@@ -54,11 +61,16 @@ public class SuspendedExecution extends AbstractIdentifiable {
     private SuspendedExecution() {
     }
 
-    public SuspendedExecution(String executionId, String splitId, Integer numberOfBranches, Execution executionObj) {
+    public SuspendedExecution(String executionId,
+                              String splitId,
+                              Integer numberOfBranches,
+                              Execution executionObj,
+                              SuspendedExecutionReason suspensionReason) {
         this.executionId = executionId;
         this.splitId = splitId;
         this.numberOfBranches = numberOfBranches;
         this.executionObj = new ExecutionObjEntity(executionObj);
+        this.suspensionReason = suspensionReason;
     }
 
     public String getExecutionId() {
@@ -104,6 +116,14 @@ public class SuspendedExecution extends AbstractIdentifiable {
         this.finishedBranches = finishedBranches;
     }
 
+    public SuspendedExecutionReason getSuspensionReason() {
+        return suspensionReason;
+    }
+
+    public void setSuspensionReason(SuspendedExecutionReason suspensionReason) {
+        this.suspensionReason = suspensionReason;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -114,6 +134,7 @@ public class SuspendedExecution extends AbstractIdentifiable {
         if (!executionId.equals(that.executionId)) return false;
         if (!numberOfBranches.equals(that.numberOfBranches)) return false;
         if (!splitId.equals(that.splitId)) return false;
+        if (!suspensionReason.equals(that.suspensionReason)) return false;
 
         return true;
     }
@@ -123,6 +144,7 @@ public class SuspendedExecution extends AbstractIdentifiable {
         int result = executionId.hashCode();
         result = 31 * result + splitId.hashCode();
         result = 31 * result + numberOfBranches.hashCode();
+        result = 31 * result + suspensionReason.hashCode();
         return result;
     }
 }

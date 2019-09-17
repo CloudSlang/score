@@ -38,8 +38,9 @@ public class SplitMessage implements Message {
 	private final String splitId;
     private final Execution parent;
     private final List<Execution> children;
+    private final boolean execute;
 
-    public SplitMessage(String splitId, Execution parent, List<Execution> children) {
+    public SplitMessage(String splitId, Execution parent, List<Execution> children, boolean execute) {
         Validate.notNull(splitId, "splitId cannot be null");
         Validate.notNull(parent, "parent cannot be null");
         Validate.notNull(children, "children cannot be null");
@@ -47,6 +48,7 @@ public class SplitMessage implements Message {
 
         this.splitId = splitId;
         this.parent = parent;
+        this.execute = execute;
         this.children = new ArrayList<>(children);
     }
 
@@ -60,6 +62,10 @@ public class SplitMessage implements Message {
 
     public String getSplitId() {
         return splitId;
+    }
+
+    public boolean isExecute() {
+        return execute;
     }
 
 	@Override
@@ -77,7 +83,7 @@ public class SplitMessage implements Message {
 		return messages; // do nothing
 	}
 
-	@Override
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof SplitMessage)) return false;
@@ -88,6 +94,7 @@ public class SplitMessage implements Message {
                 .append(this.splitId, that.splitId)
                 .append(this.parent, that.parent)
                 .append(this.children, that.children)
+                .append(this.execute, that.execute)
                 .isEquals();
     }
 
@@ -96,6 +103,7 @@ public class SplitMessage implements Message {
         return Objects.hash(
 		        this.splitId,
 		        this.parent,
-		        this.children);
+		        this.children,
+                this.execute);
     }
 }

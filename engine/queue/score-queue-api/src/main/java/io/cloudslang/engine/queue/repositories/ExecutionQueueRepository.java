@@ -19,6 +19,7 @@ package io.cloudslang.engine.queue.repositories;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 import java.util.Map;
@@ -53,4 +54,12 @@ public interface ExecutionQueueRepository {
 
 	List<ExecutionMessage> findByStatuses(int maxSize, ExecStatus... statuses);
 	List<String> getBusyWorkers(ExecStatus... statuses);
+
+	void saveNotActiveExecutionsQueues(final List<ExecutionMessage> notActiveMessages);
+
+	Pair<Long, Long> getFirstPendingBranch(final long executionId);
+
+	void activatePendingExecutionStateForAnExecution(final long executionId);
+
+	void deletePendingExecutionState(final long executionStatesId);
 }
