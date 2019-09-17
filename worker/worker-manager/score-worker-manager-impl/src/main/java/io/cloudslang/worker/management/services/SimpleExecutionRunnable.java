@@ -202,11 +202,10 @@ public class SimpleExecutionRunnable implements Runnable {
             execution.getSystemContext().setPreconditionNotFulfilled();
             preconditionNotFulfilledMessage.setPayload(converter.createPayload(execution));
 
-            ExecutionMessage[] messages = new ExecutionMessage[]{executionMessage, preconditionNotFulfilledMessage};
             try {
-                outBuffer.put(messages);
+                outBuffer.put(executionMessage, preconditionNotFulfilledMessage);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.error("Could not send the ExecutionMessage: ", e);
             }
             return true;
         }
