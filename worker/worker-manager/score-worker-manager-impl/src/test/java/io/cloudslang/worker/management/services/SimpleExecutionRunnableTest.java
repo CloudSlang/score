@@ -99,7 +99,7 @@ public class SimpleExecutionRunnableTest {
     public void testGetExecutionMessage() throws Exception {
         SimpleExecutionRunnable simpleExecutionRunnable = new SimpleExecutionRunnable(executionService, outBuffer,
                 inBuffer, converter, endExecutionCallback, queueStateIdGenerator, "stam", workerConfigurationService,
-                workerManager, executionQueueService);
+                workerManager);
         ExecutionMessage executionMessage = simpleExecutionRunnable.getExecutionMessage();
         Assert.assertNull(executionMessage);
 
@@ -127,7 +127,7 @@ public class SimpleExecutionRunnableTest {
 
         SimpleExecutionRunnable simpleExecutionRunnable = new SimpleExecutionRunnable(executionService, outBuffer,
                 inBuffer, converter, endExecutionCallback, queueStateIdGenerator, "stam", workerConfigurationService,
-                workerManager, executionQueueService);
+                workerManager);
 
         ExecutionMessage executionMessage = new ExecutionMessage();
         executionMessage.setMsgId(String.valueOf(100L));
