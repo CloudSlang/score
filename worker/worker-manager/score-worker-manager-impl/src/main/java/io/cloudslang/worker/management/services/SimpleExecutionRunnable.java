@@ -21,7 +21,6 @@ import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
-import io.cloudslang.engine.queue.services.ExecutionQueueService;
 import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
 import io.cloudslang.orchestrator.entities.SplitMessage;
 import io.cloudslang.score.facade.TempConstants;
@@ -64,8 +63,6 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private final WorkerManager workerManager;
 
-    private final ExecutionQueueService executionQueueService;
-
     public SimpleExecutionRunnable(ExecutionService executionService,
                                    OutboundBuffer outBuffer,
                                    InBuffer inBuffer,
@@ -74,8 +71,7 @@ public class SimpleExecutionRunnable implements Runnable {
                                    QueueStateIdGeneratorService queueStateIdGeneratorService,
                                    String workerUUID,
                                    WorkerConfigurationService workerConfigurationService,
-                                   WorkerManager workerManager,
-                                   ExecutionQueueService executionQueueService
+                                   WorkerManager workerManager
     ) {
         this.executionService = executionService;
         this.outBuffer = outBuffer;
@@ -86,7 +82,6 @@ public class SimpleExecutionRunnable implements Runnable {
         this.workerUUID = workerUUID;
         this.workerConfigurationService = workerConfigurationService;
         this.workerManager = workerManager;
-        this.executionQueueService = executionQueueService;
 
         // System property - whether the executions are recoverable in case of restart/failure.
         this.isRecoveryDisabled = getBoolean("is.recovery.disabled");
@@ -189,6 +184,7 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private boolean preconditionNotFulfilled(Execution nextStepExecution) {
         if (nextStepExecution.getSystemContext().getPreconditionNotFulfilled()) {
+            Payload payload = executionMessage.getPayload();
             executionMessage.setStatus(ExecStatus.FINISHED);
             executionMessage.incMsgSeqId();
             executionMessage.setPayload(null);
@@ -197,8 +193,6 @@ public class SimpleExecutionRunnable implements Runnable {
             preconditionNotFulfilledMessage.setStatus(ExecStatus.FAILED);
             preconditionNotFulfilledMessage.incMsgSeqId();
 
-            long execStateId = preconditionNotFulfilledMessage.getExecStateId();
-            Payload payload = executionQueueService.readPayloadByExecutionIds(execStateId).get(execStateId);
             Execution execution = converter.extractExecution(payload);
             execution.getSystemContext().setPreconditionNotFulfilled();
             preconditionNotFulfilledMessage.setPayload(converter.createPayload(execution));
