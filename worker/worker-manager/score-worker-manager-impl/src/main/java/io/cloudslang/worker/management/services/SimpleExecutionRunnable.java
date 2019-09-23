@@ -28,8 +28,10 @@ import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.worker.execution.services.ExecutionService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.Boolean.getBoolean;
@@ -451,6 +453,15 @@ public class SimpleExecutionRunnable implements Runnable {
 
 
     private void executeSplitStep(Execution execution) throws InterruptedException {
+        String stepType = execution.getSystemContext().get("STEP_TYPE").toString();
+        if (StringUtils.equals(stepType, "MULTI_INSTANCE")) {
+            executeMiStep(execution);
+        } else {
+            executeParallelAndNonBlocking(execution);
+        }
+    }
+
+    private void executeParallelAndNonBlocking(Execution execution) throws InterruptedException {
         // If execution is paused or cancelled it will return false
         List<Execution> newExecutions = executionService.executeSplit(execution);
 
@@ -459,19 +470,32 @@ public class SimpleExecutionRunnable implements Runnable {
         executionMessage.incMsgSeqId();
         executionMessage.setPayload(null);
         String splitId = getSplitId(newExecutions);
-
-        SplitMessage splitMessage1 = new SplitMessage(splitId, execution, newExecutions.subList(0, Integer.parseInt(execution.getSystemContext().get("MI_POOL_SIZE").toString())), true);
-        List<Execution> secondMessageChildren = newExecutions.subList(Integer.parseInt(execution.getSystemContext().get("MI_POOL_SIZE").toString()), newExecutions.size());
-        SplitMessage splitMessage2 = null;
-        if (secondMessageChildren.size() != 0) {
-            splitMessage2 = new SplitMessage(splitId, execution, secondMessageChildren, false);
-        }
-
+        SplitMessage splitMessage = new SplitMessage(splitId, execution, newExecutions, true);
         try {
-            if (splitMessage2 != null) {
-                outBuffer.put(executionMessage, splitMessage1, splitMessage2);
-            } else {
-                outBuffer.put(executionMessage, splitMessage1);
+            outBuffer.put(executionMessage, splitMessage);
+        } catch (InterruptedException e) {
+            logger.warn("Thread was interrupted! Exiting the execution... ", e);
+        }
+    }
+
+    private void executeMiStep(Execution execution) throws InterruptedException {
+        executionMessage.setStatus(ExecStatus.FINISHED);
+        executionMessage.setPayload(null);
+        executionMessage.incMsgSeqId();
+        try {
+            outBuffer.put(executionMessage);
+            @SuppressWarnings("unchecked")
+            ArrayList<String> miInputs = (ArrayList<String>) execution.getSystemContext().get("MI_INPUTS");
+            int totalNumberOfLanes = miInputs.size();
+            int currentNumberOfLanes = 0;
+            while (currentNumberOfLanes != totalNumberOfLanes) {
+                List<Execution> newExecutions = executionService.executeSplit(execution);
+
+                String splitId = getSplitId(newExecutions);
+                currentNumberOfLanes += newExecutions.size();
+                SplitMessage splitMessage = new SplitMessage(splitId, execution, newExecutions,
+                        currentNumberOfLanes == totalNumberOfLanes);
+                outBuffer.put(splitMessage);
             }
         } catch (InterruptedException e) {
             logger.warn("Thread was interrupted! Exiting the execution... ", e);
