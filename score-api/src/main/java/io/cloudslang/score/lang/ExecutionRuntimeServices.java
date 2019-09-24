@@ -95,6 +95,8 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String PRECONDITION_NOT_FULFILLED = "PRECONDITION_NOT_FULFILLED";
 
+    private static final String TRIGGER_TYPE = "TRIGGER_TYPE";
+
     protected Map<String, Serializable> contextMap = new HashMap<>();
 
     public ExecutionRuntimeServices() {
@@ -489,6 +491,14 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public boolean getPreconditionNotFulfilled() {
         return getFromMap(PRECONDITION_NOT_FULFILLED) != null;
+    }
+
+    public void setTriggerType(String triggerType) {
+        contextMap.put(TRIGGER_TYPE, triggerType);
+    }
+
+    public String getTriggerType() {
+        return getFromMap(TRIGGER_TYPE);
     }
 
     private <T> T removeFromMap(String key) {
