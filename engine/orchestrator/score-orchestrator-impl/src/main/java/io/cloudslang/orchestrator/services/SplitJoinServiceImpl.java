@@ -117,9 +117,10 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
                 childExecutionMessages.addAll(prepareExecutionMessages(splitMessage.getChildren(), true, splitMessage.getParent().getExecutionId()));
                 // 2. suspend the parent
                 final SuspendedExecutionReason stepType = valueOf(splitMessage.getParent().getSystemContext().get("STEP_TYPE").toString());
+                int miAllInputsSize = parseInt(splitMessage.getParent().getSystemContext().get("MI_ALL_INPUTS_SIZE").toString());
                 suspendedParents.add(new SuspendedExecution(splitMessage.getParent().getExecutionId().toString(),
                         splitMessage.getSplitId(),
-                        splitMessage.getChildren().size(),
+                        miAllInputsSize,
                         splitMessage.getParent(),
                         stepType));
             } else {

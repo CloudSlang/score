@@ -37,6 +37,7 @@ import java.util.List;
 import static java.lang.Boolean.getBoolean;
 import static java.lang.Long.parseLong;
 import static java.lang.Thread.currentThread;
+import static java.util.UUID.randomUUID;
 
 
 public class SimpleExecutionRunnable implements Runnable {
@@ -463,7 +464,7 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private void executeParallelAndNonBlocking(Execution execution) throws InterruptedException {
         // If execution is paused or cancelled it will return false
-        List<Execution> newExecutions = executionService.executeSplit(execution);
+        List<Execution> newExecutions = executionService.executeSplitForNonBlockAndParallel(execution);
 
         // Set current step to finished
         executionMessage.setStatus(ExecStatus.FINISHED);
@@ -478,7 +479,7 @@ public class SimpleExecutionRunnable implements Runnable {
         }
     }
 
-    private void executeMiStep(Execution execution) throws InterruptedException {
+    private void executeMiStep(Execution execution) {
         executionMessage.setStatus(ExecStatus.FINISHED);
         executionMessage.setPayload(null);
         executionMessage.incMsgSeqId();
@@ -488,8 +489,10 @@ public class SimpleExecutionRunnable implements Runnable {
             ArrayList<String> miInputs = (ArrayList<String>) execution.getSystemContext().get("MI_INPUTS");
             int totalNumberOfLanes = miInputs.size();
             int currentNumberOfLanes = 0;
+            String commonSplitUuid = randomUUID().toString();
             while (currentNumberOfLanes != totalNumberOfLanes) {
-                List<Execution> newExecutions = executionService.executeSplit(execution);
+                List<Execution> newExecutions = executionService.executeSplitForMi(execution, commonSplitUuid,
+                        currentNumberOfLanes);
 
                 String splitId = getSplitId(newExecutions);
                 currentNumberOfLanes += newExecutions.size();
