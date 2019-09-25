@@ -95,7 +95,7 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String PRECONDITION_NOT_FULFILLED = "PRECONDITION_NOT_FULFILLED";
 
-    private static final String TRIGGER_TYPE = "TRIGGER_TYPE";
+    private static final String MERGE_USER_INPUTS = "MERGE_USER_INPUTS";
 
     protected Map<String, Serializable> contextMap = new HashMap<>();
 
@@ -493,12 +493,12 @@ public class ExecutionRuntimeServices implements Serializable {
         return getFromMap(PRECONDITION_NOT_FULFILLED) != null;
     }
 
-    public void setTriggerType(String triggerType) {
-        contextMap.put(TRIGGER_TYPE, triggerType);
+    public void setMergeUserInputs(boolean mergeUserInputs) {
+        contextMap.put(MERGE_USER_INPUTS, mergeUserInputs);
     }
 
-    public String getTriggerType() {
-        return getFromMap(TRIGGER_TYPE);
+    public boolean getMergeUserInputs() {
+        return getFromMap(MERGE_USER_INPUTS) != null;
     }
 
     private <T> T removeFromMap(String key) {
