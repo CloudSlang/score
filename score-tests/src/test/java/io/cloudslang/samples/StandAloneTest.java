@@ -107,6 +107,7 @@ public class StandAloneTest {
         dependencies.put(subFlowExecutionPlan.getFlowUuid(),subFlowExecutionPlan);
         triggeringProperties.setDependencies(dependencies);
         Map<String,Serializable> getRuntimeValues = new HashMap<>();
+        getRuntimeValues.put("STEP_TYPE", "PARALLEL");
         triggeringProperties.setRuntimeValues(getRuntimeValues);
         registerEventListener("Hello score");
 
@@ -122,7 +123,9 @@ public class StandAloneTest {
         executionPlan.setSubflowsUUIDs(Sets.newHashSet(branchExecutionPlan.getFlowUuid()));
         TriggeringProperties triggeringProperties = TriggeringProperties.create(executionPlan);
         triggeringProperties.getDependencies().put(branchExecutionPlan.getFlowUuid(),branchExecutionPlan);
+
         Map<String,Serializable> getRuntimeValues = new HashMap<>();
+        getRuntimeValues.put("STEP_TYPE", "PARALLEL");
         triggeringProperties.setRuntimeValues(getRuntimeValues);
         registerEventListener("Hello score",EventConstants.SCORE_FINISHED_EVENT,EventConstants.SCORE_FINISHED_BRANCH_EVENT);
 
@@ -159,6 +162,7 @@ public class StandAloneTest {
         dependencies.put(subFlowExecutionPlan.getFlowUuid(), subFlowExecutionPlan);
 
         Map<String,Serializable> getRuntimeValues = new HashMap<>();
+        getRuntimeValues.put("STEP_TYPE", "PARALLEL");
 
         TriggeringProperties triggeringProperties = TriggeringProperties.create(executionPlan).
                 setDependencies(dependencies).setRuntimeValues(getRuntimeValues);
