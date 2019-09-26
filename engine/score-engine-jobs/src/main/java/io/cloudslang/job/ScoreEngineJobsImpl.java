@@ -158,6 +158,23 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
 
     @Override
     public void miMergeBranchesContexts() {
-        int derp = 4;
+        try {
+            if (logger.isDebugEnabled()) logger.debug("MiMergeBranchesContextsJob woke up at " + new Date());
+            StopWatch stopWatch = new StopWatch();
+            stopWatch.start();
+
+            // try sequentially at most 'ITERATIONS' attempts
+            // quit when there aren't any more results to process
+            boolean moreToJoin = true;
+            for (int i = 0; i < SPLIT_JOIN_ITERATIONS && moreToJoin; i++) {
+                int joinedSplits = splitJoinService.joinFinishedMiBranches(SPLIT_JOIN_BULK_SIZE);
+                moreToJoin = (joinedSplits == SPLIT_JOIN_BULK_SIZE);
+            }
+
+            stopWatch.stop();
+            if (logger.isDebugEnabled()) logger.debug("finished SplitJoinJob in " + stopWatch);
+        } catch (Exception ex) {
+            logger.error("SplitJoinJob failed", ex);
+        }
     }
 }

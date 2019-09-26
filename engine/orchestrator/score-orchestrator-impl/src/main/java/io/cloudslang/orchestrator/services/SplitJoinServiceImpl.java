@@ -38,20 +38,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static ch.lambdaj.Lambda.convert;
 import static ch.lambdaj.Lambda.extract;
 import static ch.lambdaj.Lambda.on;
+import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.MULTI_INSTANCE;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.NON_BLOCKING;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL;
-import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.valueOf;
 import static java.lang.Integer.parseInt;
-import static java.lang.Long.parseLong;
+import static java.lang.String.valueOf;
 import static java.util.EnumSet.of;
 import static java.util.stream.Collectors.toList;
 
@@ -113,14 +113,13 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         for (SplitMessage splitMessage : splitMessages) {
             List<ExecutionMessage> childExecutionMessages = new ArrayList<>();
             if (splitMessage.isExecute()) {
-                // 1. trigger all the child branches
                 childExecutionMessages.addAll(prepareExecutionMessages(splitMessage.getChildren(), true, splitMessage.getParent().getExecutionId()));
-                // 2. suspend the parent
-                final SuspendedExecutionReason stepType = valueOf(splitMessage.getParent().getSystemContext().get("STEP_TYPE").toString());
-                int miAllInputsSize = parseInt(splitMessage.getParent().getSystemContext().get("MI_ALL_INPUTS_SIZE").toString());
+
+                final SuspendedExecutionReason stepType = SuspendedExecutionReason.valueOf(splitMessage.getParent().getSystemContext().get("STEP_TYPE").toString());
+                Serializable miAllInputsValue = splitMessage.getParent().getSystemContext().get("MI_ALL_INPUTS_SIZE");
                 suspendedParents.add(new SuspendedExecution(splitMessage.getParent().getExecutionId().toString(),
                         splitMessage.getSplitId(),
-                        miAllInputsSize,
+                        miAllInputsValue != null ? parseInt(miAllInputsValue.toString()) : splitMessage.getChildren().size(),
                         splitMessage.getParent(),
                         stepType));
             } else {
@@ -247,6 +246,48 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         } catch (Exception ex) {
             logger.error("SplitJoinJob failed", ex);
         }
+    }
+
+    @Override
+    @Transactional
+    public int joinFinishedMiBranches(int bulkSize) {
+        // 1. Find all suspended executions that have all their branches ended
+        PageRequest pageRequest = new PageRequest(0, bulkSize);
+        List<SuspendedExecution> suspendedExecutions = suspendedExecutionsRepository.findUnmergedSuspendedExecutions(of(MULTI_INSTANCE), pageRequest);
+
+        return joinMiBranchesAndSendToQueue(suspendedExecutions);
+    }
+
+    private int joinMiBranchesAndSendToQueue(List<SuspendedExecution> suspendedExecutions) {
+        List<ExecutionMessage> messages = new ArrayList<>();
+        List<SuspendedExecution> mergedSuspendedExecutions = new ArrayList<>();
+
+        if (logger.isDebugEnabled())
+            logger.debug("Joining finished branches, found " + suspendedExecutions.size() + " suspended executions with all branches finished");
+
+        // nothing to do here
+        if (suspendedExecutions.isEmpty())
+            return 0;
+
+        for (SuspendedExecution se : suspendedExecutions) {
+            Execution exec = joinSplit(se);
+            long nrOfNewFinishedBranches = se.getFinishedBranches().stream()
+                    .filter(finishedBranch -> !finishedBranch.getBranchContexts().isBranchCancelled())
+                    .count();
+            se.setMergedBranches(se.getMergedBranches() + nrOfNewFinishedBranches);
+            exec.getSystemContext().put("REMAINING_BRANCHES", valueOf(se.getNumberOfBranches() - se.getMergedBranches()));
+            if (se.getMergedBranches() == se.getNumberOfBranches()) {
+                mergedSuspendedExecutions.add(se);
+            }
+            messages.add(executionToStartExecutionMessage.convert(exec));
+        }
+
+        // 3. send the suspended execution back to the queue
+        queueDispatcherService.dispatch(messages);
+
+        suspendedExecutionsRepository.delete(mergedSuspendedExecutions);
+
+        return suspendedExecutions.size();
     }
 
     private int joinAndSendToQueue(List<SuspendedExecution> suspendedExecutions) {

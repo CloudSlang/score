@@ -42,6 +42,11 @@ public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedEx
             @Param("suspensionReasons") EnumSet<SuspendedExecutionReason> suspensionReasons,
             Pageable pageRequest);
 
+    @Query("from SuspendedExecution se where size(se.finishedBranches) > 1 and se.suspensionReason in :suspensionReasons")
+    List<SuspendedExecution> findUnmergedSuspendedExecutions(
+            @Param("suspensionReasons") EnumSet<SuspendedExecutionReason> suspensionReasons,
+            Pageable pageRequest);
+
     @Query("select se.executionId from SuspendedExecution se " +
             "left join io.cloudslang.orchestrator.entities.ExecutionState es " +
             "on se.executionId = cast(es.executionId as string)" +
