@@ -67,14 +67,14 @@ public class SimpleExecutionRunnable implements Runnable {
     private final WorkerManager workerManager;
 
     public SimpleExecutionRunnable(ExecutionService executionService,
-            OutboundBuffer outBuffer,
-            InBuffer inBuffer,
-            ExecutionMessageConverter converter,
-            EndExecutionCallback endExecutionCallback,
-            QueueStateIdGeneratorService queueStateIdGeneratorService,
-            String workerUUID,
-            WorkerConfigurationService workerConfigurationService,
-            WorkerManager workerManager
+                                   OutboundBuffer outBuffer,
+                                   InBuffer inBuffer,
+                                   ExecutionMessageConverter converter,
+                                   EndExecutionCallback endExecutionCallback,
+                                   QueueStateIdGeneratorService queueStateIdGeneratorService,
+                                   String workerUUID,
+                                   WorkerConfigurationService workerConfigurationService,
+                                   WorkerManager workerManager
     ) {
         this.executionService = executionService;
         this.outBuffer = outBuffer;
@@ -169,7 +169,8 @@ public class SimpleExecutionRunnable implements Runnable {
         // 3. we should stop and go to queue
         // 4. The execution is terminating
         // 5. The nextStepExecution is a splitStep
-        // 6. Running too long
+        // 6. The precondition was not fulfilled
+        // 7. Running too long
 
         // The order is important
         return isOldThread() ||
@@ -180,7 +181,33 @@ public class SimpleExecutionRunnable implements Runnable {
                 shouldChangeWorkerGroup(nextStepExecution) ||
                 isPersistStep(nextStepExecution) ||
                 isRecoveryCheckpoint(nextStepExecution) ||
+                preconditionNotFulfilled(nextStepExecution) ||
                 isRunningTooLong(startTime, nextStepExecution);
+    }
+
+    private boolean preconditionNotFulfilled(Execution nextStepExecution) {
+        if (nextStepExecution.getSystemContext().getPreconditionNotFulfilled()) {
+            Payload payload = executionMessage.getPayload();
+            executionMessage.setStatus(ExecStatus.FINISHED);
+            executionMessage.incMsgSeqId();
+            executionMessage.setPayload(null);
+
+            ExecutionMessage preconditionNotFulfilledMessage = (ExecutionMessage) executionMessage.clone();
+            preconditionNotFulfilledMessage.setStatus(ExecStatus.FAILED);
+            preconditionNotFulfilledMessage.incMsgSeqId();
+
+            Execution execution = converter.extractExecution(payload);
+            execution.getSystemContext().setPreconditionNotFulfilled();
+            preconditionNotFulfilledMessage.setPayload(converter.createPayload(execution));
+
+            try {
+                outBuffer.put(executionMessage, preconditionNotFulfilledMessage);
+            } catch (InterruptedException e) {
+                logger.error("Could not send the ExecutionMessage: ", e);
+            }
+            return true;
+        }
+        return false;
     }
 
     // If execution was paused it sends the current step with status FINISHED and that is all...

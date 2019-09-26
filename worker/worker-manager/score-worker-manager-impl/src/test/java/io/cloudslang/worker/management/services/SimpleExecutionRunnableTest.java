@@ -20,6 +20,7 @@ import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
+import io.cloudslang.engine.queue.services.ExecutionQueueService;
 import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.worker.execution.services.ExecutionService;
@@ -80,6 +81,9 @@ public class SimpleExecutionRunnableTest {
 
     @Mock
     private WorkerManager workerManager;
+
+    @Mock
+    private ExecutionQueueService executionQueueService;
 
     @Before
     public void setUp() {

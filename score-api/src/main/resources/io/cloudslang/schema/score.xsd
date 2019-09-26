@@ -63,6 +63,8 @@
             <xsd:attribute type="xsd:boolean" name="registerSequentialExecutionService"/>
 			<xsd:attribute type="xsd:boolean" name="registerWorkerVersionService"/>
 			<xsd:attribute type="xsd:boolean" name="registerRobotAvailabilityService"/>
+			<xsd:attribute type="xsd:boolean" name="registerExecutionPreconditionService"/>
+			<xsd:attribute type="xsd:boolean" name="registerExecutionPostconditionService"/>
 		</xsd:complexType>
 	</xsd:element>
 </xsd:schema>

@@ -22,6 +22,8 @@ import io.cloudslang.worker.execution.reflection.ReflectionAdapterImpl;
 import io.cloudslang.worker.execution.services.ExecutionServiceImpl;
 import io.cloudslang.worker.execution.services.ScoreRobotAvailabilityServiceImpl;
 import io.cloudslang.worker.execution.services.SessionDataHandlerImpl;
+import io.cloudslang.worker.execution.services.StubExecutionPostconditionService;
+import io.cloudslang.worker.execution.services.StubExecutionPreconditionService;
 import io.cloudslang.worker.management.WorkerConfigurationServiceImpl;
 import io.cloudslang.worker.management.WorkerRegistration;
 import io.cloudslang.worker.management.monitor.ScheduledWorkerLoadMonitor;
@@ -50,6 +52,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static java.lang.Boolean.FALSE;
 
 /**
  * @since 21/01/2014
@@ -128,33 +132,62 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	}
 
 	private void registerSpecialBeans(Element element, ParserContext parserContext) {
-		if(!"false".equalsIgnoreCase(element.getAttribute("register"))) {
+		if (!"false".equalsIgnoreCase(element.getAttribute("register"))) {
 			new BeanRegistrator(parserContext).CLASS(WorkerRegistration.class).register();
 		}
 
 		registerWorkerVersionService(element, parserContext);
 		registerSequentialExecution(element, parserContext);
 		registerRobotAvailabilityService(element, parserContext);
+		registerExecutionPreconditionService(element, parserContext);
+		registerExecutionPostconditionService(element, parserContext);
 	}
 
-	private void registerSequentialExecution(Element element, ParserContext parserContext){
+	private void registerSequentialExecution(Element element, ParserContext parserContext) {
 		String registerSequentialExecutionService = element.getAttribute("registerSequentialExecutionService");
-		if(!Boolean.FALSE.toString().equals(registerSequentialExecutionService)){
-			new BeanRegistrator(parserContext).CLASS(DefaultSequentialExecutionServiceImpl.class).register();
+		if (!FALSE.toString().equals(registerSequentialExecutionService)) {
+			new BeanRegistrator(parserContext)
+					.NAME("sequentialExecutionService")
+					.CLASS(DefaultSequentialExecutionServiceImpl.class)
+					.register();
 		}
 	}
 
-	private void registerWorkerVersionService(Element element, ParserContext parserContext){
+	private void registerWorkerVersionService(Element element, ParserContext parserContext) {
 		String registerWorkerVersionService = element.getAttribute("registerWorkerVersionService");
-		if(!registerWorkerVersionService.equals(Boolean.FALSE.toString())){
+		if (!FALSE.toString().equals(registerWorkerVersionService)) {
 			new BeanRegistrator(parserContext).CLASS(WorkerVersionServiceImpl.class).register();
 		}
 	}
 
-	private void registerRobotAvailabilityService(Element element, ParserContext parserContext){
+	private void registerRobotAvailabilityService(Element element, ParserContext parserContext) {
 		String registerRobotAvailabilityService = element.getAttribute("registerRobotAvailabilityService");
-		if(!Boolean.FALSE.toString().equals(registerRobotAvailabilityService)){
-			new BeanRegistrator(parserContext).CLASS(ScoreRobotAvailabilityServiceImpl.class).register();
+		if (!FALSE.toString().equals(registerRobotAvailabilityService)) {
+			new BeanRegistrator(parserContext)
+					.NAME("robotAvailabilityService")
+					.CLASS(ScoreRobotAvailabilityServiceImpl.class)
+					.register();
+		}
+	}
+
+	private void registerExecutionPreconditionService(Element element, ParserContext parserContext) {
+		String registerPreconditionService = element.getAttribute("registerExecutionPreconditionService");
+		if (!FALSE.toString().equals(registerPreconditionService)) {
+			new BeanRegistrator(parserContext)
+					.NAME("executionPreconditionService")
+					.CLASS(StubExecutionPreconditionService.class)
+					.register();
+		}
+	}
+
+
+	private void registerExecutionPostconditionService(Element element, ParserContext parserContext) {
+		String registerPostconditionService = element.getAttribute("registerExecutionPostconditionService");
+		if (!FALSE.toString().equals(registerPostconditionService)) {
+			new BeanRegistrator(parserContext)
+					.NAME("executionPostconditionService")
+					.CLASS(StubExecutionPostconditionService.class)
+					.register();
 		}
 	}
 

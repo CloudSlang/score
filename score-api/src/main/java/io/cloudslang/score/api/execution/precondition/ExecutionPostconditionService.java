@@ -13,28 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.cloudslang.score.api.execution.precondition;
 
-package io.cloudslang.score.facade.execution;
+import java.io.Serializable;
+import java.util.Map;
 
 /**
- * Created with IntelliJ IDEA.
- * User: kravtsov
- * Date: 20/12/12
- * Time: 11:55
+ * This service is designed for any conditions that should be checked after the execution finishes.
+ *
+ * @author platon
  */
-public enum PauseReason {
-    USER_PAUSED,
-    INPUT_REQUIRED,
-    INPUT_REQUIRED_MANUAL_OP,
-	SELECT_TRANSITION,
-    DISPLAY,
-    GATED_TRANSITION,
-    HAND_OFF,
-    INTERRUPT,
-    NO_WORKERS_IN_GROUP,
-    BRANCH_PAUSED,
-    SEQUENTIAL_EXECUTION,
-    NO_ROBOTS_IN_GROUP,
-    PENDING_ROBOT,
-    PRECONDITION_NOT_FULFILLED
+public interface ExecutionPostconditionService {
+
+    void postExecutionWork(String executionId);
 }
