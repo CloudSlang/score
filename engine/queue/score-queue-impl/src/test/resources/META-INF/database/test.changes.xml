@@ -28,6 +28,9 @@
 				<constraints nullable="false"/>
 			</column>
 			<column name="CREATE_TIME" type="${timestamp.type}"/>
+            <column name="ACTIVE" type="BOOLEAN" defaultValue="true">
+                <constraints nullable="false"/>
+            </column>
 		</createTable>
 	</changeSet>
 
@@ -60,6 +63,20 @@
 		</createIndex>
 	</changeSet>
 
+    <changeSet id="create execution states to pending executions mapping" author="engine">
+        <createTable tableName="OO_EXECUTIONS_STATES_EXECUTIONS">
+            <column name="ID" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
 
+            <column name="EXEC_STATE_ID" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="EXEC_ID" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
 
 </databaseChangeLog>
