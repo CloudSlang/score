@@ -18,8 +18,10 @@ package io.cloudslang.engine.queue.repositories;
 
 import io.cloudslang.engine.data.IdentityGenerator;
 import io.cloudslang.engine.node.services.WorkerNodeService;
+import io.cloudslang.engine.queue.QueueTestsUtils;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
+import io.cloudslang.engine.queue.entities.LargeExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.versioning.services.VersionService;
 import junit.framework.Assert;
@@ -56,14 +58,18 @@ import java.util.Set;
 @TransactionConfiguration(defaultRollback = true)
 public class ExecutionQueueRepositoryTest {
 
+    private static final int WORKER_POLLING_MEMORY = 10000000;
+
     @Autowired
     private ExecutionQueueRepository executionQueueRepository;
 
+    @Autowired
+    private LargeExecutionMessagesRepository largeExecutionMessagesRepository;
 
     @Test
     public void testInsert(){
         List<ExecutionMessage> msg = new ArrayList<>();
-        msg.add(generateMessage("group1","msg1", 1));
+        msg.add(QueueTestsUtils.generateMessage("group1","msg1", 1));
         executionQueueRepository.insertExecutionQueue(msg,1L);
 
         List<ExecutionMessage> result = executionQueueRepository.pollMessagesWithoutAck(100,2);
@@ -78,19 +84,19 @@ public class ExecutionQueueRepositoryTest {
     @Test(expected = RuntimeException.class)
     public void testInsertFailureDueToUniqueConstraint(){
         List<ExecutionMessage> msg = new ArrayList<>();
-        msg.add(generateMessage("group1","msg1", 1));
-        msg.add(generateMessage("group1","msg1", 1));
+        msg.add(QueueTestsUtils.generateMessage("group1","msg1", 1));
+        msg.add(QueueTestsUtils.generateMessage("group1","msg1", 1));
         executionQueueRepository.insertExecutionQueue(msg,1L);
     }
 
     @Test
     public void testPollMessagesWithoutAckWithVersion(){
         List<ExecutionMessage> msg = new ArrayList<>();
-        msg.add(generateMessage(1, "group1", "msg1", 1));
+        msg.add(QueueTestsUtils.generateMessage(1, "group1", "msg1", 1));
         executionQueueRepository.insertExecutionQueue(msg, 1L);
 
         msg.clear();
-        msg.add(generateMessage(2, "group2","msg2", 1));
+        msg.add(QueueTestsUtils.generateMessage(2, "group2","msg2", 1));
         executionQueueRepository.insertExecutionQueue(msg,4L);
 
         List<ExecutionMessage> result = executionQueueRepository.pollMessagesWithoutAck(100,3);
@@ -141,7 +147,7 @@ public class ExecutionQueueRepositoryTest {
     @Test
     public void testPollMessagesWithoutAckEmptyResult(){
         List<ExecutionMessage> msg = new ArrayList<>();
-        msg.add(generateMessage("group1","msg1", 1));
+        msg.add(QueueTestsUtils.generateMessage("group1","msg1", 1));
         executionQueueRepository.insertExecutionQueue(msg, 1L);
 
         List<ExecutionMessage> result = executionQueueRepository.pollMessagesWithoutAck(100,0);
@@ -152,7 +158,7 @@ public class ExecutionQueueRepositoryTest {
     @Test
     public void testPollForRecovery(){
         List<ExecutionMessage> msg = new ArrayList<>();
-        ExecutionMessage execMsg = generateMessage("group1","msg1", 1);
+        ExecutionMessage execMsg = QueueTestsUtils.generateMessage("group1","msg1", 1);
         execMsg.setWorkerId("worker1");
         execMsg.setStatus(ExecStatus.IN_PROGRESS);
         execMsg.incMsgSeqId();
@@ -170,7 +176,7 @@ public class ExecutionQueueRepositoryTest {
 
         //insert to states table
         List<ExecutionMessage> msg = new ArrayList<>();
-        ExecutionMessage execMsg = generateMessage("group1","msg1", 1);
+        ExecutionMessage execMsg = QueueTestsUtils.generateMessage("group1","msg1", 1);
         execMsg.setWorkerId("worker1");
         execMsg.setStatus(ExecStatus.IN_PROGRESS);
         msg.add(execMsg);
@@ -191,7 +197,7 @@ public class ExecutionQueueRepositoryTest {
 
         //insert to states table
         List<ExecutionMessage> msg = new ArrayList<>();
-        ExecutionMessage execMsg = generateMessage("group1","msg1", 1);
+        ExecutionMessage execMsg = QueueTestsUtils.generateMessage("group1","msg1", 1);
         execMsg.setWorkerId("worker1");
         execMsg.setStatus(ExecStatus.IN_PROGRESS);
         msg.add(execMsg);
@@ -209,22 +215,102 @@ public class ExecutionQueueRepositoryTest {
     @Test
     public void testPoll(){
         List<ExecutionMessage> msg = new ArrayList<>();
-        ExecutionMessage execMsg = generateMessage("group1","msg1", 1);
+        ExecutionMessage execMsg = QueueTestsUtils.generateMessage("group1","msg1", 1);
         execMsg.setWorkerId("worker1");
         execMsg.setStatus(ExecStatus.IN_PROGRESS);
         msg.add(execMsg);
         executionQueueRepository.insertExecutionQueue(msg,1L);
         executionQueueRepository.insertExecutionStates(msg);
-        List<ExecutionMessage> result = executionQueueRepository.poll("worker1", 10, ExecStatus.IN_PROGRESS);
+        List<ExecutionMessage> result = executionQueueRepository.poll("worker1", 10,
+                WORKER_POLLING_MEMORY, ExecStatus.IN_PROGRESS);
 
         Assert.assertNotNull(result);
         Assert.assertFalse(result.isEmpty());
     }
 
     @Test
+    public void testPollLargeMessage() {
+
+        int mb = 2;
+
+        ExecutionMessage msg = QueueTestsUtils.generateMessage(1, "group1","msg1", 1);
+        msg.setWorkerId("worker1");
+        msg.setStatus(ExecStatus.IN_PROGRESS);
+
+        ExecutionMessage largeMessage = QueueTestsUtils.generateLargeMessage(2, "group1","msg2", 2, QueueTestsUtils.getMB(mb));
+        largeMessage.setWorkerId("worker1");
+        largeMessage.setStatus(ExecStatus.IN_PROGRESS);
+
+        List<ExecutionMessage> messages = new ArrayList<>();
+        messages.add(msg);
+        messages.add(largeMessage);
+
+        executionQueueRepository.insertExecutionQueue(messages,1L);
+        executionQueueRepository.insertExecutionStates(messages);
+
+        long workerFreeMem = QueueTestsUtils.getMB(mb - 1);
+        List<ExecutionMessage> result = executionQueueRepository.poll("worker1", 10, workerFreeMem, ExecStatus.IN_PROGRESS);
+
+        Assert.assertNotNull(result);
+        Assert.assertFalse(result.isEmpty());
+
+        ExecutionMessage resultMsg = result.get(0);
+        Assert.assertEquals(ExecStatus.IN_PROGRESS, resultMsg.getStatus());
+        Assert.assertEquals(msg.getWorkerGroup(), resultMsg.getWorkerGroup());
+        Assert.assertEquals(msg.getMsgId(), resultMsg.getMsgId());
+        Assert.assertEquals(msg.getMsgSeqId(), resultMsg.getMsgSeqId());
+    }
+
+    @Test
+    public void testUpdateLargeMessage() {
+
+        int mb = 2;
+        long workerFreeMem = QueueTestsUtils.getMB(mb - 1);
+
+        ExecutionMessage msg = QueueTestsUtils.generateMessage(1, "group1","msg1", 1);
+        msg.setWorkerId("worker1");
+        msg.setStatus(ExecStatus.ASSIGNED);
+
+        ExecutionMessage largeMessage = QueueTestsUtils.generateLargeMessage(2, "group1","msg2", 2, QueueTestsUtils.getMB(mb));
+        largeMessage.setWorkerId("worker1");
+        largeMessage.setStatus(ExecStatus.ASSIGNED);
+
+        QueueTestsUtils.insertMessagesInQueue(executionQueueRepository, msg, largeMessage);
+
+        executionQueueRepository.updateLargeMessages("worker1", workerFreeMem);
+
+        List<LargeExecutionMessage> largeMessages = largeExecutionMessagesRepository.findAll();
+
+        Assert.assertEquals(1, largeMessages.size());
+
+        Assert.assertEquals(largeMessage.getExecStateId(), largeMessages.get(0).getId());
+        Assert.assertEquals(1, largeMessages.get(0).getRetriesCount());
+
+        // add another large message
+        ExecutionMessage largeMessage2 = QueueTestsUtils.generateLargeMessage(3, "group1","msg3", 3, QueueTestsUtils.getMB(mb));
+        largeMessage2.setWorkerId("worker1");
+        largeMessage2.setStatus(ExecStatus.ASSIGNED);
+
+        QueueTestsUtils.insertMessagesInQueue(executionQueueRepository, largeMessage2);
+
+        // call update second time
+        executionQueueRepository.updateLargeMessages("worker1", workerFreeMem);
+
+        List<LargeExecutionMessage> newLargeMessages = largeExecutionMessagesRepository.findAll();
+
+        Assert.assertEquals(2, newLargeMessages.size());
+
+        Assert.assertEquals(largeMessage.getExecStateId(), newLargeMessages.get(0).getId());
+        Assert.assertEquals(2, newLargeMessages.get(0).getRetriesCount());      // first large message is on second retry
+
+        Assert.assertEquals(largeMessage2.getExecStateId(), newLargeMessages.get(1).getId());
+        Assert.assertEquals(1, newLargeMessages.get(1).getRetriesCount());      // second large message is on first try
+    }
+
+    @Test
     public void testGetBusyWorkersBusyWorker(){
         List<ExecutionMessage> msg = new ArrayList<>();
-        ExecutionMessage execMsg = generateMessage("group1","msg1", 1);
+        ExecutionMessage execMsg = QueueTestsUtils.generateMessage("group1","msg1", 1);
         execMsg.setWorkerId("worker1");
         execMsg.setStatus(ExecStatus.IN_PROGRESS);
         execMsg.incMsgSeqId();
@@ -234,21 +320,6 @@ public class ExecutionQueueRepositoryTest {
         List<String> busyWorkers = executionQueueRepository.getBusyWorkers(ExecStatus.ASSIGNED);
         Assert.assertNotNull(busyWorkers);
     }
-
-    private ExecutionMessage generateMessage(String groupName,String msgId, int msg_seq_id) {
-        byte[] payloadData;
-        payloadData = "This is just a test".getBytes();
-        Payload payload = new Payload(payloadData);
-        return new ExecutionMessage(-1, ExecutionMessage.EMPTY_WORKER, groupName, msgId , ExecStatus.SENT, payload, msg_seq_id);
-    }
-
-    private ExecutionMessage generateMessage(long exec_state_id, String groupName,String msgId, int msg_seq_id) {
-        byte[] payloadData;
-        payloadData = "This is just a test".getBytes();
-        Payload payload = new Payload(payloadData);
-        return new ExecutionMessage(exec_state_id, ExecutionMessage.EMPTY_WORKER, groupName, msgId , ExecStatus.SENT, payload, msg_seq_id);
-    }
-
 
     private ExecutionMessage generateFinishedMessage(long execStateId, int msg_seq_id) {
         byte[] payloadData;
@@ -326,6 +397,10 @@ public class ExecutionQueueRepositoryTest {
             return Mockito.mock(VersionService.class);
         }
 
+        @Bean
+        LargeExecutionMessagesRepository largeExecutionMessagesRepository() {
+            return new LargeExecutionMessagesRepositoryImpl();
+        }
 
     }
 }

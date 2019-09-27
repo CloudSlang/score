@@ -45,4 +45,5 @@ public interface ScoreEngineJobs {
 
     void cleanSuspendedExecutionsJob();
 
+    void monitorLargeMessagesJob();
 }

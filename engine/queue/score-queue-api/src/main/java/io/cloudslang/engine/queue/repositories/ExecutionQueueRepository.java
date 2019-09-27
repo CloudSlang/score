@@ -31,7 +31,7 @@ import java.util.Set;
  */
 public interface ExecutionQueueRepository {
 
-    List<ExecutionMessage> poll(String workerId, int maxSize, ExecStatus... statuses);
+    List<ExecutionMessage> poll(String workerId, int maxSize, long workerPollingMemory, ExecStatus... statuses);
 
 	List<ExecutionMessage> pollRecovery(String workerId, int maxSize, ExecStatus... statuses);
 
@@ -47,7 +47,9 @@ public interface ExecutionQueueRepository {
 
 	Map<Long,Payload> findPayloadByExecutionIds(Long ... ids);
 
-    void deleteFinishedSteps(Set<Long> ids);
+	void updateLargeMessages(String workerId, long workerPollingMemory);
+
+	void deleteFinishedSteps(Set<Long> ids);
 
     Set<Long> getFinishedExecStateIds();
 

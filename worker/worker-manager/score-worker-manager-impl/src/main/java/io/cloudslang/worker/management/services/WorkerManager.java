@@ -97,6 +97,10 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
     @Qualifier("inBufferCapacity")
     private Integer capacity;
 
+    @Autowired
+    @Qualifier("pollingMemoryRatio")
+    private Double pollingMemoryRatio = 0.2D; //memory ratio out of worker free memory that'll be used for polling new messages
+
     private int keepAliveFailCount = 0;
 
     private ExecutorService executorService;
@@ -128,6 +132,34 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 
         mapOfRunningTasks = new ConcurrentHashMap<>(numberOfThreads);
         newCancelBehaviour = parseBoolean(getProperty("enable.new.cancel.execution", FALSE.toString()));
+
+        pollingMemoryRatio =
+                Double.valueOf(System.getProperty("worker.inbuffer.pollingMemoryRatio", String.valueOf(
+                        pollingMemoryRatio)));
+    }
+
+    /**
+     * Returns the amount of free memory in the worker's jvm.
+     * @return amount of memory currently available, measured in bytes.
+     */
+    public long getFreeMemory() {
+        return Runtime.getRuntime().freeMemory();
+    }
+
+    /**
+     * This method computes the amount of memory the worker can use to poll new messages
+     * @return amount of memory available for polling, measured in bytes.
+     */
+    public long getMemoryForPolling() {
+        return (long) (getFreeMemory() * pollingMemoryRatio);
+    }
+
+    /**
+     * Returns the amount of memory that the worker's jvm will attempt to use.
+     * @return  amount of memory that the worker's jvm will attempt to use, in bytes.
+     */
+    public long getMaxMemory() {
+        return Runtime.getRuntime().maxMemory();
     }
 
     public void addExecution(long executionId, Runnable runnable) {

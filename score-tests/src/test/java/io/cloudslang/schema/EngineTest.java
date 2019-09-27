@@ -19,6 +19,8 @@ package io.cloudslang.schema;
 import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
+import io.cloudslang.engine.queue.repositories.LargeExecutionMessagesRepository;
+import io.cloudslang.engine.queue.repositories.LargeExecutionMessagesRepositoryImpl;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import io.cloudslang.score.api.ExecutionPlan;
 import io.cloudslang.score.api.ExecutionStep;
@@ -68,6 +70,8 @@ import static org.mockito.Mockito.mock;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class EngineTest {
 
+    private static final int WORKER_FREE_MEMORY = 200000000; //bytes
+
     @Autowired
     private Score score;
 
@@ -88,7 +92,7 @@ public class EngineTest {
         TriggeringProperties triggeringProperties = TriggeringProperties.create(executionPlan);
         score.trigger(triggeringProperties);
         Thread.sleep(300);
-        List<ExecutionMessage> messages = dispatcherService.poll("uuid", 10);
+        List<ExecutionMessage> messages = dispatcherService.poll("uuid", 10, WORKER_FREE_MEMORY);
 
         assertThat(messages).hasSize(1);
     }

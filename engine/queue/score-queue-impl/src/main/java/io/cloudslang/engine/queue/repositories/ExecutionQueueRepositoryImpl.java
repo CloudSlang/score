@@ -19,8 +19,10 @@ package io.cloudslang.engine.queue.repositories;
 import io.cloudslang.engine.data.IdentityGenerator;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
+import io.cloudslang.engine.queue.entities.LargeExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.StatementAwareJdbcTemplateWrapper;
+import io.cloudslang.engine.queue.utils.CustomRowMapperFactory;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,17 +34,22 @@ import org.springframework.jdbc.core.SingleColumnRowMapper;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+
+import static io.cloudslang.engine.queue.utils.CustomRowMappers.EXECUTION_MESSAGE;
+import static org.apache.commons.lang.StringUtils.EMPTY;
 
 /**
  * User:
@@ -54,6 +61,9 @@ import java.util.Set;
 public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
 	private Logger logger = Logger.getLogger(getClass());
+
+	private static final String SKIP_LARGE_PAYLOADS_KEY = ":skipLargePayloads";
+	private static final String SKIP_LARGE_PAYLOADS_VALUE = "(s.PAYLOAD_SIZE < ?) AND ";
 
 	final private String SELECT_FINISHED_STEPS_IDS =  " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES " +
 			" WHERE " +
@@ -121,6 +131,38 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					"              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
 					" ORDER BY q.CREATE_TIME  ";
 
+	final private String QUERY_WORKER_WITH_PAYLOAD_SQL =
+					"SELECT EXEC_STATE_ID, " +
+					"    ASSIGNED_WORKER, " +
+					"    EXEC_GROUP, " +
+					"    STATUS, " +
+					"    PAYLOAD, " +
+					"    MSG_SEQ_ID, " +
+					"    MSG_ID, " +
+					"    CREATE_TIME " +
+					"FROM (" +
+					"	SELECT EXEC_STATE_ID, " +
+					"   	ASSIGNED_WORKER, " +
+					"   	EXEC_GROUP, " +
+					"   	STATUS, " +
+					"   	PAYLOAD, " +
+					"   	MSG_SEQ_ID, " +
+					"   	MSG_ID, " +
+					"   	q.CREATE_TIME, " +
+					"   	SUM(PAYLOAD_SIZE) OVER (ORDER BY q.CREATE_TIME ASC) AS total " +
+					"	FROM OO_EXECUTION_QUEUES q, " +
+					"   	OO_EXECUTION_STATES s " +
+					"	WHERE (q.ASSIGNED_WORKER = ?)  AND " +
+					"   	(q.STATUS IN (:status)) AND " +
+							SKIP_LARGE_PAYLOADS_KEY +
+					"   	(q.EXEC_STATE_ID = s.ID) AND " +
+					"   	(NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
+					"                 FROM  OO_EXECUTION_QUEUES qq " +
+					"                 WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
+					"	ORDER BY q.CREATE_TIME" +
+					") " +
+					"WHERE total < ? ";
+
 	final private String QUERY_WORKER_RECOVERY_SQL =
 			"SELECT         EXEC_STATE_ID,      " +
 					"       ASSIGNED_WORKER,      " +
@@ -166,8 +208,19 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					"              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
 					" GROUP BY ASSIGNED_WORKER";
 
+	private static final String FIND_LRG_MSGS_QUERY =
+			"SELECT m.exec_state_id, m.payload_size, m.create_time, l.retries FROM " +
+				"(SELECT q.exec_state_id, s.payload_size, s.create_time " +
+					"FROM oo_execution_queues q, oo_execution_states s " +
+					"WHERE " +
+					"(q.exec_state_id = s.id) AND " +
+					"(q.assigned_worker = ?) AND " +
+					"(q.status = ?) AND " +
+					"(s.payload_size > ?)" +
+				") m " +
+			"LEFT JOIN OO_EXECUTION_LARGE_MESSAGE l ON m.exec_state_id = l.id";
 
-	final private String INSERT_EXEC_STATE = "INSERT INTO OO_EXECUTION_STATES  (ID, MSG_ID,  PAYLOAD, CREATE_TIME) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
+	final private String INSERT_EXEC_STATE = "INSERT INTO OO_EXECUTION_STATES  (ID, MSG_ID,  PAYLOAD, PAYLOAD_SIZE, CREATE_TIME) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)";
 
 	final private String INSERT_QUEUE = "INSERT INTO OO_EXECUTION_QUEUES (ID, EXEC_STATE_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS,MSG_SEQ_ID, CREATE_TIME,MSG_VERSION) VALUES (?, ?, ?, ?, ?, ?,?,?)";
 
@@ -186,12 +239,18 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 	private JdbcTemplate deleteFinishedStepsJdbcTemplate;
 	private JdbcTemplate findPayloadByExecutionIdsJdbcTemplate;
 	private JdbcTemplate getBusyWorkersJdbcTemplate;
+	private JdbcTemplate findLargeJdbcTemplate;
 
 	@Autowired
 	private IdentityGenerator idGen;
 
 	@Autowired
 	private DataSource dataSource;
+
+	@Autowired
+	private LargeExecutionMessagesRepository largeExecutionMessagesRepository;
+
+	private ExecutorService executor;
 
 	@PostConstruct
 	public void init() {
@@ -207,6 +266,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 		deleteFinishedStepsJdbcTemplate = new JdbcTemplate(dataSource);
 		findPayloadByExecutionIdsJdbcTemplate = new JdbcTemplate(dataSource);
 		getBusyWorkersJdbcTemplate = new JdbcTemplate(dataSource);
+		findLargeJdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
 	@Override
@@ -225,6 +285,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 				ps.setLong(1, msg.getExecStateId());
 				ps.setString(2, msg.getMsgId());
 				ps.setBytes(3, msg.getPayload().getData());
+				ps.setLong(4, msg.getPayloadSize());
 			}
 
 			@Override
@@ -287,29 +348,123 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         }
     }
 
+	@Override
+	public List<ExecutionMessage> poll(String workerId, int maxSize, long workerPollingMemory, ExecStatus... statuses) {
+
+		pollJdbcTemplate.setMaxRows(maxSize);
+		pollJdbcTemplate.setFetchSize(maxSize);
+
+		// prepare the sql statement
+		String sqlStat = QUERY_WORKER_WITH_PAYLOAD_SQL.replace(SKIP_LARGE_PAYLOADS_KEY, EMPTY);
+		sqlStat = sqlStat.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
+
+		// prepare the arguments
+		List<Object> argsList = new LinkedList<>();
+		argsList.add(workerId);
+		for (ExecStatus status : statuses) {
+			argsList.add(status.getNumber());
+		}
+		argsList.add(workerPollingMemory);
+
+		List<ExecutionMessage> executionMessages = doSelectWithTemplate(
+						pollJdbcTemplate,
+						sqlStat,
+						new CustomRowMapperFactory().create(EXECUTION_MESSAGE),
+						argsList.toArray());
+
+		if (executionMessages.isEmpty()) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("retry polling for " + workerId + " memory " + workerPollingMemory + " statuses " + statuses);
+			}
+
+			executionMessages = retryPollingSkippingLargePayloads(argsList, statuses, workerPollingMemory);
+		}
+
+		if (isMonitorLargeMessages()) {
+			executor.submit(() -> updateLargeMessages(workerId, workerPollingMemory));
+		}
+
+		return executionMessages;
+	}
+
+	private boolean isMonitorLargeMessages() {
+		return StringUtils.equalsIgnoreCase("true", System.getProperty("worker.polling.monitorLargeMessages"));
+	}
 
 	@Override
-	public List<ExecutionMessage> poll(String workerId, int maxSize, ExecStatus... statuses) {
-		pollJdbcTemplate.setStatementBatchSize(maxSize);
+	public void updateLargeMessages(String workerId, long workerPollingMemory) {
+		List<LargeExecutionMessage> largeMessages = findLargeMessages(workerId, workerPollingMemory);
 
-        try {
-            // prepare the sql statement
-            String sqlStat = QUERY_WORKER_SQL
-                    .replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
+		if (logger.isDebugEnabled()) {
+			logger.debug("Found " + largeMessages.size() + " large messages for workerId " +
+					workerId + " and worker memory " + workerPollingMemory);
+		}
 
-            // prepare the argument
-            Object[] values = new Object[statuses.length + 1];
-            values[0] = workerId;
-            int i = 1;
-            for (ExecStatus status : statuses) {
-                values[i++] = status.getNumber();
-            }
+		if (largeMessages.isEmpty()) {
+			return;
+		}
 
-            return doSelectWithTemplate(pollJdbcTemplate, sqlStat, new ExecutionMessageRowMapper(), values);
-        } finally {
-            pollJdbcTemplate.clearStatementBatchSize();
-        }
-    }
+		long now = System.currentTimeMillis();
+
+		List<LargeExecutionMessage> toAdd = new ArrayList<>();
+		List<LargeExecutionMessage> toUpdate = new ArrayList<>();
+
+		for (LargeExecutionMessage lem: largeMessages) {
+			if (lem.getRetriesCount() == 0) {
+				toAdd.add(lem);
+			} else {
+				toUpdate.add(lem);
+			}
+
+			lem.incrementRetriesCounter();
+			lem.setUpdateTime(now);
+		}
+
+		if (toAdd.size() > 0) {
+			largeExecutionMessagesRepository.add(toAdd);
+		}
+
+		if (toUpdate.size() > 0) {
+			largeExecutionMessagesRepository.updateCount(toUpdate);
+		}
+	}
+
+	private List<LargeExecutionMessage> findLargeMessages(String workerId, long workerPollingMemory) {
+		Object[] args = new Object[] { workerId, ExecStatus.ASSIGNED.getNumber(), workerPollingMemory};
+
+		long now = System.currentTimeMillis();
+
+		return findLargeJdbcTemplate.query(FIND_LRG_MSGS_QUERY, args,
+				(rs, rowNum) -> new LargeExecutionMessage(
+						rs.getLong("exec_state_id"),
+						rs.getLong("payload_size"),
+						rs.getInt("retries"),
+						rs.getTimestamp("create_time").getTime(),
+						now)
+		);
+	}
+
+	/**
+	 * This polling method will skip execution messages with payloads larger then the worker's
+	 * available memory for polling.
+	 *
+	 * @param argsList
+	 * @param statuses
+	 * @param workerPollingMemory
+	 * @return
+	 */
+	private List<ExecutionMessage> retryPollingSkippingLargePayloads(
+			List<Object> argsList, ExecStatus[] statuses, long workerPollingMemory) {
+		argsList.add(workerPollingMemory);
+		String sqlStat = QUERY_WORKER_WITH_PAYLOAD_SQL
+				.replace(SKIP_LARGE_PAYLOADS_KEY, SKIP_LARGE_PAYLOADS_VALUE);
+		sqlStat = sqlStat.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
+		return doSelectWithTemplate(
+				pollJdbcTemplate,
+				sqlStat,
+				new CustomRowMapperFactory().create(EXECUTION_MESSAGE),
+				argsList.toArray());
+	}
 
 	@Override
 	public void deleteFinishedSteps(Set<Long> ids) {

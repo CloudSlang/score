@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ch.lambdaj.Lambda.by;
@@ -64,7 +65,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
     @Autowired(required = false)
     private ExecutionsActivityListener executionsActivityListener;
 
-    private List<Message> buffer = new ArrayList<>();
+    private LinkedBlockingQueue<Message> buffer = new LinkedBlockingQueue<>();
 
     private int currentWeight;
     private int maxBufferWeight = Integer.getInteger("out.buffer.max.buffer.weight", 30000);
@@ -113,7 +114,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 
     @Override
     public void drain() {
-        List<Message> bufferToDrain;
+        List<Message> drainedMessages = new ArrayList<>();
         try {
             syncManager.startDrain();
             while (buffer.isEmpty()) {
@@ -127,8 +128,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
                 logger.debug("buffer is going to be drained. " + getStatus());
             }
 
-            bufferToDrain = buffer;
-            buffer = new ArrayList<>();
+            buffer.drainTo(drainedMessages);
             currentWeight = 0;
         } catch (InterruptedException e) {
             logger.warn("Drain outgoing buffer was interrupted while waiting for messages on the buffer");
@@ -137,7 +137,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
             syncManager.finishDrain();
         }
 
-        drainInternal(bufferToDrain);
+        drainInternal(drainedMessages);
     }
 
     private void drainInternal(List<Message> bufferToDrain) {
@@ -261,7 +261,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         private Message[] messages;
 
         public CompoundMessage(Message[] messages) {
-            this.messages = messages.clone();
+            this.messages = messages;
         }
 
         @Override

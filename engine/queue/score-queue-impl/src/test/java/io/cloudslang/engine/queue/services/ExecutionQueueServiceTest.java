@@ -27,6 +27,8 @@ import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepositoryImpl;
+import io.cloudslang.engine.queue.repositories.LargeExecutionMessagesRepository;
+import io.cloudslang.engine.queue.repositories.LargeExecutionMessagesRepositoryImpl;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerService;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerServiceImpl;
 import io.cloudslang.engine.versioning.services.VersionService;
@@ -36,7 +38,6 @@ import liquibase.integration.spring.SpringLiquibase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -361,6 +362,11 @@ public class ExecutionQueueServiceTest {
 			when(mock.getEngineVersionId()).thenReturn("");
 
 			return mock;
+		}
+
+		@Bean
+		LargeExecutionMessagesRepository largeExecutionMessagesRepository() {
+			return new LargeExecutionMessagesRepositoryImpl();
 		}
 	}
 }
