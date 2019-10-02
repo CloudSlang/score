@@ -19,8 +19,6 @@ package io.cloudslang.schema;
 import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
-import io.cloudslang.engine.queue.repositories.LargeExecutionMessagesRepository;
-import io.cloudslang.engine.queue.repositories.LargeExecutionMessagesRepositoryImpl;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import io.cloudslang.score.api.ExecutionPlan;
 import io.cloudslang.score.api.ExecutionStep;

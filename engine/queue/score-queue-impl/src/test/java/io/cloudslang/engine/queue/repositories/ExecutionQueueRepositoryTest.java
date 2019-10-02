@@ -21,7 +21,6 @@ import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.engine.queue.QueueTestsUtils;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
-import io.cloudslang.engine.queue.entities.LargeExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.versioning.services.VersionService;
 import junit.framework.Assert;
@@ -62,9 +61,6 @@ public class ExecutionQueueRepositoryTest {
 
     @Autowired
     private ExecutionQueueRepository executionQueueRepository;
-
-    @Autowired
-    private LargeExecutionMessagesRepository largeExecutionMessagesRepository;
 
     @Test
     public void testInsert(){
@@ -262,52 +258,6 @@ public class ExecutionQueueRepositoryTest {
     }
 
     @Test
-    public void testUpdateLargeMessage() {
-
-        int mb = 2;
-        long workerFreeMem = QueueTestsUtils.getMB(mb - 1);
-
-        ExecutionMessage msg = QueueTestsUtils.generateMessage(1, "group1","msg1", 1);
-        msg.setWorkerId("worker1");
-        msg.setStatus(ExecStatus.ASSIGNED);
-
-        ExecutionMessage largeMessage = QueueTestsUtils.generateLargeMessage(2, "group1","msg2", 2, QueueTestsUtils.getMB(mb));
-        largeMessage.setWorkerId("worker1");
-        largeMessage.setStatus(ExecStatus.ASSIGNED);
-
-        QueueTestsUtils.insertMessagesInQueue(executionQueueRepository, msg, largeMessage);
-
-        executionQueueRepository.updateLargeMessages("worker1", workerFreeMem);
-
-        List<LargeExecutionMessage> largeMessages = largeExecutionMessagesRepository.findAll();
-
-        Assert.assertEquals(1, largeMessages.size());
-
-        Assert.assertEquals(largeMessage.getExecStateId(), largeMessages.get(0).getId());
-        Assert.assertEquals(1, largeMessages.get(0).getRetriesCount());
-
-        // add another large message
-        ExecutionMessage largeMessage2 = QueueTestsUtils.generateLargeMessage(3, "group1","msg3", 3, QueueTestsUtils.getMB(mb));
-        largeMessage2.setWorkerId("worker1");
-        largeMessage2.setStatus(ExecStatus.ASSIGNED);
-
-        QueueTestsUtils.insertMessagesInQueue(executionQueueRepository, largeMessage2);
-
-        // call update second time
-        executionQueueRepository.updateLargeMessages("worker1", workerFreeMem);
-
-        List<LargeExecutionMessage> newLargeMessages = largeExecutionMessagesRepository.findAll();
-
-        Assert.assertEquals(2, newLargeMessages.size());
-
-        Assert.assertEquals(largeMessage.getExecStateId(), newLargeMessages.get(0).getId());
-        Assert.assertEquals(2, newLargeMessages.get(0).getRetriesCount());      // first large message is on second retry
-
-        Assert.assertEquals(largeMessage2.getExecStateId(), newLargeMessages.get(1).getId());
-        Assert.assertEquals(1, newLargeMessages.get(1).getRetriesCount());      // second large message is on first try
-    }
-
-    @Test
     public void testGetBusyWorkersBusyWorker(){
         List<ExecutionMessage> msg = new ArrayList<>();
         ExecutionMessage execMsg = QueueTestsUtils.generateMessage("group1","msg1", 1);
@@ -396,11 +346,5 @@ public class ExecutionQueueRepositoryTest {
         VersionService queueVersionService(){
             return Mockito.mock(VersionService.class);
         }
-
-        @Bean
-        LargeExecutionMessagesRepository largeExecutionMessagesRepository() {
-            return new LargeExecutionMessagesRepositoryImpl();
-        }
-
     }
 }

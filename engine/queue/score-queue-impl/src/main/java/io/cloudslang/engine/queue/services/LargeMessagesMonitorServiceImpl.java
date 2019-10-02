@@ -15,81 +15,75 @@
  */
 package io.cloudslang.engine.queue.services;
 
-import io.cloudslang.engine.queue.entities.LargeExecutionMessage;
-import io.cloudslang.engine.queue.repositories.LargeExecutionMessagesRepository;
+import io.cloudslang.engine.queue.entities.ExecStatus;
+import io.cloudslang.engine.queue.entities.ExecutionMessage;
+import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
 import io.cloudslang.orchestrator.services.CancelExecutionService;
+import io.cloudslang.score.facade.execution.ExecutionActionResult;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.Instant;
 import java.util.List;
 
 public final class LargeMessagesMonitorServiceImpl implements LargeMessagesMonitorService {
 
     private Logger logger = Logger.getLogger(getClass());
 
-    private static Integer noRetries = Integer.getInteger("queue.message.reassign.number", 5);
-    private static Integer messageMaxLifetime = Integer.getInteger("queue.message.lifetime", 30);   // min
-    private static Long reassignMinTime = Long.getLong("queue.message.reassign.min.time", 100);    // millis
 
     @Autowired
     private CancelExecutionService cancelExecutionService;
 
     @Autowired
-    private LargeExecutionMessagesRepository largeExecutionMessagesRepository;
+    private ExecutionQueueRepository executionQueueRepository;
 
     @Override
     public void monitor() {
-        List<LargeExecutionMessage> all = largeExecutionMessagesRepository.findAll();
+
+        long now = System.currentTimeMillis();
+
+        List<ExecutionMessage> messages = executionQueueRepository.findMessages(now, ExecStatus.ASSIGNED);
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Found " + all.size() + " entries");
+            logger.debug("Found " + messages.size() + " entries");
         }
 
-        for (LargeExecutionMessage lem: all) {
-            if (messageShouldBeCanceled(lem)) {
-                cancelMessage(lem);
-            } else if (messageShouldBeReassigned(lem)) {
-                clearAssignedWorker(lem);
+        for (ExecutionMessage msg : messages) {
+            if (messageShouldBeCanceled(msg)) {
+                cancelMessage(msg);
+            } else if (messageShouldBeReassigned(msg)) {
+                clearAssignedWorker(msg);
             }
         }
     }
 
-    private void clearAssignedWorker(LargeExecutionMessage lem) {
+    private void clearAssignedWorker(ExecutionMessage msg) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Clearing assigned worker for id: " + lem.getId());
+            logger.debug("Clearing assigned worker for id: " + msg.getId());
         }
 
-        largeExecutionMessagesRepository.clearAssignedWorker(lem.getId());
+        executionQueueRepository.clearAssignedWorker(msg);
     }
 
-    private void cancelMessage(LargeExecutionMessage lem) {
-        long executionId = largeExecutionMessagesRepository.getMessageRunningExecutionId(lem.getId());
+    private void cancelMessage(ExecutionMessage msg) {
+        long executionId = executionQueueRepository.getMessageRunningExecutionId(msg);
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Canceling " + lem.getId() + " executionId: " + executionId);
-        }
+        logger.warn("Canceling execution with id: " + executionId + " for message: " + msg);
 
         if (executionId != -1) {
-            cancelExecutionService.requestCancelExecution(executionId);
+            ExecutionActionResult result = cancelExecutionService.requestCancelExecution(executionId);
+            logger.warn("Requested cancel of execution id: " + executionId + ", result: " + result);
+        } else {
+            logger.warn("Execution not found for message!");
         }
-
-        largeExecutionMessagesRepository.delete(lem.getId());
     }
 
-    private boolean messageShouldBeCanceled(LargeExecutionMessage lem) {
-        return lem.getRetriesCount() >= noRetries || messageExceededLifetime(lem);
+    private boolean messageShouldBeCanceled(ExecutionMessage msg) {
+        long dtSeconds = (System.currentTimeMillis() - msg.getCreateDate()) / 1000;
+        return dtSeconds > getMessageExpirationTime();
     }
 
-    private boolean messageExceededLifetime(LargeExecutionMessage lem) {
-        return getMessageLifetime(lem) / 60 > messageMaxLifetime;
-    }
-
-    private long getMessageLifetime(LargeExecutionMessage lem) {
-        return Instant.now().getEpochSecond() - lem.getCreateTime() / 1000;
-    }
-
-    private boolean messageShouldBeReassigned(LargeExecutionMessage lem) {
-        return System.currentTimeMillis() - lem.getUpdateTime() > reassignMinTime;
+    private boolean messageShouldBeReassigned(ExecutionMessage msg) {
+        long dtSeconds = (System.currentTimeMillis() - msg.getCreateDate()) / 1000;
+        return dtSeconds > getMessageTimeOnWorker();
     }
 }

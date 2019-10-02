@@ -78,21 +78,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
                 <constraints nullable="false"/>
             </column>
             <column name="CREATE_TIME" type="${timestamp.type}"/>
-            <column name="PAYLOAD_SIZE" type="bigint"/>
-        </createTable>
-
-    </changeSet>
-
-    <changeSet id="create OO_EXECUTION_LARGE_MESSAGE" author="engine">
-
-        <createTable tableName="OO_EXECUTION_LARGE_MESSAGE">
-            <column name="id" type="bigint">            <!-- OO_EXECUTION_STATES.ID -->
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="PAYLOAD_SIZE" type="BIGINT"/>
-            <column name="RETRIES" type="integer"/>
-            <column name="CREATE_TIME" type="${timestamp.type}"/>
-            <column name="UPDATE_TIME" type="${timestamp.type}"/>
         </createTable>
 
     </changeSet>

@@ -47,12 +47,16 @@ public interface ExecutionQueueRepository {
 
 	Map<Long,Payload> findPayloadByExecutionIds(Long ... ids);
 
-	void updateLargeMessages(String workerId, long workerPollingMemory);
-
 	void deleteFinishedSteps(Set<Long> ids);
 
     Set<Long> getFinishedExecStateIds();
 
 	List<ExecutionMessage> findByStatuses(int maxSize, ExecStatus... statuses);
 	List<String> getBusyWorkers(ExecStatus... statuses);
+
+	List<ExecutionMessage> findMessages(long timestamp, ExecStatus... statuses);
+
+	void clearAssignedWorker(ExecutionMessage message);
+
+	long getMessageRunningExecutionId(ExecutionMessage message);
 }

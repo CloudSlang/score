@@ -17,5 +17,16 @@ package io.cloudslang.engine.queue.services;
 
 public interface LargeMessagesMonitorService {
 
+    int DEFAULT_TIME_ON_WORKER = 10 * 60;
+    int DEFAULT_EXPIRATION_TIME = 60 * 60;
+
+    default Integer getMessageTimeOnWorker() {
+        return Integer.getInteger("queue.message.time.on.worker", DEFAULT_TIME_ON_WORKER);    // seconds
+    }
+
+    default Integer getMessageExpirationTime() {
+        return Integer.getInteger("queue.message.expiration.time", DEFAULT_EXPIRATION_TIME);    // seconds
+    }
+
     void monitor();
 }

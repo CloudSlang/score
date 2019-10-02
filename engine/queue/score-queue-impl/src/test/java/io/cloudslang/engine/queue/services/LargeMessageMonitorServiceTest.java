@@ -25,18 +25,15 @@ import io.cloudslang.engine.queue.QueueTestsUtils;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
-import io.cloudslang.engine.queue.entities.LargeExecutionMessage;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepositoryImpl;
-import io.cloudslang.engine.queue.repositories.LargeExecutionMessagesRepository;
-import io.cloudslang.engine.queue.repositories.LargeExecutionMessagesRepositoryImpl;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerService;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerServiceImpl;
 import io.cloudslang.engine.versioning.services.VersionService;
 import io.cloudslang.orchestrator.services.CancelExecutionService;
 import io.cloudslang.orchestrator.services.EngineVersionService;
 import liquibase.integration.spring.SpringLiquibase;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +44,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.test.context.ContextConfiguration;
@@ -57,6 +53,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import javax.sql.DataSource;
 import java.util.List;
 
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -68,23 +66,14 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = LargeMessageMonitorServiceTest.Configurator.class)
 public class LargeMessageMonitorServiceTest {
 
-    static Integer noRetries = Integer.getInteger("queue.message.reassign.number", 5);
-    static Long reassignMinTime = Long.getLong("queue.message.reassign.min.time", 100);
-
     @Autowired
     private CancelExecutionService cancelExecutionService;
-
-    @Autowired
-    private ExecutionQueueService executionQueueService;
 
     @Autowired
     private LargeMessagesMonitorService largeMessagesMonitorService;
 
     @Autowired
     private ExecutionQueueRepository executionQueueRepository;
-
-    @Autowired
-    private LargeExecutionMessagesRepository largeExecutionMessagesRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -99,13 +88,21 @@ public class LargeMessageMonitorServiceTest {
     public void before() {
         jdbcTemplate.execute("delete from OO_EXECUTION_QUEUES");
         jdbcTemplate.execute("delete from OO_EXECUTION_STATES");
-        jdbcTemplate.execute("delete from OO_EXECUTION_LARGE_MESSAGE ");
 
         reset(cancelExecutionService);
+
+        System.setProperty("queue.message.time.on.worker", String.valueOf(1));
+        System.setProperty("queue.message.expiration.time", String.valueOf(5));
+    }
+
+    @After
+    public void after() {
+        System.setProperty("queue.message.time.on.worker", String.valueOf(LargeMessagesMonitorService.DEFAULT_TIME_ON_WORKER));
+        System.setProperty("queue.message.expiration.time", String.valueOf(LargeMessagesMonitorService.DEFAULT_EXPIRATION_TIME));
     }
 
     @Test
-    public void testMonitor() {
+    public void testMonitorMessageReassigned() {
 
         int mb = 2;
         long workerFreeMem = QueueTestsUtils.getMB(mb - 1);
@@ -123,50 +120,65 @@ public class LargeMessageMonitorServiceTest {
 
         QueueTestsUtils.insertMessagesInQueue(executionQueueRepository, msg1);
 
-        executionQueueRepository.updateLargeMessages(worker, workerFreeMem);
+        List<ExecutionMessage> allMsgs = findExecutionMessages(worker, workerFreeMem, ExecStatus.ASSIGNED);
+        Assert.assertEquals(1, allMsgs.size());
+
+        waitOverReassignTime();
+
+        largeMessagesMonitorService.monitor();          // clears the worker
+
+        Assert.assertEquals(0, findExecutionMessages(worker, workerFreeMem, ExecStatus.ASSIGNED).size());
+
+        List<ExecutionMessage> unassignedMsg = findExecutionMessages(ExecutionMessage.EMPTY_WORKER, workerFreeMem, ExecStatus.PENDING);
+        Assert.assertEquals(1, unassignedMsg.size());
+
+        ExecutionMessage message = unassignedMsg.get(0);
+        Assert.assertEquals(1, message.getExecStateId());
+        Assert.assertEquals("11", message.getMsgId());
+    }
+
+    @Test
+    public void testMonitorMessageCanceled() {
+
+        int mb = 2;
+        long workerFreeMem = QueueTestsUtils.getMB(mb - 1);
+        String worker = "worker1";
+        String workerGroup = "group1";
+
+        Multimap<String, String> groupWorkersMap = ArrayListMultimap.create();
+        groupWorkersMap.put(workerGroup, worker);
+
+        Mockito.when(workerNodeService.readGroupWorkersMapActiveAndRunningAndVersion(engineVersionService.getEngineVersionId())).thenReturn(groupWorkersMap);
+
+        ExecutionMessage msg1 = QueueTestsUtils.generateLargeMessage(1, workerGroup,"11", 1, QueueTestsUtils.getMB(mb));
+        msg1.setWorkerId(worker);
+        msg1.setStatus(ExecStatus.ASSIGNED);
+
+        QueueTestsUtils.insertMessagesInQueue(executionQueueRepository, msg1);
 
         List<ExecutionMessage> allMsgs = findExecutionMessages(worker, workerFreeMem, ExecStatus.ASSIGNED);
         Assert.assertEquals(1, allMsgs.size());
 
-        waitReassignMinTime();
-
-        largeMessagesMonitorService.monitor();          // clears the worker
-
-        // check large message
-        List<LargeExecutionMessage> allLargeMsgs = largeExecutionMessagesRepository.findAll();
-        Assert.assertEquals(1, allLargeMsgs.size());
-        Assert.assertEquals(msg1.getExecStateId(), allLargeMsgs.get(0).getId());
-        Assert.assertEquals(1, allLargeMsgs.get(0).getRetriesCount());
-
-        // check no message is on worker
-        Assert.assertEquals(0, findExecutionMessages(worker, workerFreeMem, ExecStatus.ASSIGNED, ExecStatus.PENDING).size());
-
-        // check there's a pending message with no worker
-        List<ExecutionMessage> allMsgs2 = findExecutionMessages(ExecutionMessage.EMPTY_WORKER, workerFreeMem, ExecStatus.PENDING);
-        Assert.assertEquals(1, allMsgs2.size());
-        Assert.assertEquals(allMsgs.get(0).getMsgSeqId(), allMsgs2.get(0).getMsgSeqId());
-
-        // reassign
-        executionQueueService.enqueue(allMsgs2);
-
-        // retry
-        for (int i = 0 ; i < noRetries; i++) {
-            executionQueueRepository.updateLargeMessages(worker, workerFreeMem);
-        }
-
-        waitReassignMinTime();
+        waitOverExpirationTime();
 
         largeMessagesMonitorService.monitor();
 
-        long executionId = largeExecutionMessagesRepository.getMessageRunningExecutionId( allLargeMsgs.get(0).getId());
-        verify(cancelExecutionService, times(1)).requestCancelExecution(executionId);
+        long executionId = executionQueueRepository.getMessageRunningExecutionId(msg1);
 
-        Assert.assertEquals(0, largeExecutionMessagesRepository.findAll().size());
+        verify(cancelExecutionService,times(1)).requestCancelExecution(executionId);
     }
 
-    private void waitReassignMinTime() {
+    private void waitOverReassignTime() {
         try {
-            Thread.sleep(reassignMinTime);
+            Thread.sleep((largeMessagesMonitorService.getMessageTimeOnWorker() + 1) * 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void waitOverExpirationTime() {
+        try {
+            Thread.sleep((largeMessagesMonitorService.getMessageExpirationTime() + 1) * 1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -230,11 +242,6 @@ public class LargeMessageMonitorServiceTest {
         CancelExecutionService cancelExecutionService() {
 
             return mock(CancelExecutionService.class);
-        }
-
-        @Bean
-        LargeExecutionMessagesRepository largeExecutionMessagesRepository() {
-            return new LargeExecutionMessagesRepositoryImpl();
         }
 
         @Bean

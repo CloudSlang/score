@@ -50,7 +50,6 @@ public class ExecutionMessage implements Message, Cloneable {
 	private ExecStatus status;
 	private Payload payload;
 	private long payloadSize;	//in bytes
-	private int retries;
 	private int msgSeqId;
 	private String msgId;
     private Long createDate;
@@ -69,7 +68,6 @@ public class ExecutionMessage implements Message, Cloneable {
 		status = ExecStatus.INIT;
 		payload = null;
 		payloadSize = 0;
-		retries = 0;
 		msgSeqId = -1;
 		msgId = "";
         createDate = null;
@@ -83,7 +81,6 @@ public class ExecutionMessage implements Message, Cloneable {
         this.status = ExecStatus.PENDING;
         this.payload = payload;
 		this.payloadSize = getPayloadSize(payload);
-		this.retries = 0;
         this.msgSeqId = 0;
     }
 
@@ -102,7 +99,6 @@ public class ExecutionMessage implements Message, Cloneable {
 		this.status = status;
 		this.payload = payload;
 		this.payloadSize = getPayloadSize(payload);
-		this.retries = 0;
 		this.msgSeqId = msgSeqId;
 		this.createDate = createDate;
    }
@@ -121,7 +117,6 @@ public class ExecutionMessage implements Message, Cloneable {
 		this.status = status;
 		this.payload = payload;
 		this.payloadSize = getPayloadSize(payload);
-		this.retries = 0;
 		this.msgSeqId = msgSeqId;
 	}
 
@@ -141,7 +136,6 @@ public class ExecutionMessage implements Message, Cloneable {
         this.executionObject = executionObject;
         this.payload = payload;
 		this.payloadSize = getPayloadSize(payload);
-		this.retries = 0;
         this.msgSeqId = msgSeqId;
     }
 
@@ -227,12 +221,8 @@ public class ExecutionMessage implements Message, Cloneable {
 		return payloadSize;
 	}
 
-	public int getRetries() {
-		return retries;
-	}
-
-	public void setRetries(int retries) {
-		this.retries = retries;
+	public void setPayloadSize(long payloadSize) {
+		this.payloadSize = payloadSize;
 	}
 
 	public int getMsgSeqId() {
@@ -382,7 +372,6 @@ public class ExecutionMessage implements Message, Cloneable {
 				.append(this.msgId, that.msgId)
 				.append(this.payload, that.payload)
 				.append(this.payloadSize, that.payloadSize)
-				.append(this.retries, that.retries)
 				.append(this.status, that.status)
 				.append(this.workerGroup, that.workerGroup)
 				.append(this.workerId, that.workerId)

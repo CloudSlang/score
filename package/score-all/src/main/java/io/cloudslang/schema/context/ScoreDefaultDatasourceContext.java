@@ -43,7 +43,7 @@ public class ScoreDefaultDatasourceContext {
     SpringLiquibase liquibase() {
         SpringLiquibase springLiquibase = new SpringLiquibase();
         springLiquibase.setDataSource(dataSource());
-        springLiquibase.setChangeLog("classpath:/META-INF/database/score.changes.xml");
+        springLiquibase.setChangeLog("classpath:/META-INF/database/all-score.changes.xml");
         return springLiquibase;
     }
 

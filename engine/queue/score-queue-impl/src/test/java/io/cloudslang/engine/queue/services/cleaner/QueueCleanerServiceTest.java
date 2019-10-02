@@ -25,8 +25,6 @@ import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepositoryImpl;
-import io.cloudslang.engine.queue.repositories.LargeExecutionMessagesRepository;
-import io.cloudslang.engine.queue.repositories.LargeExecutionMessagesRepositoryImpl;
 import io.cloudslang.engine.queue.services.BusyWorkersService;
 import io.cloudslang.engine.queue.services.ExecutionQueueService;
 import io.cloudslang.engine.queue.services.ExecutionQueueServiceImpl;
@@ -229,11 +227,6 @@ public class QueueCleanerServiceTest {
 		@Bean
 		EngineVersionService engineVersionService(){
 			return mock(EngineVersionService.class);
-		}
-
-		@Bean
-		LargeExecutionMessagesRepository largeExecutionMessagesRepository() {
-			return new LargeExecutionMessagesRepositoryImpl();
 		}
 	}
 }
