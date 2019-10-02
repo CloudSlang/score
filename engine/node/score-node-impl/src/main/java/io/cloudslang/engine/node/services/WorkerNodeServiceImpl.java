@@ -18,6 +18,7 @@ package io.cloudslang.engine.node.services;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import io.cloudslang.engine.node.entities.WorkerKeepAliveInfo;
 import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.node.repositories.WorkerNodeRepository;
 import io.cloudslang.engine.versioning.services.VersionService;
@@ -34,327 +35,343 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * @author Avi Moradi
- * @since 11/11/2012
- * @version $Id$
- */
+
 public class WorkerNodeServiceImpl implements WorkerNodeService {
 
-	private static final long maxVersionGapAllowed = Long.getLong("max.allowed.version.gap.worker.recovery", 2);
-	private static final String MSG_RECOVERY_VERSION_NAME = "MSG_RECOVERY_VERSION";
-	private static final Logger logger = Logger.getLogger(WorkerNodeServiceImpl.class);
+    private static final Logger logger = Logger.getLogger(WorkerNodeServiceImpl.class);
 
-	@Autowired
-	private WorkerNodeRepository workerNodeRepository;
-	@Autowired
-	private WorkerLockService workerLockService;
-	@Autowired
-	private VersionService versionService;
-	@Autowired(required = false)
-	private List<LoginListener> loginListeners;
+    private static final long MAX_VERSION_GAP_ALLOWED = Long.getLong("max.allowed.version.gap.worker.recovery", 2);
+    private static final String MSG_RECOVERY_VERSION_NAME = "MSG_RECOVERY_VERSION";
 
-	@Override
-	@Transactional
-	public String keepAlive(String uuid) {
-		WorkerNode worker = readByUUID(uuid);
-		worker.setAckTime(new Date());
-		String wrv = worker.getWorkerRecoveryVersion();
-		long version = versionService.getCurrentVersion(MSG_RECOVERY_VERSION_NAME);
-		worker.setAckVersion(version);
-		if(!worker.getStatus().equals(WorkerStatus.IN_RECOVERY)) {
-			worker.setStatus(WorkerStatus.RUNNING);
-		}
-		logger.debug("Got keepAlive for Worker with uuid=" + uuid + " and update its ackVersion to " + version);
-		return wrv;
-	}
+    @Autowired
+    private WorkerNodeRepository workerNodeRepository;
 
-	@Override
-	@Transactional
-	public void create(String uuid, String password, String hostName, String installDir) {
-		WorkerNode worker = new WorkerNode();
-		worker.setUuid(uuid);
-		worker.setDescription(uuid);
-		worker.setHostName(hostName);
-		worker.setActive(false);
-		worker.setInstallPath(installDir);
-		worker.setStatus(WorkerStatus.FAILED);
-		worker.setPassword(password);
-		worker.setGroups(Arrays.asList(WorkerNode.DEFAULT_WORKER_GROUPS));
-		workerNodeRepository.save(worker);
-		workerLockService.create(uuid);
-	}
+    @Autowired
+    private WorkerLockService workerLockService;
 
-	@Override
-	@Transactional
-	public void updateWorkerToDeleted(String uuid) {
-		WorkerNode worker = readByUUID(uuid);
-		if(worker != null) {
-			worker.setActive(false);
-			worker.setDeleted(true);
-			worker.setStatus(WorkerStatus.IN_RECOVERY);
-		}
-	}
+    @Autowired
+    private VersionService versionService;
 
-	@Override
-	@Transactional
-	public void updateWorkerToNotDeleted(String uuid) {
-		WorkerNode worker = workerNodeRepository.findByUuidAndDeleted(uuid, true);
-		if (worker != null) {
-			worker.setActive(false);
-			worker.setDeleted(false);
-			worker.setStatus(WorkerStatus.IN_RECOVERY);
-		}
-	}
+    @Autowired(required = false)
+    private List<LoginListener> loginListeners;
 
-	@Override
-	@Transactional
-	public List<WorkerNode> readAllNotDeletedWorkers() {
-		return workerNodeRepository.findByDeletedOrderByIdAsc(false);
-	}
+    @Override
+    @Transactional
+    public String keepAlive(String uuid) {
+        WorkerNode worker = readByUUID(uuid);
+        worker.setAckTime(new Date());
+        String wrv = worker.getWorkerRecoveryVersion();
+        long version = versionService.getCurrentVersion(MSG_RECOVERY_VERSION_NAME);
+        worker.setAckVersion(version);
+        if (!worker.getStatus().equals(WorkerStatus.IN_RECOVERY)) {
+            worker.setStatus(WorkerStatus.RUNNING);
+        }
+        logger.debug("Got keepAlive for Worker with uuid=" + uuid + " and update its ackVersion to " + version);
+        return wrv;
+    }
 
-	@Override
-	@Transactional
-	public String up(String uuid, String version, String versionId) {
+    @Override
+    @Transactional
+    public WorkerKeepAliveInfo newKeepAlive(String uuid) {
+        WorkerNode worker = readByUUID(uuid);
+        worker.setAckTime(new Date());
+        long version = versionService.getCurrentVersion(MSG_RECOVERY_VERSION_NAME);
+        worker.setAckVersion(version);
+        if (!worker.getStatus().equals(WorkerStatus.IN_RECOVERY)) {
+            worker.setStatus(WorkerStatus.RUNNING);
+        }
+        logger.debug("Got keepAlive for Worker with uuid=" + uuid + " and update its ackVersion to " + version);
+        return new WorkerKeepAliveInfo(worker.getWorkerRecoveryVersion(), worker.isActive());
+    }
 
-		if(loginListeners != null) {
-			for(LoginListener listener : loginListeners) {
-				listener.preLogin(uuid);
-			}
-		}
-		String wrv = keepAlive(uuid);
-		if(loginListeners != null) {
-			for(LoginListener listener : loginListeners) {
-				listener.postLogin(uuid);
-			}
-		}
+    @Override
+    @Transactional
+    public void create(String uuid, String password, String hostName, String installDir) {
+        WorkerNode worker = new WorkerNode();
+        worker.setUuid(uuid);
+        worker.setDescription(uuid);
+        worker.setHostName(hostName);
+        worker.setActive(false);
+        worker.setInstallPath(installDir);
+        worker.setStatus(WorkerStatus.FAILED);
+        worker.setPassword(password);
+        worker.setGroups(Arrays.asList(WorkerNode.DEFAULT_WORKER_GROUPS));
+        workerNodeRepository.save(worker);
+        workerLockService.create(uuid);
+    }
 
-		updateVersion(uuid, version, versionId);
+    @Override
+    @Transactional
+    public void updateWorkerToDeleted(String uuid) {
+        WorkerNode worker = readByUUID(uuid);
+        if (worker != null) {
+            worker.setActive(false);
+            worker.setDeleted(true);
+            worker.setStatus(WorkerStatus.IN_RECOVERY);
+        }
+    }
 
-		return wrv;
-	}
+    @Override
+    @Transactional
+    public void updateWorkerToNotDeleted(String uuid) {
+        WorkerNode worker = workerNodeRepository.findByUuidAndDeleted(uuid, true);
+        if (worker != null) {
+            worker.setActive(false);
+            worker.setDeleted(false);
+            worker.setStatus(WorkerStatus.IN_RECOVERY);
+        }
+    }
 
-	@Override
-	@Transactional
-	@Deprecated //is left here for backward compatibility
-	public String up(String uuid) {
+    @Override
+    @Transactional
+    public List<WorkerNode> readAllNotDeletedWorkers() {
+        return workerNodeRepository.findByDeletedOrderByIdAsc(false);
+    }
 
-		if(loginListeners != null) {
-			for(LoginListener listener : loginListeners) {
-				listener.preLogin(uuid);
-			}
-		}
-		String wrv = keepAlive(uuid);
-		if(loginListeners != null) {
-			for(LoginListener listener : loginListeners) {
-				listener.postLogin(uuid);
-			}
-		}
-		return wrv;
-	}
+    @Override
+    @Transactional
+    public String up(String uuid, String version, String versionId) {
 
-	@Override
-	@Transactional(readOnly = true)
-	public WorkerNode readByUUID(String uuid) {
-		WorkerNode worker = workerNodeRepository.findByUuidAndDeleted(uuid, false);
-		if(worker == null) {
-			throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
-		}
-		return worker;
-	}
+        if (loginListeners != null) {
+            for (LoginListener listener : loginListeners) {
+                listener.preLogin(uuid);
+            }
+        }
+        WorkerKeepAliveInfo workerKeepAliveInfo = newKeepAlive(uuid);
+        if (loginListeners != null) {
+            for (LoginListener listener : loginListeners) {
+                listener.postLogin(uuid);
+            }
+        }
 
-	@Override
-	@Transactional(readOnly = true)
-	public boolean isActive(String uuid) {
-		WorkerNode worker = workerNodeRepository.findByUuidAndDeleted(uuid, false);
-		if(worker == null) {
-			throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
-		}
-		return worker.isActive();
-	}
+        updateVersion(uuid, version, versionId);
 
-	@Override
-	@Transactional(readOnly = true)
-	public WorkerNode findByUuid(String uuid) {
-		WorkerNode worker = workerNodeRepository.findByUuid(uuid);
-		if(worker == null) {
-			throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
-		}
-		return worker;
-	}
+        return workerKeepAliveInfo.getWorkerRecoveryVersion();
+    }
 
-	@Override
-	@Transactional(readOnly = true)
-	public List<WorkerNode> readAllWorkers() {
-		return workerNodeRepository.findAll();
-	}
+    @Override
+    @Transactional
+    @Deprecated //is left here for backward compatibility
+    public String up(String uuid) {
 
-	@Override
-	@Transactional(readOnly = true)
-	public List<String> readAllWorkersUuids() {
-		List<WorkerNode> workers = workerNodeRepository.findAll();
-		List<String> result = new ArrayList<>();
-		for(WorkerNode w : workers) {
-			result.add(w.getUuid());
-		}
-		return result;
-	}
+        if (loginListeners != null) {
+            for (LoginListener listener : loginListeners) {
+                listener.preLogin(uuid);
+            }
+        }
+        WorkerKeepAliveInfo workerKeepAliveInfo = newKeepAlive(uuid);
+        if (loginListeners != null) {
+            for (LoginListener listener : loginListeners) {
+                listener.postLogin(uuid);
+            }
+        }
+        return workerKeepAliveInfo.getWorkerRecoveryVersion();
+    }
 
-	@Override
-	@Transactional
-	public void updateVersion(String workerUuid, String version, String versionId) {
-		WorkerNode worker = workerNodeRepository.findByUuid(workerUuid);
-		if(worker == null) {
-			throw new IllegalStateException("No worker was found by the specified UUID:" + workerUuid);
-		}
-		worker.setVersion(version);
-		worker.setVersionId(versionId);
-	}
+    @Override
+    @Transactional(readOnly = true)
+    public WorkerNode readByUUID(String uuid) {
+        WorkerNode worker = workerNodeRepository.findByUuidAndDeleted(uuid, false);
+        if (worker == null) {
+            throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
+        }
+        return worker;
+    }
 
-	@Override
-	@Transactional(readOnly = true)
-	public List<String> readNonRespondingWorkers() {
-		long systemVersion = versionService.getCurrentVersion(MSG_RECOVERY_VERSION_NAME);
-		long minVersionAllowed = Math.max(systemVersion - maxVersionGapAllowed, 0);
-		return workerNodeRepository.findNonRespondingWorkers(minVersionAllowed, WorkerStatus.RECOVERED);
-	}
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isActive(String uuid) {
+        WorkerNode worker = workerNodeRepository.findByUuidAndDeleted(uuid, false);
+        if (worker == null) {
+            throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
+        }
+        return worker.isActive();
+    }
 
-	@Override
-	@Transactional(readOnly = true)
-	public List<WorkerNode> readWorkersByActivation(boolean isActive) {
-		return workerNodeRepository.findByActiveAndDeleted(isActive, false);
-	}
+    @Override
+    @Transactional(readOnly = true)
+    public WorkerNode findByUuid(String uuid) {
+        WorkerNode worker = workerNodeRepository.findByUuid(uuid);
+        if (worker == null) {
+            throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
+        }
+        return worker;
+    }
 
-	@Override
-	@Transactional
-	public void activate(String uuid) {
-		WorkerNode worker = readByUUID(uuid);
-		worker.setActive(true);
-	}
+    @Override
+    @Transactional(readOnly = true)
+    public List<WorkerNode> readAllWorkers() {
+        return workerNodeRepository.findAll();
+    }
 
-	@Override
-	@Transactional
-	public void deactivate(String uuid) {
-		WorkerNode worker = readByUUID(uuid);
-		worker.setActive(false);
-	}
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> readAllWorkersUuids() {
+        List<WorkerNode> workers = workerNodeRepository.findAll();
+        List<String> result = new ArrayList<>();
+        for (WorkerNode w : workers) {
+            result.add(w.getUuid());
+        }
+        return result;
+    }
 
-	@Override
-	@Transactional
-	public void updateEnvironmentParams(String uuid, String os, String jvm, String dotNetVersion) {
-		WorkerNode worker = readByUUID(uuid);
-		worker.setOs(os);
-		worker.setJvm(jvm);
-		worker.setDotNetVersion(dotNetVersion);
-	}
+    @Override
+    @Transactional
+    public void updateVersion(String workerUuid, String version, String versionId) {
+        WorkerNode worker = workerNodeRepository.findByUuid(workerUuid);
+        if (worker == null) {
+            throw new IllegalStateException("No worker was found by the specified UUID:" + workerUuid);
+        }
+        worker.setVersion(version);
+        worker.setVersionId(versionId);
+    }
 
-	@Override
-	@Transactional
-	public void updateStatus(String uuid, WorkerStatus status) {
-		WorkerNode worker = workerNodeRepository.findByUuid(uuid);
-		if(worker == null) {
-			throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
-		}
-		worker.setStatus(status);
-	}
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> readNonRespondingWorkers() {
+        long systemVersion = versionService.getCurrentVersion(MSG_RECOVERY_VERSION_NAME);
+        long minVersionAllowed = Math.max(systemVersion - MAX_VERSION_GAP_ALLOWED, 0);
+        return workerNodeRepository.findNonRespondingWorkers(minVersionAllowed, WorkerStatus.RECOVERED);
+    }
 
-	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void updateStatusInSeparateTransaction(String uuid, WorkerStatus status) {
-		WorkerNode worker = workerNodeRepository.findByUuid(uuid);
-		if(worker == null) {
-			throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
-		}
-		worker.setStatus(status);
-	}
+    @Override
+    @Transactional(readOnly = true)
+    public List<WorkerNode> readWorkersByActivation(boolean isActive) {
+        return workerNodeRepository.findByActiveAndDeleted(isActive, false);
+    }
 
-	@Override
-	@Transactional(readOnly = true)
-	public List<String> readAllWorkerGroups() {
-		return workerNodeRepository.findGroups();
-	}
+    @Override
+    @Transactional
+    public void activate(String uuid) {
+        WorkerNode worker = readByUUID(uuid);
+        worker.setActive(true);
+    }
 
-	@Override
-	@Transactional(readOnly = true)
-	public List<String> readWorkerGroups(String uuid) {
-		WorkerNode node = readByUUID(uuid);
-		ArrayList<String> res = new ArrayList<>();
-		res.addAll(node.getGroups());
-		return res;
-	}
+    @Override
+    @Transactional
+    public void deactivate(String uuid) {
+        WorkerNode worker = readByUUID(uuid);
+        worker.setActive(false);
+    }
 
-	@Override
-	@Transactional
-	public void updateWorkerGroups(String uuid, String... groupNames) {
-		WorkerNode worker = readByUUID(uuid);
+    @Override
+    @Transactional
+    public void updateEnvironmentParams(String uuid, String os, String jvm, String dotNetVersion) {
+        WorkerNode worker = readByUUID(uuid);
+        worker.setOs(os);
+        worker.setJvm(jvm);
+        worker.setDotNetVersion(dotNetVersion);
+    }
 
-		Set<String> groupSet = groupNames != null ? new HashSet<>(Arrays.asList(groupNames)) : new HashSet<String>();
-		List<String> groups = new ArrayList<>();
-		groupSet.remove(null);
-		groups.addAll(groupSet);
+    @Override
+    @Transactional
+    public void updateStatus(String uuid, WorkerStatus status) {
+        WorkerNode worker = workerNodeRepository.findByUuid(uuid);
+        if (worker == null) {
+            throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
+        }
+        worker.setStatus(status);
+    }
 
-		worker.setGroups(groups);
-	}
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updateStatusInSeparateTransaction(String uuid, WorkerStatus status) {
+        WorkerNode worker = workerNodeRepository.findByUuid(uuid);
+        if (worker == null) {
+            throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
+        }
+        worker.setStatus(status);
+    }
 
-	@Override
-	@Transactional(readOnly = true)
-	public Multimap<String, String> readGroupWorkersMapActiveAndRunningAndVersion(String versionId) {
-		Multimap<String, String> result = ArrayListMultimap.create();
-		List<WorkerNode> workers;
-		workers = workerNodeRepository.findByActiveAndStatusAndDeletedAndVersionId(true, WorkerStatus.RUNNING, false, versionId);
-		for(WorkerNode worker : workers) {
-			for(String groupName : worker.getGroups()) {
-				result.put(groupName, worker.getUuid());
-			}
-		}
-		return result;
-	}
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> readAllWorkerGroups() {
+        return workerNodeRepository.findGroups();
+    }
 
-	@Override
-	@Transactional
-	public void addGroupToWorker(String workerUuid, String group) {
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> readWorkerGroups(String uuid) {
+        WorkerNode node = readByUUID(uuid);
+        ArrayList<String> res = new ArrayList<>();
+        res.addAll(node.getGroups());
+        return res;
+    }
 
-		if (group == null) {
-			return;
-		}
+    @Override
+    @Transactional
+    public void updateWorkerGroups(String uuid, String... groupNames) {
+        WorkerNode worker = readByUUID(uuid);
 
-		WorkerNode worker = readByUUID(workerUuid);
+        Set<String> groupSet = groupNames != null ? new HashSet<>(Arrays.asList(groupNames)) : new HashSet<String>();
+        List<String> groups = new ArrayList<>();
+        groupSet.remove(null);
+        groups.addAll(groupSet);
 
-		if (!worker.getGroups().contains(group)) {
-			List<String> groups = new ArrayList<>(worker.getGroups());
-			groups.add(group);
-			worker.setGroups(groups);
-		}
-	}
+        worker.setGroups(groups);
+    }
 
-	@Override
-	@Transactional
-	public void removeGroupFromWorker(String workerUuid, String group) {
-		WorkerNode worker = readByUUID(workerUuid);
-		List<String> groups = new ArrayList<>(worker.getGroups());
-		groups.remove(group);
-		if(groups.size() == 0) throw new IllegalStateException("Can't leave worker without any group !");
-		worker.setGroups(groups);
-	}
+    @Override
+    @Transactional(readOnly = true)
+    public Multimap<String, String> readGroupWorkersMapActiveAndRunningAndVersion(String versionId) {
+        Multimap<String, String> result = ArrayListMultimap.create();
+        List<WorkerNode> workers;
+        workers = workerNodeRepository.findByActiveAndStatusAndDeletedAndVersionId(true, WorkerStatus.RUNNING, false, versionId);
+        for (WorkerNode worker : workers) {
+            for (String groupName : worker.getGroups()) {
+                result.put(groupName, worker.getUuid());
+            }
+        }
+        return result;
+    }
 
-	@Override
-	@Transactional(readOnly = true)
-	public List<String> readWorkerGroups(List<String> groups) {
-		return workerNodeRepository.findGroups(groups);
-	}
+    @Override
+    @Transactional
+    public void addGroupToWorker(String workerUuid, String group) {
 
-	@Override
-	@Transactional
-	public void updateBulkNumber(String workerUuid, String bulkNumber) {
-		WorkerNode worker = readByUUID(workerUuid);
-		worker.setBulkNumber(bulkNumber);
-	}
+        if (group == null) {
+            return;
+        }
 
-	@Override
-	@Transactional
-	public void updateWRV(String workerUuid, String wrv) {
-		WorkerNode worker = workerNodeRepository.findByUuid(workerUuid);
-		worker.setWorkerRecoveryVersion(wrv);
-	}
+        WorkerNode worker = readByUUID(workerUuid);
+
+        if (!worker.getGroups().contains(group)) {
+            List<String> groups = new ArrayList<>(worker.getGroups());
+            groups.add(group);
+            worker.setGroups(groups);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void removeGroupFromWorker(String workerUuid, String group) {
+        WorkerNode worker = readByUUID(workerUuid);
+        List<String> groups = new ArrayList<>(worker.getGroups());
+        groups.remove(group);
+        if (groups.size() == 0) {
+            throw new IllegalStateException("Can't leave worker without any group !");
+        }
+        worker.setGroups(groups);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> readWorkerGroups(List<String> groups) {
+        return workerNodeRepository.findGroups(groups);
+    }
+
+    @Override
+    @Transactional
+    public void updateBulkNumber(String workerUuid, String bulkNumber) {
+        WorkerNode worker = readByUUID(workerUuid);
+        worker.setBulkNumber(bulkNumber);
+    }
+
+    @Override
+    @Transactional
+    public void updateWRV(String workerUuid, String wrv) {
+        WorkerNode worker = workerNodeRepository.findByUuid(workerUuid);
+        worker.setWorkerRecoveryVersion(wrv);
+    }
 
 }
