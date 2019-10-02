@@ -46,15 +46,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-/**
- * User: wahnonm Date: 15/08/13 Time: 11:32
- */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
 public class InBufferTest {
 
     @InjectMocks
-    @Spy
     private InBuffer inBuffer;
 
     @Mock
@@ -84,11 +78,6 @@ public class InBufferTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-    }
-
-    @Configuration
-    static class EmptyConfig {
-
     }
 
     @Test
@@ -137,7 +126,7 @@ public class InBufferTest {
             Thread thread = new Thread(inBuffer);
             thread.start();
 
-            // Wait 2 seconds
+            // Wait 1 second
             Thread.sleep(1000);
 
             // stop InBuffer operation
@@ -176,7 +165,7 @@ public class InBufferTest {
             Thread thread = new Thread(inBuffer);
             thread.start();
 
-            // Wait 2 seconds
+            // Wait 1 second
             Thread.sleep(1000);
 
             // stop InBuffer operation

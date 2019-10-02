@@ -80,8 +80,9 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
         if (!worker.getStatus().equals(WorkerStatus.IN_RECOVERY)) {
             worker.setStatus(WorkerStatus.RUNNING);
         }
-        logger.debug("Got keepAlive for Worker with uuid=" + uuid + " and update its ackVersion to " + version);
-        return new WorkerKeepAliveInfo(worker.getWorkerRecoveryVersion(), worker.isActive());
+        boolean active = worker.isActive();
+        logger.debug("Got keepAlive for Worker with uuid=" + uuid + " and update its ackVersion to " + version + " isActive" + active);
+        return new WorkerKeepAliveInfo(worker.getWorkerRecoveryVersion(), active);
     }
 
     @Override
