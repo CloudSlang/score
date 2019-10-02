@@ -100,7 +100,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     private double workerFreeMemoryRatio;
 
     @PostConstruct
-    private void init() {
+    void init() {
         capacity = getInteger("worker.inbuffer.capacity", capacity);
         coolDownPollingMillis = getInteger("worker.inbuffer.coolDownPollingMillis", coolDownPollingMillis);
         logger.info("InBuffer capacity is set to :" + capacity

@@ -189,5 +189,11 @@ public class ScheduledWorkerLoadMonitorTest {
                     .getBlockingQueue(anyInt(), anyInt());
             return workerConfigurationUtils;
         }
+
+        @Bean
+        public WorkerStateUpdateService workerStateUpdateService() {
+            return mock(WorkerStateUpdateService.class);
+        }
+
     }
 }
