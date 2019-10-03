@@ -17,15 +17,18 @@ package io.cloudslang.engine.queue.services;
 
 public interface LargeMessagesMonitorService {
 
-    int DEFAULT_TIME_ON_WORKER = 10 * 60;
     int DEFAULT_EXPIRATION_TIME = 60 * 60;
+    int DEFAULT_NO_RETRIES = 5;
 
-    default Integer getMessageTimeOnWorker() {
-        return Integer.getInteger("queue.message.time.on.worker", DEFAULT_TIME_ON_WORKER);    // seconds
-    }
+    String MESSAGE_EXPIRATION_TIME_PROP = "queue.message.expiration.time.seconds";
+    String NUMBER_OF_RETRIES_KEY = "message.queue.no.retries";
 
     default Integer getMessageExpirationTime() {
-        return Integer.getInteger("queue.message.expiration.time", DEFAULT_EXPIRATION_TIME);    // seconds
+        return Integer.getInteger(MESSAGE_EXPIRATION_TIME_PROP, DEFAULT_EXPIRATION_TIME);
+    }
+
+    default Integer getNoRetries() {
+        return Integer.getInteger(NUMBER_OF_RETRIES_KEY, DEFAULT_NO_RETRIES);
     }
 
     void monitor();

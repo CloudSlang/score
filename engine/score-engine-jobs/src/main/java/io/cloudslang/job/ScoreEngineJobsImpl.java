@@ -164,7 +164,7 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
     public void monitorLargeMessagesJob() {
 
         if (logger.isDebugEnabled()) {
-            logger.debug("MonitorLargeMessagesJob woke up at " + new Date());
+            logger.debug("MonitorLargeMessagesJob woke up!");
         }
 
         largeMessagesMonitorService.monitor();

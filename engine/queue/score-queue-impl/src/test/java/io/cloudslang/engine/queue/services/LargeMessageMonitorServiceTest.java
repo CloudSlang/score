@@ -53,12 +53,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import javax.sql.DataSource;
 import java.util.List;
 
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"SpringContextConfigurationInspection"})
@@ -91,54 +87,18 @@ public class LargeMessageMonitorServiceTest {
 
         reset(cancelExecutionService);
 
-        System.setProperty("queue.message.time.on.worker", String.valueOf(1));
-        System.setProperty("queue.message.expiration.time", String.valueOf(5));
+        System.setProperty(LargeMessagesMonitorService.NUMBER_OF_RETRIES_KEY, String.valueOf(2));
+        System.setProperty(LargeMessagesMonitorService.MESSAGE_EXPIRATION_TIME_PROP, String.valueOf(1));
     }
 
     @After
     public void after() {
-        System.setProperty("queue.message.time.on.worker", String.valueOf(LargeMessagesMonitorService.DEFAULT_TIME_ON_WORKER));
-        System.setProperty("queue.message.expiration.time", String.valueOf(LargeMessagesMonitorService.DEFAULT_EXPIRATION_TIME));
+        System.setProperty(LargeMessagesMonitorService.NUMBER_OF_RETRIES_KEY, String.valueOf(LargeMessagesMonitorService.DEFAULT_NO_RETRIES));
+        System.setProperty(LargeMessagesMonitorService.MESSAGE_EXPIRATION_TIME_PROP, String.valueOf(LargeMessagesMonitorService.DEFAULT_EXPIRATION_TIME));
     }
 
     @Test
-    public void testMonitorMessageReassigned() {
-
-        int mb = 2;
-        long workerFreeMem = QueueTestsUtils.getMB(mb - 1);
-        String worker = "worker1";
-        String workerGroup = "group1";
-
-        Multimap<String, String> groupWorkersMap = ArrayListMultimap.create();
-        groupWorkersMap.put(workerGroup, worker);
-
-        Mockito.when(workerNodeService.readGroupWorkersMapActiveAndRunningAndVersion(engineVersionService.getEngineVersionId())).thenReturn(groupWorkersMap);
-
-        ExecutionMessage msg1 = QueueTestsUtils.generateLargeMessage(1, workerGroup,"11", 1, QueueTestsUtils.getMB(mb));
-        msg1.setWorkerId(worker);
-        msg1.setStatus(ExecStatus.ASSIGNED);
-
-        QueueTestsUtils.insertMessagesInQueue(executionQueueRepository, msg1);
-
-        List<ExecutionMessage> allMsgs = findExecutionMessages(worker, workerFreeMem, ExecStatus.ASSIGNED);
-        Assert.assertEquals(1, allMsgs.size());
-
-        waitOverReassignTime();
-
-        largeMessagesMonitorService.monitor();          // clears the worker
-
-        Assert.assertEquals(0, findExecutionMessages(worker, workerFreeMem, ExecStatus.ASSIGNED).size());
-
-        List<ExecutionMessage> unassignedMsg = findExecutionMessages(ExecutionMessage.EMPTY_WORKER, workerFreeMem, ExecStatus.PENDING);
-        Assert.assertEquals(1, unassignedMsg.size());
-
-        ExecutionMessage message = unassignedMsg.get(0);
-        Assert.assertEquals(1, message.getExecStateId());
-        Assert.assertEquals("11", message.getMsgId());
-    }
-
-    @Test
-    public void testMonitorMessageCanceled() {
+    public void testMonitorMessageReassigned() throws InterruptedException {
 
         int mb = 2;
         long workerFreeMem = QueueTestsUtils.getMB(mb - 1);
@@ -161,27 +121,20 @@ public class LargeMessageMonitorServiceTest {
 
         waitOverExpirationTime();
 
-        largeMessagesMonitorService.monitor();
+        largeMessagesMonitorService.monitor();          // clears the worker
 
-        long executionId = executionQueueRepository.getMessageRunningExecutionId(msg1);
+        Assert.assertEquals(0, findExecutionMessages(worker, workerFreeMem, ExecStatus.ASSIGNED).size());
 
-        verify(cancelExecutionService,times(1)).requestCancelExecution(executionId);
+        List<ExecutionMessage> unassignedMsg = findExecutionMessages(ExecutionMessage.EMPTY_WORKER, workerFreeMem, ExecStatus.PENDING);
+        Assert.assertEquals(1, unassignedMsg.size());
+
+        ExecutionMessage message = unassignedMsg.get(0);
+        Assert.assertEquals(1, message.getExecStateId());
+        Assert.assertEquals("11", message.getMsgId());
     }
 
-    private void waitOverReassignTime() {
-        try {
-            Thread.sleep((largeMessagesMonitorService.getMessageTimeOnWorker() + 1) * 1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void waitOverExpirationTime() {
-        try {
-            Thread.sleep((largeMessagesMonitorService.getMessageExpirationTime() + 1) * 1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    private void waitOverExpirationTime() throws InterruptedException {
+        Thread.sleep((largeMessagesMonitorService.getMessageExpirationTime() + 1) * 1000);
     }
 
     private List<ExecutionMessage> findExecutionMessages(String worker, long workerFreeMem, ExecStatus... statuses) {

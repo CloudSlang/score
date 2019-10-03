@@ -15,20 +15,27 @@
  */
 package io.cloudslang.engine.queue.services;
 
-import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
 import io.cloudslang.orchestrator.services.CancelExecutionService;
 import io.cloudslang.score.facade.execution.ExecutionActionResult;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.google.common.collect.Iterables.partition;
 
 public final class LargeMessagesMonitorServiceImpl implements LargeMessagesMonitorService {
 
-    private Logger logger = Logger.getLogger(getClass());
+    private static Logger logger = Logger.getLogger(LargeMessagesMonitorServiceImpl.class);
 
+    private static final int PARTITION_SIZE = 250;
 
     @Autowired
     private CancelExecutionService cancelExecutionService;
@@ -37,53 +44,68 @@ public final class LargeMessagesMonitorServiceImpl implements LargeMessagesMonit
     private ExecutionQueueRepository executionQueueRepository;
 
     @Override
+    @Transactional
     public void monitor() {
 
-        long now = System.currentTimeMillis();
+        int noRetries = getNoRetries();
 
-        List<ExecutionMessage> messages = executionQueueRepository.findMessages(now, ExecStatus.ASSIGNED);
+        long time = System.currentTimeMillis() - getMessageExpirationTime() * 1000;
+
+        List<ExecutionMessage> messages = executionQueueRepository.findOldMessages(time);
 
         if (logger.isDebugEnabled()) {
             logger.debug("Found " + messages.size() + " entries");
         }
 
-        for (ExecutionMessage msg : messages) {
-            if (messageShouldBeCanceled(msg)) {
-                cancelMessage(msg);
-            } else if (messageShouldBeReassigned(msg)) {
-                clearAssignedWorker(msg);
+        Map<Long, List<ExecutionMessage>> execStateMap = messages.stream().collect(Collectors.groupingBy(ExecutionMessage::getExecStateId));
+
+        Set<Long> toCancel = new HashSet<>();
+        Set<Long> toRetry = new HashSet<>();
+
+        execStateMap.forEach((execStateId, msgs) -> {
+            int count = 0;
+            for (int i = 1; i < msgs.size(); i++) {
+                if (msgs.get(i).getMsgSeqId() == msgs.get(i - 1).getMsgSeqId() - 1) {
+                    count++;
+                } else {
+                    count = 0;
+                }
+
+                if (count >= noRetries) {
+                    toCancel.add(execStateId);
+                    break;
+                }
+            }
+
+            if (count < noRetries) {
+                toRetry.add(execStateId);
+            }
+        });
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Canceling " + toCancel.size() + " entries " + toCancel);
+            logger.debug("Retrying " + toRetry.size() + " entries " + toRetry);
+        }
+
+        // retry
+        if (toRetry.size() > 0) {
+            for (List<Long> execStateIds : partition(toRetry, PARTITION_SIZE)) {
+                executionQueueRepository.clearAssignedWorker(execStateIds);
             }
         }
-    }
 
-    private void clearAssignedWorker(ExecutionMessage msg) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Clearing assigned worker for id: " + msg.getId());
+        // cancel
+        if (toCancel.size() > 0) {
+            List<Long> execIds = executionQueueRepository.getExecutionIdsForExecutionStateIds(toCancel);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Canceling execution with ids " + execIds);
+            }
+
+            for (Long executionId : execIds) {
+                ExecutionActionResult result = cancelExecutionService.requestCancelExecution(executionId);
+                logger.warn("Requested cancel of execution id: " + executionId + ", result: " + result);
+            }
         }
-
-        executionQueueRepository.clearAssignedWorker(msg);
-    }
-
-    private void cancelMessage(ExecutionMessage msg) {
-        long executionId = executionQueueRepository.getMessageRunningExecutionId(msg);
-
-        logger.warn("Canceling execution with id: " + executionId + " for message: " + msg);
-
-        if (executionId != -1) {
-            ExecutionActionResult result = cancelExecutionService.requestCancelExecution(executionId);
-            logger.warn("Requested cancel of execution id: " + executionId + ", result: " + result);
-        } else {
-            logger.warn("Execution not found for message!");
-        }
-    }
-
-    private boolean messageShouldBeCanceled(ExecutionMessage msg) {
-        long dtSeconds = (System.currentTimeMillis() - msg.getCreateDate()) / 1000;
-        return dtSeconds > getMessageExpirationTime();
-    }
-
-    private boolean messageShouldBeReassigned(ExecutionMessage msg) {
-        long dtSeconds = (System.currentTimeMillis() - msg.getCreateDate()) / 1000;
-        return dtSeconds > getMessageTimeOnWorker();
     }
 }

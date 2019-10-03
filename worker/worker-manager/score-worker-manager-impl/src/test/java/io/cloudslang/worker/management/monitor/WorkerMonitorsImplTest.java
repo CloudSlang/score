@@ -195,12 +195,6 @@ public class WorkerMonitorsImplTest {
         }
 
         @Bean
-        public Double startPollingMemoryRatio() {return 0D;}
-
-        @Bean
-        public Double pollingMemoryRatio() {return 0.2D;}
-
-        @Bean
         public SimpleExecutionRunnableFactory simpleExecutionRunnableFactory() {
             return mock(SimpleExecutionRunnableFactory.class);
         }

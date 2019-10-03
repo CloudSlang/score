@@ -40,7 +40,6 @@
 						<xsd:attribute type="xsd:int" name="coolDownPollingMillis"/>
 						<xsd:attribute type="xsd:int" name="numberOfExecutionThreads"/>
 						<xsd:attribute type="xsd:int" name="maxDeltaBetweenDrains"/>
-						<xsd:attribute type="xsd:double" name="startPollingMemoryRatio"/>
 						<xsd:attribute type="xsd:double" name="pollingMemoryRatio"/>
 					</xsd:complexType>
 				</xsd:element>

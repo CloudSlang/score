@@ -80,7 +80,7 @@ public class ExecutionMessage implements Message, Cloneable {
         this.msgId = String.valueOf(executionId);
         this.status = ExecStatus.PENDING;
         this.payload = payload;
-		this.payloadSize = getPayloadSize(payload);
+        this.payloadSize = getPayloadSize(payload);
         this.msgSeqId = 0;
     }
 
@@ -135,7 +135,7 @@ public class ExecutionMessage implements Message, Cloneable {
         this.status = status;
         this.executionObject = executionObject;
         this.payload = payload;
-		this.payloadSize = getPayloadSize(payload);
+        this.payloadSize = getPayloadSize(payload);
         this.msgSeqId = msgSeqId;
     }
 
@@ -262,16 +262,6 @@ public class ExecutionMessage implements Message, Cloneable {
 
 	private int getPayloadSize(Payload payload) {
 		return payload != null ? payload.getData().length : 0;
-	}
-
-	public Object cloneWithoutPayload() {
-		try {
-			Object clone = super.clone();
-			((ExecutionMessage) clone).setPayload(null);
-			return clone;
-		} catch (CloneNotSupportedException e) {
-			throw new RuntimeException("Failed to clone message", e);
-		}
 	}
 
 	@Override

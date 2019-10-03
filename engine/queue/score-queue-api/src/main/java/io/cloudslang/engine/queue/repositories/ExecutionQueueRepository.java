@@ -54,9 +54,9 @@ public interface ExecutionQueueRepository {
 	List<ExecutionMessage> findByStatuses(int maxSize, ExecStatus... statuses);
 	List<String> getBusyWorkers(ExecStatus... statuses);
 
-	List<ExecutionMessage> findMessages(long timestamp, ExecStatus... statuses);
+	List<ExecutionMessage> findOldMessages(long timestamp);
 
-	void clearAssignedWorker(ExecutionMessage message);
+	void clearAssignedWorker(List<Long> execStateIds);
 
-	long getMessageRunningExecutionId(ExecutionMessage message);
+	List<Long> getExecutionIdsForExecutionStateIds(Set<Long> toCancel);
 }

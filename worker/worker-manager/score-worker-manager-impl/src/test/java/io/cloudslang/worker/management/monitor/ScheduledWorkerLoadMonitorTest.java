@@ -163,9 +163,6 @@ public class ScheduledWorkerLoadMonitorTest {
         }
 
         @Bean
-        public Double pollingMemoryRatio() {return 0.2D;}
-
-        @Bean
         public Long initStartUpSleep() {
             return 1L;
         }

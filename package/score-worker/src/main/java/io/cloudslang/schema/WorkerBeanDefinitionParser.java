@@ -86,7 +86,6 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 			new ConfValue().NAME("inBufferCapacity").DEFAULT(500),
 			new ConfValue().NAME("numberOfExecutionThreads").DEFAULT(20),
 			new ConfValue().NAME("maxDeltaBetweenDrains").DEFAULT(100),
-			new ConfValue().NAME("startPollingMemoryRatio").DEFAULT(0.2D),
 			new ConfValue().NAME("pollingMemoryRatio").DEFAULT(0.2D)
 	);
 

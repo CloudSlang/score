@@ -17,6 +17,8 @@
 package io.cloudslang.samples;
 
 import com.google.common.collect.Sets;
+import io.cloudslang.samples.controlactions.BranchActions;
+import io.cloudslang.samples.controlactions.SessionDataActions;
 import io.cloudslang.score.api.ControlActionMetadata;
 import io.cloudslang.score.api.ExecutionPlan;
 import io.cloudslang.score.api.ExecutionStep;
@@ -29,11 +31,8 @@ import io.cloudslang.score.events.ScoreEventListener;
 import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import io.cloudslang.samples.controlactions.BranchActions;
-import io.cloudslang.samples.controlactions.SessionDataActions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -75,13 +74,6 @@ public class StandAloneTest {
     private final static String simpleNavigationMethodName = "simpleNavigation";
     private final static String navigationActionClassName = "io.cloudslang.samples.controlactions.NavigationActions";
 
-    @BeforeClass
-    public static void setUp() {
-        System.setProperty(
-                "worker.inbuffer.startPollingMemoryRatio",
-                "0"); // Cause it uses the current jvm's runtime memory values and a loop can
-        // be obtained when polling if free memory condition is not met
-    }
 
     @Before
     public void init(){

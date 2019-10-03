@@ -32,20 +32,6 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet id="create OO_EXECUTION_LARGE_MESSAGE" author="engine">
-
-		<createTable tableName="OO_EXECUTION_LARGE_MESSAGE">
-			<column name="id" type="bigint">            <!-- OO_EXECUTION_STATES.ID -->
-				<constraints primaryKey="true" nullable="false"/>
-			</column>
-			<column name="PAYLOAD_SIZE" type="bigint"/>
-			<column name="RETRIES" type="integer"/>
-			<column name="CREATE_TIME" type="bigint"/>
-			<column name="UPDATE_TIME" type="bigint"/>
-		</createTable>
-
-	</changeSet>
-
 	<changeSet id="create OO_EXECUTION_QUEUES" author="engine">
 		<createTable tableName="OO_EXECUTION_QUEUES">
 			<column name="ID" type="bigint">
