@@ -514,6 +514,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
         if (actionData != null) {
             stepData.putAll(actionData);
         }
+        Map<String, ?> navigationData = currStep.getNavigationData();
+        if (navigationData != null) {
+            stepData.putAll(navigationData);
+        }
         // We add all the contexts to the step data - so inside of each control action we will have access to all contexts
         addContextData(stepData, execution);
         return stepData;

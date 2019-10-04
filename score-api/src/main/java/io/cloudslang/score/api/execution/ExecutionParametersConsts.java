@@ -35,4 +35,7 @@ public class ExecutionParametersConsts {
 	public static final String RUNNING_EXECUTION_PLAN_ID = "RUNNING_EXECUTION_PLAN_ID";
 	public static final String FINISHED_CHILD_BRANCHES_DATA = "FINISHED_CHILD_BRANCHES_DATA";
 	public static final String SEQUENTIAL = "sequential";
+
+	public static final double DEFAULT_ROI_VALUE = 0.0;
+	public static final String EXECUTION_TOTAL_ROI = "execution_total_roi";
 }
