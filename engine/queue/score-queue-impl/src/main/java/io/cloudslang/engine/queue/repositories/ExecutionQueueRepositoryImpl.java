@@ -16,6 +16,8 @@
 
 package io.cloudslang.engine.queue.repositories;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import io.cloudslang.engine.data.IdentityGenerator;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
@@ -53,6 +55,8 @@ import java.util.Set;
 public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
     private Logger logger = Logger.getLogger(getClass());
+
+    private static final int PARTITION_SIZE = 250;
 
     final private String SELECT_FINISHED_STEPS_IDS =  " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES " +
             " WHERE " +
@@ -185,16 +189,17 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     private static final String FIND_OLD_STATES =
             "SELECT q.EXEC_STATE_ID, CREATE_TIME, MSG_SEQ_ID, ASSIGNED_WORKER, EXEC_GROUP " +
             "FROM OO_EXECUTION_QUEUES q, " +
-            "  (SELECT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES qt WHERE (STATUS = " + ExecStatus.ASSIGNED.getNumber() + ") AND " +
+            "  (SELECT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES qt WHERE (CREATE_TIME < ?) AND " +
+            "     (STATUS = " + ExecStatus.ASSIGNED.getNumber() + ") AND " +
             "          (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
             "              FROM OO_EXECUTION_QUEUES qq " +
             "              WHERE (qq.EXEC_STATE_ID = qt.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > qt.MSG_SEQ_ID)) " +
             "  ) t " +
-            "WHERE  (CREATE_TIME < ?) AND (STATUS = " + ExecStatus.ASSIGNED.getNumber() + ") AND " +
+            "WHERE (STATUS = " + ExecStatus.ASSIGNED.getNumber() + ") AND " +
             "q.EXEC_STATE_ID = t.EXEC_STATE_ID";
 
 
-    private static final String FIND_EXEC_IDS = "SELECT DISTINCT MSG_ID FROM OO_EXECUTION_STATES WHERE ID IN (?)";
+    private static final String FIND_EXEC_IDS = "SELECT DISTINCT MSG_ID FROM OO_EXECUTION_STATES WHERE ID IN (:IDS)";
 
     //We use dedicated JDBC templates for each query since JDBCTemplate is state-full object and we have different settings for each query.
     private StatementAwareJdbcTemplateWrapper pollJdbcTemplate;
@@ -317,31 +322,35 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     @Override
     public List<ExecutionMessage> poll(String workerId, int maxSize, long workerPollingMemory, ExecStatus... statuses) {
 
-        pollJdbcTemplate.setFetchSize(maxSize);
+        pollJdbcTemplate.setStatementBatchSize(maxSize);
 
-        // prepare the sql statement
-        String sqlStat = QUERY_WORKER_SQL.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
+        try {
+            // prepare the sql statement
+            String sqlStat = QUERY_WORKER_SQL.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
 
-        // prepare the arguments
-        Object[] args = preparePollArgs(workerId, workerPollingMemory, statuses);
+            // prepare the arguments
+            Object[] args = preparePollArgs(workerId, workerPollingMemory, statuses);
 
-        RowMapper<ExecutionMessage> rowMapper = (rs, rowNum) -> new ExecutionMessage(
-                rs.getLong("EXEC_STATE_ID"),
-                rs.getString("ASSIGNED_WORKER"),
-                rs.getString("EXEC_GROUP"),
-                rs.getString("MSG_ID"),
-                ExecStatus.find(rs.getInt("STATUS")),
-                new Payload(rs.getBytes("PAYLOAD")),
-                rs.getInt("MSG_SEQ_ID"),
-                rs.getLong("CREATE_TIME"));
+            RowMapper<ExecutionMessage> rowMapper = (rs, rowNum) -> new ExecutionMessage(
+                    rs.getLong("EXEC_STATE_ID"),
+                    rs.getString("ASSIGNED_WORKER"),
+                    rs.getString("EXEC_GROUP"),
+                    rs.getString("MSG_ID"),
+                    ExecStatus.find(rs.getInt("STATUS")),
+                    new Payload(rs.getBytes("PAYLOAD")),
+                    rs.getInt("MSG_SEQ_ID"),
+                    rs.getLong("CREATE_TIME"));
 
-        List<ExecutionMessage> executionMessages = doSelectWithTemplate(
-                pollJdbcTemplate,
-                sqlStat,
-                rowMapper,
-                args);
+            List<ExecutionMessage> executionMessages = doSelectWithTemplate(
+                    pollJdbcTemplate,
+                    sqlStat,
+                    rowMapper,
+                    args);
 
-        return executionMessages;
+            return executionMessages;
+        } finally {
+            pollJdbcTemplate.clearStatementBatchSize();
+        }
     }
 
     private Object[] preparePollArgs(String workerId, long workerPollingMemory, ExecStatus[] statuses) {
@@ -529,10 +538,23 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     }
 
     @Override
-    public List<Long> getExecutionIdsForExecutionStateIds(Set<Long> execStateIds) {
-        return findExecIDsJdbcTemplate.query(FIND_EXEC_IDS, new Object[]{execStateIds},
-                (rs, rowNum) -> rs.getLong("MSG_ID")
-        );
+    public Set<Long> getExecutionIdsForExecutionStateIds(Set<Long> execStateIds) {
+
+        Set<Long> result = new HashSet<>();
+
+        for (List<Long> part: Iterables.partition(execStateIds, PARTITION_SIZE)) {
+
+            String qMarks = StringUtils.repeat("?", ",", part.size());
+            String sqlStat = FIND_EXEC_IDS.replace(":IDS", qMarks);
+
+            List<Long> execIds = findExecIDsJdbcTemplate.query(sqlStat, part.toArray(),
+                    (rs, rowNum) -> rs.getLong("MSG_ID")
+            );
+
+            result.addAll(execIds);
+        }
+
+        return result;
     }
 
     private class BusyWorkerRowMapper implements RowMapper<String> {

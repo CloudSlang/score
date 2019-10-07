@@ -56,5 +56,5 @@ public interface ExecutionQueueRepository {
 
 	List<ExecutionMessage> findOldMessages(long timestamp);
 
-	List<Long> getExecutionIdsForExecutionStateIds(Set<Long> toCancel);
+	Set<Long> getExecutionIdsForExecutionStateIds(Set<Long> toCancel);
 }

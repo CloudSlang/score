@@ -27,22 +27,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import static com.google.common.collect.Iterables.partition;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.groupingBy;
 
 public final class LargeMessagesMonitorServiceImpl implements LargeMessagesMonitorService {
 
     private static Logger logger = Logger.getLogger(LargeMessagesMonitorServiceImpl.class);
-
-    private static final int PARTITION_SIZE = 250;
 
     @Autowired
     private CancelExecutionService cancelExecutionService;
@@ -74,10 +69,6 @@ public final class LargeMessagesMonitorServiceImpl implements LargeMessagesMonit
             long execStateId = entry.getKey();
             List<ExecutionMessage> msgs = entry.getValue();
 
-            if (msgs.isEmpty()) {
-                continue;
-            }
-
             Collections.sort(msgs, comparingInt(ExecutionMessage::getMsgSeqId).reversed());
 
             if (getDistMsgSeqId(msgs) >= noRetries) {
@@ -102,7 +93,7 @@ public final class LargeMessagesMonitorServiceImpl implements LargeMessagesMonit
 
         // cancel
         if (toCancel.size() > 0) {
-            List<Long> execIds = executionQueueRepository.getExecutionIdsForExecutionStateIds(toCancel);
+            Set<Long> execIds = executionQueueRepository.getExecutionIdsForExecutionStateIds(toCancel);
 
             logger.warn("Canceling execution with ids " + execIds);
 
@@ -117,7 +108,7 @@ public final class LargeMessagesMonitorServiceImpl implements LargeMessagesMonit
         int dist = 0;
         for (int size = msgs.size(), i = 1; i < size; i++) {
             if (msgs.get(i).getMsgSeqId() != msgs.get(i - 1).getMsgSeqId() - 1) {
-                dist = msgs.get(i).getMsgSeqId() - msgs.get(0).getMsgSeqId();
+                dist = msgs.get(0).getMsgSeqId() - msgs.get(i).getMsgSeqId();
                 break;
             }
         }
