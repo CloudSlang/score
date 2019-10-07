@@ -16,9 +16,11 @@
 
 package io.cloudslang.worker.management.services;
 
+import io.cloudslang.engine.node.entities.WorkerKeepAliveInfo;
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.orchestrator.services.EngineVersionService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
+import io.cloudslang.worker.management.monitor.WorkerStateUpdateService;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,6 +98,9 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
     @Autowired
     @Qualifier("inBufferCapacity")
     private Integer capacity;
+
+    @Autowired
+    private WorkerStateUpdateService workerStateUpdateService;
 
     private int keepAliveFailCount = 0;
 
@@ -204,7 +209,9 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
         if (!recoveryManager.isInRecovery()) {
             if (endOfInit) {
                 try {
-                    String newWrv = workerNodeService.keepAlive(workerUuid);
+                    WorkerKeepAliveInfo workerKeepAliveInfo = workerNodeService.newKeepAlive(workerUuid);
+                    String newWrv = workerKeepAliveInfo.getWorkerRecoveryVersion();
+                    workerStateUpdateService.setEnableState(workerKeepAliveInfo.isActive());
                     String currentWrv = recoveryManager.getWRV();
                     //do not update it!!! if it is different than we have - restart worker (clean state)
                     if (!currentWrv.equals(newWrv)) {

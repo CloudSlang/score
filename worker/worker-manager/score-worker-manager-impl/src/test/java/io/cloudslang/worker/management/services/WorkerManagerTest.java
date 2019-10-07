@@ -19,6 +19,7 @@ package io.cloudslang.worker.management.services;
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.orchestrator.services.EngineVersionService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
+import io.cloudslang.worker.management.monitor.WorkerStateUpdateService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -248,6 +249,11 @@ public class WorkerManagerTest {
 			WorkerConfigurationUtils workerConfigurationUtils = mock(WorkerConfigurationUtils.class);
 			doReturn(mock(LinkedBlockingQueue.class)).when(workerConfigurationUtils).getBlockingQueue(anyInt(), anyInt());
 			return workerConfigurationUtils;
+		}
+
+		@Bean
+		WorkerStateUpdateService workerStateUpdateService() {
+			return mock(WorkerStateUpdateService.class);
 		}
 
 		@Bean
