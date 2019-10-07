@@ -23,11 +23,11 @@ public interface LargeMessagesMonitorService {
     String MESSAGE_EXPIRATION_TIME_PROP = "queue.message.expiration.time.seconds";
     String NUMBER_OF_RETRIES_KEY = "message.queue.no.retries";
 
-    default Integer getMessageExpirationTime() {
+    default int getMessageExpirationTime() {
         return Integer.getInteger(MESSAGE_EXPIRATION_TIME_PROP, DEFAULT_EXPIRATION_TIME);
     }
 
-    default Integer getNoRetries() {
+    default int getNoRetries() {
         return Integer.getInteger(NUMBER_OF_RETRIES_KEY, DEFAULT_NO_RETRIES);
     }
 

@@ -35,7 +35,6 @@ import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -183,14 +182,16 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
     private static final String QUERY_PAYLOAD_BY_EXECUTION_IDS = "SELECT ID, PAYLOAD FROM OO_EXECUTION_STATES WHERE ID IN (:IDS)";
 
-    private static final String UPDATE_QUEUE ="UPDATE OO_EXECUTION_QUEUES SET ASSIGNED_WORKER = ?, STATUS = ? "
-            + "WHERE EXEC_STATE_ID = ? AND STATUS = ?";
-
     private static final String FIND_OLD_STATES =
-            "SELECT EXEC_STATE_ID, CREATE_TIME, MSG_SEQ_ID " +
-            "FROM OO_EXECUTION_QUEUES " +
-            "WHERE  (CREATE_TIME < ?) AND (STATUS = " + ExecStatus.ASSIGNED.getNumber() + ") " +
-            "ORDER BY EXEC_STATE_ID, CREATE_TIME DESC";
+            "SELECT q.EXEC_STATE_ID, CREATE_TIME, MSG_SEQ_ID, ASSIGNED_WORKER, EXEC_GROUP " +
+            "FROM OO_EXECUTION_QUEUES q, " +
+            "  (SELECT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES qt WHERE (STATUS = " + ExecStatus.ASSIGNED.getNumber() + ") AND " +
+            "          (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
+            "              FROM OO_EXECUTION_QUEUES qq " +
+            "              WHERE (qq.EXEC_STATE_ID = qt.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > qt.MSG_SEQ_ID)) " +
+            "  ) t " +
+            "WHERE  (CREATE_TIME < ?) AND (STATUS = " + ExecStatus.ASSIGNED.getNumber() + ") AND " +
+            "q.EXEC_STATE_ID = t.EXEC_STATE_ID";
 
 
     private static final String FIND_EXEC_IDS = "SELECT DISTINCT MSG_ID FROM OO_EXECUTION_STATES WHERE ID IN (?)";
@@ -202,7 +203,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     private StatementAwareJdbcTemplateWrapper getFinishedExecStateIdsJdbcTemplate;
     private StatementAwareJdbcTemplateWrapper countMessagesWithoutAckForWorkerJdbcTemplate;
     private StatementAwareJdbcTemplateWrapper findByStatusesJdbcTemplate;
-    private StatementAwareJdbcTemplateWrapper updateExecutionMessagesTemplate;
     private StatementAwareJdbcTemplateWrapper findLargeJdbcTemplate;
     private StatementAwareJdbcTemplateWrapper findExecIDsJdbcTemplate;
 
@@ -226,8 +226,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         getFinishedExecStateIdsJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "getFinishedExecStateIdsJdbcTemplate");
         countMessagesWithoutAckForWorkerJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "countMessagesWithoutAckForWorkerJdbcTemplate");
         findByStatusesJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "findByStatusesJdbcTemplate");
-        updateExecutionMessagesTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "updateExecutionMessagesTemplate");
-        findLargeJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "updateExecutionMessagesTemplate");
+        findLargeJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "findLargeJdbcTemplate");
         findExecIDsJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "findExecIDsJdbcTemplate");
 
         insertExecutionJdbcTemplate = new JdbcTemplate(dataSource);
@@ -341,11 +340,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                 sqlStat,
                 rowMapper,
                 args);
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("polling fetched " + (executionMessages == null ? "null" : executionMessages.size())
-                    + " for args " + Arrays.asList(args));
-        }
 
         return executionMessages;
     }
@@ -522,8 +516,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                 (rs, rowNum) -> {
                     ExecutionMessage msg = new ExecutionMessage(
                             rs.getLong("EXEC_STATE_ID"),
-                            null,
-                            null,
+                            rs.getString("ASSIGNED_WORKER"),
+                            rs.getString("EXEC_GROUP"),
                             null,
                             ExecStatus.ASSIGNED,
                             null,
@@ -532,25 +526,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     return msg;
                 }
         );
-    }
-
-    @Override
-    public void clearAssignedWorker(List<Long> execStateIds) {
-        updateExecutionMessagesTemplate.batchUpdate(UPDATE_QUEUE, new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-
-                ps.setString(1, ExecutionMessage.EMPTY_WORKER);
-                ps.setInt(2,  ExecStatus.PENDING.getNumber());
-                ps.setLong(3, execStateIds.get(i));
-                ps.setInt(4, ExecStatus.ASSIGNED.getNumber());
-            }
-
-            @Override
-            public int getBatchSize() {
-                return execStateIds.size();
-            }
-        });
     }
 
     @Override

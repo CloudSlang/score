@@ -77,6 +77,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
             <column name="PAYLOAD" type="blob">
                 <constraints nullable="false"/>
             </column>
+            <column name="PAYLOAD_SIZE" type="BIGINT" defaultValue="0"/>
             <column name="CREATE_TIME" type="${timestamp.type}"/>
         </createTable>
 

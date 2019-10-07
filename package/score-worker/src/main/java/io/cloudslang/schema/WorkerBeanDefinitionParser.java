@@ -87,8 +87,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private List<ConfValue> configurationValues = Arrays.asList(
 			new ConfValue().NAME("inBufferCapacity").DEFAULT(500),
 			new ConfValue().NAME("numberOfExecutionThreads").DEFAULT(20),
-			new ConfValue().NAME("maxDeltaBetweenDrains").DEFAULT(100),
-			new ConfValue().NAME("pollingMemoryRatio").DEFAULT(0.2D)
+			new ConfValue().NAME("maxDeltaBetweenDrains").DEFAULT(100)
 	);
 
 	private List<ConfValue> schedulerValues = Arrays.asList(

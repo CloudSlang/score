@@ -135,22 +135,6 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
         newCancelBehaviour = parseBoolean(getProperty("enable.new.cancel.execution", FALSE.toString()));
     }
 
-    /**
-     * Returns the amount of free memory in the worker's jvm.
-     * @return amount of memory currently available, measured in bytes.
-     */
-    public long getFreeMemory() {
-        return Runtime.getRuntime().freeMemory();
-    }
-
-    /**
-     * Returns the amount of memory that the worker's jvm will attempt to use.
-     * @return  amount of memory that the worker's jvm will attempt to use, in bytes.
-     */
-    public long getMaxMemory() {
-        return Runtime.getRuntime().maxMemory();
-    }
-
     public void addExecution(long executionId, Runnable runnable) {
         // Since we can offer to thread pool queue from SimpleExecutionRunnable run method
         // it is possible we will have step x + 1 of an execution plan that is in the map of running tasks,

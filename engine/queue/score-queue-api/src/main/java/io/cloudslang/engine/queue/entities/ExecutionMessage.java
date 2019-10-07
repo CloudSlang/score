@@ -39,7 +39,6 @@ public class ExecutionMessage implements Message, Cloneable {
 	private static final int JVM_OBJECT_HEADER = 16;
 	private static final int ARRAY_LENGTH_FIELD = 4;
 	private static final int PADDING_LENGTH = 4;
-	private static final int PAYLOAD_EXTRA_BITS = JVM_OBJECT_HEADER + ARRAY_LENGTH_FIELD + PADDING_LENGTH;
 
 	public static final long EMPTY_EXEC_STATE_ID = -1L;
 	public static final String EMPTY_WORKER = "EMPTY";
@@ -214,7 +213,7 @@ public class ExecutionMessage implements Message, Cloneable {
 
     public void setPayload(Payload payload) {
         this.payload = payload;
-		this.payloadSize = getPayloadSize(payload) + PAYLOAD_EXTRA_BITS;
+		this.payloadSize = getPayloadSize(payload) + JVM_OBJECT_HEADER + ARRAY_LENGTH_FIELD + PADDING_LENGTH;
     }
 
 	public long getPayloadSize() {

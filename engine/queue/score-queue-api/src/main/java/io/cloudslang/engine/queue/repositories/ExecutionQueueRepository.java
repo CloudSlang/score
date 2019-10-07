@@ -56,7 +56,5 @@ public interface ExecutionQueueRepository {
 
 	List<ExecutionMessage> findOldMessages(long timestamp);
 
-	void clearAssignedWorker(List<Long> execStateIds);
-
 	List<Long> getExecutionIdsForExecutionStateIds(Set<Long> toCancel);
 }

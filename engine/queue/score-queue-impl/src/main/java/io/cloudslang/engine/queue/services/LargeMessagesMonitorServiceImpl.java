@@ -15,14 +15,19 @@
  */
 package io.cloudslang.engine.queue.services;
 
+import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
+import io.cloudslang.engine.versioning.services.VersionService;
 import io.cloudslang.orchestrator.services.CancelExecutionService;
 import io.cloudslang.score.facade.execution.ExecutionActionResult;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +35,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Iterables.partition;
+import static java.util.Comparator.comparingInt;
+import static java.util.stream.Collectors.groupingBy;
 
 public final class LargeMessagesMonitorServiceImpl implements LargeMessagesMonitorService {
 
@@ -43,6 +50,9 @@ public final class LargeMessagesMonitorServiceImpl implements LargeMessagesMonit
     @Autowired
     private ExecutionQueueRepository executionQueueRepository;
 
+    @Autowired
+    private VersionService versionService;
+
     @Override
     @Transactional
     public void monitor() {
@@ -53,59 +63,64 @@ public final class LargeMessagesMonitorServiceImpl implements LargeMessagesMonit
 
         List<ExecutionMessage> messages = executionQueueRepository.findOldMessages(time);
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Found " + messages.size() + " entries");
-        }
-
-        Map<Long, List<ExecutionMessage>> execStateMap = messages.stream().collect(Collectors.groupingBy(ExecutionMessage::getExecStateId));
+        Map<Long, List<ExecutionMessage>> execStateMap = messages.stream().
+                collect(groupingBy(ExecutionMessage::getExecStateId));
 
         Set<Long> toCancel = new HashSet<>();
-        Set<Long> toRetry = new HashSet<>();
+        List<ExecutionMessage> toRetry = new ArrayList<>();
 
-        execStateMap.forEach((execStateId, msgs) -> {
-            int count = 0;
-            for (int i = 1; i < msgs.size(); i++) {
-                if (msgs.get(i).getMsgSeqId() == msgs.get(i - 1).getMsgSeqId() - 1) {
-                    count++;
-                } else {
-                    count = 0;
-                }
+        for (Map.Entry<Long, List<ExecutionMessage>> entry : execStateMap.entrySet()) {
 
-                if (count >= noRetries) {
-                    toCancel.add(execStateId);
-                    break;
-                }
+            long execStateId = entry.getKey();
+            List<ExecutionMessage> msgs = entry.getValue();
+
+            if (msgs.isEmpty()) {
+                continue;
             }
 
-            if (count < noRetries) {
-                toRetry.add(execStateId);
-            }
-        });
+            Collections.sort(msgs, comparingInt(ExecutionMessage::getMsgSeqId).reversed());
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Canceling " + toCancel.size() + " entries " + toCancel);
-            logger.debug("Retrying " + toRetry.size() + " entries " + toRetry);
+            if (getDistMsgSeqId(msgs) >= noRetries) {
+                toCancel.add(execStateId);
+            } else {
+                ExecutionMessage firstMsg = msgs.get(0);
+                firstMsg.setWorkerId(ExecutionMessage.EMPTY_WORKER);
+                firstMsg.setStatus(ExecStatus.PENDING);
+                firstMsg.incMsgSeqId();
+
+                toRetry.add(firstMsg);
+            }
         }
 
         // retry
         if (toRetry.size() > 0) {
-            for (List<Long> execStateIds : partition(toRetry, PARTITION_SIZE)) {
-                executionQueueRepository.clearAssignedWorker(execStateIds);
-            }
+            logger.warn("Retrying " + toRetry.size() + " entries " + toRetry);
+
+            long msgVersion = versionService.getCurrentVersion(VersionService.MSG_RECOVERY_VERSION_COUNTER_NAME);
+            executionQueueRepository.insertExecutionQueue(toRetry, msgVersion);
         }
 
         // cancel
         if (toCancel.size() > 0) {
             List<Long> execIds = executionQueueRepository.getExecutionIdsForExecutionStateIds(toCancel);
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("Canceling execution with ids " + execIds);
-            }
+            logger.warn("Canceling execution with ids " + execIds);
 
             for (Long executionId : execIds) {
                 ExecutionActionResult result = cancelExecutionService.requestCancelExecution(executionId);
                 logger.warn("Requested cancel of execution id: " + executionId + ", result: " + result);
             }
         }
+    }
+
+    private int getDistMsgSeqId(List<ExecutionMessage> msgs) {
+        int dist = 0;
+        for (int size = msgs.size(), i = 1; i < size; i++) {
+            if (msgs.get(i).getMsgSeqId() != msgs.get(i - 1).getMsgSeqId() - 1) {
+                dist = msgs.get(i).getMsgSeqId() - msgs.get(0).getMsgSeqId();
+                break;
+            }
+        }
+        return dist;
     }
 }
