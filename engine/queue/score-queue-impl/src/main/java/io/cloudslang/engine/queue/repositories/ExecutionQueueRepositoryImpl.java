@@ -20,10 +20,9 @@ import io.cloudslang.engine.data.IdentityGenerator;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
+import io.cloudslang.engine.queue.entities.StartNewBranchPayload;
 import io.cloudslang.engine.queue.services.StatementAwareJdbcTemplateWrapper;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -118,7 +117,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 					" WHERE  " +
 					"      (q.ASSIGNED_WORKER =  ?)  AND " +
 					"      (q.STATUS IN (:status)) AND " +
-					" 	   (s.ACTIVE = TRUE) AND " +
+					" 	   (s.ACTIVE = 1) AND " +
 					" (q.EXEC_STATE_ID = s.ID) AND " +
 					" (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
 					"              FROM OO_EXECUTION_QUEUES qq " +
@@ -175,7 +174,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
 	final private String INSERT_QUEUE = "INSERT INTO OO_EXECUTION_QUEUES (ID, EXEC_STATE_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS,MSG_SEQ_ID, CREATE_TIME,MSG_VERSION) VALUES (?, ?, ?, ?, ?, ?,?,?)";
 
-	final private String INSERT_EXECUTION_STATE_MAPPING = "INSERT INTO OO_EXECUTIONS_STATES_EXECUTIONS (ID, EXEC_STATE_ID, EXEC_ID) VALUES (?, ?, ?)";
+	final private String INSERT_EXECUTION_STATE_MAPPING = "INSERT INTO OO_EXECS_STATES_EXECS_MAPPINGS (ID, EXEC_STATE_ID, EXEC_ID) VALUES (?, ?, ?)";
 
 	private static final String QUERY_PAYLOAD_BY_EXECUTION_IDS = "SELECT ID, PAYLOAD FROM OO_EXECUTION_STATES WHERE ID IN (:IDS)";
 
@@ -193,7 +192,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 	private JdbcTemplate getBusyWorkersJdbcTemplate;
 	private JdbcTemplate getFirstPendingBranchJdbcTemplate;
 	private JdbcTemplate updateExecutionStateStatusJdbcTemplate;
-	private JdbcTemplate deletePendignExecutionStateJdbcTemplate;
+	private JdbcTemplate deletePendingExecutionStateJdbcTemplate;
 
 	@Autowired
 	private IdentityGenerator idGen;
@@ -217,7 +216,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 		getBusyWorkersJdbcTemplate = new JdbcTemplate(dataSource);
 		getFirstPendingBranchJdbcTemplate = new JdbcTemplate(dataSource);
 		updateExecutionStateStatusJdbcTemplate = new JdbcTemplate(dataSource);
-		deletePendignExecutionStateJdbcTemplate = new JdbcTemplate(dataSource);
+		deletePendingExecutionStateJdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
 	@Override
@@ -236,7 +235,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 				ps.setLong(1, msg.getExecStateId());
 				ps.setString(2, msg.getMsgId());
 				ps.setBytes(3, msg.getPayload().getData());
-				ps.setBoolean(4, msg.isActive());
+				ps.setInt(4, msg.isActive() ? 1 : 0);
 			}
 
 			@Override
@@ -295,35 +294,31 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     }
 
 	@Override
-	public Pair<Long, Long> getFirstPendingBranch(final long executionId) {
-		final String sql = "SELECT ID, EXEC_STATE_ID FROM OO_EXECUTIONS_STATES_EXECUTIONS WHERE EXEC_ID = ?";
+	public StartNewBranchPayload getFirstPendingBranch(final long executionId) {
+		final String sql = "SELECT ID, EXEC_STATE_ID FROM OO_EXECS_STATES_EXECS_MAPPINGS WHERE EXEC_ID = ?";
 		getFirstPendingBranchJdbcTemplate.setMaxRows(1);
 		Object[] inputs = {executionId};
-		MutablePair<Long, Long> longLongMutablePair = null;
+		StartNewBranchPayload startNewBranchPayload = null;
 		try {
-			longLongMutablePair = getFirstPendingBranchJdbcTemplate.queryForObject(sql, inputs, (resultSet, rowNumber) -> {
-				MutablePair<Long, Long> pair = new MutablePair<>();
-				pair.setLeft(resultSet.getLong("ID"));
-				pair.setRight(resultSet.getLong("EXEC_STATE_ID"));
-				return pair;
-			});
+			startNewBranchPayload = getFirstPendingBranchJdbcTemplate.queryForObject(sql, inputs,
+					(resultSet, rowNumber) -> new StartNewBranchPayload(resultSet.getLong("EXEC_STATE_ID"), resultSet.getLong("ID")));
 		} catch (EmptyResultDataAccessException ignored) {
 		}
-		return longLongMutablePair;
+		return startNewBranchPayload;
 	}
 
 	@Override
 	public void activatePendingExecutionStateForAnExecution(long executionId) {
-		final String sql = "UPDATE OO_EXECUTION_STATES SET ACTIVE = TRUE WHERE ID = ?";
+		final String sql = "UPDATE OO_EXECUTION_STATES SET ACTIVE = 1 WHERE ID = ?";
 		Object[] args = {executionId};
 		updateExecutionStateStatusJdbcTemplate.update(sql, args);
 	}
 
 	@Override
 	public void deletePendingExecutionState(long executionStatesId) {
-		final String sql = "DELETE FROM OO_EXECUTIONS_STATES_EXECUTIONS WHERE ID = ?";
+		final String sql = "DELETE FROM OO_EXECS_STATES_EXECS_MAPPINGS WHERE ID = ?";
 		Object[] args = {executionStatesId};
-		deletePendignExecutionStateJdbcTemplate.update(sql, args);
+		deletePendingExecutionStateJdbcTemplate.update(sql, args);
 	}
 
 	@Override

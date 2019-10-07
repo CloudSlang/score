@@ -38,9 +38,14 @@ public class SplitMessage implements Message {
 	private final String splitId;
     private final Execution parent;
     private final List<Execution> children;
-    private final boolean execute;
+    private final int totalNumberOfBranches;
+    private final boolean executable;
 
-    public SplitMessage(String splitId, Execution parent, List<Execution> children, boolean execute) {
+    public SplitMessage(String splitId,
+                        Execution parent,
+                        List<Execution> children,
+                        int totalNumberOfBranches,
+                        boolean executable) {
         Validate.notNull(splitId, "splitId cannot be null");
         Validate.notNull(parent, "parent cannot be null");
         Validate.notNull(children, "children cannot be null");
@@ -48,8 +53,9 @@ public class SplitMessage implements Message {
 
         this.splitId = splitId;
         this.parent = parent;
-        this.execute = execute;
         this.children = new ArrayList<>(children);
+        this.totalNumberOfBranches = totalNumberOfBranches;
+        this.executable = executable;
     }
 
     public Execution getParent() {
@@ -64,8 +70,8 @@ public class SplitMessage implements Message {
         return splitId;
     }
 
-    public boolean isExecute() {
-        return execute;
+    public boolean isExecutable() {
+        return executable;
     }
 
 	@Override
@@ -83,6 +89,10 @@ public class SplitMessage implements Message {
 		return messages; // do nothing
 	}
 
+    public int getTotalNumberOfBranches() {
+        return totalNumberOfBranches;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -94,7 +104,9 @@ public class SplitMessage implements Message {
                 .append(this.splitId, that.splitId)
                 .append(this.parent, that.parent)
                 .append(this.children, that.children)
-                .append(this.execute, that.execute)
+                .append(this.totalNumberOfBranches, that.totalNumberOfBranches)
+                .append(this.executable, that.executable)
+                .append(this.totalNumberOfBranches, that.totalNumberOfBranches)
                 .isEquals();
     }
 
@@ -104,6 +116,8 @@ public class SplitMessage implements Message {
 		        this.splitId,
 		        this.parent,
 		        this.children,
-                this.execute);
+                this.totalNumberOfBranches,
+                this.totalNumberOfBranches,
+                this.executable);
     }
 }

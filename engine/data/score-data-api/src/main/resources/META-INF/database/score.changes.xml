@@ -78,7 +78,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
                 <constraints nullable="false"/>
             </column>
             <column name="CREATE_TIME" type="${timestamp.type}"/>
-            <column name="ACTIVE" type="BOOLEAN" defaultValue="true">
+            <column name="ACTIVE" type="INT" defaultValue="1">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -291,7 +291,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
     </changeSet>
 
     <changeSet id="create execution states to pending executions mapping" author="engine">
-        <createTable tableName="OO_EXECUTIONS_STATES_EXECUTIONS">
+        <createTable tableName="OO_EXECS_STATES_EXECS_MAPPINGS">
             <column name="ID" type="bigint">
                 <constraints primaryKey="true" nullable="false"/>
             </column>

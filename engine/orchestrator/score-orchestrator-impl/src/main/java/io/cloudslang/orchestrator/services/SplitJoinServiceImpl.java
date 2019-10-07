@@ -17,12 +17,14 @@
 package io.cloudslang.orchestrator.services;
 
 import ch.lambdaj.function.convert.Converter;
+import io.cloudslang.engine.queue.entities.StartNewBranchPayload;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
 import io.cloudslang.orchestrator.enums.SuspendedExecutionReason;
 import io.cloudslang.score.api.EndBranchDataContainer;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
+import io.cloudslang.score.api.execution.ExecutionParametersConsts;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.orchestrator.entities.BranchContexts;
@@ -32,13 +34,11 @@ import io.cloudslang.orchestrator.entities.SuspendedExecution;
 import io.cloudslang.orchestrator.repositories.FinishedBranchRepository;
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
 import org.apache.commons.lang.Validate;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +50,7 @@ import static ch.lambdaj.Lambda.on;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.MULTI_INSTANCE;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.NON_BLOCKING;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL;
+import static io.cloudslang.score.api.execution.ExecutionParametersConsts.FINISHED_CHILD_BRANCHES_DATA;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.valueOf;
 import static java.util.EnumSet.of;
@@ -111,21 +112,22 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         List<SuspendedExecution> suspendedParents = new ArrayList<>();
 
         for (SplitMessage splitMessage : splitMessages) {
-            List<ExecutionMessage> childExecutionMessages = new ArrayList<>();
-            if (splitMessage.isExecute()) {
-                childExecutionMessages.addAll(prepareExecutionMessages(splitMessage.getChildren(), true, splitMessage.getParent().getExecutionId()));
+            if (splitMessage.isExecutable()) {
+                branchTriggerMessages.addAll(prepareExecutionMessages(splitMessage.getChildren(), true,
+                        splitMessage.getParent().getExecutionId()));
 
-                final SuspendedExecutionReason stepType = SuspendedExecutionReason.valueOf(splitMessage.getParent().getSystemContext().get("STEP_TYPE").toString());
-                Serializable miAllInputsValue = splitMessage.getParent().getSystemContext().get("MI_ALL_INPUTS_SIZE");
+                final SuspendedExecutionReason stepType = SuspendedExecutionReason.valueOf(splitMessage.getParent()
+                        .getSystemContext().get("STEP_TYPE").toString());
+
                 suspendedParents.add(new SuspendedExecution(splitMessage.getParent().getExecutionId().toString(),
                         splitMessage.getSplitId(),
-                        miAllInputsValue != null ? parseInt(miAllInputsValue.toString()) : splitMessage.getChildren().size(),
+                        splitMessage.getTotalNumberOfBranches(),
                         splitMessage.getParent(),
                         stepType));
             } else {
-                childExecutionMessages.addAll(prepareExecutionMessages(splitMessage.getChildren(), false, splitMessage.getParent().getExecutionId()));
+                branchTriggerMessages.addAll(prepareExecutionMessages(splitMessage.getChildren(), false,
+                        splitMessage.getParent().getExecutionId()));
             }
-            branchTriggerMessages.addAll(childExecutionMessages);
         }
 
         List<ExecutionMessage> queueMessages = new ArrayList<>();
@@ -211,10 +213,10 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     }
 
     private void startNewBranch(final SuspendedExecution suspendedExecution) {
-        Pair<Long, Long> pair = executionQueueRepository.getFirstPendingBranch(parseInt(suspendedExecution.getExecutionId()));
-        if (pair != null) {
-            executionQueueRepository.activatePendingExecutionStateForAnExecution((pair.getRight()));
-            executionQueueRepository.deletePendingExecutionState(pair.getLeft());
+        StartNewBranchPayload startNewBranchPayload = executionQueueRepository.getFirstPendingBranch(parseInt(suspendedExecution.getExecutionId()));
+        if (startNewBranchPayload != null) {
+            executionQueueRepository.activatePendingExecutionStateForAnExecution(startNewBranchPayload.getPendingExecutionStateId());
+            executionQueueRepository.deletePendingExecutionState(startNewBranchPayload.getPendingExecutionMapingId());
         }
     }
 
@@ -270,16 +272,21 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             return 0;
 
         for (SuspendedExecution se : suspendedExecutions) {
-            Execution exec = joinSplit(se);
-            long nrOfNewFinishedBranches = se.getFinishedBranches().stream()
+            Execution execution = se.getExecutionObj();
+            execution.getSystemContext().remove(FINISHED_CHILD_BRANCHES_DATA);
+            joinMiSplit(se, execution);
+            List<FinishedBranch> finishedBranches = se.getFinishedBranches();
+            long nrOfNewFinishedBranches = finishedBranches.stream()
                     .filter(finishedBranch -> !finishedBranch.getBranchContexts().isBranchCancelled())
                     .count();
             se.setMergedBranches(se.getMergedBranches() + nrOfNewFinishedBranches);
-            exec.getSystemContext().put("REMAINING_BRANCHES", valueOf(se.getNumberOfBranches() - se.getMergedBranches()));
+            execution.getSystemContext().put("REMAINING_BRANCHES", valueOf(se.getNumberOfBranches() - se.getMergedBranches()));
             if (se.getMergedBranches() == se.getNumberOfBranches()) {
                 mergedSuspendedExecutions.add(se);
+            } else {
+                finishedBranches.clear();
             }
-            messages.add(executionToStartExecutionMessage.convert(exec));
+            messages.add(executionToStartExecutionMessage.convert(execution));
         }
 
         // 3. send the suspended execution back to the queue
@@ -343,5 +350,29 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         }
 
         return exec;
+    }
+
+    private void joinMiSplit(SuspendedExecution suspendedExecution, Execution exec) {
+        List<FinishedBranch> finishedBranches = suspendedExecution.getFinishedBranches();
+
+        if (logger.isDebugEnabled())
+            logger.debug("Joining execution " + exec.getExecutionId());
+
+        boolean wasExecutionCancelled = false;
+        ArrayList<EndBranchDataContainer> finishedContexts = new ArrayList<>();
+        for (FinishedBranch fb : finishedBranches) {
+            finishedContexts.add(new EndBranchDataContainer(fb.getBranchContexts().getContexts(), fb.getBranchContexts().getSystemContext(), fb.getBranchException()));
+            if (fb.getBranchContexts().isBranchCancelled()) {
+                wasExecutionCancelled = true;
+            }
+        }
+
+        // 2. insert all of the branches into the parent execution
+        exec.getSystemContext().setFinishedChildBranchesData(finishedContexts);
+
+        //mark cancelled on parent
+        if (wasExecutionCancelled) {
+            exec.getSystemContext().setFlowTerminationType(ExecutionStatus.CANCELED);
+        }
     }
 }

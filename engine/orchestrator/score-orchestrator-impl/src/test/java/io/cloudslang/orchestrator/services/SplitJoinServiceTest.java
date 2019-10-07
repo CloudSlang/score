@@ -237,7 +237,7 @@ public class SplitJoinServiceTest {
     }
 
     private SplitMessage createSplitMessage(String splitId, String stepType) {
-        SplitMessage splitMessage = new SplitMessage(splitId, createExecution(1L), Arrays.asList(createExecution(2L)), true);
+        SplitMessage splitMessage = new SplitMessage(splitId, createExecution(1L), Arrays.asList(createExecution(2L)), 12, true);
         SystemContext systemContext = splitMessage.getParent().getSystemContext();
         systemContext.put("STEP_TYPE", stepType);
         return splitMessage;

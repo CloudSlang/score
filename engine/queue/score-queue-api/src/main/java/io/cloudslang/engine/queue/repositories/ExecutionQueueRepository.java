@@ -19,7 +19,7 @@ package io.cloudslang.engine.queue.repositories;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
-import org.apache.commons.lang3.tuple.Pair;
+import io.cloudslang.engine.queue.entities.StartNewBranchPayload;
 
 import java.util.List;
 import java.util.Map;
@@ -57,7 +57,7 @@ public interface ExecutionQueueRepository {
 
 	void saveNotActiveExecutionsQueues(final List<ExecutionMessage> notActiveMessages);
 
-	Pair<Long, Long> getFirstPendingBranch(final long executionId);
+	StartNewBranchPayload getFirstPendingBranch(final long executionId);
 
 	void activatePendingExecutionStateForAnExecution(final long executionId);
 

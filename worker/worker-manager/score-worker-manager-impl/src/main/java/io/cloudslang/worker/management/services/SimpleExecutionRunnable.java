@@ -182,7 +182,12 @@ public class SimpleExecutionRunnable implements Runnable {
                 isPersistStep(nextStepExecution) ||
                 isRecoveryCheckpoint(nextStepExecution) ||
                 preconditionNotFulfilled(nextStepExecution) ||
-                isRunningTooLong(startTime, nextStepExecution);
+                isRunningTooLong(startTime, nextStepExecution) ||
+                isMiRunning(nextStepExecution);
+    }
+
+    private boolean isMiRunning(Execution nextStepExecution) {
+        return nextStepExecution.getSystemContext().containsKey("REMAINING_BRANCHES");
     }
 
     private boolean preconditionNotFulfilled(Execution nextStepExecution) {
@@ -498,7 +503,7 @@ public class SimpleExecutionRunnable implements Runnable {
         executionMessage.incMsgSeqId();
         executionMessage.setPayload(null);
         String splitId = getSplitId(newExecutions);
-        SplitMessage splitMessage = new SplitMessage(splitId, execution, newExecutions, true);
+        SplitMessage splitMessage = new SplitMessage(splitId, execution, newExecutions, newExecutions.size(), true);
         try {
             outBuffer.put(executionMessage, splitMessage);
         } catch (InterruptedException e) {
@@ -524,7 +529,7 @@ public class SimpleExecutionRunnable implements Runnable {
                 String splitId = getSplitId(newExecutions);
                 currentNumberOfLanes += newExecutions.size();
                 SplitMessage splitMessage = new SplitMessage(splitId, execution, newExecutions,
-                        currentNumberOfLanes == totalNumberOfLanes);
+                        totalNumberOfLanes, currentNumberOfLanes == totalNumberOfLanes);
                 outBuffer.put(splitMessage);
             }
         } catch (InterruptedException e) {
