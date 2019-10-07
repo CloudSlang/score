@@ -21,6 +21,7 @@ import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import io.cloudslang.worker.management.ExecutionsActivityListener;
+import io.cloudslang.worker.management.monitor.WorkerStateUpdateService;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +86,9 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     @Autowired
     private WorkerConfigurationUtils workerConfigurationUtils;
 
+    @Autowired
+    private WorkerStateUpdateService workerStateUpdateService;
+
     private Thread fillBufferThread = new Thread(this);
     private boolean inShutdown;
     private boolean endOfInit = false;
@@ -96,7 +100,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     private double workerFreeMemoryRatio;
 
     @PostConstruct
-    private void init() {
+    void init() {
         capacity = getInteger("worker.inbuffer.capacity", capacity);
         coolDownPollingMillis = getInteger("worker.inbuffer.coolDownPollingMillis", coolDownPollingMillis);
         logger.info("InBuffer capacity is set to :" + capacity
@@ -143,6 +147,11 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
                     // We need to check if the current thread was interrupted while waiting for the lock (InBufferThread) and RESET its interrupted flag!
                     if (Thread.interrupted()) {
                         logger.info("Thread was interrupted while waiting on the lock in fillBufferPeriodically()");
+                        continue;
+                    }
+
+                    if (!workerStateUpdateService.isWorkerEnabled()) {
+                        logger.debug("Worker is disabled, skipping polling.");
                         continue;
                     }
 

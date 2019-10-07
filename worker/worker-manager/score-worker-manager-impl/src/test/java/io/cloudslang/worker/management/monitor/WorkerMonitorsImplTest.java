@@ -243,6 +243,11 @@ public class WorkerMonitorsImplTest {
         }
 
         @Bean
+        public WorkerStateUpdateService workerStateUpdateService() {
+            return mock(WorkerStateUpdateService.class);
+        }
+
+        @Bean
         public ExecutionQueueService executionQueueService() {
             return mock(ExecutionQueueService.class);
         }
