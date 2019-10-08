@@ -53,6 +53,7 @@ import java.util.concurrent.TimeoutException;
 
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.ACTION_TYPE;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SEQUENTIAL;
+import static io.cloudslang.score.events.EventConstants.SCORE_STEP_SPLIT_ERROR;
 import static io.cloudslang.score.facade.TempConstants.EXECUTE_CONTENT_ACTION;
 import static io.cloudslang.score.facade.TempConstants.EXECUTE_CONTENT_ACTION_CLASSNAME;
 import static io.cloudslang.score.facade.TempConstants.SC_TIMEOUT_MINS;
@@ -239,8 +240,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
             execution.getSystemContext().setFlowTerminationType(ExecutionStatus.SYSTEM_FAILURE);
             execution.setPosition(null); // this ends the flow!!!
             try {
-                createErrorEvent(exception, "Error occurred during split step ",
-                        EventConstants.SCORE_STEP_SPLIT_ERROR, execution.getSystemContext());
+                createErrorEvent(exception, "Error occurred during split step ", SCORE_STEP_SPLIT_ERROR,
+                        execution.getSystemContext());
             } catch (RuntimeException eventEx) {
                 logger.error("Failed to create event: ", eventEx);
             }
@@ -556,8 +557,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
             execution.getSystemContext().setFlowTerminationType(ExecutionStatus.SYSTEM_FAILURE);
             execution.setPosition(null); // this ends the flow!!!
             try {
-                createErrorEvent(navEx.getMessage(),
-                        "Error occurred during navigation execution ", EventConstants.SCORE_STEP_NAV_ERROR, execution.getSystemContext());
+                createErrorEvent(navEx.getMessage(), "Error occurred during navigation execution ",
+                        EventConstants.SCORE_STEP_NAV_ERROR, execution.getSystemContext());
             } catch (RuntimeException eventEx) {
                 logger.error("Failed to create event: ", eventEx);
             }
