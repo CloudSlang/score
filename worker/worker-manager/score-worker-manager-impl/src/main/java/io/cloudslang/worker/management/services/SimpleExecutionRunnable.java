@@ -176,14 +176,14 @@ public class SimpleExecutionRunnable implements Runnable {
         return isOldThread() ||
                 isExecutionCancelled(nextStepExecution) ||
                 isExecutionPaused(nextStepExecution) ||
+                isMiRunning(nextStepExecution) ||
                 isExecutionTerminating(nextStepExecution) ||
                 isSplitStep(nextStepExecution) ||
                 shouldChangeWorkerGroup(nextStepExecution) ||
                 isPersistStep(nextStepExecution) ||
                 isRecoveryCheckpoint(nextStepExecution) ||
                 preconditionNotFulfilled(nextStepExecution) ||
-                isRunningTooLong(startTime, nextStepExecution) ||
-                isMiRunning(nextStepExecution);
+                isRunningTooLong(startTime, nextStepExecution);
     }
 
     private boolean isMiRunning(Execution nextStepExecution) {
