@@ -16,6 +16,7 @@
 
 package io.cloudslang.job;
 
+import io.cloudslang.engine.queue.services.LargeMessagesMonitorService;
 import io.cloudslang.engine.queue.services.cleaner.QueueCleanerService;
 import io.cloudslang.engine.queue.services.recovery.ExecutionRecoveryService;
 import io.cloudslang.engine.versioning.services.VersionService;
@@ -51,6 +52,9 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
 
     @Autowired
     private SuspendedExecutionCleanerService suspendedExecutionCleanerService;
+
+    @Autowired
+    private LargeMessagesMonitorService largeMessagesMonitorService;
 
     private final Logger logger = Logger.getLogger(getClass());
 
@@ -154,5 +158,15 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
         } catch (Exception e) {
             logger.error("Can't run suspended execution cleaner job.", e);
         }
+    }
+
+    @Override
+    public void monitorLargeMessagesJob() {
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("MonitorLargeMessagesJob woke up!");
+        }
+
+        largeMessagesMonitorService.monitor();
     }
 }

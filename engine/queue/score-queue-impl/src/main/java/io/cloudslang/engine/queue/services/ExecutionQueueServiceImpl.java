@@ -144,11 +144,11 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<ExecutionMessage> poll(String workerId, int maxSize, ExecStatus... statuses) {
+	public List<ExecutionMessage> poll(String workerId, int maxSize, long workerPollingMemory, ExecStatus... statuses) {
 		List<ExecutionMessage> result = new ArrayList<>();
 		//check if the worker has work before actually polling for work
 		if(busyWorkersService.isWorkerBusy(workerId))
-			result = executionQueueRepository.poll(workerId, maxSize, statuses);
+			result = executionQueueRepository.poll(workerId, maxSize, workerPollingMemory, statuses);
 
 		for (QueueListener listener : listeners) {
 			listener.onPoll(result, result.size());

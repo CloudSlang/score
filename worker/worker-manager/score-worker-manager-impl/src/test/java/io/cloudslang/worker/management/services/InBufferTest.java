@@ -34,6 +34,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.util.Collections;
 
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -120,7 +121,7 @@ public class InBufferTest {
             doNothing().when(synchronizationManager).startGetMessages();
             doReturn(false).when(workerConfigurationUtils).isNewInbuffer();
             doReturn(0.1).when(workerConfigurationUtils).getWorkerMemoryRatio();
-            doReturn(Collections.emptyList()).when(queueDispatcher).poll(anyString(), anyInt());
+            doReturn(Collections.emptyList()).when(queueDispatcher).poll(anyString(), anyInt(), anyLong());
 
             inBuffer.init();
             Thread thread = new Thread(inBuffer);
@@ -139,7 +140,7 @@ public class InBufferTest {
             while (thread.isAlive()) {
                 Thread.sleep(50L);
             }
-            verify(queueDispatcher, atLeastOnce()).poll(eq(null), eq(19));
+            verify(queueDispatcher, atLeastOnce()).poll(eq(null), eq(19), anyLong());
             verify(synchronizationManager, atLeastOnce()).finishGetMessages();
         } finally {
             System.clearProperty("worker.inbuffer.capacity");
@@ -159,7 +160,7 @@ public class InBufferTest {
             doNothing().when(synchronizationManager).startGetMessages();
             doReturn(false).when(workerConfigurationUtils).isNewInbuffer();
             doReturn(0.1).when(workerConfigurationUtils).getWorkerMemoryRatio();
-            doReturn(Collections.emptyList()).when(queueDispatcher).poll(anyString(), anyInt());
+            doReturn(Collections.emptyList()).when(queueDispatcher).poll(anyString(), anyInt(), anyLong());
 
             inBuffer.init();
             Thread thread = new Thread(inBuffer);
@@ -178,7 +179,7 @@ public class InBufferTest {
             while (thread.isAlive()) {
                 Thread.sleep(50L);
             }
-            verify(queueDispatcher, never()).poll(anyString(), anyInt());
+            verify(queueDispatcher, never()).poll(anyString(), anyInt(), anyLong());
             verify(synchronizationManager, atLeastOnce()).finishGetMessages();
         } finally {
             System.clearProperty("worker.inbuffer.capacity");

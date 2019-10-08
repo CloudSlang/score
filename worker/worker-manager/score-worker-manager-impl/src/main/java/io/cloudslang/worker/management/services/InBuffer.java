@@ -156,13 +156,16 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
                     }
 
                     int inBufferSize = workerManager.getInBufferSize();
-                    if (needToPoll(inBufferSize)) {
+                    long totalMemory = getRuntime().totalMemory();
+                    long freeMemory = getRuntime().freeMemory();
+
+                    if (needToPoll(inBufferSize, totalMemory, freeMemory)) {
                         int messagesToGet = !newInBufferBehaviour ? (capacity - inBufferSize) : (newInBufferSize - inBufferSize);
 
                         if (logger.isDebugEnabled()) {
                             logger.debug("Polling messages from queue (max " + messagesToGet + ")");
                         }
-                        List<ExecutionMessage> newMessages = queueDispatcher.poll(workerUuid, messagesToGet);
+                        List<ExecutionMessage> newMessages = queueDispatcher.poll(workerUuid, messagesToGet, freeMemory);
                         if (executionsActivityListener != null) {
                             executionsActivityListener.onActivate(extract(newMessages, on(ExecutionMessage.class).getExecStateId()));
                         }
@@ -206,14 +209,14 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
         }
     }
 
-    private boolean needToPoll(int bufferSize) {
+    private boolean needToPoll(int bufferSize, long totalMemory, long freeMemory) {
         if (logger.isDebugEnabled()) {
             logger.debug("InBuffer size: " + bufferSize);
         }
         if (!newInBufferBehaviour) {
-            return bufferSize < (capacity * 0.2) && checkFreeMemorySpace();
+            return bufferSize < (capacity * 0.2) && checkFreeMemorySpace(totalMemory, freeMemory);
         } else {
-            return (bufferSize < minInBufferSize) && checkFreeMemorySpace();
+            return (bufferSize < minInBufferSize) && checkFreeMemorySpace(totalMemory, freeMemory);
         }
     }
 
@@ -275,8 +278,8 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
         fillBufferPeriodically();
     }
 
-    private boolean checkFreeMemorySpace() {
-        double allocatedMemory = getRuntime().totalMemory() - getRuntime().freeMemory();
+    private boolean checkFreeMemorySpace(long totalMemory, long freeMemory) {
+        double allocatedMemory = totalMemory - freeMemory;
         long maxMemory = getRuntime().maxMemory();
         double presumableFreeMemory = maxMemory - allocatedMemory;
         double crtFreeMemoryRatio = presumableFreeMemory / maxMemory;

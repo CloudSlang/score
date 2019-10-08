@@ -13,37 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.cloudslang.engine.queue.services;
 
-package io.cloudslang.job;
+public interface LargeMessagesMonitorService {
 
-/**
- * User: wahnonm
- * Date: 13/08/14
- * Time: 10:35
- */
-public interface ScoreEngineJobs {
+    int DEFAULT_EXPIRATION_TIME = 60 * 60;
+    int DEFAULT_NO_RETRIES = 5;
 
-    /**
-     * job that clean the finished steps from the queue
-     */
-    void cleanQueueJob();
+    String MESSAGE_EXPIRATION_TIME_PROP = "queue.message.expiration.time.seconds";
+    String NUMBER_OF_RETRIES_KEY = "message.queue.no.retries";
 
-    /**
-     * job that join all the suspended execution of brunches that finished
-     */
-    void joinFinishedSplitsJob();
+    default int getMessageExpirationTime() {
+        return Integer.getInteger(MESSAGE_EXPIRATION_TIME_PROP, DEFAULT_EXPIRATION_TIME);
+    }
 
-    /**
-     * job that update version number - we use it instead of time
-     */
-    void recoveryVersionJob();
+    default int getNoRetries() {
+        return Integer.getInteger(NUMBER_OF_RETRIES_KEY, DEFAULT_NO_RETRIES);
+    }
 
-    /**
-     * job that recover workers that didn't send keep alive
-     */
-    void executionRecoveryJob();
-
-    void cleanSuspendedExecutionsJob();
-
-    void monitorLargeMessagesJob();
+    void monitor();
 }
