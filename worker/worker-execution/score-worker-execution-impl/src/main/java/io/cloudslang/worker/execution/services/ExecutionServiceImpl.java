@@ -239,7 +239,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             execution.getSystemContext().setFlowTerminationType(ExecutionStatus.SYSTEM_FAILURE);
             execution.setPosition(null); // this ends the flow!!!
             try {
-                createErrorEvent(execution.getExecutionId(), exception, "Error occurred during split step ",
+                createErrorEvent(exception, "Error occurred during split step ",
                         EventConstants.SCORE_STEP_SPLIT_ERROR, execution.getSystemContext());
             } catch (RuntimeException eventEx) {
                 logger.error("Failed to create event: ", eventEx);
@@ -523,12 +523,12 @@ public final class ExecutionServiceImpl implements ExecutionService {
         return stepData;
     }
 
-    private void createErrorEvent(Long executionId, String ex, String logMessage, String errorType, SystemContext systemContext)
+    private void createErrorEvent(String ex, String logMessage, String errorType, SystemContext systemContext)
             throws InterruptedException {
         HashMap<String, Serializable> eventData = new HashMap<>();
         eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, new HashMap<>(systemContext));
         eventData.put(EventConstants.SCORE_ERROR_MSG, ex);
-        eventData.put(EventConstants.EXECUTION_ID_CONTEXT, executionId);
+        eventData.put(EventConstants.EXECUTION_ID_CONTEXT, systemContext.getExecutionId());
         eventData.put(EventConstants.SCORE_ERROR_LOG_MSG, logMessage);
         eventData.put(EventConstants.SCORE_ERROR_TYPE, errorType);
         ScoreEvent eventWrapper = new ScoreEvent(EventConstants.SCORE_ERROR_EVENT, eventData);
@@ -556,7 +556,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             execution.getSystemContext().setFlowTerminationType(ExecutionStatus.SYSTEM_FAILURE);
             execution.setPosition(null); // this ends the flow!!!
             try {
-                createErrorEvent(execution.getExecutionId(), navEx.getMessage(),
+                createErrorEvent(navEx.getMessage(),
                         "Error occurred during navigation execution ", EventConstants.SCORE_STEP_NAV_ERROR, execution.getSystemContext());
             } catch (RuntimeException eventEx) {
                 logger.error("Failed to create event: ", eventEx);
