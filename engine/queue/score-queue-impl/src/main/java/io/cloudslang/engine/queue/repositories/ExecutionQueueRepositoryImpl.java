@@ -114,7 +114,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "    CREATE_TIME " +
                     "FROM (" +
                     "   SELECT EXEC_STATE_ID, " +
-                    "   ASSIGNED_WORKER, " +
+                    "       ASSIGNED_WORKER, " +
                     "       EXEC_GROUP, " +
                     "       STATUS, " +
                     "       PAYLOAD, " +
@@ -132,7 +132,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "                 FROM  OO_EXECUTION_QUEUES qq " +
                     "                 WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
                     "   ORDER BY q.CREATE_TIME" +
-                    ") " +
+                    ") e " +
                     "WHERE total < ? ";
 
     final private String QUERY_WORKER_RECOVERY_SQL =
