@@ -53,6 +53,7 @@ import java.util.concurrent.TimeoutException;
 
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.ACTION_TYPE;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SEQUENTIAL;
+import static io.cloudslang.score.events.EventConstants.SCORE_STEP_SPLIT_ERROR;
 import static io.cloudslang.score.facade.TempConstants.EXECUTE_CONTENT_ACTION;
 import static io.cloudslang.score.facade.TempConstants.EXECUTE_CONTENT_ACTION_CLASSNAME;
 import static io.cloudslang.score.facade.TempConstants.SC_TIMEOUT_MINS;
@@ -239,7 +240,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             execution.getSystemContext().setFlowTerminationType(ExecutionStatus.SYSTEM_FAILURE);
             execution.setPosition(null); // this ends the flow!!!
             try {
-                createErrorEvent(exception, "Error occurred during split step ", EventConstants.SCORE_STEP_SPLIT_ERROR,
+                createErrorEvent(exception, "Error occurred during split step ", SCORE_STEP_SPLIT_ERROR,
                         execution.getSystemContext());
             } catch (RuntimeException eventEx) {
                 logger.error("Failed to create event: ", eventEx);
@@ -528,6 +529,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         HashMap<String, Serializable> eventData = new HashMap<>();
         eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, new HashMap<>(systemContext));
         eventData.put(EventConstants.SCORE_ERROR_MSG, ex);
+        eventData.put(EventConstants.EXECUTION_ID_CONTEXT, systemContext.getExecutionId());
         eventData.put(EventConstants.SCORE_ERROR_LOG_MSG, logMessage);
         eventData.put(EventConstants.SCORE_ERROR_TYPE, errorType);
         ScoreEvent eventWrapper = new ScoreEvent(EventConstants.SCORE_ERROR_EVENT, eventData);
