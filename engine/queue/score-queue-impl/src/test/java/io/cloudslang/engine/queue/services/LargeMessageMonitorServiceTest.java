@@ -175,7 +175,7 @@ public class LargeMessageMonitorServiceTest {
         List<ExecutionMessage> allMsgs = findExecutionMessages(worker, workerFreeMem, ExecStatus.ASSIGNED);
         Assert.assertEquals(1, allMsgs.size());
 
-        for (int i = 0; i < noRetries - 1; i++) {
+        for (int i = 0; i < noRetries ; i++) {
             waitOverExpirationTime();
             largeMessagesMonitorService.monitor();
 

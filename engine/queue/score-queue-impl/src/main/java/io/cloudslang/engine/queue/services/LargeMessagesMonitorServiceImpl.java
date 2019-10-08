@@ -71,7 +71,7 @@ public final class LargeMessagesMonitorServiceImpl implements LargeMessagesMonit
 
             Collections.sort(msgs, comparingInt(ExecutionMessage::getMsgSeqId).reversed());
 
-            if (getDistMsgSeqId(msgs) >= noRetries) {
+            if (countRetries(msgs) >= noRetries) {
                 toCancel.add(execStateId);
             } else {
                 ExecutionMessage firstMsg = msgs.get(0);
@@ -104,15 +104,26 @@ public final class LargeMessagesMonitorServiceImpl implements LargeMessagesMonit
         }
     }
 
-    private int getDistMsgSeqId(List<ExecutionMessage> msgs) {
+    private int countRetries(List<ExecutionMessage> msgs) {
+
         int retries = 0;
+        ExecStatus status = ExecStatus.PENDING;
+
         for (int size = msgs.size(), i = 1; i < size; i++) {
-            if (msgs.get(i).getMsgSeqId() == msgs.get(i - 1).getMsgSeqId() - 1) {
-                retries++;
+            ExecutionMessage crt = msgs.get(i);
+            ExecutionMessage prev = msgs.get(i - 1);
+            if (crt.getMsgSeqId() == prev.getMsgSeqId() - 1 && crt.getStatus() == status) {
+                if (status == ExecStatus.ASSIGNED) {
+                    retries++;
+                }
+
+                status = status == ExecStatus.ASSIGNED ? ExecStatus.PENDING : ExecStatus.ASSIGNED;
+
             } else {
                 break;
             }
         }
+
         return retries;
     }
 }
