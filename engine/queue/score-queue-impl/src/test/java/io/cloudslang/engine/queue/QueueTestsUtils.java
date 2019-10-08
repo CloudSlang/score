@@ -32,6 +32,13 @@ public class QueueTestsUtils {
         return new ExecutionMessage(-1, ExecutionMessage.EMPTY_WORKER, groupName, msgId , ExecStatus.SENT, payload, msg_seq_id);
     }
 
+    public static ExecutionMessage generateMessage(String groupName, String msgId, int msg_seq_id, String worker, ExecStatus status) {
+        byte[] payloadData;
+        payloadData = "This is just a test".getBytes();
+        Payload payload = new Payload(payloadData);
+        return new ExecutionMessage(-1, worker, groupName, msgId , status, payload, msg_seq_id);
+    }
+
     public static ExecutionMessage generateMessage(long exec_state_id, String groupName, String msgId, int msg_seq_id) {
         byte[] payloadData;
         payloadData = "This is just a test".getBytes();

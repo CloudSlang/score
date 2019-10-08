@@ -105,13 +105,14 @@ public final class LargeMessagesMonitorServiceImpl implements LargeMessagesMonit
     }
 
     private int getDistMsgSeqId(List<ExecutionMessage> msgs) {
-        int dist = 0;
+        int retries = 0;
         for (int size = msgs.size(), i = 1; i < size; i++) {
-            if (msgs.get(i).getMsgSeqId() != msgs.get(i - 1).getMsgSeqId() - 1) {
-                dist = msgs.get(0).getMsgSeqId() - msgs.get(i).getMsgSeqId();
+            if (msgs.get(i).getMsgSeqId() == msgs.get(i - 1).getMsgSeqId() - 1) {
+                retries++;
+            } else {
                 break;
             }
         }
-        return dist;
+        return retries;
     }
 }

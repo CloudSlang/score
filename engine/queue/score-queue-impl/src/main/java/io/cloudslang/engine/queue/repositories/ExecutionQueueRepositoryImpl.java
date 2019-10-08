@@ -187,7 +187,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     private static final String QUERY_PAYLOAD_BY_EXECUTION_IDS = "SELECT ID, PAYLOAD FROM OO_EXECUTION_STATES WHERE ID IN (:IDS)";
 
     private static final String FIND_OLD_STATES =
-            "SELECT q.EXEC_STATE_ID, CREATE_TIME, MSG_SEQ_ID, ASSIGNED_WORKER, EXEC_GROUP " +
+            "SELECT q.EXEC_STATE_ID, CREATE_TIME, MSG_SEQ_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS " +
             "FROM OO_EXECUTION_QUEUES q, " +
             "  (SELECT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES qt WHERE (CREATE_TIME < ?) AND " +
             "     (STATUS = " + ExecStatus.ASSIGNED.getNumber() + ") AND " +
@@ -195,7 +195,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
             "              FROM OO_EXECUTION_QUEUES qq " +
             "              WHERE (qq.EXEC_STATE_ID = qt.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > qt.MSG_SEQ_ID)) " +
             "  ) t " +
-            "WHERE (STATUS = " + ExecStatus.ASSIGNED.getNumber() + ") AND " +
+            "WHERE (STATUS IN (" + ExecStatus.ASSIGNED.getNumber() + ", " + ExecStatus.PENDING.getNumber() + ")) AND " +
             "q.EXEC_STATE_ID = t.EXEC_STATE_ID";
 
 
@@ -528,7 +528,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                             rs.getString("ASSIGNED_WORKER"),
                             rs.getString("EXEC_GROUP"),
                             null,
-                            ExecStatus.ASSIGNED,
+                            ExecStatus.find(rs.getInt("STATUS")),
                             null,
                             rs.getInt("MSG_SEQ_ID"),
                             rs.getLong("CREATE_TIME"));

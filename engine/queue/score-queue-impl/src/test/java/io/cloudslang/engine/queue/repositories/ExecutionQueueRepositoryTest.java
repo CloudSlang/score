@@ -43,8 +43,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import static io.cloudslang.engine.queue.entities.ExecutionMessage.EMPTY_WORKER;
+import static java.util.Comparator.comparingInt;
 
 /**
  * User: wahnonm
@@ -121,17 +125,17 @@ public class ExecutionQueueRepositoryTest {
     @Test
     public void testCountMessagesWithoutAckWithVersionForWorker(){
         List<ExecutionMessage> msg = new ArrayList<>();
-        msg.add(generateMessageForWorker(1, "group1", "msg1", ExecutionMessage.EMPTY_WORKER, 1));
+        msg.add(generateMessageForWorker(1, "group1", "msg1", EMPTY_WORKER, 1));
         msg.add(generateMessageForWorker(2, "group2", "msg2", "uuid2", 1));
-        msg.add(generateMessageForWorker(3, "group3","msg3",ExecutionMessage.EMPTY_WORKER, 1));
+        msg.add(generateMessageForWorker(3, "group3","msg3", EMPTY_WORKER, 1));
         executionQueueRepository.insertExecutionQueue(msg,1L);
 
         msg.clear();
-        msg.add(generateMessageForWorker(4, "group2","msg2",ExecutionMessage.EMPTY_WORKER, 1));
+        msg.add(generateMessageForWorker(4, "group2","msg2", EMPTY_WORKER, 1));
 
         executionQueueRepository.insertExecutionQueue(msg,4L);
 
-        Integer result = executionQueueRepository.countMessagesWithoutAckForWorker(100,3,ExecutionMessage.EMPTY_WORKER);
+        Integer result = executionQueueRepository.countMessagesWithoutAckForWorker(100,3, EMPTY_WORKER);
         Assert.assertEquals(result.intValue(),2);
 
         result = executionQueueRepository.countMessagesWithoutAckForWorker(100,3,"uuid2");
@@ -258,6 +262,43 @@ public class ExecutionQueueRepositoryTest {
     }
 
     @Test
+    public void testFindOldMessages() throws InterruptedException {
+        List<ExecutionMessage> messages = new ArrayList<>();
+
+        String msgId = "22";
+        int msg_seq_id = 1;
+        ExecutionMessage m1 = QueueTestsUtils.generateMessage("group1", msgId, msg_seq_id++, EMPTY_WORKER, ExecStatus.PENDING);
+        ExecutionMessage m2 = QueueTestsUtils.generateMessage("group1", msgId, msg_seq_id++, "worker1", ExecStatus.ASSIGNED);
+
+        messages.add(m1);
+        messages.add(m2);
+
+        executionQueueRepository.insertExecutionQueue(messages,1L);
+
+        // cannot find 1 sec old messages
+        List<ExecutionMessage> oldMessages = executionQueueRepository.findOldMessages(System.currentTimeMillis() - 1000);
+        Assert.assertEquals(0, oldMessages.size());
+
+        // find previously inserted messages
+        oldMessages = executionQueueRepository.findOldMessages(System.currentTimeMillis());
+        Assert.assertEquals(2, oldMessages.size());
+
+        Assert.assertEquals(messages.size(), oldMessages.size());
+
+        Collections.sort(oldMessages, comparingInt(ExecutionMessage::getMsgSeqId));
+
+        compareExecutionMessages(m1, oldMessages.get(0));
+        compareExecutionMessages(m2, oldMessages.get(1));
+    }
+
+    private void compareExecutionMessages(ExecutionMessage m, ExecutionMessage om) {
+        Assert.assertEquals(m.getExecStateId(), om.getExecStateId());
+        Assert.assertEquals(m.getMsgSeqId(), om.getMsgSeqId());
+        Assert.assertEquals(m.getWorkerId(), om.getWorkerId());
+        Assert.assertEquals(m.getStatus(), om.getStatus());
+    }
+
+    @Test
     public void testGetBusyWorkersBusyWorker(){
         List<ExecutionMessage> msg = new ArrayList<>();
         ExecutionMessage execMsg = QueueTestsUtils.generateMessage("group1","msg1", 1);
@@ -275,7 +316,7 @@ public class ExecutionQueueRepositoryTest {
         byte[] payloadData;
         payloadData = "This is just a test".getBytes();
         Payload payload = new Payload(payloadData);
-        return new ExecutionMessage(execStateId, ExecutionMessage.EMPTY_WORKER, "group", "123" , ExecStatus.FINISHED, payload, msg_seq_id);
+        return new ExecutionMessage(execStateId, EMPTY_WORKER, "group", "123" , ExecStatus.FINISHED, payload, msg_seq_id);
     }
 
 

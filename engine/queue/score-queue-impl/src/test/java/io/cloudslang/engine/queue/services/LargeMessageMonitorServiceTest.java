@@ -51,10 +51,14 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"SpringContextConfigurationInspection"})
@@ -79,6 +83,9 @@ public class LargeMessageMonitorServiceTest {
 
     @Autowired
     private WorkerNodeService workerNodeService;
+
+    @Autowired
+    private ExecutionQueueService executionQueueService;
 
     @Before
     public void before() {
@@ -121,16 +128,78 @@ public class LargeMessageMonitorServiceTest {
 
         waitOverExpirationTime();
 
-        largeMessagesMonitorService.monitor();          // clears the worker
+        // this will set message for reassignment
+        largeMessagesMonitorService.monitor();
 
+        // check message no longer in ASSIGNED state
         Assert.assertEquals(0, findExecutionMessages(worker, workerFreeMem, ExecStatus.ASSIGNED).size());
 
+        // check that we have a new message with increased msg_seq_id
         List<ExecutionMessage> unassignedMsg = findExecutionMessages(ExecutionMessage.EMPTY_WORKER, workerFreeMem, ExecStatus.PENDING);
         Assert.assertEquals(1, unassignedMsg.size());
 
         ExecutionMessage message = unassignedMsg.get(0);
         Assert.assertEquals(1, message.getExecStateId());
         Assert.assertEquals("11", message.getMsgId());
+
+        ExecutionMessage prevTryMsg = allMsgs.get(0);
+
+        Assert.assertEquals(prevTryMsg.getExecStateId(), message.getExecStateId());
+        Assert.assertEquals(prevTryMsg.getMsgId(), message.getMsgId());
+        Assert.assertEquals(prevTryMsg.getMsgSeqId() + 1, message.getMsgSeqId());
+    }
+
+    @Test
+    public void testMonitorCancelExecution() throws InterruptedException {
+
+        int mb = 2;
+        long workerFreeMem = QueueTestsUtils.getMB(mb - 1);
+        String worker = "worker1";
+        String workerGroup = "group1";
+
+        int noRetries = largeMessagesMonitorService.getNoRetries();
+
+        Multimap<String, String> groupWorkersMap = ArrayListMultimap.create();
+        groupWorkersMap.put(workerGroup, worker);
+
+        Mockito.when(workerNodeService.readGroupWorkersMapActiveAndRunningAndVersion(engineVersionService.getEngineVersionId())).thenReturn(groupWorkersMap);
+
+        String msgId = "11";
+
+        ExecutionMessage msg1 = QueueTestsUtils.generateLargeMessage(1, workerGroup, msgId, 1, QueueTestsUtils.getMB(mb));
+        msg1.setWorkerId(worker);
+        msg1.setStatus(ExecStatus.ASSIGNED);
+
+        QueueTestsUtils.insertMessagesInQueue(executionQueueRepository, msg1);
+
+        List<ExecutionMessage> allMsgs = findExecutionMessages(worker, workerFreeMem, ExecStatus.ASSIGNED);
+        Assert.assertEquals(1, allMsgs.size());
+
+        for (int i = 0; i < noRetries - 1; i++) {
+            waitOverExpirationTime();
+            largeMessagesMonitorService.monitor();
+
+            List<ExecutionMessage> messages = findExecutionMessages(ExecutionMessage.EMPTY_WORKER, workerFreeMem, ExecStatus.PENDING);
+            executionQueueService.enqueue(messages);
+
+            Assert.assertEquals(1, findExecutionMessages(worker, workerFreeMem, ExecStatus.ASSIGNED).size());
+        }
+
+        waitOverExpirationTime();
+        largeMessagesMonitorService.monitor();
+
+        long execStateId = msg1.getExecStateId();
+        Set<Long> execStateIds = new HashSet<>();
+        execStateIds.add(execStateId);
+
+        Set<Long> executionIds = executionQueueRepository.getExecutionIdsForExecutionStateIds(execStateIds);
+
+        Assert.assertEquals(1, executionIds.size());
+        Long executionId = executionIds.iterator().next();
+
+        Assert.assertEquals(Long.valueOf(msgId).longValue(), executionId.longValue());
+
+        verify(cancelExecutionService, times(1)).requestCancelExecution(executionId);
     }
 
     private void waitOverExpirationTime() throws InterruptedException {
