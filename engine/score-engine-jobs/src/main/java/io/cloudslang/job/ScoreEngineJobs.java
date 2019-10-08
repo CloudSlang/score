@@ -46,4 +46,6 @@ public interface ScoreEngineJobs {
     void cleanSuspendedExecutionsJob();
 
     void miMergeBranchesContexts();
+
+    void monitorLargeMessagesJob();
 }

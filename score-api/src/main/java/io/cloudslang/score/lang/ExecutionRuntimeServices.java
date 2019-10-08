@@ -501,6 +501,16 @@ public class ExecutionRuntimeServices implements Serializable {
         return getFromMap(MERGE_USER_INPUTS) != null;
     }
 
+    public Double removeTotalRoiValue() { return removeFromMap(ExecutionParametersConsts.EXECUTION_TOTAL_ROI); }
+
+    public void addRoiValue(Double roiValue) {
+        Double currentRoiValue = (Double) contextMap.get(ExecutionParametersConsts.EXECUTION_TOTAL_ROI);
+        if (currentRoiValue == null) {
+            currentRoiValue = ExecutionParametersConsts.DEFAULT_ROI_VALUE;
+        }
+        contextMap.put(ExecutionParametersConsts.EXECUTION_TOTAL_ROI, currentRoiValue + roiValue);
+    }
+
     private <T> T removeFromMap(String key) {
         //noinspection unchecked
         return (T) contextMap.remove(key);

@@ -17,31 +17,40 @@
 package io.cloudslang.worker.management.services;
 
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
+import io.cloudslang.worker.management.monitor.WorkerStateUpdateService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.mockito.Mockito.*;
+import java.util.Collections;
 
-/**
-* User: wahnonm
-* Date: 15/08/13
-* Time: 11:32
-*/
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
 public class InBufferTest {
 
     @InjectMocks
-    private InBuffer inBuffer = new InBuffer();
+    private InBuffer inBuffer;
 
     @Mock
     private QueueDispatcherService queueDispatcher;
@@ -61,13 +70,16 @@ public class InBufferTest {
     @Mock
     private SynchronizationManager synchronizationManager;
 
+    @Mock
+    private WorkerStateUpdateService workerStateUpdateService;
+
+    @Mock
+    private WorkerConfigurationUtils workerConfigurationUtils;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
     }
-
-    @Configuration
-    static class EmptyConfig {}
 
     @Test
     public void testRunAfterCtxClosedEvent() throws Exception {
@@ -79,19 +91,101 @@ public class InBufferTest {
 
     @Test(timeout = 5000)
     public void testRunBeforeCtxClosedEvent() throws Exception {
-        ContextRefreshedEvent refreshEvent =  mock(ContextRefreshedEvent.class);
+        ContextRefreshedEvent refreshEvent = mock(ContextRefreshedEvent.class);
         inBuffer.onApplicationEvent(refreshEvent);
 
         ContextClosedEvent event = mock(ContextClosedEvent.class);
         when(workerManager.isUp()).thenReturn(true);
+        doReturn(true).when(workerStateUpdateService).isWorkerEnabled();
         Thread thread = new Thread(inBuffer);
         thread.start();
 
-        verify(workerManager,timeout(1000).atLeastOnce()).getInBufferSize();
+        verify(workerManager, timeout(1000).atLeastOnce()).getInBufferSize();
 
         inBuffer.onApplicationEvent(event);
-        while(thread.isAlive()){
-	        Thread.sleep(100L);
+        while (thread.isAlive()) {
+            Thread.sleep(100L);
         }
     }
+
+    @Test(timeout = 5000)
+    public void testPollingBehaviourOnWorkerEnabled() throws Exception {
+        System.setProperty("worker.inbuffer.capacity", "20");
+
+        try {
+            doReturn(true).when(workerManager).isUp();
+            doReturn(true).when(workerStateUpdateService).isWorkerEnabled();
+            doReturn(1).when(workerManager).getInBufferSize();
+
+            doNothing().when(synchronizationManager).finishGetMessages();
+            doNothing().when(synchronizationManager).startGetMessages();
+            doReturn(false).when(workerConfigurationUtils).isNewInbuffer();
+            doReturn(0.1).when(workerConfigurationUtils).getWorkerMemoryRatio();
+            doReturn(Collections.emptyList()).when(queueDispatcher).poll(anyString(), anyInt(), anyLong());
+
+            inBuffer.init();
+            Thread thread = new Thread(inBuffer);
+            thread.start();
+
+            // Wait 1 second
+            Thread.sleep(1000);
+
+            // stop InBuffer operation
+            new Thread(() -> {
+                ContextClosedEvent contextClosedEvent = mock(ContextClosedEvent.class);
+                inBuffer.onApplicationEvent(contextClosedEvent);
+            }).start();
+
+            // Wait for inbuffer to die
+            while (thread.isAlive()) {
+                Thread.sleep(50L);
+            }
+            verify(queueDispatcher, atLeastOnce()).poll(eq(null), eq(19), anyLong());
+            verify(synchronizationManager, atLeastOnce()).finishGetMessages();
+        } finally {
+            System.clearProperty("worker.inbuffer.capacity");
+        }
+    }
+
+    @Test(timeout = 5000)
+    public void testPollingBehaviourOnWorkerDisabled() throws Exception {
+        System.setProperty("worker.inbuffer.capacity", "20");
+        try {
+
+            doReturn(true).when(workerManager).isUp();
+            doReturn(false).when(workerStateUpdateService).isWorkerEnabled();
+            doReturn(1).when(workerManager).getInBufferSize();
+
+            doNothing().when(synchronizationManager).finishGetMessages();
+            doNothing().when(synchronizationManager).startGetMessages();
+            doReturn(false).when(workerConfigurationUtils).isNewInbuffer();
+            doReturn(0.1).when(workerConfigurationUtils).getWorkerMemoryRatio();
+            doReturn(Collections.emptyList()).when(queueDispatcher).poll(anyString(), anyInt(), anyLong());
+
+            inBuffer.init();
+            Thread thread = new Thread(inBuffer);
+            thread.start();
+
+            // Wait 1 second
+            Thread.sleep(1000);
+
+            // stop InBuffer operation
+            new Thread(() -> {
+                ContextClosedEvent contextClosedEvent = mock(ContextClosedEvent.class);
+                inBuffer.onApplicationEvent(contextClosedEvent);
+            }).start();
+
+            // Wait for inbuffer to die
+            while (thread.isAlive()) {
+                Thread.sleep(50L);
+            }
+            verify(queueDispatcher, never()).poll(anyString(), anyInt(), anyLong());
+            verify(synchronizationManager, atLeastOnce()).finishGetMessages();
+        } finally {
+            System.clearProperty("worker.inbuffer.capacity");
+        }
+
+    }
+
+
 }

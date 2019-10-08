@@ -25,6 +25,7 @@
 			<column name="PAYLOAD" type="blob">
 				<constraints nullable="false"/>
 			</column>
+			<column name="PAYLOAD_SIZE" type="BIGINT"/>
 			<column name="CREATE_TIME" type="timestamp"/>
 			<column name="ACTIVE" type="INT" defaultValue="1">
 				<constraints nullable="false"/>

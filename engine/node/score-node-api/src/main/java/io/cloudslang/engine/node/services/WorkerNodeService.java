@@ -17,6 +17,7 @@
 package io.cloudslang.engine.node.services;
 
 import com.google.common.collect.Multimap;
+import io.cloudslang.engine.node.entities.WorkerKeepAliveInfo;
 import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.score.api.nodes.WorkerStatus;
 
@@ -35,9 +36,17 @@ public interface WorkerNodeService {
     /**
      * Update the Worker Node entity with the current ack version for the keep alive mechanism
      * @param uuid worker's unique identifier
+     * Maintained for backward compatibility only
      * @return the worker's recovery version (WRV)
      */
 	String keepAlive(String uuid);
+
+    /**
+     * Update the Worker Node entity with the current ack version for the keep alive mechanism
+     * @param uuid worker's unique identifier
+     * @return the WorkerKeepAliveInfo that contains the worker's recovery version (WRV) and the enable state
+     */
+    WorkerKeepAliveInfo newKeepAlive(String uuid);
 
     /**
      * Create a new worker

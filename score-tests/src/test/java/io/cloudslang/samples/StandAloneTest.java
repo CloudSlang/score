@@ -17,6 +17,8 @@
 package io.cloudslang.samples;
 
 import com.google.common.collect.Sets;
+import io.cloudslang.samples.controlactions.BranchActions;
+import io.cloudslang.samples.controlactions.SessionDataActions;
 import io.cloudslang.score.api.ControlActionMetadata;
 import io.cloudslang.score.api.ExecutionPlan;
 import io.cloudslang.score.api.ExecutionStep;
@@ -31,8 +33,6 @@ import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import io.cloudslang.samples.controlactions.BranchActions;
-import io.cloudslang.samples.controlactions.SessionDataActions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -73,6 +73,7 @@ public class StandAloneTest {
 
     private final static String simpleNavigationMethodName = "simpleNavigation";
     private final static String navigationActionClassName = "io.cloudslang.samples.controlactions.NavigationActions";
+
 
     @Before
     public void init(){

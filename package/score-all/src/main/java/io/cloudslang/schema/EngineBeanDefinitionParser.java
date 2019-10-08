@@ -31,6 +31,7 @@ import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepositoryImpl;
 import io.cloudslang.engine.queue.services.BusyWorkersServiceImpl;
 import io.cloudslang.engine.queue.services.ExecutionQueueServiceImpl;
+import io.cloudslang.engine.queue.services.LargeMessagesMonitorServiceImpl;
 import io.cloudslang.engine.queue.services.QueueDispatcherServiceImpl;
 import io.cloudslang.engine.queue.services.QueueListenerImpl;
 import io.cloudslang.engine.queue.services.QueueStateIdGeneratorServiceImpl;
@@ -112,6 +113,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(SqlUtils.class, null);
 		put(SqlInQueryReader.class, null);
 		put(DataBaseDetector.class, null);
+		put(LargeMessagesMonitorServiceImpl.class, "largeMessagesMonitorService");
 		put(ExecutionQueueRepositoryImpl.class, null);
 		put(HiloFactoryBean.class, "scoreHiloFactoryBean");
 		put(WorkersMBean.class, "io.cloudslang.engine.node.services.WorkersMBean");

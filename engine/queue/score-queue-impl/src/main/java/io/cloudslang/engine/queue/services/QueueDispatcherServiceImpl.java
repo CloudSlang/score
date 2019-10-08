@@ -56,12 +56,12 @@ public final class QueueDispatcherServiceImpl implements QueueDispatcherService 
 
 	@Transactional
 	@Override
-	public List<ExecutionMessage> poll(String workerId, int maxSize) {
+	public List<ExecutionMessage> poll(String workerId, int maxSize, long workerPollingMemory) {
 		try {
 			if (logger.isDebugEnabled()) logger.debug("Polling messages for worker [" + workerId + "], max size " + maxSize);
 			// poll assigned messages to workerID
 			long t = System.currentTimeMillis();
-			List<ExecutionMessage> result = execQueue.poll(workerId, maxSize, ExecStatus.ASSIGNED);
+			List<ExecutionMessage> result = execQueue.poll(workerId, maxSize, workerPollingMemory, ExecStatus.ASSIGNED);
 			t = System.currentTimeMillis()-t;
 			if (logger.isDebugEnabled()) logger.debug("Poll: " + result.size() + "/" + t + " messages/ms");
 

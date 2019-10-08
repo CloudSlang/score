@@ -44,6 +44,9 @@ import static org.mockito.Mockito.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 public class QueueDispatcherServiceTest {
+
+    private static final int WORKER_FREE_MEMORY = 200000000; //bytes
+
     @Mock
     private ExecutionQueueService executionQueueService;
 
@@ -84,8 +87,8 @@ public class QueueDispatcherServiceTest {
     public void testPoll() throws Exception {
         Date now = new Date();
         when(busyWorkersService.isWorkerBusy("workerId")).thenReturn(true);
-        queueDispatcherService.poll("workerId",5);
-        verify(executionQueueService,times(1)).poll("workerId", 5, ExecStatus.ASSIGNED);
+        queueDispatcherService.poll("workerId",5, WORKER_FREE_MEMORY);
+        verify(executionQueueService,times(1)).poll("workerId", 5, WORKER_FREE_MEMORY, ExecStatus.ASSIGNED);
     }
 
     @Test
@@ -93,8 +96,8 @@ public class QueueDispatcherServiceTest {
         Date now = new Date();
         List<ExecutionMessage> msg = new ArrayList<>();
 
-        when(executionQueueService.poll("workerId", 5, ExecStatus.ASSIGNED)).thenReturn(msg);
-        List<ExecutionMessage> result = queueDispatcherService.poll("workerId",5);
+        when(executionQueueService.poll("workerId", 5, WORKER_FREE_MEMORY, ExecStatus.ASSIGNED)).thenReturn(msg);
+        List<ExecutionMessage> result = queueDispatcherService.poll("workerId",5, WORKER_FREE_MEMORY);
         Assert.assertTrue(result.isEmpty());
     }
 
@@ -109,8 +112,8 @@ public class QueueDispatcherServiceTest {
         msg.add(new ExecutionMessage());
         msg.get(1).setMsgId("id2");
 
-        when(executionQueueService.poll("workerId", 5, ExecStatus.ASSIGNED)).thenReturn(msg);
-        List<ExecutionMessage> result = queueDispatcherService.poll("workerId",5);
+        when(executionQueueService.poll("workerId", 5, WORKER_FREE_MEMORY, ExecStatus.ASSIGNED)).thenReturn(msg);
+        List<ExecutionMessage> result = queueDispatcherService.poll("workerId",5, WORKER_FREE_MEMORY);
         Assert.assertEquals(2,result.size());
         Assert.assertEquals("id1",result.get(0).getMsgId());
         Assert.assertEquals("id2",result.get(1).getMsgId());
