@@ -60,7 +60,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     private static final int PARTITION_SIZE = 250;
 
     private static final String MYSQL = "mysql";
-    private static final String MSQSQL = "mssql";
+    private static final String MSSQL = "Microsoft";
 
     final private String SELECT_FINISHED_STEPS_IDS =  " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES " +
             " WHERE " +
@@ -365,7 +365,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     private boolean useStandardQuery(final DataSource dataSource) {
         try {
             String dbms = (String) JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName");
-            return StringUtils.equalsIgnoreCase(MYSQL, dbms) || StringUtils.equalsIgnoreCase(MSQSQL, dbms);
+            return StringUtils.equalsIgnoreCase(MYSQL, dbms) || StringUtils.containsIgnoreCase(MSSQL, dbms);
         } catch (MetaDataAccessException e) {
             logger.warn("Database type could not be determined!", e);
             return false;
