@@ -17,7 +17,6 @@
 package io.cloudslang.engine.queue.repositories;
 
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import io.cloudslang.engine.data.IdentityGenerator;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
@@ -131,7 +130,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
                     "                 FROM  OO_EXECUTION_QUEUES qq " +
                     "                 WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
-                    "   ORDER BY q.CREATE_TIME" +
                     ") e " +
                     "WHERE total < ? ";
 
