@@ -30,6 +30,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
+import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.jdbc.support.MetaDataAccessException;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
@@ -56,6 +58,9 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     private Logger logger = Logger.getLogger(getClass());
 
     private static final int PARTITION_SIZE = 250;
+
+    private static final String MYSQL = "mysql";
+    private static final String MSQSQL = "mssql";
 
     final private String SELECT_FINISHED_STEPS_IDS =  " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES " +
             " WHERE " +
@@ -102,6 +107,26 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "      ) AND " +
                     "      (q.MSG_VERSION < ?)  ";
 
+    final private String QUERY_WORKER_STD_SQL =
+            "SELECT EXEC_STATE_ID,      " +
+                    "       ASSIGNED_WORKER,      " +
+                    "       EXEC_GROUP ,       " +
+                    "       STATUS,       " +
+                    "       PAYLOAD,       " +
+                    "       MSG_SEQ_ID ,      " +
+                    "       MSG_ID," +
+                    "       q.CREATE_TIME " +
+                    " FROM  OO_EXECUTION_QUEUES q,  " +
+                    "      OO_EXECUTION_STATES s   " +
+                    " WHERE  " +
+                    "      (q.ASSIGNED_WORKER =  ?)  AND " +
+                    "      (q.STATUS IN (:status)) AND " +
+                    " (q.EXEC_STATE_ID = s.ID) AND " +
+                    " (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
+                    "              FROM OO_EXECUTION_QUEUES qq " +
+                    "              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
+                    " ORDER BY q.CREATE_TIME  ";
+
     final private String QUERY_WORKER_SQL =
             "SELECT EXEC_STATE_ID, " +
                     "    ASSIGNED_WORKER, " +
@@ -130,6 +155,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
                     "                 FROM  OO_EXECUTION_QUEUES qq " +
                     "                 WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
+                    "   ORDER BY q.CREATE_TIME" +
                     ") e " +
                     "WHERE total < ? ";
 
@@ -318,17 +344,39 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     }
 
     @Override
-    public List<ExecutionMessage> poll(String workerId, int maxSize, long workerPollingMemory, ExecStatus... statuses) {
+    public List<ExecutionMessage> poll(
+            String workerId, int maxSize, long workerPollingMemory, ExecStatus... statuses) {
+
+        String sql;
+        Object[] args;
+        if (useStandardQuery(dataSource)) {
+            sql = QUERY_WORKER_STD_SQL;
+            args = prepareStdPollArgs(workerId, statuses);
+        } else {
+            sql = QUERY_WORKER_SQL;
+            args = preparePollArgs(workerId, workerPollingMemory, statuses);
+        }
+
+        String sqlStat = sql.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
+
+        return executePoll(maxSize, sqlStat, args);
+    }
+
+    private boolean useStandardQuery(final DataSource dataSource) {
+        try {
+            String dbms = (String) JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName");
+            return StringUtils.equalsIgnoreCase(MYSQL, dbms) || StringUtils.equalsIgnoreCase(MSQSQL, dbms);
+        } catch (MetaDataAccessException e) {
+            logger.warn("Database type could not be determined!", e);
+            return false;
+        }
+    }
+
+    private List<ExecutionMessage> executePoll(int maxSize, String sql, Object[] args) {
 
         pollJdbcTemplate.setStatementBatchSize(maxSize);
 
         try {
-            // prepare the sql statement
-            String sqlStat = QUERY_WORKER_SQL.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
-
-            // prepare the arguments
-            Object[] args = preparePollArgs(workerId, workerPollingMemory, statuses);
-
             RowMapper<ExecutionMessage> rowMapper = (rs, rowNum) -> new ExecutionMessage(
                     rs.getLong("EXEC_STATE_ID"),
                     rs.getString("ASSIGNED_WORKER"),
@@ -341,7 +389,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
             List<ExecutionMessage> executionMessages = doSelectWithTemplate(
                     pollJdbcTemplate,
-                    sqlStat,
+                    sql,
                     rowMapper,
                     args);
 
@@ -349,6 +397,20 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         } finally {
             pollJdbcTemplate.clearStatementBatchSize();
         }
+    }
+
+    private Object[] prepareStdPollArgs(String workerId, ExecStatus[] statuses) {
+
+        Object[] args = new Object[statuses.length + 1];
+
+        int i = 0;
+
+        args[i++] = workerId;
+        for (ExecStatus status : statuses) {
+            args[i++] = status.getNumber();
+        }
+
+        return args;
     }
 
     private Object[] preparePollArgs(String workerId, long workerPollingMemory, ExecStatus[] statuses) {
