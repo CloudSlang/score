@@ -159,6 +159,37 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     ") e " +
                     "WHERE total < ? ";
 
+    final private String QUERY_WORKER_SQL_MSSQL =
+            "SELECT EXEC_STATE_ID, " +
+                    "    ASSIGNED_WORKER, " +
+                    "    EXEC_GROUP, " +
+                    "    STATUS, " +
+                    "    PAYLOAD, " +
+                    "    MSG_SEQ_ID, " +
+                    "    MSG_ID, " +
+                    "    CREATE_TIME " +
+                    "FROM (" +
+                    "   SELECT EXEC_STATE_ID, " +
+                    "       ASSIGNED_WORKER, " +
+                    "       EXEC_GROUP, " +
+                    "       STATUS, " +
+                    "       PAYLOAD, " +
+                    "       MSG_SEQ_ID, " +
+                    "       MSG_ID, " +
+                    "       q.CREATE_TIME, " +
+                    "       SUM(PAYLOAD_SIZE) OVER (ORDER BY q.CREATE_TIME ASC) AS total " +
+                    "   FROM OO_EXECUTION_QUEUES q, " +
+                    "       OO_EXECUTION_STATES s " +
+                    "   WHERE (q.ASSIGNED_WORKER = ?)  AND " +
+                    "       (q.STATUS IN (:status)) AND " +
+                    "       (s.PAYLOAD_SIZE < ?) AND " +
+                    "       (q.EXEC_STATE_ID = s.ID) AND " +
+                    "       (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
+                    "                 FROM  OO_EXECUTION_QUEUES qq " +
+                    "                 WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
+                    ") e " +
+                    "WHERE total < ? ";
+
     final private String QUERY_WORKER_RECOVERY_SQL =
             "SELECT         EXEC_STATE_ID,      " +
                     "       ASSIGNED_WORKER,      " +
@@ -246,6 +277,10 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     @Autowired
     private DataSource dataSource;
 
+    private boolean useLargeMessageQuery = true;
+
+    private String workerQuery;
+
     @PostConstruct
     public void init() {
         //We use dedicated JDBCTemplates for each query since JDBCTemplate is state-full object and we have different settings for each query.
@@ -262,6 +297,19 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         deleteFinishedStepsJdbcTemplate = new JdbcTemplate(dataSource);
         findPayloadByExecutionIdsJdbcTemplate = new JdbcTemplate(dataSource);
         getBusyWorkersJdbcTemplate = new JdbcTemplate(dataSource);
+
+        useLargeMessageQuery = StringUtils.equalsIgnoreCase("true", System.getProperty("score.poll.use.large.message.query", "true"));
+        workerQuery = getLargeMessageQuery();
+
+        if (useLargeMessageQuery) {
+            try {
+                poll("worker1", 1000, 1000000, ExecStatus.ASSIGNED);
+            } catch (RuntimeException ex) {
+                useLargeMessageQuery = false;
+                workerQuery = QUERY_WORKER_STD_SQL;
+                logger.info("Large message poll query failed" + ex.getMessage());
+            }
+        }
     }
 
     @Override
@@ -347,25 +395,26 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     public List<ExecutionMessage> poll(
             String workerId, int maxSize, long workerPollingMemory, ExecStatus... statuses) {
 
-        String sql;
         Object[] args;
-        if (useStandardQuery(dataSource)) {
-            sql = QUERY_WORKER_STD_SQL;
-            args = prepareStdPollArgs(workerId, statuses);
-        } else {
-            sql = QUERY_WORKER_SQL;
+        if (useLargeMessageQuery) {
             args = preparePollArgs(workerId, workerPollingMemory, statuses);
+        } else {
+            args = prepareStdPollArgs(workerId, statuses);
         }
 
-        String sqlStat = sql.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
+        String sqlStat = workerQuery.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
 
         return executePoll(maxSize, sqlStat, args);
     }
 
-    private boolean useStandardQuery(final DataSource dataSource) {
+    private String getLargeMessageQuery() {
+        return isMSSQL() ? QUERY_WORKER_SQL_MSSQL : QUERY_WORKER_SQL;
+    }
+
+    private boolean isMSSQL() {
         try {
             String dbms = (String) JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName");
-            return StringUtils.equalsIgnoreCase(MYSQL, dbms) || StringUtils.containsIgnoreCase(MSSQL, dbms);
+            return StringUtils.containsIgnoreCase(dbms, MSSQL);
         } catch (MetaDataAccessException e) {
             logger.warn("Database type could not be determined!", e);
             return false;
