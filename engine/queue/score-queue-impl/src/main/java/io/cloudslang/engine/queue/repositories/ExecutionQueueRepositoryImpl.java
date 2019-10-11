@@ -107,7 +107,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "      ) AND " +
                     "      (q.MSG_VERSION < ?)  ";
 
-    final private String QUERY_WORKER_STD_SQL =
+    final private String QUERY_WORKER_LEGACY_MEMORY_HANDLING_SQL =
             "SELECT EXEC_STATE_ID,      " +
                     "       ASSIGNED_WORKER,      " +
                     "       EXEC_GROUP ,       " +
@@ -298,15 +298,17 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         findPayloadByExecutionIdsJdbcTemplate = new JdbcTemplate(dataSource);
         getBusyWorkersJdbcTemplate = new JdbcTemplate(dataSource);
 
-        useLargeMessageQuery = StringUtils.equalsIgnoreCase("true", System.getProperty("score.poll.use.large.message.query", "true"));
-        workerQuery = getLargeMessageQuery();
+        useLargeMessageQuery = Boolean.parseBoolean(System.getProperty("score.poll.use.large.message.query", "true"));
+        workerQuery = isMssql() ? QUERY_WORKER_SQL_MSSQL : QUERY_WORKER_SQL;
 
         if (useLargeMessageQuery) {
             try {
-                poll("worker1", 1000, 1000000, ExecStatus.ASSIGNED);
+                // testing query
+                poll("worker1", 1, 1, ExecStatus.ASSIGNED);
             } catch (RuntimeException ex) {
+                // query failed, fallback on old mechanism
                 useLargeMessageQuery = false;
-                workerQuery = QUERY_WORKER_STD_SQL;
+                workerQuery = QUERY_WORKER_LEGACY_MEMORY_HANDLING_SQL;
                 logger.info("Large message poll query failed" + ex.getMessage());
             }
         }
@@ -395,23 +397,16 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     public List<ExecutionMessage> poll(
             String workerId, int maxSize, long workerPollingMemory, ExecStatus... statuses) {
 
-        Object[] args;
-        if (useLargeMessageQuery) {
-            args = preparePollArgs(workerId, workerPollingMemory, statuses);
-        } else {
-            args = prepareStdPollArgs(workerId, statuses);
-        }
+        Object[] args = useLargeMessageQuery ?
+                            preparePollArgs(workerId, workerPollingMemory, statuses) :
+                            prepareStdPollArgs(workerId, statuses);
 
         String sqlStat = workerQuery.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
 
         return executePoll(maxSize, sqlStat, args);
     }
 
-    private String getLargeMessageQuery() {
-        return isMSSQL() ? QUERY_WORKER_SQL_MSSQL : QUERY_WORKER_SQL;
-    }
-
-    private boolean isMSSQL() {
+    private boolean isMssql() {
         try {
             String dbms = (String) JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName");
             return StringUtils.containsIgnoreCase(dbms, MSSQL);
