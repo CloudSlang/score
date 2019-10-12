@@ -135,9 +135,11 @@ public class DependencyServiceImpl implements DependencyService {
 
     private void initMavenLogs() {
         File mavenLogFolderFile = new File(new File(calculateLogFolderPath()), MavenConfig.MAVEN_FOLDER);
-        boolean dirsCreated = mavenLogFolderFile.mkdirs();
-        if (!dirsCreated) {
-            logger.error("Failed to create maven log directories " + mavenLogFolderFile.getAbsolutePath());
+        if (!mavenLogFolderFile.exists()) {
+            boolean dirsCreated = mavenLogFolderFile.mkdirs();
+            if (!dirsCreated) {
+                logger.error("Failed to create maven log directories " + mavenLogFolderFile.getAbsolutePath());
+            }
         }
         this.mavenLogFolder = mavenLogFolderFile.getAbsolutePath();
     }
