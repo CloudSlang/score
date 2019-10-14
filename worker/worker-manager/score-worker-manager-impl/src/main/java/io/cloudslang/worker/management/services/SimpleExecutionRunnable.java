@@ -34,6 +34,7 @@ import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.cloudslang.score.facade.TempConstants.MI_REMAINING_BRANCHES_CONTEXT_KEY;
 import static java.lang.Boolean.getBoolean;
 import static java.lang.Long.parseLong;
 import static java.lang.Thread.currentThread;
@@ -187,7 +188,7 @@ public class SimpleExecutionRunnable implements Runnable {
     }
 
     private boolean isMiRunning(Execution nextStepExecution) {
-        return nextStepExecution.getSystemContext().containsKey("REMAINING_BRANCHES");
+        return nextStepExecution.getSystemContext().containsKey(MI_REMAINING_BRANCHES_CONTEXT_KEY);
     }
 
     private boolean preconditionNotFulfilled(Execution nextStepExecution) {

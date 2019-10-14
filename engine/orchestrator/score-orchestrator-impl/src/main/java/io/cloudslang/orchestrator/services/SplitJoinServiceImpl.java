@@ -51,6 +51,7 @@ import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.MULTI_IN
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.NON_BLOCKING;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.FINISHED_CHILD_BRANCHES_DATA;
+import static io.cloudslang.score.facade.TempConstants.MI_REMAINING_BRANCHES_CONTEXT_KEY;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.valueOf;
 import static java.util.EnumSet.of;
@@ -280,7 +281,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
                     .filter(finishedBranch -> !finishedBranch.getBranchContexts().isBranchCancelled())
                     .count();
             se.setMergedBranches(se.getMergedBranches() + nrOfNewFinishedBranches);
-            execution.getSystemContext().put("REMAINING_BRANCHES", valueOf(se.getNumberOfBranches() - se.getMergedBranches()));
+            execution.getSystemContext().put(MI_REMAINING_BRANCHES_CONTEXT_KEY, valueOf(se.getNumberOfBranches() - se.getMergedBranches()));
             if (se.getMergedBranches() == se.getNumberOfBranches()) {
                 mergedSuspendedExecutions.add(se);
             } else {
@@ -289,7 +290,6 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             messages.add(executionToStartExecutionMessage.convert(execution));
         }
 
-        // 3. send the suspended execution back to the queue
         queueDispatcherService.dispatch(messages);
 
         suspendedExecutionsRepository.delete(mergedSuspendedExecutions);
@@ -355,8 +355,9 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     private void joinMiSplit(SuspendedExecution suspendedExecution, Execution exec) {
         List<FinishedBranch> finishedBranches = suspendedExecution.getFinishedBranches();
 
-        if (logger.isDebugEnabled())
+        if (logger.isDebugEnabled()) {
             logger.debug("Joining execution " + exec.getExecutionId());
+        }
 
         boolean wasExecutionCancelled = false;
         ArrayList<EndBranchDataContainer> finishedContexts = new ArrayList<>();

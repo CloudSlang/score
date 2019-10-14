@@ -217,13 +217,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
             // Run the split step
             List<StartBranchDataContainer> newBranches = execution.getSystemContext().removeBranchesData();
-            List<Execution> newExecutions = createChildExecutionsForNonBlockingAndParallel(execution.getExecutionId(), newBranches);
-
-            Serializable miInputs = execution.getSystemContext().get("MI_INPUTS");
-            if (miInputs == null) {
-                // Run the navigation since we don't have any inputs left to process
-                navigate(execution, currStep);
-            }
+            List<Execution> newExecutions = createChildExecutionsForNonBlockingAndParallel(execution.getExecutionId(),
+                    newBranches);
+            // Run the navigation
+            navigate(execution, currStep);
 
             dumpBusEvents(execution);
 
