@@ -312,6 +312,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                 logger.info("Large message poll query failed" + ex.getMessage());
             }
         }
+
+        logger.info("Poll using large message query: " + useLargeMessageQuery);
     }
 
     @Override
@@ -409,6 +411,9 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     private boolean isMssql() {
         try {
             String dbms = (String) JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName");
+
+            logger.info("Database product name: " + dbms);
+
             return StringUtils.containsIgnoreCase(dbms, MSSQL);
         } catch (MetaDataAccessException e) {
             logger.warn("Database type could not be determined!", e);
