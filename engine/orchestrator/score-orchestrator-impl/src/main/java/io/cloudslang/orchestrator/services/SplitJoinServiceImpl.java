@@ -208,7 +208,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         }
 
         if (!suspendedExecutionsWithOneBranch.isEmpty()) {
-            joinAndSendToQueue(suspendedExecutionsWithOneBranch);
+            joinMiBranchesAndSendToQueue(suspendedExecutionsWithOneBranch);
         }
     }
 
