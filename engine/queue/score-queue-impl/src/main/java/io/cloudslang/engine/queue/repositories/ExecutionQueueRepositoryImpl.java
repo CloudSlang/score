@@ -123,6 +123,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     " WHERE  " +
                     "      (q.ASSIGNED_WORKER =  ?)  AND " +
                     "      (q.STATUS IN (:status)) AND " +
+                    " 	   (s.ACTIVE = 1) AND " +
                     " (q.EXEC_STATE_ID = s.ID) AND " +
                     " (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
                     "              FROM OO_EXECUTION_QUEUES qq " +
@@ -186,6 +187,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "   WHERE (q.ASSIGNED_WORKER = ?)  AND " +
                     "       (q.STATUS IN (:status)) AND " +
                     "       (s.PAYLOAD_SIZE < ?) AND " +
+                    " 	    (s.ACTIVE = 1) AND " +
                     "       (q.EXEC_STATE_ID = s.ID) AND " +
                     "       (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
                     "                 FROM  OO_EXECUTION_QUEUES qq " +
