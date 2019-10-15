@@ -190,6 +190,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         List<FinishedBranch> finishedBranches = convert(executions, executionToFinishedBranch);
 
         List<SuspendedExecution> suspendedExecutionsWithOneBranch = new ArrayList<>();
+        List<SuspendedExecution> suspendedExecutionsForMiWithOneBranch = new ArrayList<>();
 
         // add each finished branch to it's parent
         for (FinishedBranch finishedBranch : finishedBranches) {
@@ -201,7 +202,11 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
                 //this is an optimization for subflow (also works for MI with one branch :) )
                 if (suspendedExecution.getNumberOfBranches() == 1) {
-                    suspendedExecutionsWithOneBranch.add(suspendedExecution);
+                    if (suspendedExecution.getSuspensionReason() == MULTI_INSTANCE) {
+                        suspendedExecutionsForMiWithOneBranch.add(suspendedExecution);
+                    } else {
+                        suspendedExecutionsWithOneBranch.add(suspendedExecution);
+                    }
                 } else {
                     finishedBranchRepository.save(finishedBranch);
                 }
@@ -209,7 +214,10 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         }
 
         if (!suspendedExecutionsWithOneBranch.isEmpty()) {
-            joinMiBranchesAndSendToQueue(suspendedExecutionsWithOneBranch);
+            joinAndSendToQueue(suspendedExecutionsWithOneBranch);
+        }
+        if (!suspendedExecutionsForMiWithOneBranch.isEmpty()) {
+            joinMiBranchesAndSendToQueue(suspendedExecutionsForMiWithOneBranch);
         }
     }
 
@@ -285,6 +293,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             if (se.getMergedBranches() == se.getNumberOfBranches()) {
                 mergedSuspendedExecutions.add(se);
             } else {
+                se.setLocked(true);
                 finishedBranches.clear();
             }
             messages.add(executionToStartExecutionMessage.convert(execution));

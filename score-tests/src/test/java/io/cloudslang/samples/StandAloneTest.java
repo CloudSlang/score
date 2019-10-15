@@ -154,7 +154,7 @@ public class StandAloneTest {
         assertEquals(sessionGetEvent.getData(), SessionDataActions.TEST_VALUE);
     }
 
-    @Test(timeout = 20000)
+    @Test(timeout = 50000)
     public void shareSessionDataWithSubflowTest() {
         ExecutionPlan executionPlan = createParentPutOnSessionExecutionPlan("childGetFromSessionFlow");
         ExecutionPlan subFlowExecutionPlan = createChildGetFromSessionExecutionPlan();

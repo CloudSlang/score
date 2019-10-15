@@ -17,8 +17,8 @@
 package io.cloudslang.worker.management.services;
 
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
-import io.cloudslang.engine.queue.services.ExecutionQueueService;
 import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
+import io.cloudslang.orchestrator.services.SuspendedExecutionService;
 import io.cloudslang.worker.execution.services.ExecutionService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
 import org.springframework.beans.factory.FactoryBean;
@@ -50,6 +50,9 @@ public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecuti
     private WorkerConfigurationService workerConfigurationService;
 
     @Autowired
+    private SuspendedExecutionService suspendedExecutionService;
+
+    @Autowired
     private WorkerManager workerManager;
 
     @Resource
@@ -64,6 +67,7 @@ public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecuti
                 converter,
                 endExecutionCallback,
                 queueStateIdGeneratorService,
+                suspendedExecutionService,
                 workerUuid,
                 workerConfigurationService,
                 workerManager

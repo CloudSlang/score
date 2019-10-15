@@ -16,6 +16,7 @@
 
 package io.cloudslang.orchestrator.repositories;
 
+import io.cloudslang.orchestrator.entities.ExecutionObjEntity;
 import io.cloudslang.orchestrator.entities.SuspendedExecution;
 import io.cloudslang.orchestrator.enums.SuspendedExecutionReason;
 import org.springframework.data.domain.Pageable;
@@ -42,7 +43,8 @@ public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedEx
             @Param("suspensionReasons") EnumSet<SuspendedExecutionReason> suspensionReasons,
             Pageable pageRequest);
 
-    @Query("from SuspendedExecution se where size(se.finishedBranches) > 0 and se.suspensionReason in :suspensionReasons")
+    @Query("from SuspendedExecution se where size(se.finishedBranches) > 0 and se.suspensionReason in :suspensionReasons " +
+            "and se.locked = false")
     List<SuspendedExecution> findUnmergedSuspendedExecutions(
             @Param("suspensionReasons") EnumSet<SuspendedExecutionReason> suspensionReasons,
             Pageable pageRequest);
@@ -57,5 +59,9 @@ public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedEx
     @Modifying
     int deleteByIds(@Param("ids") Collection<String> ids);
 
+    SuspendedExecution findByExecutionId(String executionId);
 
+    @Modifying
+    @Query("update SuspendedExecution se set se.executionObj = :newExecution")
+    void updateSuspendedExecutionContexts(@Param("newExecution") ExecutionObjEntity newExecution);
 }

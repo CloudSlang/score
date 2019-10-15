@@ -54,6 +54,9 @@ public class SuspendedExecution extends AbstractIdentifiable {
     @Column(name = "MERGED_BRANCHES", nullable = false)
     private long mergedBranches;
 
+    @Column(name = "LOCKED", nullable = false)
+    private boolean locked;
+
     @Basic(fetch = FetchType.LAZY)
     @Embedded
     private ExecutionObjEntity executionObj;
@@ -74,6 +77,7 @@ public class SuspendedExecution extends AbstractIdentifiable {
         this.numberOfBranches = numberOfBranches;
         this.executionObj = new ExecutionObjEntity(executionObj);
         this.suspensionReason = suspensionReason;
+        locked = false;
     }
 
     public String getExecutionId() {
@@ -135,6 +139,14 @@ public class SuspendedExecution extends AbstractIdentifiable {
         this.mergedBranches = mergedBranches;
     }
 
+    public boolean isLocked() {
+        return locked;
+    }
+
+    public void setLocked(boolean locked) {
+        this.locked = locked;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -147,6 +159,7 @@ public class SuspendedExecution extends AbstractIdentifiable {
         if (!splitId.equals(that.splitId)) return false;
         if (!suspensionReason.equals(that.suspensionReason)) return false;
         if (mergedBranches != that.mergedBranches) return false;
+        if (locked != that.locked) return false;
 
         return true;
     }

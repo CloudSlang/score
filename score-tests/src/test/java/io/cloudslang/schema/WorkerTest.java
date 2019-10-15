@@ -118,6 +118,11 @@ public class WorkerTest {
 		ExecutionQueueService executionQueueService() {
 			return mock(ExecutionQueueService.class);
 		}
+
+		@Bean
+		SuspendedExecutionService suspendedExecution() {
+			return mock(SuspendedExecutionService.class);
+		}
 	}
 
 }

@@ -22,6 +22,7 @@ import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.ExecutionQueueService;
 import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
+import io.cloudslang.orchestrator.services.SuspendedExecutionService;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.worker.execution.services.ExecutionService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
@@ -80,6 +81,9 @@ public class SimpleExecutionRunnableTest {
     private WorkerConfigurationService workerConfigurationService;
 
     @Mock
+    private SuspendedExecutionService suspendedExecutionService;
+
+    @Mock
     private WorkerManager workerManager;
 
     @Mock
@@ -98,7 +102,7 @@ public class SimpleExecutionRunnableTest {
     @Test
     public void testGetExecutionMessage() throws Exception {
         SimpleExecutionRunnable simpleExecutionRunnable = new SimpleExecutionRunnable(executionService, outBuffer,
-                inBuffer, converter, endExecutionCallback, queueStateIdGenerator, "stam", workerConfigurationService,
+                inBuffer, converter, endExecutionCallback, queueStateIdGenerator, suspendedExecutionService, "stam", workerConfigurationService,
                 workerManager);
         ExecutionMessage executionMessage = simpleExecutionRunnable.getExecutionMessage();
         Assert.assertNull(executionMessage);
@@ -126,7 +130,7 @@ public class SimpleExecutionRunnableTest {
         when(workerManager.isFromCurrentThreadPool(anyString())).thenReturn(true);
 
         SimpleExecutionRunnable simpleExecutionRunnable = new SimpleExecutionRunnable(executionService, outBuffer,
-                inBuffer, converter, endExecutionCallback, queueStateIdGenerator, "stam", workerConfigurationService,
+                inBuffer, converter, endExecutionCallback, queueStateIdGenerator, suspendedExecutionService, "stam", workerConfigurationService,
                 workerManager);
 
         ExecutionMessage executionMessage = new ExecutionMessage();

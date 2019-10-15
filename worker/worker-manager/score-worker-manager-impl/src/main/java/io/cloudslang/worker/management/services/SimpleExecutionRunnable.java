@@ -23,6 +23,7 @@ import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
 import io.cloudslang.orchestrator.entities.SplitMessage;
+import io.cloudslang.orchestrator.services.SuspendedExecutionService;
 import io.cloudslang.score.facade.TempConstants;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
@@ -59,6 +60,8 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private final QueueStateIdGeneratorService queueStateIdGeneratorService;
 
+    private final SuspendedExecutionService suspendedExecutionService;
+
     private final String workerUUID;
 
     private final WorkerConfigurationService workerConfigurationService;
@@ -73,7 +76,7 @@ public class SimpleExecutionRunnable implements Runnable {
                                    ExecutionMessageConverter converter,
                                    EndExecutionCallback endExecutionCallback,
                                    QueueStateIdGeneratorService queueStateIdGeneratorService,
-                                   String workerUUID,
+                                   SuspendedExecutionService suspendedExecutionService, String workerUUID,
                                    WorkerConfigurationService workerConfigurationService,
                                    WorkerManager workerManager
     ) {
@@ -83,6 +86,7 @@ public class SimpleExecutionRunnable implements Runnable {
         this.converter = converter;
         this.endExecutionCallback = endExecutionCallback;
         this.queueStateIdGeneratorService = queueStateIdGeneratorService;
+        this.suspendedExecutionService = suspendedExecutionService;
         this.workerUUID = workerUUID;
         this.workerConfigurationService = workerConfigurationService;
         this.workerManager = workerManager;
@@ -188,7 +192,13 @@ public class SimpleExecutionRunnable implements Runnable {
     }
 
     private boolean isMiRunning(Execution nextStepExecution) {
-        return nextStepExecution.getSystemContext().containsKey(MI_REMAINING_BRANCHES_CONTEXT_KEY);
+        if (nextStepExecution.getSystemContext().containsKey(MI_REMAINING_BRANCHES_CONTEXT_KEY)) {
+            suspendedExecutionService.updateSuspendedExecutionMiThrottlingContext(nextStepExecution);
+            suspendedExecutionService.unlockSuspendedExecution(nextStepExecution.getExecutionId().toString());
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private boolean preconditionNotFulfilled(Execution nextStepExecution) {
