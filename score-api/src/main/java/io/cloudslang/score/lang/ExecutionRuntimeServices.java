@@ -498,7 +498,8 @@ public class ExecutionRuntimeServices implements Serializable {
     }
 
     public boolean getMergeUserInputs() {
-        return getFromMap(MERGE_USER_INPUTS) != null;
+        Boolean mergeUserInputs = getFromMap(MERGE_USER_INPUTS);
+        return mergeUserInputs != null && mergeUserInputs;
     }
 
     public Double removeTotalRoiValue() { return removeFromMap(ExecutionParametersConsts.EXECUTION_TOTAL_ROI); }
