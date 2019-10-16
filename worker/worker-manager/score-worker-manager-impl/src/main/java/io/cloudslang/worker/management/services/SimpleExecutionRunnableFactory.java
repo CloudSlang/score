@@ -16,6 +16,7 @@
 
 package io.cloudslang.worker.management.services;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
 import io.cloudslang.orchestrator.services.SuspendedExecutionService;
@@ -28,8 +29,12 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 
-import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.lang.Long.MAX_VALUE;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecutionRunnable> {
@@ -68,7 +73,8 @@ public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecuti
 
     @PostConstruct
     public void init() {
-        executorService = newFixedThreadPool(5);
+        ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("miAsync - %d").build();
+        executorService = new ThreadPoolExecutor(5, 6, MAX_VALUE, MILLISECONDS, new LinkedBlockingDeque<>(20), threadFactory, new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
     @PreDestroy

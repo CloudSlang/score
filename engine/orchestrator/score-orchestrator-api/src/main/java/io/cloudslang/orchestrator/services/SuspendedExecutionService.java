@@ -20,4 +20,6 @@ import io.cloudslang.score.facade.entities.Execution;
 public interface SuspendedExecutionService {
 
     void updateSuspendedExecutionMiThrottlingContext(Execution execution);
+
+    void unlockSuspendedExecution(String executionId);
 }

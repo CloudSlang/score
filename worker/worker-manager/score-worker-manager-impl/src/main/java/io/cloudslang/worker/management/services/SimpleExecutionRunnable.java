@@ -197,7 +197,10 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private boolean isMiRunning(Execution nextStepExecution) {
         if (nextStepExecution.getSystemContext().containsKey(MI_REMAINING_BRANCHES_CONTEXT_KEY)) {
-            executorService.execute(() -> suspendedExecutionService.updateSuspendedExecutionMiThrottlingContext(nextStepExecution));
+            executorService.execute(() -> {
+                suspendedExecutionService.updateSuspendedExecutionMiThrottlingContext(nextStepExecution);
+                suspendedExecutionService.unlockSuspendedExecution(nextStepExecution.getExecutionId().toString());
+            });
             return true;
         } else {
             return false;
