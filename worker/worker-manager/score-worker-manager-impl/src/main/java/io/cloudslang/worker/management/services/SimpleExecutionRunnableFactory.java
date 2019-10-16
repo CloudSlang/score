@@ -24,7 +24,13 @@ import io.cloudslang.worker.management.WorkerConfigurationService;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
+import java.util.concurrent.ExecutorService;
+
+import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecutionRunnable> {
 
@@ -58,6 +64,24 @@ public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecuti
     @Resource
     private String workerUuid;
 
+    private ExecutorService executorService;
+
+    @PostConstruct
+    public void init() {
+        executorService = newFixedThreadPool(5);
+    }
+
+    @PreDestroy
+    public void destroy() {
+        executorService.shutdown();
+        try {
+            executorService.awaitTermination(30, SECONDS);
+        } catch (InterruptedException ignored) {
+        } finally {
+            executorService.shutdownNow();
+        }
+    }
+
     @Override
     public SimpleExecutionRunnable getObject() {
         return new SimpleExecutionRunnable(
@@ -70,7 +94,8 @@ public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecuti
                 suspendedExecutionService,
                 workerUuid,
                 workerConfigurationService,
-                workerManager
+                workerManager,
+                executorService
         );
     }
 

@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static java.util.concurrent.Executors.newFixedThreadPool;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -103,7 +104,7 @@ public class SimpleExecutionRunnableTest {
     public void testGetExecutionMessage() throws Exception {
         SimpleExecutionRunnable simpleExecutionRunnable = new SimpleExecutionRunnable(executionService, outBuffer,
                 inBuffer, converter, endExecutionCallback, queueStateIdGenerator, suspendedExecutionService, "stam", workerConfigurationService,
-                workerManager);
+                workerManager, newFixedThreadPool(5));
         ExecutionMessage executionMessage = simpleExecutionRunnable.getExecutionMessage();
         Assert.assertNull(executionMessage);
 
@@ -131,7 +132,7 @@ public class SimpleExecutionRunnableTest {
 
         SimpleExecutionRunnable simpleExecutionRunnable = new SimpleExecutionRunnable(executionService, outBuffer,
                 inBuffer, converter, endExecutionCallback, queueStateIdGenerator, suspendedExecutionService, "stam", workerConfigurationService,
-                workerManager);
+                workerManager, newFixedThreadPool(5));
 
         ExecutionMessage executionMessage = new ExecutionMessage();
         executionMessage.setMsgId(String.valueOf(100L));

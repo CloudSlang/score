@@ -34,6 +34,7 @@ import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import static io.cloudslang.score.facade.TempConstants.MI_REMAINING_BRANCHES_CONTEXT_KEY;
 import static java.lang.Boolean.getBoolean;
@@ -70,6 +71,8 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private final WorkerManager workerManager;
 
+    private final ExecutorService executorService;
+
     public SimpleExecutionRunnable(ExecutionService executionService,
                                    OutboundBuffer outBuffer,
                                    InBuffer inBuffer,
@@ -78,8 +81,8 @@ public class SimpleExecutionRunnable implements Runnable {
                                    QueueStateIdGeneratorService queueStateIdGeneratorService,
                                    SuspendedExecutionService suspendedExecutionService, String workerUUID,
                                    WorkerConfigurationService workerConfigurationService,
-                                   WorkerManager workerManager
-    ) {
+                                   WorkerManager workerManager,
+                                   ExecutorService executorService) {
         this.executionService = executionService;
         this.outBuffer = outBuffer;
         this.inBuffer = inBuffer;
@@ -90,6 +93,7 @@ public class SimpleExecutionRunnable implements Runnable {
         this.workerUUID = workerUUID;
         this.workerConfigurationService = workerConfigurationService;
         this.workerManager = workerManager;
+        this.executorService = executorService;
 
         // System property - whether the executions are recoverable in case of restart/failure.
         this.isRecoveryDisabled = getBoolean("is.recovery.disabled");
@@ -193,8 +197,7 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private boolean isMiRunning(Execution nextStepExecution) {
         if (nextStepExecution.getSystemContext().containsKey(MI_REMAINING_BRANCHES_CONTEXT_KEY)) {
-            suspendedExecutionService.updateSuspendedExecutionMiThrottlingContext(nextStepExecution);
-            suspendedExecutionService.unlockSuspendedExecution(nextStepExecution.getExecutionId().toString());
+            executorService.execute(() -> suspendedExecutionService.updateSuspendedExecutionMiThrottlingContext(nextStepExecution));
             return true;
         } else {
             return false;

@@ -19,14 +19,9 @@ import io.cloudslang.orchestrator.entities.ExecutionObjEntity;
 import io.cloudslang.orchestrator.entities.SuspendedExecution;
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
 import io.cloudslang.score.facade.entities.Execution;
-import io.cloudslang.score.lang.SystemContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.io.Serializable;
-import java.util.Map;
 
 @Service
 public class SuspendedExecutionServiceImpl implements SuspendedExecutionService {
@@ -46,14 +41,6 @@ public class SuspendedExecutionServiceImpl implements SuspendedExecutionService 
             Execution oldExecution = suspendedExecution.getExecutionObj();
             execution.setPosition(oldExecution.getPosition());
             suspendedExecutionsRepository.updateSuspendedExecutionContexts(new ExecutionObjEntity(execution));
-        }
-    }
-
-    @Override
-    @Transactional
-    public void unlockSuspendedExecution(String executionId) {
-        SuspendedExecution suspendedExecution = suspendedExecutionsRepository.findByExecutionId(executionId);
-        if (suspendedExecution != null) {
             suspendedExecution.setLocked(false);
         }
     }
