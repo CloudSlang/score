@@ -185,8 +185,8 @@ public class SimpleExecutionRunnable implements Runnable {
         return isOldThread() ||
                 isExecutionCancelled(nextStepExecution) ||
                 isExecutionPaused(nextStepExecution) ||
-                isMiRunning(nextStepExecution) ||
                 isExecutionTerminating(nextStepExecution) ||
+                isMiRunning(nextStepExecution) ||
                 isSplitStep(nextStepExecution) ||
                 shouldChangeWorkerGroup(nextStepExecution) ||
                 isPersistStep(nextStepExecution) ||
@@ -197,10 +197,7 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private boolean isMiRunning(Execution nextStepExecution) {
         if (nextStepExecution.getSystemContext().containsKey(MI_REMAINING_BRANCHES_CONTEXT_KEY)) {
-            executorService.execute(() -> {
-                suspendedExecutionService.updateSuspendedExecutionMiThrottlingContext(nextStepExecution);
-                suspendedExecutionService.unlockSuspendedExecution(nextStepExecution.getExecutionId().toString());
-            });
+            executorService.execute(() -> suspendedExecutionService.updateSuspendedExecutionMiThrottlingContext(nextStepExecution));
             return true;
         } else {
             return false;

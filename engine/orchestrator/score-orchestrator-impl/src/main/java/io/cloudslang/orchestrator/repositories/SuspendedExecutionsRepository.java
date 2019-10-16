@@ -59,7 +59,7 @@ public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedEx
     @Modifying
     int deleteByIds(@Param("ids") Collection<String> ids);
 
-    SuspendedExecution findByExecutionId(String executionId);
+    SuspendedExecution findBySplitId(String splitId);
 
     @Modifying
     @Query("update SuspendedExecution se set se.executionObj = :newExecution")

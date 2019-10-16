@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.Serializable;
+
 @Service
 public class SuspendedExecutionServiceImpl implements SuspendedExecutionService {
 
@@ -36,20 +38,13 @@ public class SuspendedExecutionServiceImpl implements SuspendedExecutionService 
     @Override
     @Transactional
     public void updateSuspendedExecutionMiThrottlingContext(Execution execution) {
-        SuspendedExecution suspendedExecution = suspendedExecutionsRepository.findByExecutionId(execution.getExecutionId().toString());
+        Serializable splitId = execution.getSystemContext().get("CURRENT_PROCESSED__SPLIT_ID");
+        SuspendedExecution suspendedExecution = suspendedExecutionsRepository.findBySplitId(splitId.toString());
         if (suspendedExecution != null) {
             Execution oldExecution = suspendedExecution.getExecutionObj();
             execution.setPosition(oldExecution.getPosition());
-            suspendedExecutionsRepository.updateSuspendedExecutionContexts(new ExecutionObjEntity(execution));
-        }
-    }
-
-    @Override
-    @Transactional
-    public void unlockSuspendedExecution(String executionId) {
-        SuspendedExecution suspendedExecution = suspendedExecutionsRepository.findByExecutionId(executionId);
-        if (suspendedExecution != null) {
             suspendedExecution.setLocked(false);
+            suspendedExecutionsRepository.updateSuspendedExecutionContexts(new ExecutionObjEntity(execution));
         }
     }
 

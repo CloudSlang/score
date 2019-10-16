@@ -24,7 +24,6 @@ import io.cloudslang.score.api.EndBranchDataContainer;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
-import io.cloudslang.score.api.execution.ExecutionParametersConsts;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.orchestrator.entities.BranchContexts;
@@ -114,8 +113,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
         for (SplitMessage splitMessage : splitMessages) {
             if (splitMessage.isExecutable()) {
-                branchTriggerMessages.addAll(prepareExecutionMessages(splitMessage.getChildren(), true,
-                        splitMessage.getParent().getExecutionId()));
+                branchTriggerMessages.addAll(prepareExecutionMessages(splitMessage.getChildren(), true));
 
                 final SuspendedExecutionReason stepType = SuspendedExecutionReason.valueOf(splitMessage.getParent()
                         .getSystemContext().get("STEP_TYPE").toString());
@@ -127,8 +125,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
                         stepType,
                         false));
             } else {
-                branchTriggerMessages.addAll(prepareExecutionMessages(splitMessage.getChildren(), false,
-                        splitMessage.getParent().getExecutionId()));
+                branchTriggerMessages.addAll(prepareExecutionMessages(splitMessage.getChildren(), false));
             }
         }
 
@@ -143,7 +140,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         suspendedExecutionsRepository.save(suspendedParents);
     }
 
-    private List<ExecutionMessage> prepareExecutionMessages(List<Execution> executions, boolean active, long executionId) {
+    private List<ExecutionMessage> prepareExecutionMessages(List<Execution> executions, boolean active) {
         return executions.stream()
                 .map(execution -> {
                     ExecutionMessage executionMessage = new ExecutionMessage(execution.getExecutionId().toString(),
@@ -288,6 +285,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         for (SuspendedExecution se : suspendedExecutions) {
             Execution execution = se.getExecutionObj();
             execution.getSystemContext().remove(FINISHED_CHILD_BRANCHES_DATA);
+            execution.getSystemContext().put("CURRENT_PROCESSED__SPLIT_ID", se.getSplitId());
             joinMiSplit(se, execution);
             List<FinishedBranch> finishedBranches = se.getFinishedBranches();
             long nrOfNewFinishedBranches = finishedBranches.stream()
