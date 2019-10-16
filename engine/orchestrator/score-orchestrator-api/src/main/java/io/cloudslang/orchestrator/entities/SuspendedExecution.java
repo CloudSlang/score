@@ -48,7 +48,7 @@ public class SuspendedExecution extends AbstractIdentifiable {
     private Integer numberOfBranches;
 
     @Enumerated(STRING)
-    @Column(name = "SUSPENSION_REASON")
+    @Column(name = "SUSPENSION_REASON", nullable = false)
     private SuspendedExecutionReason suspensionReason;
 
     @Column(name = "MERGED_BRANCHES", nullable = false)
@@ -71,13 +71,15 @@ public class SuspendedExecution extends AbstractIdentifiable {
                               String splitId,
                               Integer numberOfBranches,
                               Execution executionObj,
-                              SuspendedExecutionReason suspensionReason) {
+                              SuspendedExecutionReason suspensionReason,
+                              boolean locked) {
         this.executionId = executionId;
         this.splitId = splitId;
         this.numberOfBranches = numberOfBranches;
         this.executionObj = new ExecutionObjEntity(executionObj);
         this.suspensionReason = suspensionReason;
-        locked = false;
+        this.locked = locked;
+        mergedBranches = 0;
     }
 
     public String getExecutionId() {

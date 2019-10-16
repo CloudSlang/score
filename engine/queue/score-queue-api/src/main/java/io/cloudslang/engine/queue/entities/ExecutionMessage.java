@@ -61,7 +61,6 @@ public class ExecutionMessage implements Message, Cloneable {
     private transient Execution executionObject;
 
     private boolean active;
-    private long executionId;
 
 	public ExecutionMessage() {
 		execStateId = EMPTY_EXEC_STATE_ID;
@@ -279,14 +278,6 @@ public class ExecutionMessage implements Message, Cloneable {
 		return payload != null ? payload.getData().length : 0;
 	}
 
-	public long getExecutionId() {
-		return executionId;
-	}
-
-	public void setExecutionId(long executionId) {
-		this.executionId = executionId;
-	}
-
 	@Override
 	public List<Message> shrink(List<Message> messages) {
 		if (messages.size() > 2) {
@@ -357,8 +348,7 @@ public class ExecutionMessage implements Message, Cloneable {
         append(" Status:").append(this.status).
         append(" WorkerKey:").append(this.getId()).
                 append(" IsAck:").append(isAck)
-		.append(" IsActive:").append(active)
-		.append(" Execution Id:").append(executionId);
+		.append(" IsActive:").append(active);
 
         return str.toString();
     }
@@ -392,7 +382,6 @@ public class ExecutionMessage implements Message, Cloneable {
 				.append(this.workerId, that.workerId)
                 .append(this.createDate, that.createDate)
 				.append(this.active, that.active)
-				.append(this.executionId, that.executionId)
 				.isEquals();
 	}
 
@@ -407,8 +396,7 @@ public class ExecutionMessage implements Message, Cloneable {
 				msgSeqId,
 				execStateId,
                 createDate,
-				active,
-				executionId
+				active
 		);
 	}
 }

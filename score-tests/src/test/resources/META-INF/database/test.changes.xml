@@ -27,7 +27,7 @@
 			</column>
 			<column name="PAYLOAD_SIZE" type="BIGINT"/>
 			<column name="CREATE_TIME" type="timestamp"/>
-			<column name="ACTIVE" type="INT" defaultValue="1">
+			<column name="ACTIVE" type="INT">
 				<constraints nullable="false"/>
 			</column>
 		</createTable>

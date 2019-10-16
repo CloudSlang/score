@@ -55,7 +55,7 @@ public interface ExecutionQueueRepository {
 	List<ExecutionMessage> findByStatuses(int maxSize, ExecStatus... statuses);
 	List<String> getBusyWorkers(ExecStatus... statuses);
 
-	void saveNotActiveExecutionsQueues(final List<ExecutionMessage> notActiveMessages);
+	void insertNotActiveExecutionsQueues(final List<ExecutionMessage> notActiveMessages);
 
 	StartNewBranchPayload getFirstPendingBranch(final long executionId);
 

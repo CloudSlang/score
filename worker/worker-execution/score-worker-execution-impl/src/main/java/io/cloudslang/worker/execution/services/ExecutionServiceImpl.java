@@ -46,6 +46,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -295,13 +296,15 @@ public final class ExecutionServiceImpl implements ExecutionService {
                                                                                   List<StartBranchDataContainer> newBranches) {
         List<Execution> newExecutions = new ArrayList<>();
         String splitId = UUID.randomUUID().toString();
-        for (int i = 0; i < newBranches.size(); i++) {
-            StartBranchDataContainer from = newBranches.get(i);
+        ListIterator<StartBranchDataContainer> listIterator = newBranches.listIterator();
+        int count = 0;
+        while (listIterator.hasNext()) {
+            StartBranchDataContainer from = listIterator.next();
             Execution to = new Execution(executionId, from.getExecutionPlanId(), from.getStartPosition(),
                     from.getContexts(), from.getSystemContext());
 
             to.getSystemContext().setSplitId(splitId);
-            to.getSystemContext().setBranchId(splitId + ":" + (i + 1));
+            to.getSystemContext().setBranchId(splitId + ":" + (count++ + 1));
             newExecutions.add(to);
         }
         return newExecutions;
@@ -312,13 +315,15 @@ public final class ExecutionServiceImpl implements ExecutionService {
                                                               String splitUuid,
                                                               int nrOfAlreadyCreatedBranches) {
         List<Execution> newExecutions = new ArrayList<>();
-        for (int i = 0; i < newBranches.size(); i++) {
-            StartBranchDataContainer from = newBranches.get(i);
+        ListIterator<StartBranchDataContainer> listIterator = newBranches.listIterator();
+        int count = 0;
+        while (listIterator.hasNext()) {
+            StartBranchDataContainer from = listIterator.next();
             Execution to = new Execution(executionId, from.getExecutionPlanId(), from.getStartPosition(),
                     from.getContexts(), from.getSystemContext());
 
             to.getSystemContext().setSplitId(splitUuid);
-            int branchIndexInSplitStep = nrOfAlreadyCreatedBranches + i + 1;
+            int branchIndexInSplitStep = nrOfAlreadyCreatedBranches + count++ + 1;
             to.getSystemContext().setBranchId(splitUuid + ":" + branchIndexInSplitStep);
             newExecutions.add(to);
         }

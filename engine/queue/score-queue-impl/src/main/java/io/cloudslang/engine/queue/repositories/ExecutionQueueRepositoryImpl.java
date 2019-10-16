@@ -48,6 +48,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static java.lang.Long.parseLong;
+
 /**
  * User:
  * Date: 20/09/12
@@ -272,12 +274,12 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     private StatementAwareJdbcTemplateWrapper findByStatusesJdbcTemplate;
     private StatementAwareJdbcTemplateWrapper findLargeJdbcTemplate;
     private StatementAwareJdbcTemplateWrapper findExecIDsJdbcTemplate;
+    private StatementAwareJdbcTemplateWrapper getFirstPendingBranchJdbcTemplate;
 
 	private JdbcTemplate insertExecutionJdbcTemplate;
 	private JdbcTemplate deleteFinishedStepsJdbcTemplate;
 	private JdbcTemplate findPayloadByExecutionIdsJdbcTemplate;
 	private JdbcTemplate getBusyWorkersJdbcTemplate;
-    private JdbcTemplate getFirstPendingBranchJdbcTemplate;
     private JdbcTemplate updateExecutionStateStatusJdbcTemplate;
     private JdbcTemplate deletePendingExecutionStateJdbcTemplate;
 
@@ -302,12 +304,12 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         findByStatusesJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "findByStatusesJdbcTemplate");
         findLargeJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "findLargeJdbcTemplate");
         findExecIDsJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "findExecIDsJdbcTemplate");
+        getFirstPendingBranchJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "getFirstPendingBranchJdbcTemplate");
 
         insertExecutionJdbcTemplate = new JdbcTemplate(dataSource);
         deleteFinishedStepsJdbcTemplate = new JdbcTemplate(dataSource);
         findPayloadByExecutionIdsJdbcTemplate = new JdbcTemplate(dataSource);
         getBusyWorkersJdbcTemplate = new JdbcTemplate(dataSource);
-        getFirstPendingBranchJdbcTemplate = new JdbcTemplate(dataSource);
         updateExecutionStateStatusJdbcTemplate = new JdbcTemplate(dataSource);
         deletePendingExecutionStateJdbcTemplate = new JdbcTemplate(dataSource);
 
@@ -387,14 +389,14 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     }
 
     @Override
-    public void saveNotActiveExecutionsQueues(List<ExecutionMessage> notActiveMessages) {
+    public void insertNotActiveExecutionsQueues(List<ExecutionMessage> notActiveMessages) {
         insertExecutionJdbcTemplate.batchUpdate(INSERT_EXECUTION_STATE_MAPPING, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
                 ExecutionMessage executionMessage = notActiveMessages.get(i);
                 preparedStatement.setLong(1, idGen.next());
                 preparedStatement.setLong(2, executionMessage.getExecStateId());
-                preparedStatement.setLong(3, executionMessage.getExecutionId());
+                preparedStatement.setLong(3, parseLong(executionMessage.getMsgId()));
             }
 
             @Override
@@ -407,7 +409,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     @Override
     public StartNewBranchPayload getFirstPendingBranch(final long executionId) {
         final String sql = "SELECT ID, EXEC_STATE_ID FROM OO_EXECS_STATES_EXECS_MAPPINGS WHERE EXEC_ID = ?";
-        getFirstPendingBranchJdbcTemplate.setMaxRows(1);
+        getFirstPendingBranchJdbcTemplate.setStatementBatchSize(1);
         Object[] inputs = {executionId};
         StartNewBranchPayload startNewBranchPayload = null;
         try {

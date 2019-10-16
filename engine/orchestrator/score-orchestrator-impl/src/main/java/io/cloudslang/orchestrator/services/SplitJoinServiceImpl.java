@@ -124,7 +124,8 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
                         splitMessage.getSplitId(),
                         splitMessage.getTotalNumberOfBranches(),
                         splitMessage.getParent(),
-                        stepType));
+                        stepType,
+                        false));
             } else {
                 branchTriggerMessages.addAll(prepareExecutionMessages(splitMessage.getChildren(), false,
                         splitMessage.getParent().getExecutionId()));
@@ -148,7 +149,6 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
                     ExecutionMessage executionMessage = new ExecutionMessage(execution.getExecutionId().toString(),
                             converter.createPayload(execution));
                     executionMessage.setActive(active);
-                    executionMessage.setExecutionId(executionId);
                     return executionMessage;
                 })
                 .collect(toList());
@@ -197,18 +197,12 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             SuspendedExecution suspendedExecution = suspendedMap.get(finishedBranch.getSplitId());
             if (suspendedExecution != null) {
                 finishedBranch.connectToSuspendedExecution(suspendedExecution);
-                // start a new branch
-                startNewBranch(suspendedExecution);
-
-                //this is an optimization for subflow (also works for MI with one branch :) )
-                if (suspendedExecution.getNumberOfBranches() == 1) {
-                    if (suspendedExecution.getSuspensionReason() == MULTI_INSTANCE) {
-                        suspendedExecutionsForMiWithOneBranch.add(suspendedExecution);
-                    } else {
-                        suspendedExecutionsWithOneBranch.add(suspendedExecution);
-                    }
+                if (suspendedExecution.getSuspensionReason() == MULTI_INSTANCE) {
+                    // start a new branch
+                    startNewBranch(suspendedExecution);
+                    processFinishedBranch(finishedBranch, suspendedExecution, suspendedExecutionsForMiWithOneBranch);
                 } else {
-                    finishedBranchRepository.save(finishedBranch);
+                    processFinishedBranch(finishedBranch, suspendedExecution, suspendedExecutionsWithOneBranch);
                 }
             }
         }
@@ -218,6 +212,16 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         }
         if (!suspendedExecutionsForMiWithOneBranch.isEmpty()) {
             joinMiBranchesAndSendToQueue(suspendedExecutionsForMiWithOneBranch);
+        }
+    }
+
+    private void processFinishedBranch(FinishedBranch finishedBranch,
+                                       SuspendedExecution suspendedExecution,
+                                       List<SuspendedExecution> suspendedExecutionsWithOneBranch) {
+        if (suspendedExecution.getNumberOfBranches() == 1) {
+            suspendedExecutionsWithOneBranch.add(suspendedExecution);
+        } else {
+            finishedBranchRepository.save(finishedBranch);
         }
     }
 
@@ -273,8 +277,9 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         List<ExecutionMessage> messages = new ArrayList<>();
         List<SuspendedExecution> mergedSuspendedExecutions = new ArrayList<>();
 
-        if (logger.isDebugEnabled())
+        if (logger.isDebugEnabled()) {
             logger.debug("Joining finished branches, found " + suspendedExecutions.size() + " suspended executions with all branches finished");
+        }
 
         // nothing to do here
         if (suspendedExecutions.isEmpty())

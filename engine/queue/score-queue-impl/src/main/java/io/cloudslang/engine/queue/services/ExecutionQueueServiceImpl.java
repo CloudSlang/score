@@ -97,7 +97,7 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 		stopWatch.split();
 		if (stateMessages.size() > 0) {
 			executionQueueRepository.insertExecutionStates(stateMessages);
-			executionQueueRepository.saveNotActiveExecutionsQueues(stateMessages.stream()
+			executionQueueRepository.insertNotActiveExecutionsQueues(stateMessages.stream()
 					.filter(executionMessage -> !executionMessage.isActive())
 					.collect(toList()));
 		}

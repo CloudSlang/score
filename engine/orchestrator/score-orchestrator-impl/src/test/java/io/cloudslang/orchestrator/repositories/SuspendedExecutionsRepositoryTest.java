@@ -75,7 +75,7 @@ public class SuspendedExecutionsRepositoryTest {
         Map<String, String> contexts = new HashMap<>();
         contexts.put("flowContext", "");
         Execution exec = new Execution(2L, 0L, contexts);
-        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec, PARALLEL);
+        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec, PARALLEL, false);
 
         repository.save(suspendedExecution);
 
@@ -91,7 +91,7 @@ public class SuspendedExecutionsRepositoryTest {
         contexts.put("flowContext", "");
 
         Execution exec = new Execution(2L, 0L, contexts);
-        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec, PARALLEL);
+        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec, PARALLEL, false);
 
         SuspendedExecution saved = repository.save(suspendedExecution);
 
@@ -118,7 +118,7 @@ public class SuspendedExecutionsRepositoryTest {
         contexts.put("flowContext", "");
 
         Execution exec = new Execution(2L, 0L, contexts);
-        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec, PARALLEL);
+        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec, PARALLEL, false);
 
         repository.save(suspendedExecution);
 
@@ -137,7 +137,7 @@ public class SuspendedExecutionsRepositoryTest {
         Map<String, String> contexts = new HashMap<>();
         contexts.put("flowContext", "");
         Execution exec = new Execution(2L, 0L, contexts);
-        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 1, exec, PARALLEL);
+        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 1, exec, PARALLEL, false);
 
         SuspendedExecution saved = repository.save(suspendedExecution);
 
@@ -160,7 +160,7 @@ public class SuspendedExecutionsRepositoryTest {
         Map<String, String> contexts = new HashMap<>();
         contexts.put("flowContext", "");
         Execution exec = new Execution(2L, 0L, contexts);
-        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec, PARALLEL);
+        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec, PARALLEL, false);
 
         SuspendedExecution saved = repository.save(suspendedExecution);
 
@@ -184,7 +184,7 @@ public class SuspendedExecutionsRepositoryTest {
         contexts.put("flowContext", "");
 
         Execution exec = new Execution(2L, 0L, contexts);
-        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec, PARALLEL);
+        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec, PARALLEL, false);
 
         repository.save(suspendedExecution);
 

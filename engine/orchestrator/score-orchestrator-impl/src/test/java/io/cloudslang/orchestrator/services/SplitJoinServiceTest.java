@@ -244,7 +244,7 @@ public class SplitJoinServiceTest {
     }
 
     private SuspendedExecution createSuspendedExecution(String splitId, int numOfBranches) {
-        return new SuspendedExecution(1 + "", splitId, numOfBranches, createExecution(1L), PARALLEL);
+        return new SuspendedExecution(1 + "", splitId, numOfBranches, createExecution(1L), PARALLEL, false);
     }
 
     private FinishedBranch createFinishedBranch(String splitId, String branchId, HashMap<String, Serializable> context, Map<String, Serializable> systemContext) {
