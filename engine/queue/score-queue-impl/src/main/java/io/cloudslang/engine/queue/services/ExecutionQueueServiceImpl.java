@@ -96,10 +96,10 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 
 		stopWatch.split();
 		if (stateMessages.size() > 0) {
-			executionQueueRepository.insertExecutionStates(stateMessages);
 			executionQueueRepository.insertNotActiveExecutionsQueues(stateMessages.stream()
 					.filter(executionMessage -> !executionMessage.isActive())
 					.collect(toList()));
+			executionQueueRepository.insertExecutionStates(stateMessages);
 		}
 
 		long msgVersion = versionService.getCurrentVersion(VersionService.MSG_RECOVERY_VERSION_COUNTER_NAME);
