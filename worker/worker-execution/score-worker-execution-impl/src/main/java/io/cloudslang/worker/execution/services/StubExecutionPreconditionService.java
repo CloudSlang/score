@@ -20,7 +20,7 @@ import io.cloudslang.score.api.execution.precondition.ExecutionPreconditionServi
 public class StubExecutionPreconditionService implements ExecutionPreconditionService {
 
     @Override
-    public boolean canExecute(String executionId) {
+    public boolean canExecute(String executionId, boolean enterpriseLicenseMode) {
         return true;
     }
 }
