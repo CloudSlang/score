@@ -25,5 +25,5 @@ import java.util.Map;
  */
 public interface ExecutionPostconditionService {
 
-    void postExecutionWork(String executionId);
+    void postExecutionWork(String executionId, boolean enterpriseLicenseMode);
 }

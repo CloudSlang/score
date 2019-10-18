@@ -19,6 +19,6 @@ import io.cloudslang.score.api.execution.precondition.ExecutionPostconditionServ
 
 public class StubExecutionPostconditionService implements ExecutionPostconditionService {
     @Override
-    public void postExecutionWork(String executionId) {
+    public void postExecutionWork(String executionId, boolean enterpriseLicenseMode) {
     }
 }

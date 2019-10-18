@@ -97,6 +97,8 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String MERGE_USER_INPUTS = "MERGE_USER_INPUTS";
 
+    public static final String ENTERPRISE_MODE = "ENTERPRISE_MODE";
+
     protected Map<String, Serializable> contextMap = new HashMap<>();
 
     public ExecutionRuntimeServices() {
@@ -500,6 +502,14 @@ public class ExecutionRuntimeServices implements Serializable {
     public boolean getMergeUserInputs() {
         Boolean mergeUserInputs = getFromMap(MERGE_USER_INPUTS);
         return mergeUserInputs != null && mergeUserInputs;
+    }
+
+    public boolean isEnterpriseMode() {
+        Boolean enterprise = getFromMap(ENTERPRISE_MODE);
+        if (enterprise != null) {
+            return enterprise;
+        }
+        return false;
     }
 
     public Double removeTotalRoiValue() { return removeFromMap(ExecutionParametersConsts.EXECUTION_TOTAL_ROI); }
