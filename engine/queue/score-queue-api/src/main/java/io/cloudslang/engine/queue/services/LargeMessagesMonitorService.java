@@ -18,7 +18,7 @@ package io.cloudslang.engine.queue.services;
 public interface LargeMessagesMonitorService {
 
     int DEFAULT_EXPIRATION_TIME = 60 * 60;
-    int DEFAULT_NO_RETRIES = 5;
+    int DEFAULT_NO_RETRIES = 24;
 
     String MESSAGE_EXPIRATION_TIME_PROP = "queue.message.expiration.time.seconds";
     String NUMBER_OF_RETRIES_KEY = "message.queue.no.retries";
