@@ -505,10 +505,7 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public boolean isEnterpriseMode() {
         Boolean enterprise = getFromMap(ENTERPRISE_MODE);
-        if (enterprise != null) {
-            return enterprise;
-        }
-        return false;
+        return enterprise != null && enterprise;
     }
 
     public Double removeTotalRoiValue() { return removeFromMap(ExecutionParametersConsts.EXECUTION_TOTAL_ROI); }
