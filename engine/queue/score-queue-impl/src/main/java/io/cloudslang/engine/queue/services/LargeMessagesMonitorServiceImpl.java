@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static java.lang.Boolean.parseBoolean;
+import static java.lang.System.getProperty;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.groupingBy;
 
@@ -51,6 +53,9 @@ public final class LargeMessagesMonitorServiceImpl implements LargeMessagesMonit
     @Override
     @Transactional
     public void monitor() {
+        if (!parseBoolean(getProperty("score.poll.use.large.message.query", "true"))) {
+            return;
+        }
 
         int noRetries = getNoRetries();
 
