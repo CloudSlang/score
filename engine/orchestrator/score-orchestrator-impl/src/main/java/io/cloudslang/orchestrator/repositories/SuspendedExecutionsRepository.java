@@ -62,6 +62,7 @@ public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedEx
     SuspendedExecution findBySplitId(String splitId);
 
     @Modifying
-    @Query("update SuspendedExecution se set se.executionObj = :newExecution")
-    void updateSuspendedExecutionContexts(@Param("newExecution") ExecutionObjEntity newExecution);
+    @Query("update SuspendedExecution se set se.executionObj = :newExecution, se.locked = false where se.id = :suspendedExecutionId")
+    void updateSuspendedExecutionContexts(@Param("suspendedExecutionId") long suspendedExecutionId,
+                                          @Param("newExecution") ExecutionObjEntity newExecution);
 }

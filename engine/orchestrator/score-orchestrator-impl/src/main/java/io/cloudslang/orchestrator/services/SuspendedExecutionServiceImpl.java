@@ -43,8 +43,8 @@ public class SuspendedExecutionServiceImpl implements SuspendedExecutionService 
         if (suspendedExecution != null) {
             Execution oldExecution = suspendedExecution.getExecutionObj();
             execution.setPosition(oldExecution.getPosition());
-            suspendedExecution.setLocked(false);
-            suspendedExecutionsRepository.updateSuspendedExecutionContexts(new ExecutionObjEntity(execution));
+            suspendedExecutionsRepository.updateSuspendedExecutionContexts(suspendedExecution.getId(),
+                    new ExecutionObjEntity(execution));
         }
     }
 
