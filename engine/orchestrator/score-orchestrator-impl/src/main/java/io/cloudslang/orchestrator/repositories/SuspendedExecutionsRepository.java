@@ -16,7 +16,9 @@
 
 package io.cloudslang.orchestrator.repositories;
 
+import io.cloudslang.orchestrator.entities.ExecutionObjEntity;
 import io.cloudslang.orchestrator.entities.SuspendedExecution;
+import io.cloudslang.orchestrator.enums.SuspendedExecutionReason;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -24,6 +26,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
 
 /**
@@ -35,8 +38,16 @@ import java.util.List;
 public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedExecution, Long> {
     List<SuspendedExecution> findBySplitIdIn(List<String> splitIds);
 
-    @Query("from SuspendedExecution se where se.numberOfBranches=size(se.finishedBranches)")
-    List<SuspendedExecution> findFinishedSuspendedExecutions(Pageable pageRequest);
+    @Query("from SuspendedExecution se where se.numberOfBranches=size(se.finishedBranches) and se.suspensionReason in :suspensionReasons")
+    List<SuspendedExecution> findFinishedSuspendedExecutions(
+            @Param("suspensionReasons") EnumSet<SuspendedExecutionReason> suspensionReasons,
+            Pageable pageRequest);
+
+    @Query("from SuspendedExecution se where size(se.finishedBranches) > 0 and se.suspensionReason in :suspensionReasons " +
+            "and se.locked = false")
+    List<SuspendedExecution> findUnmergedSuspendedExecutions(
+            @Param("suspensionReasons") EnumSet<SuspendedExecutionReason> suspensionReasons,
+            Pageable pageRequest);
 
     @Query("select se.executionId from SuspendedExecution se " +
             "left join io.cloudslang.orchestrator.entities.ExecutionState es " +
@@ -48,5 +59,10 @@ public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedEx
     @Modifying
     int deleteByIds(@Param("ids") Collection<String> ids);
 
+    SuspendedExecution findBySplitId(String splitId);
 
+    @Modifying
+    @Query("update SuspendedExecution se set se.executionObj = :newExecution, se.locked = false where se.id = :suspendedExecutionId")
+    void updateSuspendedExecutionContexts(@Param("suspendedExecutionId") long suspendedExecutionId,
+                                          @Param("newExecution") ExecutionObjEntity newExecution);
 }

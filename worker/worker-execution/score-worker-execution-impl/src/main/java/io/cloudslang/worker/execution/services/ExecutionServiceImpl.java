@@ -46,6 +46,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -201,7 +202,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     @Override
     // returns null in case the split was not done - flow is paused or cancelled
-    public List<Execution> executeSplit(Execution execution) throws InterruptedException {
+    public List<Execution> executeSplitForNonBlockAndParallel(Execution execution) throws InterruptedException {
         try {
             ExecutionStep currStep = loadExecutionStep(execution);
             // Check if this execution was paused
@@ -217,9 +218,51 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
             // Run the split step
             List<StartBranchDataContainer> newBranches = execution.getSystemContext().removeBranchesData();
-            List<Execution> newExecutions = createChildExecutions(execution.getExecutionId(), newBranches);
+            List<Execution> newExecutions = createChildExecutionsForNonBlockingAndParallel(execution.getExecutionId(),
+                    newBranches);
             // Run the navigation
             navigate(execution, currStep);
+
+            dumpBusEvents(execution);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug(
+                        "End of step: " + execution.getPosition() + " in execution id: " + execution.getExecutionId());
+            }
+            return newExecutions;
+        } catch (Exception ex) {
+            logger.error("Exception during the split step!", ex);
+            throw ex;
+        }
+    }
+
+    @Override
+    public List<Execution> executeSplitForMi(Execution execution,
+                                             String splitUuid,
+                                             int nrOfAlreadyCreatedBranches) throws InterruptedException {
+        try {
+            ExecutionStep currStep = loadExecutionStep(execution);
+            // Check if this execution was paused
+            if (!isDebuggerMode(execution.getSystemContext()) && handlePausedFlow(execution)) {
+                return null;
+            }
+            // dum bus event
+            dumpBusEvents(execution);
+            executeSplitStep(execution, currStep);
+            failFlowIfSplitStepFailed(execution);
+
+            dumpBusEvents(execution);
+
+            // Run the split step
+            List<StartBranchDataContainer> newBranches = execution.getSystemContext().removeBranchesData();
+            List<Execution> newExecutions = createChildExecutionsForMi(execution.getExecutionId(), newBranches,
+                    splitUuid, nrOfAlreadyCreatedBranches);
+
+            Serializable miInputs = execution.getSystemContext().get("MI_INPUTS");
+            if (miInputs == null) {
+                // Run the navigation since we don't have any inputs left to process
+                navigate(execution, currStep);
+            }
 
             dumpBusEvents(execution);
 
@@ -249,16 +292,39 @@ public final class ExecutionServiceImpl implements ExecutionService {
         }
     }
 
-    private static List<Execution> createChildExecutions(Long executionId, List<StartBranchDataContainer> newBranches) {
+    private static List<Execution> createChildExecutionsForNonBlockingAndParallel(Long executionId,
+                                                                                  List<StartBranchDataContainer> newBranches) {
         List<Execution> newExecutions = new ArrayList<>();
         String splitId = UUID.randomUUID().toString();
-        for (int i = 0; i < newBranches.size(); i++) {
-            StartBranchDataContainer from = newBranches.get(i);
+        ListIterator<StartBranchDataContainer> listIterator = newBranches.listIterator();
+        int count = 0;
+        while (listIterator.hasNext()) {
+            StartBranchDataContainer from = listIterator.next();
             Execution to = new Execution(executionId, from.getExecutionPlanId(), from.getStartPosition(),
                     from.getContexts(), from.getSystemContext());
 
             to.getSystemContext().setSplitId(splitId);
-            to.getSystemContext().setBranchId(splitId + ":" + (i + 1));
+            to.getSystemContext().setBranchId(splitId + ":" + (count++ + 1));
+            newExecutions.add(to);
+        }
+        return newExecutions;
+    }
+
+    private static List<Execution> createChildExecutionsForMi(Long executionId,
+                                                              List<StartBranchDataContainer> newBranches,
+                                                              String splitUuid,
+                                                              int nrOfAlreadyCreatedBranches) {
+        List<Execution> newExecutions = new ArrayList<>();
+        ListIterator<StartBranchDataContainer> listIterator = newBranches.listIterator();
+        int count = 0;
+        while (listIterator.hasNext()) {
+            StartBranchDataContainer from = listIterator.next();
+            Execution to = new Execution(executionId, from.getExecutionPlanId(), from.getStartPosition(),
+                    from.getContexts(), from.getSystemContext());
+
+            to.getSystemContext().setSplitId(splitUuid);
+            int branchIndexInSplitStep = nrOfAlreadyCreatedBranches + count++ + 1;
+            to.getSystemContext().setBranchId(splitUuid + ":" + branchIndexInSplitStep);
             newExecutions.add(to);
         }
         return newExecutions;

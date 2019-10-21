@@ -21,10 +21,12 @@ import io.cloudslang.engine.data.IdentityGenerator;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
+import io.cloudslang.engine.queue.entities.StartNewBranchPayload;
 import io.cloudslang.engine.queue.services.StatementAwareJdbcTemplateWrapper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -45,6 +47,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static java.lang.Long.parseLong;
 
 /**
  * User:
@@ -121,6 +125,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     " WHERE  " +
                     "      (q.ASSIGNED_WORKER =  ?)  AND " +
                     "      (q.STATUS IN (:status)) AND " +
+                    " 	   (s.ACTIVE = 1) AND " +
                     " (q.EXEC_STATE_ID = s.ID) AND " +
                     " (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
                     "              FROM OO_EXECUTION_QUEUES qq " +
@@ -151,6 +156,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "   WHERE (q.ASSIGNED_WORKER = ?)  AND " +
                     "       (q.STATUS IN (:status)) AND " +
                     "       (s.PAYLOAD_SIZE < ?) AND " +
+                    " 	    (s.ACTIVE = 1) AND " +
                     "       (q.EXEC_STATE_ID = s.ID) AND " +
                     "       (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
                     "                 FROM  OO_EXECUTION_QUEUES qq " +
@@ -183,6 +189,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "   WHERE (q.ASSIGNED_WORKER = ?)  AND " +
                     "       (q.STATUS IN (:status)) AND " +
                     "       (s.PAYLOAD_SIZE < ?) AND " +
+                    " 	    (s.ACTIVE = 1) AND " +
                     "       (q.EXEC_STATE_ID = s.ID) AND " +
                     "       (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
                     "                 FROM  OO_EXECUTION_QUEUES qq " +
@@ -235,9 +242,11 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
                     " GROUP BY ASSIGNED_WORKER";
 
-    final private String INSERT_EXEC_STATE = "INSERT INTO OO_EXECUTION_STATES  (ID, MSG_ID,  PAYLOAD, PAYLOAD_SIZE, CREATE_TIME) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)";
+    final private String INSERT_EXEC_STATE = "INSERT INTO OO_EXECUTION_STATES  (ID, MSG_ID,  PAYLOAD, PAYLOAD_SIZE, CREATE_TIME, ACTIVE) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?)";
 
     final private String INSERT_QUEUE = "INSERT INTO OO_EXECUTION_QUEUES (ID, EXEC_STATE_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS,MSG_SEQ_ID, CREATE_TIME,MSG_VERSION) VALUES (?, ?, ?, ?, ?, ?,?,?)";
+
+	final private String INSERT_EXECUTION_STATE_MAPPING = "INSERT INTO OO_EXECS_STATES_EXECS_MAPPINGS (ID, EXEC_STATE_ID, EXEC_ID) VALUES (?, ?, ?)";
 
     private static final String QUERY_PAYLOAD_BY_EXECUTION_IDS = "SELECT ID, PAYLOAD FROM OO_EXECUTION_STATES WHERE ID IN (:IDS)";
 
@@ -265,11 +274,14 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     private StatementAwareJdbcTemplateWrapper findByStatusesJdbcTemplate;
     private StatementAwareJdbcTemplateWrapper findLargeJdbcTemplate;
     private StatementAwareJdbcTemplateWrapper findExecIDsJdbcTemplate;
+    private StatementAwareJdbcTemplateWrapper getFirstPendingBranchJdbcTemplate;
 
-    private JdbcTemplate insertExecutionJdbcTemplate;
-    private JdbcTemplate deleteFinishedStepsJdbcTemplate;
-    private JdbcTemplate findPayloadByExecutionIdsJdbcTemplate;
-    private JdbcTemplate getBusyWorkersJdbcTemplate;
+	private JdbcTemplate insertExecutionJdbcTemplate;
+	private JdbcTemplate deleteFinishedStepsJdbcTemplate;
+	private JdbcTemplate findPayloadByExecutionIdsJdbcTemplate;
+	private JdbcTemplate getBusyWorkersJdbcTemplate;
+    private JdbcTemplate updateExecutionStateStatusJdbcTemplate;
+    private JdbcTemplate deletePendingExecutionStateJdbcTemplate;
 
     @Autowired
     private IdentityGenerator idGen;
@@ -292,11 +304,14 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         findByStatusesJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "findByStatusesJdbcTemplate");
         findLargeJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "findLargeJdbcTemplate");
         findExecIDsJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "findExecIDsJdbcTemplate");
+        getFirstPendingBranchJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "getFirstPendingBranchJdbcTemplate");
 
         insertExecutionJdbcTemplate = new JdbcTemplate(dataSource);
         deleteFinishedStepsJdbcTemplate = new JdbcTemplate(dataSource);
         findPayloadByExecutionIdsJdbcTemplate = new JdbcTemplate(dataSource);
         getBusyWorkersJdbcTemplate = new JdbcTemplate(dataSource);
+        updateExecutionStateStatusJdbcTemplate = new JdbcTemplate(dataSource);
+        deletePendingExecutionStateJdbcTemplate = new JdbcTemplate(dataSource);
 
         useLargeMessageQuery = Boolean.parseBoolean(System.getProperty("score.poll.use.large.message.query", "true"));
         workerQuery = isMssql() ? QUERY_WORKER_SQL_MSSQL : QUERY_WORKER_SQL;
@@ -326,14 +341,15 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         String insertExecStateSQL = INSERT_EXEC_STATE;
         insertExecutionJdbcTemplate.batchUpdate(insertExecStateSQL, new BatchPreparedStatementSetter() {
 
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                ExecutionMessage msg = stateMessages.get(i);
-                ps.setLong(1, msg.getExecStateId());
-                ps.setString(2, msg.getMsgId());
-                ps.setBytes(3, msg.getPayload().getData());
+			@Override
+			public void setValues(PreparedStatement ps, int i) throws SQLException {
+				ExecutionMessage msg = stateMessages.get(i);
+				ps.setLong(1, msg.getExecStateId());
+				ps.setString(2, msg.getMsgId());
+				ps.setBytes(3, msg.getPayload().getData());
                 ps.setLong(4, msg.getPayloadSize());
-            }
+                ps.setInt(5, msg.isActive() ? 1 : 0);
+			}
 
             @Override
             public int getBatchSize() {
@@ -371,6 +387,53 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         t = System.currentTimeMillis() - t;
         if (logger.isDebugEnabled()) logger.debug("Insert to queue: " + messages.size() + "/" + t + " messages/ms");
     }
+
+    @Override
+    public void insertNotActiveExecutionsQueues(List<ExecutionMessage> notActiveMessages) {
+        insertExecutionJdbcTemplate.batchUpdate(INSERT_EXECUTION_STATE_MAPPING, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
+                ExecutionMessage executionMessage = notActiveMessages.get(i);
+                preparedStatement.setLong(1, idGen.next());
+                preparedStatement.setLong(2, executionMessage.getExecStateId());
+                preparedStatement.setLong(3, parseLong(executionMessage.getMsgId()));
+            }
+
+            @Override
+            public int getBatchSize() {
+                return notActiveMessages.size();
+            }
+        });
+    }
+
+    @Override
+    public StartNewBranchPayload getFirstPendingBranch(final long executionId) {
+        final String sql = "SELECT ID, EXEC_STATE_ID FROM OO_EXECS_STATES_EXECS_MAPPINGS WHERE EXEC_ID = ?";
+        getFirstPendingBranchJdbcTemplate.setStatementBatchSize(1);
+        Object[] inputs = {executionId};
+        StartNewBranchPayload startNewBranchPayload = null;
+        try {
+            startNewBranchPayload = getFirstPendingBranchJdbcTemplate.queryForObject(sql, inputs,
+                    (resultSet, rowNumber) -> new StartNewBranchPayload(resultSet.getLong("EXEC_STATE_ID"), resultSet.getLong("ID")));
+        } catch (EmptyResultDataAccessException ignored) {
+        }
+        return startNewBranchPayload;
+    }
+
+    @Override
+    public void activatePendingExecutionStateForAnExecution(long executionId) {
+        final String sql = "UPDATE OO_EXECUTION_STATES SET ACTIVE = 1 WHERE ID = ?";
+        Object[] args = {executionId};
+        updateExecutionStateStatusJdbcTemplate.update(sql, args);
+    }
+
+    @Override
+    public void deletePendingExecutionState(long executionStatesId) {
+        final String sql = "DELETE FROM OO_EXECS_STATES_EXECS_MAPPINGS WHERE ID = ?";
+        Object[] args = {executionStatesId};
+        deletePendingExecutionStateJdbcTemplate.update(sql, args);
+    }
+
 
     @Override
     public List<ExecutionMessage> pollRecovery(String workerId, int maxSize, ExecStatus... statuses) {

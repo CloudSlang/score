@@ -57,6 +57,11 @@ public interface ExecutionService {
      * returns null in case this execution is paused or cancelled and the split was not done
      * @throws InterruptedException
      */
-    List<Execution> executeSplit(Execution execution) throws InterruptedException;
+    List<Execution> executeSplitForNonBlockAndParallel(Execution execution) throws InterruptedException;
+
+    List<Execution> executeSplitForMi(Execution execution,
+                                      String splitId,
+                                      int nrOfAlreadyCreatedBranches) throws InterruptedException;
+
     boolean isSplitStep(Execution execution);
 }

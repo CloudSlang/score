@@ -44,4 +44,6 @@ public class TempConstants {
     public static final String EXECUTE_CONTENT_ACTION_CLASSNAME = "ContentExecutionActions";
     public static final String EXECUTE_CONTENT_ACTION = "executeContentAction";
 
+    public static final String MI_REMAINING_BRANCHES_CONTEXT_KEY = "REMAINING_BRANCHES";
+
 }

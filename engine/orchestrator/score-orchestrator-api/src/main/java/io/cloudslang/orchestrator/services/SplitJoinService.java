@@ -62,4 +62,6 @@ public interface SplitJoinService {
      *
      */
     void joinFinishedSplits();
+
+    int joinFinishedMiBranches(int bulkSize);
 }

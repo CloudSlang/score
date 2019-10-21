@@ -79,6 +79,9 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
             </column>
             <column name="PAYLOAD_SIZE" type="BIGINT"/>
             <column name="CREATE_TIME" type="${timestamp.type}"/>
+            <column name="ACTIVE" type="INT" defaultValue="1">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
 
     </changeSet>
@@ -129,6 +132,15 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
             </column>
             <column name="EXECUTION_OBJECT" type="${blob.type}">
                 <constraints nullable="false" />
+            </column>
+            <column name="SUSPENSION_REASON" type="VARCHAR(20)">
+                    <constraints nullable="false" />
+            </column>
+            <column name="MERGED_BRANCHES" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="LOCKED" type="BOOLEAN">
+                <constraints nullable="false"/>
             </column>
         </createTable>
 
@@ -284,6 +296,21 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         </createTable>
     </changeSet>
 
+    <changeSet id="create execution states to pending executions mapping" author="engine">
+        <createTable tableName="OO_EXECS_STATES_EXECS_MAPPINGS">
+            <column name="ID" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="EXEC_STATE_ID" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="EXEC_ID" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
 
 
 </databaseChangeLog>

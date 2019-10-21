@@ -93,7 +93,7 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
     }
 
     /**
-     * Job that will handle the joining of finished branches.
+     * Job that will handle the joining of finished branches for parallel and non-blocking steps.
      */
     @Override
     public void joinFinishedSplitsJob() {
@@ -168,5 +168,33 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
         }
 
         largeMessagesMonitorService.monitor();
+    }
+
+    @Override
+    public void miMergeBranchesContexts() {
+        try {
+            if (logger.isDebugEnabled()) {
+                logger.debug("MiMergeBranchesContextsJob woke up at " + new Date());
+            }
+            StopWatch stopWatch = new StopWatch();
+            stopWatch.start();
+
+            // try sequentially at most 'ITERATIONS' attempts
+            // quit when there aren't any more results to process
+            boolean moreToJoin;
+
+            for (int i = 0; i < SPLIT_JOIN_ITERATIONS; i++) {
+                int joinedSplits = splitJoinService.joinFinishedMiBranches(SPLIT_JOIN_BULK_SIZE);
+                moreToJoin = (joinedSplits == SPLIT_JOIN_BULK_SIZE);
+                if (!moreToJoin) {
+                    break;
+                }
+            }
+
+            stopWatch.stop();
+            if (logger.isDebugEnabled()) logger.debug("finished MiContextsMediatorJob in " + stopWatch);
+        } catch (Exception ex) {
+            logger.error("MiContextsMediatorJob failed", ex);
+        }
     }
 }

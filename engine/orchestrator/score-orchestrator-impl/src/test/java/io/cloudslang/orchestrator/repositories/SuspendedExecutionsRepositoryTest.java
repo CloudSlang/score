@@ -44,6 +44,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.NON_BLOCKING;
+import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL;
+import static java.util.EnumSet.of;
+
 /**
  * Created with IntelliJ IDEA.
  * User: kravtsov
@@ -71,7 +75,7 @@ public class SuspendedExecutionsRepositoryTest {
         Map<String, String> contexts = new HashMap<>();
         contexts.put("flowContext", "");
         Execution exec = new Execution(2L, 0L, contexts);
-        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec);
+        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec, PARALLEL, false);
 
         repository.save(suspendedExecution);
 
@@ -87,7 +91,7 @@ public class SuspendedExecutionsRepositoryTest {
         contexts.put("flowContext", "");
 
         Execution exec = new Execution(2L, 0L, contexts);
-        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec);
+        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec, PARALLEL, false);
 
         SuspendedExecution saved = repository.save(suspendedExecution);
 
@@ -114,7 +118,7 @@ public class SuspendedExecutionsRepositoryTest {
         contexts.put("flowContext", "");
 
         Execution exec = new Execution(2L, 0L, contexts);
-        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec);
+        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec, PARALLEL, false);
 
         repository.save(suspendedExecution);
 
@@ -133,7 +137,7 @@ public class SuspendedExecutionsRepositoryTest {
         Map<String, String> contexts = new HashMap<>();
         contexts.put("flowContext", "");
         Execution exec = new Execution(2L, 0L, contexts);
-        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 1, exec);
+        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 1, exec, PARALLEL, false);
 
         SuspendedExecution saved = repository.save(suspendedExecution);
 
@@ -144,7 +148,7 @@ public class SuspendedExecutionsRepositoryTest {
 
         finishedBranchRepository.save(finishedBranch);
 
-        List<SuspendedExecution> read = repository.findFinishedSuspendedExecutions(new PageRequest(0, 100));
+        List<SuspendedExecution> read = repository.findFinishedSuspendedExecutions(of(PARALLEL, NON_BLOCKING), new PageRequest(0, 100));
 
         Assert.assertTrue(read.size() == 1);
         Assert.assertEquals(read.get(0).getFinishedBranches().size(), 1);
@@ -156,7 +160,7 @@ public class SuspendedExecutionsRepositoryTest {
         Map<String, String> contexts = new HashMap<>();
         contexts.put("flowContext", "");
         Execution exec = new Execution(2L, 0L, contexts);
-        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec);
+        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec, PARALLEL, false);
 
         SuspendedExecution saved = repository.save(suspendedExecution);
 
@@ -167,7 +171,7 @@ public class SuspendedExecutionsRepositoryTest {
 
         finishedBranchRepository.save(finishedBranch);
 
-        List<SuspendedExecution> read = repository.findFinishedSuspendedExecutions(new PageRequest(0, 100));
+        List<SuspendedExecution> read = repository.findFinishedSuspendedExecutions(of(PARALLEL, NON_BLOCKING), new PageRequest(0, 100));
 
         Assert.assertTrue(read.size() == 0);
     }
@@ -180,7 +184,7 @@ public class SuspendedExecutionsRepositoryTest {
         contexts.put("flowContext", "");
 
         Execution exec = new Execution(2L, 0L, contexts);
-        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec);
+        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec, PARALLEL, false);
 
         repository.save(suspendedExecution);
 

@@ -22,6 +22,7 @@ import io.cloudslang.engine.queue.services.ExecutionQueueService;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
 import io.cloudslang.orchestrator.services.EngineVersionService;
+import io.cloudslang.orchestrator.services.SuspendedExecutionService;
 import io.cloudslang.worker.execution.services.ExecutionService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
 import io.cloudslang.worker.management.services.EndExecutionCallback;
@@ -142,6 +143,11 @@ public class WorkerMonitorsImplTest {
         @Bean
         public WorkerConfigurationService workerConfigurationService() {
             return mock(WorkerConfigurationService.class);
+        }
+
+        @Bean
+        public SuspendedExecutionService suspendedExecutionService() {
+            return mock(SuspendedExecutionService.class);
         }
 
         @Bean

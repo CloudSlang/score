@@ -57,6 +57,7 @@ import io.cloudslang.orchestrator.services.ScoreTriggeringImpl;
 import io.cloudslang.orchestrator.services.SplitJoinServiceImpl;
 import io.cloudslang.orchestrator.services.StubPauseResumeServiceImpl;
 import io.cloudslang.orchestrator.services.SuspendedExecutionCleanerServiceImpl;
+import io.cloudslang.orchestrator.services.SuspendedExecutionServiceImpl;
 import io.cloudslang.orchestrator.services.WorkerDbSupportServiceImpl;
 import io.cloudslang.schema.context.ScoreDatabaseContext;
 import io.cloudslang.schema.context.ScoreDefaultDatasourceContext;
@@ -98,6 +99,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(ScoreEventFactoryImpl.class, "scoreEventFactory");
 		put(QueueListenerImpl.class, "scoreQueueListenenerImpl");
 		put(SplitJoinServiceImpl.class, "splitJoinService");
+		put(SuspendedExecutionServiceImpl.class, "suspendedExecutionService");
 		put(ExecutionRecoveryServiceImpl.class, null);
 		put(WorkerRecoveryServiceImpl.class, null);
         put(MessageRecoveryServiceImpl.class, null);
