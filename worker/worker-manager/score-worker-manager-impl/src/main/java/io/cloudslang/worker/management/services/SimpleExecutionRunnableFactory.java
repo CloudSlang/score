@@ -74,7 +74,7 @@ public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecuti
     @PostConstruct
     public void init() {
         ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("miAsync - %d").build();
-        executorService = new ThreadPoolExecutor(5, 6, MAX_VALUE, MILLISECONDS, new LinkedBlockingDeque<>(20), threadFactory, new ThreadPoolExecutor.CallerRunsPolicy());
+        executorService = new ThreadPoolExecutor(5, 5, MAX_VALUE, MILLISECONDS, new LinkedBlockingDeque<>(20), threadFactory, new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
     @PreDestroy
