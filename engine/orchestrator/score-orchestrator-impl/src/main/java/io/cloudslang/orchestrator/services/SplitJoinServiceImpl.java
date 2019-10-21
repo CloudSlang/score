@@ -38,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +50,7 @@ import static ch.lambdaj.Lambda.on;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.MULTI_INSTANCE;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.NON_BLOCKING;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL;
+import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL_LOOP;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.FINISHED_CHILD_BRANCHES_DATA;
 import static io.cloudslang.score.facade.TempConstants.MI_REMAINING_BRANCHES_CONTEXT_KEY;
 import static java.lang.Integer.parseInt;
@@ -115,8 +117,11 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             if (splitMessage.isExecutable()) {
                 branchTriggerMessages.addAll(prepareExecutionMessages(splitMessage.getChildren(), true));
 
-                final SuspendedExecutionReason stepType = SuspendedExecutionReason.valueOf(splitMessage.getParent()
-                        .getSystemContext().get("STEP_TYPE").toString());
+                Serializable stepTypeSerializable = splitMessage.getParent()
+                        .getSystemContext().get("STEP_TYPE");
+                final SuspendedExecutionReason stepType = stepTypeSerializable != null ?
+                        SuspendedExecutionReason.valueOf(stepTypeSerializable.toString()) :
+                        PARALLEL_LOOP;
 
                 suspendedParents.add(new SuspendedExecution(splitMessage.getParent().getExecutionId().toString(),
                         splitMessage.getSplitId(),
@@ -245,7 +250,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
         // 1. Find all suspended executions that have all their branches ended
         PageRequest pageRequest = new PageRequest(0, bulkSize);
-        List<SuspendedExecution> suspendedExecutions = suspendedExecutionsRepository.findFinishedSuspendedExecutions(of(PARALLEL, NON_BLOCKING), pageRequest);
+        List<SuspendedExecution> suspendedExecutions = suspendedExecutionsRepository.findFinishedSuspendedExecutions(of(PARALLEL, NON_BLOCKING, PARALLEL_LOOP), pageRequest);
 
         return joinAndSendToQueue(suspendedExecutions);
     }

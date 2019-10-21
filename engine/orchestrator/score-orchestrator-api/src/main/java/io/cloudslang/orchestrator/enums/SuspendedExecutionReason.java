@@ -18,5 +18,6 @@ package io.cloudslang.orchestrator.enums;
 public enum SuspendedExecutionReason {
     PARALLEL,
     MULTI_INSTANCE,
-    NON_BLOCKING
+    NON_BLOCKING,
+    PARALLEL_LOOP
 }
