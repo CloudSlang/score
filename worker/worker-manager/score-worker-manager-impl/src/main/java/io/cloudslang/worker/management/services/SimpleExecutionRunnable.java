@@ -32,6 +32,7 @@ import io.cloudslang.worker.management.WorkerConfigurationService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -500,7 +501,8 @@ public class SimpleExecutionRunnable implements Runnable {
 
 
     private void executeSplitStep(Execution execution) throws InterruptedException {
-        String stepType = execution.getSystemContext().get("STEP_TYPE").toString();
+        Serializable stepTypeSerializable = execution.getSystemContext().get("STEP_TYPE");
+        String stepType = stepTypeSerializable != null ? stepTypeSerializable.toString() : null;
         if (StringUtils.equals(stepType, "MULTI_INSTANCE")) {
             executeMiStep(execution);
         } else {
