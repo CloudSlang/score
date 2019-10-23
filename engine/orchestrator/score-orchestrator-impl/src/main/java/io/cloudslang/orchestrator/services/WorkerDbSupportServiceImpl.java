@@ -16,6 +16,7 @@
 
 package io.cloudslang.orchestrator.services;
 
+import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.entities.RunningExecutionPlan;
 import io.cloudslang.score.facade.services.RunningExecutionPlanService;
 import io.cloudslang.worker.management.services.dbsupport.WorkerDbSupportService;
@@ -32,9 +33,17 @@ public class WorkerDbSupportServiceImpl implements WorkerDbSupportService {
     @Autowired
     private RunningExecutionPlanService runningExecutionPlanService;
 
+    @Autowired
+    private SuspendedExecutionService suspendedExecutionService;
+
     @Override
     @Cacheable("running_execution_plans")
     public RunningExecutionPlan readExecutionPlanById(Long runningExecutionPlanId) {
         return runningExecutionPlanService.readExecutionPlanById(runningExecutionPlanId);
+    }
+
+    @Override
+    public void updateSuspendedExecutionMiThrottlingContext(Execution execution) {
+        suspendedExecutionService.updateSuspendedExecutionMiThrottlingContext(execution);
     }
 }

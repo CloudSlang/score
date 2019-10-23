@@ -28,12 +28,8 @@ import java.io.Serializable;
 @Service
 public class SuspendedExecutionServiceImpl implements SuspendedExecutionService {
 
-    private final SuspendedExecutionsRepository suspendedExecutionsRepository;
-
     @Autowired
-    public SuspendedExecutionServiceImpl(SuspendedExecutionsRepository suspendedExecutionsRepository) {
-        this.suspendedExecutionsRepository = suspendedExecutionsRepository;
-    }
+    private SuspendedExecutionsRepository suspendedExecutionsRepository;
 
     @Override
     @Transactional

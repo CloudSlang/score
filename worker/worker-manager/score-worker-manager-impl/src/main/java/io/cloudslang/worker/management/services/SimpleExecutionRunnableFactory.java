@@ -61,32 +61,10 @@ public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecuti
     private WorkerConfigurationService workerConfigurationService;
 
     @Autowired
-    private SuspendedExecutionService suspendedExecutionService;
-
-    @Autowired
     private WorkerManager workerManager;
 
     @Resource
     private String workerUuid;
-
-    private ExecutorService executorService;
-
-    @PostConstruct
-    public void init() {
-        ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("miAsync - %d").build();
-        executorService = new ThreadPoolExecutor(5, 5, MAX_VALUE, MILLISECONDS, new LinkedBlockingDeque<>(20), threadFactory, new ThreadPoolExecutor.CallerRunsPolicy());
-    }
-
-    @PreDestroy
-    public void destroy() {
-        executorService.shutdown();
-        try {
-            executorService.awaitTermination(30, SECONDS);
-        } catch (InterruptedException ignored) {
-        } finally {
-            executorService.shutdownNow();
-        }
-    }
 
     @Override
     public SimpleExecutionRunnable getObject() {
@@ -97,11 +75,9 @@ public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecuti
                 converter,
                 endExecutionCallback,
                 queueStateIdGeneratorService,
-                suspendedExecutionService,
                 workerUuid,
                 workerConfigurationService,
-                workerManager,
-                executorService
+                workerManager
         );
     }
 
