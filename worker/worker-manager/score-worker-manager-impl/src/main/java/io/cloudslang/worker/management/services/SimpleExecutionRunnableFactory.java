@@ -66,25 +66,6 @@ public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecuti
     @Resource
     private String workerUuid;
 
-    private ExecutorService executorService;
-
-    @PostConstruct
-    public void init() {
-        ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("miAsync - %d").build();
-        executorService = new ThreadPoolExecutor(5, 5, MAX_VALUE, MILLISECONDS, new LinkedBlockingDeque<>(20), threadFactory, new ThreadPoolExecutor.CallerRunsPolicy());
-    }
-
-    @PreDestroy
-    public void destroy() {
-        executorService.shutdown();
-        try {
-            executorService.awaitTermination(30, SECONDS);
-        } catch (InterruptedException ignored) {
-        } finally {
-            executorService.shutdownNow();
-        }
-    }
-
     @Override
     public SimpleExecutionRunnable getObject() {
         return new SimpleExecutionRunnable(
