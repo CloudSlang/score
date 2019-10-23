@@ -15,6 +15,7 @@
  */
 
 package io.cloudslang.worker.management.services.dbsupport;
+import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.entities.RunningExecutionPlan;
 
 /**
@@ -30,4 +31,6 @@ public interface WorkerDbSupportService {
      * @return the running execution plan of the given id
      */
     RunningExecutionPlan readExecutionPlanById(Long id);
+
+    void updateSuspendedExecutionMiThrottlingContext(Execution execution);
 }

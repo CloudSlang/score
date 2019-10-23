@@ -16,6 +16,7 @@
 
 package io.cloudslang.worker.execution.services;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.cloudslang.orchestrator.services.PauseResumeService;
 import io.cloudslang.score.api.ControlActionMetadata;
 import io.cloudslang.score.api.ExecutionPlan;
@@ -41,6 +42,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -50,6 +53,10 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeoutException;
 
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.ACTION_TYPE;
@@ -57,15 +64,19 @@ import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SEQUEN
 import static io.cloudslang.score.events.EventConstants.SCORE_STEP_SPLIT_ERROR;
 import static io.cloudslang.score.facade.TempConstants.EXECUTE_CONTENT_ACTION;
 import static io.cloudslang.score.facade.TempConstants.EXECUTE_CONTENT_ACTION_CLASSNAME;
+import static io.cloudslang.score.facade.TempConstants.MI_REMAINING_BRANCHES_CONTEXT_KEY;
 import static io.cloudslang.score.facade.TempConstants.SC_TIMEOUT_MINS;
 import static io.cloudslang.score.facade.TempConstants.SC_TIMEOUT_START_TIME;
 import static io.cloudslang.score.facade.execution.PauseReason.NO_ROBOTS_IN_GROUP;
 import static io.cloudslang.score.facade.execution.PauseReason.PENDING_ROBOT;
 import static java.lang.Boolean.getBoolean;
 import static java.lang.Integer.getInteger;
+import static java.lang.Long.MAX_VALUE;
 import static java.lang.Long.getLong;
 import static java.lang.String.valueOf;
 import static java.lang.Thread.currentThread;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.commons.lang.StringUtils.endsWith;
 
 
@@ -100,6 +111,24 @@ public final class ExecutionServiceImpl implements ExecutionService {
     private final long waitPeriodForTimeoutMillis;
     private final boolean interruptOperationExecution;
     private final boolean enableNewTimeoutMechanism;
+    private ExecutorService executorService;
+
+    @PostConstruct
+    public void init() {
+        ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("miAsync - %d").build();
+        executorService = new ThreadPoolExecutor(5, 5, MAX_VALUE, MILLISECONDS, new LinkedBlockingDeque<>(20), threadFactory, new ThreadPoolExecutor.CallerRunsPolicy());
+    }
+
+    @PreDestroy
+    public void destroy() {
+        executorService.shutdown();
+        try {
+            executorService.awaitTermination(30, SECONDS);
+        } catch (InterruptedException ignored) {
+        } finally {
+            executorService.shutdownNow();
+        }
+    }
 
     public ExecutionServiceImpl() {
         this.operationTimeoutMillis = getSafeIntProperty("execution.operationTimeoutInSeconds",
@@ -163,6 +192,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             }
             // dum bus event
             dumpBusEvents(execution);
+            updateMiIfRequired(execution);
             return execution;
         } catch (InterruptedException ex) {
             throw ex;
@@ -174,6 +204,13 @@ public final class ExecutionServiceImpl implements ExecutionService {
             return execution;
         }
     }
+
+    private void updateMiIfRequired(Execution execution) {
+        if (execution.getSystemContext().containsKey(MI_REMAINING_BRANCHES_CONTEXT_KEY)) {
+            executorService.execute(() -> workerDbSupportService.updateSuspendedExecutionMiThrottlingContext(execution));
+        }
+    }
+
 
     @Override
     public void pauseSequentialExecution(Execution execution) throws InterruptedException {

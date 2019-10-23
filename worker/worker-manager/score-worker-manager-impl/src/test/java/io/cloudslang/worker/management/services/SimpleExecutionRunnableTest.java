@@ -103,8 +103,8 @@ public class SimpleExecutionRunnableTest {
     @Test
     public void testGetExecutionMessage() throws Exception {
         SimpleExecutionRunnable simpleExecutionRunnable = new SimpleExecutionRunnable(executionService, outBuffer,
-                inBuffer, converter, endExecutionCallback, queueStateIdGenerator, suspendedExecutionService, "stam", workerConfigurationService,
-                workerManager, newFixedThreadPool(5));
+                inBuffer, converter, endExecutionCallback, queueStateIdGenerator, "stam", workerConfigurationService,
+                workerManager);
         ExecutionMessage executionMessage = simpleExecutionRunnable.getExecutionMessage();
         Assert.assertNull(executionMessage);
 
@@ -131,8 +131,8 @@ public class SimpleExecutionRunnableTest {
         when(workerManager.isFromCurrentThreadPool(anyString())).thenReturn(true);
 
         SimpleExecutionRunnable simpleExecutionRunnable = new SimpleExecutionRunnable(executionService, outBuffer,
-                inBuffer, converter, endExecutionCallback, queueStateIdGenerator, suspendedExecutionService, "stam", workerConfigurationService,
-                workerManager, newFixedThreadPool(5));
+                inBuffer, converter, endExecutionCallback, queueStateIdGenerator, "stam", workerConfigurationService,
+                workerManager);
 
         ExecutionMessage executionMessage = new ExecutionMessage();
         executionMessage.setMsgId(String.valueOf(100L));

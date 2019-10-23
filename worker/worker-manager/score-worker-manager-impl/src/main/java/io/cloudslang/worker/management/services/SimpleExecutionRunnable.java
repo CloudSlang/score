@@ -23,7 +23,6 @@ import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
 import io.cloudslang.orchestrator.entities.SplitMessage;
-import io.cloudslang.orchestrator.services.SuspendedExecutionService;
 import io.cloudslang.score.facade.TempConstants;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
@@ -35,7 +34,6 @@ import org.apache.log4j.Logger;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 
 import static io.cloudslang.score.facade.TempConstants.MI_REMAINING_BRANCHES_CONTEXT_KEY;
 import static java.lang.Boolean.getBoolean;
@@ -62,8 +60,6 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private final QueueStateIdGeneratorService queueStateIdGeneratorService;
 
-    private final SuspendedExecutionService suspendedExecutionService;
-
     private final String workerUUID;
 
     private final WorkerConfigurationService workerConfigurationService;
@@ -72,29 +68,24 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private final WorkerManager workerManager;
 
-    private final ExecutorService executorService;
-
     public SimpleExecutionRunnable(ExecutionService executionService,
                                    OutboundBuffer outBuffer,
                                    InBuffer inBuffer,
                                    ExecutionMessageConverter converter,
                                    EndExecutionCallback endExecutionCallback,
                                    QueueStateIdGeneratorService queueStateIdGeneratorService,
-                                   SuspendedExecutionService suspendedExecutionService, String workerUUID,
+                                   String workerUUID,
                                    WorkerConfigurationService workerConfigurationService,
-                                   WorkerManager workerManager,
-                                   ExecutorService executorService) {
+                                   WorkerManager workerManager) {
         this.executionService = executionService;
         this.outBuffer = outBuffer;
         this.inBuffer = inBuffer;
         this.converter = converter;
         this.endExecutionCallback = endExecutionCallback;
         this.queueStateIdGeneratorService = queueStateIdGeneratorService;
-        this.suspendedExecutionService = suspendedExecutionService;
         this.workerUUID = workerUUID;
         this.workerConfigurationService = workerConfigurationService;
         this.workerManager = workerManager;
-        this.executorService = executorService;
 
         // System property - whether the executions are recoverable in case of restart/failure.
         this.isRecoveryDisabled = getBoolean("is.recovery.disabled");
@@ -197,12 +188,7 @@ public class SimpleExecutionRunnable implements Runnable {
     }
 
     private boolean isMiRunning(Execution nextStepExecution) {
-        if (nextStepExecution.getSystemContext().containsKey(MI_REMAINING_BRANCHES_CONTEXT_KEY)) {
-            executorService.execute(() -> suspendedExecutionService.updateSuspendedExecutionMiThrottlingContext(nextStepExecution));
-            return true;
-        } else {
-            return false;
-        }
+        return nextStepExecution.getSystemContext().containsKey(MI_REMAINING_BRANCHES_CONTEXT_KEY);
     }
 
     private boolean preconditionNotFulfilled(Execution nextStepExecution) {

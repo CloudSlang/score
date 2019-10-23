@@ -61,9 +61,6 @@ public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecuti
     private WorkerConfigurationService workerConfigurationService;
 
     @Autowired
-    private SuspendedExecutionService suspendedExecutionService;
-
-    @Autowired
     private WorkerManager workerManager;
 
     @Resource
@@ -97,11 +94,9 @@ public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecuti
                 converter,
                 endExecutionCallback,
                 queueStateIdGeneratorService,
-                suspendedExecutionService,
                 workerUuid,
                 workerConfigurationService,
-                workerManager,
-                executorService
+                workerManager
         );
     }
 
