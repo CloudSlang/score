@@ -276,7 +276,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
     @Override
     public List<Execution> executeSplitForMi(Execution execution,
                                              String splitUuid,
-                                             int nrOfAlreadyCreatedBranches) throws InterruptedException {
+                                             int nrOfAlreadyCreatedBranches,
+                                             int totalNrOfBranches) throws InterruptedException {
         try {
             ExecutionStep currStep = loadExecutionStep(execution);
             // Check if this execution was paused
@@ -293,7 +294,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             // Run the split step
             List<StartBranchDataContainer> newBranches = execution.getSystemContext().removeBranchesData();
             List<Execution> newExecutions = createChildExecutionsForMi(execution.getExecutionId(), newBranches,
-                    splitUuid, nrOfAlreadyCreatedBranches);
+                    splitUuid, nrOfAlreadyCreatedBranches, totalNrOfBranches);
 
             Serializable miInputs = execution.getSystemContext().get("MI_INPUTS");
             if (miInputs == null) {
@@ -350,7 +351,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
     private static List<Execution> createChildExecutionsForMi(Long executionId,
                                                               List<StartBranchDataContainer> newBranches,
                                                               String splitUuid,
-                                                              int nrOfAlreadyCreatedBranches) {
+                                                              int nrOfAlreadyCreatedBranches,
+                                                              int totalNrOfBranches) {
         List<Execution> newExecutions = new ArrayList<>();
         ListIterator<StartBranchDataContainer> listIterator = newBranches.listIterator();
         int count = 0;
@@ -360,7 +362,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
                     from.getContexts(), from.getSystemContext());
 
             to.getSystemContext().setSplitId(splitUuid);
-            int branchIndexInSplitStep = nrOfAlreadyCreatedBranches + count++ + 1;
+            int branchIndexInSplitStep = totalNrOfBranches - nrOfAlreadyCreatedBranches - newBranches.size() + count++;
             to.getSystemContext().setBranchId(splitUuid + ":" + branchIndexInSplitStep);
             newExecutions.add(to);
         }
