@@ -197,6 +197,39 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     ") e " +
                     "WHERE total < ? ";
 
+    final private String QUERY_WORKER_SQL_MYSQL =
+            "SELECT EXEC_STATE_ID, " +
+                    "    ASSIGNED_WORKER, " +
+                    "    EXEC_GROUP, " +
+                    "    STATUS, " +
+                    "    PAYLOAD, " +
+                    "    MSG_SEQ_ID, " +
+                    "    MSG_ID, " +
+                    "    CREATE_TIME " +
+                    "FROM (" +
+                    "   SELECT EXEC_STATE_ID, " +
+                    "       ASSIGNED_WORKER, " +
+                    "       EXEC_GROUP, " +
+                    "       STATUS, " +
+                    "       PAYLOAD, " +
+                    "       MSG_SEQ_ID, " +
+                    "       MSG_ID, " +
+                    "       q.CREATE_TIME, " +
+                    "       (@csum:=@csum + PAYLOAD_SIZE) AS total " +
+                    "   FROM OO_EXECUTION_QUEUES q, " +
+                    "       OO_EXECUTION_STATES s JOIN(SELECT @csum:=0) c " +
+                    "   WHERE (q.ASSIGNED_WORKER = ?)  AND " +
+                    "       (q.STATUS IN (:status)) AND " +
+                    "       (s.PAYLOAD_SIZE < ?) AND " +
+                    " 	    (s.ACTIVE = 1) AND " +
+                    "       (q.EXEC_STATE_ID = s.ID) AND " +
+                    "       (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
+                    "                 FROM  OO_EXECUTION_QUEUES qq " +
+                    "                 WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
+                    "   ORDER BY q.CREATE_TIME " +
+                    ") e " +
+                    "WHERE total < ? ";
+
     final private String QUERY_WORKER_RECOVERY_SQL =
             "SELECT         EXEC_STATE_ID,      " +
                     "       ASSIGNED_WORKER,      " +
@@ -314,18 +347,32 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         deletePendingExecutionStateJdbcTemplate = new JdbcTemplate(dataSource);
 
         useLargeMessageQuery = Boolean.parseBoolean(System.getProperty("score.poll.use.large.message.query", "true"));
-        workerQuery = isMssql() ? QUERY_WORKER_SQL_MSSQL : QUERY_WORKER_SQL;
 
         if (useLargeMessageQuery) {
+            String dbms = getDatabaseProductName();
+
+            if (isMssql(dbms)) {
+                workerQuery = QUERY_WORKER_SQL_MSSQL;
+
+            } else if (isMysql(dbms)) {
+                workerQuery = QUERY_WORKER_SQL_MYSQL;
+
+            } else {
+                workerQuery = QUERY_WORKER_SQL;
+            }
+
             try {
                 // testing query
                 poll("worker1", 1, 1, ExecStatus.ASSIGNED);
             } catch (RuntimeException ex) {
                 // query failed, fallback on old mechanism
                 useLargeMessageQuery = false;
-                workerQuery = QUERY_WORKER_LEGACY_MEMORY_HANDLING_SQL;
                 logger.info("Large message poll query failed" + ex.getMessage());
             }
+        }
+
+        if (!useLargeMessageQuery) {
+            workerQuery = QUERY_WORKER_LEGACY_MEMORY_HANDLING_SQL;
         }
 
         logger.info("Poll using large message query: " + useLargeMessageQuery);
@@ -471,17 +518,25 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         return executePoll(maxSize, sqlStat, args);
     }
 
-    private boolean isMssql() {
+    private String getDatabaseProductName() {
+        String dbms = "";
         try {
-            String dbms = (String) JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName");
+            dbms = (String) JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName");
 
             logger.info("Database product name: " + dbms);
-
-            return StringUtils.containsIgnoreCase(dbms, MSSQL);
         } catch (MetaDataAccessException e) {
             logger.warn("Database type could not be determined!", e);
-            return false;
         }
+
+        return dbms;
+    }
+
+    private boolean isMssql(String dbms) {
+        return StringUtils.containsIgnoreCase(dbms, MSSQL);
+    }
+
+    private boolean isMysql(String dbms) {
+        return StringUtils.containsIgnoreCase(dbms, MYSQL);
     }
 
     private List<ExecutionMessage> executePoll(int maxSize, String sql, Object[] args) {
