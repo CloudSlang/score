@@ -498,7 +498,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
                     updateMetadata(execution, runningExecutionPlan);
                     ExecutionStep currStep = runningExecutionPlan.getExecutionPlan().getStep(position);
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Begin step: " + position + " in flow " + runningExecutionPlan.getExecutionPlan().getFlowUuid() + " [" + execution.getExecutionId() + "]");
+                        logger.debug("Begin step: " + position
+                                + " in flow " + runningExecutionPlan.getExecutionPlan().getFlowUuid()
+                                + " [" + execution.getExecutionId() + "]");
                     }
                     if (currStep != null) {
                         return currStep;
