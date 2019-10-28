@@ -178,7 +178,7 @@ public class SimpleExecutionRunnable implements Runnable {
                 isExecutionCancelled(nextStepExecution) ||
                 isExecutionPaused(nextStepExecution) ||
                 isExecutionTerminating(nextStepExecution) ||
-                isMiRunning(nextStepExecution) ||
+//                isMiRunning(nextStepExecution) ||
                 isSplitStep(nextStepExecution) ||
                 shouldChangeWorkerGroup(nextStepExecution) ||
                 isPersistStep(nextStepExecution) ||

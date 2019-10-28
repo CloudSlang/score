@@ -192,7 +192,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             }
             // dum bus event
             dumpBusEvents(execution);
-            updateMiIfRequired(execution);
+//            updateMiIfRequired(execution);
             return execution;
         } catch (InterruptedException ex) {
             throw ex;
