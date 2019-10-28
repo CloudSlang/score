@@ -183,7 +183,7 @@ public class SimpleExecutionRunnable implements Runnable {
                 shouldChangeWorkerGroup(nextStepExecution) ||
                 isPersistStep(nextStepExecution) ||
                 isRecoveryCheckpoint(nextStepExecution) ||
-                preconditionNotFulfilled(nextStepExecution) ||
+                //preconditionNotFulfilled(nextStepExecution) ||
                 isRunningTooLong(startTime, nextStepExecution);
     }
 
