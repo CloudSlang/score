@@ -239,7 +239,7 @@ public class ExecutionMessage implements Message, Cloneable {
 		this.status = status;
 	}
 
-	synchronized public void incMsgSeqId() {
+	public synchronized void incMsgSeqId() {
 		this.msgSeqId = msgSeqId + 1;
 	}
 

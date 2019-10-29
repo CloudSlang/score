@@ -261,7 +261,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         private Message[] messages;
 
         public CompoundMessage(Message[] messages) {
-            this.messages = messages.clone();
+            this.messages = messages;
         }
 
         @Override
