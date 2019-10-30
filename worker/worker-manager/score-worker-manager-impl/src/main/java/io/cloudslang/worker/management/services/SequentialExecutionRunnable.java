@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.cloudslang.worker.management.services;
 
 import io.cloudslang.engine.node.entities.WorkerNode;
@@ -42,8 +41,7 @@ import static java.lang.Long.parseLong;
 import static java.lang.Thread.currentThread;
 import static java.util.UUID.randomUUID;
 
-
-public class SimpleExecutionRunnable implements Runnable, ExecutionRunnable {
+public class SequentialExecutionRunnable implements Runnable, ExecutionRunnable {
 
     private static final Logger logger = Logger.getLogger(SimpleExecutionRunnable.class);
 
@@ -69,7 +67,7 @@ public class SimpleExecutionRunnable implements Runnable, ExecutionRunnable {
 
     private final WorkerManager workerManager;
 
-    public SimpleExecutionRunnable(ExecutionService executionService,
+    public SequentialExecutionRunnable(ExecutionService executionService,
                                    OutboundBuffer outBuffer,
                                    InBuffer inBuffer,
                                    ExecutionMessageConverter converter,
@@ -184,11 +182,37 @@ public class SimpleExecutionRunnable implements Runnable, ExecutionRunnable {
                 shouldChangeWorkerGroup(nextStepExecution) ||
                 isPersistStep(nextStepExecution) ||
                 isRecoveryCheckpoint(nextStepExecution) ||
+                preconditionNotFulfilled(nextStepExecution) ||
                 isRunningTooLong(startTime, nextStepExecution);
     }
 
     private boolean isMiRunning(Execution nextStepExecution) {
         return nextStepExecution.getSystemContext().containsKey(MI_REMAINING_BRANCHES_CONTEXT_KEY);
+    }
+
+    private boolean preconditionNotFulfilled(Execution nextStepExecution) {
+        if (nextStepExecution.getSystemContext().getPreconditionNotFulfilled()) {
+            Payload payload = executionMessage.getPayload();
+            executionMessage.setStatus(ExecStatus.FINISHED);
+            executionMessage.incMsgSeqId();
+            executionMessage.setPayload(null);
+
+            ExecutionMessage preconditionNotFulfilledMessage = (ExecutionMessage) executionMessage.clone();
+            preconditionNotFulfilledMessage.setStatus(ExecStatus.FAILED);
+            preconditionNotFulfilledMessage.incMsgSeqId();
+
+            Execution execution = converter.extractExecution(payload);
+            execution.getSystemContext().setPreconditionNotFulfilled();
+            preconditionNotFulfilledMessage.setPayload(converter.createPayload(execution));
+
+            try {
+                outBuffer.put(executionMessage, preconditionNotFulfilledMessage);
+            } catch (InterruptedException e) {
+                logger.error("Could not send the ExecutionMessage: ", e);
+            }
+            return true;
+        }
+        return false;
     }
 
     // If execution was paused it sends the current step with status FINISHED and that is all...

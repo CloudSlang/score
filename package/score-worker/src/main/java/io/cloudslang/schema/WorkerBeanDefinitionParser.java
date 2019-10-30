@@ -32,6 +32,7 @@ import io.cloudslang.worker.management.monitor.WorkerStateUpdateServiceImpl;
 import io.cloudslang.worker.management.services.InBuffer;
 import io.cloudslang.worker.management.services.OutboundBufferImpl;
 import io.cloudslang.worker.management.services.RetryTemplate;
+import io.cloudslang.worker.management.services.SequentialExecutionRunnableFactory;
 import io.cloudslang.worker.management.services.SimpleExecutionRunnableFactory;
 import io.cloudslang.worker.management.services.SynchronizationManagerImpl;
 import io.cloudslang.worker.management.services.WorkerConfigurationUtils;
@@ -71,6 +72,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(OutboundBufferImpl.class, "outBuffer");
 		put(RetryTemplate.class, null);
 		put(SimpleExecutionRunnableFactory.class, null);
+		put(SequentialExecutionRunnableFactory.class, null);
 		put(WorkerManagerMBean.class, "io.cloudslang.worker.management.services.WorkerManagerMBean");
 		put(WorkerRecoveryManagerImpl.class, null);
 		put(ReflectionAdapterImpl.class, null);
