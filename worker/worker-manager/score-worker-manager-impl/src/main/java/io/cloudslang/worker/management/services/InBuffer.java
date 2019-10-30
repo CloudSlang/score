@@ -20,7 +20,6 @@ import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
-import io.cloudslang.runtime.impl.sequential.DefaultSequentialExecutionServiceImpl;
 import io.cloudslang.worker.management.ExecutionRunnable;
 import io.cloudslang.worker.management.ExecutionsActivityListener;
 import io.cloudslang.worker.management.monitor.WorkerStateUpdateService;
@@ -28,7 +27,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
@@ -73,9 +71,6 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     private SimpleExecutionRunnableFactory simpleExecutionRunnableFactory;
 
     @Autowired
-    private SequentialExecutionRunnableFactory sequentialExecutionRunnableFactory;
-
-    @Autowired
     private OutboundBuffer outBuffer;
 
     @Autowired
@@ -93,9 +88,6 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
     @Autowired
     private WorkerStateUpdateService workerStateUpdateService;
-
-    @Autowired
-    private ApplicationContext applicationContext;
 
     private Thread fillBufferThread = new Thread(this);
     private boolean inShutdown;
@@ -264,12 +256,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
     private void addExecutionMessageInner(ExecutionMessage msg) {
 
-       ExecutionRunnable executionRunnable;
-        if(!(applicationContext.getBean("sequentialExecutionService") instanceof DefaultSequentialExecutionServiceImpl)) {
-            executionRunnable = sequentialExecutionRunnableFactory.getObject();
-        } else {
-            executionRunnable = simpleExecutionRunnableFactory.getObject();
-        }
+        ExecutionRunnable executionRunnable = simpleExecutionRunnableFactory.getObject();
         executionRunnable.setExecutionMessage(msg);
         long executionId = parseLong(msg.getMsgId());
         workerManager.addExecution(executionId, executionRunnable);

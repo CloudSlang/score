@@ -16,11 +16,12 @@
 
 package io.cloudslang.worker.management.services;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
-import io.cloudslang.orchestrator.services.SuspendedExecutionService;
 import io.cloudslang.worker.execution.services.ExecutionService;
+import io.cloudslang.worker.execution.services.RobotAvailabilityService;
+import io.cloudslang.worker.execution.services.ScoreRobotAvailabilityServiceImpl;
+import io.cloudslang.worker.management.ExecutionRunnable;
 import io.cloudslang.worker.management.WorkerConfigurationService;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,16 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
 
-import static java.lang.Long.MAX_VALUE;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
-
-public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecutionRunnable> {
+public class SimpleExecutionRunnableFactory implements FactoryBean<ExecutionRunnable> {
 
     @Autowired
     private ExecutionService executionService;
@@ -66,9 +59,30 @@ public class SimpleExecutionRunnableFactory implements FactoryBean<SimpleExecuti
     @Resource
     private String workerUuid;
 
+    @Autowired
+    private RobotAvailabilityService robotAvailabilityService;
+
+    private boolean isSequential;
+
+    @PostConstruct
+    public void init() {
+        isSequential = !(robotAvailabilityService instanceof ScoreRobotAvailabilityServiceImpl);
+    }
+
+
     @Override
-    public SimpleExecutionRunnable getObject() {
-        return new SimpleExecutionRunnable(
+    public ExecutionRunnable getObject() {
+        return isSequential ? new SequentialExecutionRunnable(executionService,
+                outBuffer,
+                inBuffer,
+                converter,
+                endExecutionCallback,
+                queueStateIdGeneratorService,
+                workerUuid,
+                workerConfigurationService,
+                workerManager)
+
+                : new SimpleExecutionRunnable(
                 executionService,
                 outBuffer,
                 inBuffer,
