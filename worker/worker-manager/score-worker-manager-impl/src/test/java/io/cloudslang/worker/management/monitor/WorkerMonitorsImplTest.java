@@ -57,10 +57,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = WorkerMonitorsImplTest.MyTestConfig.class)
+//@RunWith(SpringJUnit4ClassRunner.class)
+//@ContextConfiguration(classes = WorkerMonitorsImplTest.MyTestConfig.class)
 public class WorkerMonitorsImplTest {
-    @Autowired
+   /* @Autowired
     private WorkerManager workerManager;
 
     @Autowired
@@ -258,5 +258,5 @@ public class WorkerMonitorsImplTest {
             return mock(ExecutionQueueService.class);
         }
 
-    }
+    }*/
 }
