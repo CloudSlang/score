@@ -252,8 +252,11 @@ public class SimpleExecutionRunnable implements Runnable {
             ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage,
                     inProgressMessage}; // For the outBuffer
 
+            Payload inProgressMessagePayload = inProgressMessage.getPayload();
+            // We do not need the payload for the inBuffer shortcut, but we need it for outbuffer
+            inProgressMessage.setPayload(null);
             ExecutionMessage inProgressMessageForInBuffer = (ExecutionMessage) inProgressMessage.clone();
-            inProgressMessageForInBuffer.setPayload(null); // We do not need the payload for the inBuffer shortcut
+            inProgressMessage.setPayload(inProgressMessagePayload);
 
             try {
                 // The order is important
