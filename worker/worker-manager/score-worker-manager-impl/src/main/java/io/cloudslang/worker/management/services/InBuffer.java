@@ -39,7 +39,9 @@ import static ch.lambdaj.Lambda.on;
 public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Runnable{
     private static final Logger logger = Logger.getLogger(InBuffer.class);
 
-    private final static long MEMORY_THRESHOLD = 50000000; // 50 Mega byte
+    private final static long THRESHOLD = Runtime.getRuntime().maxMemory() *12 / 100;
+    private final static long ONE_GB = 1_000_000_000;
+    private final static long MEMORY_THRESHOLD = Math.min(THRESHOLD, ONE_GB);
     private final static int MINIMUM_GC_DELTA = 10000; // minimum delta between garbage collections in milliseconds
 
     @Autowired
