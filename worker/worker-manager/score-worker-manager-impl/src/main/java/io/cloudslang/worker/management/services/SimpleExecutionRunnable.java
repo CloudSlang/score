@@ -526,7 +526,7 @@ public class SimpleExecutionRunnable implements Runnable {
             String commonSplitUuid = randomUUID().toString();
             while (currentNumberOfLanes != totalNumberOfLanes) {
                 List<Execution> newExecutions = executionService.executeSplitForMi(execution, commonSplitUuid,
-                        currentNumberOfLanes);
+                        currentNumberOfLanes, totalNumberOfLanes);
 
                 String splitId = getSplitId(newExecutions);
                 currentNumberOfLanes += newExecutions.size();

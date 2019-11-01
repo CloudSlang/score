@@ -71,6 +71,7 @@ import static io.cloudslang.score.facade.execution.PauseReason.NO_ROBOTS_IN_GROU
 import static io.cloudslang.score.facade.execution.PauseReason.PENDING_ROBOT;
 import static java.lang.Boolean.getBoolean;
 import static java.lang.Integer.getInteger;
+import static java.lang.Integer.parseInt;
 import static java.lang.Long.MAX_VALUE;
 import static java.lang.Long.getLong;
 import static java.lang.String.valueOf;
@@ -276,7 +277,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
     @Override
     public List<Execution> executeSplitForMi(Execution execution,
                                              String splitUuid,
-                                             int nrOfAlreadyCreatedBranches) throws InterruptedException {
+                                             int nrOfAlreadyCreatedBranches,
+                                             int totalNrOfBranches) throws InterruptedException {
         try {
             ExecutionStep currStep = loadExecutionStep(execution);
             // Check if this execution was paused
@@ -292,8 +294,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
             // Run the split step
             List<StartBranchDataContainer> newBranches = execution.getSystemContext().removeBranchesData();
+            int throttleSize = parseInt(execution.getSystemContext().get("MI_THROTTLE_SIZE").toString());
             List<Execution> newExecutions = createChildExecutionsForMi(execution.getExecutionId(), newBranches,
-                    splitUuid, nrOfAlreadyCreatedBranches);
+                    splitUuid, nrOfAlreadyCreatedBranches, totalNrOfBranches, throttleSize);
 
             Serializable miInputs = execution.getSystemContext().get("MI_INPUTS");
             if (miInputs == null) {
@@ -350,18 +353,21 @@ public final class ExecutionServiceImpl implements ExecutionService {
     private static List<Execution> createChildExecutionsForMi(Long executionId,
                                                               List<StartBranchDataContainer> newBranches,
                                                               String splitUuid,
-                                                              int nrOfAlreadyCreatedBranches) {
+                                                              int nrOfAlreadyCreatedBranches,
+                                                              int totalNrOfBranches,
+                                                              int throttleSize) {
         List<Execution> newExecutions = new ArrayList<>();
         ListIterator<StartBranchDataContainer> listIterator = newBranches.listIterator();
-        int count = 0;
+        int count = (nrOfAlreadyCreatedBranches + newBranches.size() == totalNrOfBranches) ?
+                0 :
+                (nrOfAlreadyCreatedBranches + throttleSize);
         while (listIterator.hasNext()) {
             StartBranchDataContainer from = listIterator.next();
             Execution to = new Execution(executionId, from.getExecutionPlanId(), from.getStartPosition(),
                     from.getContexts(), from.getSystemContext());
 
             to.getSystemContext().setSplitId(splitUuid);
-            int branchIndexInSplitStep = nrOfAlreadyCreatedBranches + count++ + 1;
-            to.getSystemContext().setBranchId(splitUuid + ":" + branchIndexInSplitStep);
+            to.getSystemContext().setBranchId(splitUuid + ":" + count++);
             newExecutions.add(to);
         }
         return newExecutions;
