@@ -23,15 +23,11 @@ import net.jpountz.lz4.LZ4FrameOutputStream.BLOCKSIZE;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 
 
 public class ExecutionMessageConverter {
-    private static final int SIZE = 1024;
+    public static final int SIZE = 1024;
 
     @Autowired(required = false)
     private SensitiveDataHandler sensitiveDataHandler;
@@ -46,7 +42,7 @@ public class ExecutionMessageConverter {
 
     public Payload createPayload(Execution execution, boolean setContainsSensitiveData) {
         Payload payload = new Payload(objToBytes(execution));
-        if (setContainsSensitiveData || checkContainsSensitiveData(execution)) {
+        if(setContainsSensitiveData || checkContainsSensitiveData(execution)) {
             setSensitive(payload);
         }
         return payload;
@@ -64,31 +60,42 @@ public class ExecutionMessageConverter {
     private <T> T objFromBytes(byte[] bytes) {
         ObjectInputStream ois = null;
         try {
+            //2 Buffers are added to increase performance
             ByteArrayInputStream is = new ByteArrayInputStream(bytes);
+
             skipPayloadMetaData(is);
 
-            ois = new ObjectInputStream(new LZ4FrameInputStream(is));
-            // noinspection unchecked
-            return (T) ois.readObject();
-        } catch (IOException | ClassNotFoundException ex) {
+            BufferedInputStream bis = new BufferedInputStream(is);
+            ois = new ObjectInputStream(bis);
+
+            //noinspection unchecked
+            return (T)ois.readObject();
+        }
+        catch(IOException | ClassNotFoundException ex) {
             throw new RuntimeException("Failed to read execution plan from byte[]. Error: ", ex);
-        } finally {
+        }
+        finally {
             IOUtils.closeQuietly(ois);
         }
+
     }
 
-    private byte[] objToBytes(Object obj) {
+    private byte[] objToBytes(Object obj){
         ObjectOutputStream oos = null;
         try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream(SIZE);
-            initPayloadMetaData(baos);
+            ByteArrayOutputStream bout = new ByteArrayOutputStream(SIZE);
 
-            oos = new ObjectOutputStream(new LZ4FrameOutputStream(baos, BLOCKSIZE.SIZE_256KB));
+            initPayloadMetaData(bout);
+
+            BufferedOutputStream bos = new BufferedOutputStream(bout);
+            oos = new ObjectOutputStream(bos);
+
             oos.writeObject(obj);
             oos.flush();
 
-            return baos.toByteArray();
-        } catch (IOException ex) {
+            return bout.toByteArray();
+        }
+        catch(IOException ex) {
             throw new RuntimeException("Failed to serialize execution plan. Error: ", ex);
         } finally {
             IOUtils.closeQuietly(oos);
@@ -112,8 +119,8 @@ public class ExecutionMessageConverter {
         return payload.getData()[INFRA_PART_BYTE] == IS_SENSITIVE;
     }
 
-    private void skipPayloadMetaData(ByteArrayInputStream is) {
-        for (int i = 0; i < PAYLOAD_META_DATA_INIT_BYTES.length; i++) {
+    private void skipPayloadMetaData(ByteArrayInputStream is) throws IOException {
+        for(int i = 0; i < PAYLOAD_META_DATA_INIT_BYTES.length; i++) {
             is.read();
         }
     }
