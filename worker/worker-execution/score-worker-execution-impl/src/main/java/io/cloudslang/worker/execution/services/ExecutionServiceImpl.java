@@ -44,6 +44,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -475,42 +476,40 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     private void dumpBusEvents(Execution execution) throws InterruptedException {
-        ArrayDeque<ScoreEvent> eventsQueue = execution.getSystemContext().getEvents();
-        if (eventsQueue == null) {
-            return;
+        final ArrayDeque<ScoreEvent> eventsQueue = execution.getSystemContext().getEvents();
+        if ((eventsQueue != null) && !eventsQueue.isEmpty()) {
+            for (ScoreEvent eventWrapper : eventsQueue) {
+                eventBus.dispatch(eventWrapper);
+            }
+            eventsQueue.clear();
         }
-        for (ScoreEvent eventWrapper : eventsQueue) {
-            eventBus.dispatch(eventWrapper);
-        }
-        eventsQueue.clear();
     }
 
     protected ExecutionStep loadExecutionStep(Execution execution) {
         RunningExecutionPlan runningExecutionPlan;
-        if (execution != null) {
-            // Optimization for external workers - run the content only without loading the execution plan
-            if (execution.getSystemContext().get(TempConstants.CONTENT_EXECUTION_STEP) != null) {
-                return (ExecutionStep) execution.getSystemContext().get(TempConstants.CONTENT_EXECUTION_STEP);
-            }
+        // Optimization for external workers - run the content only without loading the execution plan
+        if (execution.getSystemContext().get(TempConstants.CONTENT_EXECUTION_STEP) != null) {
+            return (ExecutionStep) execution.getSystemContext().get(TempConstants.CONTENT_EXECUTION_STEP);
+        } else {
             Long position = execution.getPosition();
             if (position != null) {
-                runningExecutionPlan = workerDbSupportService
-                        .readExecutionPlanById(execution.getRunningExecutionPlanId());
+                runningExecutionPlan = workerDbSupportService.readExecutionPlanById(execution.getRunningExecutionPlanId());
                 if (runningExecutionPlan != null) {
                     updateMetadata(execution, runningExecutionPlan);
                     ExecutionStep currStep = runningExecutionPlan.getExecutionPlan().getStep(position);
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Begin step: " + position + " in flow " + runningExecutionPlan.getExecutionPlan()
-                                .getFlowUuid() + " [" + execution.getExecutionId() + "]");
+                        logger.debug("Begin step: " + position
+                                + " in flow " + runningExecutionPlan.getExecutionPlan().getFlowUuid()
+                                + " [" + execution.getExecutionId() + "]");
                     }
                     if (currStep != null) {
                         return currStep;
                     }
                 }
             }
+            // If we got here - one of the objects was null
+            throw new RuntimeException("Failed to load ExecutionStep!");
         }
-        // If we got here - one of the objects was null
-        throw new RuntimeException("Failed to load ExecutionStep!");
     }
 
     private void updateMetadata(Execution execution, RunningExecutionPlan runningExecutionPlan) {
