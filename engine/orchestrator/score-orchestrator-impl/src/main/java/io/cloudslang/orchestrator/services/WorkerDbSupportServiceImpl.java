@@ -37,7 +37,6 @@ public class WorkerDbSupportServiceImpl implements WorkerDbSupportService {
     private SuspendedExecutionService suspendedExecutionService;
 
     @Override
-    @Cacheable("running_execution_plans")
     public RunningExecutionPlan readExecutionPlanById(Long runningExecutionPlanId) {
         return runningExecutionPlanService.readExecutionPlanById(runningExecutionPlanId);
     }
