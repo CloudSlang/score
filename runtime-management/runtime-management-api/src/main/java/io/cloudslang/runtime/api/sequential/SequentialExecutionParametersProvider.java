@@ -17,6 +17,7 @@ package io.cloudslang.runtime.api.sequential;
 
 public interface SequentialExecutionParametersProvider {
     Object [] getExecutionParameters();
+    Object [] getCurrentContext();
 
     boolean getExternal();
 }
