@@ -45,23 +45,31 @@ public class ExternalPythonExecutor implements Executor {
     }
 
     private PythonExecutionResult runPythonProcess(String pythonPath, TempExecutionEnvironment executionEnvironment, Map<String, String> inputs) throws IOException {
-        Path stderr = Files.createTempFile(executionEnvironment.parentFolder.toPath(), "stderr", ".txt");
-
         String payload = "{" +
                 "        \"script_name\": \"" + executionEnvironment.userScript.toString().replace("\\", "\\\\") +
-                "    }";
+                "    }\\n";
         ProcessBuilder processBuilder = new ProcessBuilder(Arrays.asList(pythonPath + "python", "-i",
                 executionEnvironment.mainScript.toPath().toString()));
 
-        processBuilder.redirectError(stderr.toFile());
-        processBuilder.directory(executionEnvironment.parentFolder);
         try {
             Process process = processBuilder.start();
-            final StringWriter writer = new StringWriter();
+            final StringWriter outputWriter = new StringWriter();
+            final StringWriter errorWriter = new StringWriter();
 //
+
+
+
             new Thread(() -> {
                 try {
-                    IOUtils.copy(process.getInputStream(), writer);
+                    IOUtils.copy(process.getInputStream(), outputWriter);
+                } catch (IOException e) {
+                    throw new RuntimeException("ceva");
+                }
+            }).start();
+
+            new Thread(() -> {
+                try {
+                    IOUtils.copy(process.getErrorStream(), errorWriter);
                 } catch (IOException e) {
                     throw new RuntimeException("ceva");
                 }
@@ -70,7 +78,9 @@ public class ExternalPythonExecutor implements Executor {
             PrintWriter printWriter = new PrintWriter(process.getOutputStream());
             printWriter.write(payload);
             printWriter.flush();
-            String processOutput = writer.toString();
+
+            String processOutput = outputWriter.toString();
+            String processError = errorWriter.toString();
 
             int exitCode = process.waitFor();
         } catch (IOException | InterruptedException e) {
