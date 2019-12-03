@@ -1,43 +1,48 @@
 import importlib
 import inspect
 
+from utils import SymmetricEncryptor
+
 ENCRYPTED_PREFIX = "{ENCRYPTED}"
-OBFUSCATED_PREFIX = "{OBFUSCATED}"
+UTF_8 = "utf-8"
+EXECUTE_METHOD = "execute"
 
 
-def process_input(key, value):
-    return key, value
+class PythonExecutionWrapper(object):
+    def __init__(self, key):
+        self.encryptor = SymmetricEncryptor(key)
 
+    def __decrypt_input(self, key, value):
+        if value.startswith(ENCRYPTED_PREFIX):
+            return key, self.encryptor.decrypt(value[len(ENCRYPTED_PREFIX):]).decode(UTF_8)
+        return key, value
 
-def __decrypt_inputs__(encrypted_inputs: dict):
-    return dict(map(lambda user_input: process_input(*user_input), encrypted_inputs.items()))
+    def __decrypt_inputs(self, encrypted_inputs: dict):
+        return dict(map(lambda user_input: self.__decrypt_input(*user_input), encrypted_inputs.items()))
 
+    def __encrypt_outputs(self, result, outputs: dict):
+        return dict(map(lambda output: self.__process_output(*output, result), outputs.items()))
 
-def __encrypt__(value):
-    return OBFUSCATED_PREFIX + str(value)
+    def __process_output(self, key, is_sensitive, result: dict):
+        value = str(result[key] if key in result else "")
+        return key, ENCRYPTED_PREFIX + self.encryptor.encrypt(value).decode(UTF_8) if is_sensitive else value
 
+    # noinspection PyMethodMayBeStatic
+    def __validate_arguments(self, actual_input_list, script):
+        expected_inputs = sorted(inspect.getfullargspec(getattr(script, EXECUTE_METHOD))[0])
+        actual_inputs = sorted(actual_input_list)
+        if expected_inputs != actual_inputs:
+            raise Exception("Expected inputs " + str(expected_inputs) +
+                            " are not the same with the actual inputs " + str(actual_inputs))
 
-def __encrypt_outputs__(result, outputs: dict):
-    return dict(map(lambda output: process_output(*output, result), outputs.items()))
+    def execute_action(self, script_name, inputs, outputs):
+        script = importlib.import_module(script_name)
+        self.__validate_arguments(inputs.keys(), script)
 
-
-def process_output(key, is_sensitive, result: dict):
-    value = str(result[key] if key in result else "")
-    return key, __encrypt__(value) if is_sensitive else value
-
-
-def __validate_arguments__(actual_input_list, script):
-    if sorted(inspect.getfullargspec(getattr(script, "execute"))[0]) != sorted(actual_input_list):
-        raise Exception("Missing required input!")
-
-
-def execute_action(script_name, enc_key, encrypted_inputs, outputs):
-    script = importlib.import_module(script_name)
-    __validate_arguments__(encrypted_inputs.keys(), script)
-    decrypted_inputs = __decrypt_inputs__(encrypted_inputs)
-    result = getattr(script, "execute")(**decrypted_inputs)
-    if isinstance(result, dict):
-        final_result = __encrypt_outputs__(result, outputs)
-    else:
-        final_result = {"returnResult": str(result)}
-    return final_result
+        decrypted_inputs = self.__decrypt_inputs(inputs)
+        result = getattr(script, EXECUTE_METHOD)(**decrypted_inputs)
+        if isinstance(result, dict):
+            final_result = self.__encrypt_outputs(result, outputs)
+        else:
+            final_result = {"returnResult": str(result)}
+        return final_result
