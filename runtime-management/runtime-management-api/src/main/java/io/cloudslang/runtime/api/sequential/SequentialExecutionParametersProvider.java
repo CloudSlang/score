@@ -15,9 +15,12 @@
  */
 package io.cloudslang.runtime.api.sequential;
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.Map;
+
 public interface SequentialExecutionParametersProvider {
-    Object [] getExecutionParameters();
-    Object [] getCurrentContext();
+    Map<String, Pair> getExecutionParameters();
 
     boolean getExternal();
 }
