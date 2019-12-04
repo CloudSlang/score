@@ -18,10 +18,13 @@ package io.cloudslang.runtime.impl.python;
 
 import io.cloudslang.dependency.impl.services.DependenciesManagementConfiguration;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
+import io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionNotCachedEngine;
+import io.cloudslang.runtime.impl.python.external.ExternalPythonRuntimeServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
@@ -31,15 +34,29 @@ import org.springframework.context.annotation.Import;
 @Import({DependenciesManagementConfiguration.class})
 public class PythonExecutionEngineConfiguration {
     @Bean
+    @Primary
     public PythonRuntimeService pythonRuntimeService() {
         return new PythonRuntimeServiceImpl();
     }
 
+    @Bean(name = "externalPythonRuntimeService")
+    public PythonRuntimeService externalPythonRuntimeService() {
+        return new ExternalPythonRuntimeServiceImpl();
+    }
+
     @Bean
+    @Primary
     PythonExecutionEngine pythonExecutionEngine() {
         String noCacheEngine = PythonExecutionNotCachedEngine.class.getSimpleName();
         String cacheEngine = PythonExecutionCachedEngine.class.getSimpleName();
         return System.getProperty(PythonExecutionConfigurationConsts.PYTHON_EXECUTOR_ENGINE, cacheEngine).equals(noCacheEngine) ?
                 new PythonExecutionNotCachedEngine() : new PythonExecutionCachedEngine();
     }
+
+    @Bean(name = "externalPythonExecutionEngine")
+    PythonExecutionEngine externalPythonExecutionEngine() {
+        return new ExternalPythonExecutionNotCachedEngine();
+    }
+
+
 }
