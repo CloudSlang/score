@@ -1,3 +1,18 @@
+/*
+ * Copyright © 2014-2017 EntIT Software LLC, a Micro Focus company (L.P.)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.cloudslang.runtime.impl.python.external;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -7,6 +22,7 @@ import io.cloudslang.runtime.impl.Executor;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,8 +56,8 @@ public class ExternalPythonExecutor implements Executor {
         checkIfAbleToExecute();
         TempExecutionEnvironment tempExecutionEnvironment = null;
         try {
-            String pythonPath = System.getProperty("python_path");
-            if (pythonPath.isEmpty() || !new File(pythonPath).exists()) {
+            String pythonPath = System.getProperty("python.path");
+            if (StringUtils.isEmpty(pythonPath) || !new File(pythonPath).exists()) {
                 throw new IllegalArgumentException("Missing or invalid python path");
             }
             tempExecutionEnvironment = generateTempExecutionResources(script);
@@ -130,7 +146,7 @@ public class ExternalPythonExecutor implements Executor {
     }
 
     private ProcessBuilder preparePythonProcess(TempExecutionEnvironment executionEnvironment, String pythonPath) {
-        ProcessBuilder processBuilder = new ProcessBuilder(Arrays.asList(pythonPath + "python",
+        ProcessBuilder processBuilder = new ProcessBuilder(Arrays.asList(Paths.get(pythonPath, "python").toString(),
                 Paths.get(executionEnvironment.parentFolder.toString(), executionEnvironment.mainScriptName).toString()));
         processBuilder.environment().clear();
         processBuilder.directory(executionEnvironment.parentFolder);
@@ -146,45 +162,30 @@ public class ExternalPythonExecutor implements Executor {
         ClassLoader classLoader = ExternalPythonExecutor.class.getClassLoader();
         Path wrapperScriptPath = Paths.get(execTempDirectory.toString(), PYTHON_WRAPPER_FILENAME + PYTHON_SUFFIX);
         Path mainScriptPath = Paths.get(execTempDirectory.toString(), PYTHON_MAIN_FILENAME + PYTHON_SUFFIX);
-        Path utilsScriptPath = Paths.get(execTempDirectory.toString(), PYTHON_UTILS_FILENAME + PYTHON_SUFFIX);
 
         Files.copy(classLoader.getResourceAsStream(PYTHON_WRAPPER_FILENAME + PYTHON_SUFFIX), wrapperScriptPath);
         Files.copy(classLoader.getResourceAsStream(PYTHON_MAIN_FILENAME + PYTHON_SUFFIX), mainScriptPath);
-        Files.copy(classLoader.getResourceAsStream(PYTHON_UTILS_FILENAME + PYTHON_SUFFIX), utilsScriptPath);
 
         String tempUserScriptName = FilenameUtils.getName(tempUserScript.toString());
         String mainScriptName = FilenameUtils.getName(mainScriptPath.toString());
-        String wrapperScriptName = FilenameUtils.getName(wrapperScriptPath.toString());
-        return new TempExecutionEnvironment(tempUserScriptName, mainScriptName, wrapperScriptName, execTempDirectory.toFile());
+        return new TempExecutionEnvironment(tempUserScriptName, mainScriptName, execTempDirectory.toFile());
     }
 
     private String generatePayload(String userScript, Map<String, Serializable> inputs) throws JsonProcessingException {
         Map<String, Serializable> payload = new HashMap<>();
         payload.put("script_name", FilenameUtils.removeExtension(userScript));
-        payload.put("enc_key", "randomstring");
-        payload.put("var", ArrayUtils.EMPTY_INT_ARRAY);
         payload.put("inputs", (Serializable) Optional.ofNullable(inputs).orElse(new HashMap<>()));
-        HashMap<Object, Object> out = new HashMap<>();
-        out.put("ceva", false);
-        payload.put("outputs", out);
         return objectMapper.writeValueAsString(payload);
-    }
-
-    public static void main(String[] args) {
-        System.setProperty("python_path", "C:\\Users\\bajzat\\AppData\\Local\\Programs\\Python\\Python38-32\\");
-        new ExternalPythonExecutor().exec("def execute(): \n    print('ceva') \n    return {'ceva': '2'}", null);
     }
 
     private class TempExecutionEnvironment {
         private String userScriptName;
         private String mainScriptName;
-        private String wrapperScriptName;
         private File parentFolder;
 
-        public TempExecutionEnvironment(String userScriptName, String mainScriptName, String wrapperScriptName, File parentFolder) {
+        public TempExecutionEnvironment(String userScriptName, String mainScriptName, File parentFolder) {
             this.userScriptName = userScriptName;
             this.mainScriptName = mainScriptName;
-            this.wrapperScriptName = wrapperScriptName;
             this.parentFolder = parentFolder;
         }
     }

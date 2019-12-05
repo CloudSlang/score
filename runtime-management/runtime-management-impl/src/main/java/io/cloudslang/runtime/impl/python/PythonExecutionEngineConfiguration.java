@@ -24,7 +24,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
@@ -33,8 +32,7 @@ import org.springframework.context.annotation.Primary;
 @ComponentScan("io.cloudslang.runtime.impl.python")
 @Import({DependenciesManagementConfiguration.class})
 public class PythonExecutionEngineConfiguration {
-    @Bean
-    @Primary
+    @Bean(name = "jythonRuntimeService")
     public PythonRuntimeService pythonRuntimeService() {
         return new PythonRuntimeServiceImpl();
     }
@@ -44,8 +42,7 @@ public class PythonExecutionEngineConfiguration {
         return new ExternalPythonRuntimeServiceImpl();
     }
 
-    @Bean
-    @Primary
+    @Bean(name = "jythonExecutionEngine")
     PythonExecutionEngine pythonExecutionEngine() {
         String noCacheEngine = PythonExecutionNotCachedEngine.class.getSimpleName();
         String cacheEngine = PythonExecutionCachedEngine.class.getSimpleName();
