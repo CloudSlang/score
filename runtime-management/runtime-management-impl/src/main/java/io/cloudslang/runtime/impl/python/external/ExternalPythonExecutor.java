@@ -16,41 +16,37 @@
 package io.cloudslang.runtime.impl.python.external;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.impl.Executor;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Logger;
 
 public class ExternalPythonExecutor implements Executor {
     private static final String PYTHON_SCRIPT_FILENAME = "script";
     private static final String PYTHON_MAIN_FILENAME = "main";
     private static final String PYTHON_SUFFIX = ".py";
-    private static final Logger logger = Logger.getLogger(ExternalPythonExecutor.class.getName());
+    private static Logger logger = Logger.getLogger(ExternalPythonExecutor.class.getName());
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private final Lock allocationLock = new ReentrantLock();
-    private int allocationCount = 0;
-    private boolean executorMarkedForClosure = false;
-    private boolean executorClosed = false;
 
     public PythonExecutionResult exec(String script, Map<String, Serializable> inputs) {
-        checkIfAbleToExecute();
         TempExecutionEnvironment tempExecutionEnvironment = null;
         try {
             String pythonPath = System.getProperty("python.path");
@@ -61,11 +57,13 @@ public class ExternalPythonExecutor implements Executor {
             return runPythonProcess(pythonPath, tempExecutionEnvironment, inputs);
 
         } catch (IOException e) {
-            throw new RuntimeException("Failed to generate execution resources");
+            String message = "Failed to generate execution resources";
+            logger.error(message, e);
+            throw new RuntimeException(message);
         } finally {
             if (tempExecutionEnvironment != null && !FileUtils.deleteQuietly(tempExecutionEnvironment.parentFolder)
                     && tempExecutionEnvironment.parentFolder != null) {
-                logger.warning(String.format("Failed to cleanup python execution resources {%s}", tempExecutionEnvironment.parentFolder));
+                logger.warn(String.format("Failed to cleanup python execution resources {%s}", tempExecutionEnvironment.parentFolder));
             }
         }
     }
@@ -86,60 +84,41 @@ public class ExternalPythonExecutor implements Executor {
 
             int exitCode = process.waitFor();
             if (exitCode != 0) {
+                StringWriter writer = new StringWriter();
+                IOUtils.copy(process.getErrorStream(), writer, StandardCharsets.UTF_8);
+                logger.error(writer.toString());
                 throw new RuntimeException("Script return non 0 result");
             }
 
-            @SuppressWarnings("unchecked")
-            Map<String, Serializable> executionReturnResults = (Map<String, Serializable>) objectMapper.readValue(process.getInputStream(),
-                    Map.class);
+            TypeReference<Map<String, Serializable>> typeRef = new TypeReference<Map<String, Serializable>>() {
+            };
 
-            return new PythonExecutionResult(executionReturnResults);
+            Map<String, Serializable> executionReturnResults = objectMapper.readValue(process.getInputStream(),
+                    typeRef);
+
+            if (executionReturnResults.containsKey("exception")) {
+                String message = (String) executionReturnResults.get("exception");
+                logger.error(String.format("Failed to execute script {%s}", message));
+                throw new ExternalPythonScriptException(message);
+            }
+
+            //noinspection unchecked
+            return new PythonExecutionResult((Map<String, Serializable>) executionReturnResults.get("returnResult"));
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException("Failed to run script");
         }
     }
 
-    private void checkIfAbleToExecute() {
-        if (executorClosed) {
-            throw new RuntimeException("Can't run script. The executor has been closed.");
-        }
-    }
-
     @Override
     public void allocate() {
-        allocationLock.lock();
-        try {
-            allocationCount++;
-        } finally {
-            allocationLock.unlock();
-        }
     }
 
     @Override
     public void release() {
-        allocationLock.lock();
-        try {
-            allocationCount--;
-            if (executorMarkedForClosure && allocationCount == 0) {
-                close();
-            }
-        } finally {
-            allocationLock.unlock();
-        }
     }
 
     @Override
     public void close() {
-        allocationLock.lock();
-        try {
-            executorMarkedForClosure = true;
-            if (allocationCount == 0) {
-                executorClosed = true;
-                logger.info("Python executor successfully closed");
-            }
-        } finally {
-            allocationLock.unlock();
-        }
     }
 
     private ProcessBuilder preparePythonProcess(TempExecutionEnvironment executionEnvironment, String pythonPath) {
@@ -169,16 +148,16 @@ public class ExternalPythonExecutor implements Executor {
     private String generatePayload(String userScript, Map<String, Serializable> inputs) throws JsonProcessingException {
         Map<String, Serializable> payload = new HashMap<>();
         payload.put("script_name", FilenameUtils.removeExtension(userScript));
-        payload.put("inputs", (Serializable) Optional.ofNullable(inputs).orElse(new HashMap<>()));
+        payload.put("inputs", new HashMap<>());
         return objectMapper.writeValueAsString(payload);
     }
 
     private class TempExecutionEnvironment {
-        private String userScriptName;
-        private String mainScriptName;
-        private File parentFolder;
+        private final String userScriptName;
+        private final String mainScriptName;
+        private final File parentFolder;
 
-        public TempExecutionEnvironment(String userScriptName, String mainScriptName, File parentFolder) {
+        private TempExecutionEnvironment(String userScriptName, String mainScriptName, File parentFolder) {
             this.userScriptName = userScriptName;
             this.mainScriptName = mainScriptName;
             this.parentFolder = parentFolder;
