@@ -24,6 +24,8 @@ import io.cloudslang.dependency.impl.services.utils.UnzipUtil;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
+import io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionNotCachedEngine;
+import io.cloudslang.runtime.impl.python.external.ExternalPythonRuntimeServiceImpl;
 import io.cloudslang.score.events.EventBus;
 import org.junit.Assert;
 import org.junit.Assume;
@@ -38,6 +40,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import javax.annotation.Resource;
 import java.io.File;
 import java.io.Serializable;
 import java.text.MessageFormat;
@@ -127,7 +130,7 @@ public class PythonExecutorTest {
         EXPECTED_CONTEXT_EVAL.put("false", new PyBoolean(false));
     }
 
-    @Autowired
+    @Resource(name = "jythonRuntimeService")
     private PythonRuntimeService pythonRuntimeService;
 
     @Test
@@ -320,8 +323,25 @@ public class PythonExecutorTest {
 
     @Configuration
     static class TestConfig {
-        @Bean public PythonRuntimeService pythonRuntimeService() {return new PythonRuntimeServiceImpl();}
-        @Bean public PythonExecutionEngine pythonExecutionEngine() {return new PythonExecutionCachedEngine();}
+        @Bean(name = "jythonRuntimeService")
+        public PythonRuntimeService pythonRuntimeService() {
+            return new PythonRuntimeServiceImpl();
+        }
+
+        @Bean(name = "externalPythonRuntimeService")
+        public PythonRuntimeService externalPythonRuntimeService() {
+            return new ExternalPythonRuntimeServiceImpl();
+        }
+
+        @Bean(name = "jythonExecutionEngine")
+        PythonExecutionEngine pythonExecutionEngine() {
+            return new PythonExecutionCachedEngine();
+        }
+
+        @Bean(name = "externalPythonExecutionEngine")
+        PythonExecutionEngine externalPythonExecutionEngine() {
+            return new ExternalPythonExecutionNotCachedEngine();
+        }
         @Bean public DependencyService dependencyService() {return new DependencyServiceImpl() {
             public Set<String> getDependencies(Set<String> resources) {
                 return resources;

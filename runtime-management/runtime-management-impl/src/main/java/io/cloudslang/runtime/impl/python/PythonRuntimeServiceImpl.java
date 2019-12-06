@@ -21,6 +21,7 @@ import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Resource;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
@@ -29,7 +30,7 @@ import java.util.Set;
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
 public class PythonRuntimeServiceImpl implements PythonRuntimeService {
-    @Autowired
+    @Resource(name = "jythonExecutionEngine")
     private PythonExecutionEngine pythonExecutionEngine;
 
     @Override
