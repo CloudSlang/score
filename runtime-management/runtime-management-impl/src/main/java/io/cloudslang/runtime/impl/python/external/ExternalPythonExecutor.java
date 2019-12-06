@@ -21,7 +21,6 @@ import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.impl.Executor;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
@@ -41,8 +40,6 @@ import java.util.logging.Logger;
 
 public class ExternalPythonExecutor implements Executor {
     private static final String PYTHON_SCRIPT_FILENAME = "script";
-    private static final String PYTHON_WRAPPER_FILENAME = "wrapper";
-    private static final String PYTHON_UTILS_FILENAME = "utils";
     private static final String PYTHON_MAIN_FILENAME = "main";
     private static final String PYTHON_SUFFIX = ".py";
     private static final Logger logger = Logger.getLogger(ExternalPythonExecutor.class.getName());
@@ -160,10 +157,8 @@ public class ExternalPythonExecutor implements Executor {
         FileUtils.writeStringToFile(tempUserScript, script);
 
         ClassLoader classLoader = ExternalPythonExecutor.class.getClassLoader();
-        Path wrapperScriptPath = Paths.get(execTempDirectory.toString(), PYTHON_WRAPPER_FILENAME + PYTHON_SUFFIX);
         Path mainScriptPath = Paths.get(execTempDirectory.toString(), PYTHON_MAIN_FILENAME + PYTHON_SUFFIX);
 
-        Files.copy(classLoader.getResourceAsStream(PYTHON_WRAPPER_FILENAME + PYTHON_SUFFIX), wrapperScriptPath);
         Files.copy(classLoader.getResourceAsStream(PYTHON_MAIN_FILENAME + PYTHON_SUFFIX), mainScriptPath);
 
         String tempUserScriptName = FilenameUtils.getName(tempUserScript.toString());
