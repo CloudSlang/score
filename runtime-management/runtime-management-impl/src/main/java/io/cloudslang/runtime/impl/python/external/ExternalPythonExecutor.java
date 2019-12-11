@@ -43,7 +43,7 @@ public class ExternalPythonExecutor implements Executor {
     private static final String PYTHON_SCRIPT_FILENAME = "script";
     private static final String PYTHON_MAIN_FILENAME = "main";
     private static final String PYTHON_SUFFIX = ".py";
-    private static Logger logger = Logger.getLogger(ExternalPythonExecutor.class.getName());
+    private static Logger logger = Logger.getLogger(ExternalPythonExecutor.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public PythonExecutionResult exec(String script, Map<String, Serializable> inputs) {
@@ -147,8 +147,11 @@ public class ExternalPythonExecutor implements Executor {
 
     private String generatePayload(String userScript, Map<String, Serializable> inputs) throws JsonProcessingException {
         Map<String, Serializable> payload = new HashMap<>();
+        Map<String, String> parsedInputs = new HashMap<>();
+        inputs.forEach((key, value) -> parsedInputs.put(key, value.toString()));
+
         payload.put("script_name", FilenameUtils.removeExtension(userScript));
-        payload.put("inputs", new HashMap<>());
+        payload.put("inputs", (Serializable) parsedInputs);
         return objectMapper.writeValueAsString(payload);
     }
 
