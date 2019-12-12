@@ -16,7 +16,6 @@
 package io.cloudslang.runtime.impl.python.external;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.impl.Executor;
@@ -90,20 +89,16 @@ public class ExternalPythonExecutor implements Executor {
                 throw new RuntimeException("Script return non 0 result");
             }
 
-            TypeReference<Map<String, Serializable>> typeRef = new TypeReference<Map<String, Serializable>>() {
-            };
+            ScriptResults scriptResults = objectMapper.readValue(process.getInputStream(), ScriptResults.class);
 
-            Map<String, Serializable> executionReturnResults = objectMapper.readValue(process.getInputStream(),
-                    typeRef);
-
-            if (executionReturnResults.containsKey("exception")) {
-                String message = (String) executionReturnResults.get("exception");
-                logger.error(String.format("Failed to execute script {%s}", message));
-                throw new ExternalPythonScriptException(message);
+            String exception = scriptResults.getException();
+            if (!StringUtils.isEmpty(exception)) {
+                logger.error(String.format("Failed to execute script {%s}", exception));
+                throw new ExternalPythonScriptException(exception);
             }
 
             //noinspection unchecked
-            return new PythonExecutionResult((Map<String, Serializable>) executionReturnResults.get("returnResult"));
+            return new PythonExecutionResult(scriptResults.getReturnResult());
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException("Failed to run script");
         }
