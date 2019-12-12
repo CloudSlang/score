@@ -99,8 +99,9 @@ public class ExternalPythonExecutor implements Executor {
 
             //noinspection unchecked
             return new PythonExecutionResult(scriptResults.getReturnResult());
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException("Failed to run script");
+        } catch (Exception e) {
+            logger.error("Failed to run script. ", e.getCause());
+            throw new RuntimeException("Failed to run script.");
         }
     }
 
