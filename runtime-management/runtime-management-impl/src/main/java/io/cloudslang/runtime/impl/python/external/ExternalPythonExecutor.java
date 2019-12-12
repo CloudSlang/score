@@ -94,7 +94,7 @@ public class ExternalPythonExecutor implements Executor {
             String exception = scriptResults.getException();
             if (!StringUtils.isEmpty(exception)) {
                 logger.error(String.format("Failed to execute script {%s}", exception));
-                throw new ExternalPythonScriptException(exception);
+                throw new ExternalPythonScriptException(String.format("Failed to execute script {%s}", exception));
             }
 
             //noinspection unchecked
