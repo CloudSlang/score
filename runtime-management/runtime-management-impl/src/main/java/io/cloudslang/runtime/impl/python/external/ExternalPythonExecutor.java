@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
@@ -76,8 +77,8 @@ public class ExternalPythonExecutor implements Executor {
 
         try {
             Process process = processBuilder.start();
-
-            PrintWriter printWriter = new PrintWriter(process.getOutputStream());
+            PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(process.getOutputStream(),
+                    StandardCharsets.UTF_8));
             printWriter.println(payload);
             printWriter.flush();
 
@@ -90,7 +91,6 @@ public class ExternalPythonExecutor implements Executor {
             }
 
             ScriptResults scriptResults = objectMapper.readValue(process.getInputStream(), ScriptResults.class);
-
             String exception = scriptResults.getException();
             if (!StringUtils.isEmpty(exception)) {
                 logger.error(String.format("Failed to execute script {%s}", exception));
@@ -129,7 +129,7 @@ public class ExternalPythonExecutor implements Executor {
     private TempExecutionEnvironment generateTempExecutionResources(String script) throws IOException {
         Path execTempDirectory = Files.createTempDirectory("python_execution");
         File tempUserScript = File.createTempFile(PYTHON_SCRIPT_FILENAME, PYTHON_SUFFIX, execTempDirectory.toFile());
-        FileUtils.writeStringToFile(tempUserScript, script);
+        FileUtils.writeStringToFile(tempUserScript, script, StandardCharsets.UTF_8);
 
         ClassLoader classLoader = ExternalPythonExecutor.class.getClassLoader();
         Path mainScriptPath = Paths.get(execTempDirectory.toString(), PYTHON_MAIN_FILENAME + PYTHON_SUFFIX);

@@ -4,6 +4,8 @@ import json
 import sys
 
 EXECUTE_METHOD = "execute"
+
+
 # noinspection PyMethodMayBeStatic
 
 
@@ -39,7 +41,8 @@ class PythonAgentExecutor(object):
 
     def main(self):
         try:
-            payload = json.loads(input())
+            raw_inputs = input().encode(sys.stdin.encoding).decode()
+            payload = json.loads(raw_inputs)
 
             script_name = payload["script_name"]
             inputs = payload["inputs"]
