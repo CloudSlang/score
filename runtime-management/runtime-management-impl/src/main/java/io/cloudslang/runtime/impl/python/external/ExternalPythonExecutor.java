@@ -16,7 +16,6 @@
 package io.cloudslang.runtime.impl.python.external;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.impl.Executor;
@@ -28,6 +27,7 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
@@ -43,7 +43,7 @@ public class ExternalPythonExecutor implements Executor {
     private static final String PYTHON_SCRIPT_FILENAME = "script";
     private static final String PYTHON_MAIN_FILENAME = "main";
     private static final String PYTHON_SUFFIX = ".py";
-    private static Logger logger = Logger.getLogger(ExternalPythonExecutor.class.getName());
+    private static Logger logger = Logger.getLogger(ExternalPythonExecutor.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public PythonExecutionResult exec(String script, Map<String, Serializable> inputs) {
@@ -77,8 +77,8 @@ public class ExternalPythonExecutor implements Executor {
 
         try {
             Process process = processBuilder.start();
-
-            PrintWriter printWriter = new PrintWriter(process.getOutputStream());
+            PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(process.getOutputStream(),
+                    StandardCharsets.UTF_8));
             printWriter.println(payload);
             printWriter.flush();
 
@@ -90,22 +90,18 @@ public class ExternalPythonExecutor implements Executor {
                 throw new RuntimeException("Script return non 0 result");
             }
 
-            TypeReference<Map<String, Serializable>> typeRef = new TypeReference<Map<String, Serializable>>() {
-            };
-
-            Map<String, Serializable> executionReturnResults = objectMapper.readValue(process.getInputStream(),
-                    typeRef);
-
-            if (executionReturnResults.containsKey("exception")) {
-                String message = (String) executionReturnResults.get("exception");
-                logger.error(String.format("Failed to execute script {%s}", message));
-                throw new ExternalPythonScriptException(message);
+            ScriptResults scriptResults = objectMapper.readValue(process.getInputStream(), ScriptResults.class);
+            String exception = scriptResults.getException();
+            if (!StringUtils.isEmpty(exception)) {
+                logger.error(String.format("Failed to execute script {%s}", exception));
+                throw new ExternalPythonScriptException(String.format("Failed to execute script {%s}", exception));
             }
 
             //noinspection unchecked
-            return new PythonExecutionResult((Map<String, Serializable>) executionReturnResults.get("returnResult"));
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException("Failed to run script");
+            return new PythonExecutionResult(scriptResults.getReturnResult());
+        } catch (Exception e) {
+            logger.error("Failed to run script. ", e.getCause());
+            throw new RuntimeException("Failed to run script.");
         }
     }
 
@@ -133,7 +129,7 @@ public class ExternalPythonExecutor implements Executor {
     private TempExecutionEnvironment generateTempExecutionResources(String script) throws IOException {
         Path execTempDirectory = Files.createTempDirectory("python_execution");
         File tempUserScript = File.createTempFile(PYTHON_SCRIPT_FILENAME, PYTHON_SUFFIX, execTempDirectory.toFile());
-        FileUtils.writeStringToFile(tempUserScript, script);
+        FileUtils.writeStringToFile(tempUserScript, script, StandardCharsets.UTF_8);
 
         ClassLoader classLoader = ExternalPythonExecutor.class.getClassLoader();
         Path mainScriptPath = Paths.get(execTempDirectory.toString(), PYTHON_MAIN_FILENAME + PYTHON_SUFFIX);
@@ -147,8 +143,11 @@ public class ExternalPythonExecutor implements Executor {
 
     private String generatePayload(String userScript, Map<String, Serializable> inputs) throws JsonProcessingException {
         Map<String, Serializable> payload = new HashMap<>();
+        Map<String, String> parsedInputs = new HashMap<>();
+        inputs.forEach((key, value) -> parsedInputs.put(key, value.toString()));
+
         payload.put("script_name", FilenameUtils.removeExtension(userScript));
-        payload.put("inputs", new HashMap<>());
+        payload.put("inputs", (Serializable) parsedInputs);
         return objectMapper.writeValueAsString(payload);
     }
 
