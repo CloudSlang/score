@@ -2,6 +2,7 @@ import importlib
 import inspect
 import json
 import sys
+import os
 
 EXECUTE_METHOD = "execute"
 
@@ -19,6 +20,7 @@ class PythonAgentExecutor(object):
                             " are not the same with the actual inputs " + str(actual_inputs))
 
     def __execute_action(self, script_name, inputs):
+        sys.path.append(os.getcwd())
         script = importlib.import_module(script_name)
         self.__validate_arguments(inputs.keys(), script)
 
