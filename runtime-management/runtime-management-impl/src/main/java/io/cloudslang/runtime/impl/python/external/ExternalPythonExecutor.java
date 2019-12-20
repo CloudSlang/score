@@ -43,7 +43,7 @@ public class ExternalPythonExecutor implements Executor {
     private static final String PYTHON_SCRIPT_FILENAME = "script";
     private static final String PYTHON_MAIN_FILENAME = "main";
     private static final String PYTHON_SUFFIX = ".py";
-    private static Logger logger = Logger.getLogger(ExternalPythonExecutor.class);
+    private static final Logger logger = Logger.getLogger(ExternalPythonExecutor.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public PythonExecutionResult exec(String script, Map<String, Serializable> inputs) {
@@ -87,19 +87,19 @@ public class ExternalPythonExecutor implements Executor {
                 StringWriter writer = new StringWriter();
                 IOUtils.copy(process.getErrorStream(), writer, StandardCharsets.UTF_8);
                 logger.error(writer.toString());
-                throw new RuntimeException("Script return non 0 result");
+                throw new RuntimeException("Script returned non 0 result");
             }
 
             ScriptResults scriptResults = objectMapper.readValue(process.getInputStream(), ScriptResults.class);
             String exception = scriptResults.getException();
             if (!StringUtils.isEmpty(exception)) {
                 logger.error(String.format("Failed to execute script {%s}", exception));
-                throw new ExternalPythonScriptException(String.format("Failed to execute script {%s}", exception));
+                throw new ExternalPythonScriptException(String.format("Failed to execute user script {%s}", exception));
             }
 
             //noinspection unchecked
             return new PythonExecutionResult(scriptResults.getReturnResult());
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException e) {
             logger.error("Failed to run script. ", e.getCause());
             throw new RuntimeException("Failed to run script.");
         }
@@ -122,6 +122,7 @@ public class ExternalPythonExecutor implements Executor {
                 Paths.get(executionEnvironment.parentFolder.toString(), executionEnvironment.mainScriptName).toString()));
         processBuilder.environment().clear();
         processBuilder.directory(executionEnvironment.parentFolder);
+
 
         return processBuilder;
     }
