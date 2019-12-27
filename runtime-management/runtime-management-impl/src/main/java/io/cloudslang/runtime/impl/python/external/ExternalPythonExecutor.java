@@ -38,6 +38,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class ExternalPythonExecutor implements Executor {
     private static final String PYTHON_SCRIPT_FILENAME = "script";
@@ -45,6 +46,7 @@ public class ExternalPythonExecutor implements Executor {
     private static final String PYTHON_SUFFIX = ".py";
     private static final Logger logger = Logger.getLogger(ExternalPythonExecutor.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final long DEFAULT_TIMEOUT = 30;
 
     public PythonExecutionResult exec(String script, Map<String, Serializable> inputs) {
         TempExecutionEnvironment tempExecutionEnvironment = null;
@@ -53,8 +55,9 @@ public class ExternalPythonExecutor implements Executor {
             if (StringUtils.isEmpty(pythonPath) || !new File(pythonPath).exists()) {
                 throw new IllegalArgumentException("Missing or invalid python path");
             }
+            long timeout = Long.getLong("python.timeout", DEFAULT_TIMEOUT);
             tempExecutionEnvironment = generateTempExecutionResources(script);
-            return runPythonProcess(pythonPath, tempExecutionEnvironment, inputs);
+            return runPythonProcess(pythonPath, tempExecutionEnvironment, timeout, inputs);
 
         } catch (IOException e) {
             String message = "Failed to generate execution resources";
@@ -69,7 +72,7 @@ public class ExternalPythonExecutor implements Executor {
     }
 
     private PythonExecutionResult runPythonProcess(String pythonPath, TempExecutionEnvironment executionEnvironment,
-                                                   Map<String, Serializable> inputs) throws IOException {
+                                                   long timeout, Map<String, Serializable> inputs) throws IOException {
 
         String userScript = FilenameUtils.removeExtension(executionEnvironment.userScriptName);
         String payload = generatePayload(userScript, inputs);
@@ -82,8 +85,11 @@ public class ExternalPythonExecutor implements Executor {
             printWriter.println(payload);
             printWriter.flush();
 
-            int exitCode = process.waitFor();
-            if (exitCode != 0) {
+            boolean isInTime = process.waitFor(timeout, TimeUnit.MINUTES);
+            if (!isInTime) {
+                process.destroy();
+                throw new RuntimeException("Script execution timed out");
+            } else if (process.exitValue() != 0 ) {
                 StringWriter writer = new StringWriter();
                 IOUtils.copy(process.getErrorStream(), writer, StandardCharsets.UTF_8);
                 logger.error(writer.toString());
