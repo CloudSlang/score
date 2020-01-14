@@ -46,6 +46,10 @@
             <artifactId>querydsl-apt</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>fastutil</groupId>
+            <artifactId>fastutil</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

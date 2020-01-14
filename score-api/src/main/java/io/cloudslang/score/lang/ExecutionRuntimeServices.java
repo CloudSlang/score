@@ -21,6 +21,7 @@ import io.cloudslang.score.api.StartBranchDataContainer;
 import io.cloudslang.score.api.execution.ExecutionParametersConsts;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -99,7 +100,7 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public static final String ENTERPRISE_MODE = "ENTERPRISE_MODE";
 
-    protected Map<String, Serializable> contextMap = new HashMap<>();
+    protected Map<String, Serializable> contextMap = new Object2ObjectOpenHashMap<>();
 
     public ExecutionRuntimeServices() {
     }

@@ -16,6 +16,7 @@
 
 package io.cloudslang.orchestrator.entities;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -35,8 +36,8 @@ public class BranchContexts implements Serializable {
         Validate.notNull(systemContext);
 
         this.isBranchCancelled = isBranchCancelled;
-        this.contexts = new HashMap<>(contexts);
-        this.systemContext = new HashMap<>(systemContext);
+        this.contexts = new Object2ObjectOpenHashMap<>(contexts);
+        this.systemContext = new Object2ObjectOpenHashMap<>(systemContext);
     }
 
     public boolean isBranchCancelled() {

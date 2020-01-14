@@ -16,6 +16,7 @@
 
 package io.cloudslang.score.lang;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
@@ -34,7 +35,7 @@ public class SystemContext extends ExecutionRuntimeServices implements Map<Strin
     }
 
     public SystemContext(Map<? extends String, ? extends Serializable> map) {
-        this.contextMap = new HashMap<>(map);
+        this.contextMap = new Object2ObjectOpenHashMap<>(map);
     }
 
     @Override

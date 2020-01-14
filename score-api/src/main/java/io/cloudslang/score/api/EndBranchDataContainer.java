@@ -16,6 +16,7 @@
 
 package io.cloudslang.score.api;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -25,7 +26,6 @@ import java.lang.Object;
 import java.lang.Override;
 import java.lang.String;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -40,8 +40,8 @@ public class EndBranchDataContainer implements Serializable {
         Validate.notNull(contexts);
         Validate.notNull(systemContext);
 
-        this.contexts = new HashMap<>(contexts);
-        this.systemContext = new HashMap<>(systemContext);
+        this.contexts = new Object2ObjectOpenHashMap<>(contexts);
+        this.systemContext = new Object2ObjectOpenHashMap<>(systemContext);
         this.exception = exception;
     }
 
