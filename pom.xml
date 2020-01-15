@@ -21,7 +21,7 @@
 
     <groupId>io.cloudslang</groupId>
     <artifactId>score-parent</artifactId>
-    <version>0.3.122-SNAPSHOT</version>
+    <version>0.3.123-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
