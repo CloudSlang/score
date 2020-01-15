@@ -1,4 +1,3 @@
-import json
 import sys
 
 EXECUTE_METHOD = "execute"
@@ -28,49 +27,63 @@ class PythonAgentExecutor(object):
         get = None
         exec (env_setup, globals())
 
-    def __wrapValues(self, value):
-        return AccessWrapper(value)
+    def __wrapValue(self, value):
+        if isinstance(value, str):
+            return AccessWrapper(value)
+        return value
 
     def main(self):
-        try:
-            raw_inputs = input().encode(sys.stdin.encoding).decode()
-            payload = json.loads(raw_inputs)
+        #try:
+        # raw_inputs = input().encode(sys.stdin.encoding).decode()
+        # payload = json.loads(raw_inputs)
+        #
+        # expression = payload["expression"]
+        # context = payload["context"]
+        # print(context)
+        # self.__init_context(payload)
+        #
+        # smallerContext = {"get_sp": get_sp, "get": get}
+        #
+        # old_io = self.__disable_standard_io()
+        # try:
+        #     final_result = {"returnResult": eval(expression, smallerContext)}
+        # finally:
+        #     self.__enable_standard_io(old_io)
 
-            expression = payload["expression"]
-            context = payload["context"]
-            print(context)
-            self.__init_context(payload)
+        val = self.__wrapValue('string_value')
+        print(val)
+        print(val + ' additional')
+        #print(val.get_parent())
+        #print(int(val))
+        #print(len(val))
+        #print(val.capitalize)
+        #except Exception as e:
+        #final_result = {"exception": str(e)}
 
-            smallerContext = {"get_sp": get_sp, "get": get}
-
-            old_io = self.__disable_standard_io()
-            try:
-                final_result = {"returnResult": eval(expression, smallerContext)}
-            finally:
-                self.__enable_standard_io(old_io)
-        except Exception as e:
-            final_result = {"exception": str(e)}
-
-        print(json.dumps(final_result))
+        #print(json.dumps(final_result))
 
 
+def delegate(method, prop):
+    def decorate(cls):
+        setattr(cls, method,
+                lambda self, *args, **kwargs:
+                do_action(self, cls, method, prop, *args, **kwargs))
+        return cls
+    return decorate
 
+def do_action(context, cls, method, prop, *args, **kwargs):
+    print('acessed')
+    setattr(cls, '__accessed', True)
+    return getattr(getattr(context, prop), method)(*args, **kwargs)
+
+@delegate('__str__', '_string_value')
+@delegate('__add__', '_string_value')
+@delegate('repr', '_string_value')
+@delegate('print', '_string_value')
 class AccessWrapper(str):
     def __init__(self, value):
-        self.__value = value
-        print('init with value: ', value)
-
-    def __enter__(self):
-        print('enter with  value', self.__value)
-        return self
-
-    def __str__(self):
-        print('str with  value', self.__value)
-        return self.__value
-
-    def __repr__(self):
-        print('repr with  value', self.__value)
-        return repr(self.__value)
+        self._string_value = value
+        self.__accessed = False
 
 
 if __name__ == '__main__':
