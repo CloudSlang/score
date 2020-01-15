@@ -26,15 +26,15 @@ import java.util.Set;
 
 public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
     @Resource(name = "externalPythonExecutionEngine")
-    private ExternalPythonExecutionNotCachedEngine externalPythonExecutionNotCachedEngine;
+    private ExternalPythonExecutionEngine externalPythonExecutionEngine;
 
     @Override
     public PythonExecutionResult exec(Set<String> dependencies, String script, Map<String, Serializable> vars) {
-        return externalPythonExecutionNotCachedEngine.exec(dependencies, script, vars);
+        return externalPythonExecutionEngine.exec(dependencies, script, vars);
     }
 
     @Override
     public PythonEvaluationResult eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
-        return externalPythonExecutionNotCachedEngine.eval(prepareEnvironmentScript, script, vars);
+        return externalPythonExecutionEngine.eval(prepareEnvironmentScript, script, vars);
     }
 }

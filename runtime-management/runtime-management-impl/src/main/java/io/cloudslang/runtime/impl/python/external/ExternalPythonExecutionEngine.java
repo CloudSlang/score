@@ -23,7 +23,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
-public class ExternalPythonExecutionNotCachedEngine implements PythonExecutionEngine {
+public class ExternalPythonExecutionEngine implements PythonExecutionEngine {
 
     @Override
     public PythonExecutionResult exec(Set<String> dependencies, String script, Map<String, Serializable> vars) {
@@ -34,6 +34,6 @@ public class ExternalPythonExecutionNotCachedEngine implements PythonExecutionEn
     @Override
     public PythonEvaluationResult eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
         ExternalPythonExecutor pythonExecutor = new ExternalPythonExecutor();
-        return pythonExecutor.eval(script, vars);
+        return pythonExecutor.eval(script, prepareEnvironmentScript, vars);
     }
 }

@@ -24,7 +24,7 @@ import io.cloudslang.dependency.impl.services.utils.UnzipUtil;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
-import io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionNotCachedEngine;
+import io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonRuntimeServiceImpl;
 import io.cloudslang.score.events.EventBus;
 import org.junit.Assert;
@@ -34,7 +34,6 @@ import org.junit.runner.RunWith;
 import org.python.core.PyBoolean;
 import org.python.core.PyString;
 import org.python.google.common.collect.Sets;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -340,7 +339,7 @@ public class PythonExecutorTest {
 
         @Bean(name = "externalPythonExecutionEngine")
         PythonExecutionEngine externalPythonExecutionEngine() {
-            return new ExternalPythonExecutionNotCachedEngine();
+            return new ExternalPythonExecutionEngine();
         }
         @Bean public DependencyService dependencyService() {return new DependencyServiceImpl() {
             public Set<String> getDependencies(Set<String> resources) {
