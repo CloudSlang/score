@@ -1,3 +1,4 @@
+import json
 import sys
 
 EXECUTE_METHOD = "execute"
@@ -21,69 +22,51 @@ class PythonAgentExecutor(object):
         global get_sp
         global get
 
-        sys_prop = payload["context"]["sys_prop"]
+        context = payload["context"]
+        if("sys_prop" in context):
+            sys_prop = context["sys_prop"]
         env_setup = payload["envSetup"]
         get_sp = None
         get = None
         exec (env_setup, globals())
 
-    def __wrapValue(self, value):
-        if isinstance(value, str):
-            return AccessWrapper(value)
-        return value
 
     def main(self):
-        #try:
-        # raw_inputs = input().encode(sys.stdin.encoding).decode()
-        # payload = json.loads(raw_inputs)
-        #
-        # expression = payload["expression"]
-        # context = payload["context"]
-        # print(context)
-        # self.__init_context(payload)
-        #
-        # smallerContext = {"get_sp": get_sp, "get": get}
-        #
-        # old_io = self.__disable_standard_io()
-        # try:
-        #     final_result = {"returnResult": eval(expression, smallerContext)}
-        # finally:
-        #     self.__enable_standard_io(old_io)
+        try:
+            raw_inputs = input().encode(sys.stdin.encoding).decode()
+            payload = json.loads(raw_inputs)
 
-        val = self.__wrapValue('string_value')
-        print(val)
-        print(val + ' additional')
-        #print(val.get_parent())
-        #print(int(val))
-        #print(len(val))
-        #print(val.capitalize)
-        #except Exception as e:
-        #final_result = {"exception": str(e)}
+            expression = payload["expression"]
+            context = payload["context"]
+            #print(context)
+            self.__init_context(payload)
 
-        #print(json.dumps(final_result))
+            smaller_context = {"get_sp": get_sp, "get": get}
 
 
-def delegate(method, prop):
-    def decorate(cls):
-        setattr(cls, method,
-                lambda self, *args, **kwargs:
-                do_action(self, cls, method, prop, *args, **kwargs))
-        return cls
-    return decorate
+            #print(__builtins__)
+            for x in dir(__builtins__):
+                #print(f"func {x}")
+                smaller_context[x] = eval(x)
 
-def do_action(context, cls, method, prop, *args, **kwargs):
-    print('acessed')
-    setattr(cls, '__accessed', True)
-    return getattr(getattr(context, prop), method)(*args, **kwargs)
+            for key, var in context.items():
+                #if(isinstance(var, str)):
+                #todo: make sure not to overwrite names
+                #print(f"key: {key}, value: {var}")
+                smaller_context[key] = var
+            #print('before')
+            #print("\n\n", smaller_context)
 
-@delegate('__str__', '_string_value')
-@delegate('__add__', '_string_value')
-@delegate('repr', '_string_value')
-@delegate('print', '_string_value')
-class AccessWrapper(str):
-    def __init__(self, value):
-        self._string_value = value
-        self.__accessed = False
+            old_io = self.__disable_standard_io()
+            try:
+                final_result = {"returnResult": eval(expression, smaller_context)}
+                print('final')
+            finally:
+                self.__enable_standard_io(old_io)
+        except Exception as e:
+            final_result = {"exception": str(e)}
+
+        print(json.dumps(final_result))
 
 
 if __name__ == '__main__':

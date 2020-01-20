@@ -54,7 +54,7 @@ public class ExternalPythonExecutor {
         try {
             String pythonPath = checkPythonPath();
             tempExecutionEnvironment = generateTempExecutionResources(script);
-            String payload = generateExecutionPayload(script, inputs);
+            String payload = generateExecutionPayload(tempExecutionEnvironment.userScriptName, inputs);
 
             return runPythonExecutionProcess(pythonPath, payload, tempExecutionEnvironment);
 
