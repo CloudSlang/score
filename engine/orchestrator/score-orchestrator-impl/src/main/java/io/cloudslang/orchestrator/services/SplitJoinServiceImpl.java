@@ -228,7 +228,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     }
 
     private void startNewBranch(final SuspendedExecution suspendedExecution) {
-        StartNewBranchPayload startNewBranchPayload = executionQueueRepository.getFirstPendingBranch(parseInt(suspendedExecution.getExecutionId()));
+        StartNewBranchPayload startNewBranchPayload = executionQueueRepository.getFirstPendingBranch(parseLong(suspendedExecution.getExecutionId()));
         if (startNewBranchPayload != null) {
             executionQueueRepository.activatePendingExecutionStateForAnExecution(startNewBranchPayload.getPendingExecutionStateId());
             executionQueueRepository.deletePendingExecutionState(startNewBranchPayload.getPendingExecutionMapingId());
