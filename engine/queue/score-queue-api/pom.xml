@@ -69,6 +69,11 @@
             <artifactId>lz4-java</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>it.unimi.dsi</groupId>
+            <artifactId>fastutil</artifactId>
+        </dependency>
+
         <!-- test artifacts -->
         <dependency>
             <groupId>junit</groupId>

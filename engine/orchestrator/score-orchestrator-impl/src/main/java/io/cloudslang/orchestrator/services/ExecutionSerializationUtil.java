@@ -17,12 +17,12 @@
 package io.cloudslang.orchestrator.services;
 
 import io.cloudslang.score.facade.entities.Execution;
+import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -55,18 +55,15 @@ public class ExecutionSerializationUtil {
     	}
 
     	public byte[] objToBytes(Execution obj){
-    		ObjectOutputStream oos;
     		try {
-    			ByteArrayOutputStream bout = new ByteArrayOutputStream();
+    			FastByteArrayOutputStream bout = new FastByteArrayOutputStream();
     			BufferedOutputStream bos = new BufferedOutputStream(bout);
-    			oos = new ObjectOutputStream(bos);
+				ObjectOutputStream oos = new ObjectOutputStream(bos);
 
     			oos.writeObject(obj);
     			oos.close();
 
-    			@SuppressWarnings({"UnnecessaryLocalVariable"})
-    			byte[] bytes = bout.toByteArray();
-    			return bytes;
+    			return bout.array;
     		}
     		catch(IOException ex) {
     			throw new RuntimeException("Failed to serialize execution . Error: ", ex);
