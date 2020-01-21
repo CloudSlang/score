@@ -55,7 +55,7 @@ public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
                 executionControlSemaphore.acquire();
                 try {
                     logger.info("Acquired a permit for a new python process. Continuing with execution...");
-                    return externalPythonExecutionNotCachedEngine.exec(dependencies, script, vars);
+                    return externalPythonExecutionEngine.exec(dependencies, script, vars);
                 } finally {
                     executionControlSemaphore.release();
                 }
@@ -81,7 +81,7 @@ public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
                 executionControlSemaphore.acquire();
                 try {
                     logger.info("Acquired a permit for a new python process. Continuing with execution...");
-                    return externalPythonExecutionNotCachedEngine.eval(prepareEnvironmentScript, script, vars);
+                    return externalPythonExecutionEngine.eval(prepareEnvironmentScript, script, vars);
                 } finally {
                     executionControlSemaphore.release();
                 }
