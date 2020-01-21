@@ -23,34 +23,44 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>engine</artifactId>
-        <version>0.3.123-SNAPSHOT</version>
+        <version>0.3.126-SNAPSHOT</version>
     </parent>
 
     <artifactId>score-facade</artifactId>
 
     <dependencies>
+
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
         </dependency>
+
         <dependency>
             <groupId>io.cloudslang</groupId>
             <artifactId>score-data-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
         </dependency>
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>score-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>it.unimi.dsi</groupId>
+            <artifactId>fastutil</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
     </dependencies>
-    
+
 </project>

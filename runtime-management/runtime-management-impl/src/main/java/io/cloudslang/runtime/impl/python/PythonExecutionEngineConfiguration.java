@@ -25,6 +25,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import java.util.concurrent.Semaphore;
+
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
@@ -39,7 +41,8 @@ public class PythonExecutionEngineConfiguration {
 
     @Bean(name = "externalPythonRuntimeService")
     public PythonRuntimeService externalPythonRuntimeService() {
-        return new ExternalPythonRuntimeServiceImpl();
+        Integer pythonProcessPermits = Integer.getInteger("python.concurrent.execution.permits", 30);
+        return new ExternalPythonRuntimeServiceImpl(new Semaphore(pythonProcessPermits));
     }
 
     @Bean(name = "jythonExecutionEngine")
