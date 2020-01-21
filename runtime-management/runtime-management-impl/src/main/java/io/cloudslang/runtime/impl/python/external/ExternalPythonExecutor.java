@@ -136,7 +136,7 @@ public class ExternalPythonExecutor {
                 logger.error(String.format("Failed to execute script {%s}", exception));
                 throw new ExternalPythonEvalException(String.format("Failed to execute user expressions {%s} ", exception));
             }
-
+            context.put("accessed_resources_set", (Serializable) scriptResults.getAccessedResources());
             //noinspection unchecked
             return new PythonEvaluationResult(scriptResults.getReturnResult(), context);
         } catch (IOException | InterruptedException e) {

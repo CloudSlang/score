@@ -3,11 +3,11 @@ import sys
 
 EXECUTE_METHOD = "execute"
 
-
 # noinspection PyMethodMayBeStatic
-
-
 class PythonAgentExecutor(object):
+
+    def __get_accessed_method(self, key):
+        accessed_resources_set.add(key)
 
     def __disable_standard_io(self):
         old_io = (sys.stdin, sys.stdout, sys.stderr, sys.exit)
@@ -21,46 +21,42 @@ class PythonAgentExecutor(object):
         global sys_prop
         global get_sp
         global get
-
+        global accessed
+        global accessed_resources_set
+        accessed_resources_set = set()
         context = payload["context"]
-        if("sys_prop" in context):
+
+        if "sys_prop" in context:
             sys_prop = context["sys_prop"]
+            accessed = self.__get_accessed_method
+
         env_setup = payload["envSetup"]
         get_sp = None
         get = None
         exec (env_setup, globals())
 
-
     def main(self):
         try:
             raw_inputs = input().encode(sys.stdin.encoding).decode()
             payload = json.loads(raw_inputs)
-
             expression = payload["expression"]
             context = payload["context"]
-            #print(context)
             self.__init_context(payload)
 
-            smaller_context = {"get_sp": get_sp, "get": get}
+            smaller_context = AccessAwareDict({"get_sp": get_sp, "get": get})
 
-
-            #print(__builtins__)
             for x in dir(__builtins__):
-                #print(f"func {x}")
                 smaller_context[x] = eval(x)
 
             for key, var in context.items():
-                #if(isinstance(var, str)):
-                #todo: make sure not to overwrite names
-                #print(f"key: {key}, value: {var}")
+                if key in smaller_context:
+                    raise Exception(f"Conflicting variable names: {key}")
                 smaller_context[key] = var
-            #print('before')
-            #print("\n\n", smaller_context)
 
             old_io = self.__disable_standard_io()
             try:
-                final_result = {"returnResult": eval(expression, smaller_context)}
-                print('final')
+                expr_result = eval(expression, smaller_context)
+                final_result = {"returnResult": expr_result, "accessedResources": list(accessed_resources_set)}
             finally:
                 self.__enable_standard_io(old_io)
         except Exception as e:
@@ -68,6 +64,11 @@ class PythonAgentExecutor(object):
 
         print(json.dumps(final_result))
 
+
+class AccessAwareDict(dict):
+    def __getitem__(self, name):
+        accessed_resources_set.add(name)
+        return self.get(name)
 
 if __name__ == '__main__':
     PythonAgentExecutor().main()

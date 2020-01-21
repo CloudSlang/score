@@ -16,12 +16,14 @@
 package io.cloudslang.runtime.impl.python.external;
 
 import java.io.Serializable;
+import java.util.Set;
 
 public class EvaluationResults implements Serializable {
-    private static final long serialVersionUID = 8288453309384648404L;
+    private static final long serialVersionUID = -7858585031291574502L;
 
     private String exception;
     private String returnResult;
+    private Set accessedResources;
 
     public String getException() {
         return exception;
@@ -37,5 +39,13 @@ public class EvaluationResults implements Serializable {
 
     public void setReturnResult(String returnResult) {
         this.returnResult = returnResult;
+    }
+
+    public Set getAccessedResources() {
+        return accessedResources;
+    }
+
+    public void setAccessedResources(Set accessedResources) {
+        this.accessedResources = accessedResources;
     }
 }
