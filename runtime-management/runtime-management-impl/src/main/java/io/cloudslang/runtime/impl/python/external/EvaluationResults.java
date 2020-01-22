@@ -15,6 +15,8 @@
  */
 package io.cloudslang.runtime.impl.python.external;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.Serializable;
 import java.util.Set;
 
@@ -24,6 +26,7 @@ public class EvaluationResults implements Serializable {
     private String exception;
     private String returnResult;
     private Set accessedResources;
+    private ReturnType returnType;
 
     public String getException() {
         return exception;
@@ -47,5 +50,22 @@ public class EvaluationResults implements Serializable {
 
     public void setAccessedResources(Set accessedResources) {
         this.accessedResources = accessedResources;
+    }
+
+    public ReturnType getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(ReturnType returnType) {
+        this.returnType = returnType;
+    }
+
+    public enum ReturnType{
+        @JsonProperty("bool")
+        BOOLEAN,
+        @JsonProperty("str")
+        STRING,
+        @JsonProperty("int")
+        INTEGER
     }
 }

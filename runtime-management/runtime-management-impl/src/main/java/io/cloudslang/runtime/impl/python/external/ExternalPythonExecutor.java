@@ -134,14 +134,29 @@ public class ExternalPythonExecutor {
             String exception = scriptResults.getException();
             if (!StringUtils.isEmpty(exception)) {
                 logger.error(String.format("Failed to execute script {%s}", exception));
-                throw new ExternalPythonEvalException(String.format("Failed to execute user expressions {%s} ", exception));
+                throw new ExternalPythonEvalException("Exception is: " + exception);
             }
             context.put("accessed_resources_set", (Serializable) scriptResults.getAccessedResources());
             //noinspection unchecked
-            return new PythonEvaluationResult(scriptResults.getReturnResult(), context);
+            return new PythonEvaluationResult(processReturnResult(scriptResults), context);
         } catch (IOException | InterruptedException e) {
             logger.error("Failed to run script. ", e.getCause());
             throw new RuntimeException("Failed to run script.");
+        }
+    }
+
+    private Serializable processReturnResult(EvaluationResults results) {
+        EvaluationResults.ReturnType returnType = results.getReturnType();
+        if (returnType == null) {
+            throw new RuntimeException("Missing return type for return result.");
+        }
+        switch (returnType) {
+            case BOOLEAN:
+                return Boolean.valueOf(results.getReturnResult());
+            case INTEGER:
+                return Integer.valueOf(results.getReturnResult());
+            default:
+                return results.getReturnResult();
         }
     }
 

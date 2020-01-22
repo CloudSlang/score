@@ -54,9 +54,15 @@ class PythonAgentExecutor(object):
                 smaller_context[key] = var
 
             old_io = self.__disable_standard_io()
+
             try:
                 expr_result = eval(expression, smaller_context)
-                final_result = {"returnResult": expr_result, "accessedResources": list(accessed_resources_set)}
+                return_type = type(expr_result).__name__
+                if return_type not in ['str', 'int', 'bool']:
+                    return_type = 'str'
+                final_result = {"returnResult": expr_result,
+                                "accessedResources": list(accessed_resources_set),
+                                "returnType": return_type}
             finally:
                 self.__enable_standard_io(old_io)
         except Exception as e:
@@ -68,10 +74,9 @@ class PythonAgentExecutor(object):
 class AccessAwareDict(dict):
     def __getitem__(self, name):
         accessed_resources_set.add(name)
-        value = self.get(name)
-        if value is None:
+        if not self.__contains__(name):
             raise NameError(f"name '{name}' is not defined")
-        return value
+        return self.get(name)
 
 if __name__ == '__main__':
     PythonAgentExecutor().main()
