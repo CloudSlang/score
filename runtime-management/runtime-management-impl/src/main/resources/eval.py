@@ -68,7 +68,10 @@ class PythonAgentExecutor(object):
 class AccessAwareDict(dict):
     def __getitem__(self, name):
         accessed_resources_set.add(name)
-        return self.get(name)
+        value = self.get(name)
+        if value is None:
+            raise NameError(f"name '{name}' is not defined")
+        return value
 
 if __name__ == '__main__':
     PythonAgentExecutor().main()
