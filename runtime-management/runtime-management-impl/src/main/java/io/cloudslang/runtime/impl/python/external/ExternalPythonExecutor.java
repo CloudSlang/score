@@ -25,7 +25,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -85,9 +87,16 @@ public class ExternalPythonExecutor implements Executor {
             printWriter.println(payload);
             printWriter.flush();
 
-            ScriptResults scriptResults = objectMapper.readValue(process.getInputStream(), ScriptResults.class);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            StringBuilder returnResult = new StringBuilder();
+            while ((line = reader.readLine()) != null) {
+                returnResult.append(line);
+            }
 
             boolean isInTime = process.waitFor(timeout, TimeUnit.MINUTES);
+            ScriptResults scriptResults = objectMapper.readValue(returnResult.toString(), ScriptResults.class);
+
             if (!isInTime) {
                 process.destroy();
                 throw new RuntimeException("Script execution timed out");
