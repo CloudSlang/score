@@ -85,8 +85,6 @@ public class ExternalPythonExecutor implements Executor {
             printWriter.println(payload);
             printWriter.flush();
 
-            ScriptResults scriptResults = objectMapper.readValue(process.getInputStream(), ScriptResults.class);
-
             boolean isInTime = process.waitFor(timeout, TimeUnit.MINUTES);
             if (!isInTime) {
                 process.destroy();
@@ -98,6 +96,7 @@ public class ExternalPythonExecutor implements Executor {
                 throw new RuntimeException("Script returned non 0 result");
             }
 
+            ScriptResults scriptResults = objectMapper.readValue(process.getInputStream(), ScriptResults.class);
             String exception = scriptResults.getException();
             if (!StringUtils.isEmpty(exception)) {
                 logger.error(String.format("Failed to execute script {%s}", exception));
