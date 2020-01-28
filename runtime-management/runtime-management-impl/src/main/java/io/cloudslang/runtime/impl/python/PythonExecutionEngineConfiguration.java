@@ -18,7 +18,7 @@ package io.cloudslang.runtime.impl.python;
 
 import io.cloudslang.dependency.impl.services.DependenciesManagementConfiguration;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
-import io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionNotCachedEngine;
+import io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonRuntimeServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -55,7 +55,7 @@ public class PythonExecutionEngineConfiguration {
 
     @Bean(name = "externalPythonExecutionEngine")
     PythonExecutionEngine externalPythonExecutionEngine() {
-        return new ExternalPythonExecutionNotCachedEngine();
+        return new ExternalPythonExecutionEngine();
     }
 
 
