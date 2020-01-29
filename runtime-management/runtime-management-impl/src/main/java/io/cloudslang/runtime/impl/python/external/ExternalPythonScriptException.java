@@ -16,15 +16,7 @@
 package io.cloudslang.runtime.impl.python.external;
 
 public class ExternalPythonScriptException extends RuntimeException {
-    public ExternalPythonScriptException() {
-        super();
-    }
-
-    public ExternalPythonScriptException(String message) {
+    ExternalPythonScriptException(String message) {
         super(message);
-    }
-
-    public ExternalPythonScriptException(String message, Throwable cause) {
-        super(message, cause);
     }
 }

@@ -13,17 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.score.api.execution.precondition;
+package io.cloudslang.runtime.impl.python.external;
 
-import java.io.Serializable;
-import java.util.Map;
-
-/**
- * This service is designed for any conditions that should be checked after the execution finishes.
- *
- * @author platon
- */
-public interface ExecutionPostconditionService {
-
-    void postExecutionWork(String executionId, boolean enterpriseLicenseMode, boolean flowEnded);
+public class ExternalPythonEvalException extends RuntimeException {
+    ExternalPythonEvalException(String message) {
+        super(message);
+    }
 }

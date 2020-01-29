@@ -43,6 +43,7 @@ public class ExecutionSummary implements Serializable {
     @SuppressWarnings("UnusedDeclaration")
     @Deprecated private long branchesCount; //not active since 10.02!! we don't set the value, but must leave it for backward compatible of the POJO in Careml.
     private Double roi;
+    private boolean reserveRobot;
 
     public String getExecutionId() {
         return executionId;
@@ -189,6 +190,14 @@ public class ExecutionSummary implements Serializable {
 
     public void setCancelReason(CancelReason cancelReason) {
         this.cancelReason = cancelReason;
+    }
+
+    public boolean isReserveRobot() {
+        return reserveRobot;
+    }
+
+    public void setReserveRobot(boolean reserveRobot) {
+        this.reserveRobot = reserveRobot;
     }
 
     @Override
