@@ -25,7 +25,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -105,9 +107,9 @@ public class ExternalPythonExecutor {
         ProcessBuilder processBuilder = preparePythonProcess(executionEnvironment, pythonPath);
 
         try {
-            Process process = buildProcess(payload, processBuilder);
+            String returnResult = getResult(payload, processBuilder);
 
-            ScriptResults scriptResults = objectMapper.readValue(process.getInputStream(), ScriptResults.class);
+            ScriptResults scriptResults = objectMapper.readValue(returnResult, ScriptResults.class);
             String exception = scriptResults.getException();
             if (!StringUtils.isEmpty(exception)) {
                 logger.error(String.format("Failed to execute script {%s}", exception));
@@ -128,9 +130,9 @@ public class ExternalPythonExecutor {
         ProcessBuilder processBuilder = preparePythonProcess(executionEnvironment, pythonPath);
 
         try {
-            Process process = buildProcess(payload, processBuilder);
+            String returnResult = getResult(payload, processBuilder);
 
-            EvaluationResults scriptResults = objectMapper.readValue(process.getInputStream(), EvaluationResults.class);
+            EvaluationResults scriptResults = objectMapper.readValue(returnResult, EvaluationResults.class);
             String exception = scriptResults.getException();
             if (!StringUtils.isEmpty(exception)) {
                 logger.error(String.format("Failed to execute script {%s}", exception));
@@ -160,13 +162,18 @@ public class ExternalPythonExecutor {
         }
     }
 
-    private Process buildProcess(String payload, ProcessBuilder processBuilder) throws IOException, InterruptedException {
+    private String getResult(String payload, ProcessBuilder processBuilder) throws IOException, InterruptedException {
         Process process = processBuilder.start();
         PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(process.getOutputStream(),
                 StandardCharsets.UTF_8));
         printWriter.println(payload);
         printWriter.flush();
-
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        StringBuilder returnResult = new StringBuilder();
+        while ((line = reader.readLine()) != null) {
+            returnResult.append(line);
+        }
         boolean isInTime = process.waitFor(EXECUTION_TIMEOUT, TimeUnit.MINUTES);
         if (!isInTime) {
             process.destroy();
@@ -177,7 +184,7 @@ public class ExternalPythonExecutor {
             logger.error(writer.toString());
             throw new RuntimeException("Execution returned non 0 result");
         }
-        return process;
+        return returnResult.toString();
     }
 
     private ProcessBuilder preparePythonProcess(TempEnvironment executionEnvironment, String pythonPath) {
