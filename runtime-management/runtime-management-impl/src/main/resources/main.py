@@ -3,6 +3,8 @@ import inspect
 import json
 import os
 import sys
+import traceback
+from traceback import StackSummary
 
 EXECUTE_METHOD = "execute"
 
@@ -11,6 +13,54 @@ EXECUTE_METHOD = "execute"
 
 
 class PythonAgentExecutor(object):
+    # error formatting, returns a list of formatted traceback
+    def __format(self, list):
+        # Similar with StackSummary format but without filename
+        _RECURSIVE_CUTOFF = 3
+        result = []
+        last_file = None
+        last_line = None
+        last_name = None
+        count = 0
+        for frame in list:
+            if (last_file is None or last_file != frame.filename or
+                last_line is None or last_line != frame.lineno or
+                last_name is None or last_name != frame.name):
+                if count > _RECURSIVE_CUTOFF:
+                    count -= _RECURSIVE_CUTOFF
+                    # Enable when we show full traceback
+                    #result.append(
+                    #    f'  [Previous line repeated {count} more '
+                    #    f'time{"s" if count > 1 else ""}]\n'
+                    #)
+                last_file = frame.filename
+                last_line = frame.lineno
+                last_name = frame.name
+                count = 0
+            count += 1
+            if count > _RECURSIVE_CUTOFF:
+                continue
+            row = []
+            row.append('  line {}, in {}\n'.format(
+                frame.lineno, frame.name))
+            if frame.line:
+                row.append('    {}\n'.format(frame.line.strip()))
+            if frame.locals:
+                for name, value in sorted(frame.locals.items()):
+                    row.append('    {name} = {value}\n'.format(name=name, value=value))
+            result.append(''.join(row))
+        if count > _RECURSIVE_CUTOFF:
+            count -= _RECURSIVE_CUTOFF
+            # Enable when we show full traceback
+            #result.append(
+            #    f'  [Previous line repeated {count} more '
+            #    f'time{"s" if count > 1 else ""}]\n'
+            #)
+        return result
+
+    def __from_list(self, extracted_list):
+        return self.__format(StackSummary.from_list(extracted_list))
+    # end of error formatting
 
     def __validate_arguments(self, actual_input_list, script):
         expected_inputs = sorted(inspect.getfullargspec(getattr(script, EXECUTE_METHOD))[0])
@@ -66,7 +116,11 @@ class PythonAgentExecutor(object):
             finally:
                 self.__enable_standard_io(old_io)
         except Exception as e:
-            final_result = {"exception": str(e)}
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            final_result = {
+                "exception": str(e),
+                "traceback": self.__from_list(traceback.extract_tb(exc_tb))
+            }
 
         print(json.dumps(final_result))
 

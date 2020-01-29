@@ -39,6 +39,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -111,9 +112,12 @@ public class ExternalPythonExecutor {
 
             ScriptResults scriptResults = objectMapper.readValue(returnResult, ScriptResults.class);
             String exception = scriptResults.getException();
+            List<String> traceback = scriptResults.getTraceback();
             if (!StringUtils.isEmpty(exception)) {
-                logger.error(String.format("Failed to execute script {%s}", exception));
-                throw new ExternalPythonScriptException(String.format("Failed to execute user script {%s}", exception));
+                String formattedException = traceback.get(traceback.size() - 1) + ", " + exception;
+                logger.error(String.format("Failed to execute script {%s}", formattedException));
+                throw new ExternalPythonScriptException(String.format("Failed to execute user script: %s",
+                        formattedException));
             }
 
             //noinspection unchecked
