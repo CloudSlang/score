@@ -51,6 +51,8 @@ public class ExternalPythonExecutor {
     private static final Logger logger = Logger.getLogger(ExternalPythonExecutor.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final long EXECUTION_TIMEOUT = Long.getLong("python.timeout", 30);
+    private static final String PYTHON_FILENAME_SCRIPT_EXTENSION = ".py\"";
+    private static final int PYTHON_FILENAME_DELIMITERS = 6;
 
     public PythonExecutionResult exec(String script, Map<String, Serializable> inputs) {
         TempExecutionEnvironment tempExecutionEnvironment = null;
@@ -111,13 +113,12 @@ public class ExternalPythonExecutor {
             String returnResult = getResult(payload, processBuilder);
 
             ScriptResults scriptResults = objectMapper.readValue(returnResult, ScriptResults.class);
-            String exception = scriptResults.getException();
-            List<String> traceback = scriptResults.getTraceback();
+            ScriptResults scriptResults = objectMapper.readValue(process.getInputStream(), ScriptResults.class);
+            String exception = formatException(scriptResults.getException(), scriptResults.getTraceback());
+
             if (!StringUtils.isEmpty(exception)) {
-                String formattedException = traceback.get(traceback.size() - 1) + ", " + exception;
-                logger.error(String.format("Failed to execute script {%s}", formattedException));
-                throw new ExternalPythonScriptException(String.format("Failed to execute user script: %s",
-                        formattedException));
+                logger.error(String.format("Failed to execute script {%s}", exception));
+                throw new ExternalPythonScriptException(String.format("Failed to execute user script: %s", exception));
             }
 
             //noinspection unchecked
@@ -137,7 +138,7 @@ public class ExternalPythonExecutor {
             String returnResult = getResult(payload, processBuilder);
 
             EvaluationResults scriptResults = objectMapper.readValue(returnResult, EvaluationResults.class);
-            String exception = scriptResults.getException();
+            String exception = formatException(scriptResults.getException(), scriptResults.getTraceback());
             if (!StringUtils.isEmpty(exception)) {
                 logger.error(String.format("Failed to execute script {%s}", exception));
                 throw new ExternalPythonEvalException("Exception is: " + exception);
@@ -149,6 +150,10 @@ public class ExternalPythonExecutor {
             logger.error("Failed to run script. ", e.getCause());
             throw new RuntimeException("Failed to run script.");
         }
+    }
+
+    @Override
+    public void allocate() {
     }
 
     private Serializable processReturnResult(EvaluationResults results) {
@@ -243,6 +248,22 @@ public class ExternalPythonExecutor {
         payload.put("script_name", FilenameUtils.removeExtension(userScript));
         payload.put("inputs", (Serializable) parsedInputs);
         return objectMapper.writeValueAsString(payload);
+    }
+
+    private String formatException(String exception, List<String> traceback) {
+        String formattedException = "";
+        if (traceback.size() > 0) {
+            formattedException = removeFileName(traceback.get(traceback.size() - 1));
+        } else {
+            return exception;
+        }
+
+        return formattedException  + ", " + exception;
+    }
+
+    private String removeFileName(String trace) {
+        int pythonFileNameIndex = trace.indexOf(PYTHON_FILENAME_SCRIPT_EXTENSION);
+        return trace.substring(pythonFileNameIndex + PYTHON_FILENAME_DELIMITERS);
     }
 
     private class TempEnvironment {
