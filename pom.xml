@@ -21,7 +21,7 @@
 
     <groupId>io.cloudslang</groupId>
     <artifactId>score-parent</artifactId>
-    <version>0.3.116-SNAPSHOT</version>
+    <version>0.3.129-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -405,6 +405,12 @@
                 <groupId>org.lz4</groupId>
                 <artifactId>lz4-java</artifactId>
                 <version>1.5.1</version>
+            </dependency>
+
+            <dependency>
+                <groupId>it.unimi.dsi</groupId>
+                <artifactId>fastutil</artifactId>
+                <version>8.3.0</version>
             </dependency>
 
         </dependencies>

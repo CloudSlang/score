@@ -17,6 +17,7 @@
 package io.cloudslang.engine.queue.entities;
 
 import io.cloudslang.score.facade.entities.Execution;
+import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 import net.jpountz.lz4.LZ4FrameInputStream;
 import net.jpountz.lz4.LZ4FrameOutputStream;
 import net.jpountz.lz4.LZ4FrameOutputStream.BLOCKSIZE;
@@ -24,14 +25,14 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 
 
 public class ExecutionMessageConverter {
-    private static final int SIZE = 1024;
+    private static final int SIZE = 8_192;
 
     @Autowired(required = false)
     private SensitiveDataHandler sensitiveDataHandler;
@@ -80,14 +81,14 @@ public class ExecutionMessageConverter {
     private byte[] objToBytes(Object obj) {
         ObjectOutputStream oos = null;
         try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream(SIZE);
+            FastByteArrayOutputStream baos = new FastByteArrayOutputStream(SIZE);
             initPayloadMetaData(baos);
 
             oos = new ObjectOutputStream(new LZ4FrameOutputStream(baos, BLOCKSIZE.SIZE_256KB));
             oos.writeObject(obj);
             oos.flush();
 
-            return baos.toByteArray();
+            return baos.array;
         } catch (IOException ex) {
             throw new RuntimeException("Failed to serialize execution plan. Error: ", ex);
         } finally {
@@ -118,7 +119,7 @@ public class ExecutionMessageConverter {
         }
     }
 
-    private void initPayloadMetaData(ByteArrayOutputStream baos) throws IOException {
+    private void initPayloadMetaData(OutputStream baos) throws IOException {
         baos.write(PAYLOAD_META_DATA_INIT_BYTES);
     }
 

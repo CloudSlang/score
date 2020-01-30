@@ -13,17 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.score.api.execution.precondition;
+package io.cloudslang.runtime.impl.python.external;
 
 import java.io.Serializable;
 import java.util.Map;
 
-/**
- * This service is designed for any conditions that should be checked after the execution finishes.
- *
- * @author platon
- */
-public interface ExecutionPostconditionService {
+public class ScriptResults implements Serializable {
+    private static final long serialVersionUID = 8288453309384648405L;
 
-    void postExecutionWork(String executionId, boolean enterpriseLicenseMode, boolean flowEnded);
+    private String exception;
+    private Map returnResult;
+
+    public String getException() {
+        return exception;
+    }
+
+    public void setException(String exception) {
+        this.exception = exception;
+    }
+
+    public Map getReturnResult() {
+        return returnResult;
+    }
+
+    public void setReturnResult(Map returnResult) {
+        this.returnResult = returnResult;
+    }
 }

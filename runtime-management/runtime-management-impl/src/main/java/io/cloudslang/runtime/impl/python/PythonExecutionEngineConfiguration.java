@@ -18,10 +18,14 @@ package io.cloudslang.runtime.impl.python;
 
 import io.cloudslang.dependency.impl.services.DependenciesManagementConfiguration;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
+import io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine;
+import io.cloudslang.runtime.impl.python.external.ExternalPythonRuntimeServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+
+import java.util.concurrent.Semaphore;
 
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
@@ -30,16 +34,29 @@ import org.springframework.context.annotation.Import;
 @ComponentScan("io.cloudslang.runtime.impl.python")
 @Import({DependenciesManagementConfiguration.class})
 public class PythonExecutionEngineConfiguration {
-    @Bean
+    @Bean(name = "jythonRuntimeService")
     public PythonRuntimeService pythonRuntimeService() {
         return new PythonRuntimeServiceImpl();
     }
 
-    @Bean
+    @Bean(name = "externalPythonRuntimeService")
+    public PythonRuntimeService externalPythonRuntimeService() {
+        Integer pythonProcessPermits = Integer.getInteger("python.concurrent.execution.permits", 30);
+        return new ExternalPythonRuntimeServiceImpl(new Semaphore(pythonProcessPermits));
+    }
+
+    @Bean(name = "jythonExecutionEngine")
     PythonExecutionEngine pythonExecutionEngine() {
         String noCacheEngine = PythonExecutionNotCachedEngine.class.getSimpleName();
         String cacheEngine = PythonExecutionCachedEngine.class.getSimpleName();
         return System.getProperty(PythonExecutionConfigurationConsts.PYTHON_EXECUTOR_ENGINE, cacheEngine).equals(noCacheEngine) ?
                 new PythonExecutionNotCachedEngine() : new PythonExecutionCachedEngine();
     }
+
+    @Bean(name = "externalPythonExecutionEngine")
+    PythonExecutionEngine externalPythonExecutionEngine() {
+        return new ExternalPythonExecutionEngine();
+    }
+
+
 }

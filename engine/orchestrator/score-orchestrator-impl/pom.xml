@@ -24,7 +24,7 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>orchestrator</artifactId>
-        <version>0.3.116-SNAPSHOT</version>
+        <version>0.3.129-SNAPSHOT</version>
     </parent>
 
     <artifactId>score-orchestrator-impl</artifactId>
@@ -97,6 +97,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>score-orchestrator-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>it.unimi.dsi</groupId>
+            <artifactId>fastutil</artifactId>
         </dependency>
 
         <!-- end of engine artifacts -->

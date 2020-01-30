@@ -24,6 +24,8 @@ import io.cloudslang.dependency.impl.services.utils.UnzipUtil;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
+import io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine;
+import io.cloudslang.runtime.impl.python.external.ExternalPythonRuntimeServiceImpl;
 import io.cloudslang.score.events.EventBus;
 import org.junit.Assert;
 import org.junit.Assume;
@@ -32,12 +34,12 @@ import org.junit.runner.RunWith;
 import org.python.core.PyBoolean;
 import org.python.core.PyString;
 import org.python.google.common.collect.Sets;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import javax.annotation.Resource;
 import java.io.File;
 import java.io.Serializable;
 import java.text.MessageFormat;
@@ -47,6 +49,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Semaphore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -127,7 +130,7 @@ public class PythonExecutorTest {
         EXPECTED_CONTEXT_EVAL.put("false", new PyBoolean(false));
     }
 
-    @Autowired
+    @Resource(name = "jythonRuntimeService")
     private PythonRuntimeService pythonRuntimeService;
 
     @Test
@@ -320,8 +323,25 @@ public class PythonExecutorTest {
 
     @Configuration
     static class TestConfig {
-        @Bean public PythonRuntimeService pythonRuntimeService() {return new PythonRuntimeServiceImpl();}
-        @Bean public PythonExecutionEngine pythonExecutionEngine() {return new PythonExecutionCachedEngine();}
+        @Bean(name = "jythonRuntimeService")
+        public PythonRuntimeService pythonRuntimeService() {
+            return new PythonRuntimeServiceImpl();
+        }
+
+        @Bean(name = "externalPythonRuntimeService")
+        public PythonRuntimeService externalPythonRuntimeService() {
+            return new ExternalPythonRuntimeServiceImpl(new Semaphore(100));
+        }
+
+        @Bean(name = "jythonExecutionEngine")
+        PythonExecutionEngine pythonExecutionEngine() {
+            return new PythonExecutionCachedEngine();
+        }
+
+        @Bean(name = "externalPythonExecutionEngine")
+        PythonExecutionEngine externalPythonExecutionEngine() {
+            return new ExternalPythonExecutionEngine();
+        }
         @Bean public DependencyService dependencyService() {return new DependencyServiceImpl() {
             public Set<String> getDependencies(Set<String> resources) {
                 return resources;
