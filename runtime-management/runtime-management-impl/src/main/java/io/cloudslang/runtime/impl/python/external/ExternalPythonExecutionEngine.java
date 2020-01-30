@@ -18,13 +18,12 @@ package io.cloudslang.runtime.impl.python.external;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.impl.python.PythonExecutionEngine;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
-public class ExternalPythonExecutionNotCachedEngine implements PythonExecutionEngine {
+public class ExternalPythonExecutionEngine implements PythonExecutionEngine {
 
     @Override
     public PythonExecutionResult exec(Set<String> dependencies, String script, Map<String, Serializable> vars) {
@@ -34,6 +33,7 @@ public class ExternalPythonExecutionNotCachedEngine implements PythonExecutionEn
 
     @Override
     public PythonEvaluationResult eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
-        throw new NotImplementedException();
+        ExternalPythonExecutor pythonExecutor = new ExternalPythonExecutor();
+        return pythonExecutor.eval(script, prepareEnvironmentScript, vars);
     }
 }
