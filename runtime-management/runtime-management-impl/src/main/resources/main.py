@@ -12,6 +12,7 @@ EXECUTE_METHOD = "execute"
 
 
 class PythonAgentExecutor(object):
+
     def __validate_arguments(self, actual_input_list, script):
         expected_inputs = sorted(inspect.getfullargspec(getattr(script, EXECUTE_METHOD))[0])
         actual_inputs = sorted(actual_input_list)
