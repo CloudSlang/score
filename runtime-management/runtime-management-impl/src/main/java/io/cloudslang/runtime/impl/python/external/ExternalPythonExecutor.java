@@ -251,14 +251,11 @@ public class ExternalPythonExecutor {
     }
 
     private String formatException(String exception, List<String> traceback) {
-        String formattedException = "";
-        if (traceback.size() > 0) {
-            formattedException = removeFileName(traceback.get(traceback.size() - 1));
-        } else {
+        if (traceback.size() == 0) {
             return exception;
         }
 
-        return formattedException  + ", " + exception;
+        return removeFileName(traceback.get(traceback.size() - 1)) + ", " + exception;
     }
 
     private String removeFileName(String trace) {

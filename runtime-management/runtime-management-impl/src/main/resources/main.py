@@ -66,7 +66,7 @@ class PythonAgentExecutor(object):
             finally:
                 self.__enable_standard_io(old_io)
         except Exception as e:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
+            exc_tb = sys.exc_info()[2]
             final_result = {
                 "exception": str(e),
                 "traceback": traceback.format_list(traceback.extract_tb(exc_tb))
