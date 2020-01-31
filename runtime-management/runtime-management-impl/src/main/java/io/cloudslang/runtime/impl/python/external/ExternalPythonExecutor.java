@@ -152,10 +152,6 @@ public class ExternalPythonExecutor {
         }
     }
 
-    @Override
-    public void allocate() {
-    }
-
     private Serializable processReturnResult(EvaluationResults results) {
         EvaluationResults.ReturnType returnType = results.getReturnType();
         if (returnType == null) {
