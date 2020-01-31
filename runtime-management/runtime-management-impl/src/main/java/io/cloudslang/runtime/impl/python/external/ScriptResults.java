@@ -16,12 +16,14 @@
 package io.cloudslang.runtime.impl.python.external;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 public class ScriptResults implements Serializable {
     private static final long serialVersionUID = 8288453309384648405L;
 
     private String exception;
+    private List<String> traceback;
     private Map returnResult;
 
     public String getException() {
@@ -38,5 +40,13 @@ public class ScriptResults implements Serializable {
 
     public void setReturnResult(Map returnResult) {
         this.returnResult = returnResult;
+    }
+
+    List<String> getTraceback() {
+        return traceback;
+    }
+
+    public void setTraceback(List<String> traceback) {
+        this.traceback = traceback;
     }
 }

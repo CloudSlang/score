@@ -39,6 +39,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -50,6 +51,8 @@ public class ExternalPythonExecutor {
     private static final Logger logger = Logger.getLogger(ExternalPythonExecutor.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final long EXECUTION_TIMEOUT = Long.getLong("python.timeout", 30);
+    private static final String PYTHON_FILENAME_SCRIPT_EXTENSION = ".py\"";
+    private static final int PYTHON_FILENAME_DELIMITERS = 6;
 
     public PythonExecutionResult exec(String script, Map<String, Serializable> inputs) {
         TempExecutionEnvironment tempExecutionEnvironment = null;
@@ -110,10 +113,11 @@ public class ExternalPythonExecutor {
             String returnResult = getResult(payload, processBuilder);
 
             ScriptResults scriptResults = objectMapper.readValue(returnResult, ScriptResults.class);
-            String exception = scriptResults.getException();
+            String exception = formatException(scriptResults.getException(), scriptResults.getTraceback());
+
             if (!StringUtils.isEmpty(exception)) {
                 logger.error(String.format("Failed to execute script {%s}", exception));
-                throw new ExternalPythonScriptException(String.format("Failed to execute user script {%s}", exception));
+                throw new ExternalPythonScriptException(String.format("Failed to execute user script: %s", exception));
             }
 
             //noinspection unchecked
@@ -239,6 +243,19 @@ public class ExternalPythonExecutor {
         payload.put("script_name", FilenameUtils.removeExtension(userScript));
         payload.put("inputs", (Serializable) parsedInputs);
         return objectMapper.writeValueAsString(payload);
+    }
+
+    private String formatException(String exception, List<String> traceback) {
+        if (traceback.size() == 0) {
+            return exception;
+        }
+
+        return removeFileName(traceback.get(traceback.size() - 1)) + ", " + exception;
+    }
+
+    private String removeFileName(String trace) {
+        int pythonFileNameIndex = trace.indexOf(PYTHON_FILENAME_SCRIPT_EXTENSION);
+        return trace.substring(pythonFileNameIndex + PYTHON_FILENAME_DELIMITERS);
     }
 
     private class TempEnvironment {

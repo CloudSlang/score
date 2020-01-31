@@ -3,6 +3,7 @@ import inspect
 import json
 import os
 import sys
+import traceback
 
 EXECUTE_METHOD = "execute"
 
@@ -66,7 +67,11 @@ class PythonAgentExecutor(object):
             finally:
                 self.__enable_standard_io(old_io)
         except Exception as e:
-            final_result = {"exception": str(e)}
+            exc_tb = sys.exc_info()[2]
+            final_result = {
+                "exception": str(e),
+                "traceback": traceback.format_list(traceback.extract_tb(exc_tb))
+            }
 
         print(json.dumps(final_result))
 
