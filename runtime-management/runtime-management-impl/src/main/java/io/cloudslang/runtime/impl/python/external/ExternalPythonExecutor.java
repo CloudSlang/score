@@ -137,7 +137,7 @@ public class ExternalPythonExecutor {
             String returnResult = getResult(payload, processBuilder);
 
             EvaluationResults scriptResults = objectMapper.readValue(returnResult, EvaluationResults.class);
-            String exception = formatException(scriptResults.getException(), scriptResults.getTraceback());
+            String exception = scriptResults.getException();
             if (!StringUtils.isEmpty(exception)) {
                 logger.error(String.format("Failed to execute script {%s}", exception));
                 throw new ExternalPythonEvalException("Exception is: " + exception);
