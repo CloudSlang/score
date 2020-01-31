@@ -113,7 +113,6 @@ public class ExternalPythonExecutor {
             String returnResult = getResult(payload, processBuilder);
 
             ScriptResults scriptResults = objectMapper.readValue(returnResult, ScriptResults.class);
-            ScriptResults scriptResults = objectMapper.readValue(process.getInputStream(), ScriptResults.class);
             String exception = formatException(scriptResults.getException(), scriptResults.getTraceback());
 
             if (!StringUtils.isEmpty(exception)) {
