@@ -24,6 +24,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.springframework.util.CollectionUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -246,7 +247,7 @@ public class ExternalPythonExecutor {
     }
 
     private String formatException(String exception, List<String> traceback) {
-        if (traceback.size() == 0) {
+        if (CollectionUtils.isEmpty(traceback)) {
             return exception;
         }
 
