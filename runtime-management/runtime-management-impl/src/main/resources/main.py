@@ -1,8 +1,9 @@
 import importlib
 import inspect
 import json
-import sys
 import os
+import sys
+import traceback
 
 EXECUTE_METHOD = "execute"
 
@@ -42,8 +43,10 @@ class PythonAgentExecutor(object):
                                 "' of type " + type(output[1]).__name__)
 
     def __process_result(self, result):
-        self.__check_output_type(result)
+        if result is None:
+            return {"returnResult": {}}
         if isinstance(result, dict):
+            self.__check_output_type(result)
             final_result = {"returnResult": dict(map(lambda output: (str(output[0]), str(output[1])), result.items()))}
         else:
             final_result = {"returnResult": {"returnResult": str(result)}}
@@ -64,7 +67,11 @@ class PythonAgentExecutor(object):
             finally:
                 self.__enable_standard_io(old_io)
         except Exception as e:
-            final_result = {"exception": str(e)}
+            exc_tb = sys.exc_info()[2]
+            final_result = {
+                "exception": str(e),
+                "traceback": traceback.format_list(traceback.extract_tb(exc_tb))
+            }
 
         print(json.dumps(final_result))
 
