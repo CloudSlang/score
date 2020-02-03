@@ -23,7 +23,7 @@
     <parent>
         <artifactId>engine</artifactId>
         <groupId>io.cloudslang</groupId>
-        <version>0.3.133</version>
+        <version>0.3.134-SNAPSHOT</version>
     </parent>
 
     <artifactId>score-engine-jobs</artifactId>
