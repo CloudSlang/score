@@ -9,7 +9,8 @@ EXECUTE_METHOD = "execute"
 
 
 # noinspection PyMethodMayBeStatic
-
+class ExecutionException(Exception):
+    pass
 
 class PythonAgentExecutor(object):
 
@@ -17,8 +18,8 @@ class PythonAgentExecutor(object):
         expected_inputs = sorted(inspect.getfullargspec(getattr(script, EXECUTE_METHOD))[0])
         actual_inputs = sorted(actual_input_list)
         if expected_inputs != actual_inputs:
-            raise Exception("Expected inputs " + str(expected_inputs) +
-                            " are not the same with the actual inputs " + str(actual_inputs))
+            raise ExecutionException("Expected inputs " + str(expected_inputs) +
+                                     " are not the same with the actual inputs " + str(actual_inputs))
 
     def __execute_action(self, script_name, inputs):
         sys.path.append(os.getcwd())
@@ -38,9 +39,9 @@ class PythonAgentExecutor(object):
     def __check_output_type(self, result):
         for output in result.items():
             if type(output[1]) != str:
-                raise Exception("Error binding output: '" + str(output[0]) +
-                                "' should be of type str, but got value '" + str(output[1]) +
-                                "' of type " + type(output[1]).__name__)
+                raise ExecutionException("Error binding output: '" + str(output[0]) +
+                                         "' should be of type str, but got value '" + str(output[1]) +
+                                         "' of type " + type(output[1]).__name__)
 
     def __process_result(self, result):
         if result is None:
@@ -66,13 +67,17 @@ class PythonAgentExecutor(object):
                 final_result = self.__process_result(result)
             finally:
                 self.__enable_standard_io(old_io)
-        except Exception as e:
-            exc_tb = sys.exc_info()[2]
-            final_result = {
-                "exception": str(e),
-                "traceback": traceback.format_list(traceback.extract_tb(exc_tb))
-            }
-
+        except ExecutionException as e:
+            if isinstance(e, ExecutionException):
+                final_result = {
+                    "exception": str(e)
+                }
+            else:
+                exc_tb = sys.exc_info()[2]
+                final_result = {
+                    "exception": str(e),
+                    "traceback": traceback.format_list(traceback.extract_tb(exc_tb))
+                }
         print(json.dumps(final_result))
 
 
