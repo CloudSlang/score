@@ -141,7 +141,7 @@ public class ExternalPythonExecutor {
             String exception = scriptResults.getException();
             if (!StringUtils.isEmpty(exception)) {
                 logger.error(String.format("Failed to execute script {%s}", exception));
-                throw new ExternalPythonEvalException("Exception is: " + exception);
+                throw new ExternalPythonEvalException(exception);
             }
             context.put("accessed_resources_set", (Serializable) scriptResults.getAccessedResources());
             //noinspection unchecked
