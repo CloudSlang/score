@@ -112,17 +112,13 @@ public class ExternalPythonExecutor {
 
         if (fileChildren != null) {
             for (File child : fileChildren) {
-                if (isWindows()) {
+                if (SystemUtils.IS_OS_WINDOWS) {
                     child.setReadOnly();
                 } else {
                     Files.setPosixFilePermissions(child.toPath(), filePermissions);
                 }
             }
         }
-    }
-
-    private static boolean isWindows() {
-        return SystemUtils.IS_OS_WINDOWS;
     }
 
     private String checkPythonPath() {
