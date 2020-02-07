@@ -68,11 +68,10 @@ class PythonAgentExecutor(object):
             finally:
                 self.__enable_standard_io(old_io)
         except ExecutionException as e:
-            if isinstance(e, ExecutionException):
                 final_result = {
                     "exception": str(e)
                 }
-            else:
+        except Exception as e:
                 exc_tb = sys.exc_info()[2]
                 final_result = {
                     "exception": str(e),
