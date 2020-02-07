@@ -9,7 +9,7 @@ EXECUTE_METHOD = "execute"
 
 
 # noinspection PyMethodMayBeStatic
-class ExecutionException(Exception):
+class InvalidExecutionException(Exception):
     pass
 
 class PythonAgentExecutor(object):
@@ -18,7 +18,7 @@ class PythonAgentExecutor(object):
         expected_inputs = sorted(inspect.getfullargspec(getattr(script, EXECUTE_METHOD))[0])
         actual_inputs = sorted(actual_input_list)
         if expected_inputs != actual_inputs:
-            raise ExecutionException("Expected inputs " + str(expected_inputs) +
+            raise InvalidExecutionException("Expected inputs " + str(expected_inputs) +
                                      " are not the same with the actual inputs " + str(actual_inputs))
 
     def __execute_action(self, script_name, inputs):
@@ -39,7 +39,7 @@ class PythonAgentExecutor(object):
     def __check_output_type(self, result):
         for output in result.items():
             if type(output[1]) != str:
-                raise ExecutionException("Error binding output: '" + str(output[0]) +
+                raise InvalidExecutionException("Error binding output: '" + str(output[0]) +
                                          "' should be of type str, but got value '" + str(output[1]) +
                                          "' of type " + type(output[1]).__name__)
 
@@ -67,7 +67,7 @@ class PythonAgentExecutor(object):
                 final_result = self.__process_result(result)
             finally:
                 self.__enable_standard_io(old_io)
-        except ExecutionException as e:
+        except InvalidExecutionException as e:
                 final_result = {
                     "exception": str(e)
                 }
