@@ -19,6 +19,7 @@ package io.cloudslang.orchestrator.repositories;
 import io.cloudslang.orchestrator.entities.FinishedBranch;
 import java.util.Collection;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -34,9 +35,9 @@ public interface FinishedBranchRepository extends JpaRepository<FinishedBranch, 
 
     @Query("select distinct fe.id from FinishedBranch fe " +
             "left join io.cloudslang.orchestrator.entities.SuspendedExecution se " +
-            "on cast(fe.suspendedExecution.executionId as string) = se.executionId " +
-            "where se.executionId IS NULL")
-    List<Long> collectOrphanFinishedBranches();
+            "on fe.suspendedExecution.id = se.id " +
+            "where se.id IS NULL")
+    List<Long> collectOrphanFinishedBranches(Pageable pageable);
 
     @Query("delete from FinishedBranch fe where fe.id in :ids")
     @Modifying

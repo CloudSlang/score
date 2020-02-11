@@ -22,8 +22,12 @@ import java.util.List;
 import javax.transaction.Transactional;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 
 public class FinishedBranchesCleanerServiceImpl implements FinishedBranchesCleanerService {
+
+    private final int MAX_BULK_SIZE = Integer.getInteger("suspendedexecution.job.bulk.size", 250);
+    private final int SPLIT_SIZE = 250;
 
     private static final Logger logger = Logger.getLogger(FinishedBranchesCleanerServiceImpl.class);
 
@@ -34,13 +38,18 @@ public class FinishedBranchesCleanerServiceImpl implements FinishedBranchesClean
     @Transactional
     public void cleanFinishedBranches() {
         try {
-            List<Long> toBeDeleted = finishedBranchRepository.collectOrphanFinishedBranches();
-            if (!isEmpty(toBeDeleted)) {
-                finishedBranchRepository.deleteByIds(toBeDeleted);
-            }
+            cleanFinishedBranches(MAX_BULK_SIZE);
         } catch (Exception e) {
             logger.error("finished branches cleaner job failed!", e);
         }
+    }
 
+    private void cleanFinishedBranches(Integer bulkSize) {
+        for (int i = 1; i <= bulkSize / SPLIT_SIZE; i++) {
+            List<Long> toBeDeleted = finishedBranchRepository.collectOrphanFinishedBranches(new PageRequest(0, SPLIT_SIZE));
+            if (!isEmpty(toBeDeleted)) {
+                finishedBranchRepository.deleteByIds(toBeDeleted);
+            }
+        }
     }
 }
