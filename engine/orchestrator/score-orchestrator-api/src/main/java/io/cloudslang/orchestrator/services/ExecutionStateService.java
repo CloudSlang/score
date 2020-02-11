@@ -21,6 +21,7 @@ import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.orchestrator.entities.ExecutionState;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * User:
@@ -112,4 +113,6 @@ public interface ExecutionStateService {
      * @param branchId id of the branch
      */
     public void deleteExecutionState(Long executionId, String branchId);
+
+    public void deleteExecutionStateByIds(List<String> executionId, String branchId);
 }

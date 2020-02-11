@@ -22,6 +22,8 @@ import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.orchestrator.entities.ExecutionState;
 import io.cloudslang.orchestrator.repositories.ExecutionStateRepository;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import org.springframework.util.CollectionUtils;
 
 /**
  * User:
@@ -144,6 +147,19 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         ExecutionState executionState = executionStateRepository.findByExecutionIdAndBranchId(executionId, branchId);
         if (executionState != null) {
             executionStateRepository.delete(executionState);
+        }
+    }
+
+    @Override
+    public void deleteExecutionStateByIds(List<String> executionId, String branchId) {
+        Set<Long> executionIds = executionId.stream().map(Long::valueOf).collect(Collectors.toSet());
+        for (Long id : executionIds) {
+            validateExecutionId(id);
+        }
+        validateBranchId(branchId);
+        List<ExecutionState> executionStates = executionStateRepository.findByBranchIdAndExecutionIdInAndStatus(branchId, executionIds, ExecutionStatus.PENDING_CANCEL);
+        if (!CollectionUtils.isEmpty(executionStates) && executionStates.size() == executionIds.size()) {
+            executionStateRepository.deleteByIds(executionIds);
         }
     }
 

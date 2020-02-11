@@ -19,6 +19,7 @@ package io.cloudslang.orchestrator.repositories;
 import io.cloudslang.orchestrator.entities.ExecutionObjEntity;
 import io.cloudslang.orchestrator.entities.SuspendedExecution;
 import io.cloudslang.orchestrator.enums.SuspendedExecutionReason;
+import java.util.Set;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -49,10 +50,10 @@ public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedEx
             @Param("suspensionReasons") EnumSet<SuspendedExecutionReason> suspensionReasons,
             Pageable pageRequest);
 
-    @Query("select se.executionId from SuspendedExecution se " +
+    @Query("select distinct se.executionId from SuspendedExecution se " +
             "left join io.cloudslang.orchestrator.entities.ExecutionState es " +
             "on se.executionId = cast(es.executionId as string)" +
-            "where es.executionId IS NULL")
+            "where es.executionId IS NULL or es.status = 'PENDING_CANCEL'")
     List<String> collectCompletedSuspendedExecutions(Pageable pageable);
 
     @Query("delete from SuspendedExecution se where se.executionId in :ids")

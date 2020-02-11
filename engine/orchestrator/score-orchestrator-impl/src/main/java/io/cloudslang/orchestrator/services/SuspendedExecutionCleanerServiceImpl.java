@@ -15,7 +15,10 @@
  */
 package io.cloudslang.orchestrator.services;
 
+import static io.cloudslang.orchestrator.entities.ExecutionState.EMPTY_BRANCH;
+
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
+import java.util.Set;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +37,9 @@ public class SuspendedExecutionCleanerServiceImpl implements SuspendedExecutionC
     @Autowired
     private SuspendedExecutionsRepository suspendedExecutionsRepository;
 
+    @Autowired
+    private ExecutionStateService executionStateService;
+
     private static final Logger logger = Logger.getLogger(SuspendedExecutionCleanerServiceImpl.class);
 
     @Override
@@ -48,9 +54,10 @@ public class SuspendedExecutionCleanerServiceImpl implements SuspendedExecutionC
 
     private void cleanupSuspendedExecutions(Integer bulkSize) {
         for (int i = 1; i <= bulkSize / SPLIT_SIZE; i++) {
-            Collection<String> toBeDeleted = suspendedExecutionsRepository.collectCompletedSuspendedExecutions(new PageRequest(0, SPLIT_SIZE));
+            List<String> toBeDeleted = suspendedExecutionsRepository.collectCompletedSuspendedExecutions(new PageRequest(0, SPLIT_SIZE));
             if (!CollectionUtils.isEmpty(toBeDeleted)) {
                 suspendedExecutionsRepository.deleteByIds(toBeDeleted);
+                executionStateService.deleteExecutionStateByIds(toBeDeleted, EMPTY_BRANCH);
             }
         }
     }

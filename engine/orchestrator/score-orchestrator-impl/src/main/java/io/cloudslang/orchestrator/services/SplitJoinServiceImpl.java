@@ -19,7 +19,6 @@ package io.cloudslang.orchestrator.services;
 import ch.lambdaj.function.convert.Converter;
 import io.cloudslang.engine.queue.entities.StartNewBranchPayload;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
-import io.cloudslang.orchestrator.entities.ExecutionState;
 import io.cloudslang.orchestrator.enums.SuspendedExecutionReason;
 import io.cloudslang.score.api.EndBranchDataContainer;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
@@ -37,6 +36,7 @@ import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
@@ -44,12 +44,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.springframework.util.CollectionUtils;
 
 import static ch.lambdaj.Lambda.convert;
 import static ch.lambdaj.Lambda.extract;
 import static ch.lambdaj.Lambda.on;
-import static io.cloudslang.orchestrator.entities.ExecutionState.EMPTY_BRANCH;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.MULTI_INSTANCE;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.NON_BLOCKING;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL;
@@ -85,7 +83,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     @Autowired
     private ExecutionStateService executionStateService;
 
-    /*execID
+    /*
         converts an execution to a fresh execution message for triggering a new flow
      */
     private final Converter<Execution, ExecutionMessage> executionToStartExecutionMessage = new Converter<Execution, ExecutionMessage>() {
@@ -161,7 +159,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     }
 
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void endBranch(List<Execution> executions) {
         Validate.notNull(executions, "executions cannot be null");
 
@@ -203,13 +201,9 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             SuspendedExecution suspendedExecution = suspendedMap.get(finishedBranch.getSplitId());
             if (suspendedExecution != null) {
                 finishedBranch.connectToSuspendedExecution(suspendedExecution);
-                List<ExecutionState> executionStates = executionStateService.readByExecutionId(
-                        Long.valueOf(suspendedExecution.getExecutionId()));
                 if (suspendedExecution.getSuspensionReason() == MULTI_INSTANCE) {
                     // start a new branch
-                    if (finishedBranch.getBranchContexts().isBranchCancelled()  || CollectionUtils.isEmpty(executionStates)) {
-                        executionStateService.deleteExecutionState(Long.valueOf(suspendedExecution.getExecutionId()), EMPTY_BRANCH);
-                    } else {
+                    if (!finishedBranch.getBranchContexts().isBranchCancelled()) {
                         startNewBranch(suspendedExecution);
                     }
                     processFinishedBranch(finishedBranch, suspendedExecution, suspendedExecutionsForMiWithOneBranch);
@@ -306,13 +300,11 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             long nrOfNewFinishedBranches = finishedBranches.stream()
                     .filter(finishedBranch -> !finishedBranch.getBranchContexts().isBranchCancelled())
                     .count();
-            se.setMergedBranches(se.getMergedBranches() + finishedBranches.size());
+            se.setMergedBranches(se.getMergedBranches() + nrOfNewFinishedBranches);
             execution.getSystemContext().put(MI_REMAINING_BRANCHES_CONTEXT_KEY, valueOf(se.getNumberOfBranches() - se.getMergedBranches()));
             if (se.getMergedBranches() == se.getNumberOfBranches()) {
                 mergedSuspendedExecutions.add(se);
-            } if (finishedBranches.size() - nrOfNewFinishedBranches > 0 || execution.getSystemContext().get("FLOW_TERMINATION_TYPE") == ExecutionStatus.CANCELED) {
-                executionStateService.deleteExecutionState(execution.getExecutionId(), EMPTY_BRANCH);
-            } else{
+            } else {
                 se.setLocked(true);
                 finishedBranches.clear();
             }
