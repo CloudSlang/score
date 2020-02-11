@@ -24,6 +24,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -38,10 +39,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class ExternalPythonExecutor {
@@ -61,6 +65,7 @@ public class ExternalPythonExecutor {
             String pythonPath = checkPythonPath();
             tempExecutionEnvironment = generateTempExecutionResources(script);
             String payload = generateExecutionPayload(tempExecutionEnvironment.userScriptName, inputs);
+            addFilePermissions(tempExecutionEnvironment.parentFolder);
 
             return runPythonExecutionProcess(pythonPath, payload, tempExecutionEnvironment);
 
@@ -83,6 +88,8 @@ public class ExternalPythonExecutor {
             String pythonPath = checkPythonPath();
             tempEvalEnvironment = generateTempEvalResources();
             String payload = generateEvalPayload(expression, prepareEnvironmentScript, context);
+            addFilePermissions(tempEvalEnvironment.parentFolder);
+
             return runPythonEvalProcess(pythonPath, payload, tempEvalEnvironment, context);
 
         } catch (IOException e) {
@@ -93,6 +100,23 @@ public class ExternalPythonExecutor {
             if (tempEvalEnvironment != null && !FileUtils.deleteQuietly(tempEvalEnvironment.parentFolder)
                     && tempEvalEnvironment.parentFolder != null) {
                 logger.warn(String.format("Failed to cleanup python execution resources {%s}", tempEvalEnvironment.parentFolder));
+            }
+        }
+    }
+
+    private void addFilePermissions(File file) throws IOException {
+        Set<PosixFilePermission> filePermissions = new HashSet<>();
+        filePermissions.add(PosixFilePermission.OWNER_READ);
+
+        File[] fileChildren = file.listFiles();
+
+        if (fileChildren != null) {
+            for (File child : fileChildren) {
+                if (SystemUtils.IS_OS_WINDOWS) {
+                    child.setReadOnly();
+                } else {
+                    Files.setPosixFilePermissions(child.toPath(), filePermissions);
+                }
             }
         }
     }
@@ -141,7 +165,7 @@ public class ExternalPythonExecutor {
             String exception = scriptResults.getException();
             if (!StringUtils.isEmpty(exception)) {
                 logger.error(String.format("Failed to execute script {%s}", exception));
-                throw new ExternalPythonEvalException("Exception is: " + exception);
+                throw new ExternalPythonEvalException(exception);
             }
             context.put("accessed_resources_set", (Serializable) scriptResults.getAccessedResources());
             //noinspection unchecked
