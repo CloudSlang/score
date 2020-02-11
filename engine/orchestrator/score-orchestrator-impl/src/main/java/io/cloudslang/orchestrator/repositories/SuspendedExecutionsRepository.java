@@ -54,7 +54,8 @@ public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedEx
             "left join io.cloudslang.orchestrator.entities.ExecutionState es " +
             "on se.executionId = cast(es.executionId as string)" +
             "where es.executionId IS NULL or (es.status = :status and se.suspensionReason = :suspendedReason)")
-    List<String> collectCompletedSuspendedExecutions(Pageable pageable, ExecutionStatus status, SuspendedExecutionReason suspendedReason);
+    List<String> collectCompletedSuspendedExecutions(Pageable pageable, @Param("status") ExecutionStatus status,
+            @Param("suspendedReason") SuspendedExecutionReason suspendedReason);
 
     @Query("delete from SuspendedExecution se where se.executionId in :ids")
     @Modifying
