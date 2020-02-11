@@ -35,14 +35,14 @@ public interface ExecutionStateRepository extends JpaRepository<ExecutionState, 
 
     public ExecutionState findByExecutionIdAndBranchId(Long executionId, String branchId);
 
-    public List<ExecutionState> findByBranchIdAndExecutionIdInAndStatus(String branchId, Set<Long> executionIds, ExecutionStatus status);
-
     public List<ExecutionState> findByExecutionId(Long executionId);
 
     public ExecutionState findByExecutionIdAndBranchIdAndStatusIn(Long executionId, String branchId, List<ExecutionStatus> statuses);
 
     @Query("select executionState.executionId from ExecutionState executionState where executionState.status in :statuses")
     public List<Long> findExecutionIdByStatuses(@Param("statuses") List<ExecutionStatus> statuses);
+
+    public List<ExecutionState> findByBranchIdAndExecutionIdInAndStatus(String branchId, Set<Long> executionIds, ExecutionStatus status);
 
     @Query("delete from ExecutionState se where se.executionId in :ids")
     @Modifying

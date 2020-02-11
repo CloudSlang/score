@@ -16,14 +16,19 @@
 
 package io.cloudslang.orchestrator.services;
 
+import static io.cloudslang.score.facade.execution.ExecutionStatus.CANCELED;
+import static io.cloudslang.score.facade.execution.ExecutionStatus.PENDING_CANCEL;
+import static java.util.stream.Collectors.toSet;
+import static org.springframework.util.CollectionUtils.isEmpty;
+
 import io.cloudslang.score.facade.execution.ExecutionActionException;
 import io.cloudslang.score.facade.execution.ExecutionActionResult;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.orchestrator.entities.ExecutionState;
 import io.cloudslang.orchestrator.repositories.ExecutionStateRepository;
+import java.util.Collection;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
-import org.springframework.util.CollectionUtils;
 
 /**
  * User:
@@ -137,7 +141,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
     }
 
     private List<ExecutionStatus> getCancelStatuses() {
-        return Arrays.asList(ExecutionStatus.CANCELED, ExecutionStatus.PENDING_CANCEL);
+        return Arrays.asList(CANCELED, PENDING_CANCEL);
     }
 
     @Override
@@ -151,14 +155,14 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
     }
 
     @Override
-    public void deleteExecutionStateByIds(List<String> executionId, String branchId) {
-        Set<Long> executionIds = executionId.stream().map(Long::valueOf).collect(Collectors.toSet());
+    public void deleteExecutionStateByIds(Collection<String> executionId, String branchId) {
+        Set<Long> executionIds = executionId.stream().map(Long::valueOf).collect(toSet());
         for (Long id : executionIds) {
             validateExecutionId(id);
         }
         validateBranchId(branchId);
-        List<ExecutionState> executionStates = executionStateRepository.findByBranchIdAndExecutionIdInAndStatus(branchId, executionIds, ExecutionStatus.PENDING_CANCEL);
-        if (!CollectionUtils.isEmpty(executionStates) && executionStates.size() == executionIds.size()) {
+        List<ExecutionState> executionStates = executionStateRepository.findByBranchIdAndExecutionIdInAndStatus(branchId, executionIds, PENDING_CANCEL);
+        if (!isEmpty(executionStates)) {
             executionStateRepository.deleteByIds(executionIds);
         }
     }

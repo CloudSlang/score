@@ -23,6 +23,7 @@ import io.cloudslang.orchestrator.entities.SuspendedExecution;
 import io.cloudslang.orchestrator.services.ExecutionSerializationUtil;
 import io.cloudslang.engine.data.DataBaseDetector;
 import io.cloudslang.engine.data.SqlUtils;
+import io.cloudslang.score.facade.execution.ExecutionStatus;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,6 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.MULTI_INSTANCE;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.NON_BLOCKING;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL;
 import static java.util.EnumSet.of;
@@ -188,14 +190,14 @@ public class SuspendedExecutionsRepositoryTest {
 
         repository.save(suspendedExecution);
 
-        List<String> read = repository.collectCompletedSuspendedExecutions(new PageRequest(0, 100));
+        List<String> read = repository.collectCompletedSuspendedExecutions(new PageRequest(0, 100), ExecutionStatus.PENDING_CANCEL, MULTI_INSTANCE);
 
         Assert.assertNotNull(read);
         Assert.assertEquals(read.get(0), "111");
 
         repository.deleteByIds(read);
 
-        Assert.assertEquals(repository.collectCompletedSuspendedExecutions(new PageRequest(0, 100)).size(), 0);
+        Assert.assertEquals(repository.collectCompletedSuspendedExecutions(new PageRequest(0, 100), ExecutionStatus.PENDING_CANCEL, MULTI_INSTANCE).size(), 0);
     }
 
 

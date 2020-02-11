@@ -17,7 +17,12 @@
 package io.cloudslang.orchestrator.repositories;
 
 import io.cloudslang.orchestrator.entities.FinishedBranch;
+import java.util.Collection;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Created with IntelliJ IDEA.
@@ -26,4 +31,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * Time: 14:16
  */
 public interface FinishedBranchRepository extends JpaRepository<FinishedBranch, Long> {
+
+    @Query("select distinct fe.id from FinishedBranch fe " +
+            "left join io.cloudslang.orchestrator.entities.SuspendedExecution se " +
+            "on cast(fe.suspendedExecution.executionId as string) = se.executionId " +
+            "where se.executionId IS NULL")
+    List<Long> collectOrphanFinishedBranches();
+
+    @Query("delete from FinishedBranch fe where fe.id in :ids")
+    @Modifying
+    void deleteByIds(@Param("ids") Collection<Long> ids);
 }

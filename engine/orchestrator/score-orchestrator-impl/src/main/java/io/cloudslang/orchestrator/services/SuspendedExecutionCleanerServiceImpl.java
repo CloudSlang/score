@@ -16,17 +16,17 @@
 package io.cloudslang.orchestrator.services;
 
 import static io.cloudslang.orchestrator.entities.ExecutionState.EMPTY_BRANCH;
+import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.MULTI_INSTANCE;
+import static io.cloudslang.score.facade.execution.ExecutionStatus.PENDING_CANCEL;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
-import java.util.Set;
+import java.util.Collection;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.util.CollectionUtils;
 
 import javax.transaction.Transactional;
-import java.util.Collection;
-import java.util.List;
 
 
 public class SuspendedExecutionCleanerServiceImpl implements SuspendedExecutionCleanerService {
@@ -54,8 +54,8 @@ public class SuspendedExecutionCleanerServiceImpl implements SuspendedExecutionC
 
     private void cleanupSuspendedExecutions(Integer bulkSize) {
         for (int i = 1; i <= bulkSize / SPLIT_SIZE; i++) {
-            List<String> toBeDeleted = suspendedExecutionsRepository.collectCompletedSuspendedExecutions(new PageRequest(0, SPLIT_SIZE));
-            if (!CollectionUtils.isEmpty(toBeDeleted)) {
+            Collection<String> toBeDeleted = suspendedExecutionsRepository.collectCompletedSuspendedExecutions(new PageRequest(0, SPLIT_SIZE), PENDING_CANCEL, MULTI_INSTANCE);
+            if (!isEmpty(toBeDeleted)) {
                 suspendedExecutionsRepository.deleteByIds(toBeDeleted);
                 executionStateService.deleteExecutionStateByIds(toBeDeleted, EMPTY_BRANCH);
             }

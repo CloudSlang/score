@@ -31,12 +31,10 @@ import io.cloudslang.orchestrator.entities.SplitMessage;
 import io.cloudslang.orchestrator.entities.SuspendedExecution;
 import io.cloudslang.orchestrator.repositories.FinishedBranchRepository;
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
-import io.cloudslang.score.facade.execution.ExecutionStatus;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
@@ -79,9 +77,6 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
     @Autowired
     private ExecutionQueueRepository executionQueueRepository;
-
-    @Autowired
-    private ExecutionStateService executionStateService;
 
     /*
         converts an execution to a fresh execution message for triggering a new flow
@@ -159,7 +154,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional
     public void endBranch(List<Execution> executions) {
         Validate.notNull(executions, "executions cannot be null");
 
