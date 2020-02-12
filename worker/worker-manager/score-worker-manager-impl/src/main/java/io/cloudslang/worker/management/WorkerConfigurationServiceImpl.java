@@ -18,6 +18,7 @@ package io.cloudslang.worker.management;
 
 import io.cloudslang.orchestrator.entities.MergedConfigurationDataContainer;
 import io.cloudslang.orchestrator.services.MergedConfigurationService;
+import io.cloudslang.worker.management.monitor.WorkerStateUpdateService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -37,6 +38,9 @@ public class WorkerConfigurationServiceImpl implements WorkerConfigurationServic
     private volatile Set<String> pausedExecutions;
     private volatile Set<String> workerGroups;
     private volatile boolean enabled;
+
+    @Autowired
+    private WorkerStateUpdateService workerStateUpdateService;
 
     @Autowired
     private MergedConfigurationService mergedConfigurationService;
@@ -62,7 +66,7 @@ public class WorkerConfigurationServiceImpl implements WorkerConfigurationServic
     }
 
     public void refresh() {
-        if (!enabled) {
+        if (!enabled || !workerStateUpdateService.isWorkerEnabled()) {
             return;
         }
         MergedConfigurationDataContainer mergedConfigurationDataContainer = mergedConfigurationService.fetchMergedConfiguration(getWorkerUuid());
