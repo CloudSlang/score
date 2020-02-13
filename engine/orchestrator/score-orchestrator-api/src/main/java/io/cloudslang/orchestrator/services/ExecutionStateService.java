@@ -114,5 +114,5 @@ public interface ExecutionStateService {
      */
     public void deleteExecutionState(Long executionId, String branchId);
 
-    public void deleteExecutionStateByIds(Collection<String> executionId, String branchId);
+    public void deleteExecutionStateByIds(Collection<String> executionIds, String branchId);
 }

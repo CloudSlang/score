@@ -18,6 +18,7 @@ package io.cloudslang.orchestrator.services;
 
 import static io.cloudslang.score.facade.execution.ExecutionStatus.CANCELED;
 import static io.cloudslang.score.facade.execution.ExecutionStatus.PENDING_CANCEL;
+import static java.lang.Long.valueOf;
 import static java.util.stream.Collectors.toSet;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
@@ -155,16 +156,19 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
     }
 
     @Override
-    public void deleteExecutionStateByIds(Collection<String> executionId, String branchId) {
-        Set<Long> executionIds = executionId.stream().map(Long::valueOf).collect(toSet());
-        for (Long id : executionIds) {
-            validateExecutionId(id);
-        }
+    public void deleteExecutionStateByIds(Collection<String> executionIds, String branchId) {
+        Set<Long> executionIdsSet = executionIds.stream().map(this::convertExecutionIdToLong).collect(toSet());
         validateBranchId(branchId);
-        List<ExecutionState> executionStates = executionStateRepository.findByBranchIdAndExecutionIdInAndStatus(branchId, executionIds, PENDING_CANCEL);
+        List<ExecutionState> executionStates = executionStateRepository.findByBranchIdAndExecutionIdInAndStatus(branchId, executionIdsSet, PENDING_CANCEL);
         if (!isEmpty(executionStates)) {
-            executionStateRepository.deleteByIds(executionIds);
+            executionStateRepository.deleteByIds(executionIdsSet);
         }
+    }
+
+    private Long convertExecutionIdToLong(String executionId) {
+        Long execId = valueOf(executionId);
+        validateExecutionId(execId);
+        return execId;
     }
 
     private void validateBranchId(String branchId) {
