@@ -69,8 +69,8 @@ class PythonAgentExecutor(object):
                 final_result = self.__process_result(result)
             finally:
                 self.__enable_standard_io(old_io)
-            print("</execution>")
-            print("<result>")
+                print("</execution>")
+                print("<result>")
         except InvalidExecutionException as e:
             final_result = {
                 "exception": str(e)
