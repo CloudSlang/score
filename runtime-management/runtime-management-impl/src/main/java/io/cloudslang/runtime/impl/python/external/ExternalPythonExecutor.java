@@ -136,9 +136,8 @@ public class ExternalPythonExecutor {
         return pythonPath;
     }
 
-    private static Document getDocument(String text) throws ParserConfigurationException, SAXException, IOException {
-        DocumentBuilderFactory dbf =
-                DocumentBuilderFactory.newInstance();
+    private static Document getExecutionResultDocument(String text) throws ParserConfigurationException, SAXException, IOException {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
         InputSource is = new InputSource();
         is.setCharacterStream(new StringReader(text));
@@ -152,7 +151,7 @@ public class ExternalPythonExecutor {
 
         try {
             String returnResult = getResult(payload, processBuilder);
-            returnResult = getDocument(returnResult).getElementsByTagName("result").item(0).getTextContent();
+            returnResult = getExecutionResultDocument(returnResult).getElementsByTagName("result").item(0).getTextContent();
             ScriptResults scriptResults = objectMapper.readValue(returnResult, ScriptResults.class);
             String exception = formatException(scriptResults.getException(), scriptResults.getTraceback());
 
