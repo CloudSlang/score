@@ -54,6 +54,8 @@ class PythonAgentExecutor(object):
         return final_result
 
     def main(self):
+        print("<data>")
+        print("<execution>")
         try:
             raw_inputs = input().encode(sys.stdin.encoding).decode()
             payload = json.loads(raw_inputs)
@@ -67,17 +69,21 @@ class PythonAgentExecutor(object):
                 final_result = self.__process_result(result)
             finally:
                 self.__enable_standard_io(old_io)
+            print("</execution>")
+            print("<result>")
         except InvalidExecutionException as e:
-                final_result = {
-                    "exception": str(e)
-                }
+            final_result = {
+                "exception": str(e)
+            }
         except Exception as e:
-                exc_tb = sys.exc_info()[2]
-                final_result = {
-                    "exception": str(e),
-                    "traceback": traceback.format_list(traceback.extract_tb(exc_tb))
-                }
+            exc_tb = sys.exc_info()[2]
+            final_result = {
+                "exception": str(e),
+                "traceback": traceback.format_list(traceback.extract_tb(exc_tb))
+            }
         print(json.dumps(final_result))
+        print("</result>")
+        print("</data>")
 
 
 if __name__ == '__main__':
