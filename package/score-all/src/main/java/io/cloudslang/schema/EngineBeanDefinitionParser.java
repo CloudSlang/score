@@ -47,7 +47,6 @@ import io.cloudslang.orchestrator.services.CancelExecutionServiceImpl;
 import io.cloudslang.orchestrator.services.EngineVersionServiceImpl;
 import io.cloudslang.orchestrator.services.ExecutionSerializationUtil;
 import io.cloudslang.orchestrator.services.ExecutionStateServiceImpl;
-import io.cloudslang.orchestrator.services.FinishedBranchesCleanerServiceImpl;
 import io.cloudslang.orchestrator.services.MergedConfigurationServiceImpl;
 import io.cloudslang.orchestrator.services.OrchestratorDispatcherServiceImpl;
 import io.cloudslang.orchestrator.services.RunningExecutionPlanServiceImpl;
@@ -109,7 +108,6 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(QueueStateIdGeneratorServiceImpl.class, null);
 		put(ScoreTriggeringImpl.class,null);
 		put(SuspendedExecutionCleanerServiceImpl.class, null);
-		put(FinishedBranchesCleanerServiceImpl.class, null);
 
 		put(PartitionUtils.class, null);
 		put(ExecutionMessageConverter.class, null);

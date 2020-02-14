@@ -42,7 +42,8 @@ public interface ExecutionStateRepository extends JpaRepository<ExecutionState, 
     @Query("select executionState.executionId from ExecutionState executionState where executionState.status in :statuses")
     public List<Long> findExecutionIdByStatuses(@Param("statuses") List<ExecutionStatus> statuses);
 
-    public List<ExecutionState> findByBranchIdAndExecutionIdInAndStatus(String branchId, Set<Long> executionIds, ExecutionStatus status);
+    @Query("select executionState.executionId from ExecutionState executionState where executionState.status = :status and branchId = :branchId")
+    public List<Long> findByBranchIdAndStatusIn(@Param("branchId") String branchId, @Param("status") ExecutionStatus status);
 
     @Query("delete from ExecutionState se where se.executionId in :ids")
     @Modifying

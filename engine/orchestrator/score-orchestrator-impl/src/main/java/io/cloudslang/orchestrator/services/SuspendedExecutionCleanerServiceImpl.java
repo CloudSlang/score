@@ -15,13 +15,12 @@
  */
 package io.cloudslang.orchestrator.services;
 
-import static io.cloudslang.orchestrator.entities.ExecutionState.EMPTY_BRANCH;
-import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.MULTI_INSTANCE;
-import static io.cloudslang.score.facade.execution.ExecutionStatus.PENDING_CANCEL;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
+import io.cloudslang.orchestrator.repositories.FinishedBranchRepository;
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
 import java.util.Collection;
+import java.util.List;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -38,7 +37,7 @@ public class SuspendedExecutionCleanerServiceImpl implements SuspendedExecutionC
     private SuspendedExecutionsRepository suspendedExecutionsRepository;
 
     @Autowired
-    private ExecutionStateService executionStateService;
+    private FinishedBranchRepository finishedBranchRepository;
 
     private static final Logger logger = Logger.getLogger(SuspendedExecutionCleanerServiceImpl.class);
 
@@ -54,10 +53,14 @@ public class SuspendedExecutionCleanerServiceImpl implements SuspendedExecutionC
 
     private void cleanupSuspendedExecutions(Integer bulkSize) {
         for (int i = 1; i <= bulkSize / SPLIT_SIZE; i++) {
-            Collection<String> toBeDeleted = suspendedExecutionsRepository.collectCompletedSuspendedExecutions(new PageRequest(0, SPLIT_SIZE), PENDING_CANCEL, MULTI_INSTANCE);
+            PageRequest pageRequest = new PageRequest(0, SPLIT_SIZE);
+            Collection<String> toBeDeleted = suspendedExecutionsRepository.collectCompletedSuspendedExecutions(pageRequest);
             if (!isEmpty(toBeDeleted)) {
                 suspendedExecutionsRepository.deleteByIds(toBeDeleted);
-                executionStateService.deleteExecutionStateByIds(toBeDeleted, EMPTY_BRANCH);
+            }
+            List<Long> finishedBranchesToBeDeleted = finishedBranchRepository.collectOrphanFinishedBranches(pageRequest);
+            if (!isEmpty(finishedBranchesToBeDeleted)) {
+                finishedBranchRepository.deleteByIds(finishedBranchesToBeDeleted);
             }
         }
     }

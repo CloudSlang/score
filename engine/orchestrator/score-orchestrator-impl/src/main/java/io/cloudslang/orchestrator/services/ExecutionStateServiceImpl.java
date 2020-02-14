@@ -16,10 +16,9 @@
 
 package io.cloudslang.orchestrator.services;
 
+import static io.cloudslang.orchestrator.entities.ExecutionState.EMPTY_BRANCH;
 import static io.cloudslang.score.facade.execution.ExecutionStatus.CANCELED;
 import static io.cloudslang.score.facade.execution.ExecutionStatus.PENDING_CANCEL;
-import static java.lang.Long.valueOf;
-import static java.util.stream.Collectors.toSet;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import io.cloudslang.score.facade.execution.ExecutionActionException;
@@ -28,8 +27,6 @@ import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.orchestrator.entities.ExecutionState;
 import io.cloudslang.orchestrator.repositories.ExecutionStateRepository;
-import java.util.Collection;
-import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +72,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
     @Transactional(readOnly = true)
     public ExecutionState readCancelledExecution(Long executionId) {
         validateExecutionId(executionId);
-        return executionStateRepository.findByExecutionIdAndBranchIdAndStatusIn(executionId, ExecutionState.EMPTY_BRANCH, getCancelStatuses());
+        return executionStateRepository.findByExecutionIdAndBranchIdAndStatusIn(executionId, EMPTY_BRANCH, getCancelStatuses());
     }
 
     @Override
@@ -84,7 +81,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         validateExecutionId(executionId);
         ExecutionState executionState = new ExecutionState();
         executionState.setExecutionId(executionId);
-        executionState.setBranchId(ExecutionState.EMPTY_BRANCH);
+        executionState.setBranchId(EMPTY_BRANCH);
         executionState.setStatus(ExecutionStatus.RUNNING);
         return executionStateRepository.save(executionState);
     }
@@ -156,19 +153,11 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
     }
 
     @Override
-    public void deleteExecutionStateByIds(Collection<String> executionIds, String branchId) {
-        Set<Long> executionIdsSet = executionIds.stream().map(this::convertExecutionIdToLong).collect(toSet());
-        validateBranchId(branchId);
-        List<ExecutionState> executionStates = executionStateRepository.findByBranchIdAndExecutionIdInAndStatus(branchId, executionIdsSet, PENDING_CANCEL);
+    public void deleteCanceledExecutionStates() {
+        List<Long> executionStates = executionStateRepository.findByBranchIdAndStatusIn(EMPTY_BRANCH, PENDING_CANCEL);
         if (!isEmpty(executionStates)) {
-            executionStateRepository.deleteByIds(executionIdsSet);
+            executionStateRepository.deleteByIds(executionStates);
         }
-    }
-
-    private Long convertExecutionIdToLong(String executionId) {
-        Long execId = valueOf(executionId);
-        validateExecutionId(execId);
-        return execId;
     }
 
     private void validateBranchId(String branchId) {

@@ -20,7 +20,6 @@ import io.cloudslang.engine.queue.services.LargeMessagesMonitorService;
 import io.cloudslang.engine.queue.services.cleaner.QueueCleanerService;
 import io.cloudslang.engine.queue.services.recovery.ExecutionRecoveryService;
 import io.cloudslang.engine.versioning.services.VersionService;
-import io.cloudslang.orchestrator.services.FinishedBranchesCleanerService;
 import io.cloudslang.orchestrator.services.SplitJoinService;
 import io.cloudslang.orchestrator.services.SuspendedExecutionCleanerService;
 import org.apache.commons.lang.time.StopWatch;
@@ -56,9 +55,6 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
 
     @Autowired
     private LargeMessagesMonitorService largeMessagesMonitorService;
-
-    @Autowired
-    private FinishedBranchesCleanerService finishedBranchesCleanerService;
 
     private final Logger logger = Logger.getLogger(getClass());
 
@@ -199,24 +195,6 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
             if (logger.isDebugEnabled()) logger.debug("finished MiContextsMediatorJob in " + stopWatch);
         } catch (Exception ex) {
             logger.error("MiContextsMediatorJob failed", ex);
-        }
-    }
-
-
-    /**
-     * clean finished branches
-     */
-    @Override
-    public void cleanFinishedBranches() {
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("FinishedBranchesCleaner woke up at " + new Date());
-        }
-
-        try {
-            finishedBranchesCleanerService.cleanFinishedBranches();
-        } catch (Exception e) {
-            logger.error("Can't run finished branches cleaner job.", e);
         }
     }
 }

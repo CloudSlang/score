@@ -48,9 +48,4 @@ public interface ScoreEngineJobs {
     void miMergeBranchesContexts();
 
     void monitorLargeMessagesJob();
-
-    /**
-     * job that deletes all orphan finished branches
-     */
-    void cleanFinishedBranches();
 }

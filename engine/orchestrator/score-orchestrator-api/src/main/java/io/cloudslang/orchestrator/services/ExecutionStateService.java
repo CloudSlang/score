@@ -20,7 +20,6 @@ import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.orchestrator.entities.ExecutionState;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -114,5 +113,5 @@ public interface ExecutionStateService {
      */
     public void deleteExecutionState(Long executionId, String branchId);
 
-    public void deleteExecutionStateByIds(Collection<String> executionIds, String branchId);
+    public void deleteCanceledExecutionStates();
 }
