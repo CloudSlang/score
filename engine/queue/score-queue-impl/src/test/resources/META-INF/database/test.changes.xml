@@ -1,68 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
-	<property name="blob.type" dbms="oracle" value=" blob"/>
-	<property name="blob.type" dbms="mssql" value="image"/>
-	<property name="blob.type" dbms="mysql" value="longblob"/>
-	<property name="blob.type" dbms="postgresql" value="oid"/>
-	<property name="blob.type" dbms="h2" value="image"/>
+    <property name="blob.type" dbms="oracle" value=" blob"/>
+    <property name="blob.type" dbms="mssql" value="image"/>
+    <property name="blob.type" dbms="mysql" value="longblob"/>
+    <property name="blob.type" dbms="postgresql" value="oid"/>
+    <property name="blob.type" dbms="h2" value="image"/>
 
-	<property name="timestamp.type" dbms="oracle" value="timestamp"/>
-	<property name="timestamp.type" dbms="mssql" value="timestamp"/>
-	<property name="timestamp.type" dbms="mysql" value="timestamp null"/>
-	<property name="timestamp.type" dbms="postgresql" value="timestamp"/>
-	<property name="timestamp.type" dbms="h2" value="timestamp"/>
+    <property name="timestamp.type" dbms="oracle" value="timestamp"/>
+    <property name="timestamp.type" dbms="mssql" value="timestamp"/>
+    <property name="timestamp.type" dbms="mysql" value="timestamp null"/>
+    <property name="timestamp.type" dbms="postgresql" value="timestamp"/>
+    <property name="timestamp.type" dbms="h2" value="timestamp"/>
 
-	<changeSet id="create OO_EXECUTION_STATES" author="engine">
-		<createTable tableName="OO_EXECUTION_STATES">
-			<column name="ID" type="bigint">
-				<constraints primaryKey="true" nullable="false"/>
-			</column>
-			<column name="MSG_ID" type="varchar(255)">
-				<constraints nullable="false"/>
-			</column>
-			<column name="PAYLOAD" type="blob">
-				<constraints nullable="false"/>
-			</column>
-			<column name="PAYLOAD_SIZE" type="bigint"/>
-			<column name="CREATE_TIME" type="${timestamp.type}"/>
+    <changeSet id="create OO_EXECUTION_STATES" author="engine">
+        <createTable tableName="OO_EXECUTION_STATES">
+            <column name="ID" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="MSG_ID" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PAYLOAD" type="blob">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PAYLOAD_SIZE" type="bigint"/>
+            <column name="CREATE_TIME" type="${timestamp.type}"/>
             <column name="ACTIVE" type="INT" defaultValue="1">
                 <constraints nullable="false"/>
             </column>
-		</createTable>
-	</changeSet>
+        </createTable>
+    </changeSet>
 
-	<changeSet id="create OO_EXECUTION_QUEUES" author="engine">
-		<createTable tableName="OO_EXECUTION_QUEUES">
-			<column name="ID" type="bigint">
-				<constraints primaryKey="true" nullable="false"/>
-			</column>
-			<column name="EXEC_STATE_ID" type="bigint">
-				<constraints nullable="false"/>
-			</column>
-			<column name="ASSIGNED_WORKER" type="varchar(40)"/>
-			<column name="EXEC_GROUP" type="varchar(255)">
-				<constraints nullable="false"/>
-			</column>
-			<column name="STATUS" type="integer"/>
-			<column name="MSG_SEQ_ID" type="integer">
-				<constraints nullable="false"/>
-			</column>
-			<column name="CREATE_TIME" type="BIGINT"/>
-			<column name="MSG_VERSION" type="BIGINT" />
-		</createTable>
+    <changeSet id="create OO_EXECUTION_QUEUES" author="engine">
+        <createTable tableName="OO_EXECUTION_QUEUES">
+            <column name="ID" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="EXEC_STATE_ID" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ASSIGNED_WORKER" type="varchar(40)"/>
+            <column name="EXEC_GROUP" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STATUS" type="integer"/>
+            <column name="MSG_SEQ_ID" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CREATE_TIME" type="BIGINT"/>
+            <column name="MSG_VERSION" type="BIGINT"/>
+        </createTable>
 
-        <addUniqueConstraint constraintName="OO_EXECUTION_QUEUES_CONSTRAINT" columnNames="EXEC_STATE_ID, MSG_SEQ_ID" tableName="OO_EXECUTION_QUEUES"/>
-	</changeSet>
+        <addUniqueConstraint constraintName="OO_EXECUTION_QUEUES_CONSTRAINT" columnNames="EXEC_STATE_ID, MSG_SEQ_ID"
+          tableName="OO_EXECUTION_QUEUES"/>
+    </changeSet>
 
-	<changeSet id="add index to OO_EXECUTION_QUEUES tables" author="engine">
-		<createIndex tableName="OO_EXECUTION_QUEUES" indexName="OO_Q_EXEC_STATE_1_IDX">
-			<column name="EXEC_STATE_ID"/>
-		</createIndex>
-	</changeSet>
+    <changeSet id="add index to OO_EXECUTION_QUEUES tables" author="engine">
+        <createIndex tableName="OO_EXECUTION_QUEUES" indexName="OO_Q_EXEC_STATE_1_IDX">
+            <column name="EXEC_STATE_ID"/>
+        </createIndex>
+    </changeSet>
 
     <changeSet id="create execution states to pending executions mapping" author="engine">
         <createTable tableName="OO_EXECS_STATES_EXECS_MAPPINGS">
@@ -79,5 +80,27 @@
             </column>
         </createTable>
     </changeSet>
+
+    <changeSet id="Create OO_EXECUTION_STATE" author="engine">
+        <createTable tableName="OO_EXECUTION_STATE">
+            <column name="ID" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="EXECUTION_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="BRANCH_ID" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STATUS" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="EXECUTION_OBJECT" type="${blob.type}"></column>
+        </createTable>
+
+        <addUniqueConstraint tableName="OO_EXECUTION_STATE" columnNames="EXECUTION_ID, BRANCH_ID"
+          constraintName="OO_EXECUTION_STATE_UC"/>
+    </changeSet>
+
 
 </databaseChangeLog>

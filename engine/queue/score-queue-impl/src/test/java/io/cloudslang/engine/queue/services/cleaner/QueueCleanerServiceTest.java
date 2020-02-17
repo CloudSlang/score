@@ -32,6 +32,7 @@ import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerService;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerServiceImpl;
 import io.cloudslang.engine.versioning.services.VersionService;
 import io.cloudslang.orchestrator.services.EngineVersionService;
+import io.cloudslang.orchestrator.services.ExecutionStateService;
 import junit.framework.Assert;
 import liquibase.integration.spring.SpringLiquibase;
 import org.junit.Before;
@@ -77,6 +78,12 @@ public class QueueCleanerServiceTest {
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
+
+	@Autowired
+	private ExecutionStateService executionStateService;
+
+	@Autowired
+	private ExecutionQueueRepository executionQueueRepository;
 
 
 	@Before
@@ -228,5 +235,8 @@ public class QueueCleanerServiceTest {
 		EngineVersionService engineVersionService(){
 			return mock(EngineVersionService.class);
 		}
+
+		@Bean
+		ExecutionStateService executionStateService() { return mock(ExecutionStateService.class); }
 	}
 }

@@ -315,6 +315,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     private StatementAwareJdbcTemplateWrapper pollForRecoveryJdbcTemplate;
     private StatementAwareJdbcTemplateWrapper pollMessagesWithoutAckJdbcTemplate;
     private StatementAwareJdbcTemplateWrapper getFinishedExecStateIdsJdbcTemplate;
+    private StatementAwareJdbcTemplateWrapper getCanceledExecStateIdsJdbcTemplate;
     private StatementAwareJdbcTemplateWrapper countMessagesWithoutAckForWorkerJdbcTemplate;
     private StatementAwareJdbcTemplateWrapper findByStatusesJdbcTemplate;
     private StatementAwareJdbcTemplateWrapper findLargeJdbcTemplate;
@@ -348,6 +349,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         pollForRecoveryJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "pollForRecoveryJdbcTemplate");
         pollMessagesWithoutAckJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "pollMessagesWithoutAckJdbcTemplate");
         getFinishedExecStateIdsJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "getFinishedExecStateIdsJdbcTemplate");
+        getCanceledExecStateIdsJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "getCanceledExecStateIdsJdbcTemplate");
         countMessagesWithoutAckForWorkerJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "countMessagesWithoutAckForWorkerJdbcTemplate");
         findByStatusesJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "findByStatusesJdbcTemplate");
         findLargeJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "findLargeJdbcTemplate");
@@ -666,14 +668,14 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     }
 
     public Set<Long> getCanceledExecStateIds() {
-        getFinishedExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
+        getCanceledExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
         try {
-            List<Long> result = doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, SELECT_CANCELED_STEPS_IDS,
+            List<Long> result = doSelectWithTemplate(getCanceledExecStateIdsJdbcTemplate, SELECT_CANCELED_STEPS_IDS,
                     new SingleColumnRowMapper<>(Long.class));
 
             return new HashSet<>(result);
         } finally {
-            getFinishedExecStateIdsJdbcTemplate.clearStatementBatchSize();
+            getCanceledExecStateIdsJdbcTemplate.clearStatementBatchSize();
         }
     }
 
