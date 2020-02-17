@@ -617,14 +617,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         if (ids == null || ids.size() == 0) {
             return;
         }
-        List<Long> result = new ArrayList<>();
-        getFinishedExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
-        try {
-           result = doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, SELECT_CANCELED_STEPS_IDS, new SingleColumnRowMapper<>(Long.class));
-        } finally {
-            getFinishedExecStateIdsJdbcTemplate.clearStatementBatchSize();
-        }
-
+        Set<Long> result = getCanceledExecStateIds();
         if (!CollectionUtils.isEmpty(result)) {
             ids.addAll(result);
         }
@@ -672,6 +665,17 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         }
     }
 
+    public Set<Long> getCanceledExecStateIds() {
+        getFinishedExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
+        try {
+            List<Long> result = doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, SELECT_CANCELED_STEPS_IDS,
+                    new SingleColumnRowMapper<>(Long.class));
+
+            return new HashSet<>(result);
+        } finally {
+            getFinishedExecStateIdsJdbcTemplate.clearStatementBatchSize();
+        }
+    }
 
     public List<ExecutionMessage> pollMessagesWithoutAck(int maxSize, long minVersionAllowed) {
         pollMessagesWithoutAckJdbcTemplate.setStatementBatchSize(maxSize);
