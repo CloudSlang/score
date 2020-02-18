@@ -78,7 +78,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     final private String SELECT_CANCELED_STEPS_IDS = " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES "
             + "WHERE EXEC_STATE_ID IN "
             + "(SELECT DISTINCT ESS.ID FROM OO_EXECUTION_STATES ESS JOIN OO_EXECUTION_STATE ES ON "
-            + "ESS.MSG_ID = CAST(ES.EXECUTION_ID AS VARCHAR(255)) "
+            + "ESS.MSG_ID = CONCAT(ES.EXECUTION_ID, '') "
             + "WHERE ES.STATUS = 'PENDING_CANCEL')";
 
     final private String QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES = "DELETE FROM OO_EXECUTION_QUEUES " +
