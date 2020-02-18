@@ -17,7 +17,6 @@
 package io.cloudslang.engine.queue.services.cleaner;
 
 import java.util.Set;
-
 /**
  * Created by IntelliJ IDEA.
  * User:

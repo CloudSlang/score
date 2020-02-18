@@ -1,7 +1,6 @@
 import json
 import sys
 
-EXECUTE_METHOD = "execute"
 
 # noinspection PyMethodMayBeStatic
 class PythonAgentExecutor(object):
