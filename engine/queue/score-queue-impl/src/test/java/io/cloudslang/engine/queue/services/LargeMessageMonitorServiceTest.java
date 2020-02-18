@@ -32,6 +32,7 @@ import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerServiceImpl
 import io.cloudslang.engine.versioning.services.VersionService;
 import io.cloudslang.orchestrator.services.CancelExecutionService;
 import io.cloudslang.orchestrator.services.EngineVersionService;
+import io.cloudslang.orchestrator.services.ExecutionStateService;
 import liquibase.integration.spring.SpringLiquibase;
 import org.junit.After;
 import org.junit.Assert;
@@ -74,6 +75,9 @@ public class LargeMessageMonitorServiceTest {
 
     @Autowired
     private ExecutionQueueRepository executionQueueRepository;
+
+    @Autowired
+    private ExecutionStateService executionStateService;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -309,5 +313,8 @@ public class LargeMessageMonitorServiceTest {
         public VersionService queueVersionService() {
             return mock(VersionService.class);
         }
+
+        @Bean
+        public  ExecutionStateService executionStateService() { return mock(ExecutionStateService.class);}
     }
 }
