@@ -36,18 +36,10 @@ class PythonAgentExecutor(object):
     def __enable_standard_io(self, old_io):
         (sys.stdin, sys.stdout, sys.stderr, sys.exit) = old_io
 
-    def __check_output_type(self, result):
-        for output in result.items():
-            if type(output[1]) != str:
-                raise InvalidExecutionException("Error binding output: '" + str(output[0]) +
-                                         "' should be of type str, but got value '" + str(output[1]) +
-                                         "' of type " + type(output[1]).__name__)
-
     def __process_result(self, result):
         if result is None:
             return {"returnResult": {}}
         if isinstance(result, dict):
-            self.__check_output_type(result)
             final_result = {"returnResult": dict(map(lambda output: (str(output[0]), str(output[1])), result.items()))}
         else:
             final_result = {"returnResult": {"returnResult": str(result)}}
