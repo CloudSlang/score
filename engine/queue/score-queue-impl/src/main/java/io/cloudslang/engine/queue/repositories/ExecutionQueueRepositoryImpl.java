@@ -78,7 +78,13 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     final private String SELECT_CANCELED_STEPS_IDS = " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES "
             + "WHERE EXEC_STATE_ID IN "
             + "(SELECT DISTINCT ESS.ID FROM OO_EXECUTION_STATES ESS JOIN OO_EXECUTION_STATE ES ON "
-            + "ESS.MSG_ID = CONCAT(ES.EXECUTION_ID, '') "
+            + "ESS.MSG_ID = CAST(ES.EXECUTION_ID AS VARCHAR(255)) "
+            + "WHERE ES.STATUS = 'PENDING_CANCEL')";
+
+    final private String SELECT_CANCELED_STEPS_IDS_MYSQL = " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES "
+            + "WHERE EXEC_STATE_ID IN "
+            + "(SELECT DISTINCT ESS.ID FROM OO_EXECUTION_STATES ESS JOIN OO_EXECUTION_STATE ES ON "
+            + "ESS.MSG_ID = CAST(ES.EXECUTION_ID AS CHAR(255)) "
             + "WHERE ES.STATUS = 'PENDING_CANCEL')";
 
     final private String QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES = "DELETE FROM OO_EXECUTION_QUEUES " +
@@ -342,6 +348,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
     private String workerQuery;
 
+    private String cancelExecQuery;
+
     @PostConstruct
     public void init() {
         //We use dedicated JDBCTemplates for each query since JDBCTemplate is state-full object and we have different settings for each query.
@@ -365,12 +373,13 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
         useLargeMessageQuery = Boolean.parseBoolean(System.getProperty("score.poll.use.large.message.query", "true"));
 
-        if (useLargeMessageQuery) {
-            String dbms = getDatabaseProductName();
+        String dbms = getDatabaseProductName();
 
+        cancelExecQuery = isMysql(dbms) ? SELECT_CANCELED_STEPS_IDS_MYSQL : SELECT_CANCELED_STEPS_IDS;
+
+        if (useLargeMessageQuery) {
             if (isMssql(dbms)) {
                 workerQuery = QUERY_WORKER_SQL_MSSQL;
-
             } else if (isMysql(dbms)) {
                 workerQuery = QUERY_WORKER_SQL_MYSQL;
 
@@ -670,7 +679,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     public Set<Long> getCanceledExecStateIds() {
         getCanceledExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
         try {
-            List<Long> result = doSelectWithTemplate(getCanceledExecStateIdsJdbcTemplate, SELECT_CANCELED_STEPS_IDS,
+            List<Long> result = doSelectWithTemplate(getCanceledExecStateIdsJdbcTemplate, cancelExecQuery,
                     new SingleColumnRowMapper<>(Long.class));
 
             return new HashSet<>(result);
