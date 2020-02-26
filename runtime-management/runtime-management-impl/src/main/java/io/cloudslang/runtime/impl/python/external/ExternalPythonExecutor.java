@@ -163,7 +163,7 @@ public class ExternalPythonExecutor {
             //noinspection unchecked
             return new PythonExecutionResult(scriptResults.getReturnResult());
         } catch (IOException | InterruptedException | ParserConfigurationException | SAXException e) {
-            logger.error("Failed to run script. ", e.getCause());
+            logger.error("Failed to run script. ", e.getCause() != null ? e.getCause() : e);
             throw new RuntimeException("Failed to run script.");
         }
     }
@@ -186,7 +186,7 @@ public class ExternalPythonExecutor {
             //noinspection unchecked
             return new PythonEvaluationResult(processReturnResult(scriptResults), context);
         } catch (IOException | InterruptedException e) {
-            logger.error("Failed to run script. ", e.getCause());
+            logger.error("Failed to run script. ", e.getCause() != null ? e.getCause() : e);
             throw new RuntimeException("Failed to run script.");
         }
     }
