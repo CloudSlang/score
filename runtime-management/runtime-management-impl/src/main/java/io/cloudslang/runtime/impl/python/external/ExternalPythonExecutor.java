@@ -19,27 +19,40 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class ExternalPythonExecutor {
@@ -50,6 +63,8 @@ public class ExternalPythonExecutor {
     private static final Logger logger = Logger.getLogger(ExternalPythonExecutor.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final long EXECUTION_TIMEOUT = Long.getLong("python.timeout", 30);
+    private static final String PYTHON_FILENAME_SCRIPT_EXTENSION = ".py\"";
+    private static final int PYTHON_FILENAME_DELIMITERS = 6;
 
     public PythonExecutionResult exec(String script, Map<String, Serializable> inputs) {
         TempExecutionEnvironment tempExecutionEnvironment = null;
@@ -57,6 +72,7 @@ public class ExternalPythonExecutor {
             String pythonPath = checkPythonPath();
             tempExecutionEnvironment = generateTempExecutionResources(script);
             String payload = generateExecutionPayload(tempExecutionEnvironment.userScriptName, inputs);
+            addFilePermissions(tempExecutionEnvironment.parentFolder);
 
             return runPythonExecutionProcess(pythonPath, payload, tempExecutionEnvironment);
 
@@ -79,6 +95,8 @@ public class ExternalPythonExecutor {
             String pythonPath = checkPythonPath();
             tempEvalEnvironment = generateTempEvalResources();
             String payload = generateEvalPayload(expression, prepareEnvironmentScript, context);
+            addFilePermissions(tempEvalEnvironment.parentFolder);
+
             return runPythonEvalProcess(pythonPath, payload, tempEvalEnvironment, context);
 
         } catch (IOException e) {
@@ -93,12 +111,37 @@ public class ExternalPythonExecutor {
         }
     }
 
+    private void addFilePermissions(File file) throws IOException {
+        Set<PosixFilePermission> filePermissions = new HashSet<>();
+        filePermissions.add(PosixFilePermission.OWNER_READ);
+
+        File[] fileChildren = file.listFiles();
+
+        if (fileChildren != null) {
+            for (File child : fileChildren) {
+                if (SystemUtils.IS_OS_WINDOWS) {
+                    child.setReadOnly();
+                } else {
+                    Files.setPosixFilePermissions(child.toPath(), filePermissions);
+                }
+            }
+        }
+    }
+
     private String checkPythonPath() {
         String pythonPath = System.getProperty("python.path");
         if (StringUtils.isEmpty(pythonPath) || !new File(pythonPath).exists()) {
             throw new IllegalArgumentException("Missing or invalid python path");
         }
         return pythonPath;
+    }
+
+    private static Document getExecutionResultDocument(String text) throws ParserConfigurationException, SAXException, IOException {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        InputSource is = new InputSource();
+        is.setCharacterStream(new StringReader(text));
+        return db.parse(is);
     }
 
     private PythonExecutionResult runPythonExecutionProcess(String pythonPath, String payload,
@@ -108,18 +151,19 @@ public class ExternalPythonExecutor {
 
         try {
             String returnResult = getResult(payload, processBuilder);
-
+            returnResult = getExecutionResultDocument(returnResult).getElementsByTagName("result").item(0).getTextContent();
             ScriptResults scriptResults = objectMapper.readValue(returnResult, ScriptResults.class);
-            String exception = scriptResults.getException();
+            String exception = formatException(scriptResults.getException(), scriptResults.getTraceback());
+
             if (!StringUtils.isEmpty(exception)) {
                 logger.error(String.format("Failed to execute script {%s}", exception));
-                throw new ExternalPythonScriptException(String.format("Failed to execute user script {%s}", exception));
+                throw new ExternalPythonScriptException(String.format("Failed to execute user script: %s", exception));
             }
 
             //noinspection unchecked
             return new PythonExecutionResult(scriptResults.getReturnResult());
-        } catch (IOException | InterruptedException e) {
-            logger.error("Failed to run script. ", e.getCause());
+        } catch (IOException | InterruptedException | ParserConfigurationException | SAXException e) {
+            logger.error("Failed to run script. ", e.getCause() != null ? e.getCause() : e);
             throw new RuntimeException("Failed to run script.");
         }
     }
@@ -136,13 +180,13 @@ public class ExternalPythonExecutor {
             String exception = scriptResults.getException();
             if (!StringUtils.isEmpty(exception)) {
                 logger.error(String.format("Failed to execute script {%s}", exception));
-                throw new ExternalPythonEvalException("Exception is: " + exception);
+                throw new ExternalPythonEvalException(exception);
             }
             context.put("accessed_resources_set", (Serializable) scriptResults.getAccessedResources());
             //noinspection unchecked
             return new PythonEvaluationResult(processReturnResult(scriptResults), context);
         } catch (IOException | InterruptedException e) {
-            logger.error("Failed to run script. ", e.getCause());
+            logger.error("Failed to run script. ", e.getCause() != null ? e.getCause() : e);
             throw new RuntimeException("Failed to run script.");
         }
     }
@@ -239,6 +283,19 @@ public class ExternalPythonExecutor {
         payload.put("script_name", FilenameUtils.removeExtension(userScript));
         payload.put("inputs", (Serializable) parsedInputs);
         return objectMapper.writeValueAsString(payload);
+    }
+
+    private String formatException(String exception, List<String> traceback) {
+        if (CollectionUtils.isEmpty(traceback)) {
+            return exception;
+        }
+
+        return removeFileName(traceback.get(traceback.size() - 1)) + ", " + exception;
+    }
+
+    private String removeFileName(String trace) {
+        int pythonFileNameIndex = trace.indexOf(PYTHON_FILENAME_SCRIPT_EXTENSION);
+        return trace.substring(pythonFileNameIndex + PYTHON_FILENAME_DELIMITERS);
     }
 
     private class TempEnvironment {

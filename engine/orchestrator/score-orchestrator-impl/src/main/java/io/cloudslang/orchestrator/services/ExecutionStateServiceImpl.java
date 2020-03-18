@@ -16,6 +16,11 @@
 
 package io.cloudslang.orchestrator.services;
 
+import static io.cloudslang.orchestrator.entities.ExecutionState.EMPTY_BRANCH;
+import static io.cloudslang.score.facade.execution.ExecutionStatus.CANCELED;
+import static io.cloudslang.score.facade.execution.ExecutionStatus.PENDING_CANCEL;
+import static org.springframework.util.CollectionUtils.isEmpty;
+
 import io.cloudslang.score.facade.execution.ExecutionActionException;
 import io.cloudslang.score.facade.execution.ExecutionActionResult;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
@@ -67,7 +72,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
     @Transactional(readOnly = true)
     public ExecutionState readCancelledExecution(Long executionId) {
         validateExecutionId(executionId);
-        return executionStateRepository.findByExecutionIdAndBranchIdAndStatusIn(executionId, ExecutionState.EMPTY_BRANCH, getCancelStatuses());
+        return executionStateRepository.findByExecutionIdAndBranchIdAndStatusIn(executionId, EMPTY_BRANCH, getCancelStatuses());
     }
 
     @Override
@@ -76,7 +81,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         validateExecutionId(executionId);
         ExecutionState executionState = new ExecutionState();
         executionState.setExecutionId(executionId);
-        executionState.setBranchId(ExecutionState.EMPTY_BRANCH);
+        executionState.setBranchId(EMPTY_BRANCH);
         executionState.setStatus(ExecutionStatus.RUNNING);
         return executionStateRepository.save(executionState);
     }
@@ -134,7 +139,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
     }
 
     private List<ExecutionStatus> getCancelStatuses() {
-        return Arrays.asList(ExecutionStatus.CANCELED, ExecutionStatus.PENDING_CANCEL);
+        return Arrays.asList(CANCELED, PENDING_CANCEL);
     }
 
     @Override
@@ -144,6 +149,14 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         ExecutionState executionState = executionStateRepository.findByExecutionIdAndBranchId(executionId, branchId);
         if (executionState != null) {
             executionStateRepository.delete(executionState);
+        }
+    }
+
+    @Override
+    public void deleteCanceledExecutionStates() {
+        List<Long> executionStates = executionStateRepository.findByBranchIdAndStatusIn(EMPTY_BRANCH, PENDING_CANCEL);
+        if (!isEmpty(executionStates)) {
+            executionStateRepository.deleteByIds(executionStates);
         }
     }
 

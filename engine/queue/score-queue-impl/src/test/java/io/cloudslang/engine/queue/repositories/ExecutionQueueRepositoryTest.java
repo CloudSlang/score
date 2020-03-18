@@ -23,6 +23,7 @@ import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.versioning.services.VersionService;
+import io.cloudslang.orchestrator.services.ExecutionStateService;
 import junit.framework.Assert;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
@@ -65,6 +66,9 @@ public class ExecutionQueueRepositoryTest {
 
     @Autowired
     private ExecutionQueueRepository executionQueueRepository;
+
+    @Autowired
+    private ExecutionStateService executionStateService;
 
     @Test
     public void testInsert(){
@@ -387,5 +391,8 @@ public class ExecutionQueueRepositoryTest {
         VersionService queueVersionService(){
             return Mockito.mock(VersionService.class);
         }
+
+        @Bean
+        ExecutionStateService executionStateService() { return Mockito.mock(ExecutionStateService.class); }
     }
 }
