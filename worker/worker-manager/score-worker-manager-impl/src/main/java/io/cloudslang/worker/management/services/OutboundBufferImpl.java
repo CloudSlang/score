@@ -143,7 +143,6 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
     private void drainInternal(List<Message> bufferToDrain) {
         List<Message> bulk = new ArrayList<>();
         int bulkWeight = 0;
-        Map<String, AtomicInteger> logMap = new HashMap<>();
         try {
             for (Message message : bufferToDrain) {
                 if (message.getClass().equals(CompoundMessage.class)) {
@@ -153,28 +152,13 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
                 }
                 bulkWeight += message.getWeight();
 
-                if (logger.isDebugEnabled()) {
-                    if (logMap.get(message.getClass().getSimpleName()) == null) {
-                        logMap.put(message.getClass().getSimpleName(), new AtomicInteger(1));
-                    } else {
-                        logMap.get(message.getClass().getSimpleName()).incrementAndGet();
-                    }
-                }
-
                 if (bulkWeight > maxBulkWeight) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("trying to drain bulk: " + logMap.toString() + ", W:" + bulkWeight);
-                    }
                     drainBulk(bulk);
                     bulk.clear();
                     bulkWeight = 0;
-                    logMap.clear();
                 }
             }
-            // drain the last bulk
-            if (logger.isDebugEnabled()) {
-                logger.debug("trying to drain bulk: " + logMap.toString() + ", " + getStatus());
-            }
+
             drainBulk(bulk);
         } catch (Exception ex) {
             logger.error("Failed to drain buffer, invoking worker internal recovery... ", ex);
@@ -183,24 +167,16 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
     }
 
     private List<Message> optimize(List<Message> messages) {
-        long t = System.currentTimeMillis();
         List<Message> result = new ArrayList<>();
 
         Group<Message> groups = group(messages, by(on(Message.class).getId()));
         for (Group<Message> group : groups.subgroups()) {
             result.addAll(group.first().shrink(group.findAll()));
         }
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("bulk optimization result: " + messages.size() + " -> " + result.size() + " in " + (
-                    System.currentTimeMillis() - t) + " ms");
-        }
-
         return result;
     }
 
     private void drainBulk(List<Message> bulkToDrain) {
-        long t = System.currentTimeMillis();
         final List<Message> optimizedBulk = optimize(bulkToDrain);
         //Bulk number is the same for all retries! This is done to prevent duplications when we insert with retries
         final String bulkNumber = UUID.randomUUID().toString();
@@ -209,22 +185,14 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
             @Override
             public void tryOnce() {
                 String wrv = recoveryManager.getWRV();
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Dispatch start with bulk number: " + bulkNumber);
-                }
                 dispatcherService.dispatch(optimizedBulk, bulkNumber, wrv, workerUuid);
                 if (executionsActivityListener != null) {
                     executionsActivityListener
                             .onHalt(extract(optimizedBulk, on(ExecutionMessage.class).getExecStateId()));
                 }
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Dispatch end with bulk number: " + bulkNumber);
-                }
             }
         });
-        if (logger.isDebugEnabled()) {
-            logger.debug("bulk was drained in " + (System.currentTimeMillis() - t) + " ms");
-        }
+
     }
 
     @Override

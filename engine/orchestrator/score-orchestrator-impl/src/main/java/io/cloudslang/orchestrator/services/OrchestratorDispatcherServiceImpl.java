@@ -16,6 +16,7 @@
 
 package io.cloudslang.orchestrator.services;
 
+import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.node.services.WorkerLockService;
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
@@ -57,9 +58,10 @@ public final class OrchestratorDispatcherServiceImpl implements OrchestratorDisp
         workerLockService.lock(workerUuid);
         Validate.notNull(messages, "Messages list is null");
 
-        String currentBulkNumber = workerNodeService.readByUUID(workerUuid).getBulkNumber();
+        WorkerNode workerNode = workerNodeService.readByUUID(workerUuid);
+        String currentBulkNumber = workerNode.getBulkNumber();
         //can not be null at this point
-        String currentWRV = workerNodeService.readByUUID(workerUuid).getWorkerRecoveryVersion();
+        String currentWRV = workerNode.getWorkerRecoveryVersion();
 
         //This is done in order to make sure that if we do retries in worker we won't insert same bulk twice
         if (currentBulkNumber != null && currentBulkNumber.equals(bulkNumber)) {
@@ -77,13 +79,6 @@ public final class OrchestratorDispatcherServiceImpl implements OrchestratorDisp
     }
 
     private void dispatch(List<? extends Serializable> messages) {
-        Validate.notNull(messages, "Messages list is null");
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Dispatching " + messages.size() + " messages");
-        }
-
-        long t = System.currentTimeMillis();
         final List<ExecutionMessage> toDispatchMessages = messages.stream()
                 .filter(ExecutionMessage.class::isInstance)
                 .map(ExecutionMessage.class::cast)
@@ -95,17 +90,6 @@ public final class OrchestratorDispatcherServiceImpl implements OrchestratorDisp
                 .map(SplitMessage.class::cast)
                 .collect(toList());
         splitJoinService.split(toSplitMessages);
-
-        int dispatched = toDispatchMessages.size() + toSplitMessages.size();
-        int count = messages.size() - dispatched;
-        t = System.currentTimeMillis() - t;
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Dispatching " + dispatched + " messages is done in " + t + " ms");
-        }
-        if (count > 0) {
-            logger.warn(count + " messages were not being dispatched, since unknown type");
-        }
     }
 
 }
