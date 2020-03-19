@@ -68,7 +68,7 @@ public class ExecutionPlanCompressUtil {
         try {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             BufferedOutputStream bos = new BufferedOutputStream(bout);
-            LZ4FrameOutputStream lzout = new- LZ4FrameOutputStream(bos, BLOCKSIZE.SIZE_64KB);
+            LZ4FrameOutputStream lzout = new LZ4FrameOutputStream(bos, BLOCKSIZE.SIZE_64KB);
             BufferedOutputStream bos_2 = new BufferedOutputStream(lzout);
             oos = new ObjectOutputStream(bos_2);
 
