@@ -32,7 +32,7 @@ import java.io.OutputStream;
 
 
 public class ExecutionMessageConverter {
-    private static final int SIZE = 8_192;
+    private static final int SIZE = 1_024;
 
     @Autowired(required = false)
     private SensitiveDataHandler sensitiveDataHandler;
