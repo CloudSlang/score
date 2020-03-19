@@ -17,6 +17,9 @@
 package io.cloudslang.score.facade.entities;
 
 import io.cloudslang.score.api.ExecutionPlan;
+import net.jpountz.lz4.LZ4FrameInputStream;
+import net.jpountz.lz4.LZ4FrameOutputStream;
+import net.jpountz.lz4.LZ4FrameOutputStream.BLOCKSIZE;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedInputStream;
@@ -26,8 +29,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * Created by IntelliJ IDEA.
@@ -49,8 +50,8 @@ public class ExecutionPlanCompressUtil {
 
         try (ByteArrayInputStream is = new ByteArrayInputStream(bytes);
              BufferedInputStream bis = new BufferedInputStream(is);
-             GZIPInputStream gis = new GZIPInputStream(bis);
-             BufferedInputStream bis_2 = new BufferedInputStream(gis);
+                LZ4FrameInputStream lzis = new LZ4FrameInputStream(bis);
+             BufferedInputStream bis_2 = new BufferedInputStream(lzis);
              ObjectInputStream ois = new ObjectInputStream(bis_2);
         ) {
 
@@ -67,8 +68,8 @@ public class ExecutionPlanCompressUtil {
         try {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             BufferedOutputStream bos = new BufferedOutputStream(bout);
-            GZIPOutputStream gzipout = new GZIPOutputStream(bos);
-            BufferedOutputStream bos_2 = new BufferedOutputStream(gzipout);
+            LZ4FrameOutputStream lzout = new- LZ4FrameOutputStream(bos, BLOCKSIZE.SIZE_64KB);
+            BufferedOutputStream bos_2 = new BufferedOutputStream(lzout);
             oos = new ObjectOutputStream(bos_2);
 
             oos.writeObject(executionPlan);
