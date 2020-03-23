@@ -55,8 +55,9 @@ public final class OrchestratorDispatcherServiceImpl implements OrchestratorDisp
     @Transactional
     public void dispatch(List<? extends Serializable> messages, String bulkNumber, String wrv, String workerUuid) {
         //lock to synchronize with the recovery job
-        workerLockService.lock(workerUuid);
         Validate.notNull(messages, "Messages list is null");
+
+        workerLockService.lock(workerUuid);
 
         WorkerNode workerNode = workerNodeService.readByUUID(workerUuid);
         String currentBulkNumber = workerNode.getBulkNumber();
