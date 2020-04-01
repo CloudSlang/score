@@ -99,11 +99,6 @@
             <artifactId>score-orchestrator-api</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>it.unimi.dsi</groupId>
-            <artifactId>fastutil</artifactId>
-        </dependency>
-
         <!-- end of engine artifacts -->
         <!-- test artifacts -->
         <dependency>
