@@ -20,7 +20,7 @@ import io.cloudslang.score.api.ControlActionMetadata;
 import io.cloudslang.score.exceptions.FlowExecutionException;
 import io.cloudslang.score.lang.ExecutionRuntimeServices;
 import io.cloudslang.worker.execution.services.SessionDataHandler;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +41,7 @@ import static io.cloudslang.score.api.execution.ExecutionParametersConsts.EXECUT
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.GLOBAL_SESSION_OBJECT;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.NON_SERIALIZABLE_EXECUTION_DATA;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SESSION_OBJECT;
+import static org.apache.commons.lang.Validate.notNull;
 
 /**
  * @author kravtsov
@@ -60,52 +61,52 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
     private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
     private Map<String, String[]> cacheParamNames = new ConcurrentHashMap<>();
 
-    private static Long getExecutionIdFromActionData(Map<String, ?> actionData) {
-        ExecutionRuntimeServices executionRuntimeServices = (ExecutionRuntimeServices) actionData.get(
-                EXECUTION_RUNTIME_SERVICES);
-        if (executionRuntimeServices != null) return executionRuntimeServices.getExecutionId();
-        return null;
+    private static Long getExecutionIdFromActionData(Map<String, ?> actionDataMap) {
+        ExecutionRuntimeServices executionRuntimeServices =
+                (ExecutionRuntimeServices) actionDataMap.get(EXECUTION_RUNTIME_SERVICES);
+        return (executionRuntimeServices != null) ? executionRuntimeServices.getExecutionId() : null;
     }
 
-    private static Long getRunningExecutionIdFromActionData(Map<String, ?> actionData) {
-        ExecutionRuntimeServices executionRuntimeServices = (ExecutionRuntimeServices) actionData.get(
+    private static Long getRunningExecutionIdFromActionData(Map<String, ?> actionDataMap) {
+        ExecutionRuntimeServices executionRuntimeServices = (ExecutionRuntimeServices) actionDataMap.get(
                 EXECUTION_RUNTIME_SERVICES);
-        if (executionRuntimeServices != null) return executionRuntimeServices.getParentRunningId();
-        return getExecutionIdFromActionData(actionData);
+        return (executionRuntimeServices != null) ? executionRuntimeServices.getParentRunningId()
+                : getExecutionIdFromActionData(actionDataMap);
     }
 
-    private static String getExceptionMessage(ControlActionMetadata actionMetadata) {
-        return "Failed to run the action! Class: " + actionMetadata.getClassName() + ", method: "
-                + actionMetadata.getMethodName();
+    private static String getExceptionMessage(ControlActionMetadata metadata) {
+        return "Failed to run the action! Class: " + metadata.getClassName() + ", method: " + metadata.getMethodName();
     }
 
     @Override
-    public Object executeControlAction(ControlActionMetadata actionMetadata, Map<String, ?> actionData) {
-        Validate.notNull(actionMetadata, "Action metadata is null");
-        if (logger.isDebugEnabled()) logger.debug(
-                "Executing control action [" + actionMetadata.getClassName() + '.' + actionMetadata.getMethodName() + ']');
+    public Object executeControlAction(ControlActionMetadata metadata, Map<String, ?> actionDataMap) {
+        notNull(metadata, "Action metadata is null");
+        if (logger.isDebugEnabled()) {
+            logger.debug("Executing control action [" + metadata.getClassName() + '.' + metadata.getMethodName() + ']');
+        }
         try {
-            Object actionBean = getActionBean(actionMetadata);
-            Method actionMethod = getActionMethod(actionMetadata);
-            Object[] arguments = buildParametersArray(actionMethod, actionData);
-            if (logger.isTraceEnabled()) logger.trace("Invoking...");
+            Object actionBean = getActionBean(metadata);
+            Method actionMethod = getActionMethod(metadata);
+            MutableBoolean didSessionActivation = new MutableBoolean(false);
+            Object[] arguments = buildParametersArray(actionMethod, actionDataMap, didSessionActivation);
             Object result = actionMethod.invoke(actionBean, arguments);
-            clearStateAfterInvocation(actionData);
-            if (logger.isDebugEnabled()) logger.debug(
-                    "Control action [" + actionMetadata.getClassName() + '.' + actionMetadata.getMethodName() + "] done");
+            if (didSessionActivation.isTrue()) {
+                clearStateAfterInvocation(actionDataMap);
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("Control action [" + metadata.getClassName() + '.' + metadata.getMethodName() + "] done");
+            }
             return result;
         } catch (IllegalArgumentException ex) {
-            String message = "Failed to run the action! Wrong arguments were passed to class: " + actionMetadata.getClassName() + ", method: " + actionMetadata
-                    .getMethodName() +
-                    ", reason: " + ex.getMessage();
+            String message = "Failed to run the action! Wrong arguments were passed to class: " + metadata.getClassName()
+                            + ", method: " + metadata.getMethodName() + ", reason: " + ex.getMessage();
             throw new FlowExecutionException(message, ex);
         } catch (InvocationTargetException ex) {
             String message = ex.getTargetException() == null ? ex.getMessage() : ex.getTargetException().getMessage();
-            logger.error(getExceptionMessage(actionMetadata) + ", reason: " + message, ex);
+            logger.error(getExceptionMessage(metadata) + ", reason: " + message, ex);
             throw new FlowExecutionException(message, ex);
         } catch (Exception ex) {
-
-            throw new FlowExecutionException(getExceptionMessage(actionMetadata) + ", reason: " + ex.getMessage(), ex);
+            throw new FlowExecutionException(getExceptionMessage(metadata) + ", reason: " + ex.getMessage(), ex);
         }
     }
 
@@ -115,51 +116,53 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
         sessionDataHandler.setSessionDataInactive(executionId, getRunningExecutionIdFromActionData(actionData));
     }
 
-    private Object getActionBean(
-            ControlActionMetadata actionMetadata) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+    private Object getActionBean(ControlActionMetadata actionMetadata)
+            throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+
         Object bean = cacheBeans.get(actionMetadata.getClassName());
-        if (bean == null) {
-            if (logger.isTraceEnabled())
-                logger.trace(actionMetadata.getClassName() + " wasn't found in the beans cache");
+        if (bean != null) {
+            return bean;
+        } else {
             Class<?> actionClass = Class.forName(actionMetadata.getClassName());
             try {
                 bean = applicationContext.getBean(actionClass);
-            } catch (Exception ex) { // Not a spring bean
-                if (logger.isTraceEnabled()) logger.trace(ex);
+            } catch (Exception ignore) { // Not a spring bean
             }
-            if (bean == null) bean = actionClass.newInstance();
+            if (bean == null) { // construct using no arg constructor
+                bean = actionClass.newInstance();
+            }
             cacheBeans.put(actionMetadata.getClassName(), bean);
-            if (logger.isTraceEnabled()) logger.trace(actionMetadata.getClassName() + " placed in the beans cache");
+            return bean;
         }
-        return bean;
     }
 
-    private Method getActionMethod(ControlActionMetadata actionMetadata) throws ClassNotFoundException {
-        Method actionMethod = cacheMethods.get(actionMetadata.getClassName() + '.' + actionMetadata.getMethodName());
-        if (actionMethod == null) {
-            if (logger.isTraceEnabled()) logger.trace(
-                    actionMetadata.getClassName() + '.' + actionMetadata.getMethodName() + " wasn't found in the methods cache");
-            for (Method method : Class.forName(actionMetadata.getClassName()).getMethods()) {
-                if (method.getName().equals(actionMetadata.getMethodName())) {
+    private Method getActionMethod(ControlActionMetadata metadata) throws ClassNotFoundException {
+        final String cacheMethodKey = metadata.getClassName() + '.' + metadata.getMethodName();
+        Method actionMethod = cacheMethods.get(cacheMethodKey);
+        if (actionMethod != null) {
+            return actionMethod;
+        } else {
+            final Method[] methods = Class.forName(metadata.getClassName()).getMethods();
+            for (Method method : methods) {
+                if (method.getName().equals(metadata.getMethodName())) {
                     actionMethod = method;
-                    cacheMethods.put(actionMetadata.getClassName() + '.' + actionMetadata.getMethodName(), method);
+                    cacheMethods.put(cacheMethodKey, method);
                     break;
                 }
             }
-        } else if (logger.isTraceEnabled()) {
-            logger.trace(
-                    actionMetadata.getClassName() + '.' + actionMetadata.getMethodName() + " was found in the methods cache");
+
+            if (actionMethod != null) {
+                return actionMethod;
+            } else {
+                String errMessage = "Method: " + metadata.getMethodName() + " was not found in class:  "
+                                + metadata.getClassName();
+                logger.error(errMessage);
+                throw new FlowExecutionException(errMessage);
+            }
         }
-        if (actionMethod == null) {
-            String errMessage = "Method: " + actionMetadata.getMethodName() + " was not found in class:  " + actionMetadata
-                    .getClassName();
-            logger.error(errMessage);
-            throw new FlowExecutionException(errMessage);
-        }
-        return actionMethod;
     }
 
-    private Object[] buildParametersArray(Method actionMethod, Map<String, ?> actionData) {
+    private Object[] buildParametersArray(Method actionMethod, Map<String, ?> actionDataMap, final MutableBoolean didSessionActivation) {
         String actionFullName = actionMethod.getDeclaringClass().getName() + "." + actionMethod.getName();
         String[] paramNames = cacheParamNames.get(actionFullName);
         if (paramNames == null) {
@@ -168,9 +171,12 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
         }
         List<Object> args = new ArrayList<>(paramNames.length);
         for (String paramName : paramNames) {
-            if (NON_SERIALIZABLE_EXECUTION_DATA.equals(paramName)) {
-                final Long executionId = getExecutionIdFromActionData(actionData);
-                final Long runningId = getRunningExecutionIdFromActionData(actionData);
+            if (!NON_SERIALIZABLE_EXECUTION_DATA.equals(paramName)) {
+                Object param = actionDataMap.get(paramName);
+                args.add(param);
+            } else { // Non serializable execution data handling
+                final Long executionId = getExecutionIdFromActionData(actionDataMap);
+                final Long runningId = getRunningExecutionIdFromActionData(actionDataMap);
                 final Map<String, Object> globalSessionsExecutionData = sessionDataHandler
                         .getGlobalSessionsExecutionData(executionId);
                 final Map<String, Object> sessionObjectExecutionData = sessionDataHandler
@@ -180,24 +186,22 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
                 nonSerializableExecutionData.put(GLOBAL_SESSION_OBJECT, globalSessionsExecutionData);
                 nonSerializableExecutionData.put(SESSION_OBJECT, sessionObjectExecutionData);
 
+                // Adding non serializable execution data to args list
                 args.add(nonSerializableExecutionData);
 
                 // If the control action requires non-serializable session data, we add it to the arguments array
                 // and set the session data as active, so that it won't be cleared
                 sessionDataHandler.setGlobalSessionDataActive(executionId);
                 sessionDataHandler.setSessionDataActive(executionId, runningId);
-                continue;
+                didSessionActivation.setTrue();
             }
-            Object param = actionData.get(paramName);
-            args.add(param);
         }
-        return args.toArray(new Object[args.size()]);
+        return args.toArray();
     }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
-
 
 }
