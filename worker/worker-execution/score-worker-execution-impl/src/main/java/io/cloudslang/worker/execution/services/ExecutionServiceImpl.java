@@ -486,14 +486,15 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     protected ExecutionStep loadExecutionStep(Execution execution) {
-        RunningExecutionPlan runningExecutionPlan;
         // Optimization for external workers - run the content only without loading the execution plan
-        if (execution.getSystemContext().get(TempConstants.CONTENT_EXECUTION_STEP) != null) {
-            return (ExecutionStep) execution.getSystemContext().get(TempConstants.CONTENT_EXECUTION_STEP);
+        Serializable executionStep = execution.getSystemContext().get(TempConstants.CONTENT_EXECUTION_STEP);
+        if (executionStep != null) {
+            return (ExecutionStep) executionStep;
         } else {
             Long position = execution.getPosition();
             if (position != null) {
-                runningExecutionPlan = workerDbSupportService.readExecutionPlanById(execution.getRunningExecutionPlanId());
+                RunningExecutionPlan runningExecutionPlan =
+                        workerDbSupportService.readExecutionPlanById(execution.getRunningExecutionPlanId());
                 if (runningExecutionPlan != null) {
                     updateMetadata(execution, runningExecutionPlan);
                     ExecutionStep currStep = runningExecutionPlan.getExecutionPlan().getStep(position);
@@ -618,9 +619,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
             stepData.putAll(actionData);
         }
         Map<String, ?> navigationData = currStep.getNavigationData();
-        if (navigationData != null) {
-            stepData.putAll(navigationData);
-        }
+        stepData.putAll(navigationData);
+
         // We add all the contexts to the step data - so inside of each control action we will have access to all contexts
         addContextData(stepData, execution);
         return stepData;
