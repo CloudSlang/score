@@ -21,6 +21,15 @@ class PythonAgentExecutor(object):
             raise InvalidExecutionException("Expected inputs " + str(expected_inputs) +
                                      " are not the same with the actual inputs " + str(actual_inputs))
 
+    def __validate_output(self, output):
+        if "]]>" in output[1]:
+            raise InvalidExecutionException("Invalid value for output variable: " + output[0])
+
+    def __parse_output(self, output):
+        stringified_output = (str(output[0]), str(output[1]))
+        self.__validate_output(stringified_output )
+        return stringified_output
+
     def __execute_action(self, script_name, inputs):
         sys.path.append(os.getcwd())
         script = importlib.import_module(script_name)
@@ -40,9 +49,11 @@ class PythonAgentExecutor(object):
         if result is None:
             return {"returnResult": {}}
         if isinstance(result, dict):
-            final_result = {"returnResult": dict(map(lambda output: (str(output[0]), str(output[1])), result.items()))}
+            final_result = {"returnResult": dict(map(lambda output: self.__parse_output(output), result.items()))}
         else:
-            final_result = {"returnResult": {"returnResult": str(result)}}
+            string_result = str(result)
+            self.__validate_output(('returnResult', string_result))
+            final_result = {"returnResult": {"returnResult": string_result}}
         return final_result
 
     def print_event(self, event):
@@ -50,7 +61,7 @@ class PythonAgentExecutor(object):
 
     def main(self):
         self.print_event("<data>")
-        self.print_event("<execution>")
+        self.print_event("<execution> <![CDATA[")
         try:
             raw_inputs = input().encode(sys.stdin.encoding).decode()
             payload = json.loads(raw_inputs)
@@ -64,7 +75,7 @@ class PythonAgentExecutor(object):
                 final_result = self.__process_result(result)
             finally:
                 self.__enable_standard_io(old_io)
-                self.print_event("</execution>")
+                self.print_event("]]> </execution>")
         except InvalidExecutionException as e:
             final_result = {
                 "exception": str(e)
@@ -75,9 +86,9 @@ class PythonAgentExecutor(object):
                 "exception": str(e),
                 "traceback": traceback.format_list(traceback.extract_tb(exc_tb))
             }
-        self.print_event("<result>")
+        self.print_event("<result> <![CDATA[")
         print(json.dumps(final_result))
-        self.print_event("</result>")
+        self.print_event("]]> </result>")
         self.print_event("</data>")
 
 

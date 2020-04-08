@@ -17,6 +17,7 @@ package io.cloudslang.runtime.impl.python.external;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import org.apache.commons.collections.CollectionUtils;
@@ -26,13 +27,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +35,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -136,12 +130,8 @@ public class ExternalPythonExecutor {
         return pythonPath;
     }
 
-    private static Document getExecutionResultDocument(String text) throws ParserConfigurationException, SAXException, IOException {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        InputSource is = new InputSource();
-        is.setCharacterStream(new StringReader(text));
-        return db.parse(is);
+    private ScriptExecutionResult parseScriptExecutionResult(String scriptExecutionResult) throws JsonProcessingException {
+        return new XmlMapper().readValue(scriptExecutionResult, ScriptExecutionResult.class);
     }
 
     private PythonExecutionResult runPythonExecutionProcess(String pythonPath, String payload,
@@ -151,7 +141,7 @@ public class ExternalPythonExecutor {
 
         try {
             String returnResult = getResult(payload, processBuilder);
-            returnResult = getExecutionResultDocument(returnResult).getElementsByTagName("result").item(0).getTextContent();
+            returnResult = parseScriptExecutionResult(returnResult).getResult();
             ScriptResults scriptResults = objectMapper.readValue(returnResult, ScriptResults.class);
             String exception = formatException(scriptResults.getException(), scriptResults.getTraceback());
 
@@ -162,7 +152,7 @@ public class ExternalPythonExecutor {
 
             //noinspection unchecked
             return new PythonExecutionResult(scriptResults.getReturnResult());
-        } catch (IOException | InterruptedException | ParserConfigurationException | SAXException e) {
+        } catch (IOException | InterruptedException e) {
             logger.error("Failed to run script. ", e.getCause() != null ? e.getCause() : e);
             throw new RuntimeException("Failed to run script.");
         }
