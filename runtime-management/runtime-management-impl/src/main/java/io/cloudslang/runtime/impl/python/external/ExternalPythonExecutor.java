@@ -131,8 +131,7 @@ public class ExternalPythonExecutor {
     }
 
     private ScriptExecutionResult parseScriptExecutionResult(String scriptExecutionResult) throws JsonProcessingException {
-        XmlMapper xmlMapper = new XmlMapper();
-        return xmlMapper.readValue(scriptExecutionResult, ScriptExecutionResult.class);
+        return new XmlMapper().readValue(scriptExecutionResult, ScriptExecutionResult.class);
     }
 
     private PythonExecutionResult runPythonExecutionProcess(String pythonPath, String payload,
