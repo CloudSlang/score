@@ -29,6 +29,7 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -150,7 +151,8 @@ public class ExternalPythonExecutor {
 
         try {
             String returnResult = getResult(payload, processBuilder);
-            returnResult = parseScriptExecutionResult(returnResult).getResult();
+            returnResult = parseScriptExecutionResult(returnResult).getElementsByTagName("result").item(0)
+                    .getTextContent();
             ScriptResults scriptResults = objectMapper.readValue(returnResult, ScriptResults.class);
             String exception = formatException(scriptResults.getException(), scriptResults.getTraceback());
 
