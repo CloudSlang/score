@@ -60,8 +60,8 @@ class PythonAgentExecutor(object):
         print(event)
 
     def main(self):
-        self.print_event("<data>")
-        self.print_event("<execution> <![CDATA[")
+        self.print_event("<execution>")
+        self.print_event("<executionOutput> <![CDATA[")
         try:
             raw_inputs = input().encode(sys.stdin.encoding).decode()
             payload = json.loads(raw_inputs)
@@ -75,7 +75,7 @@ class PythonAgentExecutor(object):
                 final_result = self.__process_result(result)
             finally:
                 self.__enable_standard_io(old_io)
-                self.print_event("]]> </execution>")
+                self.print_event("]]> </executionOutput>")
         except InvalidExecutionException as e:
             final_result = {
                 "exception": str(e)
@@ -89,7 +89,7 @@ class PythonAgentExecutor(object):
         self.print_event("<result> <![CDATA[")
         print(json.dumps(final_result))
         self.print_event("]]> </result>")
-        self.print_event("</data>")
+        self.print_event("</execution>")
 
 
 if __name__ == '__main__':
