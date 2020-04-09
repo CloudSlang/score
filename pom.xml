@@ -343,6 +343,12 @@
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-xml</artifactId>
                 <version>2.10.3</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.module</groupId>
+                        <artifactId>jackson-module-jaxb-annotations</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>javax.validation</groupId>
