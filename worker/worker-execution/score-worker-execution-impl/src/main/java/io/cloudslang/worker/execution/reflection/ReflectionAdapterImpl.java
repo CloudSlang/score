@@ -20,7 +20,6 @@ import io.cloudslang.score.api.ControlActionMetadata;
 import io.cloudslang.score.exceptions.FlowExecutionException;
 import io.cloudslang.score.lang.ExecutionRuntimeServices;
 import io.cloudslang.worker.execution.services.SessionDataHandler;
-import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.GLOBAL_SESSION_OBJECT;
@@ -56,10 +56,10 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
     @Autowired
     private SessionDataHandler sessionDataHandler;
     private ApplicationContext applicationContext;
-    private Map<String, Object> cacheBeans = new ConcurrentHashMap<>();
-    private Map<String, Method> cacheMethods = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, Object> cacheBeans = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, Method> cacheMethods = new ConcurrentHashMap<>();
     private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
-    private Map<String, String[]> cacheParamNames = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, String[]> cacheParamNames = new ConcurrentHashMap<>();
 
     private static Long getExecutionIdFromActionData(Map<String, ?> actionDataMap) {
         ExecutionRuntimeServices executionRuntimeServices =
@@ -87,12 +87,9 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
         try {
             Object actionBean = getActionBean(metadata);
             Method actionMethod = getActionMethod(metadata);
-            MutableBoolean didSessionActivation = new MutableBoolean(false);
-            Object[] arguments = buildParametersArray(actionMethod, actionDataMap, didSessionActivation);
+            Object[] arguments = buildParametersArray(actionMethod, actionDataMap);
             Object result = actionMethod.invoke(actionBean, arguments);
-            if (didSessionActivation.isTrue()) {
-                clearStateAfterInvocation(actionDataMap);
-            }
+            clearStateAfterInvocation(actionDataMap);
             if (logger.isDebugEnabled()) {
                 logger.debug("Control action [" + metadata.getClassName() + '.' + metadata.getMethodName() + "] done");
             }
@@ -162,7 +159,7 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
         }
     }
 
-    private Object[] buildParametersArray(Method actionMethod, Map<String, ?> actionDataMap, final MutableBoolean didSessionActivation) {
+    private Object[] buildParametersArray(Method actionMethod, Map<String, ?> actionDataMap) {
         String actionFullName = actionMethod.getDeclaringClass().getName() + "." + actionMethod.getName();
         String[] paramNames = cacheParamNames.get(actionFullName);
         if (paramNames == null) {
@@ -193,7 +190,6 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
                 // and set the session data as active, so that it won't be cleared
                 sessionDataHandler.setGlobalSessionDataActive(executionId);
                 sessionDataHandler.setSessionDataActive(executionId, runningId);
-                didSessionActivation.setTrue();
             }
         }
         return args.toArray();
