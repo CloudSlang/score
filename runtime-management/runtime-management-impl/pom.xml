@@ -23,7 +23,7 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>runtime-management</artifactId>
-        <version>0.3.143-SNAPSHOT</version>
+        <version>0.3.147-SNAPSHOT</version>
     </parent>
 
     <artifactId>runtime-management-impl</artifactId>
@@ -67,7 +67,7 @@
         <dependency>
             <groupId>org.python</groupId>
             <artifactId>jython-standalone</artifactId>
-            <version>2.7.0</version>
+            <version>2.7.2</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

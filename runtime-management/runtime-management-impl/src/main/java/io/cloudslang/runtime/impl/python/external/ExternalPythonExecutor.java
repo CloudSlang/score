@@ -136,11 +136,11 @@ public class ExternalPythonExecutor {
         return pythonPath;
     }
 
-    private static Document getExecutionResultDocument(String text) throws ParserConfigurationException, SAXException, IOException {
+    private Document parseScriptExecutionResult(String scriptExecutionResult) throws IOException, ParserConfigurationException, SAXException {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
         InputSource is = new InputSource();
-        is.setCharacterStream(new StringReader(text));
+        is.setCharacterStream(new StringReader(scriptExecutionResult));
         return db.parse(is);
     }
 
@@ -151,7 +151,8 @@ public class ExternalPythonExecutor {
 
         try {
             String returnResult = getResult(payload, processBuilder);
-            returnResult = getExecutionResultDocument(returnResult).getElementsByTagName("result").item(0).getTextContent();
+            returnResult = parseScriptExecutionResult(returnResult).getElementsByTagName("result").item(0)
+                    .getTextContent();
             ScriptResults scriptResults = objectMapper.readValue(returnResult, ScriptResults.class);
             String exception = formatException(scriptResults.getException(), scriptResults.getTraceback());
 
@@ -162,7 +163,7 @@ public class ExternalPythonExecutor {
 
             //noinspection unchecked
             return new PythonExecutionResult(scriptResults.getReturnResult());
-        } catch (IOException | InterruptedException | ParserConfigurationException | SAXException e) {
+        } catch (IOException | InterruptedException | SAXException | ParserConfigurationException e) {
             logger.error("Failed to run script. ", e.getCause() != null ? e.getCause() : e);
             throw new RuntimeException("Failed to run script.");
         }

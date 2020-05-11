@@ -23,7 +23,7 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>engine</artifactId>
-        <version>0.3.143-SNAPSHOT</version>
+        <version>0.3.147-SNAPSHOT</version>
     </parent>
 
     <artifactId>score-facade</artifactId>
@@ -50,11 +50,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>score-api</artifactId>
             <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>it.unimi.dsi</groupId>
-            <artifactId>fastutil</artifactId>
         </dependency>
 
         <dependency>

@@ -48,7 +48,7 @@ public class RunningExecutionPlan extends AbstractIdentifiable {
     private byte[] executionPlanZipped;
 
     @Transient
-    private ExecutionPlan executionPlan;
+    private transient ExecutionPlan executionPlan;
 
     @Column(name = "UUID", nullable = false)
     private String flowUUID;

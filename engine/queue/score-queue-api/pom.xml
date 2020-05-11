@@ -23,7 +23,7 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>queue</artifactId>
-        <version>0.3.143-SNAPSHOT</version>
+        <version>0.3.147-SNAPSHOT</version>
     </parent>
 
     <artifactId>score-queue-api</artifactId>
@@ -67,11 +67,6 @@
         <dependency>
             <groupId>org.lz4</groupId>
             <artifactId>lz4-java</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>it.unimi.dsi</groupId>
-            <artifactId>fastutil</artifactId>
         </dependency>
 
         <!-- test artifacts -->
