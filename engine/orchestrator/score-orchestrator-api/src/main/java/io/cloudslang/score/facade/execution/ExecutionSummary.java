@@ -44,6 +44,9 @@ public class ExecutionSummary implements Serializable {
     @Deprecated private long branchesCount; //not active since 10.02!! we don't set the value, but must leave it for backward compatible of the POJO in Careml.
     private Double roi;
     private boolean reserveRobot;
+    private LicenseType licenseType;
+    private boolean autoResume;
+
 
     public String getExecutionId() {
         return executionId;
@@ -198,6 +201,22 @@ public class ExecutionSummary implements Serializable {
 
     public void setReserveRobot(boolean reserveRobot) {
         this.reserveRobot = reserveRobot;
+    }
+
+    public LicenseType getLicenseType() {
+        return licenseType;
+    }
+
+    public void setLicenseType(LicenseType licenseType) {
+        this.licenseType = licenseType;
+    }
+
+    public boolean isAutoResume() {
+        return autoResume;
+    }
+
+    public void setAutoResume(boolean autoResume) {
+        this.autoResume = autoResume;
     }
 
     @Override
