@@ -16,13 +16,13 @@
 
 package io.cloudslang.orchestrator.repositories;
 
-import io.cloudslang.score.facade.entities.Execution;
+import io.cloudslang.engine.data.DataBaseDetector;
+import io.cloudslang.engine.data.SqlUtils;
 import io.cloudslang.orchestrator.entities.BranchContexts;
 import io.cloudslang.orchestrator.entities.FinishedBranch;
 import io.cloudslang.orchestrator.entities.SuspendedExecution;
 import io.cloudslang.orchestrator.services.ExecutionSerializationUtil;
-import io.cloudslang.engine.data.DataBaseDetector;
-import io.cloudslang.engine.data.SqlUtils;
+import io.cloudslang.score.facade.entities.Execution;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,9 +32,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,7 +57,7 @@ import static java.util.EnumSet.of;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @Transactional
-@TransactionConfiguration(defaultRollback = true)
+@Rollback
 public class SuspendedExecutionsRepositoryTest {
 
     @Autowired
