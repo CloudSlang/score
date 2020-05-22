@@ -148,7 +148,7 @@ public class SuspendedExecutionsRepositoryTest {
 
         finishedBranchRepository.save(finishedBranch);
 
-        List<SuspendedExecution> read = repository.findFinishedSuspendedExecutions(of(PARALLEL, NON_BLOCKING), new PageRequest(0, 100));
+        List<SuspendedExecution> read = repository.findFinishedSuspendedExecutions(of(PARALLEL, NON_BLOCKING), PageRequest.of(0, 100));
 
         Assert.assertTrue(read.size() == 1);
         Assert.assertEquals(read.get(0).getFinishedBranches().size(), 1);
@@ -171,7 +171,7 @@ public class SuspendedExecutionsRepositoryTest {
 
         finishedBranchRepository.save(finishedBranch);
 
-        List<SuspendedExecution> read = repository.findFinishedSuspendedExecutions(of(PARALLEL, NON_BLOCKING), new PageRequest(0, 100));
+        List<SuspendedExecution> read = repository.findFinishedSuspendedExecutions(of(PARALLEL, NON_BLOCKING), PageRequest.of(0, 100));
 
         Assert.assertTrue(read.size() == 0);
     }
@@ -188,14 +188,14 @@ public class SuspendedExecutionsRepositoryTest {
 
         repository.save(suspendedExecution);
 
-        List<String> read = repository.collectCompletedSuspendedExecutions(new PageRequest(0, 100));
+        List<String> read = repository.collectCompletedSuspendedExecutions(PageRequest.of(0, 100));
 
         Assert.assertNotNull(read);
         Assert.assertEquals(read.get(0), "111");
 
         repository.deleteByIds(read);
 
-        Assert.assertEquals(repository.collectCompletedSuspendedExecutions(new PageRequest(0, 100)).size(), 0);
+        Assert.assertEquals(repository.collectCompletedSuspendedExecutions(PageRequest.of(0, 100)).size(), 0);
     }
 
 

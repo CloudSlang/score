@@ -16,19 +16,19 @@
 
 package io.cloudslang.orchestrator.services;
 
-import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
-import io.cloudslang.score.api.EndBranchDataContainer;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
+import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
-import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.orchestrator.entities.BranchContexts;
 import io.cloudslang.orchestrator.entities.FinishedBranch;
 import io.cloudslang.orchestrator.entities.SplitMessage;
 import io.cloudslang.orchestrator.entities.SuspendedExecution;
 import io.cloudslang.orchestrator.repositories.FinishedBranchRepository;
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
+import io.cloudslang.score.api.EndBranchDataContainer;
+import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.lang.SystemContext;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,9 +40,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.data.domain.Pageable;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -127,7 +127,7 @@ public class SplitJoinServiceTest {
         SplitMessage splitMessage = createSplitMessage(splitId, "MULTI_INSTANCE");
 
         splitJoinService.split(Arrays.asList(splitMessage));
-        Mockito.verify(suspendedExecutionsRepository).save(suspendedExecutionsSaveCaptor.capture());
+        Mockito.verify(suspendedExecutionsRepository).saveAll(suspendedExecutionsSaveCaptor.capture());
         List<SuspendedExecution> value = suspendedExecutionsSaveCaptor.getValue();
 
         assertThat("exactly one suspended entity must be created", value.size(), is(1));
@@ -203,7 +203,7 @@ public class SplitJoinServiceTest {
         int joinedSplits = splitJoinService.joinFinishedSplits(1);
         assertThat(joinedSplits, is(1));
 
-        Mockito.verify(suspendedExecutionsRepository).delete(Arrays.asList(suspendedExecution));
+        Mockito.verify(suspendedExecutionsRepository).deleteAll(Arrays.asList(suspendedExecution));
     }
 
     @Test
