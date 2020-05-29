@@ -15,17 +15,17 @@
  */
 package io.cloudslang.orchestrator.services;
 
-import static org.springframework.util.CollectionUtils.isEmpty;
-
 import io.cloudslang.orchestrator.repositories.FinishedBranchRepository;
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
-import java.util.Collection;
-import java.util.List;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
 import javax.transaction.Transactional;
+import java.util.Collection;
+import java.util.List;
+
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 
 public class SuspendedExecutionCleanerServiceImpl implements SuspendedExecutionCleanerService {
@@ -54,8 +54,10 @@ public class SuspendedExecutionCleanerServiceImpl implements SuspendedExecutionC
     private void cleanupSuspendedExecutions(Integer bulkSize) {
         for (int i = 1; i <= bulkSize / SPLIT_SIZE; i++) {
             PageRequest pageRequest = new PageRequest(0, SPLIT_SIZE);
-            Collection<String> toBeDeleted = suspendedExecutionsRepository.collectCompletedSuspendedExecutions(pageRequest);
+            //Collection<String> toBeDeleted = suspendedExecutionsRepository.collectCompletedSuspendedExecutions(pageRequest);
+            Collection<String> toBeDeleted = suspendedExecutionsRepository.listAllCompletedSuspendedExecution(SPLIT_SIZE);
             if (!isEmpty(toBeDeleted)) {
+                logger.debug("suspended execution cleaner job deleted" + toBeDeleted.toString() + " ids");
                 suspendedExecutionsRepository.deleteByIds(toBeDeleted);
             }
             List<Long> finishedBranchesToBeDeleted = finishedBranchRepository.collectOrphanFinishedBranches(pageRequest);

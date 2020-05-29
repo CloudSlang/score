@@ -35,7 +35,7 @@ import java.util.List;
  * Date: 10/09/13
  * Time: 10:01
  */
-public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedExecution, Long> {
+public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedExecution, Long>, SuspendedExecutionCustomRepository {
     List<SuspendedExecution> findBySplitIdIn(List<String> splitIds);
 
     @Query("from SuspendedExecution se where se.numberOfBranches=size(se.finishedBranches) and se.suspensionReason in :suspensionReasons")
