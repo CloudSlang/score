@@ -90,7 +90,7 @@ public class ScoreDeprecatedImpl implements ScoreDeprecated {
         ExecutionPlan newExecutionPlan = cloneExecutionPlanWithoutSteps(executionPlan);
 
         List<ExecutionStep> executionSteps = new ArrayList<>(executionPlan.getSteps().values());
-        executionSteps.get(1).setNavigationData(setNavigationNextStep(executionSteps.get(1), execution.getPosition()));
+        executionSteps.get(1).setNavigationData(getNavigationWithNewNextStep(executionSteps.get(1), execution.getPosition()));
         newExecutionPlan.addSteps(executionSteps);
 
         Long newRunningExecPlanId = runningExecutionPlanService.createRunningExecutionPlan(newExecutionPlan, newExecutionId.toString());
@@ -119,7 +119,7 @@ public class ScoreDeprecatedImpl implements ScoreDeprecated {
         return newExecutionPlan;
     }
 
-    private Map<String, Object> setNavigationNextStep(ExecutionStep executionStep, Long nextStep){
+    private Map<String, Object> getNavigationWithNewNextStep(ExecutionStep executionStep, Long nextStep){
         Iterator i = executionStep.getNavigationData().entrySet().iterator();
         Map<String, Object> newPreconditionNavigationData = new HashMap<>();
         while (i.hasNext()) {
