@@ -64,9 +64,6 @@ public class ScoreDeprecatedImpl implements ScoreDeprecated {
     private QueueDispatcherService queueDispatcher;
 
     @Autowired
-    private RunningExecutionPlanRepository runningExecutionPlanRepository;
-
-    @Autowired
     private RunningExecutionPlanService runningExecutionPlanService;
 
     @Override
@@ -91,38 +88,17 @@ public class ScoreDeprecatedImpl implements ScoreDeprecated {
         execution.getSystemContext().setExecutionId(newExecutionId);
         execution.setExecutionId(newExecutionId);
 
-        RunningExecutionPlan runningExecutionPlan = runningExecutionPlanRepository.findOne(execution.getRunningExecutionPlanId());
+        RunningExecutionPlan runningExecutionPlan = runningExecutionPlanService.readExecutionPlanById(execution.getRunningExecutionPlanId());
         ExecutionPlan executionPlan = runningExecutionPlan.getExecutionPlan();
-
-        //Create a new execution plan which includes the precondition micro-step
-        ExecutionPlan newExecutionPlan = new ExecutionPlan();
-        newExecutionPlan.setBeginStep(executionPlan.getBeginStep());
-        newExecutionPlan.setFlowUuid(executionPlan.getFlowUuid());
-        newExecutionPlan.setLanguage(executionPlan.getLanguage());
-        newExecutionPlan.setName(executionPlan.getName());
-        newExecutionPlan.setSubflowsUUIDs(executionPlan.getSubflowsUUIDs());
-        newExecutionPlan.setSysAccPaths(executionPlan.getSysAccPaths());
-        newExecutionPlan.setWorkerGroup(executionPlan.getWorkerGroup());
+        ExecutionPlan newExecutionPlan = cloneExecutionPlanWithoutSteps(executionPlan);
 
         List<ExecutionStep> executionSteps = new ArrayList<>(executionPlan.getSteps().values());
-        Iterator i = executionSteps.get(1).getNavigationData().entrySet().iterator();
-        Map<String, Object> newPreconditionNavigationData = new HashMap<>();
-        while (i.hasNext()){
-            Map.Entry entry = ((Map.Entry)i.next());
-            if (entry.getKey().equals("next")) {
-                newPreconditionNavigationData.put("next", execution.getPosition());
-            } else {
-                newPreconditionNavigationData.put((String)entry.getKey(), entry.getValue());
-            }
-        }
-        executionSteps.get(1).setNavigationData(newPreconditionNavigationData);
-
+        setNextStepAfterPreconditionStep(executionSteps, execution.getPosition());
         newExecutionPlan.addSteps(executionSteps);
 
         Long newRunningExecPlanId = runningExecutionPlanService.createRunningExecutionPlan(newExecutionPlan, newExecutionId.toString());
         execution.setRunningExecutionPlanId(newRunningExecPlanId);
-
-        execution.setPosition(1L);
+        execution.setPosition(1L);//set the position to the precondition step
 
         // create execution record in ExecutionSummary table
         executionStateService.createParentExecution(execution.getExecutionId());
@@ -132,6 +108,32 @@ public class ScoreDeprecatedImpl implements ScoreDeprecated {
         queueDispatcher.dispatch(Collections.singletonList(message));
 
         return newExecutionId;
+    }
+
+    private ExecutionPlan cloneExecutionPlanWithoutSteps(ExecutionPlan executionPlan) {
+        ExecutionPlan newExecutionPlan = new ExecutionPlan();
+        newExecutionPlan.setBeginStep(executionPlan.getBeginStep());
+        newExecutionPlan.setFlowUuid(executionPlan.getFlowUuid());
+        newExecutionPlan.setLanguage(executionPlan.getLanguage());
+        newExecutionPlan.setName(executionPlan.getName());
+        newExecutionPlan.setSubflowsUUIDs(executionPlan.getSubflowsUUIDs());
+        newExecutionPlan.setSysAccPaths(executionPlan.getSysAccPaths());
+        newExecutionPlan.setWorkerGroup(executionPlan.getWorkerGroup());
+        return newExecutionPlan;
+    }
+
+    private void setNextStepAfterPreconditionStep (List<ExecutionStep> executionSteps, Long position){
+        Iterator i = executionSteps.get(1).getNavigationData().entrySet().iterator();
+        Map<String, Object> newPreconditionNavigationData = new HashMap<>();
+        while (i.hasNext()) {
+            Map.Entry entry = (Map.Entry) i.next();
+            if (entry.getKey().equals("next")) {
+                newPreconditionNavigationData.put("next", position);
+            } else {
+                newPreconditionNavigationData.put((String) entry.getKey(), entry.getValue());
+            }
+        }
+        executionSteps.get(1).setNavigationData(newPreconditionNavigationData);
     }
 
     @Override
