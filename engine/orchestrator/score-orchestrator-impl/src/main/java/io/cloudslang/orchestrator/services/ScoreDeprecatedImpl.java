@@ -22,7 +22,6 @@ import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
-import io.cloudslang.orchestrator.repositories.RunningExecutionPlanRepository;
 import io.cloudslang.score.api.ExecutionPlan;
 import io.cloudslang.score.api.ExecutionStep;
 import io.cloudslang.score.api.ScoreDeprecated;
@@ -34,8 +33,6 @@ import io.cloudslang.score.facade.services.RunningExecutionPlanService;
 import io.cloudslang.score.lang.SystemContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.List;
@@ -93,7 +90,7 @@ public class ScoreDeprecatedImpl implements ScoreDeprecated {
         ExecutionPlan newExecutionPlan = cloneExecutionPlanWithoutSteps(executionPlan);
 
         List<ExecutionStep> executionSteps = new ArrayList<>(executionPlan.getSteps().values());
-        setNextStepAfterPreconditionStep(executionSteps, execution.getPosition());
+        executionSteps.get(1).setNavigationData(setNavigationNextStep(executionSteps.get(1), execution.getPosition()));
         newExecutionPlan.addSteps(executionSteps);
 
         Long newRunningExecPlanId = runningExecutionPlanService.createRunningExecutionPlan(newExecutionPlan, newExecutionId.toString());
@@ -122,18 +119,18 @@ public class ScoreDeprecatedImpl implements ScoreDeprecated {
         return newExecutionPlan;
     }
 
-    private void setNextStepAfterPreconditionStep (List<ExecutionStep> executionSteps, Long position){
-        Iterator i = executionSteps.get(1).getNavigationData().entrySet().iterator();
+    private Map<String, Object> setNavigationNextStep(ExecutionStep executionStep, Long nextStep){
+        Iterator i = executionStep.getNavigationData().entrySet().iterator();
         Map<String, Object> newPreconditionNavigationData = new HashMap<>();
         while (i.hasNext()) {
             Map.Entry entry = (Map.Entry) i.next();
             if (entry.getKey().equals("next")) {
-                newPreconditionNavigationData.put("next", position);
+                newPreconditionNavigationData.put("next", nextStep);
             } else {
                 newPreconditionNavigationData.put((String) entry.getKey(), entry.getValue());
             }
         }
-        executionSteps.get(1).setNavigationData(newPreconditionNavigationData);
+        return newPreconditionNavigationData;
     }
 
     @Override
