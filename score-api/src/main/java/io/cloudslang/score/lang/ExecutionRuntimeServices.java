@@ -305,6 +305,10 @@ public class ExecutionRuntimeServices implements Serializable {
         contextMap.put(WORKER_GROUP_NAME, workerGroupName);
     }
 
+    public String getRobotGroupName() {
+        return getFromMap(ROBOT_GROUP_NAME);
+    }
+
     /** This flag is set if the current execution step needs to go through group resolving */
     public void setShouldCheckGroup() {
         contextMap.put(SHOULD_CHECK_GROUP, true);
