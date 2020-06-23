@@ -22,17 +22,23 @@ import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
+import io.cloudslang.score.api.ExecutionPlan;
+import io.cloudslang.score.api.ExecutionStep;
 import io.cloudslang.score.api.ScoreDeprecated;
 import io.cloudslang.score.api.TriggeringProperties;
 import io.cloudslang.engine.data.IdentityGenerator;
 import io.cloudslang.score.facade.entities.Execution;
+import io.cloudslang.score.facade.entities.RunningExecutionPlan;
+import io.cloudslang.score.facade.services.RunningExecutionPlanService;
 import io.cloudslang.score.lang.SystemContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.HashMap;
 
 /**
  * Created by peerme on 23/07/2014
@@ -53,6 +59,9 @@ public class ScoreDeprecatedImpl implements ScoreDeprecated {
 
     @Autowired
     private QueueDispatcherService queueDispatcher;
+
+    @Autowired
+    private RunningExecutionPlanService runningExecutionPlanService;
 
     @Override
     public Long generateExecutionId() {
@@ -76,6 +85,18 @@ public class ScoreDeprecatedImpl implements ScoreDeprecated {
         execution.getSystemContext().setExecutionId(newExecutionId);
         execution.setExecutionId(newExecutionId);
 
+        RunningExecutionPlan runningExecutionPlan = runningExecutionPlanService.readExecutionPlanById(execution.getRunningExecutionPlanId());
+        ExecutionPlan executionPlan = runningExecutionPlan.getExecutionPlan();
+        ExecutionPlan newExecutionPlan = cloneExecutionPlanWithoutSteps(executionPlan);
+
+        List<ExecutionStep> executionSteps = new ArrayList<>(executionPlan.getSteps().values());
+        executionSteps.get(1).setNavigationData(getNavigationWithNewNextStep(executionSteps.get(1), execution.getPosition()));
+        newExecutionPlan.addSteps(executionSteps);
+
+        Long newRunningExecPlanId = runningExecutionPlanService.createRunningExecutionPlan(newExecutionPlan, newExecutionId.toString());
+        execution.setRunningExecutionPlanId(newRunningExecPlanId);
+        execution.setPosition(1L);//set the position to the precondition step
+
         // create execution record in ExecutionSummary table
         executionStateService.createParentExecution(execution.getExecutionId());
 
@@ -84,6 +105,32 @@ public class ScoreDeprecatedImpl implements ScoreDeprecated {
         queueDispatcher.dispatch(Collections.singletonList(message));
 
         return newExecutionId;
+    }
+
+    private ExecutionPlan cloneExecutionPlanWithoutSteps(ExecutionPlan executionPlan) {
+        ExecutionPlan newExecutionPlan = new ExecutionPlan();
+        newExecutionPlan.setBeginStep(executionPlan.getBeginStep());
+        newExecutionPlan.setFlowUuid(executionPlan.getFlowUuid());
+        newExecutionPlan.setLanguage(executionPlan.getLanguage());
+        newExecutionPlan.setName(executionPlan.getName());
+        newExecutionPlan.setSubflowsUUIDs(executionPlan.getSubflowsUUIDs());
+        newExecutionPlan.setSysAccPaths(executionPlan.getSysAccPaths());
+        newExecutionPlan.setWorkerGroup(executionPlan.getWorkerGroup());
+        return newExecutionPlan;
+    }
+
+    private Map<String, Object> getNavigationWithNewNextStep(ExecutionStep executionStep, Long nextStep){
+        Iterator i = executionStep.getNavigationData().entrySet().iterator();
+        Map<String, Object> newPreconditionNavigationData = new HashMap<>();
+        while (i.hasNext()) {
+            Map.Entry entry = (Map.Entry) i.next();
+            if (entry.getKey().equals("next")) {
+                newPreconditionNavigationData.put("next", nextStep);
+            } else {
+                newPreconditionNavigationData.put((String) entry.getKey(), entry.getValue());
+            }
+        }
+        return newPreconditionNavigationData;
     }
 
     @Override
