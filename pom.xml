@@ -360,7 +360,7 @@
             </dependency>
             <dependency>
                 <groupId>com.oracle</groupId>
-                <artifactId>ojdbc6</artifactId>
+                <artifactId>ojdbc8</artifactId>
                 <version>${oracle.version}</version>
                 <scope>test</scope>
             </dependency>
@@ -371,7 +371,7 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>postgresql</groupId>
+                <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${postgres.driver.version}</version>
                 <scope>test</scope>
