@@ -62,7 +62,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeoutException;
 
-import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.ACTION_TYPE;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SEQUENTIAL;
 import static io.cloudslang.score.events.EventConstants.SCORE_STEP_SPLIT_ERROR;
@@ -630,6 +629,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     private Map<String, Object> getStepMetadataMap(Execution execution) {
+        // Maps.newHashMapWithExpectedSize gives 5 + 5 / 3 = 6
         Map<String, Object> data = new HashMap<>(6);
         data.put(ExecutionParametersConsts.SYSTEM_CONTEXT, execution.getSystemContext());
         data.put(ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES, execution.getSystemContext());
