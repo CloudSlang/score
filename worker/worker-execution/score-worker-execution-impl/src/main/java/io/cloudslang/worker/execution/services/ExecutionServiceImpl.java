@@ -155,20 +155,19 @@ public final class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Execution execute(Execution execution) throws InterruptedException {
         try {
-            // handle flow cancellation
-            if (handleCancelledFlow(execution)) {
-                return execution;
+            // Handle cancel or pause of execution
+            boolean cancelled;
+            if ((cancelled = handleCancelledFlow(execution)) || (!isDebuggerMode(execution.getSystemContext()) && handlePausedFlow(execution))) {
+                return cancelled ? execution : null;
             }
-            ExecutionStep currStep = loadExecutionStep(execution);
-            // Check if this execution was paused
-            if (!isDebuggerMode(execution.getSystemContext()) && handlePausedFlow(execution)) {
-                return null;
-            }
-            // dum bus event
+            // Dump the bus events before execution of steps
             dumpBusEvents(execution);
+            // Load the execution step
+            ExecutionStep currStep = loadExecutionStep(execution);
             // Run the execution step
             String timeoutMessage = executeStep(execution, currStep);
-            if (timeoutMessage != null) { // Timeout of run
+            // Handle timeout for content operation execution
+            if (timeoutMessage != null) {
                 try {
                     return doWaitForCancel(execution);
                 } catch (TimeoutException timeout) {
@@ -176,14 +175,15 @@ public final class ExecutionServiceImpl implements ExecutionService {
                     execution.getSystemContext().setStepErrorKey(timeoutMessage);
                 }
             }
+            // Pause execution in case of reaching a sequential step
             if ((!execution.getSystemContext().hasStepErrorKey()) && currStep.getActionData().get(ACTION_TYPE) != null &&
                     currStep.getActionData().get(ACTION_TYPE).toString().equalsIgnoreCase(SEQUENTIAL)) {
-                // Stop the execution here, the rest of the steps are done by the Sequential Message Handler
+                // Pause the execution here, the rest of the steps are done by the Sequential Message Handler
                 return null;
             }
-            // Run the navigation
+            // Execute the step navigation
             navigate(execution, currStep);
-            // currently handles groups and jms optimizations
+            // Currently handles groups and jms optimizations
             postExecutionSettings(execution);
             // If execution was paused in language - to avoid delay of configuration
             if (execution.getSystemContext().isPaused()) {
@@ -191,8 +191,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
                     return null;
                 }
             }
-            // dum bus event
+            // Dump the bus events
             dumpBusEvents(execution);
+            // Update MI suspended execution
             updateMiIfRequired(execution);
             return execution;
         } catch (InterruptedException ex) {
