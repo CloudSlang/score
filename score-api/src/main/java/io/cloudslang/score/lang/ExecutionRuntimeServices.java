@@ -18,6 +18,7 @@ package io.cloudslang.score.lang;
 
 import io.cloudslang.score.api.EndBranchDataContainer;
 import io.cloudslang.score.api.StartBranchDataContainer;
+import io.cloudslang.score.api.StatefulnessSessionStack;
 import io.cloudslang.score.api.execution.ExecutionParametersConsts;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
@@ -98,6 +99,8 @@ public class ExecutionRuntimeServices implements Serializable {
     private static final String MERGE_USER_INPUTS = "MERGE_USER_INPUTS";
 
     public static final String ENTERPRISE_MODE = "ENTERPRISE_MODE";
+
+    private static final String STATEFULNESS_STACK = "STATEFULNESS_STACK";
 
     protected Map<String, Serializable> contextMap = new HashMap<>();
 
@@ -304,6 +307,15 @@ public class ExecutionRuntimeServices implements Serializable {
     public void setWorkerGroupName(String workerGroupName) {
         contextMap.put(WORKER_GROUP_NAME, workerGroupName);
     }
+
+    public Serializable getLevelParallelism() {
+        return getFromMap("SC_NESTED_FOR_PARALLELISM_LEVEL");
+    }
+
+    public void setLevelParallelism(int level) {
+        contextMap.put("SC_NESTED_FOR_PARALLELISM_LEVEL", level);
+    }
+
 
     public String getRobotGroupName() {
         return getFromMap(ROBOT_GROUP_NAME);
@@ -521,6 +533,14 @@ public class ExecutionRuntimeServices implements Serializable {
             currentRoiValue = ExecutionParametersConsts.DEFAULT_ROI_VALUE;
         }
         contextMap.put(ExecutionParametersConsts.EXECUTION_TOTAL_ROI, currentRoiValue + roiValue);
+    }
+
+    public StatefulnessSessionStack getStatefulnessSessionStack() {
+        return getFromMap(STATEFULNESS_STACK);
+    }
+
+    public void setStatefulnessStack(StatefulnessSessionStack statefulnessStack) {
+        contextMap.put(STATEFULNESS_STACK, statefulnessStack);
     }
 
     private <T> T removeFromMap(String key) {

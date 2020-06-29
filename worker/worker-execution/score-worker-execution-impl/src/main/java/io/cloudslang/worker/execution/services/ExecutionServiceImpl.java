@@ -216,7 +216,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     @Override
     public void pauseSequentialExecution(Execution execution) throws InterruptedException {
         final PauseReason pauseReason =
-                robotAvailabilityService.isRobotAvailable("Default") ? PENDING_ROBOT : NO_ROBOTS_IN_GROUP;
+                robotAvailabilityService.isRobotAvailable(execution.getSystemContext().getRobotGroupName()).size() > 0 ? PENDING_ROBOT : NO_ROBOTS_IN_GROUP;
         pauseFlow(execution, pauseReason);
     }
 
