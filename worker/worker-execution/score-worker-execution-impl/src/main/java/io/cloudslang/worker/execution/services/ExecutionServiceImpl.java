@@ -183,7 +183,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             }
             // Execute the step navigation
             navigate(execution, currStep);
-            // Currently handles groups and jms optimizations
+            // Handle Worker group and change of running execution plan
             postExecutionSettings(execution);
             // Dump the bus events
             dumpBusEvents(execution);
