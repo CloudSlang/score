@@ -158,10 +158,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
     public Execution execute(Execution execution) throws InterruptedException {
         try {
             // Handle cancel or pause of execution
-            boolean cancelled;
-            if ((cancelled = handleCancelledFlow(execution))
+            if (handleCancelledFlow(execution)
                     || (!isDebuggerMode(execution.getSystemContext()) && handlePausedFlow(execution))) {
-                return cancelled ? execution : null;
+                return handleCancelledFlow(execution) ? execution : null;
             }
             // Dump the bus events before execution of steps
             dumpBusEvents(execution);
