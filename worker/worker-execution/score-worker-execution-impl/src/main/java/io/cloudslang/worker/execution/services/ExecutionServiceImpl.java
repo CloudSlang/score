@@ -185,12 +185,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
             navigate(execution, currStep);
             // Currently handles groups and jms optimizations
             postExecutionSettings(execution);
-            // If execution was paused in language - to avoid delay of configuration
-            if (execution.getSystemContext().isPaused()) {
-                if (handlePausedFlowAfterStep(execution)) {
-                    return null;
-                }
-            }
             // Dump the bus events
             dumpBusEvents(execution);
             // Update MI suspended execution
