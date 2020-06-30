@@ -98,32 +98,36 @@ public class SessionDataHandlerImpl implements SessionDataHandler {
 
     @Override
     public void setSessionDataActive(Long executionId,Long branchId) {
-        if (branchId == null)
+        if (branchId == null) {
             return;
+        }
         final SessionDataHolder nonSerializableExecutionData = getSessionDataHolder(executionId, branchId);
         nonSerializableExecutionData.setMaxTimestamp();
     }
 
     @Override
     public void setSessionDataInactive(Long executionId,Long branchId) {
-        if (branchId == null)
+        if (branchId == null) {
             return;
+        }
         final SessionDataHolder nonSerializableExecutionData = getSessionDataHolder(executionId, branchId);
         nonSerializableExecutionData.resetTimeStamp();
     }
 
     @Override
     public void setGlobalSessionDataActive(Long executionId) {
-        if (executionId == null)
+        if (executionId == null) {
             return;
+        }
         final SessionDataHolder nonSerializableExecutionData = getGlobalSessionDataHolder(executionId);
         nonSerializableExecutionData.setMaxTimestamp();
     }
 
     @Override
     public void setGlobalSessionDataInactive(Long executionId) {
-        if (executionId == null)
+        if (executionId == null) {
             return;
+        }
         final SessionDataHolder nonSerializableExecutionData = getGlobalSessionDataHolder(executionId);
         nonSerializableExecutionData.resetTimeStamp();
     }

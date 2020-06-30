@@ -79,7 +79,7 @@ public class ExecutionStep implements Serializable {
     }
 
     public Map<String, ?> getNavigationData() {
-        return navigationData != null ? navigationData : new HashMap<String, Object>();
+        return navigationData != null ? navigationData : new HashMap<>();
     }
 
     public ExecutionStep setNavigationData(Map<String, ?> navigationData) {

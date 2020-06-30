@@ -17,8 +17,7 @@
 package io.cloudslang.worker.execution.reflection;
 
 import io.cloudslang.score.api.ControlActionMetadata;
-
-import java.util.Map;
+import io.cloudslang.worker.execution.model.StepActionDataHolder.ReadonlyStepActionDataAccessor;
 
 /**
  * Created by IntelliJ IDEA.
@@ -36,8 +35,8 @@ public interface ReflectionAdapter {
      * Handle execution a control action in reflection
      *
      * @param actionMetadata the control action metadata
-     * @param actionData the data to pass to the control action
+     * @param readonlyStepActionDataAccessor readonly accessor to step action data
      * @return tan Object of the invocation result
      */
-    public Object executeControlAction(ControlActionMetadata actionMetadata, Map<String, ?> actionData);
+    public Object executeControlAction(ControlActionMetadata actionMetadata, ReadonlyStepActionDataAccessor readonlyStepActionDataAccessor);
 }
