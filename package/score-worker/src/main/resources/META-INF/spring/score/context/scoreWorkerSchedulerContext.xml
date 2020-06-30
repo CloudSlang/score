@@ -23,7 +23,7 @@
     -->
     <task:scheduler id="scoreOutboundBufferDrainer" pool-size="1" />
     <task:scheduled-tasks scheduler="scoreOutboundBufferDrainer">
-        <task:scheduled ref="outBuffer" method="drain" fixed-delay="#{outBufferInterval}"/>
+        <task:scheduled ref="outBuffer" method="drain" fixed-delay="#{T(org.apache.commons.lang3.StringUtils).isNotEmpty(systemProperties['outbuffer.drain.period']) ? systemProperties['outbuffer.drain.period'] : '100'}"/>
     </task:scheduled-tasks>
 
     <!--Session timeout job-->
