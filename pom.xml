@@ -359,7 +359,7 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>com.oracle</groupId>
+                <groupId>com.oracle.ojdbc</groupId>
                 <artifactId>ojdbc8</artifactId>
                 <version>${oracle.version}</version>
                 <scope>test</scope>
