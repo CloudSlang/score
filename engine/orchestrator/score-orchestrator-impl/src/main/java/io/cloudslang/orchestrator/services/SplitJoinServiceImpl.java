@@ -145,18 +145,24 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
     private List<ExecutionMessage> prepareExecutionMessages(List<Execution> executions, boolean active) {
         return executions.stream()
-                .map(execution -> {
-                    ExecutionMessage executionMessage = new ExecutionMessage(execution.getExecutionId().toString(),
-                            converter.createPayload(execution));
-                    if (StringUtils.equals(execution.getSystemContext().getLanguageName(), "CloudSlang")
-                            && execution.getSystemContext().getWorkerGroupName() != null) {
-                        executionMessage.setWorkerGroup(execution.getSystemContext().getWorkerGroupName());
-                        executionMessage.setWorkerId(ExecutionMessage.EMPTY_WORKER);
-                    }
-                    executionMessage.setActive(active);
-                    return executionMessage;
-                })
+                .map(execution -> convertExecutionToExecutionMessage(active, execution))
                 .collect(toList());
+    }
+
+    private ExecutionMessage convertExecutionToExecutionMessage(boolean active, Execution execution) {
+        ExecutionMessage executionMessage = new ExecutionMessage(execution.getExecutionId().toString(),
+                converter.createPayload(execution));
+        setWorkerGroupOnCSParallelLoopBranches(execution, executionMessage);
+        executionMessage.setActive(active);
+        return executionMessage;
+    }
+
+    private void setWorkerGroupOnCSParallelLoopBranches(Execution execution, ExecutionMessage executionMessage) {
+        if (StringUtils.equals(execution.getSystemContext().getLanguageName(), "CloudSlang")
+                && execution.getSystemContext().getWorkerGroupName() != null) {
+            executionMessage.setWorkerGroup(execution.getSystemContext().getWorkerGroupName());
+            executionMessage.setWorkerId(ExecutionMessage.EMPTY_WORKER);
+        }
     }
 
     @Override
@@ -310,11 +316,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
                 finishedBranches.clear();
             }
             ExecutionMessage executionMessage = executionToStartExecutionMessage.convert(execution);
-            if (StringUtils.equals(execution.getSystemContext().getLanguageName(), "CloudSlang")
-                    && execution.getSystemContext().getWorkerGroupName() != null) {
-                executionMessage.setWorkerGroup(execution.getSystemContext().getWorkerGroupName());
-                executionMessage.setWorkerId(ExecutionMessage.EMPTY_WORKER);
-            }
+            setWorkerGroupOnCSParallelLoopBranches(execution, executionMessage);
             messages.add(executionMessage);
         }
 
@@ -338,11 +340,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         for (SuspendedExecution se : suspendedExecutions) {
             Execution exec = joinSplit(se);
             ExecutionMessage executionMessage = executionToStartExecutionMessage.convert(exec);
-            if (StringUtils.equals(exec.getSystemContext().getLanguageName(), "CloudSlang")
-                    && exec.getSystemContext().getWorkerGroupName() != null) {
-                executionMessage.setWorkerGroup(exec.getSystemContext().getWorkerGroupName());
-                executionMessage.setWorkerId(ExecutionMessage.EMPTY_WORKER);
-            }
+            setWorkerGroupOnCSParallelLoopBranches(exec, executionMessage);
             messages.add(executionMessage);
         }
 
