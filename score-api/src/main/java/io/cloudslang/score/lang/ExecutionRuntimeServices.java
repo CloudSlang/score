@@ -18,7 +18,7 @@ package io.cloudslang.score.lang;
 
 import io.cloudslang.score.api.EndBranchDataContainer;
 import io.cloudslang.score.api.StartBranchDataContainer;
-import io.cloudslang.score.api.StatefulnessSessionStack;
+import io.cloudslang.score.api.StatefulSessionStack;
 import io.cloudslang.score.api.execution.ExecutionParametersConsts;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
@@ -100,7 +100,9 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public static final String ENTERPRISE_MODE = "ENTERPRISE_MODE";
 
-    private static final String STATEFULNESS_STACK = "STATEFULNESS_STACK";
+    private static final String STATEFUL_STACK = "STATEFUL_STACK";
+
+    private static final String SC_NESTED_FOR_PARALLELISM_LEVEL = "SC_NESTED_FOR_PARALLELISM_LEVEL";
 
     protected Map<String, Serializable> contextMap = new HashMap<>();
 
@@ -309,11 +311,11 @@ public class ExecutionRuntimeServices implements Serializable {
     }
 
     public Serializable getLevelParallelism() {
-        return getFromMap("SC_NESTED_FOR_PARALLELISM_LEVEL");
+        return getFromMap(SC_NESTED_FOR_PARALLELISM_LEVEL);
     }
 
     public void setLevelParallelism(int level) {
-        contextMap.put("SC_NESTED_FOR_PARALLELISM_LEVEL", level);
+        contextMap.put(SC_NESTED_FOR_PARALLELISM_LEVEL, level);
     }
 
 
@@ -440,6 +442,13 @@ public class ExecutionRuntimeServices implements Serializable {
         Map<String, Serializable> contextMapForBranch = new HashMap<>(executionRuntimeServices.contextMap);
         contextMapForBranch.remove(BRANCH_DATA);
         contextMapForBranch.put(SCORE_EVENTS_QUEUE, (ArrayDeque) new ArrayDeque<>());
+        StatefulSessionStack statefulSessionStack = executionRuntimeServices.getStatefulSessionStack();
+        if (statefulSessionStack != null) {
+            statefulSessionStack.pushSessionStack(new HashMap<>());
+        } else {
+            statefulSessionStack = new StatefulSessionStack();
+        }
+        executionRuntimeServices.setStatefulStack(statefulSessionStack);
 
         branchesData.add(new StartBranchDataContainer(startPosition, executionPlanId, context,
                 new SystemContext(contextMapForBranch)));
@@ -535,12 +544,12 @@ public class ExecutionRuntimeServices implements Serializable {
         contextMap.put(ExecutionParametersConsts.EXECUTION_TOTAL_ROI, currentRoiValue + roiValue);
     }
 
-    public StatefulnessSessionStack getStatefulnessSessionStack() {
-        return getFromMap(STATEFULNESS_STACK);
+    public StatefulSessionStack getStatefulSessionStack() {
+        return getFromMap(STATEFUL_STACK);
     }
 
-    public void setStatefulnessStack(StatefulnessSessionStack statefulnessStack) {
-        contextMap.put(STATEFULNESS_STACK, statefulnessStack);
+    public void setStatefulStack(StatefulSessionStack statefulStack) {
+        contextMap.put(STATEFUL_STACK, statefulStack);
     }
 
     private <T> T removeFromMap(String key) {

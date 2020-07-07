@@ -15,13 +15,10 @@
  */
 package io.cloudslang.worker.execution.services;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class ScoreRobotAvailabilityServiceImpl implements RobotAvailabilityService {
 
     @Override
-    public Set<String> isRobotAvailable(String robotGroup) {
-        return new HashSet<>();
+    public boolean isRobotAvailable(String robotGroup) {
+        return false;
     }
 }

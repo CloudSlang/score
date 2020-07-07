@@ -15,8 +15,6 @@
  */
 package io.cloudslang.worker.execution.services;
 
-import java.util.Set;
-
 public interface RobotAvailabilityService {
-    Set<String> isRobotAvailable(String robotGroup);
+    boolean isRobotAvailable(String robotGroup);
 }
