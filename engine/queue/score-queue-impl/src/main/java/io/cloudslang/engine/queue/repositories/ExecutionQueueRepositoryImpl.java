@@ -24,7 +24,7 @@ import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.entities.StartNewBranchPayload;
 import io.cloudslang.engine.queue.services.StatementAwareJdbcTemplateWrapper;
 import io.cloudslang.orchestrator.services.ExecutionStateService;
-import java.util.ArrayList;
+import java.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,13 +42,6 @@ import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.springframework.util.CollectionUtils;
 
 import static java.lang.Long.parseLong;
@@ -624,44 +617,50 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     }
 
     @Override
-    public void deleteFinishedSteps(Set<Long> ids) {
-        if (ids == null || ids.size() == 0) {
+    public void deleteFinishedSteps(Set<Long> stepIds) {
+        if (stepIds == null || stepIds.size() == 0) {
             return;
         }
         Set<Long> result = getCanceledExecStateIds();
         if (!CollectionUtils.isEmpty(result)) {
-            ids.addAll(result);
+            stepIds.addAll(result);
         }
-        // Access STATES first and then QUEUES - same order as ExecutionQueueService#enqueue (prevents deadlocks on MSSQL)
-        String query = QUERY_DELETE_FINISHED_STEPS_FROM_STATES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
+	Iterable<List<Long>> lists = Iterables.partition(stepIds, 1000);
+        Iterator itr = lists.iterator();
 
-        Object[] args = ids.toArray(new Object[ids.size()]);
-        logSQL(query, args);
+        while(itr.hasNext()) {
+            List ids = (List) itr.next();
+	    // Access STATES first and then QUEUES - same order as ExecutionQueueService#enqueue (prevents deadlocks on MSSQL)
+	    String query = QUERY_DELETE_FINISHED_STEPS_FROM_STATES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
 
-        int deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
+	    Object[] args = ids.toArray(new Object[ids.size()]);
+	    logSQL(query, args);
 
-        if(logger.isDebugEnabled()){
-            logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_STATES table.");
-        }
+	    int deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
 
-        query = QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
-        logSQL(query,args);
+	    if(logger.isDebugEnabled()){
+	        logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_STATES table.");
+	    }
 
-        deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
+	    query = QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
+	    logSQL(query,args);
 
-        if(logger.isDebugEnabled()){
-            logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_QUEUES table.");
-        }
+	    deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
 
-        if (!CollectionUtils.isEmpty(result)) {
-            query = QUERY_DELETE_EXECS_STATES_MAPPINGS.replace(":ids", StringUtils.repeat("?", ",", ids.size()));
-            logSQL(query, args);
-            deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECS_STATES_EXECS_MAPPINGS table.");
-            }
-            executionStateService.deleteCanceledExecutionStates();
-        }
+	    if(logger.isDebugEnabled()){
+	        logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_QUEUES table.");
+	    }
+
+	    if (!CollectionUtils.isEmpty(result)) {
+	       query = QUERY_DELETE_EXECS_STATES_MAPPINGS.replace(":ids", StringUtils.repeat("?", ",", ids.size()));
+	       logSQL(query, args);
+	       deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args);
+	       if (logger.isDebugEnabled()) {
+		   logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECS_STATES_EXECS_MAPPINGS table.");
+	       }
+	       executionStateService.deleteCanceledExecutionStates();
+	   }
+	}
     }
 
     @Override
