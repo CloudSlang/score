@@ -624,43 +624,55 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     }
 
     @Override
-    public void deleteFinishedSteps(Set<Long> ids) {
-        if (ids == null || ids.size() == 0) {
+    public void deleteFinishedSteps(Set<Long> stepsIds) {
+        if (stepsIds == null || stepsIds.size() == 0) {
             return;
         }
         Set<Long> result = getCanceledExecStateIds();
         if (!CollectionUtils.isEmpty(result)) {
-            ids.addAll(result);
+            stepsIds.addAll(result);
         }
-        // Access STATES first and then QUEUES - same order as ExecutionQueueService#enqueue (prevents deadlocks on MSSQL)
-        String query = QUERY_DELETE_FINISHED_STEPS_FROM_STATES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
+	//delete 1K at a time
 
-        Object[] args = ids.toArray(new Object[ids.size()]);
-        logSQL(query, args);
 
-        int deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
+        // fill the set
+        Iterable<List<Long>> lists = Iterables.partition(stepsIds, 1000);
+        Iterator itr = lists.iterator();
 
-        if(logger.isDebugEnabled()){
-            logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_STATES table.");
-        }
+        while(itr.hasNext())
+        {
+            List ids = (List)itr.next();
+		// Access STATES first and then QUEUES - same order as ExecutionQueueService#enqueue (prevents deadlocks on MSSQL)
+		String query = QUERY_DELETE_FINISHED_STEPS_FROM_STATES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
 
-        query = QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
-        logSQL(query,args);
+		Object[] args = ids.toArray(new Object[ids.size()]);
+		logSQL(query, args);
 
-        deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
+		int deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
 
-        if(logger.isDebugEnabled()){
-            logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_QUEUES table.");
-        }
+		if(logger.isDebugEnabled()){
+		    logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_STATES table.");
+		}
 
-        if (!CollectionUtils.isEmpty(result)) {
-            query = QUERY_DELETE_EXECS_STATES_MAPPINGS.replace(":ids", StringUtils.repeat("?", ",", ids.size()));
-            logSQL(query, args);
-            deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECS_STATES_EXECS_MAPPINGS table.");
-            }
-            executionStateService.deleteCanceledExecutionStates();
+		query = QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
+		logSQL(query,args);
+
+		deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
+
+		if(logger.isDebugEnabled()){
+		    logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_QUEUES table.");
+		}
+
+		if (!CollectionUtils.isEmpty(result)) {
+		    query = QUERY_DELETE_EXECS_STATES_MAPPINGS.replace(":ids", StringUtils.repeat("?", ",", ids.size()));
+		    logSQL(query, args);
+		    deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args);
+		    if (logger.isDebugEnabled()) {
+			logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECS_STATES_EXECS_MAPPINGS table.");
+		    }
+		    executionStateService.deleteCanceledExecutionStates();
+		}
+		itr.next();
         }
     }
 
