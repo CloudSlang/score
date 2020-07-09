@@ -443,11 +443,10 @@ public class ExecutionRuntimeServices implements Serializable {
         contextMapForBranch.remove(BRANCH_DATA);
         contextMapForBranch.put(SCORE_EVENTS_QUEUE, (ArrayDeque) new ArrayDeque<>());
         StatefulSessionStack statefulSessionStack = executionRuntimeServices.getStatefulSessionStack();
-        if (statefulSessionStack != null) {
-            statefulSessionStack.pushSessionStack(new HashMap<>());
-        } else {
+        if (statefulSessionStack == null) {
             statefulSessionStack = new StatefulSessionStack();
         }
+        statefulSessionStack.pushSessionStack(new HashMap<>());
         executionRuntimeServices.setStatefulStack(statefulSessionStack);
 
         branchesData.add(new StartBranchDataContainer(startPosition, executionPlanId, context,
