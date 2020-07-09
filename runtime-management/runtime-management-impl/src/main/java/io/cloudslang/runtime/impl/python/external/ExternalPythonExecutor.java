@@ -51,7 +51,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
@@ -64,6 +63,7 @@ import static java.nio.file.Files.newBufferedWriter;
 import static java.nio.file.Files.setPosixFilePermissions;
 import static java.nio.file.Files.walk;
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
+import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
@@ -244,7 +244,7 @@ public class ExternalPythonExecutor {
         while ((line = reader.readLine()) != null) {
             returnResult.append(line);
         }
-        boolean isInTime = process.waitFor(EXECUTION_TIMEOUT, TimeUnit.MINUTES);
+        boolean isInTime = process.waitFor(EXECUTION_TIMEOUT, MINUTES);
         if (!isInTime) {
             process.destroy();
             throw new RuntimeException("Execution timed out");
