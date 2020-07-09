@@ -71,7 +71,6 @@ import static org.apache.commons.io.FilenameUtils.removeExtension;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 public class ExternalPythonExecutor {
-    private static final String PYTHON_SUFFIX = ".py";
     private static final String PYTHON_PROVIDED_SCRIPT_FILENAME = "script.py";
     private static final String PYTHON_EVAL_SCRIPT_FILENAME = "eval.py";
     private static final String PYTHON_MAIN_SCRIPT_FILENAME = "main.py";
