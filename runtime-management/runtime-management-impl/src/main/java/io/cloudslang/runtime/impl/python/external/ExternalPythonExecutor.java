@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -184,7 +183,7 @@ public class ExternalPythonExecutor {
             ScriptResults scriptResults = objectMapper.readValue(returnResult, ScriptResults.class);
             String exception = formatException(scriptResults.getException(), scriptResults.getTraceback());
 
-            if (!StringUtils.isEmpty(exception)) {
+            if (isNotEmpty(exception)) {
                 logger.error(String.format("Failed to execute script {%s}", exception));
                 throw new ExternalPythonScriptException(String.format("Failed to execute user script: %s", exception));
             }
