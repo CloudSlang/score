@@ -307,14 +307,14 @@ public class ExternalPythonExecutor {
     }
 
     private String generateExecutionPayload(String userScript, Map<String, Serializable> inputs) throws JsonProcessingException {
-        Map<String, String> parsedInputs = newHashMapWithExpectedSize(inputs.size());
+        HashMap<String, String> parsedInputs = newHashMapWithExpectedSize(inputs.size());
         for (Entry<String, Serializable> entry : inputs.entrySet()) {
             parsedInputs.put(entry.getKey(), entry.getValue().toString());
         }
 
         Map<String, Serializable> payload = newHashMapWithExpectedSize(2);
         payload.put("script_name", removeExtension(userScript));
-        payload.put("inputs", (Serializable) parsedInputs);
+        payload.put("inputs", parsedInputs);
         return objectMapper.writeValueAsString(payload);
     }
 
