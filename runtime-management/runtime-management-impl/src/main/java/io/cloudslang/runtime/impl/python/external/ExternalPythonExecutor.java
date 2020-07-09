@@ -299,7 +299,7 @@ public class ExternalPythonExecutor {
 
     private String generateEvalPayload(String expression, String prepareEnvironmentScript,
                                        Map<String, Serializable> context) throws JsonProcessingException {
-        Map<String, Serializable> payload = new HashMap<>();
+        Map<String, Serializable> payload = newHashMapWithExpectedSize(3);
         payload.put("expression", expression);
         payload.put("envSetup", prepareEnvironmentScript);
         payload.put("context", (Serializable) context);
@@ -331,7 +331,7 @@ public class ExternalPythonExecutor {
         return trace.substring(pythonFileNameIndex + PYTHON_FILENAME_DELIMITERS);
     }
 
-    private class TempEnvironment {
+    private static class TempEnvironment {
         final String mainScriptName;
         final Path parentFolder;
 
@@ -341,7 +341,7 @@ public class ExternalPythonExecutor {
         }
     }
 
-    private class TempExecutionEnvironment extends TempEnvironment {
+    private static class TempExecutionEnvironment extends TempEnvironment {
         private final String userScriptName;
 
         private TempExecutionEnvironment(String userScriptName, String mainScriptName, Path parentFolder) {
@@ -350,7 +350,7 @@ public class ExternalPythonExecutor {
         }
     }
 
-    private class TempEvalEnvironment extends TempEnvironment {
+    private static class TempEvalEnvironment extends TempEnvironment {
         private TempEvalEnvironment(String mainScriptName, Path parentFolder) {
             super(mainScriptName, parentFolder);
         }
