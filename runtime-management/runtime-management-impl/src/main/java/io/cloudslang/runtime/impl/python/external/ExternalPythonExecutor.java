@@ -54,9 +54,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.createTempDirectory;
 import static java.nio.file.Files.getFileAttributeView;
@@ -306,8 +308,10 @@ public class ExternalPythonExecutor {
 
     private String generateExecutionPayload(String userScript, Map<String, Serializable> inputs) throws JsonProcessingException {
         Map<String, Serializable> payload = new HashMap<>();
-        Map<String, String> parsedInputs = new HashMap<>();
-        inputs.forEach((key, value) -> parsedInputs.put(key, value.toString()));
+        Map<String, String> parsedInputs = newHashMapWithExpectedSize(inputs.size());
+        for (Entry<String, Serializable> entry : inputs.entrySet()) {
+            parsedInputs.put(entry.getKey(), entry.getValue().toString());
+        }
 
         payload.put("script_name", FilenameUtils.removeExtension(userScript));
         payload.put("inputs", (Serializable) parsedInputs);
