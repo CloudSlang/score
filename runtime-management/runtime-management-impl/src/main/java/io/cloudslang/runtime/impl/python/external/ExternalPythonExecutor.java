@@ -33,7 +33,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -209,7 +208,7 @@ public class ExternalPythonExecutor {
 
             EvaluationResults scriptResults = objectMapper.readValue(returnResult, EvaluationResults.class);
             String exception = scriptResults.getException();
-            if (!StringUtils.isEmpty(exception)) {
+            if (isNotEmpty(exception)) {
                 logger.error(String.format("Failed to execute script {%s}", exception));
                 throw new ExternalPythonEvalException(exception);
             }
