@@ -59,6 +59,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.createTempDirectory;
+import static java.nio.file.Files.exists;
 import static java.nio.file.Files.getFileAttributeView;
 import static java.nio.file.Files.isRegularFile;
 import static java.nio.file.Files.newBufferedWriter;
@@ -68,6 +69,7 @@ import static java.nio.file.StandardOpenOption.CREATE_NEW;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 public class ExternalPythonExecutor {
     private static final String PYTHON_SUFFIX = ".py";
@@ -157,10 +159,11 @@ public class ExternalPythonExecutor {
 
     private String checkPythonPath() {
         String pythonPath = System.getProperty("python.path");
-        if (StringUtils.isEmpty(pythonPath) || !new File(pythonPath).exists()) {
+        if (isNotEmpty(pythonPath) && exists(Paths.get(pythonPath))) {
+            return pythonPath;
+        } else {
             throw new IllegalArgumentException("Missing or invalid python path");
         }
-        return pythonPath;
     }
 
     private Document parseScriptExecutionResult(String scriptExecutionResult) throws IOException, ParserConfigurationException, SAXException {
