@@ -19,7 +19,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -66,6 +65,7 @@ import static java.nio.file.Files.newBufferedWriter;
 import static java.nio.file.Files.setPosixFilePermissions;
 import static java.nio.file.Files.walk;
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
 
@@ -319,11 +319,11 @@ public class ExternalPythonExecutor {
     }
 
     private String formatException(String exception, List<String> traceback) {
-        if (CollectionUtils.isEmpty(traceback)) {
+        if (isNotEmpty(traceback)) {
+            return removeFileName(traceback.get(traceback.size() - 1)) + ", " + exception;
+        } else {
             return exception;
         }
-
-        return removeFileName(traceback.get(traceback.size() - 1)) + ", " + exception;
     }
 
     private String removeFileName(String trace) {
