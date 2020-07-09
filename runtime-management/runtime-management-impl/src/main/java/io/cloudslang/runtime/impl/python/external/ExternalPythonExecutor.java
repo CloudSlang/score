@@ -269,7 +269,7 @@ public class ExternalPythonExecutor {
         Path execTempDirectory = createTempDirectory("python_execution");
         Path tempUserScript = execTempDirectory.resolve(PYTHON_PROVIDED_SCRIPT_FILENAME);
         try (BufferedWriter bufferedWriter = newBufferedWriter(tempUserScript, UTF_8, CREATE_NEW)) {
-            bufferedWriter.append(script);
+            bufferedWriter.write(script);
         }
 
         Path mainScriptPath = execTempDirectory.resolve(PYTHON_MAIN_SCRIPT_FILENAME);
