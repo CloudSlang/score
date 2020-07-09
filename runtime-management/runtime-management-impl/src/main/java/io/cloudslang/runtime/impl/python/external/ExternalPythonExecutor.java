@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -68,6 +67,7 @@ import static java.nio.file.Files.setPosixFilePermissions;
 import static java.nio.file.Files.walk;
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
+import static org.apache.commons.io.FilenameUtils.removeExtension;
 
 public class ExternalPythonExecutor {
     private static final String PYTHON_SUFFIX = ".py";
@@ -307,13 +307,13 @@ public class ExternalPythonExecutor {
     }
 
     private String generateExecutionPayload(String userScript, Map<String, Serializable> inputs) throws JsonProcessingException {
-        Map<String, Serializable> payload = new HashMap<>();
         Map<String, String> parsedInputs = newHashMapWithExpectedSize(inputs.size());
         for (Entry<String, Serializable> entry : inputs.entrySet()) {
             parsedInputs.put(entry.getKey(), entry.getValue().toString());
         }
 
-        payload.put("script_name", FilenameUtils.removeExtension(userScript));
+        Map<String, Serializable> payload = newHashMapWithExpectedSize(2);
+        payload.put("script_name", removeExtension(userScript));
         payload.put("inputs", (Serializable) parsedInputs);
         return objectMapper.writeValueAsString(payload);
     }
