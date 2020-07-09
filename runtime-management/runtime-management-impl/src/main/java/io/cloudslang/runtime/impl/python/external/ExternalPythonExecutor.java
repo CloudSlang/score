@@ -213,7 +213,6 @@ public class ExternalPythonExecutor {
                 throw new ExternalPythonEvalException(exception);
             }
             context.put("accessed_resources_set", (Serializable) scriptResults.getAccessedResources());
-            //noinspection unchecked
             return new PythonEvaluationResult(processReturnResult(scriptResults), context);
         } catch (IOException | InterruptedException e) {
             logger.error("Failed to run script. ", e.getCause() != null ? e.getCause() : e);
