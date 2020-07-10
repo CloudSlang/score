@@ -132,11 +132,10 @@ public class ExternalPythonExecutor {
 
     private void addFilePermissions(Path path) throws IOException {
         try (Stream<Path> pathStream = walk(path)) {
-            Iterator<Path> iterator = pathStream.iterator();
             if (SystemUtils.IS_OS_WINDOWS) {
-                applyWindowsFilePermissionsForChildren(iterator);
+                applyWindowsFilePermissionsForChildren(pathStream.iterator());
             } else {
-                applyPosixFilePermissionsForChildren(iterator);
+                applyPosixFilePermissionsForChildren(pathStream.iterator());
             }
         }
     }
