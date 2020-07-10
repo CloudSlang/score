@@ -92,7 +92,6 @@ public class ExternalPythonExecutor {
             String pythonPath = checkPythonPath();
             tempExecutionEnvironment = generateTempExecutionResources(script);
             String payload = generateExecutionPayload(tempExecutionEnvironment.userScriptName, inputs);
-            addFilePermissions(tempExecutionEnvironment.parentFolder);
 
             return runPythonExecutionProcess(pythonPath, payload, tempExecutionEnvironment);
 
@@ -115,7 +114,6 @@ public class ExternalPythonExecutor {
             String pythonPath = checkPythonPath();
             tempEvalEnvironment = generateTempEvalResources();
             String payload = generateEvalPayload(expression, prepareEnvironmentScript, context);
-            addFilePermissions(tempEvalEnvironment.parentFolder);
 
             return runPythonEvalProcess(pythonPath, payload, tempEvalEnvironment, context);
 
@@ -130,36 +128,23 @@ public class ExternalPythonExecutor {
         }
     }
 
-    private void addFilePermissions(Path path) throws IOException {
-        try (Stream<Path> pathStream = walk(path)) {
-            if (SystemUtils.IS_OS_WINDOWS) {
-                applyWindowsFilePermissionsForChildren(pathStream.iterator());
-            } else {
-                applyPosixFilePermissionsForChildren(pathStream.iterator());
-            }
+    private void applyFilePermissions(Path path) throws IOException {
+        if (SystemUtils.IS_OS_WINDOWS) {
+            applyWindowsFilePermissions(path);
+        } else {
+            applyPosixFilePermissions(path);
         }
     }
 
-    private void applyWindowsFilePermissionsForChildren(Iterator<Path> iterator) throws IOException {
-        while (iterator.hasNext()) {
-            Path childFile = iterator.next();
-            if (isRegularFile(childFile)) {
-                DosFileAttributeView attributeView = getFileAttributeView(childFile, DosFileAttributeView.class);
-                if (attributeView != null) {
-                    attributeView.setReadOnly(true);
-                }
-            }
+    private void applyWindowsFilePermissions(Path path) throws IOException {
+        DosFileAttributeView attributeView = getFileAttributeView(path, DosFileAttributeView.class);
+        if (attributeView != null) {
+            attributeView.setReadOnly(true);
         }
     }
 
-    private void applyPosixFilePermissionsForChildren(Iterator<Path> iterator) throws IOException {
-        final EnumSet<PosixFilePermission> filePermissions = EnumSet.of(PosixFilePermission.OWNER_READ);
-        while (iterator.hasNext()) {
-            Path childPath = iterator.next();
-            if (isRegularFile(childPath)) {
-                setPosixFilePermissions(childPath, filePermissions);
-            }
-        }
+    private void applyPosixFilePermissions(Path path) throws IOException {
+        setPosixFilePermissions(path, EnumSet.of(PosixFilePermission.OWNER_READ));
     }
 
     private String checkPythonPath() {
@@ -280,12 +265,14 @@ public class ExternalPythonExecutor {
         try (BufferedWriter bufferedWriter = newBufferedWriter(tempUserScript, UTF_8, CREATE_NEW)) {
             bufferedWriter.write(script);
         }
+        applyFilePermissions(tempUserScript);
 
         Path mainScriptPath = execTempDirectory.resolve(PYTHON_MAIN_SCRIPT_FILENAME);
         try (InputStream mainPyResourceStream = ExternalPythonExecutor.class.getClassLoader()
                 .getResourceAsStream(PYTHON_MAIN_SCRIPT_FILENAME)) {
             Files.copy(mainPyResourceStream, mainScriptPath);
         }
+        applyFilePermissions(mainScriptPath);
 
         return new TempExecutionEnvironment(PYTHON_PROVIDED_SCRIPT_FILENAME,
                 PYTHON_MAIN_SCRIPT_FILENAME,
@@ -300,6 +287,7 @@ public class ExternalPythonExecutor {
                 .getResourceAsStream(PYTHON_EVAL_SCRIPT_FILENAME)) {
             Files.copy(evalScriptResourceStream, evalScriptPath);
         }
+        applyFilePermissions(evalScriptPath);
 
         return new TempEvalEnvironment(PYTHON_EVAL_SCRIPT_FILENAME, execTempDirectory);
     }
