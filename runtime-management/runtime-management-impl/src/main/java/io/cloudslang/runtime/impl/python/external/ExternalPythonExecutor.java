@@ -51,6 +51,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
@@ -70,14 +71,20 @@ import static org.apache.commons.io.FilenameUtils.removeExtension;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 public class ExternalPythonExecutor {
+    private static final Logger logger = Logger.getLogger(ExternalPythonExecutor.class);
+
     private static final String PYTHON_PROVIDED_SCRIPT_FILENAME = "script.py";
     private static final String PYTHON_EVAL_SCRIPT_FILENAME = "eval.py";
     private static final String PYTHON_MAIN_SCRIPT_FILENAME = "main.py";
-    private static final Logger logger = Logger.getLogger(ExternalPythonExecutor.class);
-    private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final long EXECUTION_TIMEOUT = Long.getLong("python.timeout", 30);
     private static final String PYTHON_FILENAME_SCRIPT_EXTENSION = ".py\"";
     private static final int PYTHON_FILENAME_DELIMITERS = 6;
+    
+    private final ObjectMapper objectMapper;
+
+    public ExternalPythonExecutor() {
+        this.objectMapper = new ObjectMapper();
+    }
 
     public PythonExecutionResult exec(String script, Map<String, Serializable> inputs) {
         TempExecutionEnvironment tempExecutionEnvironment = null;
@@ -124,11 +131,13 @@ public class ExternalPythonExecutor {
     }
 
     private void addFilePermissions(Path path) throws IOException {
-        final Iterator<Path> iterator = walk(path).iterator();
-        if (SystemUtils.IS_OS_WINDOWS) {
-            applyWindowsFilePermissionsForChildren(iterator);
-        } else {
-            applyPosixFilePermissionsForChildren(iterator);
+        try (Stream<Path> pathStream = walk(path)) {
+            Iterator<Path> iterator = pathStream.iterator();
+            if (SystemUtils.IS_OS_WINDOWS) {
+                applyWindowsFilePermissionsForChildren(iterator);
+            } else {
+                applyPosixFilePermissionsForChildren(iterator);
+            }
         }
     }
 
