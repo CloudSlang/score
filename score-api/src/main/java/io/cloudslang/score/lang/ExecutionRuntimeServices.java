@@ -446,7 +446,7 @@ public class ExecutionRuntimeServices implements Serializable {
         if (statefulSessionStack == null) {
             statefulSessionStack = new StatefulSessionStack();
         }
-        statefulSessionStack.pushSessionStack(new HashMap<>());
+        statefulSessionStack.pushSessionsMap(new HashMap<>());
         executionRuntimeServices.setStatefulStack(statefulSessionStack);
 
         branchesData.add(new StartBranchDataContainer(startPosition, executionPlanId, context,

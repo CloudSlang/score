@@ -30,18 +30,18 @@ public class StatefulSessionStack implements Serializable {
         stack = new ArrayDeque<>();
     }
 
-    public void pushSessionStack(Map<String, String> newContext) {
+    public void pushSessionsMap(Map<String, String> newContext) {
         stack.push(newContext);
     }
 
-    public Map<String, String> popSessionStack() {
+    public Map<String, String> popSessionMap() {
         if (stack.isEmpty()) {
             return null;
         }
         return stack.pop();
     }
 
-    public Map<String, String> peakSessionStack() {
+    public Map<String, String> peakSessionMap() {
         if (stack.isEmpty()) {
             return null;
         }
