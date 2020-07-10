@@ -52,7 +52,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.createTempDirectory;
@@ -60,7 +59,6 @@ import static java.nio.file.Files.exists;
 import static java.nio.file.Files.getFileAttributeView;
 import static java.nio.file.Files.newBufferedWriter;
 import static java.nio.file.Files.setPosixFilePermissions;
-import static java.nio.file.Files.walk;
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
