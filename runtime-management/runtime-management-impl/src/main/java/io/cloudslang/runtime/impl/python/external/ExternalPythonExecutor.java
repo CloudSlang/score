@@ -45,13 +45,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.DosFileAttributeView;
 import java.nio.file.attribute.PosixFilePermission;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
@@ -59,7 +58,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.createTempDirectory;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.getFileAttributeView;
-import static java.nio.file.Files.isRegularFile;
 import static java.nio.file.Files.newBufferedWriter;
 import static java.nio.file.Files.setPosixFilePermissions;
 import static java.nio.file.Files.walk;
@@ -90,7 +88,7 @@ public class ExternalPythonExecutor {
         TempExecutionEnvironment tempExecutionEnvironment = null;
         try {
             String pythonPath = checkPythonPath();
-            tempExecutionEnvironment = generateTempExecutionResources(script);
+            tempExecutionEnvironment = generateTempResourcesForExec(script);
             String payload = generateExecutionPayload(tempExecutionEnvironment.userScriptName, inputs);
 
             return runPythonExecutionProcess(pythonPath, payload, tempExecutionEnvironment);
@@ -112,7 +110,7 @@ public class ExternalPythonExecutor {
         TempEvalEnvironment tempEvalEnvironment = null;
         try {
             String pythonPath = checkPythonPath();
-            tempEvalEnvironment = generateTempEvalResources();
+            tempEvalEnvironment = generateTempResourcesForEval();
             String payload = generateEvalPayload(expression, prepareEnvironmentScript, context);
 
             return runPythonEvalProcess(pythonPath, payload, tempEvalEnvironment, context);
@@ -251,15 +249,17 @@ public class ExternalPythonExecutor {
     }
 
     private ProcessBuilder preparePythonProcess(TempEnvironment executionEnvironment, String pythonPath) {
-        ProcessBuilder processBuilder = new ProcessBuilder(
-                newArrayList(Paths.get(pythonPath, "python").toString(),
-                        executionEnvironment.parentFolder.resolve(executionEnvironment.mainScriptName).toString()));
+        List<String> arguments = new ArrayList<>(2);
+        arguments.add(Paths.get(pythonPath, "python").toString());
+        arguments.add(executionEnvironment.parentFolder.resolve(executionEnvironment.mainScriptName).toString());
+
+        ProcessBuilder processBuilder = new ProcessBuilder(arguments);
         processBuilder.environment().clear();
         processBuilder.directory(executionEnvironment.parentFolder.toFile());
         return processBuilder;
     }
 
-    private TempExecutionEnvironment generateTempExecutionResources(String script) throws IOException {
+    private TempExecutionEnvironment generateTempResourcesForExec(String script) throws IOException {
         Path execTempDirectory = createTempDirectory("python_execution");
         Path tempUserScript = execTempDirectory.resolve(PYTHON_PROVIDED_SCRIPT_FILENAME);
         try (BufferedWriter bufferedWriter = newBufferedWriter(tempUserScript, UTF_8, CREATE_NEW)) {
@@ -279,7 +279,7 @@ public class ExternalPythonExecutor {
                 execTempDirectory);
     }
 
-    private TempEvalEnvironment generateTempEvalResources() throws IOException {
+    private TempEvalEnvironment generateTempResourcesForEval() throws IOException {
         Path execTempDirectory = createTempDirectory("python_expression");
         Path evalScriptPath = execTempDirectory.resolve(PYTHON_EVAL_SCRIPT_FILENAME);
 
