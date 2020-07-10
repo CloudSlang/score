@@ -246,48 +246,44 @@ public class ExternalPythonExecutor {
         return returnResult.toString();
     }
 
-    private ProcessBuilder preparePythonProcess(TempEnvironment executionEnvironment, String pythonPath) {
+    private ProcessBuilder preparePythonProcess(TempEnvironment environment, String pythonPath) {
         List<String> arguments = new ArrayList<>(2);
         arguments.add(Paths.get(pythonPath, "python").toString());
-        arguments.add(executionEnvironment.parentFolder.resolve(executionEnvironment.mainScriptName).toString());
-
+        arguments.add(Paths.get(environment.parentFolder.toString(), environment.mainScriptName).toString());
         ProcessBuilder processBuilder = new ProcessBuilder(arguments);
         processBuilder.environment().clear();
-        processBuilder.directory(executionEnvironment.parentFolder.toFile());
+        processBuilder.directory(environment.parentFolder.toFile());
         return processBuilder;
     }
 
     private TempExecutionEnvironment generateTempResourcesForExec(String script) throws IOException {
-        Path execTempDirectory = createTempDirectory("python_execution");
-        Path tempUserScript = execTempDirectory.resolve(PYTHON_PROVIDED_SCRIPT_FILENAME);
+        Path tempDirPath = createTempDirectory("python_execution");
+        String tempDir = tempDirPath.toString();
+        Path tempUserScript = Paths.get(tempDir, PYTHON_PROVIDED_SCRIPT_FILENAME);
         try (BufferedWriter bufferedWriter = newBufferedWriter(tempUserScript, UTF_8, CREATE_NEW)) {
             bufferedWriter.write(script);
         }
         applyFilePermissions(tempUserScript);
 
-        Path mainScriptPath = execTempDirectory.resolve(PYTHON_MAIN_SCRIPT_FILENAME);
+        Path mainScriptPath = Paths.get(tempDir, PYTHON_MAIN_SCRIPT_FILENAME);
         try (InputStream mainPyResourceStream = ExternalPythonExecutor.class.getClassLoader()
                 .getResourceAsStream(PYTHON_MAIN_SCRIPT_FILENAME)) {
             Files.copy(mainPyResourceStream, mainScriptPath);
         }
         applyFilePermissions(mainScriptPath);
-
-        return new TempExecutionEnvironment(PYTHON_PROVIDED_SCRIPT_FILENAME,
-                PYTHON_MAIN_SCRIPT_FILENAME,
-                execTempDirectory);
+        return new TempExecutionEnvironment(PYTHON_PROVIDED_SCRIPT_FILENAME, PYTHON_MAIN_SCRIPT_FILENAME, tempDirPath);
     }
 
     private TempEvalEnvironment generateTempResourcesForEval() throws IOException {
-        Path execTempDirectory = createTempDirectory("python_expression");
-        Path evalScriptPath = execTempDirectory.resolve(PYTHON_EVAL_SCRIPT_FILENAME);
+        Path tempDirPath = createTempDirectory("python_expression");
+        Path evalScriptPath = Paths.get(tempDirPath.toString(), PYTHON_EVAL_SCRIPT_FILENAME);
 
         try (InputStream evalScriptResourceStream = ExternalPythonExecutor.class.getClassLoader()
                 .getResourceAsStream(PYTHON_EVAL_SCRIPT_FILENAME)) {
             Files.copy(evalScriptResourceStream, evalScriptPath);
         }
         applyFilePermissions(evalScriptPath);
-
-        return new TempEvalEnvironment(PYTHON_EVAL_SCRIPT_FILENAME, execTempDirectory);
+        return new TempEvalEnvironment(PYTHON_EVAL_SCRIPT_FILENAME, tempDirPath);
     }
 
     private String generateEvalPayload(String expression, String prepareEnvironmentScript,
