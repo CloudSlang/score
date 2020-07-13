@@ -36,7 +36,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -63,9 +62,6 @@ import static java.nio.file.Files.getFileAttributeView;
 import static java.nio.file.Files.newBufferedWriter;
 import static java.nio.file.Files.setPosixFilePermissions;
 import static java.nio.file.Paths.get;
-import static java.nio.file.StandardOpenOption.CREATE_NEW;
-import static java.nio.file.StandardOpenOption.WRITE;
-import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
@@ -281,7 +277,7 @@ public class ExternalPythonExecutor {
         Path tempDirPath = createTempDirectory("python_expression");
         // Handle eval.py
         Path evalScriptPath = get(tempDirPath.toString(), PYTHON_EVAL_SCRIPT_FILENAME);
-        Files.write(evalScriptPath, resourceScriptCache.loadEvalScriptAsBytes(), CREATE_NEW, WRITE);
+        Files.write(evalScriptPath, resourceScriptCache.loadEvalScriptAsBytes());
         applyFilePermissions(evalScriptPath);
 
         return new TempEvalEnvironment(PYTHON_EVAL_SCRIPT_FILENAME, tempDirPath);
