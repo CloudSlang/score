@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.apache.log4j.Logger;
@@ -32,6 +33,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -42,7 +44,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.attribute.DosFileAttributeView;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
@@ -55,15 +56,16 @@ import java.util.Map.Entry;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.createTempDirectory;
-import static java.nio.file.Files.exists;
 import static java.nio.file.Files.getFileAttributeView;
 import static java.nio.file.Files.newBufferedWriter;
 import static java.nio.file.Files.setPosixFilePermissions;
+import static java.nio.file.Paths.get;
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
+import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
+import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 public class ExternalPythonExecutor {
@@ -76,10 +78,9 @@ public class ExternalPythonExecutor {
     private static final String PYTHON_FILENAME_SCRIPT_EXTENSION = ".py\"";
     private static final int PYTHON_FILENAME_DELIMITERS = 6;
     
-    private final ObjectMapper objectMapper;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public ExternalPythonExecutor() {
-        this.objectMapper = new ObjectMapper();
     }
 
     public PythonExecutionResult exec(String script, Map<String, Serializable> inputs) {
@@ -88,7 +89,6 @@ public class ExternalPythonExecutor {
             String pythonPath = checkPythonPath();
             tempExecutionEnvironment = generateTempResourcesForExec(script);
             String payload = generateExecutionPayload(tempExecutionEnvironment.userScriptName, inputs);
-
             return runPythonExecutionProcess(pythonPath, payload, tempExecutionEnvironment);
 
         } catch (IOException e) {
@@ -110,7 +110,6 @@ public class ExternalPythonExecutor {
             String pythonPath = checkPythonPath();
             tempEvalEnvironment = generateTempResourcesForEval();
             String payload = generateEvalPayload(expression, prepareEnvironmentScript, context);
-
             return runPythonEvalProcess(pythonPath, payload, tempEvalEnvironment, context);
 
         } catch (IOException e) {
@@ -145,11 +144,10 @@ public class ExternalPythonExecutor {
 
     private String checkPythonPath() {
         String pythonPath = System.getProperty("python.path");
-        if (isNotEmpty(pythonPath) && exists(Paths.get(pythonPath))) {
-            return pythonPath;
-        } else {
+        if (isEmpty(pythonPath) || !new File(pythonPath).exists()) {
             throw new IllegalArgumentException("Missing or invalid python path");
         }
+        return pythonPath;
     }
 
     private Document parseScriptExecutionResult(String scriptExecutionResult) throws IOException, ParserConfigurationException, SAXException {
@@ -248,8 +246,8 @@ public class ExternalPythonExecutor {
 
     private ProcessBuilder preparePythonProcess(TempEnvironment environment, String pythonPath) {
         List<String> arguments = new ArrayList<>(2);
-        arguments.add(Paths.get(pythonPath, "python").toString());
-        arguments.add(Paths.get(environment.parentFolder.toString(), environment.mainScriptName).toString());
+        arguments.add(get(pythonPath, "python").toString());
+        arguments.add(get(environment.parentFolder.toString(), environment.mainScriptName).toString());
         ProcessBuilder processBuilder = new ProcessBuilder(arguments);
         processBuilder.environment().clear();
         processBuilder.directory(environment.parentFolder.toFile());
@@ -259,16 +257,16 @@ public class ExternalPythonExecutor {
     private TempExecutionEnvironment generateTempResourcesForExec(String script) throws IOException {
         Path tempDirPath = createTempDirectory("python_execution");
         String tempDir = tempDirPath.toString();
-        Path tempUserScript = Paths.get(tempDir, PYTHON_PROVIDED_SCRIPT_FILENAME);
+        Path tempUserScript = get(tempDir, PYTHON_PROVIDED_SCRIPT_FILENAME);
         try (BufferedWriter bufferedWriter = newBufferedWriter(tempUserScript, UTF_8, CREATE_NEW)) {
             bufferedWriter.write(script);
         }
         applyFilePermissions(tempUserScript);
 
-        Path mainScriptPath = Paths.get(tempDir, PYTHON_MAIN_SCRIPT_FILENAME);
+        Path mainScriptPath = get(tempDir, PYTHON_MAIN_SCRIPT_FILENAME);
         try (InputStream mainPyResourceStream = ExternalPythonExecutor.class.getClassLoader()
                 .getResourceAsStream(PYTHON_MAIN_SCRIPT_FILENAME)) {
-            Files.copy(mainPyResourceStream, mainScriptPath);
+            Files.copy(requireNonNull(mainPyResourceStream, "'main.py' resource does not exist"), mainScriptPath);
         }
         applyFilePermissions(mainScriptPath);
         return new TempExecutionEnvironment(PYTHON_PROVIDED_SCRIPT_FILENAME, PYTHON_MAIN_SCRIPT_FILENAME, tempDirPath);
@@ -276,11 +274,11 @@ public class ExternalPythonExecutor {
 
     private TempEvalEnvironment generateTempResourcesForEval() throws IOException {
         Path tempDirPath = createTempDirectory("python_expression");
-        Path evalScriptPath = Paths.get(tempDirPath.toString(), PYTHON_EVAL_SCRIPT_FILENAME);
+        Path evalScriptPath = get(tempDirPath.toString(), PYTHON_EVAL_SCRIPT_FILENAME);
 
         try (InputStream evalScriptResourceStream = ExternalPythonExecutor.class.getClassLoader()
                 .getResourceAsStream(PYTHON_EVAL_SCRIPT_FILENAME)) {
-            Files.copy(evalScriptResourceStream, evalScriptPath);
+            Files.copy(requireNonNull(evalScriptResourceStream, "'eval.py' resource does not exist"), evalScriptPath);
         }
         applyFilePermissions(evalScriptPath);
         return new TempEvalEnvironment(PYTHON_EVAL_SCRIPT_FILENAME, tempDirPath);
@@ -308,11 +306,8 @@ public class ExternalPythonExecutor {
     }
 
     private String formatException(String exception, List<String> traceback) {
-        if (isNotEmpty(traceback)) {
-            return removeFileName(traceback.get(traceback.size() - 1)) + ", " + exception;
-        } else {
-            return exception;
-        }
+        return CollectionUtils.isEmpty(traceback) ? exception
+                : removeFileName(traceback.get(traceback.size() - 1)) + ", " + exception;
     }
 
     private String removeFileName(String trace) {
