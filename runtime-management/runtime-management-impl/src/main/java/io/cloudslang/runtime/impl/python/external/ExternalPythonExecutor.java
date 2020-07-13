@@ -275,6 +275,7 @@ public class ExternalPythonExecutor {
 
     private TempEvalEnvironment generateTempResourcesForEval() throws IOException {
         Path tempDirPath = createTempDirectory("python_expression");
+
         // Handle eval.py
         Path evalScriptPath = get(tempDirPath.toString(), PYTHON_EVAL_SCRIPT_FILENAME);
         Files.write(evalScriptPath, resourceScriptCache.loadEvalScriptAsBytes());
