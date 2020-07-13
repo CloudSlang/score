@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
+import io.cloudslang.runtime.external.ResourceScriptCache;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -54,6 +55,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
+import static io.cloudslang.runtime.external.ResourceScriptCache.PYTHON_EVAL_SCRIPT_FILENAME;
+import static io.cloudslang.runtime.external.ResourceScriptCache.PYTHON_MAIN_SCRIPT_FILENAME;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.createTempDirectory;
 import static java.nio.file.Files.getFileAttributeView;
@@ -61,6 +64,7 @@ import static java.nio.file.Files.newBufferedWriter;
 import static java.nio.file.Files.setPosixFilePermissions;
 import static java.nio.file.Paths.get;
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
+import static java.nio.file.StandardOpenOption.WRITE;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
@@ -72,15 +76,15 @@ public class ExternalPythonExecutor {
     private static final Logger logger = Logger.getLogger(ExternalPythonExecutor.class);
 
     private static final String PYTHON_PROVIDED_SCRIPT_FILENAME = "script.py";
-    private static final String PYTHON_EVAL_SCRIPT_FILENAME = "eval.py";
-    private static final String PYTHON_MAIN_SCRIPT_FILENAME = "main.py";
     private static final long EXECUTION_TIMEOUT = Long.getLong("python.timeout", 30);
     private static final String PYTHON_FILENAME_SCRIPT_EXTENSION = ".py\"";
     private static final int PYTHON_FILENAME_DELIMITERS = 6;
     
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private final ResourceScriptCache resourceScriptCache;
 
     public ExternalPythonExecutor() {
+        resourceScriptCache = new ResourceScriptCacheImpl();
     }
 
     public PythonExecutionResult exec(String script, Map<String, Serializable> inputs) {
@@ -257,30 +261,29 @@ public class ExternalPythonExecutor {
     private TempExecutionEnvironment generateTempResourcesForExec(String script) throws IOException {
         Path tempDirPath = createTempDirectory("python_execution");
         String tempDir = tempDirPath.toString();
+
+        // Handle script.py
         Path tempUserScript = get(tempDir, PYTHON_PROVIDED_SCRIPT_FILENAME);
-        try (BufferedWriter bufferedWriter = newBufferedWriter(tempUserScript, UTF_8, CREATE_NEW)) {
+        try (BufferedWriter bufferedWriter = newBufferedWriter(tempUserScript, UTF_8)) {
             bufferedWriter.write(script);
         }
         applyFilePermissions(tempUserScript);
 
+        // Handle  main.py
         Path mainScriptPath = get(tempDir, PYTHON_MAIN_SCRIPT_FILENAME);
-        try (InputStream mainPyResourceStream = ExternalPythonExecutor.class.getClassLoader()
-                .getResourceAsStream(PYTHON_MAIN_SCRIPT_FILENAME)) {
-            Files.copy(requireNonNull(mainPyResourceStream, "'main.py' resource does not exist"), mainScriptPath);
-        }
+        Files.write(mainScriptPath, resourceScriptCache.loadExecScriptAsBytes());
         applyFilePermissions(mainScriptPath);
+
         return new TempExecutionEnvironment(PYTHON_PROVIDED_SCRIPT_FILENAME, PYTHON_MAIN_SCRIPT_FILENAME, tempDirPath);
     }
 
     private TempEvalEnvironment generateTempResourcesForEval() throws IOException {
         Path tempDirPath = createTempDirectory("python_expression");
+        // Handle eval.py
         Path evalScriptPath = get(tempDirPath.toString(), PYTHON_EVAL_SCRIPT_FILENAME);
-
-        try (InputStream evalScriptResourceStream = ExternalPythonExecutor.class.getClassLoader()
-                .getResourceAsStream(PYTHON_EVAL_SCRIPT_FILENAME)) {
-            Files.copy(requireNonNull(evalScriptResourceStream, "'eval.py' resource does not exist"), evalScriptPath);
-        }
+        Files.write(evalScriptPath, resourceScriptCache.loadEvalScriptAsBytes(), CREATE_NEW, WRITE);
         applyFilePermissions(evalScriptPath);
+
         return new TempEvalEnvironment(PYTHON_EVAL_SCRIPT_FILENAME, tempDirPath);
     }
 
