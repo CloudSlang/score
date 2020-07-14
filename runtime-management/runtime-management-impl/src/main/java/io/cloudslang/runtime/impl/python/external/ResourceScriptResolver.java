@@ -15,8 +15,6 @@
  */
 package io.cloudslang.runtime.impl.python.external;
 
-import io.cloudslang.runtime.external.ResourceScriptCache;
-
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -24,31 +22,29 @@ import static java.util.Objects.requireNonNull;
 import static org.apache.commons.io.IOUtils.toByteArray;
 
 
-public class ResourceScriptCacheImpl implements ResourceScriptCache {
+public class ResourceScriptResolver {
 
     private static final byte[] execScriptBytes;
     private static final byte[] evalScriptBytes;
 
     static {
-        execScriptBytes = loadScriptFromFile(PYTHON_MAIN_SCRIPT_FILENAME);
-        evalScriptBytes = loadScriptFromFile(PYTHON_EVAL_SCRIPT_FILENAME);
+        execScriptBytes = loadScriptFromFile("main.py");
+        evalScriptBytes = loadScriptFromFile("eval.py");
     }
 
     private static byte[] loadScriptFromFile(String resourceName) {
-        try (InputStream stream = ResourceScriptCacheImpl.class.getClassLoader().getResourceAsStream(resourceName)) {
+        try (InputStream stream = ResourceScriptResolver.class.getClassLoader().getResourceAsStream(resourceName)) {
             return toByteArray(requireNonNull(stream, "Could not locate resource '" + resourceName + "'"));
         } catch (IOException ioEx) {
             throw new RuntimeException("Could not load resource '" + resourceName + "': ", ioEx);
         }
     }
 
-    @Override
-    public byte[] loadExecScriptAsBytes() {
+    public static byte[] loadExecScriptAsBytes() {
         return execScriptBytes;
     }
 
-    @Override
-    public byte[] loadEvalScriptAsBytes() {
+    public static byte[] loadEvalScriptAsBytes() {
         return evalScriptBytes;
     }
 
