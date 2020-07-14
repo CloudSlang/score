@@ -17,34 +17,30 @@ package io.cloudslang.score.api;
 
 import java.io.Serializable;
 import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.Map;
 
 public class StatefulSessionStack implements Serializable {
 
     private static final long serialVersionUID = -7408054784258769720L;
 
-    private Deque<Map<String, StatefulQueue>> stack;
+    private ArrayDeque<Map<String, StatefulQueue>> stack;
 
     public StatefulSessionStack() {
         stack = new ArrayDeque<>();
     }
 
-    public void pushSessionStack(Map<String, StatefulQueue> newContext) {
+    public void pushSessionsMap(Map<String, StatefulQueue> newContext) {
         stack.push(newContext);
     }
 
-    public Map<String, StatefulQueue> popSessionStack() {
+    public Map<String, StatefulQueue> popSessionMap() {
         if (stack.isEmpty()) {
             return null;
         }
         return stack.pop();
     }
 
-    public Map<String, StatefulQueue> peakSessionStack() {
-        if (stack.isEmpty()) {
-            return null;
-        }
+    public Map<String, StatefulQueue> peakSessionMap() {
         return stack.peek();
     }
 
