@@ -18,7 +18,6 @@ package io.cloudslang.score.lang;
 
 import io.cloudslang.score.api.EndBranchDataContainer;
 import io.cloudslang.score.api.StartBranchDataContainer;
-import io.cloudslang.score.api.StatefulSessionStack;
 import io.cloudslang.score.api.execution.ExecutionParametersConsts;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
@@ -99,8 +98,6 @@ public class ExecutionRuntimeServices implements Serializable {
     private static final String MERGE_USER_INPUTS = "MERGE_USER_INPUTS";
 
     public static final String ENTERPRISE_MODE = "ENTERPRISE_MODE";
-
-    private static final String STATEFUL_STACK = "STATEFUL_STACK";
 
     private static final String SC_NESTED_FOR_PARALLELISM_LEVEL = "SC_NESTED_FOR_PARALLELISM_LEVEL";
 
@@ -442,12 +439,6 @@ public class ExecutionRuntimeServices implements Serializable {
         Map<String, Serializable> contextMapForBranch = new HashMap<>(executionRuntimeServices.contextMap);
         contextMapForBranch.remove(BRANCH_DATA);
         contextMapForBranch.put(SCORE_EVENTS_QUEUE, (ArrayDeque) new ArrayDeque<>());
-        StatefulSessionStack statefulSessionStack = executionRuntimeServices.getStatefulSessionStack();
-        if (statefulSessionStack == null) {
-            statefulSessionStack = new StatefulSessionStack();
-        }
-        statefulSessionStack.pushSessionsMap(new HashMap<>());
-        executionRuntimeServices.setStatefulStack(statefulSessionStack);
 
         branchesData.add(new StartBranchDataContainer(startPosition, executionPlanId, context,
                 new SystemContext(contextMapForBranch)));
@@ -541,14 +532,6 @@ public class ExecutionRuntimeServices implements Serializable {
             currentRoiValue = ExecutionParametersConsts.DEFAULT_ROI_VALUE;
         }
         contextMap.put(ExecutionParametersConsts.EXECUTION_TOTAL_ROI, currentRoiValue + roiValue);
-    }
-
-    public StatefulSessionStack getStatefulSessionStack() {
-        return getFromMap(STATEFUL_STACK);
-    }
-
-    public void setStatefulStack(StatefulSessionStack statefulStack) {
-        contextMap.put(STATEFUL_STACK, statefulStack);
     }
 
     private <T> T removeFromMap(String key) {
