@@ -104,12 +104,14 @@ public class ExecutionRuntimeServices implements Serializable {
     protected Map<String, Serializable> contextMap = new HashMap<>();
 
     public ExecutionRuntimeServices() {
+        contextMap = new HashMap<>();
     }
 
     /**
      * copy constructor that clean the NEW_SPLIT_ID & BRANCH_ID keys
      */
     public ExecutionRuntimeServices(ExecutionRuntimeServices executionRuntimeServices) {
+        this();
         contextMap.putAll(executionRuntimeServices.contextMap);
         contextMap.remove(NEW_SPLIT_ID);
         contextMap.remove(BRANCH_ID);
@@ -438,10 +440,29 @@ public class ExecutionRuntimeServices implements Serializable {
 
         Map<String, Serializable> contextMapForBranch = new HashMap<>(executionRuntimeServices.contextMap);
         contextMapForBranch.remove(BRANCH_DATA);
-        contextMapForBranch.put(SCORE_EVENTS_QUEUE, (ArrayDeque) new ArrayDeque<>());
+        contextMapForBranch.put(SCORE_EVENTS_QUEUE, new ArrayDeque<>());
 
         branchesData.add(new StartBranchDataContainer(startPosition, executionPlanId, context,
                 new SystemContext(contextMapForBranch)));
+    }
+
+    public void addBranchForParallelLoop(Long startPosition, String flowUuid, Map<String, Serializable> context) {
+        Map<String, Long> runningPlansIds = getFromMap(RUNNING_PLANS_MAP);
+        Long runningPlanId = runningPlansIds.get(flowUuid);
+
+        HashMap<String, Serializable> contextMapForBranch = new HashMap<>(this.contextMap);
+        contextMapForBranch.remove(NEW_SPLIT_ID);
+        contextMapForBranch.remove(BRANCH_ID);
+        contextMapForBranch.remove(BRANCH_DATA);
+        contextMapForBranch.put(SCORE_EVENTS_QUEUE, new ArrayDeque<>());
+
+        ArrayList<StartBranchDataContainer> branches = getFromMap(BRANCH_DATA);
+        if (branches == null) { // First branch needs to create list of containers
+            branches = new ArrayList<>();
+            contextMap.put(BRANCH_DATA, branches);
+        }
+        branches.add(new StartBranchDataContainer(startPosition, runningPlanId, context,
+                new SystemContext(contextMapForBranch, true)));
     }
 
     /**
