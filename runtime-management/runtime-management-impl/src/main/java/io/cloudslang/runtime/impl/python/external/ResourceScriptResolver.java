@@ -28,11 +28,11 @@ public class ResourceScriptResolver {
     private static final byte[] evalScriptBytes;
 
     static {
-        execScriptBytes = loadScriptFromFile("main.py");
-        evalScriptBytes = loadScriptFromFile("eval.py");
+        execScriptBytes = loadScriptFromResource("main.py");
+        evalScriptBytes = loadScriptFromResource("eval.py");
     }
 
-    private static byte[] loadScriptFromFile(String resourceName) {
+    private static byte[] loadScriptFromResource(String resourceName) {
         try (InputStream stream = ResourceScriptResolver.class.getClassLoader().getResourceAsStream(resourceName)) {
             return toByteArray(requireNonNull(stream, "Could not locate resource '" + resourceName + "'"));
         } catch (IOException ioEx) {
