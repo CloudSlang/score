@@ -17,12 +17,12 @@ package io.cloudslang.score.api;
 
 import java.io.Serializable;
 
-public class StatefulQueue implements Serializable {
+public class StatefulQueueValue implements Serializable {
     private static final long serialVersionUID = 923874345548162969L;
 
     private String name;
 
-    public StatefulQueue(String name) {
+    public StatefulQueueValue(String name) {
         this.name = name;
     }
 

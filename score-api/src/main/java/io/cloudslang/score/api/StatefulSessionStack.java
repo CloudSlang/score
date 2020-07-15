@@ -23,24 +23,24 @@ public class StatefulSessionStack implements Serializable {
 
     private static final long serialVersionUID = -7408054784258769720L;
 
-    private ArrayDeque<Map<String, StatefulQueue>> stack;
+    private ArrayDeque<Map<String, StatefulQueueValue>> stack;
 
     public StatefulSessionStack() {
         stack = new ArrayDeque<>();
     }
 
-    public void pushSessionsMap(Map<String, StatefulQueue> newContext) {
+    public void pushSessionsMap(Map<String, StatefulQueueValue> newContext) {
         stack.push(newContext);
     }
 
-    public Map<String, StatefulQueue> popSessionMap() {
+    public Map<String, StatefulQueueValue> popSessionMap() {
         if (stack.isEmpty()) {
             return null;
         }
         return stack.pop();
     }
 
-    public Map<String, StatefulQueue> peakSessionMap() {
+    public Map<String, StatefulQueueValue> peakSessionMap() {
         return stack.peek();
     }
 

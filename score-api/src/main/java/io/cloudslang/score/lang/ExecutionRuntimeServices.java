@@ -101,7 +101,7 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String SC_NESTED_FOR_PARALLELISM_LEVEL = "SC_NESTED_FOR_PARALLELISM_LEVEL";
 
-    protected Map<String, Serializable> contextMap = new HashMap<>();
+    protected Map<String, Serializable> contextMap;
 
     public ExecutionRuntimeServices() {
         contextMap = new HashMap<>();
