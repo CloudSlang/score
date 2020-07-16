@@ -64,7 +64,9 @@ import java.util.concurrent.TimeoutException;
 
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.ACTION_TYPE;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SEQUENTIAL;
+import static io.cloudslang.score.events.EventConstants.BRANCH_ID;
 import static io.cloudslang.score.events.EventConstants.SCORE_STEP_SPLIT_ERROR;
+import static io.cloudslang.score.events.EventConstants.SPLIT_ID;
 import static io.cloudslang.score.facade.TempConstants.EXECUTE_CONTENT_ACTION;
 import static io.cloudslang.score.facade.TempConstants.EXECUTE_CONTENT_ACTION_CLASSNAME;
 import static io.cloudslang.score.facade.TempConstants.MI_REMAINING_BRANCHES_CONTEXT_KEY;
@@ -331,14 +333,22 @@ public final class ExecutionServiceImpl implements ExecutionService {
         List<Execution> newExecutions = new ArrayList<>();
         String splitId = UUID.randomUUID().toString();
         ListIterator<StartBranchDataContainer> listIterator = newBranches.listIterator();
-        int count = 0;
+        int count = 1;
         while (listIterator.hasNext()) {
             StartBranchDataContainer from = listIterator.next();
+            Map<String, Serializable> branchContext = from.getContexts();
             Execution to = new Execution(executionId, from.getExecutionPlanId(), from.getStartPosition(),
-                    from.getContexts(), from.getSystemContext());
+                    branchContext, from.getSystemContext());
 
+            String branchId = splitId + ":" + count++;
+            if (branchContext != null && branchContext.get(BRANCH_ID) != null && branchContext.get(SPLIT_ID) != null) {
+                branchId = branchContext.get(BRANCH_ID).toString();
+                splitId = branchContext.get(SPLIT_ID).toString();
+            } else {
+                logger.warn("branchId is not found in context");
+            }
             to.getSystemContext().setSplitId(splitId);
-            to.getSystemContext().setBranchId(splitId + ":" + (count++ + 1));
+            to.getSystemContext().setBranchId(branchId);
             newExecutions.add(to);
         }
         return newExecutions;

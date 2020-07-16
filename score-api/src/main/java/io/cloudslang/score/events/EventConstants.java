@@ -39,6 +39,7 @@ public class EventConstants {
     public static final String IS_BRANCH = "IS_BRANCH";
     public static final String PAUSE_ID = "PAUSE_ID";
 
+    public static final String SPLIT_ID = "SPLIT_ID";
     public static final String BRANCH_ID = "BRANCH_ID";
     public static final String FLOW_UUID = "FLOW_UUID";
 
