@@ -96,8 +96,6 @@ class PythonAgentExecutor(object):
                 smaller_context[x] = eval(x)
 
             for key, var in context.items():
-                if key in smaller_context:
-                    raise Exception(f"Conflicting variable names: {key}")
                 smaller_context[key] = var
 
             old_io = self.__disable_standard_io()
