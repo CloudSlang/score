@@ -99,6 +99,8 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public static final String ENTERPRISE_MODE = "ENTERPRISE_MODE";
 
+    private static final String SC_NESTED_FOR_PARALLELISM_LEVEL = "SC_NESTED_FOR_PARALLELISM_LEVEL";
+
     protected Map<String, Serializable> contextMap;
 
     public ExecutionRuntimeServices() {
@@ -305,6 +307,19 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public void setWorkerGroupName(String workerGroupName) {
         contextMap.put(WORKER_GROUP_NAME, workerGroupName);
+    }
+
+    public Serializable getLevelParallelism() {
+        return getFromMap(SC_NESTED_FOR_PARALLELISM_LEVEL);
+    }
+
+    public void setLevelParallelism(int level) {
+        contextMap.put(SC_NESTED_FOR_PARALLELISM_LEVEL, level);
+    }
+
+
+    public String getRobotGroupName() {
+        return getFromMap(ROBOT_GROUP_NAME);
     }
 
     /** This flag is set if the current execution step needs to go through group resolving */
