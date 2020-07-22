@@ -33,6 +33,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -42,7 +43,6 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -52,26 +52,32 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static org.apache.commons.io.FileUtils.deleteQuietly;
 
 public class ExternalPythonExecutor {
-    private static final String PYTHON_SCRIPT_FILENAME = "script";
-    private static final String PYTHON_MAIN_FILENAME = "main";
-    private static final String PYTHON_EVAL_FILENAME = "eval";
-    private static final String PYTHON_SUFFIX = ".py";
+
     private static final Logger logger = Logger.getLogger(ExternalPythonExecutor.class);
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String PYTHON_SCRIPT_FILENAME = "script";
+    private static final String EVAL_PY = "eval.py";
+    private static final String MAIN_PY = "main.py";
+    private static final String PYTHON_SUFFIX = ".py";
     private static final long EXECUTION_TIMEOUT = Long.getLong("python.timeout", 30);
     private static final String PYTHON_FILENAME_SCRIPT_EXTENSION = ".py\"";
     private static final int PYTHON_FILENAME_DELIMITERS = 6;
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public PythonExecutionResult exec(String script, Map<String, Serializable> inputs) {
         TempExecutionEnvironment tempExecutionEnvironment = null;
         try {
             String pythonPath = checkPythonPath();
-            tempExecutionEnvironment = generateTempExecutionResources(script);
-            String payload = generateExecutionPayload(tempExecutionEnvironment.userScriptName, inputs);
+            tempExecutionEnvironment = generateTempResourcesForExec(script);
+            String payload = generatePayloadForExec(tempExecutionEnvironment.userScriptName, inputs);
             addFilePermissions(tempExecutionEnvironment.parentFolder);
 
             return runPythonExecutionProcess(pythonPath, payload, tempExecutionEnvironment);
@@ -81,8 +87,7 @@ public class ExternalPythonExecutor {
             logger.error(message, e);
             throw new RuntimeException(message);
         } finally {
-            if (tempExecutionEnvironment != null && !FileUtils.deleteQuietly(tempExecutionEnvironment.parentFolder)
-                    && tempExecutionEnvironment.parentFolder != null) {
+            if ((tempExecutionEnvironment != null) && !deleteQuietly(tempExecutionEnvironment.parentFolder)) {
                 logger.warn(String.format("Failed to cleanup python execution resources {%s}", tempExecutionEnvironment.parentFolder));
             }
         }
@@ -93,8 +98,8 @@ public class ExternalPythonExecutor {
         TempEvalEnvironment tempEvalEnvironment = null;
         try {
             String pythonPath = checkPythonPath();
-            tempEvalEnvironment = generateTempEvalResources();
-            String payload = generateEvalPayload(expression, prepareEnvironmentScript, context);
+            tempEvalEnvironment = generateTempResourcesForEval();
+            String payload = generatePayloadForEval(expression, prepareEnvironmentScript, context);
             addFilePermissions(tempEvalEnvironment.parentFolder);
 
             return runPythonEvalProcess(pythonPath, payload, tempEvalEnvironment, context);
@@ -104,8 +109,7 @@ public class ExternalPythonExecutor {
             logger.error(message, e);
             throw new RuntimeException(message);
         } finally {
-            if (tempEvalEnvironment != null && !FileUtils.deleteQuietly(tempEvalEnvironment.parentFolder)
-                    && tempEvalEnvironment.parentFolder != null) {
+            if ((tempEvalEnvironment != null) && !deleteQuietly(tempEvalEnvironment.parentFolder)) {
                 logger.warn(String.format("Failed to cleanup python execution resources {%s}", tempEvalEnvironment.parentFolder));
             }
         }
@@ -209,8 +213,7 @@ public class ExternalPythonExecutor {
 
     private String getResult(String payload, ProcessBuilder processBuilder) throws IOException, InterruptedException {
         Process process = processBuilder.start();
-        PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(process.getOutputStream(),
-                StandardCharsets.UTF_8));
+        PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(process.getOutputStream(), UTF_8));
         printWriter.println(payload);
         printWriter.flush();
         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -219,13 +222,13 @@ public class ExternalPythonExecutor {
         while ((line = reader.readLine()) != null) {
             returnResult.append(line);
         }
-        boolean isInTime = process.waitFor(EXECUTION_TIMEOUT, TimeUnit.MINUTES);
+        boolean isInTime = process.waitFor(EXECUTION_TIMEOUT, MINUTES);
         if (!isInTime) {
             process.destroy();
             throw new RuntimeException("Execution timed out");
         } else if (process.exitValue() != 0) {
             StringWriter writer = new StringWriter();
-            IOUtils.copy(process.getErrorStream(), writer, StandardCharsets.UTF_8);
+            IOUtils.copy(process.getErrorStream(), writer, UTF_8);
             logger.error(writer.toString());
             throw new RuntimeException("Execution returned non 0 result");
         }
@@ -240,58 +243,50 @@ public class ExternalPythonExecutor {
         return processBuilder;
     }
 
-    private TempExecutionEnvironment generateTempExecutionResources(String script) throws IOException {
+    private TempExecutionEnvironment generateTempResourcesForExec(String script) throws IOException {
         Path execTempDirectory = Files.createTempDirectory("python_execution");
         File tempUserScript = File.createTempFile(PYTHON_SCRIPT_FILENAME, PYTHON_SUFFIX, execTempDirectory.toFile());
-        FileUtils.writeStringToFile(tempUserScript, script, StandardCharsets.UTF_8);
+        FileUtils.writeStringToFile(tempUserScript, script, UTF_8);
 
-        ClassLoader classLoader = ExternalPythonExecutor.class.getClassLoader();
-        Path mainScriptPath = Paths.get(execTempDirectory.toString(), PYTHON_MAIN_FILENAME + PYTHON_SUFFIX);
-
-        Files.copy(classLoader.getResourceAsStream(PYTHON_MAIN_FILENAME + PYTHON_SUFFIX), mainScriptPath);
+        File mainScriptFile = new File(execTempDirectory.toString(), MAIN_PY);
+        FileUtils.writeByteArrayToFile(mainScriptFile, ResourceScriptResolver.loadExecScriptAsBytes());
 
         String tempUserScriptName = FilenameUtils.getName(tempUserScript.toString());
-        String mainScriptName = FilenameUtils.getName(mainScriptPath.toString());
-        return new TempExecutionEnvironment(tempUserScriptName, mainScriptName, execTempDirectory.toFile());
+        return new TempExecutionEnvironment(tempUserScriptName, MAIN_PY, execTempDirectory.toFile());
     }
 
-    private TempEvalEnvironment generateTempEvalResources() throws IOException {
+    private TempEvalEnvironment generateTempResourcesForEval() throws IOException {
         Path execTempDirectory = Files.createTempDirectory("python_expression");
+        File evalScriptFile = new File(execTempDirectory.toString(), EVAL_PY);
+        FileUtils.writeByteArrayToFile(evalScriptFile, ResourceScriptResolver.loadEvalScriptAsBytes());
 
-        ClassLoader classLoader = ExternalPythonExecutor.class.getClassLoader();
-        Path mainScriptPath = Paths.get(execTempDirectory.toString(), PYTHON_EVAL_FILENAME + PYTHON_SUFFIX);
-
-        Files.copy(classLoader.getResourceAsStream(PYTHON_EVAL_FILENAME + PYTHON_SUFFIX), mainScriptPath);
-
-        String mainScriptName = FilenameUtils.getName(mainScriptPath.toString());
-        return new TempEvalEnvironment(mainScriptName, execTempDirectory.toFile());
+        return new TempEvalEnvironment(EVAL_PY, execTempDirectory.toFile());
     }
 
-    private String generateEvalPayload(String expression, String prepareEnvironmentScript,
+    private String generatePayloadForEval(String expression, String prepareEnvironmentScript,
                                        Map<String, Serializable> context) throws JsonProcessingException {
-        Map<String, Serializable> payload = new HashMap<>();
+        HashMap<String, Serializable> payload = new HashMap<>(4);
         payload.put("expression", expression);
         payload.put("envSetup", prepareEnvironmentScript);
         payload.put("context", (Serializable) context);
         return objectMapper.writeValueAsString(payload);
     }
 
-    private String generateExecutionPayload(String userScript, Map<String, Serializable> inputs) throws JsonProcessingException {
-        Map<String, Serializable> payload = new HashMap<>();
-        Map<String, String> parsedInputs = new HashMap<>();
-        inputs.forEach((key, value) -> parsedInputs.put(key, value.toString()));
+    private String generatePayloadForExec(String userScript, Map<String, Serializable> inputs) throws JsonProcessingException {
+        HashMap<String, String> parsedInputs = new HashMap<>();
+        for (Entry<String, Serializable> entry : inputs.entrySet()) {
+            parsedInputs.put(entry.getKey(), entry.getValue().toString());
+        }
 
+        Map<String, Serializable> payload = new HashMap<>(3);
         payload.put("script_name", FilenameUtils.removeExtension(userScript));
-        payload.put("inputs", (Serializable) parsedInputs);
+        payload.put("inputs", parsedInputs);
         return objectMapper.writeValueAsString(payload);
     }
 
     private String formatException(String exception, List<String> traceback) {
-        if (CollectionUtils.isEmpty(traceback)) {
-            return exception;
-        }
-
-        return removeFileName(traceback.get(traceback.size() - 1)) + ", " + exception;
+        return CollectionUtils.isEmpty(traceback) ? exception
+                : removeFileName(traceback.get(traceback.size() - 1)) + ", " + exception;
     }
 
     private String removeFileName(String trace) {
@@ -299,7 +294,7 @@ public class ExternalPythonExecutor {
         return trace.substring(pythonFileNameIndex + PYTHON_FILENAME_DELIMITERS);
     }
 
-    private class TempEnvironment {
+    private static class TempEnvironment {
         final String mainScriptName;
         final File parentFolder;
 
@@ -309,7 +304,7 @@ public class ExternalPythonExecutor {
         }
     }
 
-    private class TempExecutionEnvironment extends TempEnvironment {
+    private static class TempExecutionEnvironment extends TempEnvironment {
         private final String userScriptName;
 
         private TempExecutionEnvironment(String userScriptName, String mainScriptName, File parentFolder) {
@@ -318,7 +313,7 @@ public class ExternalPythonExecutor {
         }
     }
 
-    private class TempEvalEnvironment extends TempEnvironment {
+    private static class TempEvalEnvironment extends TempEnvironment {
         private TempEvalEnvironment(String mainScriptName, File parentFolder) {
             super(mainScriptName, parentFolder);
         }
