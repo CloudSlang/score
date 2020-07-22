@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+import static io.cloudslang.score.events.EventConstants.BRANCH_ID;
 import static java.lang.Boolean.TRUE;
 
 /**
@@ -52,8 +53,6 @@ public class ExecutionRuntimeServices implements Serializable {
     protected static final String NO_WORKERS_IN_GROUP = "NO_WORKERS_IN_GROUP";
 
     private static final String NEW_SPLIT_ID = "NEW_SPLIT_ID";
-
-    private static final String BRANCH_ID = "BRANCH_ID";
 
     public static final String EXECUTION_ID_CONTEXT = "executionIdContext";
 
@@ -173,9 +172,9 @@ public class ExecutionRuntimeServices implements Serializable {
     /**
      * setter for the brunch id of the current Execution
      */
-    public void setBranchId(String brunchId) {
+    public void setBranchId(String branchId) {
         Validate.isTrue(StringUtils.isEmpty(getBranchId()), "not allowed to overwrite branch id");
-        contextMap.put(BRANCH_ID, brunchId);
+        contextMap.put(BRANCH_ID, branchId);
     }
 
     /**
@@ -432,7 +431,7 @@ public class ExecutionRuntimeServices implements Serializable {
     }
 
     protected void addBranch(Long startPosition, Long executionPlanId, Map<String, Serializable> context,
-            ExecutionRuntimeServices executionRuntimeServices) {
+                             ExecutionRuntimeServices executionRuntimeServices) {
         if (!contextMap.containsKey(BRANCH_DATA)) {
             contextMap.put(BRANCH_DATA, new ArrayList<StartBranchDataContainer>());
         }
