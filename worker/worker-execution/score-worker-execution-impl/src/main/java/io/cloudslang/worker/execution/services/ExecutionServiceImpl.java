@@ -294,7 +294,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             // Run the split step
             List<StartBranchDataContainer> newBranches = execution.getSystemContext().removeBranchesData();
             List<Execution> newExecutions = createChildExecutionsForMi(execution.getExecutionId(), newBranches,
-                    splitUuid, nrOfAlreadyCreatedBranches);
+                    splitUuid, nrOfAlreadyCreatedBranches, currStep);
 
             Serializable miInputs = execution.getSystemContext().get("MI_INPUTS");
             if (miInputs == null) {
@@ -351,10 +351,11 @@ public final class ExecutionServiceImpl implements ExecutionService {
         return newExecutions;
     }
 
-    private static List<Execution> createChildExecutionsForMi(Long executionId,
+    private List<Execution> createChildExecutionsForMi(Long executionId,
                                                               List<StartBranchDataContainer> newBranches,
                                                               String splitUuid,
-                                                              int nrOfAlreadyCreatedBranches) {
+                                                              int nrOfAlreadyCreatedBranches,
+                                                              ExecutionStep currStep) {
         List<Execution> newExecutions = new ArrayList<>();
         ListIterator<StartBranchDataContainer> listIterator = newBranches.listIterator();
         int count = 0;
@@ -365,7 +366,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
             to.getSystemContext().setSplitId(splitUuid);
             int branchIndexInSplitStep = nrOfAlreadyCreatedBranches + count++ + 1;
-            to.getSystemContext().setBranchId(splitUuid + ":" + branchIndexInSplitStep);
+            String branchId = splitUuid + ":" + branchIndexInSplitStep;
+            to.getSystemContext().setBranchId(branchId);
+            dispatchBranchStartEvent(executionId, splitUuid, branchId, currStep);
             newExecutions.add(to);
         }
         return newExecutions;
