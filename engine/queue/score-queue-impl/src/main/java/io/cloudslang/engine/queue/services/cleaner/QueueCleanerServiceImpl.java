@@ -32,7 +32,7 @@ final public class QueueCleanerServiceImpl  implements QueueCleanerService {
     final private int BULK_SIZE = 500;
 
     @Autowired
-   	private ExecutionQueueRepository executionQueueRepository;
+    private ExecutionQueueRepository executionQueueRepository;
 
     @Override
     @Transactional
@@ -42,8 +42,21 @@ final public class QueueCleanerServiceImpl  implements QueueCleanerService {
 
     @Override
     @Transactional
+    public Set<Long> getFlowCompletedExecStateIds() {
+        return executionQueueRepository.getFlowCompletedExecStateIds();
+    }
+
+    @Override
+    @Transactional
     public void cleanFinishedSteps(Set<Long> ids) {
         executionQueueRepository.deleteFinishedSteps(ids);
     }
+
+    @Override
+    @Transactional
+    public int deleteOrphanSteps() {
+        return executionQueueRepository.deleteOrphanSteps();
+    }
+
 
 }
