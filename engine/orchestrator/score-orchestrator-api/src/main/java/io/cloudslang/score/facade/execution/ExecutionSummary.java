@@ -44,9 +44,9 @@ public class ExecutionSummary implements Serializable {
     @Deprecated private long branchesCount; //not active since 10.02!! we don't set the value, but must leave it for backward compatible of the POJO in Careml.
     private Double roi;
     private boolean reserveRobot;
-    private LicenseType licenseType;
     private boolean autoResume;
-
+    private LicenseType licenseType;
+    private Long licenseConsumption;
 
     public String getExecutionId() {
         return executionId;
@@ -203,6 +203,14 @@ public class ExecutionSummary implements Serializable {
         this.reserveRobot = reserveRobot;
     }
 
+    public boolean isAutoResume() {
+        return autoResume;
+    }
+
+    public void setAutoResume(boolean autoResume) {
+        this.autoResume = autoResume;
+    }
+
     public LicenseType getLicenseType() {
         return licenseType;
     }
@@ -211,12 +219,12 @@ public class ExecutionSummary implements Serializable {
         this.licenseType = licenseType;
     }
 
-    public boolean isAutoResume() {
-        return autoResume;
+    public Long getLicenseConsumption() {
+        return licenseConsumption;
     }
 
-    public void setAutoResume(boolean autoResume) {
-        this.autoResume = autoResume;
+    public void setLicenseConsumption(Long licenseConsumption) {
+        this.licenseConsumption = licenseConsumption;
     }
 
     @Override
@@ -244,6 +252,7 @@ public class ExecutionSummary implements Serializable {
         if (roi != that.roi) return false;
         if (triggeredBy != null ? !triggeredBy.equals(that.triggeredBy) : that.triggeredBy != null) return false;
         if (triggeringSource != null ? !triggeringSource.equals(that.triggeringSource) : that.triggeringSource != null) return false;
+        if (licenseConsumption != null ? !licenseConsumption.equals(that.licenseConsumption) : that.licenseConsumption != null) return false;
 
         return true;
     }
@@ -265,6 +274,7 @@ public class ExecutionSummary implements Serializable {
         result = 31 * result + (flowUuid != null ? flowUuid.hashCode() : 0);
         result = 31 * result + (flowPath != null ? flowPath.hashCode() : 0);
         result = 31 * result + (executionName != null ? executionName.hashCode() : 0);
+        result = 31 * result + (licenseConsumption != null ? licenseConsumption.hashCode() : 0);
         return result;
     }
 
