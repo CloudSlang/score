@@ -71,6 +71,7 @@ class PythonAgentExecutor(object):
         exec (env_setup, globals())
 
     def main(self):
+        global smaller_context
         try:
             raw_inputs = input().encode(sys.stdin.encoding).decode()
             payload = json.loads(raw_inputs)
