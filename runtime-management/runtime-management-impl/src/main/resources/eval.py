@@ -36,6 +36,9 @@ class PythonAgentExecutor(object):
         x = jsonpath_expr.find(json_data)
         return x[0].value if len(x) > 0 else None
 
+    def get_from_smaller_context(self, key):
+        return smaller_context[key]
+
     def __init_context(self, payload):
         global sys_prop
         global get_sp
@@ -50,6 +53,9 @@ class PythonAgentExecutor(object):
         global cs_to_lower
         global accessed
         global accessed_resources_set
+        global get_from_smaller_context
+
+        get_from_smaller_context = self.get_from_smaller_context
         accessed_resources_set = set()
         context = payload["context"]
 
