@@ -64,7 +64,11 @@ import java.util.concurrent.TimeoutException;
 
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.ACTION_TYPE;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SEQUENTIAL;
+import static io.cloudslang.score.events.EventConstants.BRANCH_ID;
+import static io.cloudslang.score.events.EventConstants.EXECUTION_ID;
 import static io.cloudslang.score.events.EventConstants.SCORE_STEP_SPLIT_ERROR;
+import static io.cloudslang.score.events.EventConstants.SPLIT_ID;
+import static io.cloudslang.score.events.EventConstants.STEP_PATH;
 import static io.cloudslang.score.facade.TempConstants.EXECUTE_CONTENT_ACTION;
 import static io.cloudslang.score.facade.TempConstants.EXECUTE_CONTENT_ACTION_CLASSNAME;
 import static io.cloudslang.score.facade.TempConstants.MI_REMAINING_BRANCHES_CONTEXT_KEY;
@@ -259,7 +263,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             // Run the split step
             List<StartBranchDataContainer> newBranches = execution.getSystemContext().removeBranchesData();
             List<Execution> newExecutions = createChildExecutionsForNonBlockingAndParallel(execution.getExecutionId(),
-                    newBranches);
+                    newBranches, currStep);
             // Run the navigation
             navigate(execution, currStep);
 
@@ -296,7 +300,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             // Run the split step
             List<StartBranchDataContainer> newBranches = execution.getSystemContext().removeBranchesData();
             List<Execution> newExecutions = createChildExecutionsForMi(execution.getExecutionId(), newBranches,
-                    splitUuid, nrOfAlreadyCreatedBranches);
+                    splitUuid, nrOfAlreadyCreatedBranches, currStep);
 
             Serializable miInputs = execution.getSystemContext().get("MI_INPUTS");
             if (miInputs == null) {
@@ -332,8 +336,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
         }
     }
 
-    private static List<Execution> createChildExecutionsForNonBlockingAndParallel(Long executionId,
-                                                                                  List<StartBranchDataContainer> newBranches) {
+    private List<Execution> createChildExecutionsForNonBlockingAndParallel(Long executionId,
+                                                                                  List<StartBranchDataContainer> newBranches,
+                                                                                  ExecutionStep currStep) {
         List<Execution> newExecutions = new ArrayList<>();
         String splitId = UUID.randomUUID().toString();
         ListIterator<StartBranchDataContainer> listIterator = newBranches.listIterator();
@@ -344,16 +349,19 @@ public final class ExecutionServiceImpl implements ExecutionService {
                     from.getContexts(), from.getSystemContext());
 
             to.getSystemContext().setSplitId(splitId);
-            to.getSystemContext().setBranchId(splitId + ":" + (count++ + 1));
+            String branchId = splitId + ":" + (count++ + 1);
+            to.getSystemContext().setBranchId(branchId);
             newExecutions.add(to);
+            dispatchBranchStartEvent(executionId, splitId, branchId, currStep);
         }
         return newExecutions;
     }
 
-    private static List<Execution> createChildExecutionsForMi(Long executionId,
+    private List<Execution> createChildExecutionsForMi(Long executionId,
                                                               List<StartBranchDataContainer> newBranches,
                                                               String splitUuid,
-                                                              int nrOfAlreadyCreatedBranches) {
+                                                              int nrOfAlreadyCreatedBranches,
+                                                              ExecutionStep currStep) {
         List<Execution> newExecutions = new ArrayList<>();
         ListIterator<StartBranchDataContainer> listIterator = newBranches.listIterator();
         int count = 0;
@@ -364,7 +372,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
             to.getSystemContext().setSplitId(splitUuid);
             int branchIndexInSplitStep = nrOfAlreadyCreatedBranches + count++ + 1;
-            to.getSystemContext().setBranchId(splitUuid + ":" + branchIndexInSplitStep);
+            String branchId = splitUuid + ":" + branchIndexInSplitStep;
+            to.getSystemContext().setBranchId(branchId);
+            dispatchBranchStartEvent(executionId, splitUuid, branchId, currStep);
             newExecutions.add(to);
         }
         return newExecutions;
@@ -717,4 +727,18 @@ public final class ExecutionServiceImpl implements ExecutionService {
         eventBus.dispatch(eventWrapper);
     }
 
+    private void dispatchBranchStartEvent(Long executionId, String splitId, String branchId, ExecutionStep currStep) {
+        HashMap<String, Serializable> eventData = new HashMap<>();
+        eventData.put(EXECUTION_ID, executionId);
+        eventData.put(SPLIT_ID, splitId);
+        eventData.put(BRANCH_ID, branchId);
+        String stepPath = currStep.getActionData().get("refId") + "/" + currStep.getActionData().get("nodeName");
+        eventData.put(STEP_PATH, stepPath);
+        ScoreEvent eventWrapper = new ScoreEvent(EventConstants.SCORE_STARTED_BRANCH_EVENT, eventData);
+        try {
+            eventBus.dispatch(eventWrapper);
+        } catch (InterruptedException e) {
+            logger.error("Failed to dispatch branch start event: ", e);
+        }
+    }
 }
