@@ -17,18 +17,19 @@
 package io.cloudslang.orchestrator.services;
 
 import ch.lambdaj.function.convert.Converter;
-import io.cloudslang.score.api.EndBranchDataContainer;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
-import io.cloudslang.score.facade.entities.Execution;
-import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.orchestrator.entities.BranchContexts;
 import io.cloudslang.orchestrator.entities.FinishedBranch;
 import io.cloudslang.orchestrator.entities.SplitMessage;
 import io.cloudslang.orchestrator.entities.SuspendedExecution;
+import io.cloudslang.orchestrator.model.FinishedBranchHolder;
 import io.cloudslang.orchestrator.repositories.FinishedBranchRepository;
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
+import io.cloudslang.score.api.EndBranchDataContainer;
+import io.cloudslang.score.facade.entities.Execution;
+import io.cloudslang.score.facade.execution.ExecutionStatus;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,8 @@ import java.util.Map;
 import static ch.lambdaj.Lambda.convert;
 import static ch.lambdaj.Lambda.extract;
 import static ch.lambdaj.Lambda.on;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 
 public final class SplitJoinServiceImpl implements SplitJoinService {
     private final Logger logger = Logger.getLogger(getClass());
@@ -138,8 +141,13 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         // fetch all suspended executions
         List<SuspendedExecution> suspendedExecutions = suspendedExecutionsRepository.findBySplitIdIn(splitIds);
         Map<String, SuspendedExecution> suspendedMap = new HashMap<>();
+        Map<FinishedBranchHolder, FinishedBranchHolder> attachedFinishedBranches = new HashMap<>();
         for (SuspendedExecution se : suspendedExecutions) {
             suspendedMap.put(se.getSplitId(), se);
+            Map<FinishedBranchHolder, FinishedBranchHolder> attachedBranches = se.getFinishedBranches().stream()
+                    .map(FinishedBranchHolder::new)
+                    .collect(toMap(identity(), identity()));
+            attachedFinishedBranches.putAll(attachedBranches);
         }
 
         // validate that the returned result from the query contains entities for each of the split id's we asked
@@ -147,7 +155,8 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         for (String splitId : splitIds) {
             if (!suspendedMap.containsKey(splitId)) {
                 Long executionId = findExecutionId(executions, splitId);
-                logger.error("Couldn't find suspended execution for split " + splitId + " execution id: " + executionId);
+                logger.error("Couldn't find suspended execution for split " + splitId +
+                        " execution id: " + executionId);
             }
         }
 
@@ -160,13 +169,30 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         for (FinishedBranch finishedBranch : finishedBranches) {
             SuspendedExecution suspendedExecution = suspendedMap.get(finishedBranch.getSplitId());
             if (suspendedExecution != null) {
-                finishedBranch.connectToSuspendedExecution(suspendedExecution);
+                FinishedBranchHolder theoreticFb = new FinishedBranchHolder(finishedBranch);
+                FinishedBranchHolder actualFb = attachedFinishedBranches.get(theoreticFb);
 
-                //this is an optimization for subflow (also works for MI with one branch :) )
-                if (suspendedExecution.getNumberOfBranches() == 1) {
-                    suspendedExecutionsWithOneBranch.add(suspendedExecution);
+                if (actualFb != null) {
+                    logger.error("Found duplicate finished branch with split " + finishedBranch.getSplitId() +
+                            " execution id: " + finishedBranch.getExecutionId());
+                    // merge theoretic into actual
+                    actualFb.getFinishedBranch().setBranchContexts(theoreticFb.getFinishedBranch().getBranchContexts());
+                    actualFb.getFinishedBranch().setBranchException(theoreticFb.getFinishedBranch().getBranchException());
+                    FinishedBranchHolder resavedActualFbHolder =
+                            new FinishedBranchHolder(finishedBranchRepository.save(actualFb.getFinishedBranch()));
+                    attachedFinishedBranches.put(resavedActualFbHolder, resavedActualFbHolder);
                 } else {
-                    finishedBranchRepository.save(finishedBranch);
+                    finishedBranch.connectToSuspendedExecution(suspendedExecution);
+
+                    //this is an optimization for subflow (also works for MI with one branch :) )
+                    FinishedBranchHolder newAttachedFbHolder;
+                    if (suspendedExecution.getNumberOfBranches() == 1) {
+                        suspendedExecutionsWithOneBranch.add(suspendedExecution);
+                        newAttachedFbHolder = theoreticFb;
+                    } else {
+                        newAttachedFbHolder = new FinishedBranchHolder(finishedBranchRepository.save(finishedBranch));
+                    }
+                    attachedFinishedBranches.put(newAttachedFbHolder, newAttachedFbHolder);
                 }
             }
         }
@@ -244,7 +270,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         boolean wasExecutionCancelled = false;
         ArrayList<EndBranchDataContainer> finishedContexts = new ArrayList<>();
         for (FinishedBranch fb : finishedBranches) {
-                finishedContexts.add(new EndBranchDataContainer(fb.getBranchContexts().getContexts(), fb.getBranchContexts().getSystemContext(), fb.getBranchException()));
+            finishedContexts.add(new EndBranchDataContainer(fb.getBranchContexts().getContexts(), fb.getBranchContexts().getSystemContext(), fb.getBranchException()));
             if (fb.getBranchContexts().isBranchCancelled()) {
                 wasExecutionCancelled = true;
             }

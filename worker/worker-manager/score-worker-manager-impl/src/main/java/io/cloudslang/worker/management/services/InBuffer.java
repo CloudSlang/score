@@ -35,6 +35,9 @@ import java.util.List;
 
 import static ch.lambdaj.Lambda.extract;
 import static ch.lambdaj.Lambda.on;
+import static java.lang.Long.getLong;
+import static java.lang.Math.min;
+import static java.lang.Runtime.getRuntime;
 
 /**
  * Created with IntelliJ IDEA.
@@ -45,7 +48,7 @@ import static ch.lambdaj.Lambda.on;
 public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Runnable{
     private static final Logger logger = Logger.getLogger(InBuffer.class);
 
-    private final static long MEMORY_THRESHOLD = 50000000; // 50 Mega byte
+    private final static long MEMORY_THRESHOLD = getLong("memory.threshold", min(2_000_000_000L, getRuntime().maxMemory() * 3 / 20)); // 50 Mega byte
     private final static int MINIMUM_GC_DELTA = 10000; // minimum delta between garbage collections in milliseconds
 
     @Autowired
@@ -225,8 +228,8 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     }
 
     public boolean checkFreeMemorySpace(long threshold){
-        double allocatedMemory      = Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
-        double presumableFreeMemory = Runtime.getRuntime().maxMemory() - allocatedMemory;
+        double allocatedMemory      = getRuntime().totalMemory()- getRuntime().freeMemory();
+        double presumableFreeMemory = getRuntime().maxMemory() - allocatedMemory;
         boolean result = presumableFreeMemory > threshold;
         if (! result) {
             logger.warn("InBuffer would not poll messages, because there is not enough free memory.");

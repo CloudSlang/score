@@ -102,6 +102,14 @@ public class FinishedBranch extends AbstractIdentifiable {
         return this.branchContexts;
     }
 
+    public void setBranchException(String branchException) {
+        this.branchException = branchException;
+    }
+
+    public void setBranchContexts(BranchContexts branchContexts) {
+        this.branchContexts = branchContexts;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
