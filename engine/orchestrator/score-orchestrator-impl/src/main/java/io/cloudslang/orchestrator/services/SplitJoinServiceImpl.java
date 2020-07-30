@@ -31,6 +31,7 @@ import io.cloudslang.orchestrator.entities.SplitMessage;
 import io.cloudslang.orchestrator.entities.SuspendedExecution;
 import io.cloudslang.orchestrator.repositories.FinishedBranchRepository;
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -144,13 +145,24 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
     private List<ExecutionMessage> prepareExecutionMessages(List<Execution> executions, boolean active) {
         return executions.stream()
-                .map(execution -> {
-                    ExecutionMessage executionMessage = new ExecutionMessage(execution.getExecutionId().toString(),
-                            converter.createPayload(execution));
-                    executionMessage.setActive(active);
-                    return executionMessage;
-                })
+                .map(execution -> convertExecutionToExecutionMessage(active, execution))
                 .collect(toList());
+    }
+
+    private ExecutionMessage convertExecutionToExecutionMessage(boolean active, Execution execution) {
+        ExecutionMessage executionMessage = new ExecutionMessage(execution.getExecutionId().toString(),
+                converter.createPayload(execution));
+        setWorkerGroupOnCSParallelLoopBranches(execution, executionMessage);
+        executionMessage.setActive(active);
+        return executionMessage;
+    }
+
+    private void setWorkerGroupOnCSParallelLoopBranches(Execution execution, ExecutionMessage executionMessage) {
+        if (StringUtils.equals(execution.getSystemContext().getLanguageName(), "CloudSlang")
+                && execution.getSystemContext().getWorkerGroupName() != null) {
+            executionMessage.setWorkerGroup(execution.getSystemContext().getWorkerGroupName());
+            executionMessage.setWorkerId(ExecutionMessage.EMPTY_WORKER);
+        }
     }
 
     @Override
@@ -303,7 +315,9 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
                 se.setLocked(true);
                 finishedBranches.clear();
             }
-            messages.add(executionToStartExecutionMessage.convert(execution));
+            ExecutionMessage executionMessage = executionToStartExecutionMessage.convert(execution);
+            setWorkerGroupOnCSParallelLoopBranches(execution, executionMessage);
+            messages.add(executionMessage);
         }
 
         queueDispatcherService.dispatch(messages);
@@ -325,7 +339,9 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
         for (SuspendedExecution se : suspendedExecutions) {
             Execution exec = joinSplit(se);
-            messages.add(executionToStartExecutionMessage.convert(exec));
+            ExecutionMessage executionMessage = executionToStartExecutionMessage.convert(exec);
+            setWorkerGroupOnCSParallelLoopBranches(exec, executionMessage);
+            messages.add(executionMessage);
         }
 
         // 3. send the suspended execution back to the queue

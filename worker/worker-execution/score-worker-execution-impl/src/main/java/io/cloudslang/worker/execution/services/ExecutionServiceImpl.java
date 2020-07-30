@@ -35,6 +35,8 @@ import io.cloudslang.score.facade.execution.ExecutionSummary;
 import io.cloudslang.score.facade.execution.PauseReason;
 import io.cloudslang.score.lang.SystemContext;
 import io.cloudslang.worker.execution.model.SandboxExecutionRunnable;
+import io.cloudslang.worker.execution.model.StepActionDataHolder;
+import io.cloudslang.worker.execution.model.StepActionDataHolder.ReadonlyStepActionDataAccessor;
 import io.cloudslang.worker.execution.reflection.ReflectionAdapter;
 import io.cloudslang.worker.management.WorkerConfigurationService;
 import io.cloudslang.worker.management.services.dbsupport.WorkerDbSupportService;
@@ -62,7 +64,11 @@ import java.util.concurrent.TimeoutException;
 
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.ACTION_TYPE;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SEQUENTIAL;
+import static io.cloudslang.score.events.EventConstants.BRANCH_ID;
+import static io.cloudslang.score.events.EventConstants.EXECUTION_ID;
 import static io.cloudslang.score.events.EventConstants.SCORE_STEP_SPLIT_ERROR;
+import static io.cloudslang.score.events.EventConstants.SPLIT_ID;
+import static io.cloudslang.score.events.EventConstants.STEP_PATH;
 import static io.cloudslang.score.facade.TempConstants.EXECUTE_CONTENT_ACTION;
 import static io.cloudslang.score.facade.TempConstants.EXECUTE_CONTENT_ACTION_CLASSNAME;
 import static io.cloudslang.score.facade.TempConstants.MI_REMAINING_BRANCHES_CONTEXT_KEY;
@@ -155,20 +161,19 @@ public final class ExecutionServiceImpl implements ExecutionService {
     @Override
     public Execution execute(Execution execution) throws InterruptedException {
         try {
-            // handle flow cancellation
-            if (handleCancelledFlow(execution)) {
-                return execution;
+            // Handle cancel or pause of execution
+            if (handleCancelledFlow(execution)
+                    || (!isDebuggerMode(execution.getSystemContext()) && handlePausedFlow(execution))) {
+                return handleCancelledFlow(execution) ? execution : null;
             }
-            ExecutionStep currStep = loadExecutionStep(execution);
-            // Check if this execution was paused
-            if (!isDebuggerMode(execution.getSystemContext()) && handlePausedFlow(execution)) {
-                return null;
-            }
-            // dum bus event
+            // Dump the bus events before execution of steps
             dumpBusEvents(execution);
+            // Load the execution step
+            ExecutionStep currStep = loadExecutionStep(execution);
             // Run the execution step
             String timeoutMessage = executeStep(execution, currStep);
-            if (timeoutMessage != null) { // Timeout of run
+            // Handle timeout for content operation execution
+            if (timeoutMessage != null) {
                 try {
                     return doWaitForCancel(execution);
                 } catch (TimeoutException timeout) {
@@ -176,23 +181,25 @@ public final class ExecutionServiceImpl implements ExecutionService {
                     execution.getSystemContext().setStepErrorKey(timeoutMessage);
                 }
             }
-            if ((!execution.getSystemContext().hasStepErrorKey()) && currStep.getActionData().get(ACTION_TYPE) != null &&
-                    currStep.getActionData().get(ACTION_TYPE).toString().equalsIgnoreCase(SEQUENTIAL)) {
-                // Stop the execution here, the rest of the steps are done by the Sequential Message Handler
+            // Pause execution in case of reaching a sequential step
+            if ((!execution.getSystemContext().hasStepErrorKey()) && (currStep.getActionData().get(ACTION_TYPE) != null)
+                    && currStep.getActionData().get(ACTION_TYPE).toString().equalsIgnoreCase(SEQUENTIAL)) {
+                // Pause the execution here, the rest of the steps are done by the Sequential Message Handler
                 return null;
             }
-            // Run the navigation
+            // Execute the step navigation
             navigate(execution, currStep);
-            // currently handles groups and jms optimizations
+            // Handle Worker group and change of running execution plan
             postExecutionSettings(execution);
-            // If execution was paused in language - to avoid delay of configuration
+            // If execution was paused in language - to prevent spin in case of engine internal pause
             if (execution.getSystemContext().isPaused()) {
                 if (handlePausedFlowAfterStep(execution)) {
                     return null;
                 }
             }
-            // dum bus event
+            // Dump the bus events
             dumpBusEvents(execution);
+            // Update MI suspended execution
             updateMiIfRequired(execution);
             return execution;
         } catch (InterruptedException ex) {
@@ -212,11 +219,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
         }
     }
 
-
     @Override
     public void pauseSequentialExecution(Execution execution) throws InterruptedException {
         final PauseReason pauseReason =
-                robotAvailabilityService.isRobotAvailable("Default") ? PENDING_ROBOT : NO_ROBOTS_IN_GROUP;
+                robotAvailabilityService.isRobotAvailable(execution.getRobotGroupName()) ? PENDING_ROBOT : NO_ROBOTS_IN_GROUP;
         pauseFlow(execution, pauseReason);
     }
 
@@ -257,7 +263,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             // Run the split step
             List<StartBranchDataContainer> newBranches = execution.getSystemContext().removeBranchesData();
             List<Execution> newExecutions = createChildExecutionsForNonBlockingAndParallel(execution.getExecutionId(),
-                    newBranches);
+                    newBranches, currStep);
             // Run the navigation
             navigate(execution, currStep);
 
@@ -294,7 +300,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             // Run the split step
             List<StartBranchDataContainer> newBranches = execution.getSystemContext().removeBranchesData();
             List<Execution> newExecutions = createChildExecutionsForMi(execution.getExecutionId(), newBranches,
-                    splitUuid, nrOfAlreadyCreatedBranches);
+                    splitUuid, nrOfAlreadyCreatedBranches, currStep);
 
             Serializable miInputs = execution.getSystemContext().get("MI_INPUTS");
             if (miInputs == null) {
@@ -330,8 +336,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
         }
     }
 
-    private static List<Execution> createChildExecutionsForNonBlockingAndParallel(Long executionId,
-                                                                                  List<StartBranchDataContainer> newBranches) {
+    private List<Execution> createChildExecutionsForNonBlockingAndParallel(Long executionId,
+                                                                                  List<StartBranchDataContainer> newBranches,
+                                                                                  ExecutionStep currStep) {
         List<Execution> newExecutions = new ArrayList<>();
         String splitId = UUID.randomUUID().toString();
         ListIterator<StartBranchDataContainer> listIterator = newBranches.listIterator();
@@ -342,16 +349,19 @@ public final class ExecutionServiceImpl implements ExecutionService {
                     from.getContexts(), from.getSystemContext());
 
             to.getSystemContext().setSplitId(splitId);
-            to.getSystemContext().setBranchId(splitId + ":" + (count++ + 1));
+            String branchId = splitId + ":" + (count++ + 1);
+            to.getSystemContext().setBranchId(branchId);
             newExecutions.add(to);
+            dispatchBranchStartEvent(executionId, splitId, branchId, currStep);
         }
         return newExecutions;
     }
 
-    private static List<Execution> createChildExecutionsForMi(Long executionId,
+    private List<Execution> createChildExecutionsForMi(Long executionId,
                                                               List<StartBranchDataContainer> newBranches,
                                                               String splitUuid,
-                                                              int nrOfAlreadyCreatedBranches) {
+                                                              int nrOfAlreadyCreatedBranches,
+                                                              ExecutionStep currStep) {
         List<Execution> newExecutions = new ArrayList<>();
         ListIterator<StartBranchDataContainer> listIterator = newBranches.listIterator();
         int count = 0;
@@ -362,7 +372,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
             to.getSystemContext().setSplitId(splitUuid);
             int branchIndexInSplitStep = nrOfAlreadyCreatedBranches + count++ + 1;
-            to.getSystemContext().setBranchId(splitUuid + ":" + branchIndexInSplitStep);
+            String branchId = splitUuid + ":" + branchIndexInSplitStep;
+            to.getSystemContext().setBranchId(branchId);
+            dispatchBranchStartEvent(executionId, splitUuid, branchId, currStep);
             newExecutions.add(to);
         }
         return newExecutions;
@@ -461,7 +473,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
             if (execSummary != null && execSummary.getStatus().equals(ExecutionStatus.PENDING_PAUSE)) {
                 PauseReason reason = execSummary.getPauseReason();
                 // we only care about User-Paused here!
-                // we don't want to Pause if the parent is paused due to branch_paused! (other branch is paused for some reason (e.g. required_input), so the parent is paused as well).
+                // we don't want to Pause if the parent is paused due to branch_paused! (other branch is paused for some reason
+                // (e.g. required_input), so the parent is paused as well).
                 if (PauseReason.USER_PAUSED.equals(reason)) {
                     return reason;
                 }
@@ -522,7 +535,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     protected String executeStep(Execution execution, ExecutionStep currStep) throws InterruptedException {
         try {
-            final Map<String, Object> stepData = prepareStepData(execution, currStep);
+            final ReadonlyStepActionDataAccessor actionDataAccessor = doPrepareStepData(execution, currStep);
             final ControlActionMetadata action = currStep.getAction();
 
             if (enableNewTimeoutMechanism && isContentOperationStep(action)) {
@@ -532,7 +545,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 // New Timeout is enabled and timeout information is available for this run
                 if ((startTime != null) && (timeoutMins != null)) {
                     long now = System.currentTimeMillis();
-                    Callable<Object> operationCallable = () -> reflectionAdapter.executeControlAction(action, stepData);
+                    Callable<Object> operationCallable = () -> reflectionAdapter.executeControlAction(action, actionDataAccessor);
                     SandboxExecutionRunnable<Object> sandboxExecutionRunnable =
                             new SandboxExecutionRunnable<>(currentThread().getContextClassLoader(), operationCallable);
                     Thread operationExecutionThread = new Thread(sandboxExecutionRunnable);
@@ -566,10 +579,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
                         sandboxExecutionRunnable.afterExecute();
                     }
                 } else { // Execute on regular executor as usual if no timeout information is present
-                    reflectionAdapter.executeControlAction(action, stepData);
+                    reflectionAdapter.executeControlAction(action, actionDataAccessor);
                 }
             } else { // Execute on regular executor as this is not an operation or new mechanism is not enabled
-                reflectionAdapter.executeControlAction(action, stepData);
+                reflectionAdapter.executeControlAction(action, actionDataAccessor);
             }
         } catch (RuntimeException ex) {
             handleStepExecutionException(execution, ex);
@@ -599,8 +612,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     protected void executeSplitStep(Execution execution, ExecutionStep currStep) {
         try {
-            Map<String, Object> stepData = prepareStepData(execution, currStep);
-            reflectionAdapter.executeControlAction(currStep.getAction(), stepData);
+            ReadonlyStepActionDataAccessor readonlyStepActionDataAccessor = doPrepareStepData(execution, currStep);
+            reflectionAdapter.executeControlAction(currStep.getAction(), readonlyStepActionDataAccessor);
         } catch (RuntimeException ex) {
             handleStepExecutionException(execution, ex);
         }
@@ -611,47 +624,50 @@ public final class ExecutionServiceImpl implements ExecutionService {
         execution.getSystemContext().setStepErrorKey(ex.getMessage());
     }
 
-    private Map<String, Object> prepareStepData(Execution execution, ExecutionStep currStep) {
-        Map<String, ?> actionData = currStep.getActionData();
-        Map<String, Object> stepData = new HashMap<>();
-        if (actionData != null) {
-            stepData.putAll(actionData);
-        }
-        Map<String, ?> navigationData = currStep.getNavigationData();
-        if (navigationData != null) {
-            stepData.putAll(navigationData);
-        }
-        // We add all the contexts to the step data - so inside of each control action we will have access to all contexts
-        addContextData(stepData, execution);
-        return stepData;
+    private ReadonlyStepActionDataAccessor doPrepareStepData(Execution execution, ExecutionStep currStep) {
+        StepActionDataHolder stepActionDataHolder = new StepActionDataHolder();
+        stepActionDataHolder.addNullablePartToHolder(currStep.getActionData());
+        doAddNavigationRelatedParts(execution, currStep, stepActionDataHolder);
+        return new ReadonlyStepActionDataAccessor(stepActionDataHolder);
     }
 
-    private void createErrorEvent(String ex, String logMessage, String errorType, SystemContext systemContext)
-            throws InterruptedException {
-        HashMap<String, Serializable> eventData = new HashMap<>();
-        eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, new HashMap<>(systemContext));
-        eventData.put(EventConstants.SCORE_ERROR_MSG, ex);
-        eventData.put(EventConstants.EXECUTION_ID_CONTEXT, systemContext.getExecutionId());
-        eventData.put(EventConstants.SCORE_ERROR_LOG_MSG, logMessage);
-        eventData.put(EventConstants.SCORE_ERROR_TYPE, errorType);
-        ScoreEvent eventWrapper = new ScoreEvent(EventConstants.SCORE_ERROR_EVENT, eventData);
-        eventBus.dispatch(eventWrapper);
+    private ReadonlyStepActionDataAccessor doPrepareNavigationStepData(Execution execution, ExecutionStep currStep) {
+        StepActionDataHolder actionDataHolder = new StepActionDataHolder();
+        doAddNavigationRelatedParts(execution, currStep, actionDataHolder);
+        return new ReadonlyStepActionDataAccessor(actionDataHolder);
+    }
+
+    private void doAddNavigationRelatedParts(Execution execution, ExecutionStep currStep, StepActionDataHolder actionDataHolder) {
+        actionDataHolder.addNotNullPartToHolder(currStep.getNavigationData());
+        actionDataHolder.addNotNullPartToHolder(execution.getContexts());
+        actionDataHolder.addNotNullPartToHolder(getStepMetadataMap(execution));
+    }
+
+    private Map<String, Object> getStepMetadataMap(Execution execution) {
+        // Maps.newHashMapWithExpectedSize gives 5 + 5 / 3 = 6
+        Map<String, Object> data = new HashMap<>(6);
+        data.put(ExecutionParametersConsts.SYSTEM_CONTEXT, execution.getSystemContext());
+        data.put(ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES, execution.getSystemContext());
+        data.put(ExecutionParametersConsts.EXECUTION, execution);
+        data.put(ExecutionParametersConsts.EXECUTION_CONTEXT, execution.getContexts());
+        data.put(ExecutionParametersConsts.RUNNING_EXECUTION_PLAN_ID, execution.getRunningExecutionPlanId());
+        return data;
     }
 
     protected void navigate(Execution execution, ExecutionStep currStep) throws InterruptedException {
         Long position;
         try {
             if (currStep.getNavigation() != null) {
-                Map<String, Object> navigationData = new HashMap<>(currStep.getNavigationData());
                 // We add all the contexts to the step data - so inside of each control action we will have access to all contexts
-                addContextData(navigationData, execution);
-                position = (Long) reflectionAdapter.executeControlAction(currStep.getNavigation(), navigationData);
+                ReadonlyStepActionDataAccessor readonlyActionDataAccessor = doPrepareNavigationStepData(execution, currStep);
+                position = (Long) reflectionAdapter.executeControlAction(currStep.getNavigation(), readonlyActionDataAccessor);
                 execution.setPosition(position);
             } else {
                 execution.setPosition(null); // terminate the flow - we got to the last step!
             }
         } catch (RuntimeException navEx) {
-            // If Exception occurs in navigation (almost impossible since now we always have Flow Exception Step) we can not continue since we don't know which step is the next step...
+            // If Exception occurs in navigation (almost impossible since now we always have Flow Exception Step)
+            // we can not continue since we don't know which step is the next step...
             // terminating...
             logger.error("Error occurred during navigation execution. Execution id: " + execution.getExecutionId(),
                     navEx);
@@ -699,13 +715,30 @@ public final class ExecutionServiceImpl implements ExecutionService {
         }
     }
 
-    private static void addContextData(Map<String, Object> data, Execution execution) {
-        data.putAll(execution.getContexts());
-        data.put(ExecutionParametersConsts.SYSTEM_CONTEXT, execution.getSystemContext());
-        data.put(ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES, execution.getSystemContext());
-        data.put(ExecutionParametersConsts.EXECUTION, execution);
-        data.put(ExecutionParametersConsts.EXECUTION_CONTEXT, execution.getContexts());
-        data.put(ExecutionParametersConsts.RUNNING_EXECUTION_PLAN_ID, execution.getRunningExecutionPlanId());
+    private void createErrorEvent(String ex, String logMessage, String errorType, SystemContext systemContext)
+            throws InterruptedException {
+        HashMap<String, Serializable> eventData = new HashMap<>();
+        eventData.put(ExecutionParametersConsts.SYSTEM_CONTEXT, new HashMap<>(systemContext));
+        eventData.put(EventConstants.SCORE_ERROR_MSG, ex);
+        eventData.put(EventConstants.EXECUTION_ID_CONTEXT, systemContext.getExecutionId());
+        eventData.put(EventConstants.SCORE_ERROR_LOG_MSG, logMessage);
+        eventData.put(EventConstants.SCORE_ERROR_TYPE, errorType);
+        ScoreEvent eventWrapper = new ScoreEvent(EventConstants.SCORE_ERROR_EVENT, eventData);
+        eventBus.dispatch(eventWrapper);
     }
 
+    private void dispatchBranchStartEvent(Long executionId, String splitId, String branchId, ExecutionStep currStep) {
+        HashMap<String, Serializable> eventData = new HashMap<>();
+        eventData.put(EXECUTION_ID, executionId);
+        eventData.put(SPLIT_ID, splitId);
+        eventData.put(BRANCH_ID, branchId);
+        String stepPath = currStep.getActionData().get("refId") + "/" + currStep.getActionData().get("nodeName");
+        eventData.put(STEP_PATH, stepPath);
+        ScoreEvent eventWrapper = new ScoreEvent(EventConstants.SCORE_STARTED_BRANCH_EVENT, eventData);
+        try {
+            eventBus.dispatch(eventWrapper);
+        } catch (InterruptedException e) {
+            logger.error("Failed to dispatch branch start event: ", e);
+        }
+    }
 }
