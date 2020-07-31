@@ -21,13 +21,15 @@ public interface FastEventBus {
 
     /**
      * register listener for events
+     *
      * @param eventHandler - the handler of the events
      */
     void registerEventListener(ScoreEventListener eventHandler);
 
     /**
      * dispatch the given event
+     *
      * @param event score event to dispatch
      */
-	void dispatch(ScoreEvent event) throws InterruptedException;
+    void dispatch(ScoreEvent event) throws InterruptedException;
 }

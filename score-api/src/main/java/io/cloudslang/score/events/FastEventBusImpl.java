@@ -24,7 +24,7 @@ public class FastEventBusImpl implements FastEventBus {
 		this.eventHandler = eventHandler;
 	}
 
-    public void dispatch(ScoreEvent event)  throws InterruptedException {
+	public void dispatch(ScoreEvent event) throws InterruptedException {
 		this.eventHandler.onEvent(event);
 	}
 }
