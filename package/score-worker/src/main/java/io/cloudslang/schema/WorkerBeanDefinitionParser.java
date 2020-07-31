@@ -18,6 +18,7 @@ package io.cloudslang.schema;
 
 import io.cloudslang.runtime.impl.sequential.DefaultSequentialExecutionServiceImpl;
 import io.cloudslang.score.events.EventBusImpl;
+import io.cloudslang.score.events.FastEventBusImpl;
 import io.cloudslang.worker.execution.reflection.ReflectionAdapterImpl;
 import io.cloudslang.worker.execution.services.ExecutionServiceImpl;
 import io.cloudslang.worker.execution.services.ScoreRobotAvailabilityServiceImpl;
@@ -64,6 +65,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private Map<Class<?>,String> beans = new HashMap<Class<?>,String>(){{
 		put(WorkerManager.class, "workerManager");
 		put(EventBusImpl.class, null);
+		put(FastEventBusImpl.class, null);
 		put(ExecutionServiceImpl.class, "agent");
 		put(InBuffer.class, null);
 		put(WorkerConfigurationUtils.class, null);
