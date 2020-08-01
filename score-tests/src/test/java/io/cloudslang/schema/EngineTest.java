@@ -25,6 +25,7 @@ import io.cloudslang.score.api.ExecutionStep;
 import io.cloudslang.score.api.Score;
 import io.cloudslang.score.api.TriggeringProperties;
 import io.cloudslang.score.events.EventBus;
+import io.cloudslang.score.events.FastEventBus;
 import io.cloudslang.worker.execution.reflection.ReflectionAdapter;
 import io.cloudslang.worker.execution.services.ExecutionServiceImpl;
 import io.cloudslang.worker.execution.services.RobotAvailabilityService;
@@ -173,6 +174,11 @@ public class EngineTest {
         @Bean
         EventBus eventBus() {
             return mock(EventBus.class);
+        }
+
+        @Bean
+        FastEventBus fastEventBus() {
+            return mock(FastEventBus.class);
         }
 
         @Bean

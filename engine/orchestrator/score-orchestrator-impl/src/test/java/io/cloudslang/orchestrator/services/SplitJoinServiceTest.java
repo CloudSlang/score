@@ -22,6 +22,7 @@ import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
+import io.cloudslang.score.events.FastEventBus;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.orchestrator.entities.BranchContexts;
 import io.cloudslang.orchestrator.entities.FinishedBranch;
@@ -80,6 +81,9 @@ public class SplitJoinServiceTest {
 
     @Mock
     private QueueDispatcherService queueDispatcherService;
+
+    @Mock
+    private FastEventBus fastEventBus;
 
     @Mock
     private ExecutionMessageConverter converter;

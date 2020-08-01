@@ -23,6 +23,7 @@ import io.cloudslang.score.api.ExecutionPlan;
 import io.cloudslang.score.api.ExecutionStep;
 import io.cloudslang.score.events.EventBus;
 import io.cloudslang.score.events.EventConstants;
+import io.cloudslang.score.events.FastEventBus;
 import io.cloudslang.score.facade.TempConstants;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.entities.RunningExecutionPlan;
@@ -373,6 +374,11 @@ public class ExecutionServiceTest {
 		@Bean
 		public EventBus getEventBus() {
 			return mock(EventBus.class);
+		}
+
+		@Bean
+		public FastEventBus getFastEventBus() {
+			return mock(FastEventBus.class);
 		}
 
 		@Bean
