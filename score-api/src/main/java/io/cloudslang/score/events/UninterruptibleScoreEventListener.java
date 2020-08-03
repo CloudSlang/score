@@ -17,19 +17,12 @@
 package io.cloudslang.score.events;
 
 
-public interface FastEventBus {
+public interface UninterruptibleScoreEventListener {
 
     /**
-     * register listener for events
-     *
-     * @param eventHandler - the handler of the events
+     * handler of score event, this method will be called on score event
+     * @param event - the event that dispatched
      */
-    void registerEventListener(UninterruptibleScoreEventListener eventHandler);
+    void onEvent(ScoreEvent event);
 
-    /**
-     * dispatch the given event
-     *
-     * @param event score event to dispatch
-     */
-    void dispatch(ScoreEvent event);
 }

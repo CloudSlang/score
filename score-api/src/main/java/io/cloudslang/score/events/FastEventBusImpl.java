@@ -18,9 +18,9 @@ package io.cloudslang.score.events;
 
 public class FastEventBusImpl implements FastEventBus {
 
-    private ScoreEventListener eventHandler;
+    private UninterruptibleScoreEventListener eventHandler;
 
-    public void registerEventListener(ScoreEventListener eventHandler) {
+    public void registerEventListener(UninterruptibleScoreEventListener eventHandler) {
         if (this.eventHandler == null ) {
             this.eventHandler = eventHandler;
         } else {
@@ -33,7 +33,7 @@ public class FastEventBusImpl implements FastEventBus {
         }
     }
 
-    public void dispatch(ScoreEvent event) throws InterruptedException {
+    public void dispatch(ScoreEvent event) {
         if (eventHandler != null) {
             eventHandler.onEvent(event);
         }
