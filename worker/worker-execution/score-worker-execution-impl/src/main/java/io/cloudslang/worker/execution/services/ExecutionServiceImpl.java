@@ -739,10 +739,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
         String stepPath = currStep.getActionData().get("refId") + "/" + currStep.getActionData().get("nodeName");
         eventData.put(STEP_PATH, stepPath);
         ScoreEvent eventWrapper = new ScoreEvent(EventConstants.SCORE_STARTED_BRANCH_EVENT, eventData);
-        try {
-            fastEventBus.dispatch(eventWrapper);
-        } catch (InterruptedException e) {
-            logger.error("Failed to dispatch branch start event: ", e);
-        }
+        fastEventBus.dispatch(eventWrapper);
     }
 }

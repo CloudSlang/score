@@ -425,10 +425,6 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         eventData.put(SPLIT_ID, splitId);
         eventData.put(BRANCH_ID, branchId);
         ScoreEvent eventWrapper = new ScoreEvent(EventConstants.SCORE_FINISHED_BRANCH_EVENT, eventData);
-        try {
-            fastEventBus.dispatch(eventWrapper);
-        } catch (InterruptedException e) {
-            logger.error("Failed to dispatch branch end event: ", e);
-        }
+        fastEventBus.dispatch(eventWrapper);
     }
 }

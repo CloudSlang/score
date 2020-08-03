@@ -16,17 +16,19 @@
 
 package io.cloudslang.score.events;
 
+import java.util.Objects;
+
 public class FastEventBusImpl implements FastEventBus {
 
     private UninterruptibleScoreEventListener eventHandler;
 
     public void registerEventListener(UninterruptibleScoreEventListener eventHandler) {
+        Objects.requireNonNull(eventHandler, "eventHandler must not be null");
         if (this.eventHandler == null ) {
             this.eventHandler = eventHandler;
         } else {
-            String eventHandlerToRegister = eventHandler != null ? eventHandler.getClass().getName() : "";
             StringBuilder errorMessage = new StringBuilder();
-            errorMessage.append("Failed to register '").append(eventHandlerToRegister)
+            errorMessage.append("Failed to register '").append(eventHandler.getClass().getName())
                     .append("' because another '").append(this.eventHandler.getClass().getName())
                     .append("' is registered. You cannot register more than one eventHandler for FastEventBus.");
             throw new RuntimeException(errorMessage.toString());
