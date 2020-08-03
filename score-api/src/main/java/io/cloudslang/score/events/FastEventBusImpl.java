@@ -18,15 +18,24 @@ package io.cloudslang.score.events;
 
 public class FastEventBusImpl implements FastEventBus {
 
-	private ScoreEventListener eventHandler;
+    private ScoreEventListener eventHandler;
 
-	public void registerEventListener(ScoreEventListener eventHandler) {
-		this.eventHandler = eventHandler;
-	}
+    public void registerEventListener(ScoreEventListener eventHandler) {
+        if (this.eventHandler == null ) {
+            this.eventHandler = eventHandler;
+        } else {
+            String eventHandlerToRegister = eventHandler != null ? eventHandler.getClass().getName() : "";
+            StringBuilder errorMessage = new StringBuilder();
+            errorMessage.append("Failed to register '").append(eventHandlerToRegister)
+                    .append("' because another '").append(this.eventHandler.getClass().getName())
+                    .append("' is registered. You cannot register more than one eventHandler for FastEventBus.");
+            throw new RuntimeException(errorMessage.toString());
+        }
+    }
 
-	public void dispatch(ScoreEvent event) throws InterruptedException {
-		if (eventHandler != null) {
-			eventHandler.onEvent(event);
-		}
-	}
+    public void dispatch(ScoreEvent event) throws InterruptedException {
+        if (eventHandler != null) {
+            eventHandler.onEvent(event);
+        }
+    }
 }

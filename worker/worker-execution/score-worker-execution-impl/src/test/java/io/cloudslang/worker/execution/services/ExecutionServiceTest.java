@@ -376,10 +376,10 @@ public class ExecutionServiceTest {
 			return mock(EventBus.class);
 		}
 
-		@Bean
-		public FastEventBus getFastEventBus() {
-			return mock(FastEventBus.class);
-		}
+        @Bean
+        public FastEventBus getFastEventBus() {
+            return mock(FastEventBus.class);
+        }
 
 		@Bean
 		public ExecutionServiceImpl executionService() {

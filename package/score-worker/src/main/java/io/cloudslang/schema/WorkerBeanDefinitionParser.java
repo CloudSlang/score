@@ -65,7 +65,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private Map<Class<?>,String> beans = new HashMap<Class<?>,String>(){{
 		put(WorkerManager.class, "workerManager");
 		put(EventBusImpl.class, null);
-		put(FastEventBusImpl.class, null);
+		put(FastEventBusImpl.class, "consumptionFastEventBus");
 		put(ExecutionServiceImpl.class, "agent");
 		put(InBuffer.class, null);
 		put(WorkerConfigurationUtils.class, null);
