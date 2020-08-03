@@ -376,7 +376,7 @@ public class ExecutionServiceTest {
 			return mock(EventBus.class);
 		}
 
-        @Bean
+        @Bean(name = "consumptionFastEventBus")
         public FastEventBus getFastEventBus() {
             return mock(FastEventBus.class);
         }

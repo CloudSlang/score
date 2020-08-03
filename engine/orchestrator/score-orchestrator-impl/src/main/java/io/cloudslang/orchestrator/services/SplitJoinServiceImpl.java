@@ -38,6 +38,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -86,6 +87,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     private ExecutionQueueRepository executionQueueRepository;
 
     @Autowired
+    @Qualifier("consumptionFastEventBus")
     private FastEventBus fastEventBus;
 
     /*

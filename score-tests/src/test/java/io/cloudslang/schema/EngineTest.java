@@ -176,7 +176,7 @@ public class EngineTest {
             return mock(EventBus.class);
         }
 
-        @Bean
+        @Bean(name = "consumptionFastEventBus")
         FastEventBus fastEventBus() {
             return mock(FastEventBus.class);
         }

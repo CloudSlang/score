@@ -44,6 +44,7 @@ import io.cloudslang.worker.management.services.dbsupport.WorkerDbSupportService
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -108,6 +109,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     private EventBus eventBus;
 
     @Autowired
+    @Qualifier("consumptionFastEventBus")
     private FastEventBus fastEventBus;
 
     @Autowired
