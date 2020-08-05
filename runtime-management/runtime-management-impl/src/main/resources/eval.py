@@ -126,6 +126,7 @@ class PythonAgentExecutor(object):
                     expr_result = str(list(expr_result.keys())).replace("\'", "\"")
                     return_type = 'list'
 
+                # all types are turned into str or list except for int, bool and list
                 if return_type not in ['str', 'int', 'bool', 'list']:
                     return_type = 'str'
 
