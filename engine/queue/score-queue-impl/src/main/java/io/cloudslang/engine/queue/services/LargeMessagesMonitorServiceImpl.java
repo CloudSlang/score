@@ -18,7 +18,6 @@ package io.cloudslang.engine.queue.services;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
-import io.cloudslang.engine.versioning.services.VersionService;
 import io.cloudslang.orchestrator.services.CancelExecutionService;
 import io.cloudslang.score.facade.execution.ExecutionActionResult;
 import org.apache.log4j.Logger;
@@ -48,7 +47,7 @@ public final class LargeMessagesMonitorServiceImpl implements LargeMessagesMonit
     private ExecutionQueueRepository executionQueueRepository;
 
     @Autowired
-    private VersionService versionService;
+    private ExecutionQueueService execQueue;
 
     @Override
     @Transactional
@@ -82,8 +81,6 @@ public final class LargeMessagesMonitorServiceImpl implements LargeMessagesMonit
                 ExecutionMessage firstMsg = msgs.get(0);
                 firstMsg.setWorkerId(ExecutionMessage.EMPTY_WORKER);
                 firstMsg.setStatus(ExecStatus.PENDING);
-                firstMsg.incMsgSeqId();
-
                 toRetry.add(firstMsg);
             }
         }
@@ -91,9 +88,7 @@ public final class LargeMessagesMonitorServiceImpl implements LargeMessagesMonit
         // retry
         if (toRetry.size() > 0) {
             logger.warn("Retrying " + toRetry.size() + " entries " + toRetry);
-
-            long msgVersion = versionService.getCurrentVersion(VersionService.MSG_RECOVERY_VERSION_COUNTER_NAME);
-            executionQueueRepository.insertExecutionQueue(toRetry, msgVersion);
+            execQueue.enqueue(toRetry);
         }
 
         // cancel
@@ -111,22 +106,27 @@ public final class LargeMessagesMonitorServiceImpl implements LargeMessagesMonit
 
     private int countRetries(List<ExecutionMessage> msgs) {
 
-        int retries = 0;
-        ExecStatus status = ExecStatus.PENDING;
+        if (msgs.size() == 0) {
+            return 0;
+        }
 
-        for (int size = msgs.size(), i = 1; i < size; i++) {
+        int retries = 0;
+        if (msgs.get(0).getStatus() == ExecStatus.ASSIGNED) {
+            retries = 1;
+        }
+
+        int size = msgs.size();
+        int i = 1;
+        while (i < size) {
             ExecutionMessage crt = msgs.get(i);
             ExecutionMessage prev = msgs.get(i - 1);
-            if (crt.getMsgSeqId() == prev.getMsgSeqId() - 1 && crt.getStatus() == status) {
-                if (status == ExecStatus.ASSIGNED) {
-                    retries++;
-                }
-
-                status = status == ExecStatus.ASSIGNED ? ExecStatus.PENDING : ExecStatus.ASSIGNED;
-
+            if (crt.getStatus() == ExecStatus.ASSIGNED && crt.getMsgSeqId() == prev.getMsgSeqId() - 1) {
+                retries++;
             } else {
                 break;
             }
+
+            i++;
         }
 
         return retries;

@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+import static io.cloudslang.score.events.EventConstants.BRANCH_ID;
 import static java.lang.Boolean.TRUE;
 
 /**
@@ -52,8 +53,6 @@ public class ExecutionRuntimeServices implements Serializable {
     protected static final String NO_WORKERS_IN_GROUP = "NO_WORKERS_IN_GROUP";
 
     private static final String NEW_SPLIT_ID = "NEW_SPLIT_ID";
-
-    private static final String BRANCH_ID = "BRANCH_ID";
 
     public static final String EXECUTION_ID_CONTEXT = "executionIdContext";
 
@@ -99,15 +98,19 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public static final String ENTERPRISE_MODE = "ENTERPRISE_MODE";
 
-    protected Map<String, Serializable> contextMap = new HashMap<>();
+    private static final String SC_NESTED_FOR_PARALLELISM_LEVEL = "SC_NESTED_FOR_PARALLELISM_LEVEL";
+
+    protected Map<String, Serializable> contextMap;
 
     public ExecutionRuntimeServices() {
+        contextMap = new HashMap<>();
     }
 
     /**
      * copy constructor that clean the NEW_SPLIT_ID & BRANCH_ID keys
      */
     public ExecutionRuntimeServices(ExecutionRuntimeServices executionRuntimeServices) {
+        this();
         contextMap.putAll(executionRuntimeServices.contextMap);
         contextMap.remove(NEW_SPLIT_ID);
         contextMap.remove(BRANCH_ID);
@@ -169,9 +172,9 @@ public class ExecutionRuntimeServices implements Serializable {
     /**
      * setter for the brunch id of the current Execution
      */
-    public void setBranchId(String brunchId) {
+    public void setBranchId(String branchId) {
         Validate.isTrue(StringUtils.isEmpty(getBranchId()), "not allowed to overwrite branch id");
-        contextMap.put(BRANCH_ID, brunchId);
+        contextMap.put(BRANCH_ID, branchId);
     }
 
     /**
@@ -305,6 +308,19 @@ public class ExecutionRuntimeServices implements Serializable {
         contextMap.put(WORKER_GROUP_NAME, workerGroupName);
     }
 
+    public Serializable getLevelParallelism() {
+        return getFromMap(SC_NESTED_FOR_PARALLELISM_LEVEL);
+    }
+
+    public void setLevelParallelism(int level) {
+        contextMap.put(SC_NESTED_FOR_PARALLELISM_LEVEL, level);
+    }
+
+
+    public String getRobotGroupName() {
+        return getFromMap(ROBOT_GROUP_NAME);
+    }
+
     /** This flag is set if the current execution step needs to go through group resolving */
     public void setShouldCheckGroup() {
         contextMap.put(SHOULD_CHECK_GROUP, true);
@@ -415,7 +431,7 @@ public class ExecutionRuntimeServices implements Serializable {
     }
 
     protected void addBranch(Long startPosition, Long executionPlanId, Map<String, Serializable> context,
-            ExecutionRuntimeServices executionRuntimeServices) {
+                             ExecutionRuntimeServices executionRuntimeServices) {
         if (!contextMap.containsKey(BRANCH_DATA)) {
             contextMap.put(BRANCH_DATA, new ArrayList<StartBranchDataContainer>());
         }
@@ -423,10 +439,29 @@ public class ExecutionRuntimeServices implements Serializable {
 
         Map<String, Serializable> contextMapForBranch = new HashMap<>(executionRuntimeServices.contextMap);
         contextMapForBranch.remove(BRANCH_DATA);
-        contextMapForBranch.put(SCORE_EVENTS_QUEUE, (ArrayDeque) new ArrayDeque<>());
+        contextMapForBranch.put(SCORE_EVENTS_QUEUE, new ArrayDeque<>());
 
         branchesData.add(new StartBranchDataContainer(startPosition, executionPlanId, context,
                 new SystemContext(contextMapForBranch)));
+    }
+
+    public void addBranchForParallelLoop(Long startPosition, String flowUuid, Map<String, Serializable> context) {
+        Map<String, Long> runningPlansIds = getFromMap(RUNNING_PLANS_MAP);
+        Long runningPlanId = runningPlansIds.get(flowUuid);
+
+        HashMap<String, Serializable> contextMapForBranch = new HashMap<>(this.contextMap);
+        contextMapForBranch.remove(NEW_SPLIT_ID);
+        contextMapForBranch.remove(BRANCH_ID);
+        contextMapForBranch.remove(BRANCH_DATA);
+        contextMapForBranch.put(SCORE_EVENTS_QUEUE, new ArrayDeque<>());
+
+        ArrayList<StartBranchDataContainer> branches = getFromMap(BRANCH_DATA);
+        if (branches == null) { // First branch needs to create list of containers
+            branches = new ArrayList<>();
+            contextMap.put(BRANCH_DATA, branches);
+        }
+        branches.add(new StartBranchDataContainer(startPosition, runningPlanId, context,
+                new SystemContext(contextMapForBranch, true)));
     }
 
     /**

@@ -13,14 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.cloudslang.score.api;
 
-package io.cloudslang.runtime.impl;
+import java.io.Serializable;
 
-/**
- * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
- */
-public interface Executor {
-    void allocate();
-    void release();
-    void close();
+public class StatefulQueueValue implements Serializable {
+    private static final long serialVersionUID = 923874345548162969L;
+
+    private String name;
+
+    public StatefulQueueValue(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

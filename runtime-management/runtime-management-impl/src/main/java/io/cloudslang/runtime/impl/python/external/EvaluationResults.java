@@ -63,6 +63,8 @@ public class EvaluationResults implements Serializable {
     public enum ReturnType{
         @JsonProperty("bool")
         BOOLEAN,
+        @JsonProperty("list")
+        LIST,
         @JsonProperty("str")
         STRING,
         @JsonProperty("int")

@@ -21,7 +21,7 @@
 	<parent>
 		<artifactId>worker</artifactId>
 		<groupId>io.cloudslang</groupId>
-		<version>0.3.150-SNAPSHOT</version>
+		<version>0.3.162-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 

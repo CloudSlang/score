@@ -63,6 +63,14 @@ public class Execution implements Serializable {
         systemContext.setWorkerGroupName(groupName);
     }
 
+    public String getRobotGroupName() {
+        return systemContext.getRobotGroupName();
+    }
+
+    public void setRobotGroupName(String robotGroupName) {
+        systemContext.setRobotGroupName(robotGroupName);
+    }
+
     public Long getExecutionId() {
         return executionId;
     }

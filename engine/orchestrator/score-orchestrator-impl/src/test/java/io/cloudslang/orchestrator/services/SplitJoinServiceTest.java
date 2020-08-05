@@ -22,6 +22,7 @@ import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
+import io.cloudslang.score.events.FastEventBus;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.orchestrator.entities.BranchContexts;
 import io.cloudslang.orchestrator.entities.FinishedBranch;
@@ -39,6 +40,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -80,6 +82,9 @@ public class SplitJoinServiceTest {
 
     @Mock
     private QueueDispatcherService queueDispatcherService;
+
+    @Mock
+    private FastEventBus fastEventBus;
 
     @Mock
     private ExecutionMessageConverter converter;
