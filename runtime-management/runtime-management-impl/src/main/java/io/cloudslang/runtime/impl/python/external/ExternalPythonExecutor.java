@@ -16,6 +16,7 @@
 package io.cloudslang.runtime.impl.python.external;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
@@ -196,7 +197,7 @@ public class ExternalPythonExecutor {
         }
     }
 
-    private Serializable processReturnResult(EvaluationResults results) {
+    private Serializable processReturnResult(EvaluationResults results) throws JsonProcessingException {
         EvaluationResults.ReturnType returnType = results.getReturnType();
         if (returnType == null) {
             throw new RuntimeException("Missing return type for return result.");
@@ -206,6 +207,8 @@ public class ExternalPythonExecutor {
                 return Boolean.valueOf(results.getReturnResult());
             case INTEGER:
                 return Integer.valueOf(results.getReturnResult());
+            case LIST:
+                return (Serializable) objectMapper.readValue(results.getReturnResult(), new TypeReference<List<String>>(){});
             default:
                 return results.getReturnResult();
         }
