@@ -118,7 +118,7 @@ class PythonAgentExecutor(object):
                 elif return_type == 'list':
                     expr_result = str(expr_result).replace("\'", "\"")
 
-                elif return_type == 'map':
+                elif return_type in ['map',  'tuple',  'set']:
                     expr_result = str(list(expr_result)).replace("\'", "\"")
                     return_type = 'list'
 
