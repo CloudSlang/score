@@ -24,6 +24,9 @@ import io.cloudslang.score.api.EndBranchDataContainer;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
+import io.cloudslang.score.events.EventConstants;
+import io.cloudslang.score.events.FastEventBus;
+import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.orchestrator.entities.BranchContexts;
 import io.cloudslang.orchestrator.entities.FinishedBranch;
@@ -35,6 +38,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,6 +56,9 @@ import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.NON_BLOC
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL_LOOP;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.FINISHED_CHILD_BRANCHES_DATA;
+import static io.cloudslang.score.events.EventConstants.BRANCH_ID;
+import static io.cloudslang.score.events.EventConstants.EXECUTION_ID;
+import static io.cloudslang.score.events.EventConstants.SPLIT_ID;
 import static io.cloudslang.score.facade.TempConstants.MI_REMAINING_BRANCHES_CONTEXT_KEY;
 import static io.cloudslang.score.facade.execution.ExecutionStatus.CANCELED;
 import static java.lang.Long.parseLong;
@@ -78,6 +85,10 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
     @Autowired
     private ExecutionQueueRepository executionQueueRepository;
+
+    @Autowired
+    @Qualifier("consumptionFastEventBus")
+    private FastEventBus fastEventBus;
 
     /*
         converts an execution to a fresh execution message for triggering a new flow
@@ -205,6 +216,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
         // add each finished branch to it's parent
         for (FinishedBranch finishedBranch : finishedBranches) {
+            dispatchBranchFinishedEvent(finishedBranch.getExecutionId(), finishedBranch.getSplitId(), finishedBranch.getBranchId());
             SuspendedExecution suspendedExecution = suspendedMap.get(finishedBranch.getSplitId());
             if (suspendedExecution != null) {
                 finishedBranch.connectToSuspendedExecution(suspendedExecution);
@@ -407,5 +419,14 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         if (wasExecutionCancelled) {
             exec.getSystemContext().setFlowTerminationType(CANCELED);
         }
+    }
+
+    private void dispatchBranchFinishedEvent(String executionId, String splitId, String branchId) {
+        HashMap<String, Serializable> eventData = new HashMap<>();
+        eventData.put(EXECUTION_ID, executionId);
+        eventData.put(SPLIT_ID, splitId);
+        eventData.put(BRANCH_ID, branchId);
+        ScoreEvent eventWrapper = new ScoreEvent(EventConstants.SCORE_FINISHED_BRANCH_EVENT, eventData);
+        fastEventBus.dispatch(eventWrapper);
     }
 }

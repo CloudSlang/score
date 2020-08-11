@@ -36,6 +36,9 @@ class PythonAgentExecutor(object):
         x = jsonpath_expr.find(json_data)
         return x[0].value if len(x) > 0 else None
 
+    def get_from_smaller_context(self, key):
+        return smaller_context[key]
+
     def __init_context(self, payload):
         global sys_prop
         global get_sp
@@ -50,6 +53,9 @@ class PythonAgentExecutor(object):
         global cs_to_lower
         global accessed
         global accessed_resources_set
+        global get_from_smaller_context
+
+        get_from_smaller_context = self.get_from_smaller_context
         accessed_resources_set = set()
         context = payload["context"]
 
@@ -71,6 +77,7 @@ class PythonAgentExecutor(object):
         exec (env_setup, globals())
 
     def main(self):
+        global smaller_context
         try:
             raw_inputs = input().encode(sys.stdin.encoding).decode()
             payload = json.loads(raw_inputs)
@@ -103,8 +110,26 @@ class PythonAgentExecutor(object):
             try:
                 expr_result = eval(expression, smaller_context)
                 return_type = type(expr_result).__name__
-                if return_type not in ['str', 'int', 'bool']:
+
+                if return_type == 'range':
+                    expr_result = str(list(map(str, expr_result))).replace("\'", "\"")
+                    return_type = 'list'
+
+                elif return_type == 'list':
+                    expr_result = str(expr_result).replace("\'", "\"")
+
+                elif return_type in ['map',  'tuple',  'set']:
+                    expr_result = str(list(expr_result)).replace("\'", "\"")
+                    return_type = 'list'
+
+                elif return_type == 'dict':
+                    expr_result = str(list(expr_result.keys())).replace("\'", "\"")
+                    return_type = 'list'
+
+                # all types are turned into str or list except for int, bool and list
+                if return_type not in ['str', 'int', 'bool', 'list']:
                     return_type = 'str'
+
                 final_result = {"returnResult": expr_result,
                                 "accessedResources": list(accessed_resources_set),
                                 "returnType": return_type}
