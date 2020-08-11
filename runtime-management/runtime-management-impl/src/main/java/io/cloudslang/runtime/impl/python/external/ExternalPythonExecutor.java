@@ -100,7 +100,7 @@ public class ExternalPythonExecutor {
         try {
             String pythonPath = checkPythonPath();
             tempEvalEnvironment = generateTempResourcesForEval();
-            String payload = generatePayloadForEval(expression.replace("\n", ""), prepareEnvironmentScript, context);
+            String payload = generatePayloadForEval(expression.replaceAll("[\\n\\r]", ""), prepareEnvironmentScript, context);
             addFilePermissions(tempEvalEnvironment.parentFolder);
 
             return runPythonEvalProcess(pythonPath, payload, tempEvalEnvironment, context);
