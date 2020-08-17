@@ -267,7 +267,7 @@ public class ExecutionQueueRepositoryTest {
 
         String msgId = "22";
         int msg_seq_id = 1;
-        ExecutionMessage m1 = QueueTestsUtils.generateMessage("group1", msgId, msg_seq_id++, EMPTY_WORKER, ExecStatus.PENDING);
+        ExecutionMessage m1 = QueueTestsUtils.generateMessage("group1", msgId, msg_seq_id++, "worker1", ExecStatus.ASSIGNED);
         ExecutionMessage m2 = QueueTestsUtils.generateMessage("group1", msgId, msg_seq_id++, "worker1", ExecStatus.ASSIGNED);
 
         messages.add(m1);

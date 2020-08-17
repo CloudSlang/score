@@ -131,14 +131,11 @@ public class LargeMessageMonitorServiceTest {
         // this will set message for reassignment
         largeMessagesMonitorService.monitor();
 
-        // check message no longer in ASSIGNED state
-        Assert.assertEquals(0, findExecutionMessages(worker, workerFreeMem, ExecStatus.ASSIGNED).size());
-
         // check that we have a new message with increased msg_seq_id
-        List<ExecutionMessage> unassignedMsg = findExecutionMessages(ExecutionMessage.EMPTY_WORKER, workerFreeMem, ExecStatus.PENDING);
-        Assert.assertEquals(1, unassignedMsg.size());
+        final List<ExecutionMessage> messages = findExecutionMessages(worker, workerFreeMem, ExecStatus.ASSIGNED);
+        Assert.assertEquals(1, messages.size());
 
-        ExecutionMessage message = unassignedMsg.get(0);
+        ExecutionMessage message = messages.get(0);
         Assert.assertEquals(1, message.getExecStateId());
         Assert.assertEquals("11", message.getMsgId());
 
@@ -179,14 +176,8 @@ public class LargeMessageMonitorServiceTest {
             waitOverExpirationTime();
             largeMessagesMonitorService.monitor();
 
-            List<ExecutionMessage> messages = findExecutionMessages(ExecutionMessage.EMPTY_WORKER, workerFreeMem, ExecStatus.PENDING);
-            executionQueueService.enqueue(messages);
-
             Assert.assertEquals(1, findExecutionMessages(worker, workerFreeMem, ExecStatus.ASSIGNED).size());
         }
-
-        waitOverExpirationTime();
-        largeMessagesMonitorService.monitor();
 
         long execStateId = msg1.getExecStateId();
         Set<Long> execStateIds = new HashSet<>();

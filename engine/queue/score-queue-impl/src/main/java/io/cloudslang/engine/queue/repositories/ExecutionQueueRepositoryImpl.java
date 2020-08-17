@@ -59,7 +59,17 @@ import static java.lang.Long.parseLong;
 @SuppressWarnings("FieldCanBeLocal")
 public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
-    private Logger logger = Logger.getLogger(getClass());
+    private static final String FIND_OLD_STATES =
+            "SELECT q.EXEC_STATE_ID, CREATE_TIME, MSG_SEQ_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS " +
+            "FROM OO_EXECUTION_QUEUES q, " +
+            "  (SELECT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES qt WHERE (CREATE_TIME < ?) AND " +
+            "     (STATUS = " + ExecStatus.ASSIGNED.getNumber() + ") AND " +
+            "          (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
+            "              FROM OO_EXECUTION_QUEUES qq " +
+            "              WHERE (qq.EXEC_STATE_ID = qt.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > qt.MSG_SEQ_ID)) " +
+            "  ) t " +
+            "WHERE (STATUS = " + ExecStatus.ASSIGNED.getNumber() + ") AND " +
+            "q.EXEC_STATE_ID = t.EXEC_STATE_ID";
 
     private static final int PARTITION_SIZE = 250;
 
@@ -282,18 +292,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 	final private String INSERT_EXECUTION_STATE_MAPPING = "INSERT INTO OO_EXECS_STATES_EXECS_MAPPINGS (ID, EXEC_STATE_ID, EXEC_ID) VALUES (?, ?, ?)";
 
     private static final String QUERY_PAYLOAD_BY_EXECUTION_IDS = "SELECT ID, PAYLOAD FROM OO_EXECUTION_STATES WHERE ID IN (:IDS)";
-
-    private static final String FIND_OLD_STATES =
-            "SELECT q.EXEC_STATE_ID, CREATE_TIME, MSG_SEQ_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS " +
-            "FROM OO_EXECUTION_QUEUES q, " +
-            "  (SELECT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES qt WHERE (CREATE_TIME < ?) AND " +
-            "     (STATUS = " + ExecStatus.ASSIGNED.getNumber() + ") AND " +
-            "          (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
-            "              FROM OO_EXECUTION_QUEUES qq " +
-            "              WHERE (qq.EXEC_STATE_ID = qt.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > qt.MSG_SEQ_ID)) " +
-            "  ) t " +
-            "WHERE (STATUS IN (" + ExecStatus.ASSIGNED.getNumber() + ", " + ExecStatus.PENDING.getNumber() + ")) AND " +
-            "q.EXEC_STATE_ID = t.EXEC_STATE_ID";
+    private final Logger logger = Logger.getLogger(getClass());
 
 
     private static final String FIND_EXEC_IDS = "SELECT DISTINCT MSG_ID FROM OO_EXECUTION_STATES WHERE ID IN (:IDS)";
