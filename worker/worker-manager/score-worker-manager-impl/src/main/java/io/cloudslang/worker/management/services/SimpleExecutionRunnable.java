@@ -45,6 +45,7 @@ import org.apache.commons.lang3.SerializationUtils;
 public class SimpleExecutionRunnable implements Runnable {
 
     private static final Logger logger = Logger.getLogger(SimpleExecutionRunnable.class);
+    private static final long WORKER_EXECUTION_INTERVAL = Integer.getInteger("worker.executionIntervalSeconds", 60) * 1_000L;
 
     private final ExecutionService executionService;
 
@@ -415,7 +416,7 @@ public class SimpleExecutionRunnable implements Runnable {
         // Return true if running more than 60 seconds. (this is not enforced, just a weak check)
         // to prevent starvation of other executions
 
-        if ((System.currentTimeMillis() - startTime) > 60_000) {
+        if ((System.currentTimeMillis() - startTime) > WORKER_EXECUTION_INTERVAL) {
             // Set current step to finished
             executionMessage.setStatus(ExecStatus.FINISHED);
             executionMessage.incMsgSeqId();
