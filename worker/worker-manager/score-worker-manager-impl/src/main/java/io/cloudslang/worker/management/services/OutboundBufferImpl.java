@@ -42,7 +42,7 @@ import static java.util.stream.Collectors.toList;
 public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListener {
 
     private static final Logger logger = Logger.getLogger(OutboundBufferImpl.class);
-    private static long GB = 900000000; //there is JVM overhead, so i will take 10% buffer...
+    private static final long GB = 900000000; //there is JVM overhead, so i will take 10% buffer...
 
     @Autowired
     private RetryTemplate retryTemplate;
@@ -62,17 +62,23 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
     @Autowired(required = false)
     private ExecutionsActivityListener executionsActivityListener;
 
-    private List<Message> buffer = new ArrayList<>();
-
+    private List<Message> buffer;
     private int currentWeight;
-    private int maxBufferWeight = Integer.getInteger("out.buffer.max.buffer.weight", 30000);
-    private int maxBulkWeight = Integer.getInteger("out.buffer.max.bulk.weight", 1500);
-    private int retryAmount = Integer.getInteger("out.buffer.retry.number", 5);
-    private long retryDelay = Long.getLong("out.buffer.retry.delay", 5000);
 
-    @PostConstruct
-    public void init() {
-        maxBufferWeight = Integer.getInteger("out.buffer.max.buffer.weight", defaultBufferCapacity());
+    private final int maxBufferWeight;
+    private final int maxBulkWeight;
+    private final int retryAmount;
+    private final long retryDelay;
+
+    public OutboundBufferImpl() {
+        this.buffer = new ArrayList<>();
+        this.currentWeight = 0;
+
+        this.maxBufferWeight = Integer.getInteger("out.buffer.max.buffer.weight", defaultBufferCapacity());
+        this.maxBulkWeight = Integer.getInteger("out.buffer.max.bulk.weight", 1500);
+        this.retryAmount = Integer.getInteger("out.buffer.retry.number", 5);
+        this.retryDelay = Long.getLong("out.buffer.retry.delay", 5000);
+
         logger.info("maxBufferWeight = " + maxBufferWeight);
     }
 
