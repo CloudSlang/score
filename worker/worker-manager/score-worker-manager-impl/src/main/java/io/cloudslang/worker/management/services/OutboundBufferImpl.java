@@ -28,7 +28,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +35,7 @@ import java.util.UUID;
 
 import static ch.lambdaj.Lambda.extract;
 import static ch.lambdaj.Lambda.on;
+import static java.util.Collections.addAll;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
@@ -258,7 +258,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         }
 
         public void drainTo(List<Message> drainResult) {
-            Collections.addAll(drainResult, messages);
+            addAll(drainResult, messages);
         }
 
         @Override
