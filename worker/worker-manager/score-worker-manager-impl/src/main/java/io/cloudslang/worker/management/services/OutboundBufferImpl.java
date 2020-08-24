@@ -82,6 +82,10 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         final int messageToAddWeight = messageToAdd.getWeight();
         syncManager.startPutMessages();
         try {
+            // We need to check if the current thread was interrupted while waiting for the lock (ExecutionThread or InBufferThread in ackMessages)
+            if (Thread.currentThread().isInterrupted()) {
+                throw new InterruptedException("Thread was interrupted while waiting on the lock! Exiting...");
+            }
             while (currentWeight >= maxBufferWeight) {
                 logger.info("Outbound buffer is full. Waiting...");
                 syncManager.waitForDrain();
