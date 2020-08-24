@@ -80,8 +80,8 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
     public void put(final Message... messages) throws InterruptedException {
         final Message messageToAdd = validateAndGetMessageToPut(messages);
         final int messageToAddWeight = messageToAdd.getWeight();
-        syncManager.startPutMessages();
         try {
+            syncManager.startPutMessages();
             // We need to check if the current thread was interrupted while waiting for the lock (ExecutionThread or InBufferThread in ackMessages)
             if (Thread.currentThread().isInterrupted()) {
                 throw new InterruptedException("Thread was interrupted while waiting on the lock! Exiting...");
@@ -117,8 +117,8 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
     @Override
     public void drain() {
         List<Message> bufferToDrain;
-        syncManager.startDrain();
         try {
+            syncManager.startDrain();
             while (buffer.isEmpty()) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("buffer is empty. Waiting to drain...");
