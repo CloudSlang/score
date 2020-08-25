@@ -147,7 +147,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 
     private void drainInternal(HashMap<String, ArrayList<Message>> bufferToDrain) {
         int bulkWeight = 0;
-        List<Message> bulk = new ArrayList<>();
+        List<Message> bulk = new ArrayList<>(bufferToDrain.size());
         try {
             for (ArrayList<Message> value : bufferToDrain.values()) {
                 List<Message> optimizedList = value.get(0).shrink(value);
