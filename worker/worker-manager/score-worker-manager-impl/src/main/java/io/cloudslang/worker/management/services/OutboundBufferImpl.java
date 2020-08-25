@@ -39,7 +39,7 @@ import static java.util.Collections.addAll;
 public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListener {
 
     private static final Logger logger = Logger.getLogger(OutboundBufferImpl.class);
-    private static long GB = 900000000; //there is JVM overhead, so i will take 10% buffer...
+    private static final long GB = 900000000; //there is JVM overhead, so i will take 10% buffer...
 
     @Autowired
     private RetryTemplate retryTemplate;
@@ -59,17 +59,23 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
     @Autowired(required = false)
     private ExecutionsActivityListener executionsActivityListener;
 
-    private List<Message> buffer = new ArrayList<>();
-
+    private HashMap<String, ArrayList<Message>> buffer;
     private int currentWeight;
-    private int maxBufferWeight = Integer.getInteger("out.buffer.max.buffer.weight", 30000);
-    private int maxBulkWeight = Integer.getInteger("out.buffer.max.bulk.weight", 1500);
-    private int retryAmount = Integer.getInteger("out.buffer.retry.number", 5);
-    private long retryDelay = Long.getLong("out.buffer.retry.delay", 5000);
 
-    @PostConstruct
-    public void init() {
-        maxBufferWeight = Integer.getInteger("out.buffer.max.buffer.weight", defaultBufferCapacity());
+    private final int maxBufferWeight;
+    private final int maxBulkWeight;
+    private final int retryAmount;
+    private final long retryDelay;
+
+    public OutboundBufferImpl() {
+        this.buffer = getInitialBuffer();
+        this.currentWeight = 0;
+
+        this.maxBufferWeight = Integer.getInteger("out.buffer.max.buffer.weight", defaultBufferCapacity());
+        this.maxBulkWeight = Integer.getInteger("out.buffer.max.bulk.weight", 1500);
+        this.retryAmount = Integer.getInteger("out.buffer.retry.number", 5);
+        this.retryDelay = Long.getLong("out.buffer.retry.delay", 5000);
+
         logger.info("maxBufferWeight = " + maxBufferWeight);
     }
 
@@ -79,29 +85,28 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 
     @Override
     public void put(final Message... messages) throws InterruptedException {
-        notEmpty(messages, "messages is null or empty");
+        final Message messageToAdd = validateAndGetMessageToPut(messages);
+        final int messageToAddWeight = messageToAdd.getWeight();
+        final String executionId = messageToAdd.getId();
+        final ArrayList<Message> mutableListWrapper = getMutableListWrapper(messageToAdd);
+
         try {
             syncManager.startPutMessages();
-
             // We need to check if the current thread was interrupted while waiting for the lock (ExecutionThread or InBufferThread in ackMessages)
-            if (Thread.currentThread().isInterrupted()) {
-                throw new InterruptedException("Thread was interrupted while waiting on the lock! Exiting...");
-            }
-
             while (currentWeight >= maxBufferWeight) {
                 logger.info("Outbound buffer is full. Waiting...");
                 syncManager.waitForDrain();
                 logger.info("Outbound buffer drained. Finished waiting.");
             }
 
-            // In case of multiple messages create a single compound message
-            // to make sure that it will be processed in a single transaction
-            Message message = messages.length == 1 ? messages[0] : new CompoundMessage(messages);
-
             // Put message into the buffer
-            buffer.add(message);
-
-            currentWeight += message.getWeight();
+            buffer.merge(executionId, mutableListWrapper, (oldValue, newValue) -> {
+                // Guaranteed that oldValue is not null, since otherwise newValue will be assigned directly
+                // Guaranteed that newValue has 1 element only
+                oldValue.add(newValue.get(0));
+                return oldValue;
+            });
+            currentWeight += messageToAddWeight;
         } catch (InterruptedException ex) {
             logger.warn("Buffer put action was interrupted", ex);
             throw ex;
@@ -114,6 +119,18 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         ArrayList<Message> list = new ArrayList<>();
         list.add(messageToAdd);
         return list;
+    }
+
+    private Message validateAndGetMessageToPut(Message[] messages) {
+        Message retVal;
+        if (ArrayUtils.isEmpty(messages)) { // No messages
+            throw new IllegalArgumentException("messages is null or empty");
+        } else if (messages.length == 1) { // Single message
+            retVal = messages[0];
+        } else { // At least 2 messages -> use one compound message such that it will be processed in one transaction
+            retVal = new CompoundMessage(messages);
+        }
+        return retVal;
     }
 
     @Override
@@ -264,8 +281,8 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
             return weight;
         }
 
-        public List<Message> asList() {
-            return Arrays.asList(messages);
+        public void drainTo(List<Message> drainResult) {
+            addAll(drainResult, messages);
         }
 
         public int getNumberOfMessages() {
