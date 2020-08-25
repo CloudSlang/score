@@ -16,30 +16,25 @@
 
 package io.cloudslang.worker.management.services;
 
-import ch.lambdaj.group.Group;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.orchestrator.entities.Message;
 import io.cloudslang.orchestrator.services.OrchestratorDispatcherService;
 import io.cloudslang.worker.management.ExecutionsActivityListener;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import static ch.lambdaj.Lambda.by;
 import static ch.lambdaj.Lambda.extract;
-import static ch.lambdaj.Lambda.group;
 import static ch.lambdaj.Lambda.on;
-import static org.apache.commons.lang.Validate.notEmpty;
+import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
+import static java.util.Collections.addAll;
 
 public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListener {
 
@@ -78,6 +73,10 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         logger.info("maxBufferWeight = " + maxBufferWeight);
     }
 
+    private HashMap<String, ArrayList<Message>> getInitialBuffer() {
+        return newHashMapWithExpectedSize(225);
+    }
+
     @Override
     public void put(final Message... messages) throws InterruptedException {
         notEmpty(messages, "messages is null or empty");
@@ -111,9 +110,15 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         }
     }
 
+    private ArrayList<Message> getMutableListWrapper(Message messageToAdd) {
+        ArrayList<Message> list = new ArrayList<>();
+        list.add(messageToAdd);
+        return list;
+    }
+
     @Override
     public void drain() {
-        List<Message> bufferToDrain;
+        HashMap<String, ArrayList<Message>> bufferToDrain;
         try {
             syncManager.startDrain();
             while (buffer.isEmpty()) {
@@ -128,7 +133,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
             }
 
             bufferToDrain = buffer;
-            buffer = new ArrayList<>();
+            buffer = getInitialBuffer();
             currentWeight = 0;
         } catch (InterruptedException e) {
             logger.warn("Drain outgoing buffer was interrupted while waiting for messages on the buffer");
@@ -140,68 +145,33 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         drainInternal(bufferToDrain);
     }
 
-    private void drainInternal(List<Message> bufferToDrain) {
-        List<Message> bulk = new ArrayList<>();
+    private void drainInternal(HashMap<String, ArrayList<Message>> bufferToDrain) {
         int bulkWeight = 0;
-        Map<String, AtomicInteger> logMap = new HashMap<>();
+        List<Message> bulk = new ArrayList<>();
         try {
-            for (Message message : bufferToDrain) {
-                if (message.getClass().equals(CompoundMessage.class)) {
-                    bulk.addAll(((CompoundMessage) message).asList());
-                } else {
-                    bulk.add(message);
-                }
-                bulkWeight += message.getWeight();
+            for (ArrayList<Message> value : bufferToDrain.values()) {
+                List<Message> optimizedList = value.get(0).shrink(value);
+                int optimizedWeight = optimizedList.stream().mapToInt(Message::getWeight).sum();
 
-                if (logger.isDebugEnabled()) {
-                    if (logMap.get(message.getClass().getSimpleName()) == null) {
-                        logMap.put(message.getClass().getSimpleName(), new AtomicInteger(1));
-                    } else {
-                        logMap.get(message.getClass().getSimpleName()).incrementAndGet();
-                    }
-                }
+                bulk.addAll(optimizedList);
+                bulkWeight += optimizedWeight;
 
                 if (bulkWeight > maxBulkWeight) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("trying to drain bulk: " + logMap.toString() + ", W:" + bulkWeight);
-                    }
                     drainBulk(bulk);
                     bulk.clear();
                     bulkWeight = 0;
-                    logMap.clear();
                 }
             }
-            // drain the last bulk
-            if (logger.isDebugEnabled()) {
-                logger.debug("trying to drain bulk: " + logMap.toString() + ", " + getStatus());
+            if (!bulk.isEmpty()) {
+                drainBulk(bulk);
             }
-            drainBulk(bulk);
         } catch (Exception ex) {
             logger.error("Failed to drain buffer, invoking worker internal recovery... ", ex);
             recoveryManager.doRecovery();
         }
     }
 
-    private List<Message> optimize(List<Message> messages) {
-        long t = System.currentTimeMillis();
-        List<Message> result = new ArrayList<>();
-
-        Group<Message> groups = group(messages, by(on(Message.class).getId()));
-        for (Group<Message> group : groups.subgroups()) {
-            result.addAll(group.first().shrink(group.findAll()));
-        }
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("bulk optimization result: " + messages.size() + " -> " + result.size() + " in " + (
-                    System.currentTimeMillis() - t) + " ms");
-        }
-
-        return result;
-    }
-
-    private void drainBulk(List<Message> bulkToDrain) {
-        long t = System.currentTimeMillis();
-        final List<Message> optimizedBulk = optimize(bulkToDrain);
+    private void drainBulk(final List<Message> bulkToDrain) {
         //Bulk number is the same for all retries! This is done to prevent duplications when we insert with retries
         final String bulkNumber = UUID.randomUUID().toString();
 
@@ -212,19 +182,16 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
                 if (logger.isDebugEnabled()) {
                     logger.debug("Dispatch start with bulk number: " + bulkNumber);
                 }
-                dispatcherService.dispatch(optimizedBulk, bulkNumber, wrv, workerUuid);
+                dispatcherService.dispatch(bulkToDrain, bulkNumber, wrv, workerUuid);
                 if (executionsActivityListener != null) {
                     executionsActivityListener
-                            .onHalt(extract(optimizedBulk, on(ExecutionMessage.class).getExecStateId()));
+                            .onHalt(extract(bulkToDrain, on(ExecutionMessage.class).getExecStateId()));
                 }
                 if (logger.isDebugEnabled()) {
                     logger.debug("Dispatch end with bulk number: " + bulkNumber);
                 }
             }
         });
-        if (logger.isDebugEnabled()) {
-            logger.debug("bulk was drained in " + (System.currentTimeMillis() - t) + " ms");
-        }
     }
 
     @Override
