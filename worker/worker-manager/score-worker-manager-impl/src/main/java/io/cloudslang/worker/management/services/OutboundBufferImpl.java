@@ -181,6 +181,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
                     bulkWeight = 0;
                 }
             }
+            // Drain last bulk if required
             if (!bulk.isEmpty()) {
                 drainBulk(bulk);
             }
