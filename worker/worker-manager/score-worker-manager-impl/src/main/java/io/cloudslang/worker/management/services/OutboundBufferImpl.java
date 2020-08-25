@@ -150,7 +150,8 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         List<Message> bulk = new ArrayList<>(bufferToDrain.size());
         try {
             for (ArrayList<Message> value : bufferToDrain.values()) {
-                List<Message> optimizedList = value.get(0).shrink(value);
+                List<Message> convertedList = expandCompoundMessages(value);
+                List<Message> optimizedList = convertedList.get(0).shrink(convertedList);
                 int optimizedWeight = optimizedList.stream().mapToInt(Message::getWeight).sum();
 
                 bulk.addAll(optimizedList);
@@ -168,6 +169,29 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         } catch (Exception ex) {
             logger.error("Failed to drain buffer, invoking worker internal recovery... ", ex);
             recoveryManager.doRecovery();
+        }
+    }
+
+    private List<Message> expandCompoundMessages(ArrayList<Message> value) {
+        int compoundMessages = 0, compoundMessageSize = 0;
+        for (Message crt : value) {
+            if (crt instanceof CompoundMessage) {
+                compoundMessages++;
+                compoundMessageSize += ((CompoundMessage) crt).getNumberOfMessages();
+            }
+        }
+        if (compoundMessages == 0) {
+            return value;
+        } else {
+            List<Message> convertedList = new ArrayList<>(value.size() + compoundMessageSize - compoundMessages);
+            for (Message crt : value) {
+                if (crt instanceof CompoundMessage) {
+                    ((CompoundMessage) crt).drainTo(convertedList);
+                } else {
+                    convertedList.add(crt);
+                }
+            }
+            return convertedList;
         }
     }
 
@@ -244,9 +268,13 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
             return Arrays.asList(messages);
         }
 
+        public int getNumberOfMessages() {
+            return messages.length;
+        }
+
         @Override
         public String getId() {
-            return null;
+            return messages[0].getId();
         }
 
         @Override
