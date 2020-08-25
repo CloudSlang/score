@@ -103,6 +103,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
             buffer.merge(executionId, mutableListWrapper, (oldValue, newValue) -> {
                 // Guaranteed that oldValue is not null, since otherwise newValue will be assigned directly
                 // Guaranteed that newValue has 1 element only
+                // Add at end to keep order of events across an execution id
                 oldValue.add(newValue.get(0));
                 return oldValue;
             });
@@ -164,7 +165,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 
     private void drainInternal(HashMap<String, ArrayList<Message>> bufferToDrain) {
         int bulkWeight = 0;
-        List<Message> bulk = new ArrayList<>(bufferToDrain.size());
+        List<Message> bulk = new ArrayList<>();
         try {
             for (ArrayList<Message> value : bufferToDrain.values()) {
                 List<Message> convertedList = expandCompoundMessages(value);
