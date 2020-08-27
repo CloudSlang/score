@@ -30,16 +30,11 @@ class PythonAgentExecutor(object):
         r = tree.xpath(xpath)
         return r[0] if len(r) > 0 else None
 
-    def cs_json_query(self, string, json_path):
-        json_data = json.loads(string)
+    def cs_json_query(self, str, json_path):
+        json_data = json.loads(str)
         jsonpath_expr = parse(json_path)
         x = jsonpath_expr.find(json_data)
-        return str(self.get_all_values(x)) if len(x) > 0 else None
-
-    def get_all_values(self, values):
-        if len(values) == 1:
-            return values[0].value
-        return list(map(lambda x: x.value, values))
+        return json.dumps(list(map(lambda val: val.value, x))) if len(x) > 0 else None
 
     def get_from_smaller_context(self, key):
         return smaller_context[key]
