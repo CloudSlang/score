@@ -34,7 +34,7 @@ class PythonAgentExecutor(object):
         json_data = json.loads(str)
         jsonpath_expr = parse(json_path)
         x = jsonpath_expr.find(json_data)
-        return x[0].value if len(x) > 0 else None
+        return json.dumps(list(map(lambda val: val.value, x))) if x is not None and len(x) > 0 else None
 
     def get_from_smaller_context(self, key):
         return smaller_context[key]
