@@ -88,8 +88,6 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         final Message messageToAdd = validateAndGetMessageToPut(messages);
         final int messageToAddWeight = messageToAdd.getWeight();
         final String executionId = messageToAdd.getId();
-        final ArrayList<Message> mutableListWrapper = getMutableListWrapper(messageToAdd);
-
         try {
             syncManager.startPutMessages();
             // We need to check if the current thread was interrupted while waiting for the lock (ExecutionThread or InBufferThread in ackMessages)
@@ -102,9 +100,9 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
             // Put message into the buffer
             ArrayList<Message> oldValue = buffer.get(executionId);
             if (oldValue == null) {
-                buffer.put(executionId, mutableListWrapper);
+                buffer.put(executionId, getMutableListWrapper(messageToAdd));
             } else {
-                oldValue.add(mutableListWrapper.get(0));
+                oldValue.add(messageToAdd);
             }
 //            buffer.merge(executionId, mutableListWrapper, (oldValue, newValue) -> {
 //                // Guaranteed that oldValue is not null, since otherwise newValue will be assigned directly
