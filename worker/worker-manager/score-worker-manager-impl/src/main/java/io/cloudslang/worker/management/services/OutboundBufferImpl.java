@@ -100,13 +100,19 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
             }
 
             // Put message into the buffer
-            buffer.merge(executionId, mutableListWrapper, (oldValue, newValue) -> {
-                // Guaranteed that oldValue is not null, since otherwise newValue will be assigned directly
-                // Guaranteed that newValue has 1 element only
-                // Add at end to keep order of events across an execution id
-                oldValue.add(newValue.get(0));
-                return oldValue;
-            });
+            ArrayList<Message> oldValue = buffer.get(executionId);
+            if (oldValue == null) {
+                buffer.put(executionId, mutableListWrapper);
+            } else {
+                oldValue.add(mutableListWrapper.get(0));
+            }
+//            buffer.merge(executionId, mutableListWrapper, (oldValue, newValue) -> {
+//                // Guaranteed that oldValue is not null, since otherwise newValue will be assigned directly
+//                // Guaranteed that newValue has 1 element only
+//                // Add at end to keep order of events across an execution id
+//                oldValue.add(newValue.get(0));
+//                return oldValue;
+//            });
             currentWeight += messageToAddWeight;
         } catch (InterruptedException ex) {
             logger.warn("Buffer put action was interrupted", ex);
