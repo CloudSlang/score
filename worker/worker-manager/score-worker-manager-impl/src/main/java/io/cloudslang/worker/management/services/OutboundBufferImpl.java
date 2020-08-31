@@ -104,13 +104,6 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
             } else {
                 oldValue.add(messageToAdd);
             }
-//            buffer.merge(executionId, mutableListWrapper, (oldValue, newValue) -> {
-//                // Guaranteed that oldValue is not null, since otherwise newValue will be assigned directly
-//                // Guaranteed that newValue has 1 element only
-//                // Add at end to keep order of events across an execution id
-//                oldValue.add(newValue.get(0));
-//                return oldValue;
-//            });
             currentWeight += messageToAddWeight;
         } catch (InterruptedException ex) {
             logger.warn("Buffer put action was interrupted", ex);
@@ -149,11 +142,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
                 }
                 syncManager.waitForMessages();
             }
-
-            if (logger.isDebugEnabled()) {
-                logger.debug("buffer is going to be drained. " + getStatus());
-            }
-
+            // Switch to the new buffer and drain old buffer on the same scheduled threadpool thread
             bufferToDrain = buffer;
             buffer = getInitialBuffer();
             currentWeight = 0;
