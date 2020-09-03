@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.score.facade.execution;
 
-public enum LicenseType {
-    UNDEFINED(-1),
-    CONCURRENT_BOT(0),
-    HOURLY(1),
-    INSTANT_ON(2),
-    CONCURRENT_HOURLY(3);
+package io.cloudslang.score.events;
 
-    private final int code;
 
-    LicenseType(int code) {
-        this.code = code;
-    }
+public interface FastEventBus {
 
-    public int getCode() {
-        return code;
-    }
+    /**
+     * register listener for events
+     *
+     * @param eventHandler - the handler of the events
+     */
+    void registerEventListener(UninterruptibleScoreEventListener eventHandler);
+
+    /**
+     * dispatch the given event
+     *
+     * @param event score event to dispatch
+     */
+    void dispatch(ScoreEvent event);
 }

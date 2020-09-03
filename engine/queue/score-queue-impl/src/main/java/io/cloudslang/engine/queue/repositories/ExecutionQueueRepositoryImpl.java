@@ -311,7 +311,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
             "              FROM OO_EXECUTION_QUEUES qq " +
             "              WHERE (qq.EXEC_STATE_ID = qt.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > qt.MSG_SEQ_ID)) " +
             "  ) t " +
-            "WHERE (STATUS IN (" + ExecStatus.ASSIGNED.getNumber() + ", " + ExecStatus.PENDING.getNumber() + ")) AND " +
+            "WHERE (STATUS = " + ExecStatus.ASSIGNED.getNumber() + ") AND " +
             "q.EXEC_STATE_ID = t.EXEC_STATE_ID";
 
 

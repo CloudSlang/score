@@ -34,7 +34,7 @@ class PythonAgentExecutor(object):
         json_data = json.loads(str)
         jsonpath_expr = parse(json_path)
         x = jsonpath_expr.find(json_data)
-        return x[0].value if len(x) > 0 else None
+        return json.dumps(list(map(lambda val: val.value, x))) if x is not None and len(x) > 0 else None
 
     def get_from_smaller_context(self, key):
         return smaller_context[key]
@@ -110,8 +110,30 @@ class PythonAgentExecutor(object):
             try:
                 expr_result = eval(expression, smaller_context)
                 return_type = type(expr_result).__name__
-                if return_type not in ['str', 'int', 'bool']:
+
+                if return_type == 'range':
+                    expr_result = str(list(map(str, expr_result))).replace("\'", "\"")
+                    return_type = 'list'
+
+                elif return_type == 'list':
+                    expr_result = str(expr_result).replace("\'", "\"")
+
+                elif return_type in ['map',  'tuple',  'set']:
+                    expr_result = str(list(expr_result)).replace("\'", "\"")
+                    return_type = 'list'
+
+                elif return_type == 'dict':
+                    expr_result = str(list(expr_result.keys())).replace("\'", "\"")
+                    return_type = 'list'
+
+                elif return_type == '_Element':
+                    expr_result = etree.tostring(expr_result, encoding="UTF-8").decode("UTF-8")
                     return_type = 'str'
+
+                # all types are turned into str or list except for int, bool and list
+                if return_type not in ['str', 'int', 'bool', 'list']:
+                    return_type = 'str'
+
                 final_result = {"returnResult": expr_result,
                                 "accessedResources": list(accessed_resources_set),
                                 "returnType": return_type}

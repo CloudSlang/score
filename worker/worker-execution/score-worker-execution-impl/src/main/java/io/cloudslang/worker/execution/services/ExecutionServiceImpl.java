@@ -26,6 +26,7 @@ import io.cloudslang.score.api.execution.ExecutionMetadataConsts;
 import io.cloudslang.score.api.execution.ExecutionParametersConsts;
 import io.cloudslang.score.events.EventBus;
 import io.cloudslang.score.events.EventConstants;
+import io.cloudslang.score.events.FastEventBus;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.facade.TempConstants;
 import io.cloudslang.score.facade.entities.Execution;
@@ -43,6 +44,7 @@ import io.cloudslang.worker.management.services.dbsupport.WorkerDbSupportService
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -105,6 +107,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     @Autowired
     private EventBus eventBus;
+
+    @Autowired
+    @Qualifier("consumptionFastEventBus")
+    private FastEventBus fastEventBus;
 
     @Autowired
     private RobotAvailabilityService robotAvailabilityService;
@@ -440,7 +446,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 pauseService.pauseExecution(executionId, branchId, reason); // this creates a DB record for this branch, as Pending-paused
             }
         } else if (reason == NO_ROBOTS_IN_GROUP || reason == PENDING_ROBOT) {
-            pauseService.pauseExecution(executionId, branchId, reason);
+            Long pauseId = pauseService.pauseExecution(executionId, branchId, reason);
+            if (pauseId != null && reason == NO_ROBOTS_IN_GROUP) {
+                logger.warn("Can't assign robot for group name: " + systemContext.getRobotGroupName() + "; because there are no available robots for that group.");
+            }
         }
         addPauseEvent(systemContext);
         // dump bus events here because out side is too late
@@ -735,10 +744,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
         String stepPath = currStep.getActionData().get("refId") + "/" + currStep.getActionData().get("nodeName");
         eventData.put(STEP_PATH, stepPath);
         ScoreEvent eventWrapper = new ScoreEvent(EventConstants.SCORE_STARTED_BRANCH_EVENT, eventData);
-        try {
-            eventBus.dispatch(eventWrapper);
-        } catch (InterruptedException e) {
-            logger.error("Failed to dispatch branch start event: ", e);
-        }
+        fastEventBus.dispatch(eventWrapper);
     }
 }
