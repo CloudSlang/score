@@ -28,6 +28,7 @@ import javax.annotation.Resource;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -59,7 +60,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
     @Autowired(required = false)
     private ExecutionsActivityListener executionsActivityListener;
 
-    private HashMap<String, ArrayList<Message>> buffer;
+    private HashMap<String, LinkedList<Message>> buffer;
     private int currentWeight;
 
     private final int maxBufferWeight;
@@ -79,7 +80,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         logger.info("maxBufferWeight = " + maxBufferWeight);
     }
 
-    private HashMap<String, ArrayList<Message>> getInitialBuffer() {
+    private HashMap<String, LinkedList<Message>> getInitialBuffer() {
         return newHashMapWithExpectedSize(225);
     }
 
@@ -98,7 +99,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
             }
 
             // Put message into the buffer
-            ArrayList<Message> oldValue = buffer.get(executionId);
+            LinkedList<Message> oldValue = buffer.get(executionId);
             if (oldValue == null) {
                 buffer.put(executionId, getMutableListWrapper(messageToAdd));
             } else {
@@ -113,8 +114,8 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         }
     }
 
-    private ArrayList<Message> getMutableListWrapper(Message messageToAdd) {
-        ArrayList<Message> list = new ArrayList<>();
+    private LinkedList<Message> getMutableListWrapper(Message messageToAdd) {
+        LinkedList<Message> list = new LinkedList<>();
         list.add(messageToAdd);
         return list;
     }
@@ -133,7 +134,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 
     @Override
     public void drain() {
-        HashMap<String, ArrayList<Message>> bufferToDrain;
+        HashMap<String, LinkedList<Message>> bufferToDrain;
         try {
             syncManager.startDrain();
             while (buffer.isEmpty()) {
@@ -156,11 +157,11 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         drainInternal(bufferToDrain);
     }
 
-    private void drainInternal(HashMap<String, ArrayList<Message>> bufferToDrain) {
+    private void drainInternal(HashMap<String, LinkedList<Message>> bufferToDrain) {
         int bulkWeight = 0;
-        List<Message> bulk = new ArrayList<>();
+        List<Message> bulk = new LinkedList<>();
         try {
-            for (ArrayList<Message> value : bufferToDrain.values()) {
+            for (LinkedList<Message> value : bufferToDrain.values()) {
                 List<Message> convertedList = expandCompoundMessages(value);
                 List<Message> optimizedList = convertedList.get(0).shrink(convertedList);
                 int optimizedWeight = optimizedList.stream().mapToInt(Message::getWeight).sum();
@@ -184,7 +185,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         }
     }
 
-    private List<Message> expandCompoundMessages(ArrayList<Message> value) {
+    private List<Message> expandCompoundMessages(LinkedList<Message> value) {
         int compoundMessages = 0, compoundMessageSize = 0;
         for (Message crt : value) {
             if (crt instanceof CompoundMessage) {
