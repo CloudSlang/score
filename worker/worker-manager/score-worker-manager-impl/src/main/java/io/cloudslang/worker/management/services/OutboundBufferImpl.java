@@ -98,7 +98,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
                 logger.info("Outbound buffer drained. Finished waiting.");
             }
 
-            // Put message into the buffer
+            // Put message into the buffer, intentionally not using merge function because of extra if
             LinkedList<Message> oldValue = buffer.get(executionId);
             if (oldValue == null) {
                 buffer.put(executionId, getMutableListWrapper(messageToAdd));
