@@ -248,6 +248,7 @@ public class QueueCleanerServiceTest {
 	public void cleanBulkTest() throws Exception {
 		//Add messages with no completion records these will be marked as completed in execution summary
 		List<ExecutionMessage> msgs = generateMessageBulk(1000,1 ,true );
+		jdbcTemplate.execute("delete from OO_EXECUTION_SUMMARY");
 		insertToExecutionSummary(IntStream.range(1,1000).toArray());
 
 		//Add standard messages with full lifecycle completed
