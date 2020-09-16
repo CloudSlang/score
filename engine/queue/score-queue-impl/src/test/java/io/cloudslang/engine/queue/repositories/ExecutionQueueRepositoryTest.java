@@ -28,6 +28,7 @@ import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import io.cloudslang.orchestrator.services.ExecutionStateService;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -65,6 +66,9 @@ public class ExecutionQueueRepositoryTest {
 
     @Autowired
     private ExecutionQueueRepository executionQueueRepository;
+
+    @Autowired
+    private ExecutionStateService executionStateService;
 
     @Test
     public void testInsert(){
@@ -387,5 +391,7 @@ public class ExecutionQueueRepositoryTest {
         VersionService queueVersionService(){
             return Mockito.mock(VersionService.class);
         }
+        @Bean
+        ExecutionStateService executionStateService() { return Mockito.mock(ExecutionStateService.class); }
     }
 }

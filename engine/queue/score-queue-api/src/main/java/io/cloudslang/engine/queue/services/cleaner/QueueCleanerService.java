@@ -42,4 +42,19 @@ public interface QueueCleanerService {
      * @param ids the ids to clean data for
      */
     void cleanFinishedSteps(Set<Long> ids);
+
+    /**
+     * get a set of ids of finished executions
+     * but are still present in queues and states
+     *
+     * @return Set of ids of finished executions
+     */
+    Set<Long> getFlowCompletedExecStateIds();
+    /**
+     * delete orphan ids still present in queues
+     * but not in states
+     *
+     * @return Set of ids of finished executions
+     */
+    int deleteOrphanSteps();
 }

@@ -32,6 +32,7 @@ import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerServiceImpl
 import io.cloudslang.engine.versioning.services.VersionService;
 import io.cloudslang.orchestrator.services.EngineVersionService;
 import junit.framework.Assert;
+import io.cloudslang.orchestrator.services.ExecutionStateService;
 import liquibase.integration.spring.SpringLiquibase;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,6 +66,9 @@ public class ExecutionQueueServiceTest {
 
 	@Autowired
 	public ExecutionQueueService executionQueueService;
+
+	@Autowired
+	private ExecutionStateService executionStateService;
 
 	@Autowired
 	public WorkerNodeService workerNodeService;
@@ -361,5 +365,8 @@ public class ExecutionQueueServiceTest {
 
 			return mock;
 		}
+
+		@Bean
+		ExecutionStateService executionStateService() { return mock(ExecutionStateService.class);}
 	}
 }
