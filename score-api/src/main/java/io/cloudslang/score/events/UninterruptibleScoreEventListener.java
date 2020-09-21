@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package io.cloudslang.runtime.impl;
+package io.cloudslang.score.events;
 
-/**
- * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
- */
-public interface Executor {
-    void allocate();
-    void release();
-    void close();
+
+public interface UninterruptibleScoreEventListener {
+
+    /**
+     * handler of score event, this method will be called on score event
+     * @param event - the event that dispatched
+     */
+    void onEvent(ScoreEvent event);
+
 }

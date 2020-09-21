@@ -16,8 +16,10 @@
 
 package io.cloudslang.worker.execution.reflection;
 
-import io.cloudslang.worker.execution.services.SessionDataHandler;
 import io.cloudslang.score.api.ControlActionMetadata;
+import io.cloudslang.worker.execution.model.StepActionDataHolder;
+import io.cloudslang.worker.execution.model.StepActionDataHolder.ReadonlyStepActionDataAccessor;
+import io.cloudslang.worker.execution.services.SessionDataHandler;
 import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.Test;
@@ -30,6 +32,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNull;
 
 /**
  * @author kravtsov
@@ -54,8 +59,9 @@ public class ReflectionAdapterTest {
 		Map<String, Object> map = new HashMap<>();
 		map.put("parameter_1", "TEST");
 		map.put("parameter_2", 3);
+
 		try {
-			adapter.executeControlAction(metadata, map);
+			adapter.executeControlAction(metadata, createAccessorFromMap(map));
 		} catch(Exception ex) {
 			logger.error("Failed to run method in reflectionAdapter...", ex);
 			Assert.fail();
@@ -68,8 +74,8 @@ public class ReflectionAdapterTest {
 		Map<String, Object> map = new HashMap<>();
 		map.put("parameter_1", 5);
 		map.put("parameter_2", 3);
-		Integer result = (Integer)adapter.executeControlAction(metadata, map);
-		Assert.assertEquals(8, (int)result);
+		Integer result = (Integer)adapter.executeControlAction(metadata, createAccessorFromMap(map));
+		assertEquals(8, (int)result);
 	}
 
 	@Test
@@ -79,8 +85,8 @@ public class ReflectionAdapterTest {
 		actionData.put("parameter_1", 5);
 		actionData.put("parameter_2", 3);
 		@SuppressWarnings("unchecked")
-		Map<String, ?> result = (Map<String, ?>)adapter.executeControlAction(metadata, actionData);
-		Assert.assertNull(result);
+		Map<String, ?> result = (Map<String, ?>)adapter.executeControlAction(metadata, createAccessorFromMap(actionData));
+		assertNull(result);
 	}
 
 	@Test
@@ -90,8 +96,14 @@ public class ReflectionAdapterTest {
 		actionData.put("parameter_1", 5);
 		actionData.put("parameter_2", 3);
 		@SuppressWarnings("unchecked")
-		Map<String, ?> result = (Map<String, ?>)adapter.executeControlAction(metadata, actionData);
-		Assert.assertNull(result);
+		Map<String, ?> result = (Map<String, ?>)adapter.executeControlAction(metadata, createAccessorFromMap(actionData));
+		assertNull(result);
+	}
+
+	private ReadonlyStepActionDataAccessor createAccessorFromMap(Map<String, Object> map) {
+		StepActionDataHolder stepActionDataHolder = new StepActionDataHolder();
+		stepActionDataHolder.addNotNullPartToHolder(map);
+		return new ReadonlyStepActionDataAccessor(stepActionDataHolder);
 	}
 
 	@Configuration

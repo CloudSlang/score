@@ -22,6 +22,10 @@ import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.StartNewBranchPayload;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
+import io.cloudslang.score.events.EventConstants;
+import io.cloudslang.score.events.FastEventBus;
+import io.cloudslang.score.events.ScoreEvent;
+import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.orchestrator.entities.BranchContexts;
 import io.cloudslang.orchestrator.entities.FinishedBranch;
 import io.cloudslang.orchestrator.entities.SplitMessage;
@@ -29,11 +33,13 @@ import io.cloudslang.orchestrator.entities.SuspendedExecution;
 import io.cloudslang.orchestrator.enums.SuspendedExecutionReason;
 import io.cloudslang.orchestrator.repositories.FinishedBranchRepository;
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
+import org.apache.commons.lang.StringUtils;
 import io.cloudslang.score.api.EndBranchDataContainer;
 import io.cloudslang.score.facade.entities.Execution;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +57,9 @@ import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.NON_BLOC
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL_LOOP;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.FINISHED_CHILD_BRANCHES_DATA;
+import static io.cloudslang.score.events.EventConstants.BRANCH_ID;
+import static io.cloudslang.score.events.EventConstants.EXECUTION_ID;
+import static io.cloudslang.score.events.EventConstants.SPLIT_ID;
 import static io.cloudslang.score.facade.TempConstants.MI_REMAINING_BRANCHES_CONTEXT_KEY;
 import static io.cloudslang.score.facade.execution.ExecutionStatus.CANCELED;
 import static java.lang.Long.parseLong;
@@ -77,6 +86,10 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
     @Autowired
     private ExecutionQueueRepository executionQueueRepository;
+
+    @Autowired
+    @Qualifier("consumptionFastEventBus")
+    private FastEventBus fastEventBus;
 
     /*
         converts an execution to a fresh execution message for triggering a new flow
@@ -144,13 +157,24 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
     private List<ExecutionMessage> prepareExecutionMessages(List<Execution> executions, boolean active) {
         return executions.stream()
-                .map(execution -> {
-                    ExecutionMessage executionMessage = new ExecutionMessage(execution.getExecutionId().toString(),
-                            converter.createPayload(execution));
-                    executionMessage.setActive(active);
-                    return executionMessage;
-                })
+                .map(execution -> convertExecutionToExecutionMessage(active, execution))
                 .collect(toList());
+    }
+
+    private ExecutionMessage convertExecutionToExecutionMessage(boolean active, Execution execution) {
+        ExecutionMessage executionMessage = new ExecutionMessage(execution.getExecutionId().toString(),
+                converter.createPayload(execution));
+        setWorkerGroupOnCSParallelLoopBranches(execution, executionMessage);
+        executionMessage.setActive(active);
+        return executionMessage;
+    }
+
+    private void setWorkerGroupOnCSParallelLoopBranches(Execution execution, ExecutionMessage executionMessage) {
+        if (StringUtils.equals(execution.getSystemContext().getLanguageName(), "CloudSlang")
+                && execution.getSystemContext().getWorkerGroupName() != null) {
+            executionMessage.setWorkerGroup(execution.getSystemContext().getWorkerGroupName());
+            executionMessage.setWorkerId(ExecutionMessage.EMPTY_WORKER);
+        }
     }
 
     @Override
@@ -193,6 +217,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
         // add each finished branch to it's parent
         for (FinishedBranch finishedBranch : finishedBranches) {
+            dispatchBranchFinishedEvent(finishedBranch.getExecutionId(), finishedBranch.getSplitId(), finishedBranch.getBranchId());
             SuspendedExecution suspendedExecution = suspendedMap.get(finishedBranch.getSplitId());
             if (suspendedExecution != null) {
                 finishedBranch.connectToSuspendedExecution(suspendedExecution);
@@ -303,7 +328,9 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
                 se.setLocked(true);
                 finishedBranches.clear();
             }
-            messages.add(executionToStartExecutionMessage.convert(execution));
+            ExecutionMessage executionMessage = executionToStartExecutionMessage.convert(execution);
+            setWorkerGroupOnCSParallelLoopBranches(execution, executionMessage);
+            messages.add(executionMessage);
         }
 
         queueDispatcherService.dispatch(messages);
@@ -325,7 +352,9 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
         for (SuspendedExecution se : suspendedExecutions) {
             Execution exec = joinSplit(se);
-            messages.add(executionToStartExecutionMessage.convert(exec));
+            ExecutionMessage executionMessage = executionToStartExecutionMessage.convert(exec);
+            setWorkerGroupOnCSParallelLoopBranches(exec, executionMessage);
+            messages.add(executionMessage);
         }
 
         // 3. send the suspended execution back to the queue
@@ -391,5 +420,14 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         if (wasExecutionCancelled) {
             exec.getSystemContext().setFlowTerminationType(CANCELED);
         }
+    }
+
+    private void dispatchBranchFinishedEvent(String executionId, String splitId, String branchId) {
+        HashMap<String, Serializable> eventData = new HashMap<>();
+        eventData.put(EXECUTION_ID, executionId);
+        eventData.put(SPLIT_ID, splitId);
+        eventData.put(BRANCH_ID, branchId);
+        ScoreEvent eventWrapper = new ScoreEvent(EventConstants.SCORE_FINISHED_BRANCH_EVENT, eventData);
+        fastEventBus.dispatch(eventWrapper);
     }
 }

@@ -19,7 +19,8 @@ public enum LicenseType {
     UNDEFINED(-1),
     CONCURRENT_BOT(0),
     HOURLY(1),
-    INSTANT_ON(2);
+    INSTANT_ON(2),
+    CONCURRENT_HOURLY(3);
 
     private final int code;
 

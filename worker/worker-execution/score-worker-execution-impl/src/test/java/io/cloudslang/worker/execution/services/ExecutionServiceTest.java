@@ -23,12 +23,14 @@ import io.cloudslang.score.api.ExecutionPlan;
 import io.cloudslang.score.api.ExecutionStep;
 import io.cloudslang.score.events.EventBus;
 import io.cloudslang.score.events.EventConstants;
+import io.cloudslang.score.events.FastEventBus;
 import io.cloudslang.score.facade.TempConstants;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.entities.RunningExecutionPlan;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.score.facade.execution.ExecutionSummary;
 import io.cloudslang.score.facade.execution.PauseReason;
+import io.cloudslang.worker.execution.model.StepActionDataHolder.ReadonlyStepActionDataAccessor;
 import io.cloudslang.worker.execution.reflection.ReflectionAdapter;
 import io.cloudslang.worker.management.WorkerConfigurationService;
 import io.cloudslang.worker.management.services.WorkerRecoveryManager;
@@ -303,7 +305,8 @@ public class ExecutionServiceTest {
         executionStep.setActionData(actionData);
         executionStep.setAction(CONTENT_EXEC_CONTROL_ACTION_METADATA);
 
-        when(reflectionAdapter.executeControlAction(eq(CONTENT_EXEC_CONTROL_ACTION_METADATA), any(Map.class))).thenReturn(null);
+        when(reflectionAdapter.executeControlAction(eq(CONTENT_EXEC_CONTROL_ACTION_METADATA), any(
+				ReadonlyStepActionDataAccessor.class))).thenReturn(null);
 
         Execution exe = new Execution(0L, 0L, new HashMap<String, String>());
         exe.getSystemContext().put("SC_TIMEOUT_START_TIME", System.currentTimeMillis());
@@ -329,7 +332,7 @@ public class ExecutionServiceTest {
         exe.getSystemContext().put("SC_TIMEOUT_START_TIME", System.currentTimeMillis());
         exe.getSystemContext().put("SC_TIMEOUT_MINS", 3);
 
-        when(reflectionAdapter.executeControlAction(eq(CONTENT_EXEC_CONTROL_ACTION_METADATA), any(Map.class))).thenThrow(new RuntimeException("ABC message"));
+        when(reflectionAdapter.executeControlAction(eq(CONTENT_EXEC_CONTROL_ACTION_METADATA), any(ReadonlyStepActionDataAccessor.class))).thenThrow(new RuntimeException("ABC message"));
         timeoutExecutionService.executeStep(exe, executionStep);
 
         assertEquals(0, exe.getPosition().longValue()); // position is still 0
@@ -373,6 +376,11 @@ public class ExecutionServiceTest {
 			return mock(EventBus.class);
 		}
 
+        @Bean(name = "consumptionFastEventBus")
+        public FastEventBus getFastEventBus() {
+            return mock(FastEventBus.class);
+        }
+
 		@Bean
 		public ExecutionServiceImpl executionService() {
 			return new ExecutionServiceImpl();
@@ -399,7 +407,7 @@ public class ExecutionServiceTest {
 			ReflectionAdapter adapter = mock(ReflectionAdapter.class);
 
 			//noinspection unchecked
-			when(adapter.executeControlAction(eq(RUNTIME_EXCEPTION_METADATA), any(Map.class))).thenThrow(RuntimeException.class);
+			when(adapter.executeControlAction(eq(RUNTIME_EXCEPTION_METADATA), any(ReadonlyStepActionDataAccessor.class))).thenThrow(RuntimeException.class);
 
 			return adapter;
 		}
