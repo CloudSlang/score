@@ -15,6 +15,8 @@
  */
 package io.cloudslang.runtime.impl.python.external;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,6 +50,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -70,8 +73,13 @@ public class ExternalPythonExecutor {
     private static final long EXECUTION_TIMEOUT = Long.getLong("python.timeout", 30);
     private static final String PYTHON_FILENAME_SCRIPT_EXTENSION = ".py\"";
     private static final int PYTHON_FILENAME_DELIMITERS = 6;
+    private static final ObjectMapper objectMapper;
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    static {
+        JsonFactory factory = new JsonFactory();
+        factory.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
+        objectMapper = new ObjectMapper(factory);
+    }
 
     public PythonExecutionResult exec(String script, Map<String, Serializable> inputs) {
         TempExecutionEnvironment tempExecutionEnvironment = null;
@@ -208,7 +216,7 @@ public class ExternalPythonExecutor {
             case INTEGER:
                 return Integer.valueOf(results.getReturnResult());
             case LIST:
-                return (Serializable) objectMapper.readValue(results.getReturnResult(), new TypeReference<List<String>>(){});
+                return objectMapper.readValue(results.getReturnResult(), new TypeReference<ArrayList<Serializable>>(){});
             default:
                 return results.getReturnResult();
         }

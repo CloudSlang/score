@@ -18,7 +18,6 @@ package io.cloudslang.worker.management.services;
 
 import io.cloudslang.orchestrator.entities.Message;
 import io.cloudslang.orchestrator.services.OrchestratorDispatcherService;
-import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +30,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import static org.mockito.Matchers.argThat;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -39,10 +37,12 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
@@ -113,12 +113,12 @@ public class OutboundBufferTest {
 
 		// wait for that thread to block
 		waitForThreadStateToBe(thread, Thread.State.WAITING);
-		Assert.assertEquals("inserting thread should be in a waiting state when inserting to full buffer", Thread.State.WAITING, thread.getState());
+		assertEquals("inserting thread should be in a waiting state when inserting to full buffer", Thread.State.WAITING, thread.getState());
 
 		// drain the buffer -> will send the first 10 messages and release the blocking thread
 		buffer.drain();
 		waitForThreadStateToBe(thread, Thread.State.TERMINATED);
-		Assert.assertEquals("inserting thread should be in a terminated state after inserting to buffer", Thread.State.TERMINATED, thread.getState());
+		assertEquals("inserting thread should be in a terminated state after inserting to buffer", Thread.State.TERMINATED, thread.getState());
 		thread.join();
 	}
 
@@ -139,7 +139,7 @@ public class OutboundBufferTest {
 
 		// draining the buffer should block since it is empty
 		waitForThreadStateToBe(thread, Thread.State.WAITING);
-		Assert.assertEquals("reading thread should be in a waiting state when inserting to full buffer", Thread.State.WAITING, thread.getState());
+		assertEquals("reading thread should be in a waiting state when inserting to full buffer", Thread.State.WAITING, thread.getState());
 
 		// insert 2 new messages
 		Message[] messages = new Message[]{new DummyMsg1(), new DummyMsg2()};
@@ -147,7 +147,7 @@ public class OutboundBufferTest {
 
 		// thread should be released now
 		waitForThreadStateToBe(thread, Thread.State.TERMINATED);
-		Assert.assertEquals("reading thread should be in a terminated after a message was inserted to the buffer", Thread.State.TERMINATED, thread.getState());
+		assertEquals("reading thread should be in a terminated after a message was inserted to the buffer", Thread.State.TERMINATED, thread.getState());
 
 		thread.join();
         verify(dispatcherService).dispatch((List<? extends Serializable>) argThat(new MessagesSizeMatcher(Arrays.asList(messages))), anyString(), anyString(), anyString());
@@ -253,11 +253,11 @@ public class OutboundBufferTest {
         for (DummyMsg1 message : messages) {
             buffer.put(message);
         }
-        Assert.assertEquals(2,buffer.getSize());
-        Assert.assertEquals(2,buffer.getWeight());
+        assertEquals(1, buffer.getSize());
+        assertEquals(2, buffer.getWeight());
         ((WorkerRecoveryListener)buffer).doRecovery();
-        Assert.assertEquals(0,buffer.getSize());
-        Assert.assertEquals(0,buffer.getWeight());
+        assertEquals(0, buffer.getSize());
+        assertEquals(0, buffer.getWeight());
     }
 
     private class MessagesSizeMatcher extends ArgumentMatcher{

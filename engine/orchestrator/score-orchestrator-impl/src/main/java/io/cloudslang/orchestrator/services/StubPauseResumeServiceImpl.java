@@ -66,4 +66,14 @@ public class StubPauseResumeServiceImpl implements PauseResumeService {
     public List<Long> readPauseIds(Long executionId) {
         return null;
     }
+
+    @Override
+    public void createNoRobotGroup(Execution execution, Long pauseId, String branchId) {
+
+    }
+
+    @Override
+    public void deletePauseData(String executionId, String branchId) {
+
+    }
 }
