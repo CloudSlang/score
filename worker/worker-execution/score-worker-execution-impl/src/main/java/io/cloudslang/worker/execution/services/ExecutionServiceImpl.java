@@ -448,6 +448,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         } else if (reason == NO_ROBOTS_IN_GROUP || reason == PENDING_ROBOT) {
             Long pauseId = pauseService.pauseExecution(executionId, branchId, reason);
             if (pauseId != null && reason == NO_ROBOTS_IN_GROUP) {
+                pauseService.createNoRobotGroup(execution, pauseId, branchId);
                 logger.warn("Can't assign robot for group name: " + systemContext.getRobotGroupName() + "; because there are no available robots for that group.");
             }
         }
