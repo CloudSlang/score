@@ -112,18 +112,18 @@ class PythonAgentExecutor(object):
                 return_type = type(expr_result).__name__
 
                 if return_type == 'range':
-                    expr_result = str(list(map(str, expr_result))).replace("\'", "\"")
+                    expr_result = str(list(map(str, expr_result)))
                     return_type = 'list'
 
                 elif return_type == 'list':
-                    expr_result = str(expr_result).replace("\'", "\"")
+                    expr_result = str(expr_result)
 
                 elif return_type in ['map',  'tuple',  'set']:
-                    expr_result = str(list(expr_result)).replace("\'", "\"")
+                    expr_result = str(list(expr_result))
                     return_type = 'list'
 
                 elif return_type == 'dict':
-                    expr_result = str(list(expr_result.keys())).replace("\'", "\"")
+                    expr_result = str(list(expr_result.keys()))
                     return_type = 'list'
 
                 elif return_type == '_Element':

@@ -86,4 +86,8 @@ public interface PauseResumeService {
      * @return a list of all current pauses id relevant
      */
     List<Long> readPauseIds(Long executionId);
+
+    void createNoRobotGroup(Execution execution, Long pauseId, String branchId);
+
+    void deletePauseData(String executionId, String branchId);
 }
