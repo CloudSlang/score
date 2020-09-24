@@ -59,6 +59,7 @@
     <modules>
         <module>worker-execution</module>
         <module>worker-manager</module>
+        <module>worker-monitor</module>
     </modules>
 
 </project>
