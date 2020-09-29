@@ -41,6 +41,7 @@ import io.cloudslang.worker.management.services.WorkerManager;
 import io.cloudslang.worker.management.services.WorkerManagerMBean;
 import io.cloudslang.worker.management.services.WorkerRecoveryManagerImpl;
 import io.cloudslang.worker.management.services.WorkerVersionServiceImpl;
+import io.cloudslang.worker.monitor.service.WorkerMetricCollectorServiceImpl;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
@@ -82,6 +83,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
         //Monitors
         put(WorkerExecutionMonitorServiceImpl.class, "workerExecutionMonitorService");
+        put(WorkerMetricCollectorServiceImpl.class,"workerMetricsCollectorService");
         put(WorkerMonitorsImpl.class, "workerMonitorsImpl");
         put(ScheduledWorkerLoadMonitor.class, "scheduledWorkerLoadMonitor");
 	}};
@@ -99,7 +101,8 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 			new ConfValue().NAME("interruptCanceledInterval").DEFAULT(30000L),
             new ConfValue().NAME("statisticsInterval").DEFAULT(1000L),
             new ConfValue().NAME("scheduledWorkerMonitorInterval").DEFAULT(10000L),
-            new ConfValue().NAME("workerMonitorRefreshInterval").DEFAULT(300000L)
+			new ConfValue().NAME("scheduledPerfMetricCollectionInterval").DEFAULT(10000L),
+			new ConfValue().NAME("workerMonitorRefreshInterval").DEFAULT(300000L)
 	);
 
 	@Override

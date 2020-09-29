@@ -13,32 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.worker.monitor;
+package io.cloudslang.worker.monitor.service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+public interface WorkerMetricCollectorService {
 
-
-public class PerfMonitorCollectorImpl implements PerfMetricCollector {
-
-    List<WorkerPerfMetric> workerPerfMetrics;
-
-    public PerfMonitorCollectorImpl() {
-        createMetrics();
-    }
-
-    private void createMetrics() {
-
-    }
-
-    @Override
-    public Map<String, Double> collectMetric() {
-        Map<String, Double> currentValues = new HashMap<>();
-        for (WorkerPerfMetric metric :
-                workerPerfMetrics) {
-            currentValues.putAll(metric.measure());
-        }
-        return currentValues;
-    }
+    void collectPerfMetrics();
 }

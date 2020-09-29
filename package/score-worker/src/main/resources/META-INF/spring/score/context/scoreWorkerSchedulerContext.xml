@@ -15,6 +15,7 @@
         <task:scheduled ref="sessionDataHandler" method="sessionTimeOutScheduler" fixed-rate="60000"/>
         <task:scheduled ref="workerExecutionMonitorService" method="executeScheduledWorkerMonitors" fixed-delay="#{scheduledWorkerMonitorInterval}"/>
         <task:scheduled ref="workerExecutionMonitorService" method="collectMonitorInformation" fixed-delay="#{workerMonitorRefreshInterval}"/>
+        <task:scheduled ref="workerMetricsCollectorService" method="collectPerfMetrics" fixed-delay="#{scheduledPerfMetricCollectionInterval}"/>
 	</task:scheduled-tasks>
 
     <!--
