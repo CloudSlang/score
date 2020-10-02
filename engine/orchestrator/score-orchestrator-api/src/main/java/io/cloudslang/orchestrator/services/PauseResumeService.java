@@ -22,6 +22,7 @@ import io.cloudslang.score.facade.entities.Execution;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,7 +51,7 @@ public interface PauseResumeService {
      * @param executionId id of the execution
      * @return add interrupts to the current execution
      */
-    void injectInterrupts(Long executionId, Map<String, ArrayList<String>> interrupts);
+    void injectInterrupts(Long executionId, Map<String, Set<String>> interrupts);
 
     /**
      * removes interrupts
@@ -58,7 +59,7 @@ public interface PauseResumeService {
      * @param executionId id of the execution
      * @return add interrupts to the current execution
      */
-    void deleteInterrupts(Long executionId, Map<String, ArrayList<String>> interrupts);
+    void deleteInterrupts(Long executionId, Map<String, Set<String>> interrupts);
 
     /**
      * Resumes execution and puts it back to execution queue
