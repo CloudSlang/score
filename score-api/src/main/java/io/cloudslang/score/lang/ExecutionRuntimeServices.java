@@ -549,7 +549,7 @@ public class ExecutionRuntimeServices implements Serializable {
                 }
             }
         }
-        return null;
+        return "";
     }
 
     public boolean getMergeUserInputs() {
