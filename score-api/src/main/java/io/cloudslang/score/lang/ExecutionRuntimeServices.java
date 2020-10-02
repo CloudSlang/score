@@ -541,11 +541,12 @@ public class ExecutionRuntimeServices implements Serializable {
         if (parentRunId == null) {
             return "";
         }
+        Map<String, Serializable> runMap = ((Map<String, Serializable>) contextMap.get(RUNNING_PLANS_MAP));
         if (contextMap.containsKey(RUNNING_PLANS_MAP)) {
-            for (String key : ((Map<String, Serializable>) contextMap.get(RUNNING_PLANS_MAP)).keySet()) {
-                if ((contextMap.get(key)).equals(parentRunId)) {
-                    List<String> splitArray = Arrays.asList(key.split("."));
-                    return splitArray.get(splitArray.size() - 1);
+            for (String key : runMap.keySet()) {
+                if ((runMap.get(key)).equals(parentRunId)) {
+                    String[] splitArray = key.split("\\.");
+                    return splitArray[splitArray.length - 1];
                 }
             }
         }
