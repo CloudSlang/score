@@ -538,7 +538,9 @@ public class ExecutionRuntimeServices implements Serializable {
     }
 
     public String extractParentNameFromRunId(Long parentRunId) {
-
+        if (parentRunId == null) {
+            return "";
+        }
         if (contextMap.containsKey(RUNNING_PLANS_MAP)) {
             for (String key : ((Map<String, Serializable>) contextMap.get(RUNNING_PLANS_MAP)).keySet()) {
                 if ((contextMap.get(key)).equals(parentRunId)) {
