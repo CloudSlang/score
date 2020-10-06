@@ -541,8 +541,8 @@ public class ExecutionRuntimeServices implements Serializable {
         if (parentRunId == null) {
             return "";
         }
-        Map<String, Serializable> runMap = ((Map<String, Serializable>) contextMap.get(RUNNING_PLANS_MAP));
         if (contextMap.containsKey(RUNNING_PLANS_MAP)) {
+            Map<String, Serializable> runMap = ((Map<String, Serializable>) contextMap.get(RUNNING_PLANS_MAP));
             for (String key : runMap.keySet()) {
                 if ((runMap.get(key)).equals(parentRunId)) {
                     String[] splitArray = key.split("\\.");
