@@ -13,13 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.worker.monitor;
+package io.cloudslang.worker.monitor.service;
 
-import io.cloudslang.worker.monitor.service.MetricKeyValue;
+public enum MetricKeyValue {
+    WORKER_ID,
+    WORKER_MEASURED_TIME,
+    WORKER_BUSYNESS_VALUE,
+    CPU_USAGE,
+    MEMORY_USAGE,
+    DISK_USAGE,
+    IN_OUT_BUFFER,
+    HEAP_SIZE,
+    THREAD_COUNTS;
 
-import java.io.Serializable;
-import java.util.Map;
-
-public interface WorkerPerfMetric {
-    Map<MetricKeyValue, Serializable> measure();
+    private MetricKeyValue() { }
 }

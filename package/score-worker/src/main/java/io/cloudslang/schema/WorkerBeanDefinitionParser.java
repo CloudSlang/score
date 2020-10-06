@@ -47,6 +47,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
@@ -61,6 +62,7 @@ import static java.lang.Boolean.FALSE;
 /**
  * @since 21/01/2014
  */
+@Component
 public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	private Map<Class<?>,String> beans = new HashMap<Class<?>,String>(){{

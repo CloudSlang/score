@@ -18,7 +18,7 @@ package io.cloudslang.worker.monitor.service;
 import io.cloudslang.score.events.EventBus;
 import io.cloudslang.score.events.EventConstants;
 import io.cloudslang.score.events.ScoreEvent;
-import io.cloudslang.worker.monitor.PerfMonitorCollectorImpl;
+import io.cloudslang.worker.monitor.PerfMetricCollector;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,7 +31,7 @@ import java.util.Map;
 public class WorkerMetricCollectorServiceImpl implements WorkerMetricCollectorService {
     protected static final Logger logger = Logger.getLogger(WorkerMetricCollectorServiceImpl.class);
     @Autowired
-    PerfMonitorCollectorImpl perfMonitorCollector;
+    PerfMetricCollector perfMetricCollector;
     @Autowired
     private EventBus eventBus;
 
@@ -41,7 +41,7 @@ public class WorkerMetricCollectorServiceImpl implements WorkerMetricCollectorSe
             logger.debug("Collecting Worker Metrics");
         }
         try {
-            Map<String, Double> monitorInfo = perfMonitorCollector.collectMetric();
+            Map<MetricKeyValue, Serializable> monitorInfo = perfMetricCollector.collectMetric();
             if (logger.isDebugEnabled()) {
                 logger.debug("Sending Worker Monitors Info:[" + monitorInfo + "]");
             }
@@ -50,7 +50,5 @@ public class WorkerMetricCollectorServiceImpl implements WorkerMetricCollectorSe
         } catch (InterruptedException e) {
             logger.error("Failed to dispatch monitor info event", e);
         }
-
-
     }
 }

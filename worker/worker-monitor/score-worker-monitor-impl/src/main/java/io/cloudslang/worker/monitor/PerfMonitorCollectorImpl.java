@@ -15,26 +15,36 @@
  */
 package io.cloudslang.worker.monitor;
 
+import io.cloudslang.worker.monitor.service.MetricKeyValue;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-
+@Service
 public class PerfMonitorCollectorImpl implements PerfMetricCollector {
+
+    @Autowired
+    WorkerPerfMetric workerPerfMetric;
 
     List<WorkerPerfMetric> workerPerfMetrics;
 
-    public PerfMonitorCollectorImpl() {
-        createMetrics();
-    }
+    public PerfMonitorCollectorImpl() { createMetrics(); }
 
     private void createMetrics() {
-
+        workerPerfMetric=new CpuPerProcess();
+        workerPerfMetrics.add(workerPerfMetric);
+        workerPerfMetric=new DiskUsagePerProcess();
+        workerPerfMetrics.add(workerPerfMetric);
+        workerPerfMetric=new MemoryPerProcess();
+        workerPerfMetrics.add(workerPerfMetric);
     }
 
     @Override
-    public Map<String, Double> collectMetric() {
-        Map<String, Double> currentValues = new HashMap<>();
+    public Map<MetricKeyValue, Serializable> collectMetric() {
+        Map<MetricKeyValue, Serializable> currentValues = new HashMap<>();
         for (WorkerPerfMetric metric :
                 workerPerfMetrics) {
             currentValues.putAll(metric.measure());
