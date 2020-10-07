@@ -20,6 +20,9 @@ import org.apache.log4j.Logger;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.jdbc.dialect.internal.StandardDialectResolver;
 import org.hibernate.engine.jdbc.dialect.spi.DatabaseMetaDataDialectResolutionInfoAdapter;
+import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
+import org.hibernate.engine.jdbc.dialect.spi.DialectResolver;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -30,20 +33,25 @@ import java.sql.SQLException;
  * Date: 22/07/14
  * Time: 11:52
  */
-public class ScoreDialectResolver  extends StandardDialectResolver {
+public class ScoreDialectResolver implements DialectResolver {
+
+    private static final long serialVersionUID = 2544153575193017888L;
+
+    @Autowired
+    StandardDialectResolver dialectResolver;
 
     private final Logger logger = Logger.getLogger(getClass());
 
-    protected Dialect resolveDialectInternal(DatabaseMetaData metaData) throws SQLException {
-        String databaseName = metaData.getDatabaseProductName();
+    @Override
+    public Dialect resolveDialect(DialectResolutionInfo metaData) {
+        String databaseName = metaData.getDatabaseName();
         int databaseMajorVersion = metaData.getDatabaseMajorVersion();
 
         logger.info("Database name is: " + databaseName + " databaseMajorVersion is: " + databaseMajorVersion);
-        
-        if ( "MySQL".equals( databaseName ) ) {
-			return new ScoreMySQLDialect();
+
+        if ("MySQL".equals(databaseName)) {
+            return new ScoreMySQLDialect();
         }
-        DatabaseMetaDataDialectResolutionInfoAdapter databaseMetaDataDialectResolutionInfoAdapter=new DatabaseMetaDataDialectResolutionInfoAdapter(metaData);
-        return resolveDialect(databaseMetaDataDialectResolutionInfoAdapter);
+        return dialectResolver.resolveDialect(metaData);
     }
 }
