@@ -281,51 +281,51 @@ public class ExecutionMessage implements Message, Cloneable {
         if (messages.size() > 2) {
             List<Message> resultAfterShrink = new ArrayList<>();
 
-			ExecutionMessage firstMessage  = (ExecutionMessage) messages.get(0);
-            ExecutionMessage secondMessage = (ExecutionMessage) messages.get(1);
-
-			List<Message> toPersistMessages = filerToPersistMessages(messages.subList(2, messages.size() - 1));
-
-			ExecutionMessage lastMessage = (ExecutionMessage) messages.get(messages.size()-1);
-
-            //Shrink is done for messages of same msg.id - this is set in the id field of ExecutionMessage in Inbuffer (executionId + execStateId)
-			//If messages run in InBuffer shortcut they keep running with the same msg.id even if execStateId is changing - in order to shrink more
-			//But we must keep the toPersist messages and not shrink them!!!
+            ExecutionMessage firstMessage = (ExecutionMessage) messages.get(0);
+            Message secondMessage = messages.get(1);
+            List<Message> toPersistMessages = filerToPersistMessages(messages.subList(2, messages.size() - 1));
+            Message lastMessage = messages.get(messages.size() - 1);
+            // Shrink is done for messages of same msg.id - this is set in the id field of ExecutionMessage in Inbuffer (executionId + execStateId)
+            // If messages run in InBuffer shortcut they keep running with the same msg.id even if execStateId is changing - in order to shrink more
+            // But we must keep the toPersist messages and not shrink them!!!
             if (firstMessage.getStatus().equals(ExecStatus.IN_PROGRESS)) {
-				resultAfterShrink.add(secondMessage);
-				resultAfterShrink.addAll(toPersistMessages);
-				resultAfterShrink.add(lastMessage);
-				return resultAfterShrink;
-			}
-			else {
-				resultAfterShrink.add(firstMessage);
+                resultAfterShrink.add(secondMessage);
+                resultAfterShrink.addAll(toPersistMessages);
+                resultAfterShrink.add(lastMessage);
+                return resultAfterShrink;
+            } else {
+                resultAfterShrink.add(firstMessage);
+                // If second needs to be persisted - we must add it also
+                if (shouldKeepMessageForShrink(secondMessage)) {
+                    resultAfterShrink.add(secondMessage);
+                }
+                resultAfterShrink.addAll(toPersistMessages);
+                resultAfterShrink.add(lastMessage);
+                return resultAfterShrink;
+            }
+        } else {
+            return messages;
+        }
+    }
 
-				//If second needs to be persisted - we must add it also
-				if(secondMessage.isStepPersist()&& secondMessage.getStatus().equals(ExecStatus.FINISHED) ){
-					resultAfterShrink.add(secondMessage);
-				}
+    protected List<Message> filerToPersistMessages(List<Message> messages) {
+        List<Message> result = new ArrayList<>();
+        // either a split message or a FINISHED persisted messages
+        for (Message msg : messages) {
+            if (shouldKeepMessageForShrink(msg)) {
+                result.add(msg);
+            }
+        }
+        return result;
+    }
 
-				resultAfterShrink.addAll(toPersistMessages);
-				resultAfterShrink.add(lastMessage);
-				return resultAfterShrink;
-			}
-		} else {
-			return messages;
-		}
-	}
+    private boolean shouldKeepMessageForShrink(Message msg) {
+        return (!(msg instanceof ExecutionMessage))
+                || (((ExecutionMessage) msg).isStepPersist() && ((ExecutionMessage) msg).getStatus()
+                .equals(ExecStatus.FINISHED));
+    }
 
-	protected List<Message> filerToPersistMessages(List<Message> messages){
-		List<Message> result = new ArrayList<>();
-		//We need to get from the list the FINISHED persisted messages
-		for(Message msg : messages){
-			if(((ExecutionMessage)msg).isStepPersist() && ((ExecutionMessage)msg).getStatus().equals(ExecStatus.FINISHED)){
-				result.add(msg);
-			}
-		}
-		return result;
-	}
-
-    private String messagesToString(List<Message> messages){
+    private String messagesToString(List<Message> messages) {
         StringBuilder str = new StringBuilder();
 
         for (Message m : messages) {
@@ -356,9 +356,9 @@ public class ExecutionMessage implements Message, Cloneable {
     public Object clone() {
         try {
             ExecutionMessage cloned = (ExecutionMessage) super.clone();
-			if (payload != null) {
-				cloned.payload = (Payload) (payload.clone());
-			}
+            if (payload != null) {
+                cloned.payload = (Payload) (payload.clone());
+            }
             return cloned;
         } catch (CloneNotSupportedException ex) {
             throw new RuntimeException("Failed to clone message", ex);
@@ -367,12 +367,12 @@ public class ExecutionMessage implements Message, Cloneable {
 
     @Override
     public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         ExecutionMessage that = (ExecutionMessage) o;
         return new EqualsBuilder()
