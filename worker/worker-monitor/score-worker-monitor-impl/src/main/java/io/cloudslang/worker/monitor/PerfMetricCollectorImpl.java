@@ -15,31 +15,33 @@
  */
 package io.cloudslang.worker.monitor;
 
+import io.cloudslang.worker.management.services.WorkerManager;
 import io.cloudslang.worker.monitor.service.MetricKeyValue;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-@Service
-public class PerfMonitorCollectorImpl implements PerfMetricCollector {
+@Component
+public class PerfMetricCollectorImpl implements PerfMetricCollector {
+
 
     @Autowired
-    WorkerPerfMetric workerPerfMetric;
+    private WorkerManager workerManager;
 
     List<WorkerPerfMetric> workerPerfMetrics;
 
-    public PerfMonitorCollectorImpl() { createMetrics(); }
+    public PerfMetricCollectorImpl() { createMetrics(); }
 
     private void createMetrics() {
-        workerPerfMetric=new CpuPerProcess();
-        workerPerfMetrics.add(workerPerfMetric);
-        workerPerfMetric=new DiskUsagePerProcess();
-        workerPerfMetrics.add(workerPerfMetric);
-        workerPerfMetric=new MemoryPerProcess();
-        workerPerfMetrics.add(workerPerfMetric);
+        workerPerfMetrics = new ArrayList<>();
+        workerPerfMetrics.add(new CpuPerProcess());
+        workerPerfMetrics.add(new DiskUsagePerProcess());
+        workerPerfMetrics.add(new MemoryPerProcess());
     }
 
     @Override
@@ -49,6 +51,8 @@ public class PerfMonitorCollectorImpl implements PerfMetricCollector {
                 workerPerfMetrics) {
             currentValues.putAll(metric.measure());
         }
+        currentValues.put(MetricKeyValue.WORKER_ID,workerManager.getWorkerUuid());
+        currentValues.put(MetricKeyValue.WORKER_MEASURED_TIME,System.currentTimeMillis());
         return currentValues;
     }
 }
