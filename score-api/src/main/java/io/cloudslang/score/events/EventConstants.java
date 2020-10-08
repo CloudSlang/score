@@ -48,6 +48,7 @@ public class EventConstants {
     public static final String FLOW_UUID = "FLOW_UUID";
 
     public static final String WORKER_EXECUTION_MONITOR = "WORKER_EXECUTION_MONITOR";
+    public static final String WORKER_PERFORMANCE_MONITOR = "WORKER_PERFORMANCE_MONITOR";
 
     public static final String EXECUTION_ID_CONTEXT = "executionIdContext";
 

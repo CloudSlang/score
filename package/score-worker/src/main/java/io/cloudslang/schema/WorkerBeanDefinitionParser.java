@@ -41,11 +41,14 @@ import io.cloudslang.worker.management.services.WorkerManager;
 import io.cloudslang.worker.management.services.WorkerManagerMBean;
 import io.cloudslang.worker.management.services.WorkerRecoveryManagerImpl;
 import io.cloudslang.worker.management.services.WorkerVersionServiceImpl;
+import io.cloudslang.worker.monitor.PerfMetricCollectorImpl;
+import io.cloudslang.worker.monitor.service.WorkerMetricCollectorServiceImpl;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
@@ -60,6 +63,7 @@ import static java.lang.Boolean.FALSE;
 /**
  * @since 21/01/2014
  */
+@Component
 public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	private Map<Class<?>,String> beans = new HashMap<Class<?>,String>(){{
@@ -82,6 +86,8 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
         //Monitors
         put(WorkerExecutionMonitorServiceImpl.class, "workerExecutionMonitorService");
+        put(WorkerMetricCollectorServiceImpl.class,"workerMetricCollectorService");
+        put(PerfMetricCollectorImpl.class,"perfMetricCollector");
         put(WorkerMonitorsImpl.class, "workerMonitorsImpl");
         put(ScheduledWorkerLoadMonitor.class, "scheduledWorkerLoadMonitor");
 	}};
@@ -99,7 +105,9 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 			new ConfValue().NAME("interruptCanceledInterval").DEFAULT(30000L),
             new ConfValue().NAME("statisticsInterval").DEFAULT(1000L),
             new ConfValue().NAME("scheduledWorkerMonitorInterval").DEFAULT(10000L),
-            new ConfValue().NAME("workerMonitorRefreshInterval").DEFAULT(300000L)
+			new ConfValue().NAME("scheduledPerfMetricCollectionInterval").DEFAULT(10000L),
+			new ConfValue().NAME("workerMonitorRefreshInterval").DEFAULT(300000L)
+
 	);
 
 	@Override
