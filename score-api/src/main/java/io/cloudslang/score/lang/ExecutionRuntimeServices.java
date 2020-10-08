@@ -29,6 +29,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -131,7 +132,7 @@ public class ExecutionRuntimeServices implements Serializable {
      * put all the data relevant for sub flows: map of runningPlanIds and list of BeginStepIds
      *
      * @param runningPlansIds - map of flowUUID to runningPlanId
-     * @param beginStepsIds -  map of flowUUID to beginStepId
+     * @param beginStepsIds   -  map of flowUUID to beginStepId
      */
     public void setSubFlowsData(Map<String, Long> runningPlansIds, Map<String, Long> beginStepsIds) {
         contextMap.put(RUNNING_PLANS_MAP, (Serializable) runningPlansIds);
@@ -321,7 +322,9 @@ public class ExecutionRuntimeServices implements Serializable {
         return getFromMap(ROBOT_GROUP_NAME);
     }
 
-    /** This flag is set if the current execution step needs to go through group resolving */
+    /**
+     * This flag is set if the current execution step needs to go through group resolving
+     */
     public void setShouldCheckGroup() {
         contextMap.put(SHOULD_CHECK_GROUP, true);
     }
@@ -421,8 +424,8 @@ public class ExecutionRuntimeServices implements Serializable {
      * add brunch - means you want to split your execution
      *
      * @param startPosition - the position in the execution plan the new brunch will point to
-     * @param flowUuid - the flow uuid
-     * @param context - the context of the created brunch
+     * @param flowUuid      - the flow uuid
+     * @param context       - the context of the created brunch
      */
     public void addBranch(Long startPosition, String flowUuid, Map<String, Serializable> context) {
         Map<String, Long> runningPlansIds = getFromMap(RUNNING_PLANS_MAP);
@@ -534,6 +537,22 @@ public class ExecutionRuntimeServices implements Serializable {
         contextMap.put(MERGE_USER_INPUTS, mergeUserInputs);
     }
 
+    public String extractParentNameFromRunId(Long parentRunId) {
+        if (parentRunId == null) {
+            return "";
+        }
+        if (contextMap.containsKey(RUNNING_PLANS_MAP)) {
+            Map<String, Serializable> runMap = ((Map<String, Serializable>) contextMap.get(RUNNING_PLANS_MAP));
+            for (String key : runMap.keySet()) {
+                if ((runMap.get(key)).equals(parentRunId)) {
+                    String[] splitArray = key.split("\\.");
+                    return splitArray[splitArray.length - 1];
+                }
+            }
+        }
+        return "";
+    }
+
     public boolean getMergeUserInputs() {
         Boolean mergeUserInputs = getFromMap(MERGE_USER_INPUTS);
         return mergeUserInputs != null && mergeUserInputs;
@@ -544,7 +563,9 @@ public class ExecutionRuntimeServices implements Serializable {
         return enterprise != null && enterprise;
     }
 
-    public Double removeTotalRoiValue() { return removeFromMap(ExecutionParametersConsts.EXECUTION_TOTAL_ROI); }
+    public Double removeTotalRoiValue() {
+        return removeFromMap(ExecutionParametersConsts.EXECUTION_TOTAL_ROI);
+    }
 
     public void addRoiValue(Double roiValue) {
         Double currentRoiValue = (Double) contextMap.get(ExecutionParametersConsts.EXECUTION_TOTAL_ROI);
