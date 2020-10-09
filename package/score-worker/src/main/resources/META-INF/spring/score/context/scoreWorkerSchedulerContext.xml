@@ -16,7 +16,7 @@
         <task:scheduled ref="workerExecutionMonitorService" method="executeScheduledWorkerMonitors" fixed-delay="#{scheduledWorkerMonitorInterval}"/>
         <task:scheduled ref="workerExecutionMonitorService" method="collectMonitorInformation" fixed-delay="#{workerMonitorRefreshInterval}"/>
         <task:scheduled ref="workerMetricCollectorService" method="collectPerfMetrics" fixed-delay="#{scheduledPerfMetricCollectionInterval}"/>
-	</task:scheduled-tasks>
+    </task:scheduled-tasks>
 
     <!--
     This is a dedicated scheduler with fixed pool size of 1

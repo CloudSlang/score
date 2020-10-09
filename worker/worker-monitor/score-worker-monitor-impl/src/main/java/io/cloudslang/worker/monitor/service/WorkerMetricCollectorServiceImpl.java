@@ -45,6 +45,7 @@ public class WorkerMetricCollectorServiceImpl implements WorkerMetricCollectorSe
             ScoreEvent event = new ScoreEvent(EventConstants.WORKER_PERFORMANCE_MONITOR, (Serializable) monitorInfo);
             eventBus.dispatch(event);
 
+
         } catch (InterruptedException e) {
             logger.error("insideQQ Failed to dispatch metric info event", e);
         }
