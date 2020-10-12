@@ -38,15 +38,15 @@ public class WorkerMetricCollectorServiceImpl implements WorkerMetricCollectorSe
             logger.debug("Collecting Worker Metrics");
         }
         try {
-            Map<MetricKeyValue, Serializable> monitorInfo = perfMetricCollector.collectMetric();
+            Map<MetricKeyValue, Serializable> metricInfo = perfMetricCollector.collectMetric();
             if (logger.isDebugEnabled()) {
-                logger.debug("insideQQ Sending Worker Metric Info:[" + monitorInfo + "]");
+                logger.debug("Sending Worker Metric Info:[" + metricInfo + "]");
             }
-            ScoreEvent event = new ScoreEvent(EventConstants.WORKER_PERFORMANCE_MONITOR, (Serializable) monitorInfo);
-            eventBus.dispatch(event);
+            ScoreEvent scoreEvent = new ScoreEvent(EventConstants.WORKER_PERFORMANCE_MONITOR, (Serializable) metricInfo);
+            eventBus.dispatch(scoreEvent);
 
         } catch (InterruptedException e) {
-            logger.error("insideQQ Failed to dispatch metric info event", e);
+            logger.error("Failed to dispatch metric info event", e);
         }
     }
 }

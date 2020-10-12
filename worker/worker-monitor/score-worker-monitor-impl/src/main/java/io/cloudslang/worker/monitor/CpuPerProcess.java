@@ -23,10 +23,12 @@ import oshi.software.os.OperatingSystem;
 
 
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
 public class CpuPerProcess implements WorkerPerfMetric {
+    private static DecimalFormat decimalFormat = new DecimalFormat("#.##");
     private static OSProcess oldProcess;
     @Override
     public Map<MetricKeyValue, Serializable> measure() {
@@ -38,9 +40,9 @@ public class CpuPerProcess implements WorkerPerfMetric {
         int pid=operatingSystem.getProcessId();// current pid
         oldProcess = operatingSystem.getProcess(pid);
         OSProcess osProcess = operatingSystem.getProcess(pid);
-        double res=(osProcess.getProcessCpuLoadBetweenTicks(oldProcess)*100)/cpuNumber;
+        double cpuUsed=(osProcess.getProcessCpuLoadBetweenTicks(oldProcess)*100)/cpuNumber;
         oldProcess = osProcess;
-        cpuUsage.put(MetricKeyValue.CPU_USAGE,res);
+        cpuUsage.put(MetricKeyValue.CPU_USAGE,decimalFormat.format(cpuUsed));
         return cpuUsage;
     }
 }

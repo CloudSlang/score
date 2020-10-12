@@ -18,13 +18,9 @@ package io.cloudslang.worker.monitor.service;
 public enum MetricKeyValue {
     WORKER_ID,
     WORKER_MEASURED_TIME,
-    WORKER_BUSYNESS_VALUE,
     CPU_USAGE,
     MEMORY_USAGE,
-    DISK_USAGE,
-    IN_OUT_BUFFER,
-    HEAP_SIZE,
-    THREAD_COUNTS;
+    DISK_USAGE;
 
     private MetricKeyValue() { }
 }
