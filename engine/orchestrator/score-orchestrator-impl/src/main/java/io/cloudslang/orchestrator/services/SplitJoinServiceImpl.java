@@ -17,12 +17,10 @@
 package io.cloudslang.orchestrator.services;
 
 import ch.lambdaj.function.convert.Converter;
-import io.cloudslang.engine.queue.entities.StartNewBranchPayload;
-import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
-import io.cloudslang.orchestrator.enums.SuspendedExecutionReason;
-import io.cloudslang.score.api.EndBranchDataContainer;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
+import io.cloudslang.engine.queue.entities.StartNewBranchPayload;
+import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import io.cloudslang.score.events.EventConstants;
 import io.cloudslang.score.events.FastEventBus;
@@ -32,9 +30,12 @@ import io.cloudslang.orchestrator.entities.BranchContexts;
 import io.cloudslang.orchestrator.entities.FinishedBranch;
 import io.cloudslang.orchestrator.entities.SplitMessage;
 import io.cloudslang.orchestrator.entities.SuspendedExecution;
+import io.cloudslang.orchestrator.enums.SuspendedExecutionReason;
 import io.cloudslang.orchestrator.repositories.FinishedBranchRepository;
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
 import org.apache.commons.lang.StringUtils;
+import io.cloudslang.score.api.EndBranchDataContainer;
+import io.cloudslang.score.facade.entities.Execution;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -151,7 +152,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         queueDispatcherService.dispatch(queueMessages);
 
         // save the suspended parent entities
-        suspendedExecutionsRepository.save(suspendedParents);
+        suspendedExecutionsRepository.saveAll(suspendedParents);
     }
 
     private List<ExecutionMessage> prepareExecutionMessages(List<Execution> executions, boolean active) {
@@ -272,7 +273,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     public int joinFinishedSplits(int bulkSize) {
 
         // 1. Find all suspended executions that have all their branches ended
-        PageRequest pageRequest = new PageRequest(0, bulkSize);
+        PageRequest pageRequest = PageRequest.of(0, bulkSize);
         List<SuspendedExecution> suspendedExecutions = suspendedExecutionsRepository.findFinishedSuspendedExecutions(of(PARALLEL, NON_BLOCKING, PARALLEL_LOOP), pageRequest);
 
         return joinAndSendToQueue(suspendedExecutions);
@@ -292,7 +293,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     @Transactional
     public int joinFinishedMiBranches(int bulkSize) {
         // 1. Find all suspended executions that have all their branches ended
-        PageRequest pageRequest = new PageRequest(0, bulkSize);
+        PageRequest pageRequest = PageRequest.of(0, bulkSize);
         List<SuspendedExecution> suspendedExecutions = suspendedExecutionsRepository.findUnmergedSuspendedExecutions(of(MULTI_INSTANCE), pageRequest);
 
         return joinMiBranchesAndSendToQueue(suspendedExecutions);
@@ -334,7 +335,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
         queueDispatcherService.dispatch(messages);
 
-        suspendedExecutionsRepository.delete(mergedSuspendedExecutions);
+        suspendedExecutionsRepository.deleteAll(mergedSuspendedExecutions);
 
         return suspendedExecutions.size();
     }
@@ -360,7 +361,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         queueDispatcherService.dispatch(messages);
 
         // 4. delete the suspended execution from the suspended table
-        suspendedExecutionsRepository.delete(suspendedExecutions);
+        suspendedExecutionsRepository.deleteAll(suspendedExecutions);
 
         return suspendedExecutions.size();
     }
