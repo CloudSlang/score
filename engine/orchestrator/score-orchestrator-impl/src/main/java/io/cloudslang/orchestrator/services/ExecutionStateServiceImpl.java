@@ -160,6 +160,17 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         }
     }
 
+    @Override
+    public Execution getExecutionObjectForNullBranch(Long executionId) {
+        validateExecutionId(executionId);
+        ExecutionState executionState = readByExecutionId(executionId).get(0);
+        if (executionState.getExecutionObject() != null) {
+            return executionSerializationUtil.objFromBytes(executionState.getExecutionObject());
+        } else {
+            return null;
+        }
+    }
+
     private void validateBranchId(String branchId) {
         Validate.notEmpty(StringUtils.trim(branchId), "branchId cannot be null or empty");
     }
