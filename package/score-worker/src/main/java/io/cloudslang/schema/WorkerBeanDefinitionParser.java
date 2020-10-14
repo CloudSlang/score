@@ -71,9 +71,6 @@ import static java.lang.Boolean.FALSE;
 public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	private Map<Class<?>,String> beans = new HashMap<Class<?>,String>(){{
-		put(WorkerManager.class, "workerManager");
-		put(CpuPerProcess.class, "cpuPerProcess");
-		put(DiskUsagePerProcess.class, "diskUsagePerProcess");
 		put(MemoryPerProcess.class, "memoryPerProcess");
 		put(EventBusImpl.class, null);
 		put(FastEventBusImpl.class, "consumptionFastEventBus");
