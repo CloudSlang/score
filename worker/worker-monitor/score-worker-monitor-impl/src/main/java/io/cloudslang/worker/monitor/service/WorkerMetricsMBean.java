@@ -15,37 +15,32 @@
  */
 package io.cloudslang.worker.monitor.service;
 
+import io.cloudslang.worker.monitor.CpuPerProcess;
 import io.cloudslang.worker.monitor.DiskUsagePerProcess;
+import io.cloudslang.worker.monitor.MemoryPerProcess;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
 @ManagedResource(description = "Worker Metrics API")
 public class WorkerMetricsMBean {
 
+    @Autowired
+    CpuPerProcess cpuPerProcess;
+
+    @Autowired
     DiskUsagePerProcess diskUsagePerProcess;
 
-    public WorkerMetricsMBean(){
-        diskUsagePerProcess = new DiskUsagePerProcess();
-    }
+    @Autowired
+    MemoryPerProcess memoryPerProcess;
+
+    @ManagedAttribute(description = "Current Cpu Usage")
+    public double getCpuUsage() { return cpuPerProcess.getCurrentValue(); }
 
     @ManagedAttribute(description = "Current Disk Usage")
-    public long getDiskUsage()
-    {
+    public long getDiskUsage() { return diskUsagePerProcess.getCurrentValue(); }
 
-        return diskUsagePerProcess.getCurrentValue();
-    }
-
-    /*@ManagedAttribute(description = "Current Out-Buffer Size")
-    public int getOutBufferSize(){
-        return outBuffer.getSize();
-    }
-    @ManagedAttribute(description = "Out-Buffer Capacity")
-    public int getOutBufferCapacity(){
-        return outBuffer.getCapacity();
-    }
-    @ManagedAttribute(description = "Worker UUID")
-    public String getWorkerUuid(){
-        return workerManager.getWorkerUuid();
-    }*/
+    @ManagedAttribute(description = "Current Memory Usage")
+    public double geMemoryUsage() { return memoryPerProcess.getCurrentValue(); }
 
 }

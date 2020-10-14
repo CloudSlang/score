@@ -71,6 +71,9 @@ import static java.lang.Boolean.FALSE;
 public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	private Map<Class<?>,String> beans = new HashMap<Class<?>,String>(){{
+		put(WorkerManager.class, "workerManager");
+		put(CpuPerProcess.class, "cpuPerProcess");
+		put(DiskUsagePerProcess.class, "diskUsagePerProcess");
 		put(MemoryPerProcess.class, "memoryPerProcess");
 		put(EventBusImpl.class, null);
 		put(FastEventBusImpl.class, "consumptionFastEventBus");
@@ -85,16 +88,16 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(WorkerMetricsMBean.class, "io.cloudslang.worker.monitor.service.WorkerMetricsMBean");
 		put(WorkerRecoveryManagerImpl.class, null);
 		put(ReflectionAdapterImpl.class, null);
-        put(SessionDataHandlerImpl.class, "sessionDataHandler");
+		put(SessionDataHandlerImpl.class, "sessionDataHandler");
 		put(SynchronizationManagerImpl.class, null);
-        put(WorkerConfigurationServiceImpl.class, "workerConfiguration");
+		put(WorkerConfigurationServiceImpl.class, "workerConfiguration");
 
-        //Monitors
-        put(WorkerExecutionMonitorServiceImpl.class, "workerExecutionMonitorService");
-        put(WorkerMetricCollectorServiceImpl.class,"workerMetricCollectorService");
-        put(PerfMetricCollectorImpl.class,"perfMetricCollector");
-        put(WorkerMonitorsImpl.class, "workerMonitorsImpl");
-        put(ScheduledWorkerLoadMonitor.class, "scheduledWorkerLoadMonitor");
+		//Monitors
+		put(WorkerExecutionMonitorServiceImpl.class, "workerExecutionMonitorService");
+		put(WorkerMetricCollectorServiceImpl.class,"workerMetricCollectorService");
+		put(PerfMetricCollectorImpl.class,"perfMetricCollector");
+		put(WorkerMonitorsImpl.class, "workerMonitorsImpl");
+		put(ScheduledWorkerLoadMonitor.class, "scheduledWorkerLoadMonitor");
 	}};
 
 	private List<ConfValue> configurationValues = Arrays.asList(
@@ -108,8 +111,8 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 			new ConfValue().NAME("keepAliveInterval").DEFAULT(10000L),
 			new ConfValue().NAME("configRefreshInterval").DEFAULT(1000L),
 			new ConfValue().NAME("interruptCanceledInterval").DEFAULT(30000L),
-            new ConfValue().NAME("statisticsInterval").DEFAULT(1000L),
-            new ConfValue().NAME("scheduledWorkerMonitorInterval").DEFAULT(10000L),
+			new ConfValue().NAME("statisticsInterval").DEFAULT(1000L),
+			new ConfValue().NAME("scheduledWorkerMonitorInterval").DEFAULT(10000L),
 			new ConfValue().NAME("scheduledPerfMetricCollectionInterval").DEFAULT(10000L),
 			new ConfValue().NAME("workerMonitorRefreshInterval").DEFAULT(300000L)
 
