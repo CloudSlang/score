@@ -30,6 +30,10 @@ public class MemoryPerProcess implements WorkerPerfMetric {
     @Override
     public Map<MetricKeyValue, Serializable> measure() {
         Map<MetricKeyValue, Serializable> memUsage = new HashMap<>();
+        memUsage.put(MetricKeyValue.MEMORY_USAGE,getCurrentValue());
+        return memUsage;
+    }
+    public double getCurrentValue() {
         OSProcess process;
         SystemInfo si = new SystemInfo();
         OperatingSystem os = si.getOperatingSystem();
@@ -38,7 +42,6 @@ public class MemoryPerProcess implements WorkerPerfMetric {
         long usedRamProcess = process.getResidentSetSize();
         long totalRam = globalMemory.getTotal();
         double ramUsed = (double) ((usedRamProcess*100)/totalRam);
-        memUsage.put(MetricKeyValue.MEMORY_USAGE,decimalFormat.format(ramUsed));
-        return memUsage;
+        return ramUsed;
     }
 }

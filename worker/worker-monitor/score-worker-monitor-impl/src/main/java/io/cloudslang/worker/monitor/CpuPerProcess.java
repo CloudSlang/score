@@ -33,6 +33,10 @@ public class CpuPerProcess implements WorkerPerfMetric {
     @Override
     public Map<MetricKeyValue, Serializable> measure() {
         Map<MetricKeyValue, Serializable> cpuUsage = new HashMap<>();
+        cpuUsage.put(MetricKeyValue.CPU_USAGE,getCurrentValue());
+        return cpuUsage;
+    }
+    public double getCurrentValue() {
         SystemInfo systemInfo = new SystemInfo();
         OperatingSystem operatingSystem = systemInfo.getOperatingSystem();
         CentralProcessor processor = systemInfo.getHardware().getProcessor();
@@ -42,7 +46,6 @@ public class CpuPerProcess implements WorkerPerfMetric {
         OSProcess osProcess = operatingSystem.getProcess(pid);
         double cpuUsed=(osProcess.getProcessCpuLoadBetweenTicks(oldProcess)*100)/cpuNumber;
         oldProcess = osProcess;
-        cpuUsage.put(MetricKeyValue.CPU_USAGE,decimalFormat.format(cpuUsed));
-        return cpuUsage;
+        return cpuUsed;
     }
 }

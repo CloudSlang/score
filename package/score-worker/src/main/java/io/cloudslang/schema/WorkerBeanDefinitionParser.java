@@ -41,8 +41,12 @@ import io.cloudslang.worker.management.services.WorkerManager;
 import io.cloudslang.worker.management.services.WorkerManagerMBean;
 import io.cloudslang.worker.management.services.WorkerRecoveryManagerImpl;
 import io.cloudslang.worker.management.services.WorkerVersionServiceImpl;
+import io.cloudslang.worker.monitor.CpuPerProcess;
+import io.cloudslang.worker.monitor.DiskUsagePerProcess;
+import io.cloudslang.worker.monitor.MemoryPerProcess;
 import io.cloudslang.worker.monitor.PerfMetricCollectorImpl;
 import io.cloudslang.worker.monitor.service.WorkerMetricCollectorServiceImpl;
+import io.cloudslang.worker.monitor.service.WorkerMetricsMBean;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
@@ -68,6 +72,9 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	private Map<Class<?>,String> beans = new HashMap<Class<?>,String>(){{
 		put(WorkerManager.class, "workerManager");
+		put(CpuPerProcess.class, "cpuPerProcess");
+		put(DiskUsagePerProcess.class, "diskUsagePerProcess");
+		put(MemoryPerProcess.class, "memoryPerProcess");
 		put(EventBusImpl.class, null);
 		put(FastEventBusImpl.class, "consumptionFastEventBus");
 		put(ExecutionServiceImpl.class, "agent");
@@ -78,6 +85,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(RetryTemplate.class, null);
 		put(SimpleExecutionRunnableFactory.class, null);
 		put(WorkerManagerMBean.class, "io.cloudslang.worker.management.services.WorkerManagerMBean");
+		put(WorkerMetricsMBean.class, "io.cloudslang.worker.monitor.service.WorkerMetricsMBean");
 		put(WorkerRecoveryManagerImpl.class, null);
 		put(ReflectionAdapterImpl.class, null);
         put(SessionDataHandlerImpl.class, "sessionDataHandler");

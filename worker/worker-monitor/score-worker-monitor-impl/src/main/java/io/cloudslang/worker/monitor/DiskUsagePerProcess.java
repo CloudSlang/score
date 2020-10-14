@@ -25,16 +25,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DiskUsagePerProcess implements WorkerPerfMetric {
+
     @Override
     public Map<MetricKeyValue, Serializable> measure() {
         Map<MetricKeyValue, Serializable> diskUsage = new HashMap<>();
+        diskUsage.put(MetricKeyValue.DISK_USAGE, getCurrentValue());
+        return diskUsage;
+    }
+
+    public long getCurrentValue() {
         OSProcess process;
         SystemInfo si = new SystemInfo();
         OperatingSystem os = si.getOperatingSystem();
         int processId = os.getProcessId(); //current process id
         process = os.getProcess(processId);
         long readBytes = process.getBytesRead();
-        diskUsage.put(MetricKeyValue.DISK_USAGE,readBytes);
-        return diskUsage;
+        return readBytes;
     }
 }
