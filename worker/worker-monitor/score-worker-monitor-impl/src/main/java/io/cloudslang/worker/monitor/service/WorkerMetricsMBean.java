@@ -37,10 +37,10 @@ public class WorkerMetricsMBean {
     @ManagedAttribute(description = "Current Cpu Usage")
     public double getCpuUsage() { return cpuPerProcess.getCurrentValue(); }
 
+    @ManagedAttribute(description="Current Memory Usage")
+    public double getMemoryUsage() { return memoryPerProcess.getCurrentValue(); }
+
     @ManagedAttribute(description = "Current Disk Usage")
     public long getDiskUsage() { return diskUsagePerProcess.getCurrentValue(); }
-
-    @ManagedAttribute(description = "Current Memory Usage")
-    public double geMemoryUsage() { return memoryPerProcess.getCurrentValue(); }
 
 }
