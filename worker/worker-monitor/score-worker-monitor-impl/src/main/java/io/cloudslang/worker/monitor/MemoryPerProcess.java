@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MemoryPerProcess implements WorkerPerfMetric {
-    private static DecimalFormat decimalFormat = new DecimalFormat("#.##");
     @Override
     public Map<MetricKeyValue, Serializable> measure() {
         Map<MetricKeyValue, Serializable> memUsage = new HashMap<>();
@@ -42,6 +41,8 @@ public class MemoryPerProcess implements WorkerPerfMetric {
         long usedRamProcess = process.getResidentSetSize();
         long totalRam = globalMemory.getTotal();
         double ramUsed = (double) ((usedRamProcess*100)/totalRam);
+        int temp = (int) ramUsed*100;
+        ramUsed = ((double)temp)/100.0;
         return ramUsed;
     }
 }
