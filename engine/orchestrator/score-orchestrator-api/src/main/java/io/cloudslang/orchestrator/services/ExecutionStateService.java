@@ -32,7 +32,7 @@ public interface ExecutionStateService {
      * Reads the run with the specified execution id and branch id
      *
      * @param executionId id of the execution
-     * @param branchId id of the branch
+     * @param branchId    id of the branch
      * @return the execution state
      */
     public ExecutionState readByExecutionIdAndBranchId(Long executionId, String branchId);
@@ -73,7 +73,7 @@ public interface ExecutionStateService {
      * Creates a new execution state object
      *
      * @param executionId id of the execution
-     * @param branchId id of the branch
+     * @param branchId    id of the branch
      * @return the execution state
      */
     public ExecutionState createExecutionState(Long executionId, String branchId);
@@ -82,7 +82,7 @@ public interface ExecutionStateService {
      * Returns the execution object for the specified execution id and branch id
      *
      * @param executionId id of the execution
-     * @param branchId id of the branch
+     * @param branchId    id of the branch
      * @return the execution object
      */
     public Execution readExecutionObject(Long executionId, String branchId);
@@ -91,8 +91,8 @@ public interface ExecutionStateService {
      * Updates the execution object for the specified execution id and branch id
      *
      * @param executionId id of the execution
-     * @param branchId id of the branch
-     * @param execution the execution object
+     * @param branchId    id of the branch
+     * @param execution   the execution object
      */
     public void updateExecutionObject(Long executionId, String branchId, Execution execution);
 
@@ -109,9 +109,11 @@ public interface ExecutionStateService {
      * Deletes the specified execution, both the parent execution and any child executions
      *
      * @param executionId id of the execution
-     * @param branchId id of the branch
+     * @param branchId    id of the branch
      */
     public void deleteExecutionState(Long executionId, String branchId);
 
     public void deleteCanceledExecutionStates();
+
+    public Execution getExecutionObjectForNullBranch(Long executionId);
 }
