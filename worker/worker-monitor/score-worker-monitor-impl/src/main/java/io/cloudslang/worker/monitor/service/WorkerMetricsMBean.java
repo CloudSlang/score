@@ -15,15 +15,24 @@
  */
 package io.cloudslang.worker.monitor.service;
 
+import io.cloudslang.worker.management.services.WorkerManager;
 import io.cloudslang.worker.monitor.CpuPerProcess;
 import io.cloudslang.worker.monitor.DiskUsagePerProcess;
 import io.cloudslang.worker.monitor.MemoryPerProcess;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
 @ManagedResource(description = "Worker Metrics API")
 public class WorkerMetricsMBean {
+
+    @Autowired
+    private WorkerManager workerManager;
+
+    @Autowired
+    @Qualifier("numberOfExecutionThreads")
+    private Integer numberOfThreads;
 
     @Autowired
     CpuPerProcess cpuPerProcess;
@@ -42,5 +51,8 @@ public class WorkerMetricsMBean {
 
     @ManagedAttribute(description = "Current Disk Usage")
     public long getDiskUsage() { return diskUsagePerProcess.getCurrentValue(); }
+
+    @ManagedAttribute(description = "Running Tasks Count")
+    public int getPercentageRunningTasksCount(){ return ((workerManager.getRunningTasksCount()*100)/numberOfThreads); }
 
 }
