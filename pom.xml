@@ -263,9 +263,9 @@
                 <version>${spring.version}</version>
             </dependency>
             <dependency>
-                    <groupId>org.springframework.data</groupId>
-                    <artifactId>spring-data-jpa</artifactId>
-                    <version>2.3.4.RELEASE</version>
+                <groupId>org.springframework.data</groupId>
+                <artifactId>spring-data-jpa</artifactId>
+                <version>2.3.4.RELEASE</version>
                 <exclusions>
                     <exclusion>
                         <groupId>junit</groupId>
