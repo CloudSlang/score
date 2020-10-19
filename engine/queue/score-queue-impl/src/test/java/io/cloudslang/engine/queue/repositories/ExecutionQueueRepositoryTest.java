@@ -35,9 +35,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,7 +59,7 @@ import static java.util.Comparator.comparingInt;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @Transactional
-@TransactionConfiguration(defaultRollback = true)
+@Rollback
 public class ExecutionQueueRepositoryTest {
 
     private static final int WORKER_POLLING_MEMORY = 10000000;

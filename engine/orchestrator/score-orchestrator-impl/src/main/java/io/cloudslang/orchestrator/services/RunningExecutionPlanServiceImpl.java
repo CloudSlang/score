@@ -16,21 +16,18 @@
 
 package io.cloudslang.orchestrator.services;
 
+import com.google.common.collect.Lists;
 import io.cloudslang.orchestrator.repositories.RunningExecutionPlanRepository;
 import io.cloudslang.score.api.ExecutionPlan;
 import io.cloudslang.score.facade.entities.RunningExecutionPlan;
 import io.cloudslang.score.facade.services.RunningExecutionPlanService;
-
-import com.google.common.collect.Lists;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -63,7 +60,8 @@ public final class RunningExecutionPlanServiceImpl implements RunningExecutionPl
     @Override
     @Transactional(readOnly = true)
     public RunningExecutionPlan readExecutionPlanById(Long id) {
-        return runningExecutionPlanRepository.findOne(id);
+        return runningExecutionPlanRepository.findById(id)
+                .orElse(null);
     }
 
 
