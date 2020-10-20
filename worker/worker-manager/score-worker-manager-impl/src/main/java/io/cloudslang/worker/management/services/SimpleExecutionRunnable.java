@@ -103,10 +103,12 @@ public class SimpleExecutionRunnable implements Runnable {
     @Override
     public void run() {
         String executionId = executionMessage.getMsgId();
-
-        // We are renaming the thread for logging/monitoring purposes
-        String origThreadName = currentThread().getName();
-        currentThread().setName(origThreadName + "_" + executionId);
+        // Get thread reference only once, since Thread.currentThread() is a native method
+        final Thread currentThreadRef = currentThread();
+        // Needed for restoring original thread name when thread is not executing runs
+        final String origThreadName = currentThreadRef.getName();
+        // We are renaming the thread for logging/profiling purposes
+        currentThreadRef.setName(origThreadName + "_" + executionId);
         Execution execution = null;
         try {
             // If we got here because of te shortcut we have the object
@@ -148,8 +150,8 @@ public class SimpleExecutionRunnable implements Runnable {
             }
         } finally {
             endExecutionCallback.endExecution(parseLong(executionId));
-            // Rename the thread back
-            currentThread().setName(origThreadName);
+            // Restore the original thread name, the original name as given by the thread factory
+            currentThreadRef.setName(origThreadName);
         }
     }
 
