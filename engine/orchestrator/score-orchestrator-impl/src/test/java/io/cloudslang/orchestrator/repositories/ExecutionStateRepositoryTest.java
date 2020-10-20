@@ -39,10 +39,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -73,6 +70,7 @@ public class ExecutionStateRepositoryTest {
         executionState.setStatus(status);
         executionState.setExecutionId(123L);
         executionState.setBranchId(UUID.randomUUID().toString());
+        executionState.setUpdatedTime(Calendar.getInstance().getTime());
         executionStateRepository.saveAndFlush(executionState);
         return executionState;
     }

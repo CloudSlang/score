@@ -48,4 +48,8 @@ public interface ExecutionStateRepository extends JpaRepository<ExecutionState, 
     @Query("delete from ExecutionState se where se.executionId in :ids")
     @Modifying
     int deleteByIds(@Param("ids") Collection<Long> ids);
+
+    @Query("delete from ExecutionState executionState where executionState.status in :statuses")
+    public void deleteByStatusIn(@Param("statuses") List<ExecutionStatus> statuses);
+
 }

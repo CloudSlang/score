@@ -20,6 +20,7 @@ import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.orchestrator.entities.ExecutionState;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -104,6 +105,15 @@ public interface ExecutionStateService {
      * @param status  status of the execution
      */
     public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionStatus status);
+
+    /***
+     * Updates the status for the given execution id and branch id
+     *
+     * @param executionId id of the execution
+     * @param branchId id of the branch
+     * @param status  status of the execution
+     */
+    public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionStatus status, Date date);
 
     /**
      * Deletes the specified execution, both the parent execution and any child executions

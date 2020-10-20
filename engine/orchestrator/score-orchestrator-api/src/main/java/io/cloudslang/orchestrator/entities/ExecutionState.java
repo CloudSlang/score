@@ -31,6 +31,7 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import java.util.Arrays;
+import java.util.Date;
 
 /**
  * User:
@@ -57,6 +58,14 @@ public class ExecutionState extends AbstractIdentifiable {
     @Lob
     @Basic(fetch = FetchType.LAZY)
     private byte[] executionObject;
+
+
+    @Column(name = "UPDATE_TIME", nullable = false)
+    private Date updatedTime;
+
+    public Date getUpdatedTime() {return updatedTime;}
+
+    public void setUpdatedTime(Date updatedTime) {this.updatedTime = updatedTime;}
 
     public Long getExecutionId() {
         return executionId;
@@ -101,6 +110,7 @@ public class ExecutionState extends AbstractIdentifiable {
         equalsBuilder.append(executionId, that.executionId);
         equalsBuilder.append(executionObject, that.executionObject);
         equalsBuilder.append(status, that.status);
+        equalsBuilder.append(updatedTime,this.updatedTime);
         return equalsBuilder.isEquals();
     }
 
@@ -110,6 +120,7 @@ public class ExecutionState extends AbstractIdentifiable {
         result = 31 * result + (branchId != null ? branchId.hashCode() : 0);
         result = 31 * result + (status != null ? status.hashCode() : 0);
         result = 31 * result + (executionObject != null ? Arrays.hashCode(executionObject) : 0);
+        result = 31 * result + (updatedTime != null ? updatedTime.hashCode() : 0);
         return result;
     }
 
@@ -118,6 +129,7 @@ public class ExecutionState extends AbstractIdentifiable {
         return "ExecutionState {" +
                 "executionId='" + executionId + '\'' +
                 ", branchId='" + branchId + '\'' +
+                ", updatedTime='" + updatedTime +'\''+
                 '}';
     }
 }

@@ -33,6 +33,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -83,6 +85,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         executionState.setExecutionId(executionId);
         executionState.setBranchId(EMPTY_BRANCH);
         executionState.setStatus(ExecutionStatus.RUNNING);
+        executionState.setUpdatedTime(Calendar.getInstance().getTime());
         return executionStateRepository.save(executionState);
     }
 
@@ -95,6 +98,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         executionState.setExecutionId(executionId);
         executionState.setBranchId(branchId);
         executionState.setStatus(ExecutionStatus.PENDING_PAUSE);
+        executionState.setUpdatedTime(Calendar.getInstance().getTime());
         return executionStateRepository.save(executionState);
     }
 
@@ -128,6 +132,17 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         Validate.notNull(status, "status cannot be null");
         ExecutionState executionState = findByExecutionIdAndBranchId(executionId, branchId);
         executionState.setStatus(status);
+    }
+
+    @Override
+    @Transactional
+    public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionStatus status, Date date) {
+        validateExecutionId(executionId);
+        validateBranchId(branchId);
+        Validate.notNull(status, "status cannot be null");
+        ExecutionState executionState = findByExecutionIdAndBranchId(executionId, branchId);
+        executionState.setStatus(status);
+        executionState.setUpdatedTime(date);
     }
 
     private ExecutionState findByExecutionIdAndBranchId(Long executionId, String branchId) {

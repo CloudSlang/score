@@ -57,6 +57,9 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
             <column name="STATUS" type="varchar(255)">
                 <constraints nullable="false" />
             </column>
+            <column name="UPDATE_TIME" type="DATETIME">
+                <constraints nullable="false" />
+            </column>
             <column name="EXECUTION_OBJECT" type="${blob.type}"></column>
         </createTable>
 
