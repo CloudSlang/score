@@ -17,8 +17,8 @@
 
 package io.cloudslang.engine.node.repositories;
 
-import io.cloudslang.score.api.nodes.WorkerStatus;
 import io.cloudslang.engine.node.entities.WorkerNode;
+import io.cloudslang.score.api.nodes.WorkerStatus;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,9 +28,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
@@ -41,7 +41,7 @@ import java.util.UUID;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = WorkerNodeRepositoryTest.Conf.class)
 @Transactional
-@TransactionConfiguration(defaultRollback = true)
+@Rollback
 public class WorkerNodeRepositoryTest {
 
     @Autowired

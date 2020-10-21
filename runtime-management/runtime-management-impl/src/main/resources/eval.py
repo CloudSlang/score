@@ -1,6 +1,6 @@
 import json
 import sys
-from jsonpath_ng import jsonpath, parse
+from jsonpath_ng.ext import parse
 import re
 from io import StringIO
 from lxml import etree

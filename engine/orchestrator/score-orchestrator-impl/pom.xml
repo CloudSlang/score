@@ -24,7 +24,7 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>orchestrator</artifactId>
-        <version>0.3.177-SNAPSHOT</version>
+        <version>0.3.180-SNAPSHOT</version>
     </parent>
 
     <artifactId>score-orchestrator-impl</artifactId>
@@ -32,13 +32,18 @@
     <dependencies>
 
         <dependency>
-            <groupId>javax.el</groupId>
-            <artifactId>javax.el-api</artifactId>
+            <groupId>org.glassfish</groupId>
+            <artifactId>jakarta.el</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jpa</artifactId>
         </dependency>
 
         <dependency>
@@ -124,7 +129,7 @@
         </dependency>
 
         <dependency>
-            <groupId>org.hibernate</groupId>
+            <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
             <scope>test</scope>
         </dependency>
