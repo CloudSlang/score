@@ -94,7 +94,7 @@
             <column name="STATUS" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-			<column name="UPDATE_TIME" type="DATETIME">
+			<column name="UPDATE_TIME" type="BIGINT">
 				<constraints nullable="false"/>
 			</column>
             <column name="EXECUTION_OBJECT" type="${blob.type}"></column>

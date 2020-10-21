@@ -113,7 +113,7 @@ public interface ExecutionStateService {
      * @param branchId id of the branch
      * @param status  status of the execution
      */
-    public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionStatus status, Date date);
+    public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionStatus status, Long date);
 
     /**
      * Deletes the specified execution, both the parent execution and any child executions

@@ -61,11 +61,11 @@ public class ExecutionState extends AbstractIdentifiable {
 
 
     @Column(name = "UPDATE_TIME", nullable = false)
-    private Date updatedTime;
+    private Long updatedTime;
 
-    public Date getUpdatedTime() {return updatedTime;}
+    public Long getUpdatedTime() {return updatedTime;}
 
-    public void setUpdatedTime(Date updatedTime) {this.updatedTime = updatedTime;}
+    public void setUpdatedTime(Long updatedTime) {this.updatedTime = updatedTime;}
 
     public Long getExecutionId() {
         return executionId;

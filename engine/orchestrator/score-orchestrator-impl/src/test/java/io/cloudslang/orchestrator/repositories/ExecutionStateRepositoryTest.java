@@ -70,7 +70,7 @@ public class ExecutionStateRepositoryTest {
         executionState.setStatus(status);
         executionState.setExecutionId(123L);
         executionState.setBranchId(UUID.randomUUID().toString());
-        executionState.setUpdatedTime(Calendar.getInstance().getTime());
+        executionState.setUpdatedTime(System.currentTimeMillis());
         executionStateRepository.saveAndFlush(executionState);
         return executionState;
     }

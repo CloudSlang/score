@@ -340,35 +340,35 @@ public class ExecutionStateServiceTest {
     public void testUpdateExecutionStateStatus_NullExecutionId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.updateExecutionStateStatus(null, "Asdfsdf", null);
+        executionStateService.updateExecutionStateStatus(null, "Asdfsdf", null,System.currentTimeMillis());
     }
 
     @Test
     public void testUpdateExecutionStateStatus_EmptyExecutionId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.updateExecutionStateStatus(null, "Asdfsdf", null);
+        executionStateService.updateExecutionStateStatus(null, "Asdfsdf", null,System.currentTimeMillis());
     }
 
     @Test
     public void testUpdateExecutionStateStatus_NullBranchId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.updateExecutionStateStatus(123L, null, null);
+        executionStateService.updateExecutionStateStatus(123L, null, null,System.currentTimeMillis());
     }
 
     @Test
     public void testUpdateExecutionStateStatus_EmptyBranchId() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.updateExecutionStateStatus(123L, "          ", null);
+        executionStateService.updateExecutionStateStatus(123L, "          ", null,System.currentTimeMillis());
     }
 
     @Test
     public void testUpdateExecutionStateStatus_NullStatus() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("status cannot be null");
-        executionStateService.updateExecutionStateStatus(123L, "asdasd", null);
+        executionStateService.updateExecutionStateStatus(123L, "asdasd", null,System.currentTimeMillis());
     }
 
     @Test
@@ -381,7 +381,7 @@ public class ExecutionStateServiceTest {
 
         when(executionStateRepository.findByExecutionIdAndBranchId(executionId, branchId)).thenReturn(executionState);
 
-        executionStateService.updateExecutionStateStatus(executionId, branchId, status);
+        executionStateService.updateExecutionStateStatus(executionId, branchId, status,System.currentTimeMillis());
         verify(executionState, times(1)).setStatus(status);
     }
 
