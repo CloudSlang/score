@@ -20,12 +20,15 @@ import io.cloudslang.engine.queue.services.LargeMessagesMonitorService;
 import io.cloudslang.engine.queue.services.cleaner.QueueCleanerService;
 import io.cloudslang.engine.queue.services.recovery.ExecutionRecoveryService;
 import io.cloudslang.engine.versioning.services.VersionService;
+import io.cloudslang.orchestrator.services.FinishedExecutionStateCleanerService;
 import io.cloudslang.orchestrator.services.SplitJoinService;
 import io.cloudslang.orchestrator.services.SuspendedExecutionCleanerService;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import java.util.Iterator;
+import java.util.List;
+import com.google.common.collect.Iterables;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -55,6 +58,9 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
 
     @Autowired
     private LargeMessagesMonitorService largeMessagesMonitorService;
+
+    @Autowired
+    private FinishedExecutionStateCleanerService finishedExecutionStateCleanerService;
 
     private final Logger logger = Logger.getLogger(getClass());
 
@@ -157,6 +163,19 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
             suspendedExecutionCleanerService.cleanupSuspendedExecutions();
         } catch (Exception e) {
             logger.error("Can't run suspended execution cleaner job.", e);
+        }
+    }
+
+    @Override
+    public void cleanFinishedExecutionState() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("CleanFinishedExecutionState woke up at " + new Date());
+        }
+
+        try {
+            finishedExecutionStateCleanerService.cleanFinishedExecutionState();
+        } catch (Exception e) {
+            logger.error("Can't run finished execution state cleaner job.", e);
         }
     }
 

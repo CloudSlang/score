@@ -126,4 +126,6 @@ public interface ExecutionStateService {
     public void deleteCanceledExecutionStates();
 
     public Execution getExecutionObjectForNullBranch(Long executionId);
+
+    public void deleteFinishedExecutionState();
 }

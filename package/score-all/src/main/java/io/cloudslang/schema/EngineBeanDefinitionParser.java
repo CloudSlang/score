@@ -71,7 +71,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.w3c.dom.Element;
-
+import io.cloudslang.orchestrator.services.FinishedExecutionStateCleanerServiceImpl;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -108,7 +108,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(QueueStateIdGeneratorServiceImpl.class, null);
 		put(ScoreTriggeringImpl.class,null);
 		put(SuspendedExecutionCleanerServiceImpl.class, null);
-
+		put(FinishedExecutionStateCleanerServiceImpl.class, null);
 		put(PartitionUtils.class, null);
 		put(ExecutionMessageConverter.class, null);
 		put(ExecutionSerializationUtil.class, null);

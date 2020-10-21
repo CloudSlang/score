@@ -48,4 +48,5 @@ public interface ScoreEngineJobs {
     void miMergeBranchesContexts();
 
     void monitorLargeMessagesJob();
+    void cleanFinishedExecutionState();
 }

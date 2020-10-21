@@ -17,8 +17,7 @@
 package io.cloudslang.orchestrator.services;
 
 import static io.cloudslang.orchestrator.entities.ExecutionState.EMPTY_BRANCH;
-import static io.cloudslang.score.facade.execution.ExecutionStatus.CANCELED;
-import static io.cloudslang.score.facade.execution.ExecutionStatus.PENDING_CANCEL;
+import static io.cloudslang.score.facade.execution.ExecutionStatus.*;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import io.cloudslang.score.facade.execution.ExecutionActionException;
@@ -31,15 +30,18 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.util.CollectionUtils;
+import static java.util.Arrays.asList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * User:
  * Date: 12/05/2014
  */
 public class ExecutionStateServiceImpl implements ExecutionStateService {
+    private static final long EXECUTION_STATE_INACTIVE_TIME = 1800000;
 
     @Autowired
     private ExecutionStateRepository executionStateRepository;
@@ -142,6 +144,18 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         executionState.setStatus(status);
         executionState.setUpdatedTime(date);
     }
+    @Override
+    @Transactional
+    public void deleteFinishedExecutionState() {
+        long timeLimitMillis = System.currentTimeMillis() - EXECUTION_STATE_INACTIVE_TIME;
+        List<ExecutionState> toBeDeleted =
+                executionStateRepository.findByStatusInAndUpdateTimeLessThanEqual(
+                        asList(CANCELED, COMPLETED, SYSTEM_FAILURE), timeLimitMillis);
+        if (!CollectionUtils.isEmpty(toBeDeleted)) {
+            List<Long> ids = toBeDeleted.stream().map(map -> map.getExecutionId()).collect(Collectors.toList());
+            executionStateRepository.deleteByIds(ids);
+        }
+    }
 
     private ExecutionState findByExecutionIdAndBranchId(Long executionId, String branchId) {
         ExecutionState executionState = executionStateRepository.findByExecutionIdAndBranchId(executionId, branchId);
@@ -152,7 +166,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
     }
 
     private List<ExecutionStatus> getCancelStatuses() {
-        return Arrays.asList(CANCELED, PENDING_CANCEL);
+        return asList(CANCELED, PENDING_CANCEL);
     }
 
     @Override
