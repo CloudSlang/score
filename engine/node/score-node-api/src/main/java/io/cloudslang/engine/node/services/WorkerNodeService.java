@@ -196,6 +196,7 @@ public interface WorkerNodeService {
      * @param uuid the uuid of the worker to update
      * @param status the status to update the given worker to
      */
+    void updateWorkerBusynessValue(String uuid, int workerBusynessValue);
     void updateStatusInSeparateTransaction(String uuid, WorkerStatus status);
 
     /**

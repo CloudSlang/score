@@ -27,13 +27,13 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Random;
 
 
 public class WorkerNodeServiceImpl implements WorkerNodeService {
@@ -274,6 +274,16 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
         worker.setStatus(status);
     }
 
+    @Transactional
+    public void updateWorkerBusynessValue(String uuid, int workerBusynessValue)
+    {
+        WorkerNode worker = workerNodeRepository.findByUuid(uuid);
+        if (worker == null) {
+            throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
+        }
+        worker.setWorkerBusynessValue(workerBusynessValue);
+    }
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateStatusInSeparateTransaction(String uuid, WorkerStatus status) {
@@ -282,6 +292,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
             throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
         }
         worker.setStatus(status);
+        worker.setWorkerBusynessValue(new Random().nextInt(100));
     }
 
     @Override
