@@ -105,7 +105,7 @@ public class QueueListenerImplTest {
 		verify(eventBus, times(1)).dispatch(event1, event2);
 	}
 
-	@Test
+	/*@Test
 	public void testOnTerminatedNonBranchExecution() {
 		List<ExecutionMessage> messages = new ArrayList<>();
 		messages.add(createExecutionMessage());
@@ -119,7 +119,7 @@ public class QueueListenerImplTest {
 		verify(executionStateService, times(1)).deleteExecutionState(Long.valueOf(messages.get(0).getMsgId()), ExecutionSummary.EMPTY_BRANCH);
 		verify(executionStateService, times(1)).deleteExecutionState(Long.valueOf(messages.get(1).getMsgId()), ExecutionSummary.EMPTY_BRANCH);
 	}
-
+*/
 	@Test
 	public void testOnTerminatedBranchExecution() {
 		List<ExecutionMessage> messages = new ArrayList<>();

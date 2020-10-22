@@ -149,7 +149,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
     public void deleteFinishedExecutionState() {
         long timeLimitMillis = System.currentTimeMillis() - EXECUTION_STATE_INACTIVE_TIME;
         List<ExecutionState> toBeDeleted =
-                executionStateRepository.findByStatusInAndUpdateTimeLessThanEqual(
+                executionStateRepository.findByStatusInAndUpdatedTimeLessThanEqual(
                         asList(CANCELED, COMPLETED, SYSTEM_FAILURE), timeLimitMillis);
         if (!CollectionUtils.isEmpty(toBeDeleted)) {
             List<Long> ids = toBeDeleted.stream().map(map -> map.getExecutionId()).collect(Collectors.toList());
