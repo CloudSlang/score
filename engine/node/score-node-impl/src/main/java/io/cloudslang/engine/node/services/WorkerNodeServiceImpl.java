@@ -274,6 +274,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
         worker.setStatus(status);
     }
 
+    @Override
     @Transactional
     public void updateWorkerBusynessValue(String uuid, int workerBusynessValue)
     {
