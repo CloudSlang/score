@@ -20,9 +20,21 @@ class PythonAgentExecutor(object):
     def __enable_standard_io(self, old_io):
         (sys.stdin, sys.stdout, sys.stderr, sys.exit) = old_io
 
-    def cs_regex(self, str, regex):
-        x = re.search(regex, str)
-        return None if x is None else x.group()
+    def cs_regex(self, str, regex, split_lines = False):
+        lines = str.splitlines() if split_lines else [ str ]
+
+        result = []
+        for line in lines:
+            x = re.findall(regex, line)
+            result.extend(x)
+
+        if len(result) == 0:
+            return None
+
+        if len(result) == 1:
+            return result[0]
+
+        return json.dumps(result)
 
     def cs_xpath_query(self, str, xpath):
         f = StringIO(str)
