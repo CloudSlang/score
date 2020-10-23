@@ -20,6 +20,8 @@ public enum MetricKeyValue {
     WORKER_MEASURED_TIME,
     CPU_USAGE,
     MEMORY_USAGE,
+    HEAP_SIZE,
+    THREAD_UTILIZATION,
     DISK_USAGE;
 
     private MetricKeyValue() { }
