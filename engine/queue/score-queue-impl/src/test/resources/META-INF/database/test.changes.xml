@@ -95,6 +95,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="EXECUTION_OBJECT" type="${blob.type}"></column>
+			<column name="UPDATE_TIME" type="BIGINT"></column>
         </createTable>
 
         <addUniqueConstraint tableName="OO_EXECUTION_STATE" columnNames="EXECUTION_ID, BRANCH_ID"

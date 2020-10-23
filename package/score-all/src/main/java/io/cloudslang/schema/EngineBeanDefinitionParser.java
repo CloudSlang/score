@@ -43,22 +43,7 @@ import io.cloudslang.engine.queue.services.recovery.MessageRecoveryServiceImpl;
 import io.cloudslang.engine.queue.services.recovery.WorkerRecoveryServiceImpl;
 import io.cloudslang.engine.versioning.services.VersionServiceImpl;
 import io.cloudslang.job.ScoreEngineJobsImpl;
-import io.cloudslang.orchestrator.services.CancelExecutionServiceImpl;
-import io.cloudslang.orchestrator.services.EngineVersionServiceImpl;
-import io.cloudslang.orchestrator.services.ExecutionSerializationUtil;
-import io.cloudslang.orchestrator.services.ExecutionStateServiceImpl;
-import io.cloudslang.orchestrator.services.MergedConfigurationServiceImpl;
-import io.cloudslang.orchestrator.services.OrchestratorDispatcherServiceImpl;
-import io.cloudslang.orchestrator.services.RunningExecutionPlanServiceImpl;
-import io.cloudslang.orchestrator.services.ScoreDeprecatedImpl;
-import io.cloudslang.orchestrator.services.ScoreImpl;
-import io.cloudslang.orchestrator.services.ScorePauseResumeImpl;
-import io.cloudslang.orchestrator.services.ScoreTriggeringImpl;
-import io.cloudslang.orchestrator.services.SplitJoinServiceImpl;
-import io.cloudslang.orchestrator.services.StubPauseResumeServiceImpl;
-import io.cloudslang.orchestrator.services.SuspendedExecutionCleanerServiceImpl;
-import io.cloudslang.orchestrator.services.SuspendedExecutionServiceImpl;
-import io.cloudslang.orchestrator.services.WorkerDbSupportServiceImpl;
+import io.cloudslang.orchestrator.services.*;
 import io.cloudslang.schema.context.ScoreDatabaseContext;
 import io.cloudslang.schema.context.ScoreDefaultDatasourceContext;
 import io.cloudslang.worker.execution.services.ExternalExecutionServiceImpl;
@@ -124,6 +109,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
         put(ScoreEngineJobsImpl.class,"scoreEngineJobs");
 		put(BusyWorkersServiceImpl.class,"busyWorkersService");
 		put(MergedConfigurationServiceImpl.class,"MergedConfigurationService");
+		put(FinishedExecutionStateCleanerServiceImpl.class, null);
 	}};
 
 	@Override
