@@ -268,6 +268,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
             <column name="IS_DELETED" type="boolean" valueBoolean="false" />
             <column name="BULK_NUMBER" type="VARCHAR(48)"/>
             <column name="WRV" type="VARCHAR(48)"/>
+            <column name="WORKER_BUSYNESS_VALUE" type="INTEGER"/>
             <column name="VERSION" type="VARCHAR(48)"/>
             <column name="VERSION_ID" type="VARCHAR(48)"/>
         </createTable>
@@ -311,6 +312,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
             </column>
         </createTable>
     </changeSet>
+
 
 
 </databaseChangeLog>

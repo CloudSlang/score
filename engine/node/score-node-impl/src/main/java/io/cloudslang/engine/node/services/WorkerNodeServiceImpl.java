@@ -28,12 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 
 public class WorkerNodeServiceImpl implements WorkerNodeService {
@@ -282,6 +277,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
             throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
         }
         worker.setStatus(status);
+        worker.setWorkerBusynessValue(new Random().nextInt(100));
     }
 
     @Override

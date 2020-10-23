@@ -117,6 +117,9 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
 	@Column(name = "VERSION_ID", length = 48, nullable = false)
 	private String versionId = "";
 
+	@Column(name = "WORKER_BUSYNESS_VALUE", length = 20)
+	private int workerBusynessValue;
+
     @Override
 	public String getUuid() {
 		return uuid;
@@ -273,6 +276,17 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
 	public void setVersionId(String versionId) {
 		this.versionId = versionId;
 	}
+
+	@Override
+	public int getWorkerBusynessValue() {
+		return workerBusynessValue;
+	}
+
+	public void setWorkerBusynessValue(int workerBusynessValue)
+	{
+		this.workerBusynessValue = workerBusynessValue;
+	}
+
 
 	@Override
 	public boolean equals(Object o) {
