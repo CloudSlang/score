@@ -23,7 +23,7 @@
 	<parent>
 		<groupId>io.cloudslang</groupId>
 		<artifactId>node</artifactId>
-		<version>0.3.181-SNAPSHOT</version>
+		<version>0.3.182-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>score-node-impl</artifactId>
