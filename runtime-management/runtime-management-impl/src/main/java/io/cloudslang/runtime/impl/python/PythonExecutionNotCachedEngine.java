@@ -52,4 +52,13 @@ public class PythonExecutionNotCachedEngine implements PythonExecutionEngine{
             pythonExecutor.close();
         }
     }
+
+    @Override
+    public PythonEvaluationResult test(String prepareEnvironmentScript, String script, Map<String, Serializable> vars, long timeout) {
+        PythonExecutor pythonExecutor = new PythonExecutor(Collections.<String>emptySet());
+        try {
+            return pythonExecutor.eval(prepareEnvironmentScript, script, vars);
+        } finally {
+            pythonExecutor.close();
+        }    }
 }

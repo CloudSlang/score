@@ -26,7 +26,6 @@ import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.apache.log4j.Logger;
@@ -37,7 +36,6 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +44,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -59,6 +56,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -72,6 +72,7 @@ public class ExternalPythonExecutor {
     private static final String MAIN_PY = "main.py";
     private static final String PYTHON_SUFFIX = ".py";
     private static final long EXECUTION_TIMEOUT = Long.getLong("python.timeout", 30);
+    private static final long EVALUATION_TIMEOUT = Long.getLong("python.evaluation.timeout", 3);
     private static final String PYTHON_FILENAME_SCRIPT_EXTENSION = ".py\"";
     private static final int PYTHON_FILENAME_DELIMITERS = 6;
     private static final ObjectMapper objectMapper;
@@ -126,6 +127,28 @@ public class ExternalPythonExecutor {
         }
     }
 
+    public PythonEvaluationResult test(String expression, String prepareEnvironmentScript,
+                                       Map<String, Serializable> context, long timeout) {
+        TempEvalEnvironment tempEvalEnvironment = null;
+        try {
+            String pythonPath = checkPythonPath();
+            tempEvalEnvironment = generateTempResourcesForEval();
+            String payload = generatePayloadForEval(expression, prepareEnvironmentScript, context);
+            addFilePermissions(tempEvalEnvironment.parentFolder);
+
+            return runPythonTestProcess(pythonPath, payload, tempEvalEnvironment, context, timeout);
+
+        } catch (IOException e) {
+            String message = "Failed to generate execution resources";
+            logger.error(message, e);
+            throw new RuntimeException(message);
+        } finally {
+            if ((tempEvalEnvironment != null) && !deleteQuietly(tempEvalEnvironment.parentFolder)) {
+                logger.warn(String.format("Failed to cleanup python execution resources {%s}", tempEvalEnvironment.parentFolder));
+            }
+        }
+    }
+
     private void addFilePermissions(File file) throws IOException {
         Set<PosixFilePermission> filePermissions = new HashSet<>();
         filePermissions.add(PosixFilePermission.OWNER_READ);
@@ -165,7 +188,7 @@ public class ExternalPythonExecutor {
         ProcessBuilder processBuilder = preparePythonProcess(executionEnvironment, pythonPath);
 
         try {
-            String returnResult = getResult(payload, processBuilder);
+            String returnResult = getResult(payload, processBuilder, EXECUTION_TIMEOUT);
             returnResult = parseScriptExecutionResult(returnResult).getElementsByTagName("result").item(0)
                     .getTextContent();
             ScriptResults scriptResults = objectMapper.readValue(returnResult, ScriptResults.class);
@@ -178,7 +201,7 @@ public class ExternalPythonExecutor {
 
             //noinspection unchecked
             return new PythonExecutionResult(scriptResults.getReturnResult());
-        } catch (IOException | InterruptedException | SAXException | ParserConfigurationException e) {
+        } catch (IOException | InterruptedException | SAXException | ParserConfigurationException | ExecutionException | TimeoutException e) {
             logger.error("Failed to run script. ", e.getCause() != null ? e.getCause() : e);
             throw new RuntimeException("Failed to run script.");
         }
@@ -190,7 +213,7 @@ public class ExternalPythonExecutor {
         ProcessBuilder processBuilder = preparePythonProcess(executionEnvironment, pythonPath);
 
         try {
-            String returnResult = getResult(payload, processBuilder);
+            String returnResult = getResult(payload, processBuilder, EVALUATION_TIMEOUT);
 
             EvaluationResults scriptResults = objectMapper.readValue(returnResult, EvaluationResults.class);
             String exception = scriptResults.getException();
@@ -201,9 +224,35 @@ public class ExternalPythonExecutor {
             context.put("accessed_resources_set", (Serializable) scriptResults.getAccessedResources());
             //noinspection unchecked
             return new PythonEvaluationResult(processReturnResult(scriptResults), context);
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
             logger.error("Failed to run script. ", e.getCause() != null ? e.getCause() : e);
             throw new RuntimeException("Failed to run script.");
+        }
+    }
+
+    private PythonEvaluationResult runPythonTestProcess(String pythonPath, String payload, TempEvalEnvironment executionEnvironment,
+                                                        Map<String, Serializable> context, long timeout) {
+
+        ProcessBuilder processBuilder = preparePythonProcess(executionEnvironment, pythonPath);
+
+        try {
+            String returnResult = getResult(payload, processBuilder, timeout);
+
+            EvaluationResults scriptResults = objectMapper.readValue(returnResult, EvaluationResults.class);
+            String exception = scriptResults.getException();
+            if (!StringUtils.isEmpty(exception)) {
+                logger.error(String.format("Failed to execute script {%s}", exception));
+                throw new ExternalPythonEvalException(exception);
+            }
+            context.put("accessed_resources_set", (Serializable) scriptResults.getAccessedResources());
+            //noinspection unchecked
+            return new PythonEvaluationResult(processReturnResult(scriptResults), context);
+        } catch (IOException | InterruptedException | ExecutionException e) {
+            logger.error("Failed to run script. ", e.getCause() != null ? e.getCause() : e);
+            throw new RuntimeException("Failed to run script.");
+        } catch (TimeoutException e) {
+            throw new RuntimeException("Evaluation timed out.");
+
         }
     }
 
@@ -218,34 +267,34 @@ public class ExternalPythonExecutor {
             case INTEGER:
                 return Integer.valueOf(results.getReturnResult());
             case LIST:
-                return objectMapper.readValue(results.getReturnResult(), new TypeReference<ArrayList<Serializable>>(){});
+                return objectMapper.readValue(results.getReturnResult(), new TypeReference<ArrayList<Serializable>>() {
+                });
             default:
                 return results.getReturnResult();
         }
     }
 
-    private String getResult(String payload, ProcessBuilder processBuilder) throws IOException, InterruptedException {
-        Process process = processBuilder.start();
-        PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(process.getOutputStream(), UTF_8));
-        printWriter.println(payload);
-        printWriter.flush();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        String line;
-        StringBuilder returnResult = new StringBuilder();
-        while ((line = reader.readLine()) != null) {
-            returnResult.append(line);
-        }
-        boolean isInTime = process.waitFor(EXECUTION_TIMEOUT, MINUTES);
-        if (!isInTime) {
-            process.destroy();
-            throw new RuntimeException("Execution timed out");
-        } else if (process.exitValue() != 0) {
-            StringWriter writer = new StringWriter();
-            IOUtils.copy(process.getErrorStream(), writer, UTF_8);
-            logger.error(writer.toString());
-            throw new RuntimeException("Execution returned non 0 result");
-        }
-        return returnResult.toString();
+    private String getResult(String payload, ProcessBuilder processBuilder, long timeoutPeriod) throws InterruptedException, ExecutionException, TimeoutException {
+        return CompletableFuture.supplyAsync(
+                () -> {
+                    try {
+                        Process process = processBuilder.start();
+                        PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(process.getOutputStream(), UTF_8));
+                        printWriter.println(payload);
+                        printWriter.flush();
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                        String line;
+                        StringBuilder returnResult = new StringBuilder();
+                        while ((line = reader.readLine()) != null) {
+                            returnResult.append(line);
+                        }
+
+                        return returnResult.toString();
+                    } catch (IOException e) {
+                        logger.error("Failed to run script. ", e.getCause() != null ? e.getCause() : e);
+                        throw new RuntimeException("Execution timed out");
+                    }
+                }).get(timeoutPeriod, MINUTES);
     }
 
     private ProcessBuilder preparePythonProcess(TempEnvironment executionEnvironment, String pythonPath) {
@@ -277,7 +326,7 @@ public class ExternalPythonExecutor {
     }
 
     private String generatePayloadForEval(String expression, String prepareEnvironmentScript,
-                                       Map<String, Serializable> context) throws JsonProcessingException {
+                                          Map<String, Serializable> context) throws JsonProcessingException {
         HashMap<String, Serializable> payload = new HashMap<>(4);
         payload.put("expression", expression);
         payload.put("envSetup", prepareEnvironmentScript);
@@ -285,7 +334,8 @@ public class ExternalPythonExecutor {
         return objectMapper.writeValueAsString(payload);
     }
 
-    private String generatePayloadForExec(String userScript, Map<String, Serializable> inputs) throws JsonProcessingException {
+    private String generatePayloadForExec(String userScript, Map<String, Serializable> inputs) throws
+            JsonProcessingException {
         HashMap<String, String> parsedInputs = new HashMap<>();
         for (Entry<String, Serializable> entry : inputs.entrySet()) {
             parsedInputs.put(entry.getKey(), entry.getValue().toString());

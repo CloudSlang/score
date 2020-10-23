@@ -90,4 +90,30 @@ public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
             throw new ExternalPythonScriptException("Execution was interrupted while waiting for a python permit.");
         }
     }
+
+    @Override
+    public PythonEvaluationResult test(String prepareEnvironmentScript, String script, Map<String, Serializable> vars, long timeout) {
+        try {
+            if (executionControlSemaphore.tryAcquire(1L, TimeUnit.SECONDS)) {
+                try {
+                    return externalPythonExecutionEngine.test(prepareEnvironmentScript, script, vars,timeout);
+                } finally {
+                    executionControlSemaphore.release();
+                }
+            } else {
+                logger.warn("Maximum number of python processes has been reached. Waiting for a python process to finish. " +
+                        "You can configure the number of concurrent python executions by setting " +
+                        "'python.concurrent.execution.permits' system property.");
+                executionControlSemaphore.acquire();
+                try {
+                    logger.info("Acquired a permit for a new python process. Continuing with execution...");
+                    return externalPythonExecutionEngine.test(prepareEnvironmentScript, script, vars,timeout);
+                } finally {
+                    executionControlSemaphore.release();
+                }
+            }
+        } catch (InterruptedException ie) {
+            throw new ExternalPythonScriptException("Execution was interrupted while waiting for a python permit.");
+        }
+    }
 }

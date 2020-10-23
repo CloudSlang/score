@@ -42,4 +42,9 @@ public class PythonRuntimeServiceImpl implements PythonRuntimeService {
     public PythonEvaluationResult eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
         return pythonExecutionEngine.eval(prepareEnvironmentScript, script, vars);
     }
+
+    @Override
+    public PythonEvaluationResult test(String prepareEnvironmentScript, String script, Map<String, Serializable> vars, long timeout) {
+        return pythonExecutionEngine.test(prepareEnvironmentScript, script, vars,timeout);
+    }
 }

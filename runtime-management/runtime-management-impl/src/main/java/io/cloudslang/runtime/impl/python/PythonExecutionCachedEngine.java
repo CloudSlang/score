@@ -31,7 +31,7 @@ import java.util.Set;
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
-public class PythonExecutionCachedEngine extends ExecutionCachedEngine<PythonExecutor> implements PythonExecutionEngine{
+public class PythonExecutionCachedEngine extends ExecutionCachedEngine<PythonExecutor> implements PythonExecutionEngine {
     @Autowired
     private DependencyService dependencyService;
 
@@ -50,6 +50,16 @@ public class PythonExecutionCachedEngine extends ExecutionCachedEngine<PythonExe
 
     @Override
     public PythonEvaluationResult eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
+        PythonExecutor executor = allocateExecutor(Sets.<String>newHashSet());
+        try {
+            return executor.eval(prepareEnvironmentScript, script, vars);
+        } finally {
+            releaseExecutor(executor);
+        }
+    }
+
+    @Override
+    public PythonEvaluationResult test(String prepareEnvironmentScript, String script, Map<String, Serializable> vars, long timeout) {
         PythonExecutor executor = allocateExecutor(Sets.<String>newHashSet());
         try {
             return executor.eval(prepareEnvironmentScript, script, vars);
