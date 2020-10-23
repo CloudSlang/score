@@ -120,7 +120,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         return list;
     }
 
-    private Message validateAndGetMessageToPut(Message[] messages) {
+    private Message validateAndGetMessageToPut(final Message[] messages) {
         Message retVal;
         if ((messages != null) && (messages.length == 1)) {
             // Single message
