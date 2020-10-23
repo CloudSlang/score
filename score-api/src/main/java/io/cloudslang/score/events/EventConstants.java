@@ -26,6 +26,8 @@ public class EventConstants {
     public static final String SCORE_FINISHED_EVENT = "SCORE_FINISHED_EVENT";
     public static final String SCORE_STARTED_BRANCH_EVENT = "SCORE_STARTED_BRANCH_EVENT";
     public static final String SCORE_FINISHED_BRANCH_EVENT = "SCORE_FINISHED_BRANCH_EVENT";
+    public static final String SCORE_RESUMED_BRANCH_EVENT = "SCORE_RESUMED_BRANCH_EVENT";
+    public static final String SCORE_PAUSED_BRANCH_EVENT = "SCORE_PAUSED_BRANCH_EVENT" ;
     public static final String SCORE_FAILURE_EVENT = "SCORE_FAILURE_EVENT";
     public static final String SCORE_BRANCH_FAILURE_EVENT = "SCORE_BRANCH_FAILURE_EVENT";
     public static final String SCORE_NO_WORKER_FAILURE_EVENT = "SCORE_NO_WORKER_FAILURE_EVENT";
