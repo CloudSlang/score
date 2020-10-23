@@ -120,14 +120,16 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         return list;
     }
 
-    private Message validateAndGetMessageToPut(Message[] messages) {
+    private Message validateAndGetMessageToPut(final Message[] messages) {
         Message retVal;
-        if (ArrayUtils.isEmpty(messages)) { // No messages
-            throw new IllegalArgumentException("messages is null or empty");
-        } else if (messages.length == 1) { // Single message
+        if ((messages != null) && (messages.length == 1)) {
+            // Single message
             retVal = messages[0];
-        } else { // At least 2 messages -> use one compound message such that it will be processed in one transaction
+        } else if ((messages != null) && (messages.length > 1)) {
+            // At least 2 messages -> use one compound message such that it will be processed in one transaction
             retVal = new CompoundMessage(messages);
+        } else {
+            throw new IllegalArgumentException("messages is null or empty");
         }
         return retVal;
     }
