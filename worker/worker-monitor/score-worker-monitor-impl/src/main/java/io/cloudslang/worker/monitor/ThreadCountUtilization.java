@@ -16,9 +16,11 @@
 package io.cloudslang.worker.monitor;
 
 import io.cloudslang.worker.management.services.WorkerManager;
+import io.cloudslang.worker.monitor.WorkerPerfMetric;
 import io.cloudslang.worker.monitor.service.MetricKeyValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -36,14 +38,11 @@ public class ThreadCountUtilization implements WorkerPerfMetric {
     @Override
     public Map<MetricKeyValue, Serializable> measure() {
         Map<MetricKeyValue, Serializable> threadUtilization = new HashMap<>();
+
         threadUtilization.put(MetricKeyValue.THREAD_UTILIZATION,getCurrentValue());
         return threadUtilization;
     }
-    public double getCurrentValue() {
-        int currentRunningTasks = workerManager.getRunningTasksCount();
-        double percentageRunningTasksUtilization = (double) (currentRunningTasks*100)/numberOfThreads;
-        int temp = (int) percentageRunningTasksUtilization*100;
-        percentageRunningTasksUtilization = ((double)temp)/100.0;
-        return percentageRunningTasksUtilization;
+    public int getCurrentValue() {
+        return ((workerManager.getRunningTasksCount()*100)/numberOfThreads);
     }
 }

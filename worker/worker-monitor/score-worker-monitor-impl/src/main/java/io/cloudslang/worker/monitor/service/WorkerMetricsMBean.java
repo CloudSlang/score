@@ -53,6 +53,7 @@ public class WorkerMetricsMBean {
     public long getDiskUsage() { return diskUsagePerProcess.getCurrentValue(); }
 
     @ManagedAttribute(description = "Running Tasks Count")
-    public int getPercentageRunningTasksCount(){ return ((workerManager.getRunningTasksCount()*100)/numberOfThreads); }
+    public double getWorkerThreadsUsage(){
+        return (double) ((workerManager.getRunningTasksCount()*100)/numberOfThreads); }
 
 }

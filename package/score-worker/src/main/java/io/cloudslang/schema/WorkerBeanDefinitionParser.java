@@ -44,6 +44,7 @@ import io.cloudslang.worker.management.services.WorkerVersionServiceImpl;
 import io.cloudslang.worker.monitor.CpuPerProcess;
 import io.cloudslang.worker.monitor.DiskUsagePerProcess;
 import io.cloudslang.worker.monitor.MemoryPerProcess;
+import io.cloudslang.worker.monitor.ThreadCountUtilization;
 import io.cloudslang.worker.monitor.PerfMetricCollectorImpl;
 import io.cloudslang.worker.monitor.service.WorkerMetricCollectorServiceImpl;
 import io.cloudslang.worker.monitor.service.WorkerMetricsMBean;
@@ -74,6 +75,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(WorkerManager.class, "workerManager");
 		put(CpuPerProcess.class, "cpuPerProcess");
 		put(DiskUsagePerProcess.class, "diskUsagePerProcess");
+		put(ThreadCountUtilization.class, "threadCountUtilization");
 		put(MemoryPerProcess.class, "memoryPerProcess");
 		put(EventBusImpl.class, null);
 		put(FastEventBusImpl.class, "consumptionFastEventBus");

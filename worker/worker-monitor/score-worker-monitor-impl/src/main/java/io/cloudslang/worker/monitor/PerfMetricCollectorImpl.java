@@ -18,8 +18,8 @@ package io.cloudslang.worker.monitor;
 import io.cloudslang.worker.management.services.WorkerManager;
 import io.cloudslang.worker.monitor.service.MetricKeyValue;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -29,6 +29,9 @@ import java.util.Map;
 @Component
 public class PerfMetricCollectorImpl implements PerfMetricCollector {
 
+    @Autowired
+    @Qualifier("numberOfExecutionThreads")
+    private Integer numberOfThreads;
 
     @Autowired
     private WorkerManager workerManager;
@@ -43,7 +46,7 @@ public class PerfMetricCollectorImpl implements PerfMetricCollector {
         workerPerfMetrics.add(new DiskUsagePerProcess());
         workerPerfMetrics.add(new MemoryPerProcess());
         workerPerfMetrics.add(new HeapSize());
-        workerPerfMetrics.add(new ThreadCountUtilization());
+//        workerPerfMetrics.add(new ThreadCountUtilization());
     }
 
     @Override
@@ -55,6 +58,7 @@ public class PerfMetricCollectorImpl implements PerfMetricCollector {
         }
         currentValues.put(MetricKeyValue.WORKER_ID,workerManager.getWorkerUuid());
         currentValues.put(MetricKeyValue.WORKER_MEASURED_TIME,System.currentTimeMillis());
+        currentValues.put(MetricKeyValue.THREAD_UTILIZATION,((workerManager.getRunningTasksCount()*100)/numberOfThreads));
         return currentValues;
     }
 }
