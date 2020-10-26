@@ -32,8 +32,11 @@ public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
 
     private final Semaphore executionControlSemaphore;
 
-    public ExternalPythonRuntimeServiceImpl(Semaphore executionControlSemaphore) {
+    private final Semaphore testingControlSemaphore;
+
+    public ExternalPythonRuntimeServiceImpl(Semaphore executionControlSemaphore, Semaphore testingControlSemaphore) {
         this.executionControlSemaphore = executionControlSemaphore;
+        this.testingControlSemaphore = testingControlSemaphore;
     }
 
     @Resource(name = "externalPythonExecutionEngine")
@@ -94,22 +97,22 @@ public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
     @Override
     public PythonEvaluationResult test(String prepareEnvironmentScript, String script, Map<String, Serializable> vars, long timeout) {
         try {
-            if (executionControlSemaphore.tryAcquire(1L, TimeUnit.SECONDS)) {
+            if (testingControlSemaphore.tryAcquire(1L, TimeUnit.SECONDS)) {
                 try {
                     return externalPythonExecutionEngine.test(prepareEnvironmentScript, script, vars,timeout);
                 } finally {
-                    executionControlSemaphore.release();
+                    testingControlSemaphore.release();
                 }
             } else {
                 logger.warn("Maximum number of python processes has been reached. Waiting for a python process to finish. " +
                         "You can configure the number of concurrent python executions by setting " +
-                        "'python.concurrent.execution.permits' system property.");
-                executionControlSemaphore.acquire();
+                        "'python.testing.concurrent.execution.permits' system property.");
+                testingControlSemaphore.acquire();
                 try {
                     logger.info("Acquired a permit for a new python process. Continuing with execution...");
                     return externalPythonExecutionEngine.test(prepareEnvironmentScript, script, vars,timeout);
                 } finally {
-                    executionControlSemaphore.release();
+                    testingControlSemaphore.release();
                 }
             }
         } catch (InterruptedException ie) {
