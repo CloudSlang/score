@@ -107,28 +107,16 @@ public class ExternalPythonExecutor {
 
     public PythonEvaluationResult eval(String expression, String prepareEnvironmentScript,
                                        Map<String, Serializable> context) {
-        TempEvalEnvironment tempEvalEnvironment = null;
-        try {
-            String pythonPath = checkPythonPath();
-            tempEvalEnvironment = generateTempResourcesForEval();
-            String payload = generatePayloadForEval(expression, prepareEnvironmentScript, context);
-            addFilePermissions(tempEvalEnvironment.parentFolder);
-
-            return runPythonEvalProcess(pythonPath, payload, tempEvalEnvironment, context);
-
-        } catch (IOException e) {
-            String message = "Failed to generate execution resources";
-            logger.error(message, e);
-            throw new RuntimeException(message);
-        } finally {
-            if ((tempEvalEnvironment != null) && !deleteQuietly(tempEvalEnvironment.parentFolder)) {
-                logger.warn(String.format("Failed to cleanup python execution resources {%s}", tempEvalEnvironment.parentFolder));
-            }
-        }
+        return getPythonEvaluationResult(expression, prepareEnvironmentScript, context, EVALUATION_TIMEOUT);
     }
 
     public PythonEvaluationResult test(String expression, String prepareEnvironmentScript,
                                        Map<String, Serializable> context, long timeout) {
+        return getPythonEvaluationResult(expression, prepareEnvironmentScript, context, timeout);
+    }
+
+    private PythonEvaluationResult getPythonEvaluationResult(String expression, String prepareEnvironmentScript,
+                                                             Map<String, Serializable> context, long evaluationTimeout) {
         TempEvalEnvironment tempEvalEnvironment = null;
         try {
             String pythonPath = checkPythonPath();
@@ -136,7 +124,7 @@ public class ExternalPythonExecutor {
             String payload = generatePayloadForEval(expression, prepareEnvironmentScript, context);
             addFilePermissions(tempEvalEnvironment.parentFolder);
 
-            return runPythonTestProcess(pythonPath, payload, tempEvalEnvironment, context, timeout);
+            return runPythonEvalProcess(pythonPath, payload, tempEvalEnvironment, context, evaluationTimeout);
 
         } catch (IOException e) {
             String message = "Failed to generate execution resources";
@@ -208,29 +196,6 @@ public class ExternalPythonExecutor {
     }
 
     private PythonEvaluationResult runPythonEvalProcess(String pythonPath, String payload, TempEvalEnvironment executionEnvironment,
-                                                        Map<String, Serializable> context) {
-
-        ProcessBuilder processBuilder = preparePythonProcess(executionEnvironment, pythonPath);
-
-        try {
-            String returnResult = getResult(payload, processBuilder, EVALUATION_TIMEOUT);
-
-            EvaluationResults scriptResults = objectMapper.readValue(returnResult, EvaluationResults.class);
-            String exception = scriptResults.getException();
-            if (!StringUtils.isEmpty(exception)) {
-                logger.error(String.format("Failed to execute script {%s}", exception));
-                throw new ExternalPythonEvalException(exception);
-            }
-            context.put("accessed_resources_set", (Serializable) scriptResults.getAccessedResources());
-            //noinspection unchecked
-            return new PythonEvaluationResult(processReturnResult(scriptResults), context);
-        } catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
-            logger.error("Failed to run script. ", e.getCause() != null ? e.getCause() : e);
-            throw new RuntimeException("Failed to run script.");
-        }
-    }
-
-    private PythonEvaluationResult runPythonTestProcess(String pythonPath, String payload, TempEvalEnvironment executionEnvironment,
                                                         Map<String, Serializable> context, long timeout) {
 
         ProcessBuilder processBuilder = preparePythonProcess(executionEnvironment, pythonPath);
@@ -255,6 +220,7 @@ public class ExternalPythonExecutor {
 
         }
     }
+
 
     private Serializable processReturnResult(EvaluationResults results) throws JsonProcessingException {
         EvaluationResults.ReturnType returnType = results.getReturnType();

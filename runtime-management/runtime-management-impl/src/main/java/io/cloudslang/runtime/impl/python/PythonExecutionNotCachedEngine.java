@@ -60,5 +60,6 @@ public class PythonExecutionNotCachedEngine implements PythonExecutionEngine{
             return pythonExecutor.eval(prepareEnvironmentScript, script, vars);
         } finally {
             pythonExecutor.close();
-        }    }
+        }
+    }
 }
