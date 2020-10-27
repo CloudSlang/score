@@ -22,16 +22,15 @@ import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import static java.util.Collections.*;
+import static java.util.Collections.emptySet;
 
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
-public class PythonExecutionNotCachedEngine implements PythonExecutionEngine{
+public class PythonExecutionNotCachedEngine implements PythonExecutionEngine {
     @Autowired
     private DependencyService dependencyService;
 
