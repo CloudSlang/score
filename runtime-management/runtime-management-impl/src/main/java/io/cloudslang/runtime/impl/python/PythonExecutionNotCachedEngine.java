@@ -57,6 +57,7 @@ public class PythonExecutionNotCachedEngine implements PythonExecutionEngine{
     public PythonEvaluationResult test(String prepareEnvironmentScript, String script, Map<String, Serializable> vars, long timeout) {
         PythonExecutor pythonExecutor = new PythonExecutor(Collections.<String>emptySet());
         try {
+            // For Jython test is identical with eval
             return pythonExecutor.eval(prepareEnvironmentScript, script, vars);
         } finally {
             pythonExecutor.close();

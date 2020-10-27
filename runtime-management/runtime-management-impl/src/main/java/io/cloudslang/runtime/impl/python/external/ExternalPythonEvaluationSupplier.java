@@ -27,6 +27,7 @@ import java.util.function.Supplier;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class ExternalPythonEvaluationSupplier implements Supplier<String> {
+
     private final AtomicReference<Process> processRef;
     private final ProcessBuilder processBuilder;
     private final String payload;
@@ -54,14 +55,20 @@ public class ExternalPythonEvaluationSupplier implements Supplier<String> {
                 returnResult.append(line);
             }
             return returnResult.toString();
-        } catch (IOException e) {
-            throw new RuntimeException("Script execution failed.");
+        } catch (IOException ioException) {
+            throw new RuntimeException("Script execution failed: ", ioException);
         }
     }
 
 
-    public Process getProcess() {
-        return processRef.get();
+    public void destroyProcess() {
+        try {
+            Process process = processRef.get();
+            if (process != null) {
+                process.destroy();
+            }
+        } catch (Exception ignored) {
+        }
     }
 
 }

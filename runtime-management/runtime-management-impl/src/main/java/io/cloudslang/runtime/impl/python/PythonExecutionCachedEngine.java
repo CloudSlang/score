@@ -63,6 +63,7 @@ public class PythonExecutionCachedEngine extends ExecutionCachedEngine<PythonExe
     public PythonEvaluationResult test(String prepareEnvironmentScript, String script, Map<String, Serializable> vars, long timeout) {
         PythonExecutor executor = allocateExecutor(emptySet());
         try {
+            // For Jython test is identical with eval
             return executor.eval(prepareEnvironmentScript, script, vars);
         } finally {
             releaseExecutor(executor);

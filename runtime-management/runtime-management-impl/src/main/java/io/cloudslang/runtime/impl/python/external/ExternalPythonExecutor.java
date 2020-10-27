@@ -53,7 +53,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -61,6 +60,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeoutException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 
@@ -71,10 +71,10 @@ public class ExternalPythonExecutor {
     private static final String EVAL_PY = "eval.py";
     private static final String MAIN_PY = "main.py";
     private static final String PYTHON_SUFFIX = ".py";
-    private static final long EXECUTION_TIMEOUT = Long.getLong("python.timeout", 30);
-    private static final long EVALUATION_TIMEOUT = Long.getLong("python.evaluation.timeout", 3);
-    private static final int ENGINE_EXECUTOR_THREAD_NUMBER = Integer.getInteger("engine.executor.thread.number", 10);
-    private static final int TEST_EXECUTOR_THREAD_NUMBER = Integer.getInteger("test.executor.thread.number", 3);
+    private static final long EXECUTION_TIMEOUT = Long.getLong("python.timeout", 30) * 60 * 1000;
+    private static final long EVALUATION_TIMEOUT = Long.getLong("python.evaluation.timeout", 3) * 60 * 1000;
+    private static final int ENGINE_EXECUTOR_THREAD_COUNT = Integer.getInteger("python.executor.threadCount", 10);
+    private static final int TEST_EXECUTOR_THREAD_COUNT = Integer.getInteger("test.executor.threadCount", 3);
     private static final String PYTHON_FILENAME_SCRIPT_EXTENSION = ".py\"";
     private static final int PYTHON_FILENAME_DELIMITERS = 6;
     private static final ObjectMapper objectMapper;
@@ -93,7 +93,7 @@ public class ExternalPythonExecutor {
                 .setNameFormat("python-engine-%d")
                 .setDaemon(true)
                 .build();
-        engineExecutorService = Executors.newFixedThreadPool(ENGINE_EXECUTOR_THREAD_NUMBER, threadFactory);
+        engineExecutorService = Executors.newFixedThreadPool(ENGINE_EXECUTOR_THREAD_COUNT, threadFactory);
 
     }
 
@@ -102,7 +102,7 @@ public class ExternalPythonExecutor {
                 .setNameFormat("python-test-%d")
                 .setDaemon(true)
                 .build();
-        testExecutorService = Executors.newFixedThreadPool(TEST_EXECUTOR_THREAD_NUMBER, threadFactory);
+        testExecutorService = Executors.newFixedThreadPool(TEST_EXECUTOR_THREAD_COUNT, threadFactory);
 
     }
 
@@ -253,29 +253,19 @@ public class ExternalPythonExecutor {
             case INTEGER:
                 return Integer.valueOf(results.getReturnResult());
             case LIST:
-                return objectMapper.readValue(results.getReturnResult(), new TypeReference<ArrayList<Serializable>>() {
-                });
+                return objectMapper.readValue(results.getReturnResult(), new TypeReference<ArrayList<Serializable>>() {});
             default:
                 return results.getReturnResult();
         }
     }
 
-    private String getResult(final String payload, final ProcessBuilder processBuilder, final long timeoutPeriod, ExecutorService executorService) throws InterruptedException, ExecutionException {
+    private String getResult(final String payload, final ProcessBuilder processBuilder, final long timeoutPeriodMillis, ExecutorService executorService) throws InterruptedException, ExecutionException {
         ExternalPythonEvaluationSupplier supplier = new ExternalPythonEvaluationSupplier(processBuilder, payload);
-        long timeoutMillis = timeoutPeriod * 60 * 1000;
         try {
-            return CompletableFuture.supplyAsync(supplier, executorService).get(timeoutMillis, MILLISECONDS);
+            return supplyAsync(supplier, executorService).get(timeoutPeriodMillis, MILLISECONDS);
         } catch (TimeoutException timeoutException) {
-            try {
-                Process process = supplier.getProcess();
-                if (process != null) {
-                    process.destroy();
-                }
-            } catch (Exception exception) {
-                throw new RuntimeException("Failed to run script.", timeoutException);
-            }
-            throw new RuntimeException("Timeout has been reached.");
-
+            supplier.destroyProcess();
+            throw new RuntimeException("Timeout " + timeoutPeriodMillis + " has been reached: ", timeoutException);
         }
     }
 
