@@ -23,6 +23,7 @@ import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.node.repositories.WorkerNodeRepository;
 import io.cloudslang.engine.versioning.services.VersionService;
 import io.cloudslang.score.api.nodes.WorkerStatus;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
@@ -282,6 +283,19 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
             throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
         }
         worker.setStatus(status);
+    }
+
+    @Override
+    @Transactional
+    public void migratePassword(String uuid, String password) {
+        WorkerNode workerNode = workerNodeRepository.findByUuid(uuid);
+        if (workerNode == null) {
+            throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
+        }
+        if (StringUtils.isNotEmpty(workerNode.getMigratedPassword())) {
+            throw new IllegalStateException("the migration password has already been changed for the specified UUID:" + uuid);
+        }
+        workerNode.setMigratedPassword(password);
     }
 
     @Override
