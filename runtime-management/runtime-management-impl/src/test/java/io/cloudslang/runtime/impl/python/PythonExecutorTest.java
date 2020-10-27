@@ -65,6 +65,7 @@ import static org.mockito.Mockito.mock;
 @ContextConfiguration(classes = PythonExecutorTest.TestConfig.class)
 public class PythonExecutorTest {
     private static boolean shouldRunMaven;
+
     static {
         ClassLoader classLoader = PythonExecutorTest.class.getClassLoader();
 
@@ -142,7 +143,7 @@ public class PythonExecutorTest {
 
         final CountDownLatch latch = new CountDownLatch(executionsNum);
 
-        for(int i = 0; i < executionsNum; i++) {
+        for (int i = 0; i < executionsNum; i++) {
             final int executioId = i;
             new Thread() {
                 public void run() {
@@ -159,12 +160,12 @@ public class PythonExecutorTest {
                         String prepareEnvironmentScript = buildAddFunctionsScript(GET_SP_FUNCTION_DEFINITION);
                         String script = "check_env('" + varName + "', '" + value + "', '" + doubleName + "', '" + doubleValue + "')";
                         PythonEvaluationResult result = pythonRuntimeService.eval(prepareEnvironmentScript, script, vars);
-                        String [] pyResults = ((String) result.getEvalResult()).split(",");
+                        String[] pyResults = ((String) result.getEvalResult()).split(",");
                         assertNotNull(pyResults.length == 2);
-                        String [] sysValues = pyResults[0].split(":");
+                        String[] sysValues = pyResults[0].split(":");
                         assertNotNull(sysValues.length == 2);
                         assertEquals(sysValues[0], sysValues[1]);
-                        String [] globalValues = pyResults[1].split(":");
+                        String[] globalValues = pyResults[1].split(":");
                         assertNotNull(globalValues.length == 2);
                         assertEquals(globalValues[0], globalValues[1]);
                     } finally {
@@ -183,7 +184,7 @@ public class PythonExecutorTest {
 
         final CountDownLatch latch = new CountDownLatch(executionsNum);
 
-        for(int i = 0; i < executionsNum; i++) {
+        for (int i = 0; i < executionsNum; i++) {
             final String executioId = String.valueOf(i);
             new Thread() {
                 public void run() {
@@ -209,14 +210,14 @@ public class PythonExecutorTest {
 
         final CountDownLatch latch = new CountDownLatch(executionsNum);
 
-        final String [] dependencies = {
+        final String[] dependencies = {
                 new File(getClass().getClassLoader().getResource(".m2/repository/python/math2/mult/1.0/mult-1.0.zip").getFile()).getAbsolutePath(),
                 new File(getClass().getClassLoader().getResource(".m2/repository/python/math2/sum/2.1/sum-2.1.zip").getFile()).getAbsolutePath(),
                 new File(getClass().getClassLoader().getResource(".m2/repository/python/math3/mult/1.2/mult-1.2.zip").getFile()).getAbsolutePath(),
                 new File(getClass().getClassLoader().getResource(".m2/repository/python/math3/sum/4.1/sum-4.1.zip").getFile()).getAbsolutePath()
         };
 
-        for(int i = 0; i < executionsNum; i++) {
+        for (int i = 0; i < executionsNum; i++) {
             final String executioId = String.valueOf(i);
             final String varName = "VAR";
             final String script = "import sys\nimport time\nimport math_fake.utils.print_text as print_text\ntime.sleep(3)\n" + varName + " = print_text.foo('" + executioId + "')\nprint " + varName + "\n";
@@ -301,7 +302,7 @@ public class PythonExecutorTest {
     @Test
     public void testEvalPyClassIsExcluded() throws Exception {
         PythonExecutor executor = getPythonExecutor();
-        PythonEvaluationResult pythonEvaluationResult = executor.eval(PY_CLASS_IS_EXCLUDED_SCRIPT, "'hello'" , EMPTY_CALL_ARGUMENTS);
+        PythonEvaluationResult pythonEvaluationResult = executor.eval(PY_CLASS_IS_EXCLUDED_SCRIPT, "'hello'", EMPTY_CALL_ARGUMENTS);
         Assert.assertEquals(EXPECTED_CONTEXT_EVAL, pythonEvaluationResult.getResultContext());
     }
 
@@ -309,7 +310,7 @@ public class PythonExecutorTest {
         return new PythonExecutor(Sets.newHashSet("a.zip, b.zip"));
     }
 
-    private String buildAddFunctionsScript(String ... functionDependencies) {
+    private String buildAddFunctionsScript(String... functionDependencies) {
         String functions = "";
         for (String function : functionDependencies) {
             functions = appendDelimiterBetweenFunctions(functions + function);
@@ -330,7 +331,7 @@ public class PythonExecutorTest {
 
         @Bean(name = "externalPythonRuntimeService")
         public PythonRuntimeService externalPythonRuntimeService() {
-            return new ExternalPythonRuntimeServiceImpl(new Semaphore(100),new Semaphore(50));
+            return new ExternalPythonRuntimeServiceImpl(new Semaphore(100), new Semaphore(50));
         }
 
         @Bean(name = "jythonExecutionEngine")
@@ -342,12 +343,24 @@ public class PythonExecutorTest {
         PythonExecutionEngine externalPythonExecutionEngine() {
             return new ExternalPythonExecutionEngine();
         }
-        @Bean public DependencyService dependencyService() {return new DependencyServiceImpl() {
-            public Set<String> getDependencies(Set<String> resources) {
-                return resources;
-            }
-        };}
-        @Bean public EventBus eventBus() { return mock(EventBus.class);}
-        @Bean public MavenConfig mavenConfig() {return new MavenConfigImpl();}
+
+        @Bean
+        public DependencyService dependencyService() {
+            return new DependencyServiceImpl() {
+                public Set<String> getDependencies(Set<String> resources) {
+                    return resources;
+                }
+            };
+        }
+
+        @Bean
+        public EventBus eventBus() {
+            return mock(EventBus.class);
+        }
+
+        @Bean
+        public MavenConfig mavenConfig() {
+            return new MavenConfigImpl();
+        }
     }
 }

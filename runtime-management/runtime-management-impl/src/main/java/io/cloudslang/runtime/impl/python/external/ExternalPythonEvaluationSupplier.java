@@ -55,7 +55,7 @@ public class ExternalPythonEvaluationSupplier implements Supplier<String> {
             }
             return returnResult.toString();
         } catch (IOException e) {
-            throw new RuntimeException("Execution timed out");
+            throw new RuntimeException("Script execution failed.");
         }
     }
 

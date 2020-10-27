@@ -73,6 +73,8 @@ public class ExternalPythonExecutor {
     private static final String PYTHON_SUFFIX = ".py";
     private static final long EXECUTION_TIMEOUT = Long.getLong("python.timeout", 30);
     private static final long EVALUATION_TIMEOUT = Long.getLong("python.evaluation.timeout", 3);
+    private static final int ENGINE_EXECUTOR_THREAD_NUMBER = Integer.getInteger("engine.executor.thread.number", 10);
+    private static final int TEST_EXECUTOR_THREAD_NUMBER = Integer.getInteger("test.executor.thread.number", 3);
     private static final String PYTHON_FILENAME_SCRIPT_EXTENSION = ".py\"";
     private static final int PYTHON_FILENAME_DELIMITERS = 6;
     private static final ObjectMapper objectMapper;
@@ -91,7 +93,7 @@ public class ExternalPythonExecutor {
                 .setNameFormat("python-engine-%d")
                 .setDaemon(true)
                 .build();
-        engineExecutorService = Executors.newFixedThreadPool(10, threadFactory);
+        engineExecutorService = Executors.newFixedThreadPool(ENGINE_EXECUTOR_THREAD_NUMBER, threadFactory);
 
     }
 
@@ -100,7 +102,7 @@ public class ExternalPythonExecutor {
                 .setNameFormat("python-test-%d")
                 .setDaemon(true)
                 .build();
-        testExecutorService = Executors.newFixedThreadPool(3, threadFactory);
+        testExecutorService = Executors.newFixedThreadPool(TEST_EXECUTOR_THREAD_NUMBER, threadFactory);
 
     }
 
@@ -263,15 +265,14 @@ public class ExternalPythonExecutor {
         long timeoutMillis = timeoutPeriod * 60 * 1000;
         try {
             return CompletableFuture.supplyAsync(supplier, executorService).get(timeoutMillis, MILLISECONDS);
-        } catch (TimeoutException e) {
+        } catch (TimeoutException timeoutException) {
             try {
                 Process process = supplier.getProcess();
                 if (process != null) {
                     process.destroy();
                 }
-            } catch (Exception t) {
-                logger.error("Failed to run script. ", t.getCause() != null ? t.getCause() : t);
-                throw new RuntimeException("Failed to run script.");
+            } catch (Exception exception) {
+                throw new RuntimeException("Failed to run script.", timeoutException);
             }
             throw new RuntimeException("Timeout has been reached.");
 

@@ -99,7 +99,7 @@ public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
         try {
             if (testingControlSemaphore.tryAcquire(1L, TimeUnit.SECONDS)) {
                 try {
-                    return externalPythonExecutionEngine.test(prepareEnvironmentScript, script, vars,timeout);
+                    return externalPythonExecutionEngine.test(prepareEnvironmentScript, script, vars, timeout);
                 } finally {
                     testingControlSemaphore.release();
                 }
@@ -110,7 +110,7 @@ public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
                 testingControlSemaphore.acquire();
                 try {
                     logger.info("Acquired a permit for a new python process. Continuing with execution...");
-                    return externalPythonExecutionEngine.test(prepareEnvironmentScript, script, vars,timeout);
+                    return externalPythonExecutionEngine.test(prepareEnvironmentScript, script, vars, timeout);
                 } finally {
                     testingControlSemaphore.release();
                 }

@@ -43,7 +43,7 @@ public class PythonExecutionEngineConfiguration {
     public PythonRuntimeService externalPythonRuntimeService() {
         Integer pythonProcessPermits = Integer.getInteger("python.concurrent.execution.permits", 30);
         Integer pythonTestingProcessPermits = Integer.getInteger("python.testing.concurrent.execution.permits", 10);
-        return new ExternalPythonRuntimeServiceImpl(new Semaphore(pythonProcessPermits),new Semaphore(pythonTestingProcessPermits));
+        return new ExternalPythonRuntimeServiceImpl(new Semaphore(pythonProcessPermits), new Semaphore(pythonTestingProcessPermits));
     }
 
     @Bean(name = "jythonExecutionEngine")
