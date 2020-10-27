@@ -26,6 +26,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import static java.util.Collections.*;
+
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
@@ -45,7 +47,7 @@ public class PythonExecutionNotCachedEngine implements PythonExecutionEngine{
 
     @Override
     public PythonEvaluationResult eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
-        PythonExecutor pythonExecutor = new PythonExecutor(Collections.<String>emptySet());
+        PythonExecutor pythonExecutor = new PythonExecutor(emptySet());
         try {
             return pythonExecutor.eval(prepareEnvironmentScript, script, vars);
         } finally {
@@ -55,7 +57,7 @@ public class PythonExecutionNotCachedEngine implements PythonExecutionEngine{
 
     @Override
     public PythonEvaluationResult test(String prepareEnvironmentScript, String script, Map<String, Serializable> vars, long timeout) {
-        PythonExecutor pythonExecutor = new PythonExecutor(Collections.<String>emptySet());
+        PythonExecutor pythonExecutor = new PythonExecutor(emptySet());
         try {
             // For Jython test is identical with eval
             return pythonExecutor.eval(prepareEnvironmentScript, script, vars);
