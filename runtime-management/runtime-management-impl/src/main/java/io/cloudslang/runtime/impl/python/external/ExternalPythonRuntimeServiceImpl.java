@@ -32,8 +32,11 @@ public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
 
     private final Semaphore executionControlSemaphore;
 
-    public ExternalPythonRuntimeServiceImpl(Semaphore executionControlSemaphore) {
+    private final Semaphore testingControlSemaphore;
+
+    public ExternalPythonRuntimeServiceImpl(Semaphore executionControlSemaphore, Semaphore testingControlSemaphore) {
         this.executionControlSemaphore = executionControlSemaphore;
+        this.testingControlSemaphore = testingControlSemaphore;
     }
 
     @Resource(name = "externalPythonExecutionEngine")
@@ -84,6 +87,32 @@ public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
                     return externalPythonExecutionEngine.eval(prepareEnvironmentScript, script, vars);
                 } finally {
                     executionControlSemaphore.release();
+                }
+            }
+        } catch (InterruptedException ie) {
+            throw new ExternalPythonScriptException("Execution was interrupted while waiting for a python permit.");
+        }
+    }
+
+    @Override
+    public PythonEvaluationResult test(String prepareEnvironmentScript, String script, Map<String, Serializable> vars, long timeout) {
+        try {
+            if (testingControlSemaphore.tryAcquire(1L, TimeUnit.SECONDS)) {
+                try {
+                    return externalPythonExecutionEngine.test(prepareEnvironmentScript, script, vars, timeout);
+                } finally {
+                    testingControlSemaphore.release();
+                }
+            } else {
+                logger.warn("Maximum number of python processes has been reached. Waiting for a python process to finish. " +
+                        "You can configure the number of concurrent python executions by setting " +
+                        "'python.testing.concurrent.execution.permits' system property.");
+                testingControlSemaphore.acquire();
+                try {
+                    logger.info("Acquired a permit for a new python process. Continuing with execution...");
+                    return externalPythonExecutionEngine.test(prepareEnvironmentScript, script, vars, timeout);
+                } finally {
+                    testingControlSemaphore.release();
                 }
             }
         } catch (InterruptedException ie) {
