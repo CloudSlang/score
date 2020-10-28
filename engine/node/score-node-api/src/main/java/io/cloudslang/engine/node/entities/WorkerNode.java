@@ -117,7 +117,7 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
 	@Column(name = "VERSION_ID", length = 48, nullable = false)
 	private String versionId = "";
 
-	@Column(name = "PERCENTAGE_UTILIZATION", length = 20)
+	@Column(name = "PERCENTAGE_UTILIZATION")
 	private int workerBusynessValue;
 
     @Override

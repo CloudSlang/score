@@ -46,7 +46,7 @@ public class PerfMetricCollectorImpl implements PerfMetricCollector {
         workerPerfMetrics.add(new DiskUsagePerProcess());
         workerPerfMetrics.add(new MemoryPerProcess());
         workerPerfMetrics.add(new HeapSize());
-//        workerPerfMetrics.add(new ThreadCountUtilization());
+        //workerPerfMetrics.add(new ThreadCountUtilization());
     }
 
     @Override

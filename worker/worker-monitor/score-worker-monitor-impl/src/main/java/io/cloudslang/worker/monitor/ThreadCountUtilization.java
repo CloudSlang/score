@@ -16,11 +16,9 @@
 package io.cloudslang.worker.monitor;
 
 import io.cloudslang.worker.management.services.WorkerManager;
-import io.cloudslang.worker.monitor.WorkerPerfMetric;
 import io.cloudslang.worker.monitor.service.MetricKeyValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -28,8 +26,11 @@ import java.util.Map;
 
 public class ThreadCountUtilization implements WorkerPerfMetric {
 
-    @Autowired
     private WorkerManager workerManager;
+
+    public ThreadCountUtilization(WorkerManager workerManager) {
+        this.workerManager=workerManager;
+    }
 
     @Autowired
     @Qualifier("numberOfExecutionThreads")

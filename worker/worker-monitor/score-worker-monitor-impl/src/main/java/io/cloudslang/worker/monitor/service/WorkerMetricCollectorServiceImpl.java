@@ -21,6 +21,8 @@ import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.worker.monitor.PerfMetricCollector;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import io.cloudslang.score.events.FastEventBus;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -30,7 +32,8 @@ public class WorkerMetricCollectorServiceImpl implements WorkerMetricCollectorSe
     @Autowired
     PerfMetricCollector perfMetricCollector;
     @Autowired
-    private EventBus eventBus;
+    @Qualifier("consumptionFastEventBus")
+    private FastEventBus fastEventBus;
 
     @Override
     public void collectPerfMetrics() {
@@ -43,9 +46,9 @@ public class WorkerMetricCollectorServiceImpl implements WorkerMetricCollectorSe
                 logger.debug("Sending Worker Metric Info:[" + metricInfo + "]");
             }
             ScoreEvent scoreEvent = new ScoreEvent(EventConstants.WORKER_PERFORMANCE_MONITOR, (Serializable) metricInfo);
-            eventBus.dispatch(scoreEvent);
+            fastEventBus.dispatch(scoreEvent);
 
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             logger.error("Failed to dispatch metric info event", e);
         }
     }

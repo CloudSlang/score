@@ -21,11 +21,10 @@ import oshi.software.os.OSProcess;
 import oshi.software.os.OperatingSystem;
 
 import java.io.Serializable;
-import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MemoryPerProcess implements WorkerPerfMetric {
+public class MemoryPerProcess extends CurrentProcessId implements WorkerPerfMetric {
     @Override
     public Map<MetricKeyValue, Serializable> measure() {
         Map<MetricKeyValue, Serializable> memUsage = new HashMap<>();
@@ -36,7 +35,8 @@ public class MemoryPerProcess implements WorkerPerfMetric {
         OSProcess process;
         SystemInfo si = new SystemInfo();
         OperatingSystem os = si.getOperatingSystem();
-        process = os.getProcess(os.getProcessId());
+        int pid = getCurrentProcessId();//current pid
+        process = os.getProcess(pid);
         oshi.hardware.GlobalMemory globalMemory = si.getHardware().getMemory();
         long usedRamProcess = process.getResidentSetSize();
         long totalRam = globalMemory.getTotal();

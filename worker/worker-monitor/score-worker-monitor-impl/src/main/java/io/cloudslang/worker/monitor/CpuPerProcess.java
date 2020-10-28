@@ -26,7 +26,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CpuPerProcess implements WorkerPerfMetric {
+public class CpuPerProcess extends CurrentProcessId implements WorkerPerfMetric {
     private static OSProcess oldProcess;
     @Override
     public Map<MetricKeyValue, Serializable> measure() {
@@ -39,7 +39,7 @@ public class CpuPerProcess implements WorkerPerfMetric {
         OperatingSystem operatingSystem = systemInfo.getOperatingSystem();
         CentralProcessor processor = systemInfo.getHardware().getProcessor();
         int cpuNumber = processor.getLogicalProcessorCount();
-        int pid=operatingSystem.getProcessId();// current pid
+        int pid = getCurrentProcessId();//current pid
         oldProcess = operatingSystem.getProcess(pid);
         OSProcess osProcess = operatingSystem.getProcess(pid);
         double cpuUsed=(osProcess.getProcessCpuLoadBetweenTicks(oldProcess)*100)/cpuNumber;

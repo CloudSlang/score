@@ -46,6 +46,7 @@ import io.cloudslang.worker.monitor.DiskUsagePerProcess;
 import io.cloudslang.worker.monitor.MemoryPerProcess;
 import io.cloudslang.worker.monitor.ThreadCountUtilization;
 import io.cloudslang.worker.monitor.PerfMetricCollectorImpl;
+import io.cloudslang.worker.monitor.CurrentProcessId;
 import io.cloudslang.worker.monitor.service.WorkerMetricCollectorServiceImpl;
 import io.cloudslang.worker.monitor.service.WorkerMetricsMBean;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -73,10 +74,6 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	private Map<Class<?>,String> beans = new HashMap<Class<?>,String>(){{
 		put(WorkerManager.class, "workerManager");
-		put(CpuPerProcess.class, "cpuPerProcess");
-		put(DiskUsagePerProcess.class, "diskUsagePerProcess");
-		put(ThreadCountUtilization.class, "threadCountUtilization");
-		put(MemoryPerProcess.class, "memoryPerProcess");
 		put(EventBusImpl.class, null);
 		put(FastEventBusImpl.class, "consumptionFastEventBus");
 		put(ExecutionServiceImpl.class, "agent");
@@ -96,10 +93,15 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 		//Monitors
 		put(WorkerExecutionMonitorServiceImpl.class, "workerExecutionMonitorService");
-		put(WorkerMetricCollectorServiceImpl.class,"workerMetricCollectorService");
-		put(PerfMetricCollectorImpl.class,"perfMetricCollector");
 		put(WorkerMonitorsImpl.class, "workerMonitorsImpl");
 		put(ScheduledWorkerLoadMonitor.class, "scheduledWorkerLoadMonitor");
+		put(CpuPerProcess.class, "cpuPerProcess");
+		put(DiskUsagePerProcess.class, "diskUsagePerProcess");
+		put(ThreadCountUtilization.class, "threadCountUtilization");
+		put(MemoryPerProcess.class, "memoryPerProcess");
+		put(PerfMetricCollectorImpl.class,"perfMetricCollector");
+		put(WorkerMetricCollectorServiceImpl.class,"workerMetricCollectorService");
+		put(CurrentProcessId.class, "currentProcessId");
 	}};
 
 	private List<ConfValue> configurationValues = Arrays.asList(

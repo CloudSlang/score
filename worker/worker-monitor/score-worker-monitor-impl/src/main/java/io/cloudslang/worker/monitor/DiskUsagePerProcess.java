@@ -24,7 +24,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DiskUsagePerProcess implements WorkerPerfMetric {
+public class DiskUsagePerProcess extends CurrentProcessId implements WorkerPerfMetric {
 
     @Override
     public Map<MetricKeyValue, Serializable> measure() {
@@ -37,8 +37,8 @@ public class DiskUsagePerProcess implements WorkerPerfMetric {
         OSProcess process;
         SystemInfo si = new SystemInfo();
         OperatingSystem os = si.getOperatingSystem();
-        int processId = os.getProcessId(); //current process id
-        process = os.getProcess(processId);
+        int pid = getCurrentProcessId();//current pid
+        process = os.getProcess(pid);
         long readBytes = process.getBytesRead();
         return readBytes;
     }
