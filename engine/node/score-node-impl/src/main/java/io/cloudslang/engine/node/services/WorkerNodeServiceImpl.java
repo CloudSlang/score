@@ -282,6 +282,8 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
         if (worker == null) {
             throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
         }
+        if (!worker.getStatus().equals(WorkerStatus.RUNNING))
+            workerBusynessValue=0;
         worker.setWorkerBusynessValue(workerBusynessValue);
     }
 

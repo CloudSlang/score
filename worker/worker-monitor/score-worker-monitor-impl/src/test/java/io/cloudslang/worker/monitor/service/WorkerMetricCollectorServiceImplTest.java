@@ -15,13 +15,12 @@
  */
 package io.cloudslang.worker.monitor.service;
 
-import io.cloudslang.score.events.EventBus;
-import io.cloudslang.score.events.EventConstants;
-import io.cloudslang.score.events.ScoreEvent;
+import io.cloudslang.score.events.*;
 import io.cloudslang.worker.monitor.PerfMetricCollector;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -32,7 +31,6 @@ import java.util.HashMap;
 
 import static org.mockito.Matchers.refEq;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = WorkerMetricCollectorServiceImplTest.MyTestConfig.class)
@@ -43,7 +41,8 @@ public class WorkerMetricCollectorServiceImplTest {
     @Autowired
     PerfMetricCollector perfMetricCollector;
     @Autowired
-    private EventBus eventBus;
+    @Qualifier("consumptionFastEventBus")
+    private FastEventBus fastEventBus;
 
     @Test
     public void testWorkerMetricCollectorService() throws InterruptedException {
@@ -51,7 +50,7 @@ public class WorkerMetricCollectorServiceImplTest {
         when(perfMetricCollector.collectMetric()).thenReturn(monitorInfo);
         ScoreEvent event = new ScoreEvent(EventConstants.WORKER_PERFORMANCE_MONITOR, monitorInfo);
         workerMetricCollectorService.collectPerfMetrics();
-        verify(eventBus, times(1)).dispatch(refEq(event));
+        verify(fastEventBus, times(1)).dispatch(refEq(event));
     }
 
 
@@ -63,7 +62,7 @@ public class WorkerMetricCollectorServiceImplTest {
         @Bean
         public PerfMetricCollector perfMetricCollector() {return mock(PerfMetricCollector.class);}
         @Bean
-        public EventBus eventBus() {return mock(EventBus.class);}
+        public FastEventBus consumptionFastEventBus() {return mock(FastEventBusImpl.class);}
 
     }
 }
