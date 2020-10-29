@@ -69,7 +69,6 @@ import static java.lang.Boolean.FALSE;
 /**
  * @since 21/01/2014
  */
-@Component
 public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	private Map<Class<?>,String> beans = new HashMap<Class<?>,String>(){{
