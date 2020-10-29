@@ -28,5 +28,8 @@ import java.util.Set;
  */
 public interface PythonExecutionEngine {
     PythonExecutionResult exec(Set<String> dependencies, String script, Map<String, Serializable> vars);
+
     PythonEvaluationResult eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars);
+
+    PythonEvaluationResult test(String prepareEnvironmentScript, String script, Map<String, Serializable> vars, long timeout);
 }

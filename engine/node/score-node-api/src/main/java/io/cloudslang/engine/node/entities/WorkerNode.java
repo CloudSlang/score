@@ -182,7 +182,24 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
 		this.password = password;
 	}
 
-    @Override
+    public String getMigratedPassword() {
+        return migratedPassword;
+    }
+
+    public void setMigratedPassword(String migratedPassword) {
+        this.migratedPassword = migratedPassword;
+    }
+
+	@Override
+	public int getWorkerBusynessValue() {
+		return workerBusynessValue;
+	}
+
+	public void setWorkerBusynessValue(int workerBusynessValue) {
+		this.workerBusynessValue = workerBusynessValue;
+	}
+
+	@Override
 	public String getOs() {
 		return os;
 	}
@@ -275,15 +292,6 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
 
 	public void setVersionId(String versionId) {
 		this.versionId = versionId;
-	}
-
-	@Override
-	public int getWorkerBusynessValue() {
-		return workerBusynessValue;
-	}
-
-	public void setWorkerBusynessValue(int workerBusynessValue) {
-		this.workerBusynessValue = workerBusynessValue;
 	}
 
 	@Override
