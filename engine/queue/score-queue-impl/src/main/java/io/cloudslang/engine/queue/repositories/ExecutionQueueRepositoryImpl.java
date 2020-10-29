@@ -73,7 +73,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     final private String SELECT_FINISHED_STEPS_IDS = "SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES EQ WHERE EQ.STATUS = " + ExecStatus.FINISHED.getNumber() +
             " OR EQ.STATUS = " + ExecStatus.TERMINATED.getNumber() + " OR EQ.STATUS = " + ExecStatus.FAILED.getNumber() + " OR ((EQ.EXEC_STATE_ID IN "
             + "(SELECT DISTINCT ESS.ID FROM OO_EXECUTION_STATES ESS JOIN OO_EXECUTION_STATE ES ON ESS.MSG_ID = CAST(ES.EXECUTION_ID AS VARCHAR(255)) "
-            + "WHERE ((ES.STATUS = 'COMPLETED' OR ES.STATUS = 'CANCELED' OR ES.STATUS = 'SYSTEM_FAILURE' OR ES.STATUS = 'PENDING_CANCEL') ))))";
+            + "WHERE ((ES.STATUS = 'COMPLETED' OR ES.STATUS = 'CANCELED' OR ES.STATUS = 'SYSTEM_FAILURE') ))))";
 
     final private String QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES = "DELETE FROM OO_EXECUTION_QUEUES " +
             " WHERE EXEC_STATE_ID in (:ids)";
@@ -270,10 +270,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "     WHERE" +
                     "         qq.EXEC_STATE_ID = q.EXEC_STATE_ID" +
                     "         AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID" +
-                    "  ) AND "
-                    + " q.EXEC_STATE_ID NOT IN ("
-                    + " SELECT DISTINCT ESS.ID FROM OO_EXECUTION_STATES ESS JOIN OO_EXECUTION_STATE ES ON ESS.MSG_ID = CAST(ES.EXECUTION_ID AS VARCHAR(255))"
-                    + " WHERE ((ES.STATUS = 'COMPLETED' OR ES.STATUS = 'CANCELED' OR ES.STATUS = 'SYSTEM_FAILURE' OR ES.STATUS = 'PENDING_CANCEL')))";
+                    "  ))";
 
     final private String BUSY_WORKERS_SQL =
             "SELECT ASSIGNED_WORKER      " +

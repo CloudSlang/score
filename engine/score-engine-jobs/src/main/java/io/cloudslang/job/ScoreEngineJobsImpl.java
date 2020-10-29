@@ -100,13 +100,13 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
     @Override
     public void cleanFinishedExecutionState() {
         if (logger.isDebugEnabled()) {
-            logger.debug("CleanFinishedExecutionState woke up at " + new Date());
+            logger.debug("started in CleanFinishedExecutionState method");
         }
 
         try {
             finishedExecutionStateCleanerService.cleanFinishedExecutionState();
         } catch (Exception e) {
-            logger.error("Can't run finished execution state cleaner job.", e);
+            logger.error("Can't run finished execution state cleaner job. : " + e);
         }
     }
     /**

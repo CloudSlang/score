@@ -33,7 +33,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Date;
+import static java.lang.System.currentTimeMillis;
 import java.util.stream.Collectors;
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +44,7 @@ import org.springframework.util.CollectionUtils;
  */
 public class ExecutionStateServiceImpl implements ExecutionStateService {
 
-    private static final long EXECUTION_STATE_INACTIVE_TIME = 1800000;
+    private static final long EXECUTION_STATE_INACTIVE_TIME = 30*60*1000L;
 
     @Autowired
     private ExecutionStateRepository executionStateRepository;
@@ -88,7 +88,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         executionState.setExecutionId(executionId);
         executionState.setBranchId(EMPTY_BRANCH);
         executionState.setStatus(ExecutionStatus.RUNNING);
-        executionState.setUpdateTime(System.currentTimeMillis());
+        executionState.setUpdateTime(currentTimeMillis());
         return executionStateRepository.save(executionState);
     }
 
@@ -101,7 +101,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         executionState.setExecutionId(executionId);
         executionState.setBranchId(branchId);
         executionState.setStatus(ExecutionStatus.PENDING_PAUSE);
-        executionState.setUpdateTime(System.currentTimeMillis());
+        executionState.setUpdateTime(currentTimeMillis());
         return executionStateRepository.save(executionState);
     }
 
@@ -191,7 +191,8 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
                                            Long updateDate) {
         validateExecutionId(executionId);
         Validate.notNull(status, "status cannot be null");
-        ExecutionState executionState = findByExecutionIdAndBranchId(executionId, EMPTY_BRANCH);
+        validateBranchId(branchId);
+        ExecutionState executionState = findByExecutionIdAndBranchId(executionId, branchId);
         executionState.setStatus(status);
         executionState.setUpdateTime(updateDate);
     }
@@ -200,9 +201,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
     @Transactional
     public void deleteFinishedExecutionState() {
         long timeLimitMillis = System.currentTimeMillis() - EXECUTION_STATE_INACTIVE_TIME;
-        List<ExecutionState> toBeDeleted =
-                executionStateRepository.findByStatusInAndUpdateTimeLessThanEqual(
-                        asList(CANCELED, COMPLETED, SYSTEM_FAILURE), timeLimitMillis);
+        List<ExecutionState> toBeDeleted = executionStateRepository.findByStatusInAndUpdateTimeLessThanEqual(asList(CANCELED, COMPLETED, SYSTEM_FAILURE), timeLimitMillis);
         if (!CollectionUtils.isEmpty(toBeDeleted)) {
             List<Long> ids = toBeDeleted.stream().map(map -> map.getExecutionId()).collect(Collectors.toList());
             executionStateRepository.deleteByIds(ids);

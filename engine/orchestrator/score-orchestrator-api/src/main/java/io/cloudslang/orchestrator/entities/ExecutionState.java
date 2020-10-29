@@ -54,18 +54,18 @@ public class ExecutionState extends AbstractIdentifiable {
     private ExecutionStatus status;
 
     @Column(name = "UPDATE_TIME")
-    private Long updateTime;
+    private long updateTime;
 
     @Column(name = "EXECUTION_OBJECT")
     @Lob
     @Basic(fetch = FetchType.LAZY)
     private byte[] executionObject;
 
-    public Long getUpdateTime() {
+    public long getUpdateTime() {
         return updateTime;
     }
 
-    public void setUpdateTime(Long updateTime) {
+    public void setUpdateTime(long updateTime) {
         this.updateTime = updateTime;
     }
 

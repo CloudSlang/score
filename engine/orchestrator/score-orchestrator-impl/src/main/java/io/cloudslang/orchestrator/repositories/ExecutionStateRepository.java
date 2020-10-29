@@ -49,7 +49,7 @@ public interface ExecutionStateRepository extends JpaRepository<ExecutionState, 
     @Modifying
     int deleteByIds(@Param("ids") Collection<Long> ids);
 
-    public List<ExecutionState> findByStatusInAndUpdateTimeLessThanEqual(List<ExecutionStatus> statuses, Long time);
+    public List<ExecutionState> findByStatusInAndUpdateTimeLessThanEqual(List<ExecutionStatus> statuses, long time);
 
     @Query("delete from ExecutionState executionState where executionState.status in :statuses")
     public void deleteByStatusIn(@Param("statuses") List<ExecutionStatus> statuses);
