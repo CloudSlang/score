@@ -33,7 +33,7 @@ import java.util.List;
  */
 public interface ExecutionStateRepository extends JpaRepository<ExecutionState, String> {
 
-    public ExecutionState findByExecutionIdAndBranchId(Long executionId, String branchId);
+    public ExecutionState findByExecutionIdAndBranchId(long executionId, String branchId);
 
     public List<ExecutionState> findByExecutionId(Long executionId);
 
@@ -49,8 +49,8 @@ public interface ExecutionStateRepository extends JpaRepository<ExecutionState, 
     @Modifying
     int deleteByIds(@Param("ids") Collection<Long> ids);
 
-    public List<ExecutionState> findByStatusInAndUpdateTimeLessThanEqual(List<ExecutionStatus> statuses, long time);
+    List<ExecutionState> findByStatusInAndUpdateTimeLessThanEqual(List<ExecutionStatus> statuses, long time);
 
     @Query("delete from ExecutionState executionState where executionState.status in :statuses")
-    public void deleteByStatusIn(@Param("statuses") List<ExecutionStatus> statuses);
+    void deleteByStatusIn(@Param("statuses") List<ExecutionStatus> statuses);
 }
