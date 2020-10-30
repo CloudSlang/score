@@ -13,33 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.worker.monitor;
+package io.cloudslang.worker.monitor.metrics;
 
-import io.cloudslang.worker.monitor.service.MetricKeyValue;
+import io.cloudslang.worker.monitor.metric.WorkerPerfMetric;
 import oshi.SystemInfo;
 import oshi.software.os.OSProcess;
 import oshi.software.os.OperatingSystem;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
-public class DiskUsagePerProcess extends CurrentProcessId implements WorkerPerfMetric {
+public abstract class WorkerPerfMetricImpl implements WorkerPerfMetric {
 
-    @Override
-    public Map<MetricKeyValue, Serializable> measure() {
-        Map<MetricKeyValue, Serializable> diskUsage = new HashMap<>();
-        diskUsage.put(MetricKeyValue.DISK_USAGE, getCurrentValue());
-        return diskUsage;
+    public int getCurrentProcessId() {
+        SystemInfo systemInfo = new SystemInfo();
+        OperatingSystem operatingSystem = systemInfo.getOperatingSystem();
+        return operatingSystem.getProcessId();
     }
 
-    public long getCurrentValue() {
-        OSProcess process;
+    protected OSProcess getProcess(int pid){
         SystemInfo si = new SystemInfo();
         OperatingSystem os = si.getOperatingSystem();
-        int pid = getCurrentProcessId();//current pid
-        process = os.getProcess(pid);
-        long readBytes = process.getBytesRead();
-        return readBytes;
+        return os.getProcess(pid);
+    }
+
+    protected double formatTo2Decimal(double value) {
+        return new BigDecimal(value).setScale(2, RoundingMode.HALF_EVEN).doubleValue();
     }
 }

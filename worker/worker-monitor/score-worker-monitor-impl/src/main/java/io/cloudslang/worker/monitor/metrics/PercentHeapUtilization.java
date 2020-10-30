@@ -13,37 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.worker.monitor;
+package io.cloudslang.worker.monitor.metrics;
 
-import io.cloudslang.worker.management.services.WorkerManager;
+import io.cloudslang.worker.monitor.metric.WorkerPerfMetric;
 import io.cloudslang.worker.monitor.service.MetricKeyValue;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ThreadCountUtilization implements WorkerPerfMetric {
-
-    private WorkerManager workerManager;
-
-    public ThreadCountUtilization(WorkerManager workerManager) {
-        this.workerManager=workerManager;
-    }
-
-    @Autowired
-    @Qualifier("numberOfExecutionThreads")
-    private Integer numberOfThreads;
-
+public class PercentHeapUtilization extends WorkerPerfMetricImpl {
     @Override
     public Map<MetricKeyValue, Serializable> measure() {
-        Map<MetricKeyValue, Serializable> threadUtilization = new HashMap<>();
+        Map<MetricKeyValue, Serializable> heapUsage = new HashMap<>();
+        heapUsage.put(MetricKeyValue.HEAP_SIZE, getCurrentValue());
+        return heapUsage;
+    }
 
-        threadUtilization.put(MetricKeyValue.THREAD_UTILIZATION,getCurrentValue());
-        return threadUtilization;
+    public double getCurrentValue() {
+        // Get current size of heap in bytes
+        long heapSize = Runtime.getRuntime().totalMemory();
+        // Get maximum size of heap in bytes. The heap cannot grow beyond this size.
+        long heapMaxSize = Runtime.getRuntime().maxMemory();
+        double percentageHeapUsed = ((double) heapSize / (double) heapMaxSize) * 100;
+        return formatTo2Decimal(percentageHeapUsed);
     }
-    public int getCurrentValue() {
-        return ((workerManager.getRunningTasksCount()*100)/numberOfThreads);
-    }
+
+
 }

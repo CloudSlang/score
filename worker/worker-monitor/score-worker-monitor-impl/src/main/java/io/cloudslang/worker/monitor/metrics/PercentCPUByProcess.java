@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.worker.monitor;
+package io.cloudslang.worker.monitor.metrics;
 
 import io.cloudslang.worker.monitor.service.MetricKeyValue;
 import oshi.SystemInfo;
@@ -21,31 +21,28 @@ import oshi.hardware.CentralProcessor;
 import oshi.software.os.OSProcess;
 import oshi.software.os.OperatingSystem;
 
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CpuPerProcess extends CurrentProcessId implements WorkerPerfMetric {
-    private static OSProcess oldProcess;
+public class PercentCPUByProcess extends WorkerPerfMetricImpl {
+
     @Override
     public Map<MetricKeyValue, Serializable> measure() {
         Map<MetricKeyValue, Serializable> cpuUsage = new HashMap<>();
-        cpuUsage.put(MetricKeyValue.CPU_USAGE,getCurrentValue());
+        cpuUsage.put(MetricKeyValue.CPU_USAGE, getCurrentValue());
         return cpuUsage;
     }
+
     public double getCurrentValue() {
         SystemInfo systemInfo = new SystemInfo();
         OperatingSystem operatingSystem = systemInfo.getOperatingSystem();
         CentralProcessor processor = systemInfo.getHardware().getProcessor();
         int cpuNumber = processor.getLogicalProcessorCount();
         int pid = getCurrentProcessId();//current pid
-        oldProcess = operatingSystem.getProcess(pid);
+        //OSProcess oldProcess = operatingSystem.getProcess(pid);
         OSProcess osProcess = operatingSystem.getProcess(pid);
-        double cpuUsed=(osProcess.getProcessCpuLoadBetweenTicks(oldProcess)*100)/cpuNumber;
-        oldProcess = osProcess;
-        int temp = (int) cpuUsed*100;
-        cpuUsed = ((double)temp)/100.0;
-        return cpuUsed;
+        double cpuUsed = (osProcess.getProcessCpuLoadBetweenTicks(osProcess) * 100) / cpuNumber;
+        return formatTo2Decimal(cpuUsed);
     }
 }

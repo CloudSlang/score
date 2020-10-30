@@ -13,19 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.worker.monitor;
+package io.cloudslang.worker.monitor.metric;
 
-import org.springframework.stereotype.Component;
-import oshi.SystemInfo;
-import oshi.software.os.OperatingSystem;
+import io.cloudslang.worker.monitor.service.MetricKeyValue;
 
-public class CurrentProcessId {
+import java.io.Serializable;
+import java.util.Map;
 
-    public int getCurrentProcessId() {
-        int pid;
-        SystemInfo systemInfo = new SystemInfo();
-        OperatingSystem operatingSystem = systemInfo.getOperatingSystem();
-        pid=operatingSystem.getProcessId();
-        return pid;
-    }
+public interface WorkerPerfMetric {
+    Map<MetricKeyValue, Serializable> measure();
 }

@@ -29,7 +29,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.io.Serializable;
 import java.util.HashMap;
 
-import static org.mockito.Matchers.refEq;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -45,7 +44,7 @@ public class WorkerMetricCollectorServiceImplTest {
     private FastEventBus fastEventBus;
 
     @Test
-    public void testWorkerMetricCollectorService() throws InterruptedException {
+    public void testWorkerMetricCollectorService() {
         HashMap<MetricKeyValue, Serializable> monitorInfo = new HashMap<>();
         when(perfMetricCollector.collectMetric()).thenReturn(monitorInfo);
         ScoreEvent event = new ScoreEvent(EventConstants.WORKER_PERFORMANCE_MONITOR, monitorInfo);

@@ -15,13 +15,12 @@
  */
 package io.cloudslang.worker.monitor.service;
 
-import io.cloudslang.score.events.EventBus;
 import io.cloudslang.score.events.EventConstants;
+import io.cloudslang.score.events.FastEventBus;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.worker.monitor.PerfMetricCollector;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import io.cloudslang.score.events.FastEventBus;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.io.Serializable;

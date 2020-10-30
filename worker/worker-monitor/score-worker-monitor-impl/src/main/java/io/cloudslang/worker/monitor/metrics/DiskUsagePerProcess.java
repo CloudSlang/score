@@ -13,13 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.worker.monitor;
+package io.cloudslang.worker.monitor.metrics;
 
 import io.cloudslang.worker.monitor.service.MetricKeyValue;
+import oshi.software.os.OSProcess;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
-public interface WorkerPerfMetric {
-    Map<MetricKeyValue, Serializable> measure();
+public class DiskUsagePerProcess extends WorkerPerfMetricImpl {
+
+    @Override
+    public Map<MetricKeyValue, Serializable> measure() {
+        Map<MetricKeyValue, Serializable> diskUsage = new HashMap<>();
+        diskUsage.put(MetricKeyValue.DISK_USAGE, getCurrentValue());
+        return diskUsage;
+    }
+
+    public long getCurrentValue() {
+        long readBytes = 0;
+        int pid = getCurrentProcessId();//current pid
+        OSProcess process = getProcess(pid);
+        if (process != null) {
+            readBytes = process.getBytesRead();
+        }
+        return readBytes;
+    }
 }

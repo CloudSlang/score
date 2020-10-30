@@ -13,28 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.worker.monitor;
+package io.cloudslang.worker.monitor.metrics;
+
 import io.cloudslang.worker.monitor.service.MetricKeyValue;
+import oshi.SystemInfo;
+import oshi.hardware.GlobalMemory;
+import oshi.software.os.OSProcess;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HeapSize implements WorkerPerfMetric {
+public class PercentMemoryByProcess extends WorkerPerfMetricImpl {
     @Override
-    public Map<MetricKeyValue, Serializable> measure(){
-        Map<MetricKeyValue, Serializable> heapUsage = new HashMap<>();
-        heapUsage.put(MetricKeyValue.HEAP_SIZE,getCurrentValue());
-        return heapUsage;
+    public Map<MetricKeyValue, Serializable> measure() {
+        Map<MetricKeyValue, Serializable> memUsage = new HashMap<>();
+        memUsage.put(MetricKeyValue.MEMORY_USAGE, getCurrentValue());
+        return memUsage;
     }
+
     public double getCurrentValue() {
-        // Get current size of heap in bytes
-        long heapSize = Runtime.getRuntime().totalMemory();
-        // Get maximum size of heap in bytes. The heap cannot grow beyond this size.
-        long heapMaxSize = Runtime.getRuntime().maxMemory();
-        double percentageHeapUsed=((double)heapSize/(double)heapMaxSize)*100;
-        int temp = (int) percentageHeapUsed*100;
-        percentageHeapUsed = ((double)temp)/100.0;
-        return percentageHeapUsed;
+        SystemInfo si = new SystemInfo();
+        int pid = getCurrentProcessId();
+        OSProcess process = getProcess(pid);
+        GlobalMemory globalMemory = si.getHardware().getMemory();
+        long usedRamProcess = process.getResidentSetSize();
+        long totalRam = globalMemory.getTotal();
+        double ramUsed = (double) (usedRamProcess * 100 / totalRam);
+        return formatTo2Decimal(ramUsed);
     }
 }
