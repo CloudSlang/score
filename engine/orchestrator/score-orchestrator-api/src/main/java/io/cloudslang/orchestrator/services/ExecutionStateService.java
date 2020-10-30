@@ -117,7 +117,7 @@ public interface ExecutionStateService {
 
     public Execution getExecutionObjectForNullBranch(Long executionId);
 
-    public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionStatus status, Long updateDate);
+    public void updateExecutionStateStatus(long executionId, String branchId, ExecutionStatus status, Long updateDate);
 
     public void deleteFinishedExecutionState();
 }
