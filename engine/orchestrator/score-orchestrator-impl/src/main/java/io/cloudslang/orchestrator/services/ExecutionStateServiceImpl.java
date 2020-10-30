@@ -188,7 +188,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
 
     @Override
     public void updateExecutionStateStatus(long executionId, String branchId, ExecutionStatus status,
-                                           Long updateDate) {
+                                           long updateDate) {
         validateExecutionId(executionId);
         Validate.notNull(status, "status cannot be null");
         validateBranchId(branchId);
