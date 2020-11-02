@@ -20,6 +20,7 @@ import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.orchestrator.entities.ExecutionState;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -117,5 +118,5 @@ public interface ExecutionStateService {
 
     public Execution getExecutionObjectForNullBranch(Long executionId);
 
-    public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionStatus status, long updateDate);
+    public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionStatus status, Date updateDate);
 }
