@@ -70,10 +70,11 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     private static final String MYSQL = "mysql";
     private static final String MSSQL = "Microsoft";
 
-    final private String SELECT_FINISHED_STEPS_IDS = "SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES EQ WHERE EQ.STATUS = " + ExecStatus.FINISHED.getNumber() +
-            " OR EQ.STATUS = " + ExecStatus.TERMINATED.getNumber() + " OR EQ.STATUS = " + ExecStatus.FAILED.getNumber() + " OR ((EQ.EXEC_STATE_ID IN "
+    // Note : Do not join the below queries using a OR clause as it has proved to more expensive
+    final private String SELECT_FINISHED_STEPS_IDS_1 = "SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES EQ WHERE EQ.STATUS IN (6,7,8)" ;
+    final private String SELECT_FINISHED_STEPS_IDS_2 =  "SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES EQ WHERE (EQ.EXEC_STATE_ID IN "
             + "(SELECT DISTINCT STATES.ID FROM OO_EXECUTION_STATES STATES JOIN OO_EXECUTION_STATE ES ON STATES.MSG_ID = CAST(ES.EXECUTION_ID AS VARCHAR(255)) "
-            + "WHERE ((ES.STATUS = 'COMPLETED' OR ES.STATUS = 'CANCELED' OR ES.STATUS = 'SYSTEM_FAILURE') ))))";
+            + "WHERE ES.STATUS IN('COMPLETED','CANCELED','SYSTEM_FAILURE') ))";
 
     final private String QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES = "DELETE FROM OO_EXECUTION_QUEUES " +
             " WHERE EXEC_STATE_ID in (:ids)";
@@ -653,7 +654,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     public Set<Long> getFinishedExecStateIds() {
         getFinishedExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
         try {
-            List<Long> result = doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, SELECT_FINISHED_STEPS_IDS, new SingleColumnRowMapper<>(Long.class));
+            List<Long> result = doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, SELECT_FINISHED_STEPS_IDS_1, new SingleColumnRowMapper<>(Long.class));
+            result.addAll(doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, SELECT_FINISHED_STEPS_IDS_2, new SingleColumnRowMapper<>(Long.class)));
 
             return new HashSet<>(result);
         } finally {
