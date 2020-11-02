@@ -16,35 +16,32 @@
 
 package io.cloudslang.orchestrator.services;
 
-import static io.cloudslang.orchestrator.entities.ExecutionState.EMPTY_BRANCH;
-import static io.cloudslang.score.facade.execution.ExecutionStatus.CANCELED;
-import static io.cloudslang.score.facade.execution.ExecutionStatus.PENDING_CANCEL;
-import static io.cloudslang.score.facade.execution.ExecutionStatus.COMPLETED;
-import static io.cloudslang.score.facade.execution.ExecutionStatus.SYSTEM_FAILURE;
-import static org.springframework.util.CollectionUtils.isEmpty;
-import static java.util.Arrays.asList;
+import io.cloudslang.orchestrator.entities.ExecutionState;
+import io.cloudslang.orchestrator.repositories.ExecutionStateRepository;
+import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.execution.ExecutionActionException;
 import io.cloudslang.score.facade.execution.ExecutionActionResult;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
-import io.cloudslang.score.facade.entities.Execution;
-import io.cloudslang.orchestrator.entities.ExecutionState;
-import io.cloudslang.orchestrator.repositories.ExecutionStateRepository;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import static java.lang.System.currentTimeMillis;
-import java.util.stream.Collectors;
+
 import java.util.Arrays;
 import java.util.List;
-import org.springframework.util.CollectionUtils;
+
+import static io.cloudslang.orchestrator.entities.ExecutionState.EMPTY_BRANCH;
+import static io.cloudslang.score.facade.execution.ExecutionStatus.CANCELED;
+import static io.cloudslang.score.facade.execution.ExecutionStatus.PENDING_CANCEL;
+import static java.lang.System.currentTimeMillis;
+import static org.springframework.util.CollectionUtils.isEmpty;
 /**
  * User:
  * Date: 12/05/2014
  */
 public class ExecutionStateServiceImpl implements ExecutionStateService {
 
-    private static final long EXECUTION_STATE_INACTIVE_TIME = 30*60*1000L;
+
 
     @Autowired
     private ExecutionStateRepository executionStateRepository;
@@ -187,7 +184,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
     }
 
     @Override
-    public void updateExecutionStateStatus(long executionId, String branchId, ExecutionStatus status,
+    public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionStatus status,
                                            long updateDate) {
         validateExecutionId(executionId);
         Validate.notNull(status, "status cannot be null");
@@ -197,14 +194,5 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         executionState.setUpdateTime(updateDate);
     }
 
-    @Override
-    @Transactional
-    public void deleteFinishedExecutionState() {
-        long timeLimitMillis = System.currentTimeMillis() - EXECUTION_STATE_INACTIVE_TIME;
-        List<ExecutionState> toBeDeleted = executionStateRepository.findByStatusInAndUpdateTimeLessThanEqual(asList(CANCELED, COMPLETED, SYSTEM_FAILURE), timeLimitMillis);
-        if (!CollectionUtils.isEmpty(toBeDeleted)) {
-            List<Long> ids = toBeDeleted.stream().map(map -> map.getExecutionId()).collect(Collectors.toList());
-            executionStateRepository.deleteByIds(ids);
-        }
-    }
+
 }
