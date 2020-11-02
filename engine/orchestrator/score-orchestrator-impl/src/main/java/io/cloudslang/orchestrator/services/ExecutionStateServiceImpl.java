@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import static io.cloudslang.orchestrator.entities.ExecutionState.EMPTY_BRANCH;
@@ -185,13 +186,13 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
 
     @Override
     public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionStatus status,
-                                           long updateDate) {
+                                           Date updateDate) {
         validateExecutionId(executionId);
         Validate.notNull(status, "status cannot be null");
         validateBranchId(branchId);
         ExecutionState executionState = findByExecutionIdAndBranchId(executionId, branchId);
         executionState.setStatus(status);
-        executionState.setUpdateTime(updateDate);
+        executionState.setUpdateTime(updateDate.getTime());
     }
 
 
