@@ -128,10 +128,6 @@ public class QueueListenerImpl implements QueueListener {
             Boolean isBranch = isBranch(execution);
             if (!isBranch) {
                 scoreEvents.add(scoreEventFactory.createFinishedEvent(execution));
-                if (!(valueOf(execution.getSystemContext().get(STEP_TYPE)).equals(MULTI_INSTANCE) &&
-                        execution.getSystemContext().get(FLOW_TERMINATION_TYPE) == CANCELED)) {
-                    executionStateService.deleteExecutionState(Long.valueOf(executionMessage.getMsgId()), EMPTY_BRANCH);
-                }
             } else {
                 branches.add(execution);
                 scoreEvents.add(scoreEventFactory.createFinishedBranchEvent(execution));
