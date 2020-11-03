@@ -59,7 +59,7 @@ public class ExecutionState extends AbstractIdentifiable {
     private byte[] executionObject;
 
     @Column(name = "UPDATE_TIME")
-    private long updateTime;
+    private Long updateTime;
 
     public Long getExecutionId() {
         return executionId;
@@ -93,9 +93,9 @@ public class ExecutionState extends AbstractIdentifiable {
         this.executionObject = executionObj;
     }
 
-    public long getUpdateTime() { return updateTime; }
+    public Long getUpdateTime() { return updateTime; }
 
-    public void setUpdateTime(long updateTime) { this.updateTime = updateTime; }
+    public void setUpdateTime(Long updateTime) { this.updateTime = updateTime; }
 
     @Override
     public boolean equals(Object obj) {
