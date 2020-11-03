@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
@@ -39,10 +40,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -64,6 +62,18 @@ public class ExecutionStateRepositoryTest {
         createExecutionState(ExecutionStatus.PENDING_CANCEL);
 
         List<Long> executionStates = executionStateRepository.findExecutionIdByStatuses(Arrays.asList(ExecutionStatus.CANCELED, ExecutionStatus.COMPLETED));
+
+        assertThat(executionStates).containsExactly(canceledExecutionState.getExecutionId(), completedExecutionState.getExecutionId());
+    }
+
+
+    @Test
+    public void findByStatusInAndUpdateTimeLessThanEqual() {
+        ExecutionState canceledExecutionState = createExecutionState(ExecutionStatus.CANCELED);
+        ExecutionState completedExecutionState = createExecutionState(ExecutionStatus.COMPLETED);
+        createExecutionState(ExecutionStatus.PENDING_CANCEL);
+
+        List<Long> executionStates = executionStateRepository.findByStatusInAndUpdateTimeLessThanEqual(Arrays.asList(ExecutionStatus.CANCELED, ExecutionStatus.COMPLETED), new Date().getTime(), PageRequest.of(0, 100));
 
         assertThat(executionStates).containsExactly(canceledExecutionState.getExecutionId(), completedExecutionState.getExecutionId());
     }

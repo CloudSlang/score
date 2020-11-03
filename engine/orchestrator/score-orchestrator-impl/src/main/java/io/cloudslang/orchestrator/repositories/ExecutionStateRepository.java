@@ -52,7 +52,7 @@ public interface ExecutionStateRepository extends JpaRepository<ExecutionState, 
     int deleteByIds(@Param("ids") Collection<Long> ids);
 
     @Query("select executionState.executionId from ExecutionState executionState where executionState.status in :statuses and executionState.updateTime <= :time")
-    List<Long> findByStatusInAndUpdateTimeLessThanEqual(@Param("status")List<ExecutionStatus> statuses, @Param("updateTime")long time, Pageable pageable);
+    List<Long> findByStatusInAndUpdateTimeLessThanEqual(@Param("statuses")List<ExecutionStatus> statuses, @Param("time")long time, Pageable pageable);
 
     @Query("delete from ExecutionState executionState where executionState.status in :statuses")
     void deleteByStatusIn(@Param("statuses") List<ExecutionStatus> statuses);
