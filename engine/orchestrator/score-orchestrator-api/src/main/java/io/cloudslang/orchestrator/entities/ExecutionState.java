@@ -58,6 +58,9 @@ public class ExecutionState extends AbstractIdentifiable {
     @Basic(fetch = FetchType.LAZY)
     private byte[] executionObject;
 
+    @Column(name = "UPDATE_TIME")
+    private Long updateTime;
+
     public Long getExecutionId() {
         return executionId;
     }
@@ -89,6 +92,10 @@ public class ExecutionState extends AbstractIdentifiable {
     public void setExecutionObject(byte[] executionObj) {
         this.executionObject = executionObj;
     }
+
+    public Long getUpdateTime() { return updateTime; }
+
+    public void setUpdateTime(Long updateTime) { this.updateTime = updateTime; }
 
     @Override
     public boolean equals(Object obj) {
