@@ -22,6 +22,8 @@ import io.cloudslang.score.facade.execution.ExecutionStatus;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,10 +52,15 @@ import static org.fest.assertions.Assertions.assertThat;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-public class ExecutionStateRepositoryTest {
+public class ExecutionStateRepositoryTest{
 
     @Autowired
     private ExecutionStateRepository executionStateRepository;
+
+    @Before
+    public void cleanRepository() {
+        executionStateRepository.deleteAll();
+    }
 
     @Test
     public void testFindExecutionIdByStatuses() {
@@ -67,16 +74,15 @@ public class ExecutionStateRepositoryTest {
     }
 
 
-
     @Test
     public void findByStatusInAndUpdateTimeLessThanEqual() {
         ExecutionState canceledExecutionState = createExecutionState(ExecutionStatus.CANCELED);
         ExecutionState completedExecutionState = createExecutionState(ExecutionStatus.COMPLETED);
         createExecutionState(ExecutionStatus.PENDING_CANCEL);
 
-        List<Long> executionStates = executionStateRepository.findByStatusInAndUpdateTimeLessThanEqual(Arrays.asList(ExecutionStatus.CANCELED, ExecutionStatus.COMPLETED), new Date().getTime(), PageRequest.of(0, 100));
+        List<Long> executionIds = executionStateRepository.findByStatusInAndUpdateTimeLessThanEqual(Arrays.asList(ExecutionStatus.CANCELED, ExecutionStatus.COMPLETED), new Date().getTime(), PageRequest.of(0, 100));
 
-        assertThat(executionStates).containsExactly(canceledExecutionState.getExecutionId(), completedExecutionState.getExecutionId());
+        assertThat(executionIds).containsExactly(canceledExecutionState.getExecutionId(), completedExecutionState.getExecutionId());
     }
 
     private ExecutionState createExecutionState(ExecutionStatus status) {
@@ -87,6 +93,7 @@ public class ExecutionStateRepositoryTest {
         executionStateRepository.saveAndFlush(executionState);
         return executionState;
     }
+
 
     @Configuration
     @EnableJpaRepositories("io.cloudslang")
