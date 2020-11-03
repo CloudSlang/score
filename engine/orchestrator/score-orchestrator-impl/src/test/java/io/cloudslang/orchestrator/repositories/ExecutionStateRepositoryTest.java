@@ -67,9 +67,7 @@ public class ExecutionStateRepositoryTest{
         ExecutionState canceledExecutionState = createExecutionState(ExecutionStatus.CANCELED);
         ExecutionState completedExecutionState = createExecutionState(ExecutionStatus.COMPLETED);
         createExecutionState(ExecutionStatus.PENDING_CANCEL);
-
         List<Long> executionStates = executionStateRepository.findExecutionIdByStatuses(Arrays.asList(ExecutionStatus.CANCELED, ExecutionStatus.COMPLETED));
-
         assertThat(executionStates).containsExactly(canceledExecutionState.getExecutionId(), completedExecutionState.getExecutionId());
     }
 
@@ -79,9 +77,7 @@ public class ExecutionStateRepositoryTest{
         ExecutionState canceledExecutionState = createExecutionState(ExecutionStatus.CANCELED);
         ExecutionState completedExecutionState = createExecutionState(ExecutionStatus.COMPLETED);
         createExecutionState(ExecutionStatus.PENDING_CANCEL);
-
         List<Long> executionIds = executionStateRepository.findByStatusInAndUpdateTimeLessThanEqual(Arrays.asList(ExecutionStatus.CANCELED, ExecutionStatus.COMPLETED), new Date().getTime(), PageRequest.of(0, 100));
-
         assertThat(executionIds).containsExactly(canceledExecutionState.getExecutionId(), completedExecutionState.getExecutionId());
     }
 
@@ -90,6 +86,7 @@ public class ExecutionStateRepositoryTest{
         executionState.setStatus(status);
         executionState.setExecutionId(123L);
         executionState.setBranchId(UUID.randomUUID().toString());
+        executionState.setUpdateTime(new Date().getTime());
         executionStateRepository.saveAndFlush(executionState);
         return executionState;
     }
