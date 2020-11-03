@@ -67,6 +67,7 @@ public class ExecutionStateRepositoryTest {
     }
 
 
+
     @Test
     public void findByStatusInAndUpdateTimeLessThanEqual() {
         ExecutionState canceledExecutionState = createExecutionState(ExecutionStatus.CANCELED);
