@@ -50,6 +50,8 @@ import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.stream.Collectors;
+
 import org.springframework.util.CollectionUtils;
 
 import static java.lang.Long.parseLong;
@@ -652,10 +654,12 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     public Set<Long> getFinishedExecStateIds() {
         getFinishedExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
         try {
-            Set<Long> result = new HashSet<Long>();
+            Set<Long> result;
 
-            result = (Set<Long>) doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, SELECT_FINISHED_STEPS_IDS_1, new SingleColumnRowMapper<>(Long.class));
-            result.addAll((Set<Long>) doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, SELECT_FINISHED_STEPS_IDS_2, new SingleColumnRowMapper<>(Long.class)));
+            result = doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, SELECT_FINISHED_STEPS_IDS_1,
+                    new SingleColumnRowMapper<>(Long.class)).stream().collect(Collectors.toSet());
+            result.addAll((Set<Long>) doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, SELECT_FINISHED_STEPS_IDS_2,
+                    new SingleColumnRowMapper<>(Long.class)).stream().collect(Collectors.toSet()));
 
             return result;
         } finally {
