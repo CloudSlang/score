@@ -16,6 +16,11 @@
 package io.cloudslang.worker.monitor;
 
 import io.cloudslang.worker.management.services.WorkerManager;
+import io.cloudslang.worker.monitor.metric.WorkerPerfMetric;
+import io.cloudslang.worker.monitor.metrics.PercentCPUByProcess;
+import io.cloudslang.worker.monitor.metrics.DiskUsagePerProcess;
+import io.cloudslang.worker.monitor.metrics.PercentHeapUtilization;
+import io.cloudslang.worker.monitor.metrics.PercentMemoryByProcess;
 import io.cloudslang.worker.monitor.service.MetricKeyValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,10 +47,10 @@ public class PerfMetricCollectorImpl implements PerfMetricCollector {
 
     private void createMetrics() {
         workerPerfMetrics = new ArrayList<>();
-        workerPerfMetrics.add(new CpuPerProcess());
+        workerPerfMetrics.add(new PercentCPUByProcess());
         workerPerfMetrics.add(new DiskUsagePerProcess());
-        workerPerfMetrics.add(new MemoryPerProcess());
-        workerPerfMetrics.add(new HeapSize());
+        workerPerfMetrics.add(new PercentMemoryByProcess());
+        workerPerfMetrics.add(new PercentHeapUtilization());
         //workerPerfMetrics.add(new ThreadCountUtilization());
     }
 

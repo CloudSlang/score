@@ -24,5 +24,5 @@ public enum MetricKeyValue {
     THREAD_UTILIZATION,
     DISK_USAGE;
 
-    private MetricKeyValue() { }
+    MetricKeyValue() { }
 }
