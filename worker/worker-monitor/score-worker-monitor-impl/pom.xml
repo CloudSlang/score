@@ -64,7 +64,7 @@
         <dependency>
             <groupId>io.cloudslang</groupId>
             <artifactId>score-worker-manager-impl</artifactId>
-            <version>0.3.184-SNAPSHOT</version>
+            <version>0.3.186-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
