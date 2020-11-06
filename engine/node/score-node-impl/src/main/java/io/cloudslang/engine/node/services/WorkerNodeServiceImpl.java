@@ -98,6 +98,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
         worker.setStatus(WorkerStatus.FAILED);
         worker.setPassword(password);
         worker.setGroups(Arrays.asList(WorkerNode.DEFAULT_WORKER_GROUPS));
+        worker.setWorkerBusynessValue(0);
         workerNodeRepository.save(worker);
         workerLockService.create(uuid);
     }

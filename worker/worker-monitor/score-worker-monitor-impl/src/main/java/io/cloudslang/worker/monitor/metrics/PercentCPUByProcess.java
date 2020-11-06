@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PercentCPUByProcess extends WorkerPerfMetricImpl {
-
+    private static OSProcess oldProcess;
     @Override
     public Map<MetricKeyValue, Serializable> measure() {
         Map<MetricKeyValue, Serializable> cpuUsage = new HashMap<>();
@@ -40,9 +40,10 @@ public class PercentCPUByProcess extends WorkerPerfMetricImpl {
         CentralProcessor processor = systemInfo.getHardware().getProcessor();
         int cpuNumber = processor.getLogicalProcessorCount();
         int pid = getCurrentProcessId();//current pid
-        //OSProcess oldProcess = operatingSystem.getProcess(pid);
+        oldProcess = operatingSystem.getProcess(pid);
         OSProcess osProcess = operatingSystem.getProcess(pid);
-        double cpuUsed = (osProcess.getProcessCpuLoadBetweenTicks(osProcess) * 100) / cpuNumber;
+        double cpuUsed = (osProcess.getProcessCpuLoadBetweenTicks(oldProcess) * 100) / cpuNumber;
+        oldProcess = osProcess;
         return formatTo2Decimal(cpuUsed);
     }
 }
