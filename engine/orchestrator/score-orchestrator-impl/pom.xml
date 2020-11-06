@@ -104,6 +104,11 @@
             <artifactId>score-orchestrator-api</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
         <!-- end of engine artifacts -->
         <!-- test artifacts -->
         <dependency>

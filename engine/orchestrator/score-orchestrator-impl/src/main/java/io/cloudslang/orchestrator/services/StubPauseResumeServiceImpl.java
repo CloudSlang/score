@@ -70,6 +70,11 @@ public class StubPauseResumeServiceImpl implements PauseResumeService {
     }
 
     @Override
+    public Set<String> readAllPausedExecutionBranchIdsNoCache() {
+        return null;
+    }
+
+    @Override
     public ExecutionSummary readPausedExecution(Long executionId, String branchId) {
         return null;
     }
