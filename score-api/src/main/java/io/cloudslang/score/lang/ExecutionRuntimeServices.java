@@ -567,6 +567,11 @@ public class ExecutionRuntimeServices implements Serializable {
         return removeFromMap(ExecutionParametersConsts.EXECUTION_TOTAL_ROI);
     }
 
+    public Double getRoiValue() {
+        return (Double) contextMap.getOrDefault(ExecutionParametersConsts.EXECUTION_TOTAL_ROI,
+                ExecutionParametersConsts.DEFAULT_ROI_VALUE);
+    }
+
     public void addRoiValue(Double roiValue) {
         Double currentRoiValue = (Double) contextMap.get(ExecutionParametersConsts.EXECUTION_TOTAL_ROI);
         if (currentRoiValue == null) {
