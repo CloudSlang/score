@@ -20,12 +20,12 @@ import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.orchestrator.entities.Message;
 import io.cloudslang.orchestrator.services.OrchestratorDispatcherService;
 import io.cloudslang.worker.management.ExecutionsActivityListener;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -34,7 +34,6 @@ import java.util.UUID;
 
 import static ch.lambdaj.Lambda.extract;
 import static ch.lambdaj.Lambda.on;
-import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static java.util.Collections.addAll;
 
 public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListener {
@@ -60,8 +59,13 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
     @Autowired(required = false)
     private ExecutionsActivityListener executionsActivityListener;
 
-    private HashMap<String, LinkedList<Message>> buffer;
+    @Autowired
+    @Qualifier("numberOfExecutionThreads")
+    private Integer numberOfThreads;
+
     private int currentWeight;
+    private int bufferMapCapacity;
+    private HashMap<String, LinkedList<Message>> buffer;
 
     private final int maxBufferWeight;
     private final int maxBulkWeight;
@@ -69,8 +73,9 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
     private final long retryDelay;
 
     public OutboundBufferImpl() {
-        this.buffer = getInitialBuffer();
         this.currentWeight = 0;
+        this.bufferMapCapacity = getMapCapacity(20);
+        this.buffer = getInitialBuffer();
 
         this.maxBufferWeight = Integer.getInteger("out.buffer.max.buffer.weight", defaultBufferCapacity());
         this.maxBulkWeight = Integer.getInteger("out.buffer.max.bulk.weight", 1500);
@@ -80,8 +85,23 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         logger.info("maxBufferWeight = " + maxBufferWeight);
     }
 
+    @PostConstruct
+    public void initialize() {
+        // Compute the buffer map capacity based on the number of threads as default, such as to prevent rehashing
+        this.bufferMapCapacity = Integer.getInteger("out.buffer.entries", getMapCapacity(numberOfThreads));
+        this.buffer = getInitialBuffer();
+    }
+
+    private int getMapCapacity(int expectedSize) {
+        if (expectedSize < 3) {
+            return expectedSize + 1;
+        } else {
+            return expectedSize < 1073741824 ? expectedSize + expectedSize / 3 : 2147483647;
+        }
+    }
+
     private HashMap<String, LinkedList<Message>> getInitialBuffer() {
-        return newHashMapWithExpectedSize(225);
+        return new HashMap<>(bufferMapCapacity);
     }
 
     @Override
