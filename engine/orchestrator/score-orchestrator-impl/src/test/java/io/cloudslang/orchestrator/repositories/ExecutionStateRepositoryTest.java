@@ -22,12 +22,15 @@ import io.cloudslang.score.facade.execution.ExecutionStatus;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
@@ -39,10 +42,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -52,20 +52,33 @@ import static org.fest.assertions.Assertions.assertThat;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-public class ExecutionStateRepositoryTest {
+public class ExecutionStateRepositoryTest{
 
     @Autowired
     private ExecutionStateRepository executionStateRepository;
+
+    @Before
+    public void cleanRepository() {
+        executionStateRepository.deleteAll();
+    }
 
     @Test
     public void testFindExecutionIdByStatuses() {
         ExecutionState canceledExecutionState = createExecutionState(ExecutionStatus.CANCELED);
         ExecutionState completedExecutionState = createExecutionState(ExecutionStatus.COMPLETED);
         createExecutionState(ExecutionStatus.PENDING_CANCEL);
-
         List<Long> executionStates = executionStateRepository.findExecutionIdByStatuses(Arrays.asList(ExecutionStatus.CANCELED, ExecutionStatus.COMPLETED));
-
         assertThat(executionStates).containsExactly(canceledExecutionState.getExecutionId(), completedExecutionState.getExecutionId());
+    }
+
+
+    @Test
+    public void findByStatusInAndUpdateTimeLessThanEqual() {
+        ExecutionState canceledExecutionState = createExecutionState(ExecutionStatus.CANCELED);
+        ExecutionState completedExecutionState = createExecutionState(ExecutionStatus.COMPLETED);
+        createExecutionState(ExecutionStatus.PENDING_CANCEL);
+        List<Long> executionIds = executionStateRepository.findByStatusInAndUpdateTimeLessThanEqual(Arrays.asList(ExecutionStatus.CANCELED, ExecutionStatus.COMPLETED), new Date().getTime(), PageRequest.of(0, 100));
+        assertThat(executionIds).containsExactly(canceledExecutionState.getExecutionId(), completedExecutionState.getExecutionId());
     }
 
     private ExecutionState createExecutionState(ExecutionStatus status) {
@@ -73,9 +86,11 @@ public class ExecutionStateRepositoryTest {
         executionState.setStatus(status);
         executionState.setExecutionId(123L);
         executionState.setBranchId(UUID.randomUUID().toString());
+        executionState.setUpdateTime(new Date().getTime());
         executionStateRepository.saveAndFlush(executionState);
         return executionState;
     }
+
 
     @Configuration
     @EnableJpaRepositories("io.cloudslang")

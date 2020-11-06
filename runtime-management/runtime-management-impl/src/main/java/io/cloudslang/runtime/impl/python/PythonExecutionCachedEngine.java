@@ -20,7 +20,6 @@ import io.cloudslang.dependency.api.services.DependencyService;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.impl.ExecutionCachedEngine;
-import org.python.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -28,10 +27,12 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
+import static java.util.Collections.emptySet;
+
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
-public class PythonExecutionCachedEngine extends ExecutionCachedEngine<PythonExecutor> implements PythonExecutionEngine{
+public class PythonExecutionCachedEngine extends ExecutionCachedEngine<PythonExecutor> implements PythonExecutionEngine {
     @Autowired
     private DependencyService dependencyService;
 
@@ -50,8 +51,19 @@ public class PythonExecutionCachedEngine extends ExecutionCachedEngine<PythonExe
 
     @Override
     public PythonEvaluationResult eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
-        PythonExecutor executor = allocateExecutor(Sets.<String>newHashSet());
+        PythonExecutor executor = allocateExecutor(emptySet());
         try {
+            return executor.eval(prepareEnvironmentScript, script, vars);
+        } finally {
+            releaseExecutor(executor);
+        }
+    }
+
+    @Override
+    public PythonEvaluationResult test(String prepareEnvironmentScript, String script, Map<String, Serializable> vars, long timeout) {
+        PythonExecutor executor = allocateExecutor(emptySet());
+        try {
+            // For Jython test is identical with eval
             return executor.eval(prepareEnvironmentScript, script, vars);
         } finally {
             releaseExecutor(executor);

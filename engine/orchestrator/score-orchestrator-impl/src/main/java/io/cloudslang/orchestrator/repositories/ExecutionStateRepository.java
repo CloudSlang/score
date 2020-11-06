@@ -20,6 +20,8 @@ import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.orchestrator.entities.ExecutionState;
 import java.util.Collection;
 import java.util.Set;
+
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -48,4 +50,11 @@ public interface ExecutionStateRepository extends JpaRepository<ExecutionState, 
     @Query("delete from ExecutionState se where se.executionId in :ids")
     @Modifying
     int deleteByIds(@Param("ids") Collection<Long> ids);
+
+    @Query("select executionState.executionId from ExecutionState executionState where executionState.status in :statuses and executionState.updateTime <= :time")
+    List<Long> findByStatusInAndUpdateTimeLessThanEqual(@Param("statuses")List<ExecutionStatus> statuses, @Param("time")long time, Pageable pageable);
+
+
+    @Query("delete from ExecutionState executionState where executionState.status in :statuses")
+    void deleteByStatusIn(@Param("statuses") List<ExecutionStatus> statuses);
 }

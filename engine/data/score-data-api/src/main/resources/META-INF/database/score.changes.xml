@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
 http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
-    <property name="blob.type" dbms="oracle" value=" blob" />
-    <property name="blob.type" dbms="mssql" value="image" />
-    <property name="blob.type" dbms="mysql" value="longblob" />
-    <property name="blob.type" dbms="postgresql" value="oid" />
-    <property name="blob.type" dbms="h2" value="image" />
+    <property name="blob.type" dbms="oracle" value=" blob"/>
+    <property name="blob.type" dbms="mssql" value="image"/>
+    <property name="blob.type" dbms="mysql" value="longblob"/>
+    <property name="blob.type" dbms="postgresql" value="oid"/>
+    <property name="blob.type" dbms="h2" value="image"/>
 
-    <property name="clob.type" dbms="oracle" value=" clob" />
-    <property name="clob.type" dbms="mssql" value="text" />
-    <property name="clob.type" dbms="mysql" value="longtext" />
-    <property name="clob.type" dbms="postgresql" value="text" />
-    <property name="clob.type" dbms="h2" value=" clob" />
+    <property name="clob.type" dbms="oracle" value=" clob"/>
+    <property name="clob.type" dbms="mssql" value="text"/>
+    <property name="clob.type" dbms="mysql" value="longtext"/>
+    <property name="clob.type" dbms="postgresql" value="text"/>
+    <property name="clob.type" dbms="h2" value=" clob"/>
 
-    <property name="nvarchar.type" dbms="oracle" value="VARCHAR2" />
-    <property name="nvarchar.type" dbms="mssql" value="NVARCHAR" />
-    <property name="nvarchar.type" dbms="mysql" value="VARCHAR" />
-    <property name="nvarchar.type" dbms="postgresql" value="VARCHAR" />
-    <property name="nvarchar.type" dbms="h2" value="VARCHAR" />
+    <property name="nvarchar.type" dbms="oracle" value="VARCHAR2"/>
+    <property name="nvarchar.type" dbms="mssql" value="NVARCHAR"/>
+    <property name="nvarchar.type" dbms="mysql" value="VARCHAR"/>
+    <property name="nvarchar.type" dbms="postgresql" value="VARCHAR"/>
+    <property name="nvarchar.type" dbms="h2" value="VARCHAR"/>
 
-    <property name="timestamp.type" dbms="oracle" value="timestamp" />
-    <property name="timestamp.type" dbms="mssql" value="timestamp" />
-    <property name="timestamp.type" dbms="mysql" value="timestamp null" />
-    <property name="timestamp.type" dbms="postgresql" value="timestamp" />
-    <property name="timestamp.type" dbms="h2" value="timestamp" />
+    <property name="timestamp.type" dbms="oracle" value="timestamp"/>
+    <property name="timestamp.type" dbms="mssql" value="timestamp"/>
+    <property name="timestamp.type" dbms="mysql" value="timestamp null"/>
+    <property name="timestamp.type" dbms="postgresql" value="timestamp"/>
+    <property name="timestamp.type" dbms="h2" value="timestamp"/>
 
     <property name="blob.stream.type" dbms="oracle" value=" blob"/>
     <property name="blob.stream.type" dbms="mssql" value="image"/>
@@ -36,33 +36,34 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
     <changeSet id="Manually create the hibernate auto-increment table for OO" author="hibernate">
         <createTable tableName="OO_HILO">
-            <column name="NEXT_HI" type="INT" />
+            <column name="NEXT_HI" type="INT"/>
         </createTable>
         <insert tableName="OO_HILO">
-            <column name="NEXT_HI" value="1000" />
+            <column name="NEXT_HI" value="1000"/>
         </insert>
     </changeSet>
 
-	<changeSet id="Create OO_EXECUTION_STATE" author="engine">
-		<createTable tableName="OO_EXECUTION_STATE">
-		<column name="ID" type="BIGINT">
-                <constraints primaryKey="true" nullable="false" />
+    <changeSet id="Create OO_EXECUTION_STATE" author="engine">
+        <createTable tableName="OO_EXECUTION_STATE">
+            <column name="ID" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="EXECUTION_ID" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="BRANCH_ID" type="varchar(255)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="STATUS" type="varchar(255)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="EXECUTION_OBJECT" type="${blob.type}"></column>
+            <column name="UPDATE_TIME" type="BIGINT"></column>
         </createTable>
 
-		<addUniqueConstraint tableName="OO_EXECUTION_STATE" columnNames="EXECUTION_ID, BRANCH_ID"
-			constraintName="OO_EXECUTION_STATE_UC" />
-	</changeSet>
+        <addUniqueConstraint tableName="OO_EXECUTION_STATE" columnNames="EXECUTION_ID, BRANCH_ID"
+                             constraintName="OO_EXECUTION_STATE_UC"/>
+    </changeSet>
 
     <changeSet id="create OO_EXECUTION_STATES" author="engine">
 
@@ -94,24 +95,25 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
     <changeSet id="create OO_EXECUTION_QUEUES" author="engine">
         <createTable tableName="OO_EXECUTION_QUEUES">
             <column name="ID" type="bigint">
-                <constraints primaryKey="true" nullable="false" />
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="EXEC_STATE_ID" type="bigint">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
-            <column name="ASSIGNED_WORKER" type="varchar(40)" />
+            <column name="ASSIGNED_WORKER" type="varchar(40)"/>
             <column name="EXEC_GROUP" type="varchar(255)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
-            <column name="STATUS" type="integer" />
+            <column name="STATUS" type="integer"/>
             <column name="MSG_SEQ_ID" type="integer">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
-            <column name="CREATE_TIME" type="BIGINT" />
-            <column name="MSG_VERSION" type="BIGINT" />
+            <column name="CREATE_TIME" type="BIGINT"/>
+            <column name="MSG_VERSION" type="BIGINT"/>
         </createTable>
 
-        <addUniqueConstraint constraintName="OO_EXECUTION_QUEUES_CONSTRAINT" columnNames="EXEC_STATE_ID, MSG_SEQ_ID" tableName="OO_EXECUTION_QUEUES"/>
+        <addUniqueConstraint constraintName="OO_EXECUTION_QUEUES_CONSTRAINT" columnNames="EXEC_STATE_ID, MSG_SEQ_ID"
+                             tableName="OO_EXECUTION_QUEUES"/>
 
     </changeSet>
 
@@ -119,22 +121,22 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
     <changeSet id="Create OO_SUSPENDED_EXECUTIONS" author="engine">
         <createTable tableName="OO_SUSPENDED_EXECUTIONS">
             <column name="ID" type="BIGINT">
-                <constraints primaryKey="true" nullable="false" />
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="EXECUTION_ID" type="varchar(255)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="SPLIT_ID" type="varchar(255)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="NUMBER_OF_BRANCHES" type="INT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="EXECUTION_OBJECT" type="${blob.type}">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="SUSPENSION_REASON" type="VARCHAR(20)">
-                    <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="MERGED_BRANCHES" type="BIGINT">
                 <constraints nullable="false"/>
@@ -145,22 +147,22 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         </createTable>
 
         <addUniqueConstraint tableName="OO_SUSPENDED_EXECUTIONS" columnNames="SPLIT_ID"
-            constraintName="OO_SUSPENDED_EXECUTIONS_UC" />
+                             constraintName="OO_SUSPENDED_EXECUTIONS_UC"/>
     </changeSet>
 
     <changeSet id="Create OO_FINISHED_BRANCHES" author="engine">
         <createTable tableName="OO_FINISHED_BRANCHES">
             <column name="ID" type="BIGINT">
-                <constraints primaryKey="true" nullable="false" />
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="EXECUTION_ID" type="varchar(255)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="BRANCH_ID" type="varchar(255)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="SPLIT_ID" type="varchar(255)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="BRANCH_EXCEPTION" type="${clob.type}"></column>
             <column name="BRANCH_CONTEXT" type="${blob.type}"></column>
@@ -168,32 +170,32 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         </createTable>
 
         <addUniqueConstraint tableName="OO_FINISHED_BRANCHES" columnNames="BRANCH_ID, SPLIT_ID"
-            constraintName="OO_FINISHED_BRANCHES_UC" />
+                             constraintName="OO_FINISHED_BRANCHES_UC"/>
 
     </changeSet>
 
     <changeSet id="create OO_PARTITION_GROUPS table" author="engine">
         <createTable tableName="OO_PARTITION_GROUPS">
             <column name="ID" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="PK_OO_PARTITION_GROUPS" />
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK_OO_PARTITION_GROUPS"/>
             </column>
             <column name="NAME" type="VARCHAR(27)">
-                <constraints nullable="false" unique="true" uniqueConstraintName="OO_PARTITION_GROUPS_TABLE_UQ" />
+                <constraints nullable="false" unique="true" uniqueConstraintName="OO_PARTITION_GROUPS_TABLE_UQ"/>
             </column>
             <column name="GROUP_SIZE" type="INT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="TIME_THRESHOLD" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="SIZE_THRESHOLD" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="ACTIVE_PARTITION" type="INT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="LAST_ROLL_TIME" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>
@@ -201,71 +203,73 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
     <changeSet author="engine" id="create OO_RUNNING_EXECUTION_PLANS">
         <createTable tableName="OO_RUNNING_EXECUTION_PLANS">
             <column name="ID" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="PK_OO_RUNNING_EXECUTION_PLANS" />
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK_OO_RUNNING_EXECUTION_PLANS"/>
             </column>
             <column name="UUID" type="VARCHAR(255)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
-            <column name="EXECUTION_PLAN" type="${clob.type}" />
-            <column name="RESULT" type="${clob.type}" />
-            <column name="EXECUTION_PLAN_ZIPPED" type="${blob.type}" />
-            <column name="EXECUTION_ID" type="VARCHAR(64)" />
+            <column name="EXECUTION_PLAN" type="${clob.type}"/>
+            <column name="RESULT" type="${clob.type}"/>
+            <column name="EXECUTION_PLAN_ZIPPED" type="${blob.type}"/>
+            <column name="EXECUTION_ID" type="VARCHAR(64)"/>
         </createTable>
     </changeSet>
 
     <changeSet id="add table OO_VERSION_COUNTERS" author="engine">
         <createTable tableName="OO_VERSION_COUNTERS">
             <column name="ID" type="BIGINT">
-                <constraints primaryKey="true" nullable="false" />
+                <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="COUNTER_VERSION" type="BIGINT" />
-            <column name="COUNTER_NAME" type="varchar(64)" />
+            <column name="COUNTER_VERSION" type="BIGINT"/>
+            <column name="COUNTER_NAME" type="varchar(64)"/>
         </createTable>
 
         <addUniqueConstraint tableName="OO_VERSION_COUNTERS" columnNames="COUNTER_NAME"
-            constraintName="OO_COUNTER_NAME_UI" />
+                             constraintName="OO_COUNTER_NAME_UI"/>
 
         <insert tableName="OO_VERSION_COUNTERS">
-            <column name="COUNTER_NAME" value="MSG_RECOVERY_VERSION" />
-            <column name="COUNTER_VERSION" value="0" />
-            <column name="ID" value="0" />
+            <column name="COUNTER_NAME" value="MSG_RECOVERY_VERSION"/>
+            <column name="COUNTER_VERSION" value="0"/>
+            <column name="ID" value="0"/>
         </insert>
 
         <rollback>
-            <dropTable tableName="OO_VERSION_COUNTERS" />
+            <dropTable tableName="OO_VERSION_COUNTERS"/>
         </rollback>
     </changeSet>
 
     <changeSet id="create OO_WORKER_NODES" author="engine">
         <createTable tableName="OO_WORKER_NODES">
             <column name="ID" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="OO_WORKER_NODES_PK" />
+                <constraints nullable="false" primaryKey="true" primaryKeyName="OO_WORKER_NODES_PK"/>
             </column>
             <column name="UUID" type="VARCHAR(48)">
-                <constraints nullable="false" unique="true" />
+                <constraints nullable="false" unique="true"/>
             </column>
             <column name="STATUS" type="INTEGER">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="IS_ACTIVE" type="BOOLEAN">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="HOST_NAME" type="VARCHAR(128)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="INSTALL_PATH" type="VARCHAR(256)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
-            <column name="DESCRIPTION" type="VARCHAR(255)" />
+            <column name="DESCRIPTION" type="VARCHAR(255)"/>
             <column name="PASSWORD" type="VARCHAR(80)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
-            <column name="OS" type="VARCHAR(64)" />
-            <column name="JVM" type="VARCHAR(64)" />
-            <column name="DOT_NET_VERSION" type="VARCHAR(16)" />
-            <column name="ACK_TIME" type="${timestamp.type}" />
-            <column name="ACK_VERSION" type="BIGINT" />
-            <column name="IS_DELETED" type="boolean" valueBoolean="false" />
+            <column name="MIGRATED_PASSWORD" type="VARCHAR(80)">
+            </column>
+            <column name="OS" type="VARCHAR(64)"/>
+            <column name="JVM" type="VARCHAR(64)"/>
+            <column name="DOT_NET_VERSION" type="VARCHAR(16)"/>
+            <column name="ACK_TIME" type="${timestamp.type}"/>
+            <column name="ACK_VERSION" type="BIGINT"/>
+            <column name="IS_DELETED" type="boolean" valueBoolean="false"/>
             <column name="BULK_NUMBER" type="VARCHAR(48)"/>
             <column name="WRV" type="VARCHAR(48)"/>
             <column name="VERSION" type="VARCHAR(48)"/>
@@ -274,24 +278,24 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         <createTable tableName="OO_WORKER_GROUPS">
             <column name="WORKER_ID" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="GROUP_NAME" type="VARCHAR(64)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
         </createTable>
 
         <addPrimaryKey tableName="OO_WORKER_GROUPS" columnNames="WORKER_ID,GROUP_NAME"
-            constraintName="OO_WORKER_GROUPS_PK" />
+                       constraintName="OO_WORKER_GROUPS_PK"/>
     </changeSet>
 
     <changeSet id="create OO_WORKER_LOCKS" author="engine">
         <createTable tableName="OO_WORKER_LOCKS">
             <column name="ID" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="OO_WORKER_LOCKS_PK" />
+                <constraints nullable="false" primaryKey="true" primaryKeyName="OO_WORKER_LOCKS_PK"/>
             </column>
             <column name="UUID" type="VARCHAR(48)">
-                <constraints nullable="false" unique="true" />
+                <constraints nullable="false" unique="true"/>
             </column>
         </createTable>
     </changeSet>
@@ -311,6 +315,4 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
             </column>
         </createTable>
     </changeSet>
-
-
 </databaseChangeLog>
