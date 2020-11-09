@@ -112,4 +112,5 @@ public interface ExecutionStateService {
      * @param branchId id of the branch
      */
     public void deleteExecutionState(Long executionId, String branchId);
+    public void deleteCanceledExecutionStates();
 }

@@ -30,6 +30,7 @@ import io.cloudslang.engine.queue.services.ExecutionQueueService;
 import io.cloudslang.engine.queue.services.ExecutionQueueServiceImpl;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerService;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerServiceImpl;
+import io.cloudslang.orchestrator.services.ExecutionStateService;
 import io.cloudslang.engine.versioning.services.VersionService;
 import io.cloudslang.orchestrator.services.EngineVersionService;
 import junit.framework.Assert;
@@ -48,7 +49,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-
+import static java.lang.System.currentTimeMillis;
+import static junit.framework.Assert.assertEquals;
+import java.util.Arrays;
+import java.util.stream.IntStream;
+import java.util.Date;
 import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,6 +83,11 @@ public class QueueCleanerServiceTest {
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
+	@Autowired
+	private ExecutionStateService executionStateService;
+
+	@Autowired
+	private ExecutionQueueRepository executionQueueRepository;
 
 	@Before
 	public void before() {
@@ -228,5 +238,8 @@ public class QueueCleanerServiceTest {
 		EngineVersionService engineVersionService(){
 			return mock(EngineVersionService.class);
 		}
+
+		@Bean
+		ExecutionStateService executionStateService() { return mock(ExecutionStateService.class); }
 	}
 }

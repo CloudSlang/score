@@ -29,6 +29,7 @@ import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepositoryImpl;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerService;
 import io.cloudslang.engine.queue.services.assigner.ExecutionAssignerServiceImpl;
+import io.cloudslang.orchestrator.services.ExecutionStateService;
 import io.cloudslang.engine.versioning.services.VersionService;
 import io.cloudslang.orchestrator.services.EngineVersionService;
 import junit.framework.Assert;
@@ -80,6 +81,9 @@ public class ExecutionQueueServiceTest {
 
 	@Autowired
 	private EngineVersionService engineVersionService;
+
+	@Autowired
+	private ExecutionStateService executionStateService;
 
 	@Before
 	public void before() {
@@ -361,5 +365,8 @@ public class ExecutionQueueServiceTest {
 
 			return mock;
 		}
+
+		@Bean
+		ExecutionStateService executionStateService() { return mock(ExecutionStateService.class);}
 	}
 }

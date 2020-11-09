@@ -30,7 +30,9 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import static io.cloudslang.score.facade.execution.ExecutionStatus.CANCELED;
+import static io.cloudslang.score.facade.execution.ExecutionSummary.EMPTY_BRANCH;
+import static java.lang.String.valueOf;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,6 +45,11 @@ import java.util.List;
 public class QueueListenerImpl implements QueueListener {
 
     private static Logger logger = Logger.getLogger(QueueListenerImpl.class);
+
+    private static final String FLOW_TERMINATION_TYPE = "FLOW_TERMINATION_TYPE";
+    private static final String STEP_TYPE = "STEP_TYPE";
+    private static final String MULTI_INSTANCE = "MULTI_INSTANCE";
+
 
     @Autowired
     private ExecutionStateService executionStateService;
@@ -75,7 +82,7 @@ public class QueueListenerImpl implements QueueListener {
                 for (ExecutionMessage msg : messages) {
                     String message = String.format(
                             "Enqueue msgId= %s:%s,workerId=%s,status=%s",
-                            msg.getMsgUniqueId(), String.valueOf(msg.getMsgSeqId()), msg.getWorkerId(), msg.getStatus().toString()
+                            msg.getMsgUniqueId(), valueOf(msg.getMsgSeqId()), msg.getWorkerId(), msg.getStatus().toString()
                     );
                     logger.trace(message);
                 }
@@ -92,7 +99,7 @@ public class QueueListenerImpl implements QueueListener {
                 for (ExecutionMessage msg : messages) {
                     String message = String.format(
                             "Poll msgId= %s:%s,workerId=%s,status=%s",
-                            msg.getMsgUniqueId(), String.valueOf(msg.getMsgSeqId()), msg.getWorkerId(), msg.getStatus().toString()
+                            msg.getMsgUniqueId(), valueOf(msg.getMsgSeqId()), msg.getWorkerId(), msg.getStatus().toString()
                     );
                     logger.trace(message);
                 }
@@ -121,7 +128,10 @@ public class QueueListenerImpl implements QueueListener {
             Boolean isBranch = isBranch(execution);
             if (!isBranch) {
                 scoreEvents.add(scoreEventFactory.createFinishedEvent(execution));
-                executionStateService.deleteExecutionState(Long.valueOf(executionMessage.getMsgId()), ExecutionSummary.EMPTY_BRANCH);
+                if (!(valueOf(execution.getSystemContext().get(STEP_TYPE)).equals(MULTI_INSTANCE) &&
+                        execution.getSystemContext().get(FLOW_TERMINATION_TYPE) == CANCELED)) {
+                    executionStateService.deleteExecutionState(Long.valueOf(executionMessage.getMsgId()), EMPTY_BRANCH);
+                }
             } else {
                 branches.add(execution);
                 scoreEvents.add(scoreEventFactory.createFinishedBranchEvent(execution));
@@ -208,7 +218,7 @@ public class QueueListenerImpl implements QueueListener {
     private void deleteExecutionStateObjects(List<ExecutionMessage> messages) {
         for (ExecutionMessage executionMessage : messages) {
             if (!failedBecauseNoWorker(extractExecution(executionMessage)) && !failedBecausePreconditionNotFulfilled(extractExecution(executionMessage))) {
-                executionStateService.deleteExecutionState(Long.valueOf(executionMessage.getMsgId()), ExecutionSummary.EMPTY_BRANCH);
+                executionStateService.deleteExecutionState(Long.valueOf(executionMessage.getMsgId()), EMPTY_BRANCH);
             }
         }
     }

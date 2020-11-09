@@ -66,4 +66,9 @@ public interface ExecutionQueueRepository {
 	List<ExecutionMessage> findOldMessages(long timestamp);
 
 	Set<Long> getExecutionIdsForExecutionStateIds(Set<Long> toCancel);
+	Set<Long> getFlowCompletedExecStateIds();
+
+	Set<Long> getOrphanExecStateIds();
+
+	int deleteOrphanSteps();
 }

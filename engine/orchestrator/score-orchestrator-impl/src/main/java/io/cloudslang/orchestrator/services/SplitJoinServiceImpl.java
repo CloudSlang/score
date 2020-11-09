@@ -43,10 +43,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import static java.lang.Long.parseLong;
 import static ch.lambdaj.Lambda.convert;
 import static ch.lambdaj.Lambda.extract;
 import static ch.lambdaj.Lambda.on;
+import static io.cloudslang.score.facade.execution.ExecutionStatus.CANCELED;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.MULTI_INSTANCE;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.NON_BLOCKING;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL;
@@ -92,12 +93,9 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     /*
         converts an execution to a finish branch entity
      */
-    private final Converter<Execution, FinishedBranch> executionToFinishedBranch = new Converter<Execution, FinishedBranch>() {
-        @Override
-        public FinishedBranch convert(Execution execution) {
-            boolean isBranchCancelled = ExecutionStatus.CANCELED.equals(execution.getSystemContext().getFlowTerminationType());
-            return new FinishedBranch(execution.getExecutionId().toString(), execution.getSystemContext().getBranchId(), execution.getSystemContext().getSplitId(), execution.getSystemContext().getStepErrorKey(), new BranchContexts(isBranchCancelled, execution.getContexts(), execution.getSystemContext()));
-        }
+    private final Converter<Execution, FinishedBranch> executionToFinishedBranch = execution -> {
+        boolean isBranchCancelled = CANCELED.equals(execution.getSystemContext().getFlowTerminationType());
+        return new FinishedBranch(execution.getExecutionId().toString(), execution.getSystemContext().getBranchId(), execution.getSystemContext().getSplitId(), execution.getSystemContext().getStepErrorKey(), new BranchContexts(isBranchCancelled, execution.getContexts(), execution.getSystemContext()));
     };
 
     @Override
@@ -201,7 +199,9 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
                 finishedBranch.connectToSuspendedExecution(suspendedExecution);
                 if (suspendedExecution.getSuspensionReason() == MULTI_INSTANCE) {
                     // start a new branch
-                    startNewBranch(suspendedExecution);
+                    if (!finishedBranch.getBranchContexts().isBranchCancelled()) {
+                        startNewBranch(suspendedExecution);
+                    }
                     processFinishedBranch(finishedBranch, suspendedExecution, suspendedExecutionsForMiWithOneBranch);
                 } else {
                     processFinishedBranch(finishedBranch, suspendedExecution, suspendedExecutionsWithOneBranch);
@@ -228,7 +228,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     }
 
     private void startNewBranch(final SuspendedExecution suspendedExecution) {
-        StartNewBranchPayload startNewBranchPayload = executionQueueRepository.getFirstPendingBranch(parseInt(suspendedExecution.getExecutionId()));
+        StartNewBranchPayload startNewBranchPayload = executionQueueRepository.getFirstPendingBranch(parseLong(suspendedExecution.getExecutionId()));
         if (startNewBranchPayload != null) {
             executionQueueRepository.activatePendingExecutionStateForAnExecution(startNewBranchPayload.getPendingExecutionStateId());
             executionQueueRepository.deletePendingExecutionState(startNewBranchPayload.getPendingExecutionMapingId());
@@ -363,7 +363,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
         //mark cancelled on parent
         if (wasExecutionCancelled) {
-            exec.getSystemContext().setFlowTerminationType(ExecutionStatus.CANCELED);
+            exec.getSystemContext().setFlowTerminationType(CANCELED);
         }
 
         return exec;
@@ -390,7 +390,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
         //mark cancelled on parent
         if (wasExecutionCancelled) {
-            exec.getSystemContext().setFlowTerminationType(ExecutionStatus.CANCELED);
+            exec.getSystemContext().setFlowTerminationType(CANCELED);
         }
     }
 }

@@ -46,4 +46,16 @@ final public class QueueCleanerServiceImpl  implements QueueCleanerService {
         executionQueueRepository.deleteFinishedSteps(ids);
     }
 
+    @Override
+    @Transactional
+    public Set<Long> getFlowCompletedExecStateIds() {
+        return executionQueueRepository.getFlowCompletedExecStateIds();
+    }
+
+    @Override
+    @Transactional
+    public int deleteOrphanSteps() {
+        return executionQueueRepository.deleteOrphanSteps();
+    }
+
 }
