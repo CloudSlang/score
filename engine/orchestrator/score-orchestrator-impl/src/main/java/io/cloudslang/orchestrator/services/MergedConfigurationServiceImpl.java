@@ -88,6 +88,10 @@ public class MergedConfigurationServiceImpl implements MergedConfigurationServic
                 holder.getWorkerGroupsForWorker(workerUuid));
     }
 
+    AtomicReference<MergedConfigurationHolder> getMergedConfigHolderReference() {
+        return mergedConfigHolderReference;
+    }
+
     @PreDestroy
     public void destroy() {
         try {
