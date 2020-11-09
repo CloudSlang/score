@@ -184,7 +184,7 @@ public interface WorkerNodeService {
      * @param uuid   the uuid of the worker to update
      * @param status the status to update the given worker to
      */
-    void updateWorkerBusynessValue(String uuid, int workerBusynessValue);
+
     void updateStatusInSeparateTransaction(String uuid, WorkerStatus status);
 
     /**
@@ -282,4 +282,5 @@ public interface WorkerNodeService {
      * @param versionId  comparable worker's version
      */
     void updateVersion(String workerUuid, String version, String versionId);
+    void updateWorkerBusynessValue(String uuid, int workerBusynessValue);
 }
