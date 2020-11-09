@@ -159,7 +159,7 @@ public class MergedConfigurationServiceImpl implements MergedConfigurationServic
                     log.error("Failed to read current worker group information: ", readWorkerGroupsExc);
                 }
 
-                // Construct the object that is queries
+                // Construct the object that is queried
                 mergedConfigHolderValue = new MergedConfigurationHolder(cancelledExecutions, pausedExecutionBranchIds, workerGroupsMap);
             } catch (Exception exception) {
                 log.error("Exception during refresh worker merged configuration information: ", exception);
