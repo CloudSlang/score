@@ -16,7 +16,8 @@
 
 package io.cloudslang.orchestrator.services;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
@@ -41,7 +42,7 @@ import static io.cloudslang.score.facade.execution.ExecutionSummary.EMPTY_BRANCH
  */
 public final class CancelExecutionServiceImpl implements CancelExecutionService {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     @Autowired
     private ExecutionSerializationUtil executionSerializationUtil;

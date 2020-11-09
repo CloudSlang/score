@@ -17,14 +17,15 @@
 package io.cloudslang.worker.management.services;
 
 import org.apache.commons.lang.Validate;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Date: 6/10/13
  *
  */
 public class RetryTemplate {
-	private final Logger logger = Logger.getLogger(getClass());
+	private final Logger logger = LogManager.getLogger(getClass());
 
 	public final static int INFINITELY = -1;
 

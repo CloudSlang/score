@@ -24,7 +24,8 @@ import io.cloudslang.engine.node.repositories.WorkerNodeRepository;
 import io.cloudslang.engine.versioning.services.VersionService;
 import io.cloudslang.score.api.nodes.WorkerStatus;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +40,7 @@ import java.util.Set;
 
 public class WorkerNodeServiceImpl implements WorkerNodeService {
 
-    private static final Logger logger = Logger.getLogger(WorkerNodeServiceImpl.class);
+    private static final Logger logger = LogManager.getLogger(WorkerNodeServiceImpl.class);
 
     private static final long MAX_VERSION_GAP_ALLOWED = Long.getLong("max.allowed.version.gap.worker.recovery", 2);
     private static final String MSG_RECOVERY_VERSION_NAME = "MSG_RECOVERY_VERSION";

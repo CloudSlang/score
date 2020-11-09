@@ -29,7 +29,8 @@ import io.cloudslang.score.events.EventConstants;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.events.ScoreEventListener;
 import junit.framework.Assert;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,7 +70,7 @@ public class StandAloneTest {
 
     private List<ScoreEvent> eventQueue = Collections.synchronizedList(new ArrayList<ScoreEvent>());
 
-    private final static Logger logger = Logger.getLogger(StandAloneTest.class);
+    private final static Logger logger = LogManager.getLogger(StandAloneTest.class);
 
     private final static String simpleNavigationMethodName = "simpleNavigation";
     private final static String navigationActionClassName = "io.cloudslang.samples.controlactions.NavigationActions";

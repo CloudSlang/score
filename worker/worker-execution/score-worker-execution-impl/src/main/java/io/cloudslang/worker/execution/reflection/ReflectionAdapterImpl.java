@@ -22,7 +22,8 @@ import io.cloudslang.score.lang.ExecutionRuntimeServices;
 import io.cloudslang.worker.execution.model.StepActionDataHolder.ReadonlyStepActionDataAccessor;
 import io.cloudslang.worker.execution.services.SessionDataHandler;
 import org.apache.commons.lang.Validate;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -44,7 +45,7 @@ import static java.lang.Class.forName;
 
 public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationContextAware {
 
-    private static final Logger logger = Logger.getLogger(ReflectionAdapterImpl.class);
+    private static final Logger logger = LogManager.getLogger(ReflectionAdapterImpl.class);
 
     @Autowired
     private SessionDataHandler sessionDataHandler;

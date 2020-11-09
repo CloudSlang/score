@@ -18,7 +18,8 @@ package io.cloudslang.runtime.impl;
 
 import io.cloudslang.dependency.api.services.DependencyService;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -30,7 +31,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
 public abstract class ExecutionCachedEngine<T extends Executor> extends ExecutionEngine {
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     // key --> dependencies concatenated
     // value --> classloader/pythoninterpreter which was build with classpath from these dependencies
     // if we reached the limit of cache we will release the least recently used

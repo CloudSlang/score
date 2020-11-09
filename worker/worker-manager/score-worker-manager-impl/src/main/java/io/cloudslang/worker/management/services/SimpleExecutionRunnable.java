@@ -29,7 +29,8 @@ import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.worker.execution.services.ExecutionService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ import org.apache.commons.lang3.SerializationUtils;
 
 public class SimpleExecutionRunnable implements Runnable {
 
-    private static final Logger logger = Logger.getLogger(SimpleExecutionRunnable.class);
+    private static final Logger logger = LogManager.getLogger(SimpleExecutionRunnable.class);
     private static final long WORKER_EXECUTION_INTERVAL = Integer.getInteger("worker.executionIntervalSeconds", 60) * 1_000L;
 
     private final ExecutionService executionService;

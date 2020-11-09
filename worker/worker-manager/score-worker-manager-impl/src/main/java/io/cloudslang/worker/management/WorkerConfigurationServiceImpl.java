@@ -18,7 +18,8 @@ package io.cloudslang.worker.management;
 
 import io.cloudslang.orchestrator.entities.MergedConfigurationDataContainer;
 import io.cloudslang.orchestrator.services.MergedConfigurationService;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Set;
@@ -31,7 +32,7 @@ import java.util.Set;
  */
 public class WorkerConfigurationServiceImpl implements WorkerConfigurationService {
 
-    private static final Logger log = Logger.getLogger(WorkerConfigurationServiceImpl.class);
+    private static final Logger log = LogManager.getLogger(WorkerConfigurationServiceImpl.class);
 
     private volatile Set<Long> cancelledExecutions;
     private volatile Set<String> pausedExecutions;

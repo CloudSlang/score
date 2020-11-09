@@ -18,7 +18,8 @@ package io.cloudslang.runtime.impl.python.external;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Resource;
 import java.io.Serializable;
@@ -28,7 +29,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
-    private static final Logger logger = Logger.getLogger(ExternalPythonRuntimeServiceImpl.class);
+    private static final Logger logger = LogManager.getLogger(ExternalPythonRuntimeServiceImpl.class);
 
     private final Semaphore executionControlSemaphore;
 

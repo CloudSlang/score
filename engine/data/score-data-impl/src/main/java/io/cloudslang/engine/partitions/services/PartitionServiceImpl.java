@@ -19,7 +19,8 @@ package io.cloudslang.engine.partitions.services;
 import io.cloudslang.engine.partitions.entities.PartitionGroup;
 import io.cloudslang.engine.partitions.repositories.PartitionGroupRepository;
 import org.apache.commons.lang.Validate;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Propagation;
@@ -30,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 public final class PartitionServiceImpl implements PartitionService {
-	private final Logger logger = Logger.getLogger(getClass());
+	private final Logger logger = LogManager.getLogger(getClass());
 
 	public static final int MIN_GROUP_SIZE = 2;
 

@@ -18,7 +18,8 @@ package io.cloudslang.engine.queue.services;
 
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class BusyWorkersServiceImpl implements BusyWorkersService {
 
-    private final Logger logger = Logger.getLogger(BusyWorkersServiceImpl.class);
+    private final Logger logger = LogManager.getLogger(BusyWorkersServiceImpl.class);
     private Map<String, String> busyWorkersMap = new ConcurrentHashMap<>();
 
     @Autowired

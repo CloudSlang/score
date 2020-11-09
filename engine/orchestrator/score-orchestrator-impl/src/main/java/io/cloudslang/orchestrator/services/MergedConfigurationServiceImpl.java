@@ -18,7 +18,8 @@ package io.cloudslang.orchestrator.services;
 
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.orchestrator.entities.MergedConfigurationDataContainer;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;
@@ -26,7 +27,7 @@ import java.util.HashSet;
 
 public class MergedConfigurationServiceImpl implements MergedConfigurationService {
 
-    private static final Logger log = Logger.getLogger(MergedConfigurationServiceImpl.class);
+    private static final Logger log = LogManager.getLogger(MergedConfigurationServiceImpl.class);
 
     @Autowired
     private CancelExecutionService cancelExecutionService;
