@@ -18,7 +18,8 @@ package io.cloudslang.worker.management.services;
 
 import io.cloudslang.orchestrator.entities.Message;
 import io.cloudslang.orchestrator.services.OrchestratorDispatcherService;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,7 +52,7 @@ import static org.mockito.Mockito.verify;
 @ContextConfiguration
 public class OutboundBufferTest {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     private static final int MAX_BUFFER_WEIGHT = 10;
     private static final int MAX_BULK_WEIGHT = 3;
