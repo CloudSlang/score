@@ -78,7 +78,7 @@ public class MergedConfigurationServiceImpl implements MergedConfigurationServic
     }
 
     /**
-     * Read data from memory that is periodically refreshed from database
+     * Read data from memory, this data is periodically refreshed from database by scheduledExecutor executor.
      */
     @Override
     public MergedConfigurationDataContainer fetchMergedConfiguration(String workerUuid) {
@@ -138,17 +138,17 @@ public class MergedConfigurationServiceImpl implements MergedConfigurationServic
                 Set<Long> cancelledExecutions;
                 try {
                     cancelledExecutions = new HashSet<>(cancelExecutionService.readCanceledExecutionsIds());
-                } catch (Exception ex) {
+                } catch (Exception readCancelledExc) {
                     cancelledExecutions = emptySet();
-                    log.error("Failed to fetch cancelled information: ", ex);
+                    log.error("Failed to read cancelled executions information: ", readCancelledExc);
                 }
 
                 Set<String> pausedExecutionBranchIds;
                 try {
                     pausedExecutionBranchIds = pauseResumeService.readAllPausedExecutionBranchIdsNoCache();
-                } catch (Exception ex) {
+                } catch (Exception readPausedExecBranchPairsExc) {
                     pausedExecutionBranchIds = emptySet();
-                    log.error("Failed to read paused flows information: ", ex);
+                    log.error("Failed to read paused executions information: ", readPausedExecBranchPairsExc);
                 }
 
                 Map<String, Set<String>> workerGroupsMap;
@@ -156,7 +156,7 @@ public class MergedConfigurationServiceImpl implements MergedConfigurationServic
                     workerGroupsMap = workerNodeService.readWorkerGroupsMap();
                 } catch (Exception readWorkerGroupsExc) {
                     workerGroupsMap = emptyMap();
-                    log.error("Failed to fetch worker group information: ", readWorkerGroupsExc);
+                    log.error("Failed to read current worker group information: ", readWorkerGroupsExc);
                 }
 
                 // Construct the object that is queries
