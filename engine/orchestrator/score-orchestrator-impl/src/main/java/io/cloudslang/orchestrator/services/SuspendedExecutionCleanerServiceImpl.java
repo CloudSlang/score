@@ -65,8 +65,7 @@ public class SuspendedExecutionCleanerServiceImpl implements SuspendedExecutionC
             if (!isEmpty(finishedBranchesToBeDeleted)) {
                 finishedBranchRepository.deleteByIds(finishedBranchesToBeDeleted);
             }
-                suspendedExecutionsRepository.deleteByIds(toBeDeleted);
-            }
+            suspendedExecutionsRepository.deleteByIds(toBeDeleted);
         }
     }
 }
