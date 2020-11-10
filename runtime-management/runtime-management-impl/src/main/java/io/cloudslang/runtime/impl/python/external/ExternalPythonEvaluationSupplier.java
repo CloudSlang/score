@@ -16,9 +16,10 @@
 package io.cloudslang.runtime.impl.python.external;
 
 
-import java.io.BufferedReader;
+import org.apache.commons.io.IOUtils;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicReference;
@@ -26,7 +27,7 @@ import java.util.function.Supplier;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class ExternalPythonEvaluationSupplier implements Supplier<String> {
+public class ExternalPythonEvaluationSupplier implements Supplier<byte[]> {
 
     private final AtomicReference<Process> processRef;
     private final ProcessBuilder processBuilder;
@@ -41,20 +42,16 @@ public class ExternalPythonEvaluationSupplier implements Supplier<String> {
 
 
     @Override
-    public String get() {
+    public byte[] get() {
         try {
             Process process = processBuilder.start();
             this.processRef.set(process);
             PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(process.getOutputStream(), UTF_8));
             printWriter.println(payload);
             printWriter.flush();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            StringBuilder returnResult = new StringBuilder();
-            while ((line = reader.readLine()) != null) {
-                returnResult.append(line);
-            }
-            return returnResult.toString();
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            IOUtils.copy(process.getInputStream(), outputStream);
+            return outputStream.toByteArray();
         } catch (IOException ioException) {
             throw new RuntimeException("Script execution failed: ", ioException);
         }

@@ -34,9 +34,13 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -80,6 +84,7 @@ public class ExternalPythonExecutor {
     private static final ObjectMapper objectMapper;
     private static final ExecutorService engineExecutorService;
     private static final ExecutorService testExecutorService;
+    private static final DocumentBuilderFactory documentBuilderFactory;
 
     static {
         JsonFactory factory = new JsonFactory();
@@ -104,6 +109,20 @@ public class ExternalPythonExecutor {
                 .build();
         testExecutorService = Executors.newFixedThreadPool(TEST_EXECUTOR_THREAD_COUNT, threadFactory);
 
+    }
+
+    static {
+        documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        try {
+            documentBuilderFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            documentBuilderFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        } catch (ParserConfigurationException pce) {
+            logger.error("Could not configure secured XML processing factory: ", pce);
+        }
+        documentBuilderFactory.setExpandEntityReferences(false);
     }
 
 
@@ -185,11 +204,10 @@ public class ExternalPythonExecutor {
         return pythonPath;
     }
 
-    private Document parseScriptExecutionResult(String scriptExecutionResult) throws IOException, ParserConfigurationException, SAXException {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db = dbf.newDocumentBuilder();
+    private Document parseScriptExecutionResult(byte[] scriptResultBytes) throws IOException, ParserConfigurationException, SAXException {
+        DocumentBuilder db = documentBuilderFactory.newDocumentBuilder();
         InputSource is = new InputSource();
-        is.setCharacterStream(new StringReader(scriptExecutionResult));
+        is.setByteStream(new ByteArrayInputStream(scriptResultBytes));
         return db.parse(is);
     }
 
@@ -199,8 +217,8 @@ public class ExternalPythonExecutor {
         ProcessBuilder processBuilder = preparePythonProcess(executionEnvironment, pythonPath);
 
         try {
-            String returnResult = getResult(payload, processBuilder, EXECUTION_TIMEOUT, engineExecutorService);
-            returnResult = parseScriptExecutionResult(returnResult).getElementsByTagName("result").item(0)
+            byte[] returnResultStream = getResult(payload, processBuilder, EXECUTION_TIMEOUT, engineExecutorService);
+            String returnResult = parseScriptExecutionResult(returnResultStream).getElementsByTagName("result").item(0)
                     .getTextContent();
             ScriptResults scriptResults = objectMapper.readValue(returnResult, ScriptResults.class);
             String exception = formatException(scriptResults.getException(), scriptResults.getTraceback());
@@ -224,9 +242,8 @@ public class ExternalPythonExecutor {
         ProcessBuilder processBuilder = preparePythonProcess(executionEnvironment, pythonPath);
 
         try {
-            String returnResult = getResult(payload, processBuilder, timeout, executorService);
-
-            EvaluationResults scriptResults = objectMapper.readValue(returnResult, EvaluationResults.class);
+            byte[] returnResultBytes = getResult(payload, processBuilder, timeout, executorService);
+            EvaluationResults scriptResults = objectMapper.readValue(returnResultBytes, EvaluationResults.class);
             String exception = scriptResults.getException();
             if (!StringUtils.isEmpty(exception)) {
                 logger.error(String.format("Failed to execute script {%s}", exception));
@@ -259,7 +276,7 @@ public class ExternalPythonExecutor {
         }
     }
 
-    private String getResult(final String payload, final ProcessBuilder processBuilder, final long timeoutPeriodMillis, ExecutorService executorService) throws InterruptedException, ExecutionException {
+    private byte[] getResult(final String payload, final ProcessBuilder processBuilder, final long timeoutPeriodMillis, ExecutorService executorService) throws InterruptedException, ExecutionException {
         ExternalPythonEvaluationSupplier supplier = new ExternalPythonEvaluationSupplier(processBuilder, payload);
         try {
             return supplyAsync(supplier, executorService).get(timeoutPeriodMillis, MILLISECONDS);
