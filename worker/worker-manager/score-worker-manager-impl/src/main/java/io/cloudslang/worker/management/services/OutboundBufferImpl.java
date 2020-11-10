@@ -20,12 +20,15 @@ import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.orchestrator.entities.Message;
 import io.cloudslang.orchestrator.services.OrchestratorDispatcherService;
 import io.cloudslang.worker.management.ExecutionsActivityListener;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -38,7 +41,7 @@ import static java.util.Collections.addAll;
 
 public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListener {
 
-    private static final Logger logger = Logger.getLogger(OutboundBufferImpl.class);
+    private static final Logger logger = LogManager.getLogger(OutboundBufferImpl.class);
     private static final long GB = 900000000; //there is JVM overhead, so i will take 10% buffer...
 
     @Autowired

@@ -24,7 +24,8 @@ import io.cloudslang.orchestrator.services.FinishedExecutionStateCleanerService;
 import io.cloudslang.orchestrator.services.SplitJoinService;
 import io.cloudslang.orchestrator.services.SuspendedExecutionCleanerService;
 import org.apache.commons.lang.time.StopWatch;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
@@ -60,7 +61,7 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
     @Autowired
     private FinishedExecutionStateCleanerService finishedExecutionStateCleanerService;
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     final private int QUEUE_BULK_SIZE = 500;
 

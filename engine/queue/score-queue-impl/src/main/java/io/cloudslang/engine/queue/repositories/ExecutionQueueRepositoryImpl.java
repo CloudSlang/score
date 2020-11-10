@@ -34,7 +34,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Iterator;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -65,7 +66,7 @@ import static java.lang.Long.parseLong;
 @SuppressWarnings("FieldCanBeLocal")
 public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
-    private Logger logger = Logger.getLogger(getClass());
+    private Logger logger = LogManager.getLogger(getClass());
 
     private static final int PARTITION_SIZE = 250;
 

@@ -17,7 +17,8 @@ package io.cloudslang.orchestrator.services;
 
 import io.cloudslang.orchestrator.repositories.FinishedBranchRepository;
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
@@ -39,7 +40,7 @@ public class SuspendedExecutionCleanerServiceImpl implements SuspendedExecutionC
     @Autowired
     private FinishedBranchRepository finishedBranchRepository;
 
-    private static final Logger logger = Logger.getLogger(SuspendedExecutionCleanerServiceImpl.class);
+    private static final Logger logger = LogManager.getLogger(SuspendedExecutionCleanerServiceImpl.class);
 
     @Override
     @Transactional

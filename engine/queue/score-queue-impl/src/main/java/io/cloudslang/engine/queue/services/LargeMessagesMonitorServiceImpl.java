@@ -20,7 +20,8 @@ import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
 import io.cloudslang.orchestrator.services.CancelExecutionService;
 import io.cloudslang.score.facade.execution.ExecutionActionResult;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +39,7 @@ import static java.util.stream.Collectors.groupingBy;
 
 public final class LargeMessagesMonitorServiceImpl implements LargeMessagesMonitorService {
 
-    private static Logger logger = Logger.getLogger(LargeMessagesMonitorServiceImpl.class);
+    private static Logger logger = LogManager.getLogger(LargeMessagesMonitorServiceImpl.class);
 
     @Autowired
     private CancelExecutionService cancelExecutionService;

@@ -18,7 +18,8 @@ package io.cloudslang.engine.node.services;
 
 import io.cloudslang.engine.node.entities.WorkerLock;
 import io.cloudslang.engine.node.repositories.WorkerLockRepository;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 //@Service
 public final class WorkerLockServiceImpl implements WorkerLockService {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     @Autowired
     private WorkerLockRepository workerLockRepository;

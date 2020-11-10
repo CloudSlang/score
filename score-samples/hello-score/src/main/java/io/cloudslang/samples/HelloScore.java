@@ -25,7 +25,8 @@ import io.cloudslang.score.events.EventBus;
 import io.cloudslang.score.events.EventConstants;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.events.ScoreEventListener;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -50,7 +51,7 @@ public class HelloScore {
     @Autowired
     private EventBus eventBus;
 
-    private final static Logger logger = Logger.getLogger(HelloScore.class);
+    private final static Logger logger = LogManager.getLogger(HelloScore.class);
     private ApplicationContext context;
     private final Object lock = new Object();
 

@@ -16,7 +16,8 @@
 
 package io.cloudslang.engine.data;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
@@ -40,7 +41,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class SimpleHiloIdentifierGenerator implements IdentifierGenerator, IdentityGenerator {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     static final String TABLE_NAME = "OO_HILO";
     static final String SQL_SELECT = "SELECT NEXT_HI FROM " + TABLE_NAME;
