@@ -99,7 +99,6 @@ public class ExternalPythonExecutor {
                 .setDaemon(true)
                 .build();
         engineExecutorService = Executors.newFixedThreadPool(ENGINE_EXECUTOR_THREAD_COUNT, threadFactory);
-
     }
 
     static {
@@ -108,7 +107,6 @@ public class ExternalPythonExecutor {
                 .setDaemon(true)
                 .build();
         testExecutorService = Executors.newFixedThreadPool(TEST_EXECUTOR_THREAD_COUNT, threadFactory);
-
     }
 
     static {
