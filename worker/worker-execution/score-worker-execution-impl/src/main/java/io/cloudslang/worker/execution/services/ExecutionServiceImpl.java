@@ -96,6 +96,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     private static final Logger logger = LogManager.getLogger(ExecutionServiceImpl.class);
 
+    public static final String USER_INTERRUPT = "USER_INTERRUPT";
+
     @Autowired
     private PauseResumeService pauseService;
 
@@ -237,13 +239,13 @@ public final class ExecutionServiceImpl implements ExecutionService {
     private void updateUserInterrupts(Execution execution) {
         Execution detached = executionStateService.getExecutionObjectForNullBranch(execution.getExecutionId());
         if (detached != null) {
-            Set<String> currentInterrupts = (Set<String>) execution.getSystemContext().get("USER_INTERRUPT");
-            Set<String> updatedInterrupts = (Set<String>) detached.getSystemContext().get("USER_INTERRUPT");
+            Set<String> currentInterrupts = (Set<String>) execution.getSystemContext().get(USER_INTERRUPT);
+            Set<String> updatedInterrupts = (Set<String>) detached.getSystemContext().get(USER_INTERRUPT);
             if (currentInterrupts != null &&
                     updatedInterrupts != null &&
                     !currentInterrupts.equals(updatedInterrupts)) {
-                ((Collection) execution.getSystemContext().get("USER_INTERRUPT")).removeAll(currentInterrupts);
-                ((Collection) execution.getSystemContext().get("USER_INTERRUPT")).addAll(updatedInterrupts);
+                ((Collection) execution.getSystemContext().get(USER_INTERRUPT)).removeAll(currentInterrupts);
+                ((Collection) execution.getSystemContext().get(USER_INTERRUPT)).addAll(updatedInterrupts);
             }
         }
     }
