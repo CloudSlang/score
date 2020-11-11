@@ -35,6 +35,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -81,6 +82,7 @@ public class ExternalPythonExecutor {
     private static final ObjectMapper objectMapper;
     private static final ExecutorService engineExecutorService;
     private static final ExecutorService testExecutorService;
+    private static final DocumentBuilderFactory documentBuilderFactory;
 
     static {
         JsonFactory factory = new JsonFactory();
@@ -105,6 +107,20 @@ public class ExternalPythonExecutor {
                 .build();
         testExecutorService = Executors.newFixedThreadPool(TEST_EXECUTOR_THREAD_COUNT, threadFactory);
 
+    }
+
+    static {
+        documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        try {
+            documentBuilderFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            documentBuilderFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        } catch (ParserConfigurationException pce) {
+            logger.error("Could not configure secured XML processing factory: ", pce);
+        }
+        documentBuilderFactory.setExpandEntityReferences(false);
     }
 
 
@@ -187,8 +203,7 @@ public class ExternalPythonExecutor {
     }
 
     private Document parseScriptExecutionResult(String scriptExecutionResult) throws IOException, ParserConfigurationException, SAXException {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db = dbf.newDocumentBuilder();
+        DocumentBuilder db = documentBuilderFactory.newDocumentBuilder();
         InputSource is = new InputSource();
         is.setCharacterStream(new StringReader(scriptExecutionResult));
         return db.parse(is);
