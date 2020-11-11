@@ -15,6 +15,7 @@
  */
 package io.cloudslang.worker.monitor.service;
 
+import io.cloudslang.score.events.EventBus;
 import io.cloudslang.score.events.EventConstants;
 import io.cloudslang.score.events.FastEventBus;
 import io.cloudslang.score.events.ScoreEvent;
@@ -30,9 +31,11 @@ public class WorkerMetricCollectorServiceImpl implements WorkerMetricCollectorSe
     protected static final Logger logger = Logger.getLogger(WorkerMetricCollectorServiceImpl.class);
     @Autowired
     PerfMetricCollector perfMetricCollector;
+//    @Autowired
+//    @Qualifier("consumptionFastEventBus")
+//    private FastEventBus fastEventBus;
     @Autowired
-    @Qualifier("consumptionFastEventBus")
-    private FastEventBus fastEventBus;
+    EventBus eventBus;
 
     @Override
     public void collectPerfMetrics() {
@@ -45,7 +48,7 @@ public class WorkerMetricCollectorServiceImpl implements WorkerMetricCollectorSe
                 logger.debug("Sending Worker Metric Info:[" + metricInfo + "]");
             }
             ScoreEvent scoreEvent = new ScoreEvent(EventConstants.WORKER_PERFORMANCE_MONITOR, (Serializable) metricInfo);
-            fastEventBus.dispatch(scoreEvent);
+            eventBus.dispatch(scoreEvent);
 
         } catch (Exception e) {
             logger.error("Failed to dispatch metric info event", e);

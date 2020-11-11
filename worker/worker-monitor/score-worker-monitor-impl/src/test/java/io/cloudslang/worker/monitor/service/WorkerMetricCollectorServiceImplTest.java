@@ -17,6 +17,7 @@ package io.cloudslang.worker.monitor.service;
 
 import io.cloudslang.score.events.*;
 import io.cloudslang.worker.monitor.PerfMetricCollector;
+import io.cloudslang.worker.monitor.metrics.PercentCPUByProcess;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.HashMap;
 
 import static org.mockito.Mockito.*;
@@ -40,17 +42,29 @@ public class WorkerMetricCollectorServiceImplTest {
     @Autowired
     PerfMetricCollector perfMetricCollector;
     @Autowired
-    @Qualifier("consumptionFastEventBus")
-    private FastEventBus fastEventBus;
+    PercentCPUByProcess percentCPUByProcess;
+//    @Autowired
+//    @Qualifier("consumptionFastEventBus")
+//    private FastEventBus fastEventBus;
+    @Autowired
+    EventBus eventBus;
 
     @Test
-    public void testWorkerMetricCollectorService() {
+    public void testWorkerMetricCollectorService() throws InterruptedException {
         HashMap<MetricKeyValue, Serializable> monitorInfo = new HashMap<>();
         when(perfMetricCollector.collectMetric()).thenReturn(monitorInfo);
         ScoreEvent event = new ScoreEvent(EventConstants.WORKER_PERFORMANCE_MONITOR, monitorInfo);
         workerMetricCollectorService.collectPerfMetrics();
-        verify(fastEventBus, times(1)).dispatch(refEq(event));
+        verify(eventBus, times(1)).dispatch(refEq(event));
     }
+//    @Test
+//    public void testCpuUsage() {
+//        BigInteger fact = BigInteger.valueOf(1);
+//        for (int i = 1; i <= 87858; i++) {
+//            fact = fact.multiply(BigInteger.valueOf(i));
+//            System.out.println(percentCPUByProcess.getCurrentValue());
+//        }
+//    }
 
 
     @Configuration
@@ -60,8 +74,11 @@ public class WorkerMetricCollectorServiceImplTest {
         public WorkerMetricCollectorService workerMetricCollectorService() {return new WorkerMetricCollectorServiceImpl();}
         @Bean
         public PerfMetricCollector perfMetricCollector() {return mock(PerfMetricCollector.class);}
+//        @Bean
+//        public FastEventBus consumptionFastEventBus() {return mock(FastEventBusImpl.class);}
+    @Bean public EventBus eventBus() {return mock(EventBus.class);}
         @Bean
-        public FastEventBus consumptionFastEventBus() {return mock(FastEventBusImpl.class);}
+        public PercentCPUByProcess percentCPUByProcess() {return mock(PercentCPUByProcess.class);}
 
     }
 }
