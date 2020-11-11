@@ -36,6 +36,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import static io.cloudslang.score.facade.execution.ExecutionSummary.EMPTY_BRANCH;
+
 /**
  * User: wahnonm
  * Date: 30/01/14
@@ -76,6 +78,8 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
 
         // create execution record in ExecutionSummary table
         executionStateService.createParentExecution(execution.getExecutionId());
+
+        executionStateService.updateExecutionObject(execution.getExecutionId(), EMPTY_BRANCH, execution);
 
         // create execution message
         ExecutionMessage message = createExecutionMessage(execution);

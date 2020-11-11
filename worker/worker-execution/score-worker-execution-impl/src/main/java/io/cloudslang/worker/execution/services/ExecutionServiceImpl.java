@@ -17,6 +17,7 @@
 package io.cloudslang.worker.execution.services;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.cloudslang.orchestrator.services.ExecutionStateService;
 import io.cloudslang.orchestrator.services.PauseResumeService;
 import io.cloudslang.score.api.ControlActionMetadata;
 import io.cloudslang.score.api.ExecutionPlan;
@@ -49,14 +50,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -115,6 +117,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     @Autowired
     private RobotAvailabilityService robotAvailabilityService;
+
+    @Autowired
+    private ExecutionStateService executionStateService;
 
     private static final int DEFAULT_PLATFORM_LEVEL_OPERATION_TIMEOUT_IN_SECONDS = 24 * 60 * 60; // seconds in a day
     private static final int DEFAULT_PLATFORM_LEVEL_WAIT_PERIOD_FOR_TIMEOUT_IN_SECONDS = 5 * 60; // 5 minutes
@@ -208,6 +213,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
             dumpBusEvents(execution);
             // Update MI suspended execution
             updateMiIfRequired(execution);
+
+            updateUserInterrupts(execution);
+
             return execution;
         } catch (InterruptedException ex) {
             throw ex;
@@ -223,6 +231,20 @@ public final class ExecutionServiceImpl implements ExecutionService {
     private void updateMiIfRequired(Execution execution) {
         if (execution.getSystemContext().containsKey(MI_REMAINING_BRANCHES_CONTEXT_KEY)) {
             executorService.execute(() -> workerDbSupportService.updateSuspendedExecutionMiThrottlingContext(execution));
+        }
+    }
+
+    private void updateUserInterrupts(Execution execution) {
+        Execution detached = executionStateService.getExecutionObjectForNullBranch(execution.getExecutionId());
+        if (detached != null) {
+            Set<String> currentInterrupts = (Set<String>) execution.getSystemContext().get("USER_INTERRUPT");
+            Set<String> updatedInterrupts = (Set<String>) detached.getSystemContext().get("USER_INTERRUPT");
+            if (currentInterrupts != null &&
+                    updatedInterrupts != null &&
+                    !currentInterrupts.equals(updatedInterrupts)) {
+                ((Collection) execution.getSystemContext().get("USER_INTERRUPT")).removeAll(currentInterrupts);
+                ((Collection) execution.getSystemContext().get("USER_INTERRUPT")).addAll(updatedInterrupts);
+            }
         }
     }
 
