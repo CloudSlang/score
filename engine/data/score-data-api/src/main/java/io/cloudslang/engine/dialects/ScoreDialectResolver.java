@@ -16,7 +16,8 @@
 
 package io.cloudslang.engine.dialects;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.jdbc.dialect.internal.StandardDialectResolver;
 import org.hibernate.engine.jdbc.dialect.spi.DatabaseMetaDataDialectResolutionInfoAdapter;
@@ -40,7 +41,7 @@ public class ScoreDialectResolver implements DialectResolver {
     @Autowired
     StandardDialectResolver dialectResolver;
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     @Override
     public Dialect resolveDialect(DialectResolutionInfo metaData) {

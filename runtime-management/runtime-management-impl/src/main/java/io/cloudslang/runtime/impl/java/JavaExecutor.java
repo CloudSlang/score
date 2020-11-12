@@ -21,7 +21,8 @@ import io.cloudslang.runtime.impl.Executor;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.python.google.common.collect.Sets;
 
 import java.io.File;
@@ -41,7 +42,7 @@ import static io.cloudslang.runtime.impl.constants.ScoreContentSdk.SERIALIZABLE_
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
 public class JavaExecutor implements Executor {
-    private static final Logger logger = Logger.getLogger(JavaExecutor.class);
+    private static final Logger logger = LogManager.getLogger(JavaExecutor.class);
 
     private static final String SCORE_CONTENT_SDK_JAR = "score-content-sdk*.jar";
     private static final String APP_HOME = "app.home";

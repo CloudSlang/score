@@ -20,7 +20,8 @@ import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.impl.Executor;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.python.core.Py;
 import org.python.core.PyBoolean;
 import org.python.core.PyClass;
@@ -50,7 +51,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class PythonExecutor implements Executor {
     public static final String THREADED_MODULES_ISSUE = "No module named";
-    private static final Logger logger = Logger.getLogger(PythonExecutor.class);
+    private static final Logger logger = LogManager.getLogger(PythonExecutor.class);
 
     private static final String TRUE = "true";
     private static final String FALSE = "false";

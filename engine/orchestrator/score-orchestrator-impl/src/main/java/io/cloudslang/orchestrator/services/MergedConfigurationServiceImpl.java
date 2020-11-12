@@ -20,7 +20,8 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.orchestrator.entities.MergedConfigurationDataContainer;
 import io.cloudslang.orchestrator.model.MergedConfigurationHolder;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
@@ -42,7 +43,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class MergedConfigurationServiceImpl implements MergedConfigurationService {
 
-    private static final Logger log = Logger.getLogger(MergedConfigurationServiceImpl.class);
+    private static final Logger log = LogManager.getLogger(MergedConfigurationServiceImpl.class);
     private static final long MERGED_CONFIGURATION_PERIODIC_REFRESH_MILLIS = getLong("worker.mergedConfiguration.refreshDelayMillis", 1_800L);
     private static final long MERGED_CONFIGURATION_INITIAL_DELAY_MILLIS = getLong("worker.mergedConfiguration.initialDelayMillis", 1_000L);
 

@@ -21,7 +21,7 @@
 	<parent>
 		<groupId>io.cloudslang</groupId>
 		<artifactId>worker-manager</artifactId>
-		<version>0.3.186-SNAPSHOT</version>
+		<version>0.3.193-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
@@ -91,6 +91,12 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<scope>test</scope>
 		</dependency>
 		
 	</dependencies>

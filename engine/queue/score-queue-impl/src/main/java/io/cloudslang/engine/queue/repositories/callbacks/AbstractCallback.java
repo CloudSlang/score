@@ -17,7 +17,8 @@
 package io.cloudslang.engine.queue.repositories.callbacks;
 
 import io.cloudslang.engine.partitions.services.PartitionCallback;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -32,7 +33,7 @@ import java.util.concurrent.TimeUnit;
  *
  */
 abstract class AbstractCallback implements PartitionCallback {
-	private final Logger logger = Logger.getLogger(getClass());
+	private final Logger logger = LogManager.getLogger(getClass());
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;

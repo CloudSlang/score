@@ -18,7 +18,8 @@ package io.cloudslang.worker.management.services;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -33,7 +34,7 @@ import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 public class WorkerConfigurationUtils {
 
-    private static final Logger logger = Logger.getLogger(WorkerConfigurationUtils.class);
+    private static final Logger logger = LogManager.getLogger(WorkerConfigurationUtils.class);
 
     private static final long MEMORY_THRESHOLD = 50_000_000L; // 50 Mega byte
 
