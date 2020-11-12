@@ -43,8 +43,8 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 public class MergedConfigurationServiceImpl implements MergedConfigurationService {
 
     private static final Logger log = Logger.getLogger(MergedConfigurationServiceImpl.class);
-    private static final long MERGED_CONFIGURATION_PERIODIC_REFRESH_MILLIS = getLong("worker.mergedConfiguration.refreshDelayMillis", 2000L);
-    private static final long MERGED_CONFIGURATION_INITIAL_DELAY_MILLIS = getLong("worker.mergedConfiguration.initialDelayMillis", 1000L);
+    private static final long MERGED_CONFIGURATION_PERIODIC_REFRESH_MILLIS = getLong("worker.mergedConfiguration.refreshDelayMillis", 1_800L);
+    private static final long MERGED_CONFIGURATION_INITIAL_DELAY_MILLIS = getLong("worker.mergedConfiguration.initialDelayMillis", 1_000L);
 
     @Autowired
     private CancelExecutionService cancelExecutionService;
