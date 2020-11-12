@@ -17,6 +17,7 @@
 package io.cloudslang.worker.execution.services;
 
 import io.cloudslang.orchestrator.services.CancelExecutionService;
+import io.cloudslang.orchestrator.services.ExecutionStateService;
 import io.cloudslang.orchestrator.services.PauseResumeService;
 import io.cloudslang.score.api.ControlActionMetadata;
 import io.cloudslang.score.api.ExecutionPlan;
@@ -107,6 +108,9 @@ public class ExecutionServiceTest {
 
 	@Autowired
     private ReflectionAdapter reflectionAdapter;
+
+	@Autowired
+	private ExecutionStateService executionStateService;
 
 	@Before
 	public void init() {
@@ -435,6 +439,11 @@ public class ExecutionServiceTest {
 		@Bean
 		public RobotAvailabilityService robotAvailabilityService() {
 			return mock(RobotAvailabilityService.class);
+		}
+
+		@Bean
+		public ExecutionStateService executionStateService() {
+			return mock(ExecutionStateService.class);
 		}
 
 	}
