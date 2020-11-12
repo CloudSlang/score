@@ -104,6 +104,11 @@
             <artifactId>score-orchestrator-api</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
         <!-- end of engine artifacts -->
         <!-- test artifacts -->
         <dependency>
@@ -153,6 +158,11 @@
         <dependency>
             <groupId>org.easytesting</groupId>
             <artifactId>fest-assert</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
         </dependency>
 
         <dependency>
