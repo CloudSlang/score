@@ -16,7 +16,8 @@
 package io.cloudslang.orchestrator.services;
 
 import io.cloudslang.orchestrator.repositories.ExecutionStateRepository;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
@@ -32,7 +33,7 @@ public class FinishedExecutionStateCleanerServiceImpl implements FinishedExecuti
     private final int SPLIT_SIZE = 200;
     private static final long EXECUTION_STATE_INACTIVE_TIME = 30 * 60 * 1000L;
 
-    private static final Logger logger = Logger.getLogger(FinishedExecutionStateCleanerServiceImpl.class);
+    private static final Logger logger = LogManager.getLogger(FinishedExecutionStateCleanerServiceImpl.class);
 
     @Autowired
     private ExecutionStateRepository executionStateRepository;

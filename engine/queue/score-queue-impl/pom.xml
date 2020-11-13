@@ -23,16 +23,16 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>queue</artifactId>
-        <version>0.3.186-SNAPSHOT</version>
+        <version>0.3.194-SNAPSHOT</version>
     </parent>
 
     <artifactId>score-queue-impl</artifactId>
 
     <dependencies>
 
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
+         <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
         </dependency>
 
         <dependency>
@@ -127,6 +127,12 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

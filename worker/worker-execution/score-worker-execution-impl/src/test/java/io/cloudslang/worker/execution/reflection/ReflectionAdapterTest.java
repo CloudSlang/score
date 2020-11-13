@@ -21,7 +21,8 @@ import io.cloudslang.worker.execution.model.StepActionDataHolder;
 import io.cloudslang.worker.execution.model.StepActionDataHolder.ReadonlyStepActionDataAccessor;
 import io.cloudslang.worker.execution.services.SessionDataHandler;
 import junit.framework.Assert;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,7 @@ import static junit.framework.Assert.assertNull;
 @ContextConfiguration
 public class ReflectionAdapterTest {
 
-	private static final Logger logger = Logger.getLogger(ReflectionAdapterTest.class);
+	private static final Logger logger = LogManager.getLogger(ReflectionAdapterTest.class);
 	@Autowired
     ReflectionAdapter adapter;
 

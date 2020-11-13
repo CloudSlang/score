@@ -16,7 +16,8 @@
 
 package io.cloudslang.schema;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
@@ -29,7 +30,7 @@ import java.util.Map;
  */
 @SuppressWarnings("unused")
 public class ScoreNamespaceHandler extends NamespaceHandlerSupport {
-	private final Logger logger = Logger.getLogger(getClass());
+	private final Logger logger = LogManager.getLogger(getClass());
 
 	private Map<String,String> parsers = new HashMap<String,String>(){{
 		put("engine", "io.cloudslang.schema.EngineBeanDefinitionParser");

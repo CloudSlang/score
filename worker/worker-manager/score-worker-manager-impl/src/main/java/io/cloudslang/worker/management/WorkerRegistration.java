@@ -24,7 +24,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.node.services.WorkerNodeService;
@@ -36,7 +37,7 @@ import io.cloudslang.engine.node.services.WorkerNodeService;
  */
 public class WorkerRegistration {
 
-	private static final Logger log = Logger.getLogger(WorkerRegistration.class);
+	private static final Logger log = LogManager.getLogger(WorkerRegistration.class);
 
 	@Resource
 	protected String workerUuid;

@@ -29,7 +29,8 @@ import io.cloudslang.engine.queue.services.assigner.strategies.RoundRobinStrateg
 import io.cloudslang.engine.queue.services.assigner.strategies.SecureRandomStrategy;
 import io.cloudslang.orchestrator.services.EngineVersionService;
 import io.cloudslang.score.facade.entities.Execution;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +47,7 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 public final class ExecutionAssignerServiceImpl implements ExecutionAssignerService {
 
-    private static final Logger logger = Logger.getLogger(ExecutionAssignerServiceImpl.class);
+    private static final Logger logger = LogManager.getLogger(ExecutionAssignerServiceImpl.class);
     public static final String WORKER_MESSAGE_ASSIGNMENT_POLICY_KEY = "worker.message.assignment.policy";
     private static final String WORKER_PREFIX = "Worker_";
     private static final int WORKER_PREFIX_LENGTH = WORKER_PREFIX.length();

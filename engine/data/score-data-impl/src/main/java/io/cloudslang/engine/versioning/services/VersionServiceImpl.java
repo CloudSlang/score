@@ -19,7 +19,8 @@ package io.cloudslang.engine.versioning.services;
 
 import io.cloudslang.engine.versioning.entities.VersionCounter;
 import io.cloudslang.engine.versioning.repositories.VersionRepository;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +34,7 @@ import java.util.Date;
  */
 public final class  VersionServiceImpl implements VersionService {
 
-    private final Logger logger = Logger.getLogger(this.getClass());
+    private final Logger logger = LogManager.getLogger(this.getClass());
 
     @Autowired
     private VersionRepository versionRepository;

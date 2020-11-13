@@ -37,7 +37,8 @@ import org.apache.commons.lang.StringUtils;
 import io.cloudslang.score.api.EndBranchDataContainer;
 import io.cloudslang.score.facade.entities.Execution;
 import org.apache.commons.lang.Validate;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
@@ -68,7 +69,7 @@ import static java.util.EnumSet.of;
 import static java.util.stream.Collectors.toList;
 
 public final class SplitJoinServiceImpl implements SplitJoinService {
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     private final Integer BULK_SIZE = Integer.getInteger("splitjoin.job.bulk.size", 200);
 

@@ -42,7 +42,8 @@ import io.cloudslang.worker.execution.reflection.ReflectionAdapter;
 import io.cloudslang.worker.management.WorkerConfigurationService;
 import io.cloudslang.worker.management.services.dbsupport.WorkerDbSupportService;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -91,7 +92,7 @@ import static org.apache.commons.lang.StringUtils.endsWith;
 
 public final class ExecutionServiceImpl implements ExecutionService {
 
-    private static final Logger logger = Logger.getLogger(ExecutionServiceImpl.class);
+    private static final Logger logger = LogManager.getLogger(ExecutionServiceImpl.class);
 
     @Autowired
     private PauseResumeService pauseService;

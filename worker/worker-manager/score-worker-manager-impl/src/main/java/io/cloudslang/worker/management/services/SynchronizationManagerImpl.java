@@ -16,13 +16,14 @@
 
 package io.cloudslang.worker.management.services;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class SynchronizationManagerImpl implements SynchronizationManager {
-    private static final Logger logger = Logger.getLogger(SynchronizationManagerImpl.class);
+    private static final Logger logger = LogManager.getLogger(SynchronizationManagerImpl.class);
 
     private final ReentrantLock recoveryGetLock = new ReentrantLock();  //synchronizing Recovery and InBuffer
     private final ReentrantLock recoveryPutLock = new ReentrantLock(); //synchronizing Recovery and OutBuffer put()
