@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
-
+import org.springframework.transaction.annotation.Transactional;
 import static io.cloudslang.score.facade.execution.ExecutionStatus.*;
 import static java.util.Arrays.asList;
 import static org.springframework.util.CollectionUtils.isEmpty;
