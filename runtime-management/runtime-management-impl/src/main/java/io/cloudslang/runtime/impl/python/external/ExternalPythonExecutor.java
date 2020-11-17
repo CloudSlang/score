@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
+import io.cloudslang.runtime.api.python.external.ViburDocumentBuilderPoolService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -35,10 +36,8 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -57,12 +56,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeoutException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
+import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 
@@ -82,7 +81,7 @@ public class ExternalPythonExecutor {
     private static final ObjectMapper objectMapper;
     private static final ExecutorService engineExecutorService;
     private static final ExecutorService testExecutorService;
-    private static final DocumentBuilderFactory documentBuilderFactory;
+    private static final ViburDocumentBuilderPoolService viburDocumentBuilderService;
 
     static {
         JsonFactory factory = new JsonFactory();
@@ -92,37 +91,24 @@ public class ExternalPythonExecutor {
     }
 
     static {
-        final ThreadFactory threadFactory = new ThreadFactoryBuilder()
+        final ThreadFactory engineThreadFactory = new ThreadFactoryBuilder()
                 .setNameFormat("python-engine-%d")
                 .setDaemon(true)
                 .build();
-        engineExecutorService = Executors.newFixedThreadPool(ENGINE_EXECUTOR_THREAD_COUNT, threadFactory);
-
+        engineExecutorService = newFixedThreadPool(ENGINE_EXECUTOR_THREAD_COUNT, engineThreadFactory);
     }
 
     static {
-        final ThreadFactory threadFactory = new ThreadFactoryBuilder()
+        final ThreadFactory testThreadFactory = new ThreadFactoryBuilder()
                 .setNameFormat("python-test-%d")
                 .setDaemon(true)
                 .build();
-        testExecutorService = Executors.newFixedThreadPool(TEST_EXECUTOR_THREAD_COUNT, threadFactory);
-
+        testExecutorService = newFixedThreadPool(TEST_EXECUTOR_THREAD_COUNT, testThreadFactory);
     }
 
     static {
-        documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        try {
-            documentBuilderFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-            documentBuilderFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-            documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        } catch (ParserConfigurationException pce) {
-            logger.error("Could not configure secured XML processing factory: ", pce);
-        }
-        documentBuilderFactory.setExpandEntityReferences(false);
+        viburDocumentBuilderService = new ViburDocumentBuilderPoolServiceImpl();
     }
-
 
     public PythonExecutionResult exec(String script, Map<String, Serializable> inputs) {
         TempExecutionEnvironment tempExecutionEnvironment = null;
@@ -202,11 +188,15 @@ public class ExternalPythonExecutor {
         return pythonPath;
     }
 
-    private Document parseScriptExecutionResult(String scriptExecutionResult) throws IOException, ParserConfigurationException, SAXException {
-        DocumentBuilder db = documentBuilderFactory.newDocumentBuilder();
-        InputSource is = new InputSource();
-        is.setCharacterStream(new StringReader(scriptExecutionResult));
-        return db.parse(is);
+    private Document parseScriptExecutionResult(String scriptExecutionResult) throws IOException, SAXException {
+        DocumentBuilder documentBuilder = viburDocumentBuilderService.tryTakeWithTimeout();
+        try {
+            InputSource is = new InputSource();
+            is.setCharacterStream(new StringReader(scriptExecutionResult));
+            return documentBuilder.parse(is);
+        } finally {
+            viburDocumentBuilderService.restore(documentBuilder);
+        }
     }
 
     private PythonExecutionResult runPythonExecutionProcess(String pythonPath, String payload,
@@ -228,7 +218,7 @@ public class ExternalPythonExecutor {
 
             //noinspection unchecked
             return new PythonExecutionResult(scriptResults.getReturnResult());
-        } catch (IOException | InterruptedException | SAXException | ParserConfigurationException | ExecutionException e) {
+        } catch (IOException | InterruptedException | SAXException | ExecutionException e) {
             logger.error("Failed to run script. ", e.getCause() != null ? e.getCause() : e);
             throw new RuntimeException("Failed to run script.");
         }
