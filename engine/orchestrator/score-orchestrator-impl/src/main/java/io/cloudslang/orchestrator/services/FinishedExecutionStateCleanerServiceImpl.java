@@ -39,6 +39,7 @@ public class FinishedExecutionStateCleanerServiceImpl implements FinishedExecuti
     private ExecutionStateRepository executionStateRepository;
 
     @Override
+    @Transactional
     public void cleanFinishedExecutionState() {
         try {
             cleanFinishedExecutionState(MAX_BULK_SIZE);
