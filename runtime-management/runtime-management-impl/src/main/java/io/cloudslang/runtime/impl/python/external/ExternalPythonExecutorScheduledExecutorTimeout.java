@@ -369,6 +369,7 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
             PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(process.getOutputStream(), UTF_8));
             printWriter.println(payload);
             printWriter.flush();
+            process.waitFor();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             StringBuilder returnResult = new StringBuilder();
