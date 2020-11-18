@@ -263,7 +263,7 @@ public class ExternalPythonExecutorWaitForTimeout implements ExternalPythonProce
             boolean finishedInTime = process.waitFor(timeoutPeriodMillis, MILLISECONDS);
             if (!finishedInTime) { // Timeout
                 destroyProcess(process);
-                throw new RuntimeException("Timeout " + timeoutPeriodMillis + " has been reached");
+                throw new RuntimeException("Python timeout of " + timeoutPeriodMillis + " millis has been reached");
             }
 
             // Process finished before timeout was reached, so read from process.getInputStream()

@@ -281,7 +281,7 @@ public class ExternalPythonExecutorCompletableFutureTimeout implements ExternalP
             return supplyAsync(supplier, executorService).get(timeoutPeriodMillis, MILLISECONDS);
         } catch (TimeoutException timeoutException) {
             supplier.destroyProcess();
-            throw new RuntimeException("Timeout " + timeoutPeriodMillis + " has been reached: ", timeoutException);
+            throw new RuntimeException("Python timeout of " + timeoutPeriodMillis + " millis has been reached: ", timeoutException);
         }
     }
 

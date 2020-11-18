@@ -308,7 +308,7 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
 
             if (threadTest.isAlive()) { // Test python script timed out
                 testRunnable.destroyProcess();
-                throw new RuntimeException("Timeout " + timeout + " has been reached");
+                throw new RuntimeException("Python timeout of " + timeout + " millis has been reached");
             }
 
             // Test python script encountered an exception during its execution
