@@ -63,6 +63,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import static io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine.WAIT_FOR_STRATEGY;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
@@ -349,6 +350,6 @@ public class ExternalPythonExecutorWaitForTimeout implements ExternalPythonProce
 
     @Override
     public String getStrategyName() {
-        return "waitfor";
+        return WAIT_FOR_STRATEGY;
     }
 }

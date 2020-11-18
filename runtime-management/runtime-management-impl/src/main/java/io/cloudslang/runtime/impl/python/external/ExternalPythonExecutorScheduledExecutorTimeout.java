@@ -71,6 +71,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine.SCHEDULED_EXECUTOR_STRATEGY;
 import static java.lang.Boolean.TRUE;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -452,6 +453,6 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
 
     @Override
     public String getStrategyName() {
-        return "scheduled-executor";
+        return SCHEDULED_EXECUTOR_STRATEGY;
     }
 }

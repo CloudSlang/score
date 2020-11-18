@@ -32,15 +32,21 @@ public class ExternalPythonExecutionEngine implements PythonExecutionEngine {
 
     private static final Logger logger = LogManager.getLogger(ExternalPythonExecutionEngine.class);
     private static final Supplier<ExternalPythonProcessRunService> pythonRunServiceSupplier;
+    public static final String WAIT_FOR_STRATEGY = "wait-for";
+    public static final String SCHEDULED_EXECUTOR_STRATEGY = "scheduled-executor";
+    public static final String COMPLETABLE_EXECUTOR_STRATEGY = "completable-future";
 
     static {
-        String timeoutStrategy = System.getProperty("python.timeoutStrategy", "completable-future");
-        if (StringUtils.equalsIgnoreCase(timeoutStrategy, "scheduled-executor")) {
+        String timeoutStrategy = System.getProperty("python.timeoutStrategy", COMPLETABLE_EXECUTOR_STRATEGY);
+        if (StringUtils.equalsIgnoreCase(timeoutStrategy, SCHEDULED_EXECUTOR_STRATEGY)) {
             pythonRunServiceSupplier = () -> new ExternalPythonExecutorScheduledExecutorTimeout();
-        } else if (StringUtils.equalsIgnoreCase(timeoutStrategy, "waitfor")) {
+
+        } else if (StringUtils.equalsIgnoreCase(timeoutStrategy, WAIT_FOR_STRATEGY)) {
             pythonRunServiceSupplier = () -> new ExternalPythonExecutorWaitForTimeout();
-        } else if (StringUtils.equalsIgnoreCase(timeoutStrategy, "completable-future")) {
+
+        } else if (StringUtils.equalsIgnoreCase(timeoutStrategy, COMPLETABLE_EXECUTOR_STRATEGY)) {
             pythonRunServiceSupplier = () -> new ExternalPythonExecutorCompletableFutureTimeout();
+
         } else { // Use default
             pythonRunServiceSupplier = () -> new ExternalPythonExecutorCompletableFutureTimeout();
         }
@@ -63,6 +69,5 @@ public class ExternalPythonExecutionEngine implements PythonExecutionEngine {
     public PythonEvaluationResult test(String prepareEnvironmentScript, String script, Map<String, Serializable> vars, long timeout) {
         ExternalPythonProcessRunService pythonExecutor = pythonRunServiceSupplier.get();
         return pythonExecutor.test(script, prepareEnvironmentScript, vars, timeout);
-
     }
 }

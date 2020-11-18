@@ -65,6 +65,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeoutException;
 
+import static io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine.COMPLETABLE_EXECUTOR_STRATEGY;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -347,6 +348,6 @@ public class ExternalPythonExecutorCompletableFutureTimeout implements ExternalP
 
     @Override
     public String getStrategyName() {
-        return "completable-future";
+        return COMPLETABLE_EXECUTOR_STRATEGY;
     }
 }
