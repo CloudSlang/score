@@ -377,8 +377,9 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
         } catch (IOException ioException) {
             if (TRUE.equals(timeoutMap.get(uniqueKey))) {
                 throw new RuntimeException("Timeout " + timeoutPeriodMillis + " has been reached");
+            } else {
+                throw new RuntimeException("Script execution failed: ", ioException);
             }
-            throw new RuntimeException("Script execution failed: ", ioException);
         } finally {
             // Remove from timeoutScheduledExecutor queue, because of setRemoveOnCancelPolicy(true)
             if (scheduledFuture != null) {
