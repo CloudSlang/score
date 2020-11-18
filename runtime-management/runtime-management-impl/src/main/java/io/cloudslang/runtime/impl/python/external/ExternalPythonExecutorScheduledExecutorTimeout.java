@@ -33,6 +33,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
@@ -42,7 +43,6 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -63,17 +63,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine.SCHEDULED_EXECUTOR_STRATEGY;
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
+import static java.lang.Thread.currentThread;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
@@ -91,8 +87,6 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     private static final int PYTHON_FILENAME_DELIMITERS = 6;
     private static final ObjectMapper objectMapper;
     private static final ScheduledThreadPoolExecutor timeoutScheduledExecutor;
-    private static final ConcurrentMap<Long, Boolean> timeoutMap;
-    private static final AtomicLong timeoutCounter = new AtomicLong();
     private static final ThreadFactory testThreadFactory;
 
     static {
@@ -115,11 +109,6 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
         scheduledExecutor.setRemoveOnCancelPolicy(true);
         scheduledExecutor.setRejectedExecutionHandler(new AbortPolicy());
         timeoutScheduledExecutor = scheduledExecutor;
-    }
-
-    static {
-        int timeoutMapNrEntries = Integer.getInteger("python.timeoutMap.entries", 512);
-        timeoutMap = new ConcurrentHashMap<>(timeoutMapNrEntries);
     }
 
     static {
@@ -154,18 +143,18 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
 
     @Override
     public PythonEvaluationResult eval(String expression, String prepareEnvironmentScript,
-            Map<String, Serializable> context) {
+                                       Map<String, Serializable> context) {
         return getPythonEvaluationResult(expression, prepareEnvironmentScript, context);
     }
 
     @Override
     public PythonEvaluationResult test(String expression, String prepareEnvironmentScript,
-            Map<String, Serializable> context, long timeout) {
+                                       Map<String, Serializable> context, long timeout) {
         return getPythonTestResult(expression, prepareEnvironmentScript, context, timeout);
     }
 
     private PythonEvaluationResult getPythonTestResult(String expression, String prepareEnvironmentScript,
-            Map<String, Serializable> context, long evaluationTimeout) {
+                                                       Map<String, Serializable> context, long evaluationTimeout) {
         TempEvalEnvironment tempTestEnvironment = null;
         try {
             String pythonPath = checkPythonPath();
@@ -188,7 +177,7 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     }
 
     private PythonEvaluationResult getPythonEvaluationResult(String expression, String prepareEnvironmentScript,
-            Map<String, Serializable> context) {
+                                                             Map<String, Serializable> context) {
         TempEvalEnvironment tempEvalEnvironment = null;
         try {
             String pythonPath = checkPythonPath();
@@ -246,7 +235,7 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     }
 
     private PythonExecutionResult runPythonExecutionProcess(String pythonPath, String payload,
-            TempExecutionEnvironment executionEnvironment) {
+                                                            TempExecutionEnvironment executionEnvironment) {
 
         ProcessBuilder processBuilder = preparePythonProcess(executionEnvironment, pythonPath);
 
@@ -271,8 +260,8 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     }
 
     private PythonEvaluationResult runPythonEvalProcess(String pythonPath, String payload,
-            TempEvalEnvironment executionEnvironment,
-            Map<String, Serializable> context, long timeout) {
+                                                        TempEvalEnvironment executionEnvironment,
+                                                        Map<String, Serializable> context, long timeout) {
 
         ProcessBuilder processBuilder = preparePythonProcess(executionEnvironment, pythonPath);
 
@@ -296,8 +285,8 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     }
 
     private PythonEvaluationResult runPythonTestProcess(String pythonPath, String payload,
-            TempEvalEnvironment executionEnvironment,
-            Map<String, Serializable> context, long timeout) {
+                                                        TempEvalEnvironment executionEnvironment,
+                                                        Map<String, Serializable> context, long timeout) {
 
         ProcessBuilder processBuilder = preparePythonProcess(executionEnvironment, pythonPath);
 
@@ -356,24 +345,23 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     }
 
     private String getResult(final String payload, final ProcessBuilder processBuilder, final long timeoutPeriodMillis) {
-        final long uniqueKey = timeoutCounter.incrementAndGet();
         ScheduledFuture<?> scheduledFuture = null;
         Process process = null;
 
+        final MutableBoolean timedOut = new MutableBoolean(false);
         try {
             process = processBuilder.start();
-            timeoutMap.put(uniqueKey, FALSE);
-            final ExternalPythonTimeoutRunnable runnable = new ExternalPythonTimeoutRunnable(uniqueKey, timeoutMap, Thread.currentThread());
+            final ExternalPythonTimeoutRunnable runnable = new ExternalPythonTimeoutRunnable(timedOut, currentThread());
             scheduledFuture = timeoutScheduledExecutor.schedule(runnable, timeoutPeriodMillis, MILLISECONDS);
 
             PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(process.getOutputStream(), UTF_8));
             printWriter.println(payload);
             printWriter.flush();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
-            // Interrupted by timeoutScheduledExecutor
+            // Interrupted by timeoutScheduledExecutor from ExternalPythonTimeoutRunnable
             process.waitFor();
 
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             StringBuilder returnResult = new StringBuilder();
             while ((line = reader.readLine()) != null) {
@@ -383,7 +371,7 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
         } catch (IOException exception) {
             throw new RuntimeException("Script execution failed: ", exception);
         } catch (InterruptedException interruptedException) {
-            if (TRUE.equals(timeoutMap.get(uniqueKey))) { // intentional to not call get twice
+            if (timedOut.isTrue()) {
                 destroyProcess(process);
                 throw new RuntimeException("Python timeout of " + timeoutPeriodMillis + " millis has been reached");
             } else {
@@ -394,7 +382,6 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
             if (scheduledFuture != null) {
                 scheduledFuture.cancel(false);
             }
-            timeoutMap.remove(uniqueKey);
         }
     }
 
@@ -437,7 +424,7 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     }
 
     private String generatePayloadForEval(String expression, String prepareEnvironmentScript,
-            Map<String, Serializable> context) throws JsonProcessingException {
+                                          Map<String, Serializable> context) throws JsonProcessingException {
         HashMap<String, Serializable> payload = new HashMap<>(4);
         payload.put("expression", expression);
         payload.put("envSetup", prepareEnvironmentScript);

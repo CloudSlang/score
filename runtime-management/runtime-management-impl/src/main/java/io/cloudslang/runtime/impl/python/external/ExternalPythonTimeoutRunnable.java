@@ -16,23 +16,21 @@
 package io.cloudslang.runtime.impl.python.external;
 
 
-import java.util.concurrent.ConcurrentMap;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 
 public class ExternalPythonTimeoutRunnable implements Runnable {
 
-    private final long uniqueKey;
-    private final ConcurrentMap<Long, Boolean> map;
+    private final MutableBoolean timeoutInterrupted;
     private final Thread waitingThread;
 
-    public ExternalPythonTimeoutRunnable(long uniqueKey, ConcurrentMap<Long, Boolean> map, Thread thread) {
-        this.uniqueKey = uniqueKey;
-        this.map = map;
-        this.waitingThread = thread;
+    public ExternalPythonTimeoutRunnable(MutableBoolean timeoutInterrupted, Thread waitingThread) {
+        this.timeoutInterrupted = timeoutInterrupted;
+        this.waitingThread = waitingThread;
     }
 
     @Override
     public void run() {
-        map.put(uniqueKey, Boolean.TRUE);
+        timeoutInterrupted.setTrue();
         waitingThread.interrupt();
     }
 
