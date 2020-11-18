@@ -353,17 +353,17 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
         }
     }
 
-    private String getResult(final String payload,
-            final ProcessBuilder processBuilder,
-            final long timeoutPeriodMillis) {
+    private String getResult(final String payload, final ProcessBuilder processBuilder, final long timeoutPeriodMillis) {
+
         final long uniqueKey = timeoutCounter.incrementAndGet();
         ScheduledFuture<?> scheduledFuture = null;
+
         try {
             Process process = processBuilder.start();
             timeoutMap.put(uniqueKey, process);
-            ExternalPythonTimeoutRunnable runnable = new ExternalPythonTimeoutRunnable(uniqueKey, timeoutMap);
-            scheduledFuture = timeoutScheduledExecutor
-                    .schedule(runnable, timeoutPeriodMillis, MILLISECONDS);
+            final ExternalPythonTimeoutRunnable runnable = new ExternalPythonTimeoutRunnable(uniqueKey, timeoutMap);
+            scheduledFuture = timeoutScheduledExecutor.schedule(runnable, timeoutPeriodMillis, MILLISECONDS);
+
             PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(process.getOutputStream(), UTF_8));
             printWriter.println(payload);
             printWriter.flush();
@@ -380,6 +380,7 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
             }
             throw new RuntimeException("Script execution failed: ", ioException);
         } finally {
+            // Remove from timeoutScheduledExecutor queue, because of setRemoveOnCancelPolicy(true)
             if (scheduledFuture != null) {
                 scheduledFuture.cancel(false);
             }
