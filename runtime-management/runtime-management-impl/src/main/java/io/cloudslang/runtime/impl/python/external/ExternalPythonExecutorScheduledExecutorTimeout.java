@@ -72,6 +72,7 @@ import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine.SCHEDULED_EXECUTOR_STRATEGY;
+import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -90,7 +91,7 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     private static final int PYTHON_FILENAME_DELIMITERS = 6;
     private static final ObjectMapper objectMapper;
     private static final ScheduledThreadPoolExecutor timeoutScheduledExecutor;
-    private static final ConcurrentMap<Long, Object> timeoutMap;
+    private static final ConcurrentMap<Long, Boolean> timeoutMap;
     private static final AtomicLong timeoutCounter = new AtomicLong();
     private static final ThreadFactory testThreadFactory;
 
@@ -355,34 +356,38 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     }
 
     private String getResult(final String payload, final ProcessBuilder processBuilder, final long timeoutPeriodMillis) {
-
         final long uniqueKey = timeoutCounter.incrementAndGet();
         ScheduledFuture<?> scheduledFuture = null;
         Process process = null;
 
         try {
             process = processBuilder.start();
-            timeoutMap.put(uniqueKey, process);
-            final ExternalPythonTimeoutRunnable runnable = new ExternalPythonTimeoutRunnable(uniqueKey, timeoutMap);
+            timeoutMap.put(uniqueKey, FALSE);
+            final ExternalPythonTimeoutRunnable runnable = new ExternalPythonTimeoutRunnable(uniqueKey, timeoutMap, Thread.currentThread());
             scheduledFuture = timeoutScheduledExecutor.schedule(runnable, timeoutPeriodMillis, MILLISECONDS);
 
             PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(process.getOutputStream(), UTF_8));
             printWriter.println(payload);
             printWriter.flush();
-            // Wait for the process to finish until reading the output
-            process.waitFor();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+            // Interrupted by timeoutScheduledExecutor
+            process.waitFor();
+
             String line;
             StringBuilder returnResult = new StringBuilder();
             while ((line = reader.readLine()) != null) {
                 returnResult.append(line);
             }
             return returnResult.toString();
-        } catch (Exception exception) {
+        } catch (IOException exception) {
+            throw new RuntimeException("Script execution failed: ", exception);
+        } catch (InterruptedException interruptedException) {
             if (TRUE.equals(timeoutMap.get(uniqueKey))) { // intentional to not call get twice
+                destroyProcess(process);
                 throw new RuntimeException("Python timeout of " + timeoutPeriodMillis + " millis has been reached");
             } else {
-                throw new RuntimeException("Script execution failed: ", exception);
+                throw new RuntimeException(interruptedException);
             }
         } finally {
             // Remove from timeoutScheduledExecutor queue, because of setRemoveOnCancelPolicy(true)

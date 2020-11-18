@@ -21,24 +21,19 @@ import java.util.concurrent.ConcurrentMap;
 public class ExternalPythonTimeoutRunnable implements Runnable {
 
     private final long uniqueKey;
-    private final ConcurrentMap<Long, Object> map;
+    private final ConcurrentMap<Long, Boolean> map;
+    private final Thread waitingThread;
 
-    public ExternalPythonTimeoutRunnable(long uniqueKey, ConcurrentMap<Long, Object> map) {
+    public ExternalPythonTimeoutRunnable(long uniqueKey, ConcurrentMap<Long, Boolean> map, Thread thread) {
         this.uniqueKey = uniqueKey;
         this.map = map;
+        this.waitingThread = thread;
     }
 
     @Override
     public void run() {
-        Object value = map.remove(uniqueKey);
-        if (value instanceof Process) {
-            Process process = (Process) value;
-            map.put(uniqueKey, Boolean.TRUE);
-            try {
-                // To force waitFor to return after timeout
-                process.destroy();
-            } catch (Exception ignore) {
-            }
-        }
+        map.put(uniqueKey, Boolean.TRUE);
+        waitingThread.interrupt();
     }
+
 }
