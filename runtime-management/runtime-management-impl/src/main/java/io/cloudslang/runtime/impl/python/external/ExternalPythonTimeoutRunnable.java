@@ -35,8 +35,8 @@ public class ExternalPythonTimeoutRunnable implements Runnable {
             Process process = (Process) value;
             map.put(uniqueKey, Boolean.TRUE);
             try {
-                // To force thread stuck in readLine() to reach IOException
-                process.getInputStream().close();
+                // To force waitFor to return after timeout
+                process.destroy();
             } catch (Exception ignore) {
             }
         }

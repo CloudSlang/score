@@ -380,7 +380,6 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
             return returnResult.toString();
         } catch (Exception exception) {
             if (TRUE.equals(timeoutMap.get(uniqueKey))) { // intentional to not call get twice
-                destroyProcess(process);
                 throw new RuntimeException("Python timeout of " + timeoutPeriodMillis + " millis has been reached");
             } else {
                 throw new RuntimeException("Script execution failed: ", exception);
