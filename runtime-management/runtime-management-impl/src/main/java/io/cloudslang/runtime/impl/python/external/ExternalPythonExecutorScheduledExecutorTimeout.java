@@ -373,6 +373,8 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
         } catch (InterruptedException interruptedException) {
             if (timedOut.isTrue()) {
                 destroyProcess(process);
+                //noinspection ResultOfMethodCallIgnored
+                Thread.interrupted();
                 throw new RuntimeException("Python timeout of " + timeoutPeriodMillis + " millis has been reached");
             } else {
                 throw new RuntimeException(interruptedException);
