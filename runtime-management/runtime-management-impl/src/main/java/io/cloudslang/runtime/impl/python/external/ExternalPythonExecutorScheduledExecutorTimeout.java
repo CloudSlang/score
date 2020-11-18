@@ -376,7 +376,7 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
                 returnResult.append(line);
             }
             return returnResult.toString();
-        } catch (IOException exception) {
+        } catch (Exception exception) {
             if (TRUE.equals(timeoutMap.get(uniqueKey))) {
                 if (process != null) {
                     try {
