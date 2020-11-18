@@ -25,5 +25,6 @@ public interface ExternalPythonProcessRunService {
     PythonEvaluationResult eval(String expression, String prepareEnvironmentScript, Map<String, Serializable> context);
     PythonEvaluationResult test(String expression, String prepareEnvironmentScript, Map<String, Serializable> context,
             long timeout);
+    String getStrategyName();
 
 }

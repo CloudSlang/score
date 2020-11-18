@@ -347,4 +347,8 @@ public class ExternalPythonExecutorWaitForTimeout implements ExternalPythonProce
         return trace.substring(pythonFileNameIndex + PYTHON_FILENAME_DELIMITERS);
     }
 
+    @Override
+    public String getStrategyName() {
+        return "waitfor";
+    }
 }

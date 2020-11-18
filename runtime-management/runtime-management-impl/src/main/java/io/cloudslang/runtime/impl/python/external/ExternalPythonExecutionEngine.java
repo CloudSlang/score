@@ -20,6 +20,8 @@ import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.impl.python.PythonExecutionEngine;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -27,7 +29,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 public class ExternalPythonExecutionEngine implements PythonExecutionEngine {
-
+    private static final Logger logger = LogManager.getLogger(ExternalPythonExecutionEngine.class);
     private static final Supplier<ExternalPythonProcessRunService> pythonRunServiceSupplier;
 
     static {
@@ -41,6 +43,7 @@ public class ExternalPythonExecutionEngine implements PythonExecutionEngine {
         } else { // Use default
             pythonRunServiceSupplier = () -> new ExternalPythonExecutorCompletableFutureTimeout();
         }
+        logger.info("python timeout strategy: " + pythonRunServiceSupplier.get().getStrategyName());
     }
 
     @Override

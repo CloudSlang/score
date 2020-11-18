@@ -345,4 +345,8 @@ public class ExternalPythonExecutorCompletableFutureTimeout implements ExternalP
         return trace.substring(pythonFileNameIndex + PYTHON_FILENAME_DELIMITERS);
     }
 
+    @Override
+    public String getStrategyName() {
+        return "completable-future";
+    }
 }
