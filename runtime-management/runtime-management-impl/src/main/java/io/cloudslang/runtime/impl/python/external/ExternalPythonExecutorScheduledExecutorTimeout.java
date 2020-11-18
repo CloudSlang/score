@@ -93,7 +93,6 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     private static final AtomicLong timeoutCounter = new AtomicLong();
     private static final ThreadFactory testThreadFactory;
 
-
     static {
         JsonFactory factory = new JsonFactory();
         factory.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
@@ -154,7 +153,7 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     @Override
     public PythonEvaluationResult eval(String expression, String prepareEnvironmentScript,
             Map<String, Serializable> context) {
-        return getPythonEvaluationResult(expression, prepareEnvironmentScript, context, EVALUATION_TIMEOUT);
+        return getPythonEvaluationResult(expression, prepareEnvironmentScript, context);
     }
 
     @Override
@@ -187,7 +186,7 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     }
 
     private PythonEvaluationResult getPythonEvaluationResult(String expression, String prepareEnvironmentScript,
-            Map<String, Serializable> context, long evaluationTimeout) {
+            Map<String, Serializable> context) {
         TempEvalEnvironment tempEvalEnvironment = null;
         try {
             String pythonPath = checkPythonPath();
@@ -195,7 +194,8 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
             String payload = generatePayloadForEval(expression, prepareEnvironmentScript, context);
             addFilePermissions(tempEvalEnvironment.getParentFolder());
 
-            return runPythonEvalProcess(pythonPath, payload, tempEvalEnvironment, context, evaluationTimeout);
+            return runPythonEvalProcess(pythonPath, payload, tempEvalEnvironment, context,
+                    ExternalPythonExecutorScheduledExecutorTimeout.EVALUATION_TIMEOUT);
 
         } catch (IOException e) {
             String message = "Failed to generate execution resources";
