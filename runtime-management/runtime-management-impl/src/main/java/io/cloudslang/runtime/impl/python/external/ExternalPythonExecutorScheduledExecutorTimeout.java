@@ -369,6 +369,7 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
             PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(process.getOutputStream(), UTF_8));
             printWriter.println(payload);
             printWriter.flush();
+            // Wait for the process to finish until reading the output
             process.waitFor();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
@@ -378,13 +379,8 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
             }
             return returnResult.toString();
         } catch (Exception exception) {
-            if (TRUE.equals(timeoutMap.get(uniqueKey))) {
-                if (process != null) {
-                    try {
-                        process.destroy();
-                    } catch (Exception ignore) {
-                    }
-                }
+            if (TRUE.equals(timeoutMap.get(uniqueKey))) { // intentional to not call get twice
+                destroyProcess(process);
                 throw new RuntimeException("Python timeout of " + timeoutPeriodMillis + " millis has been reached");
             } else {
                 throw new RuntimeException("Script execution failed: ", exception);
@@ -395,6 +391,15 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
                 scheduledFuture.cancel(false);
             }
             timeoutMap.remove(uniqueKey);
+        }
+    }
+
+    private void destroyProcess(Process process) {
+        if (process != null) {
+            try {
+                process.destroy();
+            } catch (Exception ignore) {
+            }
         }
     }
 
