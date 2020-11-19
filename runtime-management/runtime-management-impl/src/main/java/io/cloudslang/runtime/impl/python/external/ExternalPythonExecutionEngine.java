@@ -48,7 +48,7 @@ public class ExternalPythonExecutionEngine implements PythonExecutionEngine {
             pythonRunServiceSupplier = () -> new ExternalPythonExecutorCompletableFutureTimeout();
 
         } else { // Use default
-            pythonRunServiceSupplier = () -> new ExternalPythonExecutorCompletableFutureTimeout();
+            pythonRunServiceSupplier = () -> new ExternalPythonExecutorScheduledExecutorTimeout();
         }
         logger.info("python timeout strategy: " + pythonRunServiceSupplier.get().getStrategyName());
     }
