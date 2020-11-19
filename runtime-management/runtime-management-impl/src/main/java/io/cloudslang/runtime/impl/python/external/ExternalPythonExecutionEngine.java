@@ -37,7 +37,7 @@ public class ExternalPythonExecutionEngine implements PythonExecutionEngine {
     public static final String COMPLETABLE_EXECUTOR_STRATEGY = "completable-future";
 
     static {
-        String timeoutStrategy = System.getProperty("python.timeoutStrategy", COMPLETABLE_EXECUTOR_STRATEGY);
+        String timeoutStrategy = System.getProperty("python.timeoutStrategy", SCHEDULED_EXECUTOR_STRATEGY);
         if (StringUtils.equalsIgnoreCase(timeoutStrategy, SCHEDULED_EXECUTOR_STRATEGY)) {
             pythonRunServiceSupplier = () -> new ExternalPythonExecutorScheduledExecutorTimeout();
 
