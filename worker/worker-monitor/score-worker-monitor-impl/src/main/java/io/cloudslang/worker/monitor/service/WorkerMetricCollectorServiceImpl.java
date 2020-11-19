@@ -20,7 +20,8 @@ import io.cloudslang.score.events.EventConstants;
 import io.cloudslang.score.events.FastEventBus;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.worker.monitor.PerfMetricCollector;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -28,7 +29,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 public class WorkerMetricCollectorServiceImpl implements WorkerMetricCollectorService {
-    protected static final Logger logger = Logger.getLogger(WorkerMetricCollectorServiceImpl.class);
+    protected static final Logger logger = LogManager.getLogger(WorkerMetricCollectorServiceImpl.class);
     @Autowired
     PerfMetricCollector perfMetricCollector;
     @Autowired
