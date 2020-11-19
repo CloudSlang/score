@@ -31,11 +31,11 @@ public class WorkerMetricCollectorServiceImpl implements WorkerMetricCollectorSe
     protected static final Logger logger = Logger.getLogger(WorkerMetricCollectorServiceImpl.class);
     @Autowired
     PerfMetricCollector perfMetricCollector;
-//    @Autowired
-//    @Qualifier("consumptionFastEventBus")
-//    private FastEventBus fastEventBus;
     @Autowired
-    EventBus eventBus;
+    @Qualifier("consumptionFastEventBus")
+    private FastEventBus fastEventBus;
+//    @Autowired
+//    EventBus eventBus;
 
     @Override
     public void collectPerfMetrics() {
@@ -48,7 +48,7 @@ public class WorkerMetricCollectorServiceImpl implements WorkerMetricCollectorSe
                 logger.debug("Sending Worker Metric Info:[" + metricInfo + "]");
             }
             ScoreEvent scoreEvent = new ScoreEvent(EventConstants.WORKER_PERFORMANCE_MONITOR, (Serializable) metricInfo);
-            eventBus.dispatch(scoreEvent);
+            fastEventBus.dispatch(scoreEvent);
 
         } catch (Exception e) {
             logger.error("Failed to dispatch metric info event", e);

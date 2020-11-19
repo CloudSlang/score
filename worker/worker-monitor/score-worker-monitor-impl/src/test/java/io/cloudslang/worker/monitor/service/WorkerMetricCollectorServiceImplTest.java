@@ -43,11 +43,10 @@ public class WorkerMetricCollectorServiceImplTest {
     PerfMetricCollector perfMetricCollector;
     @Autowired
     PercentCPUByProcess percentCPUByProcess;
-//    @Autowired
-//    @Qualifier("consumptionFastEventBus")
-//    private FastEventBus fastEventBus;
     @Autowired
-    EventBus eventBus;
+    @Qualifier("consumptionFastEventBus")
+    private FastEventBus fastEventBus;
+
 
     @Test
     public void testWorkerMetricCollectorService() throws InterruptedException {
@@ -55,7 +54,7 @@ public class WorkerMetricCollectorServiceImplTest {
         when(perfMetricCollector.collectMetric()).thenReturn(monitorInfo);
         ScoreEvent event = new ScoreEvent(EventConstants.WORKER_PERFORMANCE_MONITOR, monitorInfo);
         workerMetricCollectorService.collectPerfMetrics();
-        verify(eventBus, times(1)).dispatch(refEq(event));
+        verify(fastEventBus, times(1)).dispatch(refEq(event));
     }
 //    @Test
 //    public void testCpuUsage() {
@@ -74,9 +73,9 @@ public class WorkerMetricCollectorServiceImplTest {
         public WorkerMetricCollectorService workerMetricCollectorService() {return new WorkerMetricCollectorServiceImpl();}
         @Bean
         public PerfMetricCollector perfMetricCollector() {return mock(PerfMetricCollector.class);}
-//        @Bean
-//        public FastEventBus consumptionFastEventBus() {return mock(FastEventBusImpl.class);}
-    @Bean public EventBus eventBus() {return mock(EventBus.class);}
+        @Bean
+        public FastEventBus consumptionFastEventBus() {return mock(FastEventBusImpl.class);}
+//    @Bean public EventBus eventBus() {return mock(EventBus.class);}
         @Bean
         public PercentCPUByProcess percentCPUByProcess() {return mock(PercentCPUByProcess.class);}
 
