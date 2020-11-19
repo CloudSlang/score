@@ -19,14 +19,26 @@ package io.cloudslang.orchestrator.entities;
 import java.io.Serializable;
 import java.util.Set;
 
+import static java.util.Collections.emptySet;
+
 
 public class MergedConfigurationDataContainer implements Serializable {
 
-    private volatile Set<Long> cancelledExecutions;
-    private volatile Set<String> pausedExecutions;
-    private volatile Set<String> workerGroups;
+    private Set<Long> cancelledExecutions;
+    private Set<String> pausedExecutions;
+    private Set<String> workerGroups;
 
     public MergedConfigurationDataContainer() {
+        this.cancelledExecutions = emptySet();
+        this.pausedExecutions = emptySet();
+        this.workerGroups = emptySet();
+    }
+
+    public MergedConfigurationDataContainer(Set<Long> cancelledExecutions, Set<String> pausedExecutions,
+            Set<String> workerGroups) {
+        this.cancelledExecutions = cancelledExecutions;
+        this.pausedExecutions = pausedExecutions;
+        this.workerGroups = workerGroups;
     }
 
     public Set<Long> getCancelledExecutions() {
@@ -52,5 +64,4 @@ public class MergedConfigurationDataContainer implements Serializable {
     public void setWorkerGroups(Set<String> workerGroups) {
         this.workerGroups = workerGroups;
     }
-
 }

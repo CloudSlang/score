@@ -16,7 +16,8 @@
 package io.cloudslang.engine.queue.services;
 
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
@@ -26,7 +27,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class StatementAwareJdbcTemplateWrapper extends JdbcTemplate {
-    private static final Logger log = Logger.getLogger(StatementAwareJdbcTemplateWrapper.class);
+    private static final Logger log = LogManager.getLogger(StatementAwareJdbcTemplateWrapper.class);
 
     private final String name;
     private final ThreadLocal<Integer> statementBatchSizeThreadLocal;

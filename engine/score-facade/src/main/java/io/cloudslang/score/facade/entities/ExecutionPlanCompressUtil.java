@@ -17,7 +17,8 @@
 package io.cloudslang.score.facade.entities;
 
 import io.cloudslang.score.api.ExecutionPlan;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -36,7 +37,7 @@ import java.util.zip.GZIPOutputStream;
  * Time: 14:29
  */
 public class ExecutionPlanCompressUtil {
-    private static final Logger logger = Logger.getLogger(ExecutionPlanCompressUtil.class);
+    private static final Logger logger = LogManager.getLogger(ExecutionPlanCompressUtil.class);
 
     /**
      * Gets byte[] that contains serialized object ExecutionPlan + zipped

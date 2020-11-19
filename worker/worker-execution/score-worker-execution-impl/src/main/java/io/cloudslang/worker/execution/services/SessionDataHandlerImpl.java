@@ -16,7 +16,8 @@
 
 package io.cloudslang.worker.execution.services;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -34,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SessionDataHandlerImpl implements SessionDataHandler {
 
-    private static final Logger logger = Logger.getLogger(SessionDataHandlerImpl.class);
+    private static final Logger logger = LogManager.getLogger(SessionDataHandlerImpl.class);
     @Autowired(required = false)
     @Qualifier("scoreSessionTimeout")
     private Long sessionTimeout = 1800000L; // 30 minutes

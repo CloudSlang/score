@@ -16,12 +16,13 @@
 package io.cloudslang.orchestrator.services;
 
 import io.cloudslang.orchestrator.repositories.ExecutionStateRepository;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
-
+import org.springframework.transaction.annotation.Transactional;
 import static io.cloudslang.score.facade.execution.ExecutionStatus.*;
 import static java.util.Arrays.asList;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -32,12 +33,13 @@ public class FinishedExecutionStateCleanerServiceImpl implements FinishedExecuti
     private final int SPLIT_SIZE = 200;
     private static final long EXECUTION_STATE_INACTIVE_TIME = 30 * 60 * 1000L;
 
-    private static final Logger logger = Logger.getLogger(FinishedExecutionStateCleanerServiceImpl.class);
+    private static final Logger logger = LogManager.getLogger(FinishedExecutionStateCleanerServiceImpl.class);
 
     @Autowired
     private ExecutionStateRepository executionStateRepository;
 
     @Override
+    @Transactional
     public void cleanFinishedExecutionState() {
         try {
             cleanFinishedExecutionState(MAX_BULK_SIZE);

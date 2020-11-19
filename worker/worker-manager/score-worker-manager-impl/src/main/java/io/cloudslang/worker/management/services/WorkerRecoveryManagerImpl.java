@@ -17,7 +17,8 @@
 package io.cloudslang.worker.management.services;
 
 import io.cloudslang.engine.node.services.WorkerNodeService;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -28,7 +29,7 @@ import java.util.List;
  */
 public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager {
 
-    protected static final Logger logger = Logger.getLogger(WorkerRecoveryManagerImpl.class);
+    protected static final Logger logger = LogManager.getLogger(WorkerRecoveryManagerImpl.class);
     private static final int EXIT_STATUS = 75;
 
     @Autowired

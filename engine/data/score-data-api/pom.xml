@@ -23,15 +23,15 @@
     <parent>
         <artifactId>data</artifactId>
         <groupId>io.cloudslang</groupId>
-        <version>0.3.186-SNAPSHOT</version>
+        <version>0.3.195-SNAPSHOT</version>
     </parent>
 
     <artifactId>score-data-api</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
+         <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>

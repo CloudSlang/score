@@ -23,7 +23,8 @@ import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import io.cloudslang.worker.management.ExecutionsActivityListener;
 import io.cloudslang.worker.management.monitor.WorkerStateUpdateService;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEvent;
@@ -47,7 +48,7 @@ import static java.lang.Runtime.getRuntime;
 
 public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Runnable {
 
-    private static final Logger logger = Logger.getLogger(InBuffer.class);
+    private static final Logger logger = LogManager.getLogger(InBuffer.class);
     private static final int MINIMUM_GC_DELTA = 10000; // Minimum delta between garbage collections in milliseconds
 
     @Autowired
@@ -152,6 +153,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
 
                     if (!workerStateUpdateService.isWorkerEnabled()) {
                         logger.debug("Worker is disabled, skipping polling.");
+                        Thread.sleep(1000);
                         continue;
                     }
 

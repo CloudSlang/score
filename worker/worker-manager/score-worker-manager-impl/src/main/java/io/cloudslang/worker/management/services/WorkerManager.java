@@ -22,7 +22,8 @@ import io.cloudslang.orchestrator.services.EngineVersionService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
 import io.cloudslang.worker.management.monitor.WorkerStateUpdateService;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEvent;
@@ -56,7 +57,7 @@ import static java.lang.System.getProperty;
 
 public class WorkerManager implements ApplicationListener, EndExecutionCallback, WorkerRecoveryListener {
 
-    private static final Logger logger = Logger.getLogger(WorkerManager.class);
+    private static final Logger logger = LogManager.getLogger(WorkerManager.class);
     private static final int KEEP_ALIVE_FAIL_LIMIT = 5;
     private static final String DOTNET_PATH = System.getenv("WINDIR") + "/Microsoft.NET/Framework";
 
