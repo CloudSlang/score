@@ -15,32 +15,59 @@
  */
 package io.cloudslang.runtime.impl.python.external;
 
+import io.cloudslang.runtime.api.python.ExternalPythonProcessRunService;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.impl.python.PythonExecutionEngine;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public class ExternalPythonExecutionEngine implements PythonExecutionEngine {
 
+    private static final Logger logger = LogManager.getLogger(ExternalPythonExecutionEngine.class);
+    private static final Supplier<ExternalPythonProcessRunService> pythonRunServiceSupplier;
+    public static final String WAIT_FOR_STRATEGY = "wait-for";
+    public static final String SCHEDULED_EXECUTOR_STRATEGY = "scheduled-executor";
+    public static final String COMPLETABLE_EXECUTOR_STRATEGY = "completable-future";
+
+    static {
+        String timeoutStrategy = System.getProperty("python.timeoutStrategy", SCHEDULED_EXECUTOR_STRATEGY);
+        if (StringUtils.equalsIgnoreCase(timeoutStrategy, SCHEDULED_EXECUTOR_STRATEGY)) {
+            pythonRunServiceSupplier = () -> new ExternalPythonExecutorScheduledExecutorTimeout();
+
+        } else if (StringUtils.equalsIgnoreCase(timeoutStrategy, WAIT_FOR_STRATEGY)) {
+            pythonRunServiceSupplier = () -> new ExternalPythonExecutorWaitForTimeout();
+
+        } else if (StringUtils.equalsIgnoreCase(timeoutStrategy, COMPLETABLE_EXECUTOR_STRATEGY)) {
+            pythonRunServiceSupplier = () -> new ExternalPythonExecutorCompletableFutureTimeout();
+
+        } else { // Use default
+            pythonRunServiceSupplier = () -> new ExternalPythonExecutorScheduledExecutorTimeout();
+        }
+        logger.info("python timeout strategy: " + pythonRunServiceSupplier.get().getStrategyName());
+    }
+
     @Override
     public PythonExecutionResult exec(Set<String> dependencies, String script, Map<String, Serializable> vars) {
-        ExternalPythonExecutor pythonExecutor = new ExternalPythonExecutor();
+        ExternalPythonProcessRunService pythonExecutor = pythonRunServiceSupplier.get();
         return pythonExecutor.exec(script, vars);
     }
 
     @Override
     public PythonEvaluationResult eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
-        ExternalPythonExecutor pythonExecutor = new ExternalPythonExecutor();
+        ExternalPythonProcessRunService pythonExecutor = pythonRunServiceSupplier.get();
         return pythonExecutor.eval(script, prepareEnvironmentScript, vars);
     }
 
     @Override
     public PythonEvaluationResult test(String prepareEnvironmentScript, String script, Map<String, Serializable> vars, long timeout) {
-        ExternalPythonExecutor pythonExecutor = new ExternalPythonExecutor();
+        ExternalPythonProcessRunService pythonExecutor = pythonRunServiceSupplier.get();
         return pythonExecutor.test(script, prepareEnvironmentScript, vars, timeout);
-
     }
 }
