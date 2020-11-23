@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 
 
@@ -243,6 +244,19 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
         }
         worker.setVersion(version);
         worker.setVersionId(versionId);
+    }
+
+    @Override
+    @Transactional
+    public void updateMigratedPassword(String workerUuid, String encodedPassword) {
+        WorkerNode worker = workerNodeRepository.findByUuid(workerUuid);
+        if (worker == null) {
+            throw new IllegalStateException("No worker was found by the specified UUID:" + workerUuid);
+        }
+        if (StringUtils.isEmpty(encodedPassword)) {
+            throw new IllegalStateException("Invalid encoded password provided for UUID:" + workerUuid);
+        }
+        worker.setMigratedPassword(encodedPassword);
     }
 
     @Override
