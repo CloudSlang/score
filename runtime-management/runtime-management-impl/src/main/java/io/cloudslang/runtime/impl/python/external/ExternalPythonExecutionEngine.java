@@ -32,7 +32,6 @@ public class ExternalPythonExecutionEngine implements PythonExecutionEngine {
 
     private static final Logger logger = LogManager.getLogger(ExternalPythonExecutionEngine.class);
     private static final Supplier<ExternalPythonProcessRunService> pythonRunServiceSupplier;
-    public static final String WAIT_FOR_STRATEGY = "wait-for";
     public static final String SCHEDULED_EXECUTOR_STRATEGY = "scheduled-executor";
     public static final String COMPLETABLE_EXECUTOR_STRATEGY = "completable-future";
 
@@ -40,9 +39,6 @@ public class ExternalPythonExecutionEngine implements PythonExecutionEngine {
         String timeoutStrategy = System.getProperty("python.timeoutStrategy", SCHEDULED_EXECUTOR_STRATEGY);
         if (StringUtils.equalsIgnoreCase(timeoutStrategy, SCHEDULED_EXECUTOR_STRATEGY)) {
             pythonRunServiceSupplier = () -> new ExternalPythonExecutorScheduledExecutorTimeout();
-
-        } else if (StringUtils.equalsIgnoreCase(timeoutStrategy, WAIT_FOR_STRATEGY)) {
-            pythonRunServiceSupplier = () -> new ExternalPythonExecutorWaitForTimeout();
 
         } else if (StringUtils.equalsIgnoreCase(timeoutStrategy, COMPLETABLE_EXECUTOR_STRATEGY)) {
             pythonRunServiceSupplier = () -> new ExternalPythonExecutorCompletableFutureTimeout();
