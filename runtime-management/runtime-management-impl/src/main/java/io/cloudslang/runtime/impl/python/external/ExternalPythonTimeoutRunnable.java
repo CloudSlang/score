@@ -20,18 +20,21 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 
 public class ExternalPythonTimeoutRunnable implements Runnable {
 
-    private final MutableBoolean timeoutInterrupted;
-    private final Thread waitingThread;
+    private final MutableBoolean processDestroyed;
+    private final Process process;
 
-    public ExternalPythonTimeoutRunnable(MutableBoolean timeoutInterrupted, Thread waitingThread) {
-        this.timeoutInterrupted = timeoutInterrupted;
-        this.waitingThread = waitingThread;
+    public ExternalPythonTimeoutRunnable(MutableBoolean processDestroyed, Process process) {
+        this.processDestroyed = processDestroyed;
+        this.process = process;
     }
 
     @Override
     public void run() {
-        timeoutInterrupted.setTrue();
-        waitingThread.interrupt();
+        try {
+            processDestroyed.setTrue();
+            process.destroy();
+        } catch (Exception ignore) {
+        }
     }
 
 }
