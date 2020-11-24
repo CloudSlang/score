@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -83,6 +84,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         executionState.setExecutionId(executionId);
         executionState.setBranchId(EMPTY_BRANCH);
         executionState.setStatus(ExecutionStatus.RUNNING);
+        executionState.setUpdateTime(new Date().getTime());
         return executionStateRepository.save(executionState);
     }
 
@@ -95,7 +97,19 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         executionState.setExecutionId(executionId);
         executionState.setBranchId(branchId);
         executionState.setStatus(ExecutionStatus.PENDING_PAUSE);
+        executionState.setUpdateTime(new Date().getTime());
         return executionStateRepository.save(executionState);
+    }
+
+    @Override
+    public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionStatus status,
+                                           Date updateDate) {
+        validateExecutionId(executionId);
+        Validate.notNull(status, "status cannot be null");
+        validateBranchId(branchId);
+        ExecutionState executionState = findByExecutionIdAndBranchId(executionId, branchId);
+        executionState.setStatus(status);
+        executionState.setUpdateTime(updateDate.getTime());
     }
 
     @Override

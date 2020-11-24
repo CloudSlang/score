@@ -21,9 +21,10 @@ import io.cloudslang.dependency.api.services.MavenConfig;
 import io.cloudslang.score.events.EventBus;
 import io.cloudslang.score.events.EventConstants;
 import io.cloudslang.score.events.ScoreEvent;
-import org.apache.log4j.Appender;
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.appender.RollingFileAppender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -66,7 +67,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -76,6 +76,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static io.cloudslang.dependency.api.services.MavenConfig.SEPARATOR;
+import static java.lang.System.getProperty;
 
 /**
  * @author Alexander Eskin
@@ -83,7 +84,7 @@ import static io.cloudslang.dependency.api.services.MavenConfig.SEPARATOR;
 @Component
 @SuppressWarnings("unused")
 public class DependencyServiceImpl implements DependencyService {
-    private static final Logger logger = Logger.getLogger(DependencyServiceImpl.class);
+    private static final Logger logger = LogManager.getLogger(DependencyServiceImpl.class);
 
     private static final String MAVEN_LAUNCHER_CLASS_NAME = "org.codehaus.plexus.classworlds.launcher.Launcher";
     private static final String MAVEN_LANUCHER_METHOD_NAME = "mainWithExitCode";
@@ -145,15 +146,13 @@ public class DependencyServiceImpl implements DependencyService {
     }
 
     private String calculateLogFolderPath() {
-        Enumeration e = Logger.getRootLogger().getAllAppenders();
-        while (e.hasMoreElements()) {
-            Appender app = (Appender) e.nextElement();
-            if (app instanceof FileAppender) {
-                String logFile = ((FileAppender) app).getFile();
+        for (Appender appender : ((org.apache.logging.log4j.core.Logger) logger).getAppenders().values()) {
+            if (appender instanceof RollingFileAppender) {
+                String logFile = ((RollingFileAppender) appender).getFileName();
                 return new File(logFile).getParentFile().getAbsolutePath();
             }
         }
-        return new File(System.getProperty(MavenConfig.APP_HOME), MavenConfig.LOGS_FOLDER_NAME).getAbsolutePath();
+        return new File(getProperty(MavenConfig.APP_HOME), MavenConfig.LOGS_FOLDER_NAME).getAbsolutePath();
     }
 
     protected PrintStream outputFile(String name) throws FileNotFoundException {

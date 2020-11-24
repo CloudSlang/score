@@ -22,14 +22,19 @@ import com.fasterxml.jackson.core.json.JsonWriteFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.cloudslang.runtime.api.python.ExternalPythonProcessRunService;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
+import io.cloudslang.runtime.impl.python.external.model.TempEnvironment;
+import io.cloudslang.runtime.impl.python.external.model.TempEvalEnvironment;
+import io.cloudslang.runtime.impl.python.external.model.TempExecutionEnvironment;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -37,6 +42,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -59,14 +65,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeoutException;
 
+import static io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine.COMPLETABLE_EXECUTOR_STRATEGY;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 
-public class ExternalPythonExecutor {
+public class ExternalPythonExecutorCompletableFutureTimeout implements ExternalPythonProcessRunService {
 
-    private static final Logger logger = Logger.getLogger(ExternalPythonExecutor.class);
+    private static final Logger logger = LogManager.getLogger(ExternalPythonExecutorCompletableFutureTimeout.class);
     private static final String PYTHON_SCRIPT_FILENAME = "script";
     private static final String EVAL_PY = "eval.py";
     private static final String MAIN_PY = "main.py";
@@ -103,17 +110,16 @@ public class ExternalPythonExecutor {
                 .setDaemon(true)
                 .build();
         testExecutorService = Executors.newFixedThreadPool(TEST_EXECUTOR_THREAD_COUNT, threadFactory);
-
     }
 
-
+    @Override
     public PythonExecutionResult exec(String script, Map<String, Serializable> inputs) {
         TempExecutionEnvironment tempExecutionEnvironment = null;
         try {
             String pythonPath = checkPythonPath();
             tempExecutionEnvironment = generateTempResourcesForExec(script);
-            String payload = generatePayloadForExec(tempExecutionEnvironment.userScriptName, inputs);
-            addFilePermissions(tempExecutionEnvironment.parentFolder);
+            String payload = generatePayloadForExec(tempExecutionEnvironment.getUserScriptName(), inputs);
+            addFilePermissions(tempExecutionEnvironment.getParentFolder());
 
             return runPythonExecutionProcess(pythonPath, payload, tempExecutionEnvironment);
 
@@ -122,40 +128,46 @@ public class ExternalPythonExecutor {
             logger.error(message, e);
             throw new RuntimeException(message);
         } finally {
-            if ((tempExecutionEnvironment != null) && !deleteQuietly(tempExecutionEnvironment.parentFolder)) {
-                logger.warn(String.format("Failed to cleanup python execution resources {%s}", tempExecutionEnvironment.parentFolder));
+            if ((tempExecutionEnvironment != null) && !deleteQuietly(tempExecutionEnvironment.getParentFolder())) {
+                logger.warn(String.format("Failed to cleanup python execution resources {%s}",
+                        tempExecutionEnvironment.getParentFolder()));
             }
         }
     }
 
+    @Override
     public PythonEvaluationResult eval(String expression, String prepareEnvironmentScript,
-                                       Map<String, Serializable> context) {
-        return getPythonEvaluationResult(expression, prepareEnvironmentScript, context, EVALUATION_TIMEOUT, engineExecutorService);
+            Map<String, Serializable> context) {
+        return getPythonEvaluationResult(expression, prepareEnvironmentScript, context, EVALUATION_TIMEOUT,
+                engineExecutorService);
     }
 
+    @Override
     public PythonEvaluationResult test(String expression, String prepareEnvironmentScript,
-                                       Map<String, Serializable> context, long timeout) {
+            Map<String, Serializable> context, long timeout) {
         return getPythonEvaluationResult(expression, prepareEnvironmentScript, context, timeout, testExecutorService);
     }
 
     private PythonEvaluationResult getPythonEvaluationResult(String expression, String prepareEnvironmentScript,
-                                                             Map<String, Serializable> context, long evaluationTimeout, ExecutorService executorService) {
+            Map<String, Serializable> context, long evaluationTimeout, ExecutorService executorService) {
         TempEvalEnvironment tempEvalEnvironment = null;
         try {
             String pythonPath = checkPythonPath();
             tempEvalEnvironment = generateTempResourcesForEval();
             String payload = generatePayloadForEval(expression, prepareEnvironmentScript, context);
-            addFilePermissions(tempEvalEnvironment.parentFolder);
+            addFilePermissions(tempEvalEnvironment.getParentFolder());
 
-            return runPythonEvalProcess(pythonPath, payload, tempEvalEnvironment, context, evaluationTimeout, executorService);
+            return runPythonEvalProcess(pythonPath, payload, tempEvalEnvironment, context, evaluationTimeout,
+                    executorService);
 
         } catch (IOException e) {
             String message = "Failed to generate execution resources";
             logger.error(message, e);
             throw new RuntimeException(message);
         } finally {
-            if ((tempEvalEnvironment != null) && !deleteQuietly(tempEvalEnvironment.parentFolder)) {
-                logger.warn(String.format("Failed to cleanup python execution resources {%s}", tempEvalEnvironment.parentFolder));
+            if ((tempEvalEnvironment != null) && !deleteQuietly(tempEvalEnvironment.getParentFolder())) {
+                logger.warn(String.format("Failed to cleanup python execution resources {%s}",
+                        tempEvalEnvironment.getParentFolder()));
             }
         }
     }
@@ -185,7 +197,8 @@ public class ExternalPythonExecutor {
         return pythonPath;
     }
 
-    private Document parseScriptExecutionResult(String scriptExecutionResult) throws IOException, ParserConfigurationException, SAXException {
+    private Document parseScriptExecutionResult(String scriptExecutionResult)
+            throws IOException, ParserConfigurationException, SAXException {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
         InputSource is = new InputSource();
@@ -194,7 +207,7 @@ public class ExternalPythonExecutor {
     }
 
     private PythonExecutionResult runPythonExecutionProcess(String pythonPath, String payload,
-                                                            TempExecutionEnvironment executionEnvironment) {
+            TempExecutionEnvironment executionEnvironment) {
 
         ProcessBuilder processBuilder = preparePythonProcess(executionEnvironment, pythonPath);
 
@@ -218,8 +231,9 @@ public class ExternalPythonExecutor {
         }
     }
 
-    private PythonEvaluationResult runPythonEvalProcess(String pythonPath, String payload, TempEvalEnvironment executionEnvironment,
-                                                        Map<String, Serializable> context, long timeout, ExecutorService executorService) {
+    private PythonEvaluationResult runPythonEvalProcess(String pythonPath, String payload,
+            TempEvalEnvironment executionEnvironment,
+            Map<String, Serializable> context, long timeout, ExecutorService executorService) {
 
         ProcessBuilder processBuilder = preparePythonProcess(executionEnvironment, pythonPath);
 
@@ -253,27 +267,30 @@ public class ExternalPythonExecutor {
             case INTEGER:
                 return Integer.valueOf(results.getReturnResult());
             case LIST:
-                return objectMapper.readValue(results.getReturnResult(), new TypeReference<ArrayList<Serializable>>() {});
+                return objectMapper.readValue(results.getReturnResult(), new TypeReference<ArrayList<Serializable>>() {
+                });
             default:
                 return results.getReturnResult();
         }
     }
 
-    private String getResult(final String payload, final ProcessBuilder processBuilder, final long timeoutPeriodMillis, ExecutorService executorService) throws InterruptedException, ExecutionException {
+    private String getResult(final String payload, final ProcessBuilder processBuilder, final long timeoutPeriodMillis,
+            ExecutorService executorService) throws InterruptedException, ExecutionException {
         ExternalPythonEvaluationSupplier supplier = new ExternalPythonEvaluationSupplier(processBuilder, payload);
         try {
             return supplyAsync(supplier, executorService).get(timeoutPeriodMillis, MILLISECONDS);
         } catch (TimeoutException timeoutException) {
             supplier.destroyProcess();
-            throw new RuntimeException("Timeout " + timeoutPeriodMillis + " has been reached: ", timeoutException);
+            throw new RuntimeException("Python timeout of " + timeoutPeriodMillis + " millis has been reached");
         }
     }
 
     private ProcessBuilder preparePythonProcess(TempEnvironment executionEnvironment, String pythonPath) {
         ProcessBuilder processBuilder = new ProcessBuilder(Arrays.asList(Paths.get(pythonPath, "python").toString(),
-                Paths.get(executionEnvironment.parentFolder.toString(), executionEnvironment.mainScriptName).toString()));
+                Paths.get(executionEnvironment.getParentFolder().toString(), executionEnvironment.getMainScriptName())
+                        .toString()));
         processBuilder.environment().clear();
-        processBuilder.directory(executionEnvironment.parentFolder);
+        processBuilder.directory(executionEnvironment.getParentFolder());
         return processBuilder;
     }
 
@@ -298,7 +315,7 @@ public class ExternalPythonExecutor {
     }
 
     private String generatePayloadForEval(String expression, String prepareEnvironmentScript,
-                                          Map<String, Serializable> context) throws JsonProcessingException {
+            Map<String, Serializable> context) throws JsonProcessingException {
         HashMap<String, Serializable> payload = new HashMap<>(4);
         payload.put("expression", expression);
         payload.put("envSetup", prepareEnvironmentScript);
@@ -329,28 +346,8 @@ public class ExternalPythonExecutor {
         return trace.substring(pythonFileNameIndex + PYTHON_FILENAME_DELIMITERS);
     }
 
-    private static class TempEnvironment {
-        final String mainScriptName;
-        final File parentFolder;
-
-        private TempEnvironment(String mainScriptName, File parentFolder) {
-            this.mainScriptName = mainScriptName;
-            this.parentFolder = parentFolder;
-        }
-    }
-
-    private static class TempExecutionEnvironment extends TempEnvironment {
-        private final String userScriptName;
-
-        private TempExecutionEnvironment(String userScriptName, String mainScriptName, File parentFolder) {
-            super(mainScriptName, parentFolder);
-            this.userScriptName = userScriptName;
-        }
-    }
-
-    private static class TempEvalEnvironment extends TempEnvironment {
-        private TempEvalEnvironment(String mainScriptName, File parentFolder) {
-            super(mainScriptName, parentFolder);
-        }
+    @Override
+    public String getStrategyName() {
+        return COMPLETABLE_EXECUTOR_STRATEGY;
     }
 }

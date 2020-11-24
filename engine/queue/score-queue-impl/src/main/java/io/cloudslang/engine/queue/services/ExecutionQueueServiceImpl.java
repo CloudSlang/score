@@ -25,7 +25,8 @@ import io.cloudslang.engine.versioning.services.VersionService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.time.StopWatch;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +44,7 @@ import static java.util.stream.Collectors.toList;
  */
 final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 
-	private final Logger logger = Logger.getLogger(this.getClass());
+	private final Logger logger = LogManager.getLogger(this.getClass());
 
 	@Autowired
 	private ExecutionQueueRepository executionQueueRepository;

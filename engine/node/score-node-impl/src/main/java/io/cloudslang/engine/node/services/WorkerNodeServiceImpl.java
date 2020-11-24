@@ -24,7 +24,8 @@ import io.cloudslang.engine.node.repositories.WorkerNodeRepository;
 import io.cloudslang.engine.versioning.services.VersionService;
 import io.cloudslang.score.api.nodes.WorkerStatus;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,12 +35,15 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 
 
 public class WorkerNodeServiceImpl implements WorkerNodeService {
 
-    private static final Logger logger = Logger.getLogger(WorkerNodeServiceImpl.class);
+    private static final Logger logger = LogManager.getLogger(WorkerNodeServiceImpl.class);
 
     private static final long MAX_VERSION_GAP_ALLOWED = Long.getLong("max.allowed.version.gap.worker.recovery", 2);
     private static final String MSG_RECOVERY_VERSION_NAME = "MSG_RECOVERY_VERSION";
@@ -82,7 +86,9 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
             worker.setStatus(WorkerStatus.RUNNING);
         }
         boolean active = worker.isActive();
-        logger.debug("Got keepAlive for Worker with uuid=" + uuid + " and update its ackVersion to " + version + " isActive" + active);
+        logger.debug(
+                "Got keepAlive for Worker with uuid=" + uuid + " and update its ackVersion to " + version + " isActive"
+                        + active);
         return new WorkerKeepAliveInfo(worker.getWorkerRecoveryVersion(), active);
     }
 
@@ -208,6 +214,17 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 
     @Override
     @Transactional(readOnly = true)
+    public Map<String, Set<String>> readWorkerGroupsMap() {
+        List<WorkerNode> all = workerNodeRepository.findAll();
+        Map<String, Set<String>> workerGroupsMap = newHashMapWithExpectedSize(all.size());
+        for (WorkerNode workerNode : all) {
+            workerGroupsMap.put(workerNode.getUuid(), new HashSet<>(workerNode.getGroups()));
+        }
+        return workerGroupsMap;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<String> readAllWorkersUuids() {
         List<WorkerNode> workers = workerNodeRepository.findAll();
         List<String> result = new ArrayList<>();
@@ -306,7 +323,8 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
             throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
         }
         if (StringUtils.isNotEmpty(workerNode.getMigratedPassword())) {
-            throw new IllegalStateException("the migration password has already been changed for the specified UUID:" + uuid);
+            throw new IllegalStateException(
+                    "the migration password has already been changed for the specified UUID:" + uuid);
         }
         workerNode.setMigratedPassword(password);
     }
@@ -344,7 +362,8 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
     public Multimap<String, String> readGroupWorkersMapActiveAndRunningAndVersion(String versionId) {
         Multimap<String, String> result = ArrayListMultimap.create();
         List<WorkerNode> workers;
-        workers = workerNodeRepository.findByActiveAndStatusAndDeletedAndVersionId(true, WorkerStatus.RUNNING, false, versionId);
+        workers = workerNodeRepository
+                .findByActiveAndStatusAndDeletedAndVersionId(true, WorkerStatus.RUNNING, false, versionId);
         for (WorkerNode worker : workers) {
             for (String groupName : worker.getGroups()) {
                 result.put(groupName, worker.getUuid());

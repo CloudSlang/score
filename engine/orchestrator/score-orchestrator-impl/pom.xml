@@ -24,7 +24,7 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>orchestrator</artifactId>
-        <version>0.3.184-SNAPSHOT</version>
+        <version>0.3.197-SNAPSHOT</version>
     </parent>
 
     <artifactId>score-orchestrator-impl</artifactId>
@@ -104,6 +104,11 @@
             <artifactId>score-orchestrator-api</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
         <!-- end of engine artifacts -->
         <!-- test artifacts -->
         <dependency>
@@ -155,5 +160,15 @@
             <artifactId>fest-assert</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

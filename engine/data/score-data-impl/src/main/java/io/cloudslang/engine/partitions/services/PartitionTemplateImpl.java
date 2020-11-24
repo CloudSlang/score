@@ -18,7 +18,8 @@ package io.cloudslang.engine.partitions.services;
 
 import io.cloudslang.engine.partitions.entities.PartitionGroup;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
@@ -35,7 +36,7 @@ import java.util.Map;
  */
 @SuppressWarnings("unused")
 public class PartitionTemplateImpl implements PartitionTemplate, BeanNameAware {
-	private final Logger logger = Logger.getLogger(getClass());
+	private final Logger logger = LogManager.getLogger(getClass());
 
 	@Autowired
 	private PartitionUtils partitionUtils;

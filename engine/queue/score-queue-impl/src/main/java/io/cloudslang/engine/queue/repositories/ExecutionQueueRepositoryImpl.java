@@ -34,7 +34,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Iterator;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -50,6 +51,8 @@ import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.stream.Collectors;
+
 import org.springframework.util.CollectionUtils;
 
 import static java.lang.Long.parseLong;
@@ -63,31 +66,18 @@ import static java.lang.Long.parseLong;
 @SuppressWarnings("FieldCanBeLocal")
 public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
-    private Logger logger = Logger.getLogger(getClass());
+    private Logger logger = LogManager.getLogger(getClass());
 
     private static final int PARTITION_SIZE = 250;
 
     private static final String MYSQL = "mysql";
     private static final String MSSQL = "Microsoft";
 
-    final private String SELECT_FINISHED_STEPS_IDS =  " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES " +
-            " WHERE " +
-            "        (STATUS = "+ExecStatus.TERMINATED.getNumber()+") OR " +
-            "        (STATUS = "+ExecStatus.FAILED.getNumber()+") OR " +
-            "        (STATUS = "+ExecStatus.FINISHED.getNumber()+")";
-
-    final private String SELECT_CANCELED_STEPS_IDS = " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES "
-            + "WHERE EXEC_STATE_ID IN "
-            + "(SELECT DISTINCT ESS.ID FROM OO_EXECUTION_STATES ESS JOIN OO_EXECUTION_STATE ES ON "
-            + "ESS.MSG_ID = CAST(ES.EXECUTION_ID AS VARCHAR(255)) "
-            + "WHERE ES.STATUS = 'PENDING_CANCEL')";
-
-    final private String SELECT_CANCELED_STEPS_IDS_MYSQL = " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES "
-            + "WHERE EXEC_STATE_ID IN "
-            + "(SELECT DISTINCT ESS.ID FROM OO_EXECUTION_STATES ESS JOIN OO_EXECUTION_STATE ES ON "
-            + "ESS.MSG_ID = CAST(ES.EXECUTION_ID AS CHAR(255)) "
-            + "WHERE ES.STATUS = 'PENDING_CANCEL')";
-
+    // Note : Do not join the below queries using a OR clause as it has proved to more expensive
+    final private String SELECT_FINISHED_STEPS_IDS_1 = "SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES EQ WHERE EQ.STATUS IN (6,7,8)" ;
+    final private String SELECT_FINISHED_STEPS_IDS_2 =  "SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES EQ WHERE (EQ.EXEC_STATE_ID IN "
+            + "(SELECT DISTINCT STATES.ID FROM OO_EXECUTION_STATES STATES JOIN OO_EXECUTION_STATE ES ON STATES.MSG_ID = CAST(ES.EXECUTION_ID AS VARCHAR(255)) "
+            + "WHERE ES.STATUS IN('COMPLETED','CANCELED','SYSTEM_FAILURE') ))";
     final private String QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES = "DELETE FROM OO_EXECUTION_QUEUES " +
             " WHERE EXEC_STATE_ID in (:ids)";
 
@@ -322,7 +312,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     private StatementAwareJdbcTemplateWrapper pollForRecoveryJdbcTemplate;
     private StatementAwareJdbcTemplateWrapper pollMessagesWithoutAckJdbcTemplate;
     private StatementAwareJdbcTemplateWrapper getFinishedExecStateIdsJdbcTemplate;
-    private StatementAwareJdbcTemplateWrapper getCanceledExecStateIdsJdbcTemplate;
     private StatementAwareJdbcTemplateWrapper countMessagesWithoutAckForWorkerJdbcTemplate;
     private StatementAwareJdbcTemplateWrapper findByStatusesJdbcTemplate;
     private StatementAwareJdbcTemplateWrapper findLargeJdbcTemplate;
@@ -358,7 +347,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         pollForRecoveryJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "pollForRecoveryJdbcTemplate");
         pollMessagesWithoutAckJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "pollMessagesWithoutAckJdbcTemplate");
         getFinishedExecStateIdsJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "getFinishedExecStateIdsJdbcTemplate");
-        getCanceledExecStateIdsJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "getCanceledExecStateIdsJdbcTemplate");
         countMessagesWithoutAckForWorkerJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "countMessagesWithoutAckForWorkerJdbcTemplate");
         findByStatusesJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "findByStatusesJdbcTemplate");
         findLargeJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "findLargeJdbcTemplate");
@@ -375,8 +363,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         useLargeMessageQuery = Boolean.parseBoolean(System.getProperty("score.poll.use.large.message.query", "true"));
 
         String dbms = getDatabaseProductName();
-
-        cancelExecQuery = isMysql(dbms) ? SELECT_CANCELED_STEPS_IDS_MYSQL : SELECT_CANCELED_STEPS_IDS;
 
         if (useLargeMessageQuery) {
             if (isMssql(dbms)) {
@@ -629,10 +615,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         if (stepIds == null || stepIds.size() == 0) {
             return;
         }
-        Set<Long> result = getCanceledExecStateIds();
-        if (!CollectionUtils.isEmpty(result)) {
-            stepIds.addAll(result);
-        }
+
 	Iterable<List<Long>> lists = Iterables.partition(stepIds, 1000);
         Iterator itr = lists.iterator();
 
@@ -659,15 +642,12 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 	        logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_QUEUES table.");
 	    }
 
-	    if (!CollectionUtils.isEmpty(result)) {
-	       query = QUERY_DELETE_EXECS_STATES_MAPPINGS.replace(":ids", StringUtils.repeat("?", ",", ids.size()));
-	       logSQL(query, args);
-	       deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args);
-	       if (logger.isDebugEnabled()) {
-		   logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECS_STATES_EXECS_MAPPINGS table.");
-	       }
-	       executionStateService.deleteCanceledExecutionStates();
-	   }
+	    query = QUERY_DELETE_EXECS_STATES_MAPPINGS.replace(":ids", StringUtils.repeat("?", ",", ids.size()));
+	    logSQL(query, args);
+	    deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args);
+	    if (logger.isDebugEnabled()) {
+	        logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECS_STATES_EXECS_MAPPINGS table.");
+	    }
 	}
     }
 
@@ -675,23 +655,16 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     public Set<Long> getFinishedExecStateIds() {
         getFinishedExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
         try {
-            List<Long> result = doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, SELECT_FINISHED_STEPS_IDS, new SingleColumnRowMapper<>(Long.class));
+            Set<Long> result;
 
-            return new HashSet<>(result);
+            result = doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, SELECT_FINISHED_STEPS_IDS_1,
+                    new SingleColumnRowMapper<>(Long.class)).stream().collect(Collectors.toSet());
+            result.addAll((Set<Long>) doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, SELECT_FINISHED_STEPS_IDS_2,
+                    new SingleColumnRowMapper<>(Long.class)).stream().collect(Collectors.toSet()));
+
+            return result;
         } finally {
             getFinishedExecStateIdsJdbcTemplate.clearStatementBatchSize();
-        }
-    }
-
-    public Set<Long> getCanceledExecStateIds() {
-        getCanceledExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
-        try {
-            List<Long> result = doSelectWithTemplate(getCanceledExecStateIdsJdbcTemplate, cancelExecQuery,
-                    new SingleColumnRowMapper<>(Long.class));
-
-            return new HashSet<>(result);
-        } finally {
-            getCanceledExecStateIdsJdbcTemplate.clearStatementBatchSize();
         }
     }
 

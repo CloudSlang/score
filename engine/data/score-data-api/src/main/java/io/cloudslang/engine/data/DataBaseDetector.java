@@ -16,7 +16,8 @@
 
 package io.cloudslang.engine.data;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.sql.DataSource;
@@ -32,7 +33,7 @@ import java.sql.SQLException;
 
 public class DataBaseDetector {
 
-	private final Logger logger = Logger.getLogger(getClass());
+	private final Logger logger = LogManager.getLogger(getClass());
 
 	private final static String MSSQL_PRODUCT_NAME = "Microsoft SQL Server";
 	private final static String ORACLE_PRODUCT_NAME = "Oracle";

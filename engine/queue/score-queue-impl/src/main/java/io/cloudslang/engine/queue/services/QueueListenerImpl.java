@@ -28,7 +28,8 @@ import io.cloudslang.score.facade.execution.ExecutionSummary;
 import io.cloudslang.score.facade.execution.PauseReason;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ import static java.lang.String.valueOf;
  */
 public class QueueListenerImpl implements QueueListener {
 
-    private static Logger logger = Logger.getLogger(QueueListenerImpl.class);
+    private static Logger logger = LogManager.getLogger(QueueListenerImpl.class);
     private static final String FLOW_TERMINATION_TYPE = "FLOW_TERMINATION_TYPE";
     private static final String STEP_TYPE = "STEP_TYPE";
     private static final String MULTI_INSTANCE = "MULTI_INSTANCE";
@@ -128,10 +129,6 @@ public class QueueListenerImpl implements QueueListener {
             Boolean isBranch = isBranch(execution);
             if (!isBranch) {
                 scoreEvents.add(scoreEventFactory.createFinishedEvent(execution));
-                if (!(valueOf(execution.getSystemContext().get(STEP_TYPE)).equals(MULTI_INSTANCE) &&
-                        execution.getSystemContext().get(FLOW_TERMINATION_TYPE) == CANCELED)) {
-                    executionStateService.deleteExecutionState(Long.valueOf(executionMessage.getMsgId()), EMPTY_BRANCH);
-                }
             } else {
                 branches.add(execution);
                 scoreEvents.add(scoreEventFactory.createFinishedBranchEvent(execution));
