@@ -43,6 +43,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -69,7 +70,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 
 import static io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine.SCHEDULED_EXECUTOR_STRATEGY;
-import static java.lang.Thread.currentThread;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
@@ -346,24 +346,46 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
 
     private String getResult(final String payload, final ProcessBuilder processBuilder, final long timeoutPeriodMillis) {
         ScheduledFuture<?> scheduledFuture = null;
-        Process process = null;
 
-        final MutableBoolean timedOut = new MutableBoolean(false);
+        final MutableBoolean wasProcessDestroyed = new MutableBoolean(false);
         try {
-            process = processBuilder.start();
-            final ExternalPythonTimeoutRunnable runnable = new ExternalPythonTimeoutRunnable(timedOut, currentThread());
+            final Process process = processBuilder.start();
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            ExternalPythonTimeoutRunnable runnable = new ExternalPythonTimeoutRunnable(wasProcessDestroyed, process);
             scheduledFuture = timeoutScheduledExecutor.schedule(runnable, timeoutPeriodMillis, MILLISECONDS);
 
             PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(process.getOutputStream(), UTF_8));
             printWriter.println(payload);
             printWriter.flush();
 
-            // Interrupted by timeoutScheduledExecutor from ExternalPythonTimeoutRunnable
+            // Start reading in order to prevent buffer getting full, such that process.waitFor does not deadlock
+            String line;
+            IOException readExc = null;
+            StringBuilder returnResult = new StringBuilder();
+            try {
+                while ((line = reader.readLine()) != null) {
+                    returnResult.append(line);
+                }
+            } catch (IOException exc) {
+                if (wasProcessDestroyed.isTrue()) {
+                    throw new RuntimeException("Python timeout of " + timeoutPeriodMillis + " millis has been reached");
+                } else {
+                    readExc = exc;
+                }
+            }
+
+            // Wait for the process to terminate naturally or be destroyed from ExternalPythonTimeoutRunnable
             process.waitFor();
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            StringBuilder returnResult = new StringBuilder();
+            if (wasProcessDestroyed.isTrue() || (readExc != null)) { // Timeout or script execution exception
+                if (wasProcessDestroyed.isTrue()) {
+                    throw new RuntimeException("Python timeout of " + timeoutPeriodMillis + " millis has been reached");
+                } else {
+                    throw new RuntimeException("Script execution failed: ", readExc);
+                }
+            }
+
+            // Continue reading leftover, if required
             while ((line = reader.readLine()) != null) {
                 returnResult.append(line);
             }
@@ -371,28 +393,11 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
         } catch (IOException exception) {
             throw new RuntimeException("Script execution failed: ", exception);
         } catch (InterruptedException interruptedException) {
-            if (timedOut.isTrue()) {
-                destroyProcess(process);
-                // Clear the interrupted status back
-                //noinspection ResultOfMethodCallIgnored
-                Thread.interrupted();
-                throw new RuntimeException("Python timeout of " + timeoutPeriodMillis + " millis has been reached");
-            } else {
-                throw new RuntimeException(interruptedException);
-            }
+            throw new RuntimeException(interruptedException);
         } finally {
             // Remove from timeoutScheduledExecutor queue, because of setRemoveOnCancelPolicy(true)
             if (scheduledFuture != null) {
                 scheduledFuture.cancel(false);
-            }
-        }
-    }
-
-    private void destroyProcess(Process process) {
-        if (process != null) {
-            try {
-                process.destroy();
-            } catch (Exception ignore) {
             }
         }
     }
