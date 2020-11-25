@@ -256,7 +256,9 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
         if (StringUtils.isEmpty(encodedPassword)) {
             throw new IllegalStateException("Invalid encoded password provided for UUID:" + workerUuid);
         }
-        worker.setMigratedPassword(encodedPassword);
+        if (!StringUtils.equals(worker.getMigratedPassword(), encodedPassword)) {
+            worker.setMigratedPassword(encodedPassword);
+        }
     }
 
     @Override
