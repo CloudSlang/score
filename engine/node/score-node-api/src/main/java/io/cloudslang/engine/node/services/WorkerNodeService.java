@@ -180,7 +180,6 @@ public interface WorkerNodeService {
      * @param uuid the uuid of the worker to update
      * @param status the status to update the given worker to
      */
-
     void updateStatusInSeparateTransaction(String uuid, WorkerStatus status);
 
     /**
@@ -283,5 +282,13 @@ public interface WorkerNodeService {
      * @param versionId comparable worker's version
      */
     void updateVersion(String workerUuid, String version, String versionId);
+
+    /**
+     * updates worker's password encoding
+     *
+     * @param workerUuid the uuid of the worker to be updated
+     * @param encodedPassword the newly encoded password of the worker
+     */
+    void updateMigratedPassword(String workerUuid, String encodedPassword);
     void updateWorkerBusynessValue(String uuid, int workerBusynessValue);
 }
