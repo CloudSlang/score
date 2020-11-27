@@ -34,7 +34,7 @@ import org.apache.log4j.Logger;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
+import org.apache.commons.lang3.SerializationUtils;
 import static io.cloudslang.score.facade.TempConstants.MI_REMAINING_BRANCHES_CONTEXT_KEY;
 import static java.lang.Boolean.getBoolean;
 import static java.lang.Long.parseLong;
@@ -530,7 +530,7 @@ public class SimpleExecutionRunnable implements Runnable {
 
                 String splitId = getSplitId(newExecutions);
                 currentNumberOfLanes += newExecutions.size();
-                SplitMessage splitMessage = new SplitMessage(splitId, execution, newExecutions,
+                SplitMessage splitMessage = new SplitMessage(splitId, SerializationUtils.clone(execution), newExecutions,
                         totalNumberOfLanes, currentNumberOfLanes == totalNumberOfLanes);
                 outBuffer.put(splitMessage);
             }
