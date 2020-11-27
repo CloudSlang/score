@@ -49,7 +49,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
-
+import io.cloudslang.orchestrator.services.ExecutionStateService;
 import javax.sql.DataSource;
 import java.util.HashSet;
 import java.util.List;
@@ -74,6 +74,9 @@ public class LargeMessageMonitorServiceTest {
 
     @Autowired
     private ExecutionQueueRepository executionQueueRepository;
+
+    @Autowired
+    private ExecutionStateService executionStateService;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -309,5 +312,8 @@ public class LargeMessageMonitorServiceTest {
         public VersionService queueVersionService() {
             return mock(VersionService.class);
         }
+
+        @Bean
+        public  ExecutionStateService executionStateService() { return mock(ExecutionStateService.class);}
     }
 }

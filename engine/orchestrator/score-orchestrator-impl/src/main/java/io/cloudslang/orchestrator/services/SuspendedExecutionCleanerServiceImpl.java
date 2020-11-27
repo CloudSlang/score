@@ -15,11 +15,14 @@
  */
 package io.cloudslang.orchestrator.services;
 
+import io.cloudslang.orchestrator.repositories.FinishedBranchRepository;
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.util.CollectionUtils;
+
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 import javax.transaction.Transactional;
 import java.util.Collection;
@@ -34,6 +37,9 @@ public class SuspendedExecutionCleanerServiceImpl implements SuspendedExecutionC
     @Autowired
     private SuspendedExecutionsRepository suspendedExecutionsRepository;
 
+    @Autowired
+    private FinishedBranchRepository finishedBranchRepository;
+
     private static final Logger logger = Logger.getLogger(SuspendedExecutionCleanerServiceImpl.class);
 
     @Override
@@ -47,11 +53,17 @@ public class SuspendedExecutionCleanerServiceImpl implements SuspendedExecutionC
     }
 
     private void cleanupSuspendedExecutions(Integer bulkSize) {
-        for (int i = 1; i <= bulkSize / SPLIT_SIZE; i++) {
-            Collection<String> toBeDeleted = suspendedExecutionsRepository.collectCompletedSuspendedExecutions(new PageRequest(0, SPLIT_SIZE));
-            if (!CollectionUtils.isEmpty(toBeDeleted)) {
-                suspendedExecutionsRepository.deleteByIds(toBeDeleted);
-            }
+        PageRequest pageRequest = new PageRequest(0, SPLIT_SIZE);
+        Collection<String> toBeDeleted = suspendedExecutionsRepository.collectCompletedSuspendedExecutions(pageRequest);
+        if (!isEmpty(toBeDeleted)) {
+            suspendedExecutionsRepository.deleteByIds(toBeDeleted);
+        }
+        List<Long> finishedBranchesToBeDeleted = finishedBranchRepository.collectOrphanFinishedBranches(pageRequest);
+        if (!isEmpty(finishedBranchesToBeDeleted)) {
+            finishedBranchRepository.deleteByIds(finishedBranchesToBeDeleted);
+        }
+        if (!CollectionUtils.isEmpty(toBeDeleted)) {
+            suspendedExecutionsRepository.deleteByIds(toBeDeleted);
         }
     }
 }

@@ -48,7 +48,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-
+import io.cloudslang.orchestrator.services.ExecutionStateService;
 import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,6 +78,11 @@ public class QueueCleanerServiceTest {
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
+	@Autowired
+	private ExecutionStateService executionStateService;
+
+	@Autowired
+	private ExecutionQueueRepository executionQueueRepository;
 
 	@Before
 	public void before() {
@@ -228,5 +233,9 @@ public class QueueCleanerServiceTest {
 		EngineVersionService engineVersionService(){
 			return mock(EngineVersionService.class);
 		}
+
+		@Bean
+		ExecutionStateService executionStateService() { return mock(ExecutionStateService.class); }
 	}
+
 }

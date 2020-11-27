@@ -19,9 +19,11 @@ package io.cloudslang.orchestrator.repositories;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.orchestrator.entities.ExecutionState;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -38,4 +40,11 @@ public interface ExecutionStateRepository extends JpaRepository<ExecutionState, 
 
     @Query("select executionState.executionId from ExecutionState executionState where executionState.status in :statuses")
     public List<Long> findExecutionIdByStatuses(@Param("statuses") List<ExecutionStatus> statuses);
+    
+    @Query("select executionState.executionId from ExecutionState executionState where executionState.status = :status and branchId = :branchId")
+    public List<Long> findByBranchIdAndStatusIn(@Param("branchId") String branchId, @Param("status") ExecutionStatus status);
+
+    @Query("delete from ExecutionState se where se.executionId in :ids")
+    @Modifying
+    int deleteByIds(@Param("ids") Collection<Long> ids);
 }
