@@ -53,7 +53,7 @@ import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL_LOOP;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.FINISHED_CHILD_BRANCHES_DATA;
 import static io.cloudslang.score.facade.TempConstants.MI_REMAINING_BRANCHES_CONTEXT_KEY;
-import static java.lang.Integer.parseInt;
+import static java.lang.Long.parseLong;
 import static java.lang.String.valueOf;
 import static java.util.EnumSet.of;
 import static java.util.stream.Collectors.toList;
@@ -228,7 +228,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     }
 
     private void startNewBranch(final SuspendedExecution suspendedExecution) {
-        StartNewBranchPayload startNewBranchPayload = executionQueueRepository.getFirstPendingBranch(parseInt(suspendedExecution.getExecutionId()));
+        StartNewBranchPayload startNewBranchPayload = executionQueueRepository.getFirstPendingBranch(parseLong(suspendedExecution.getExecutionId()));
         if (startNewBranchPayload != null) {
             executionQueueRepository.activatePendingExecutionStateForAnExecution(startNewBranchPayload.getPendingExecutionStateId());
             executionQueueRepository.deletePendingExecutionState(startNewBranchPayload.getPendingExecutionMapingId());
