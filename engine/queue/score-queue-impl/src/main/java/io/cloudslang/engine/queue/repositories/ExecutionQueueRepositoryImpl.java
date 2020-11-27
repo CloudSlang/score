@@ -35,8 +35,11 @@ import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
 import io.cloudslang.orchestrator.services.ExecutionStateService;
+
 import java.util.ArrayList;
+
 import org.springframework.util.CollectionUtils;
+
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
@@ -68,18 +71,28 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     private static final String MYSQL = "mysql";
     private static final String MSSQL = "Microsoft";
     final private String SELECT_CANCELED_STEPS_IDS = " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES "
-                        + "WHERE EXEC_STATE_ID IN "
-                        + "(SELECT DISTINCT ESS.ID FROM OO_EXECUTION_STATES ESS JOIN OO_EXECUTION_STATE ES ON "
-                        + "ESS.MSG_ID = CAST(ES.EXECUTION_ID AS VARCHAR(255)) "
-                        + "WHERE ES.STATUS = 'PENDING_CANCEL')";
+            + "WHERE EXEC_STATE_ID IN "
+            + "(SELECT DISTINCT ESS.ID FROM OO_EXECUTION_STATES ESS JOIN OO_EXECUTION_STATE ES ON "
+            + "ESS.MSG_ID = CAST(ES.EXECUTION_ID AS VARCHAR(255)) "
+            + "WHERE ES.STATUS = 'PENDING_CANCEL')";
     final private String QUERY_DELETE_EXECS_STATES_MAPPINGS = "DELETE FROM OO_EXECS_STATES_EXECS_MAPPINGS " +
-                        " WHERE EXEC_STATE_ID in (:ids)";
+            " WHERE EXEC_STATE_ID in (:ids)";
 
-    final private String SELECT_FINISHED_STEPS_IDS =  " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES " +
+    final private String SELECT_FLOW_COMPLETED_STEPS_IDS = " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES "
+            + "WHERE EXEC_STATE_ID IN "
+            + "(SELECT DISTINCT ESS.ID FROM OO_EXECUTION_STATES ESS JOIN OO_EXECUTION_SUMMARY ES ON "
+            + "ESS.MSG_ID = ES.EXECUTION_ID "
+            + "AND ES.END_TIME_LONG  IS NOT NULL)";
+
+    final private String SELECT_ORPHAN_STEPS_IDS = " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES "
+            + "WHERE EXEC_STATE_ID NOT IN "
+            + "(SELECT DISTINCT ESS.ID FROM OO_EXECUTION_STATES ESS)";
+
+    final private String SELECT_FINISHED_STEPS_IDS = " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES " +
             " WHERE " +
-            "        (STATUS = "+ExecStatus.TERMINATED.getNumber()+") OR " +
-            "        (STATUS = "+ExecStatus.FAILED.getNumber()+") OR " +
-            "        (STATUS = "+ExecStatus.FINISHED.getNumber()+") ";
+            "        (STATUS = " + ExecStatus.TERMINATED.getNumber() + ") OR " +
+            "        (STATUS = " + ExecStatus.FAILED.getNumber() + ") OR " +
+            "        (STATUS = " + ExecStatus.FINISHED.getNumber() + ") ";
 
     final private String QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES = "DELETE FROM OO_EXECUTION_QUEUES " +
             " WHERE EXEC_STATE_ID in (:ids)";
@@ -88,10 +101,10 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
             " WHERE ID in (:ids)";
 
     final private String SELECT_CANCELED_STEPS_IDS_MYSQL = " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES "
-                        + "WHERE EXEC_STATE_ID IN "
-                        + "(SELECT DISTINCT ESS.ID FROM OO_EXECUTION_STATES ESS JOIN OO_EXECUTION_STATE ES ON "
-                        + "ESS.MSG_ID = CAST(ES.EXECUTION_ID AS CHAR(255)) "
-                        + "WHERE ES.STATUS = 'PENDING_CANCEL')";
+            + "WHERE EXEC_STATE_ID IN "
+            + "(SELECT DISTINCT ESS.ID FROM OO_EXECUTION_STATES ESS JOIN OO_EXECUTION_STATE ES ON "
+            + "ESS.MSG_ID = CAST(ES.EXECUTION_ID AS CHAR(255)) "
+            + "WHERE ES.STATUS = 'PENDING_CANCEL')";
 
     final private String QUERY_MESSAGES_WITHOUT_ACK_SQL =
             "SELECT EXEC_STATE_ID,      " +
@@ -294,21 +307,21 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
     final private String INSERT_QUEUE = "INSERT INTO OO_EXECUTION_QUEUES (ID, EXEC_STATE_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS,MSG_SEQ_ID, CREATE_TIME,MSG_VERSION) VALUES (?, ?, ?, ?, ?, ?,?,?)";
 
-	final private String INSERT_EXECUTION_STATE_MAPPING = "INSERT INTO OO_EXECS_STATES_EXECS_MAPPINGS (ID, EXEC_STATE_ID, EXEC_ID) VALUES (?, ?, ?)";
+    final private String INSERT_EXECUTION_STATE_MAPPING = "INSERT INTO OO_EXECS_STATES_EXECS_MAPPINGS (ID, EXEC_STATE_ID, EXEC_ID) VALUES (?, ?, ?)";
 
     private static final String QUERY_PAYLOAD_BY_EXECUTION_IDS = "SELECT ID, PAYLOAD FROM OO_EXECUTION_STATES WHERE ID IN (:IDS)";
 
     private static final String FIND_OLD_STATES =
             "SELECT q.EXEC_STATE_ID, CREATE_TIME, MSG_SEQ_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS " +
-            "FROM OO_EXECUTION_QUEUES q, " +
-            "  (SELECT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES qt WHERE (CREATE_TIME < ?) AND " +
-            "     (STATUS = " + ExecStatus.ASSIGNED.getNumber() + ") AND " +
-            "          (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
-            "              FROM OO_EXECUTION_QUEUES qq " +
-            "              WHERE (qq.EXEC_STATE_ID = qt.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > qt.MSG_SEQ_ID)) " +
-            "  ) t " +
-            "WHERE (STATUS IN (" + ExecStatus.ASSIGNED.getNumber() + ", " + ExecStatus.PENDING.getNumber() + ")) AND " +
-            "q.EXEC_STATE_ID = t.EXEC_STATE_ID";
+                    "FROM OO_EXECUTION_QUEUES q, " +
+                    "  (SELECT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES qt WHERE (CREATE_TIME < ?) AND " +
+                    "     (STATUS = " + ExecStatus.ASSIGNED.getNumber() + ") AND " +
+                    "          (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
+                    "              FROM OO_EXECUTION_QUEUES qq " +
+                    "              WHERE (qq.EXEC_STATE_ID = qt.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > qt.MSG_SEQ_ID)) " +
+                    "  ) t " +
+                    "WHERE (STATUS IN (" + ExecStatus.ASSIGNED.getNumber() + ", " + ExecStatus.PENDING.getNumber() + ")) AND " +
+                    "q.EXEC_STATE_ID = t.EXEC_STATE_ID";
 
 
     private static final String FIND_EXEC_IDS = "SELECT DISTINCT MSG_ID FROM OO_EXECUTION_STATES WHERE ID IN (:IDS)";
@@ -324,13 +337,14 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     private StatementAwareJdbcTemplateWrapper findExecIDsJdbcTemplate;
     private StatementAwareJdbcTemplateWrapper getFirstPendingBranchJdbcTemplate;
     private StatementAwareJdbcTemplateWrapper getCanceledExecStateIdsJdbcTemplate;
-	private JdbcTemplate insertExecutionJdbcTemplate;
-	private JdbcTemplate deleteFinishedStepsJdbcTemplate;
-	private JdbcTemplate findPayloadByExecutionIdsJdbcTemplate;
-	private JdbcTemplate getBusyWorkersJdbcTemplate;
+    private JdbcTemplate insertExecutionJdbcTemplate;
+    private JdbcTemplate deleteFinishedStepsJdbcTemplate;
+    private JdbcTemplate findPayloadByExecutionIdsJdbcTemplate;
+    private JdbcTemplate getBusyWorkersJdbcTemplate;
     private JdbcTemplate updateExecutionStateStatusJdbcTemplate;
     private JdbcTemplate deletePendingExecutionStateJdbcTemplate;
-
+    private StatementAwareJdbcTemplateWrapper getFlowCompletedExecStateIdsJdbcTemplate;
+    private StatementAwareJdbcTemplateWrapper getOrphanExecStateIdsJdbcTemplate;
     @Autowired
     private IdentityGenerator idGen;
 
@@ -362,12 +376,13 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         getBusyWorkersJdbcTemplate = new JdbcTemplate(dataSource);
         updateExecutionStateStatusJdbcTemplate = new JdbcTemplate(dataSource);
         deletePendingExecutionStateJdbcTemplate = new JdbcTemplate(dataSource);
-
+        getOrphanExecStateIdsJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "getOrphanExecStateIdsJdbcTemplate");
+        getFlowCompletedExecStateIdsJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "getFlowCompletedExecStateIdsJdbcTemplate");
         useLargeMessageQuery = Boolean.parseBoolean(System.getProperty("score.poll.use.large.message.query", "true"));
 
         String dbms = getDatabaseProductName();
         cancelExecQuery = isMysql(dbms) ? SELECT_CANCELED_STEPS_IDS_MYSQL : SELECT_CANCELED_STEPS_IDS;
-         if (useLargeMessageQuery) {
+        if (useLargeMessageQuery) {
             if (isMssql(dbms)) {
                 workerQuery = QUERY_WORKER_SQL_MSSQL;
 
@@ -405,15 +420,15 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         String insertExecStateSQL = INSERT_EXEC_STATE;
         insertExecutionJdbcTemplate.batchUpdate(insertExecStateSQL, new BatchPreparedStatementSetter() {
 
-			@Override
-			public void setValues(PreparedStatement ps, int i) throws SQLException {
-				ExecutionMessage msg = stateMessages.get(i);
-				ps.setLong(1, msg.getExecStateId());
-				ps.setString(2, msg.getMsgId());
-				ps.setBytes(3, msg.getPayload().getData());
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ExecutionMessage msg = stateMessages.get(i);
+                ps.setLong(1, msg.getExecStateId());
+                ps.setString(2, msg.getMsgId());
+                ps.setBytes(3, msg.getPayload().getData());
                 ps.setLong(4, msg.getPayloadSize());
                 ps.setInt(5, msg.isActive() ? 1 : 0);
-			}
+            }
 
             @Override
             public int getBatchSize() {
@@ -527,8 +542,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
             String workerId, int maxSize, long workerPollingMemory, ExecStatus... statuses) {
 
         Object[] args = useLargeMessageQuery ?
-                            preparePollArgs(workerId, workerPollingMemory, statuses) :
-                            prepareStdPollArgs(workerId, statuses);
+                preparePollArgs(workerId, workerPollingMemory, statuses) :
+                prepareStdPollArgs(workerId, statuses);
 
         String sqlStat = workerQuery.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
 
@@ -615,44 +630,73 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     }
 
     @Override
-    public void deleteFinishedSteps(Set<Long> ids) {
-        if (ids == null || ids.size() == 0) {
+    public void deleteFinishedSteps(Set<Long> stepIds) {
+        if (stepIds == null || stepIds.size() == 0) {
             return;
         }
-
         Set<Long> result = getCanceledExecStateIds();
         if (!CollectionUtils.isEmpty(result)) {
-            ids.addAll(result);
+            stepIds.addAll(result);
         }
-        // Access STATES first and then QUEUES - same order as ExecutionQueueService#enqueue (prevents deadlocks on MSSQL)
-        String query = QUERY_DELETE_FINISHED_STEPS_FROM_STATES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
+        for (List<Long> currentPartition : Iterables.partition(stepIds, 1000)) {
+            // Access STATES first and then QUEUES - same order as ExecutionQueueService#enqueue (prevents deadlocks on MSSQL)
+            deleteIdsFromTable(currentPartition, QUERY_DELETE_FINISHED_STEPS_FROM_STATES, "OO_EXECUTION_STATES");
+
+            deleteIdsFromTable(currentPartition, QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES, "OO_EXECUTION_QUEUES");
+
+            if (!CollectionUtils.isEmpty(result)) {
+                deleteIdsFromTable(currentPartition, QUERY_DELETE_EXECS_STATES_MAPPINGS, "OO_EXECS_STATES_EXECS_MAPPINGS");
+                executionStateService.deleteCanceledExecutionStates();
+            }
+        }
+    }
+
+    private int deleteIdsFromTable(List ids, String deleteQuery, final String tableName) {
+        String query = deleteQuery.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
 
         Object[] args = ids.toArray(new Object[ids.size()]);
         logSQL(query, args);
 
         int deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
 
-        if(logger.isDebugEnabled()){
-            logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_STATES table.");
+        if (logger.isDebugEnabled()) {
+            logger.debug("Deleted " + deletedRows + " rows of finished steps from " + tableName + " table.");
         }
+        return deletedRows;
+    }
 
-        query = QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
-        logSQL(query,args);
+    @Override
+    public int deleteOrphanSteps() {
 
-        deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
-
-        if(logger.isDebugEnabled()){
-            logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_QUEUES table.");
+        Set<Long> stepIds = getOrphanExecStateIds();
+        int deletedRows = 0;
+        for (List<Long> partition : Iterables.partition(stepIds, 1000)) {
+            deletedRows += deleteIdsFromTable(partition, QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES, "OO_EXECUTION_QUEUES");
         }
+        return deletedRows;
+    }
 
-        if (!CollectionUtils.isEmpty(result)) {
-            query = QUERY_DELETE_EXECS_STATES_MAPPINGS.replace(":ids", StringUtils.repeat("?", ",", ids.size()));
-            logSQL(query, args);
-            deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECS_STATES_EXECS_MAPPINGS table.");
-            }
-            executionStateService.deleteCanceledExecutionStates();
+    @Override
+    public Set<Long> getFlowCompletedExecStateIds() {
+        getFlowCompletedExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
+        try {
+            List<Long> result = doSelectWithTemplate(getFlowCompletedExecStateIdsJdbcTemplate, SELECT_FLOW_COMPLETED_STEPS_IDS, new SingleColumnRowMapper<>(Long.class));
+
+            return new HashSet<>(result);
+        } finally {
+            getFlowCompletedExecStateIdsJdbcTemplate.clearStatementBatchSize();
+        }
+    }
+
+    @Override
+    public Set<Long> getOrphanExecStateIds() {
+        getOrphanExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
+        try {
+            List<Long> result = doSelectWithTemplate(getOrphanExecStateIdsJdbcTemplate, SELECT_ORPHAN_STEPS_IDS, new SingleColumnRowMapper<>(Long.class));
+
+            return new HashSet<>(result);
+        } finally {
+            getOrphanExecStateIdsJdbcTemplate.clearStatementBatchSize();
         }
     }
 
@@ -667,7 +711,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
             getCanceledExecStateIdsJdbcTemplate.clearStatementBatchSize();
         }
     }
-        
+
     @Override
     public Set<Long> getFinishedExecStateIds() {
         getFinishedExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
@@ -717,7 +761,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
             Object[] values = {workerUuid, ExecStatus.SENT.getNumber(), minVersionAllowed};
 
             long time = System.currentTimeMillis();
-            Integer result = countMessagesWithoutAckForWorkerJdbcTemplate.queryForObject(QUERY_COUNT_MESSAGES_WITHOUT_ACK_FOR_WORKER_SQL, values,Integer.class);
+            Integer result = countMessagesWithoutAckForWorkerJdbcTemplate.queryForObject(QUERY_COUNT_MESSAGES_WITHOUT_ACK_FOR_WORKER_SQL, values, Integer.class);
 
             if (logger.isTraceEnabled())
                 logger.trace("Query [" + QUERY_COUNT_MESSAGES_WITHOUT_ACK_FOR_WORKER_SQL + "] took " + (System.currentTimeMillis() - time) + " ms");
@@ -781,7 +825,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                 .replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
         // prepare the argument
         Object[] values = new Object[statuses.length];
-        int i=0;
+        int i = 0;
         for (ExecStatus status : statuses) {
             values[i] = status.getNumber();
         }
@@ -812,7 +856,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
         Set<Long> result = new HashSet<>();
 
-        for (List<Long> part: Iterables.partition(execStateIds, PARTITION_SIZE)) {
+        for (List<Long> part : Iterables.partition(execStateIds, PARTITION_SIZE)) {
 
             String qMarks = StringUtils.repeat("?", ",", part.size());
             String sqlStat = FIND_EXEC_IDS.replace(":IDS", qMarks);
@@ -833,7 +877,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
             return rs.getString("ASSIGNED_WORKER");
         }
     }
-
 
 
     private class ExecutionMessageRowMapper implements RowMapper<ExecutionMessage> {
@@ -865,7 +908,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     }
 
     private <T> List<T> doSelectWithTemplate(JdbcTemplate jdbcTemplate, String sql, RowMapper<T> rowMapper, Object... params) {
-        logSQL(sql,params);
+        logSQL(sql, params);
         try {
             long t = System.currentTimeMillis();
             List<T> result = jdbcTemplate.query(sql, params, rowMapper);
