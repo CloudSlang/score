@@ -22,11 +22,11 @@ import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.node.repositories.WorkerNodeRepository;
 import io.cloudslang.engine.versioning.services.VersionService;
 import io.cloudslang.score.api.nodes.WorkerStatus;
-import junit.framework.Assert;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -349,6 +350,19 @@ public class WorkerNodeServiceTest {
         workerNode = workerNodeService.readByUUID("H1");
 
         Assert.assertEquals("Version not updated!", "VERSION", workerNode.getVersion());
+    }
+
+    @Test
+    public void updateMigratedPasswordTest() {
+        workerNodeService.create("worker_1", "password", "stamHost", "c:/dir");
+        WorkerNode workerNode = workerNodeService.readByUUID("H1");
+        Assert.assertNull(workerNode.getMigratedPassword());
+
+        workerNodeService.updateMigratedPassword("H1", "newPassword");
+
+        workerNode = workerNodeService.readByUUID("H1");
+
+        Assert.assertEquals("Version not updated!", "newPassword", workerNode.getMigratedPassword());
     }
 
     @Configuration

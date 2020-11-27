@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 
 
@@ -104,6 +105,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
         worker.setStatus(WorkerStatus.FAILED);
         worker.setPassword(password);
         worker.setGroups(Arrays.asList(WorkerNode.DEFAULT_WORKER_GROUPS));
+        worker.setWorkerBusynessValue(0);
         workerNodeRepository.save(worker);
         workerLockService.create(uuid);
     }
@@ -246,6 +248,21 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
     }
 
     @Override
+    @Transactional
+    public void updateMigratedPassword(String workerUuid, String encodedPassword) {
+        WorkerNode worker = workerNodeRepository.findByUuid(workerUuid);
+        if (worker == null) {
+            throw new IllegalStateException("No worker was found by the specified UUID:" + workerUuid);
+        }
+        if (StringUtils.isEmpty(encodedPassword)) {
+            throw new IllegalStateException("Invalid encoded password provided for UUID:" + workerUuid);
+        }
+        if (!StringUtils.equals(worker.getMigratedPassword(), encodedPassword)) {
+            worker.setMigratedPassword(encodedPassword);
+        }
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<String> readNonRespondingWorkers() {
         long systemVersion = versionService.getCurrentVersion(MSG_RECOVERY_VERSION_NAME);
@@ -300,8 +317,6 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
         if (worker == null) {
             throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
         }
-        if (!isActive(uuid))
-            workerBusynessValue=0;
         worker.setWorkerBusynessValue(workerBusynessValue);
     }
 
