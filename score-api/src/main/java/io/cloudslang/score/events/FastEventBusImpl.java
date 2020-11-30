@@ -16,11 +16,15 @@
 
 package io.cloudslang.score.events;
 
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class FastEventBusImpl implements FastEventBus {
 
     private UninterruptibleScoreEventListener eventHandler;
+    private Map<UninterruptibleScoreEventListener, Set<String>> handlers = new ConcurrentHashMap<>();
 
     public void registerEventListener(UninterruptibleScoreEventListener eventHandler) {
         Objects.requireNonNull(eventHandler, "eventHandler must not be null");
@@ -35,9 +39,17 @@ public class FastEventBusImpl implements FastEventBus {
         }
     }
 
-    public void dispatch(ScoreEvent event) {
-        if (eventHandler != null) {
-            eventHandler.onEvent(event);
+    public void dispatch(ScoreEvent... events) {
+//      if (eventHandler != null) {
+//          eventHandler.onEvent(event);
+//        }
+        for (UninterruptibleScoreEventListener eventHandler : handlers.keySet()) {
+            Set<String> eventTypes = handlers.get(eventHandler);
+            for (ScoreEvent eventWrapper : events) {
+                if (eventTypes.contains(eventWrapper.getEventType())) {
+                    eventHandler.onEvent(eventWrapper);
+                }
+            }
         }
     }
 }

@@ -29,7 +29,8 @@ public interface FastEventBus {
     /**
      * dispatch the given event
      *
-     * @param event score event to dispatch
+     * @param eventWrappers score event to dispatch
      */
-    void dispatch(ScoreEvent event);
+    //void dispatch(ScoreEvent event);
+    void dispatch(ScoreEvent... eventWrappers);
 }
