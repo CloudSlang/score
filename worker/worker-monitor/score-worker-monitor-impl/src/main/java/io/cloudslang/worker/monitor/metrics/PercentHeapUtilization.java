@@ -15,12 +15,8 @@
  */
 package io.cloudslang.worker.monitor.metrics;
 
-import io.cloudslang.worker.monitor.metric.WorkerPerfMetric;
 import io.cloudslang.worker.monitor.service.MetricKeyValue;
-
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
 
