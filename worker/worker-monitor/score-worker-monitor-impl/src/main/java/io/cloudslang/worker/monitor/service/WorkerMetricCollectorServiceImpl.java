@@ -15,7 +15,6 @@
  */
 package io.cloudslang.worker.monitor.service;
 
-import io.cloudslang.score.events.EventBus;
 import io.cloudslang.score.events.EventConstants;
 import io.cloudslang.score.events.FastEventBus;
 import io.cloudslang.score.events.ScoreEvent;
@@ -24,7 +23,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-
 import java.io.Serializable;
 import java.util.Map;
 
@@ -35,8 +33,6 @@ public class WorkerMetricCollectorServiceImpl implements WorkerMetricCollectorSe
     @Autowired
     @Qualifier("consumptionFastEventBus")
     private FastEventBus fastEventBus;
-//    @Autowired
-//    EventBus eventBus;
 
     @Override
     public void collectPerfMetrics() {
