@@ -16,38 +16,23 @@
 
 package io.cloudslang.score.events;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class FastEventBusImpl implements FastEventBus {
 
-    private UninterruptibleScoreEventListener eventHandler;
     private Map<UninterruptibleScoreEventListener, Set<String>> handlers = new ConcurrentHashMap<>();
 
-    public void registerEventListener(UninterruptibleScoreEventListener eventHandler) {
-        Objects.requireNonNull(eventHandler, "eventHandler must not be null");
-        if (this.eventHandler == null ) {
-            this.eventHandler = eventHandler;
-        } else {
-            StringBuilder errorMessage = new StringBuilder();
-            errorMessage.append("Failed to register '").append(eventHandler.getClass().getName())
-                    .append("' because another '").append(this.eventHandler.getClass().getName())
-                    .append("' is registered. You cannot register more than one eventHandler for FastEventBus.");
-            throw new RuntimeException(errorMessage.toString());
-        }
+    public void registerEventListener(UninterruptibleScoreEventListener eventHandler,Set<String> eventTypes) {
+        handlers.put(eventHandler, eventTypes);
     }
 
     public void dispatch(ScoreEvent... events) {
-//      if (eventHandler != null) {
-//          eventHandler.onEvent(event);
-//        }
-        for (UninterruptibleScoreEventListener eventHandler : handlers.keySet()) {
-            Set<String> eventTypes = handlers.get(eventHandler);
+        for (UninterruptibleScoreEventListener fastEventListner : handlers.keySet()) {
+            Set<String> eventTypes = handlers.get(fastEventListner);
             for (ScoreEvent eventWrapper : events) {
                 if (eventTypes.contains(eventWrapper.getEventType())) {
-                    eventHandler.onEvent(eventWrapper);
+                    fastEventListner.onEvent(eventWrapper);
                 }
             }
         }
