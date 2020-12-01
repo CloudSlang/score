@@ -17,7 +17,6 @@ package io.cloudslang.worker.monitor.service;
 
 import io.cloudslang.score.events.*;
 import io.cloudslang.worker.monitor.PerfMetricCollector;
-import io.cloudslang.worker.monitor.metrics.PercentCPUByProcess;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +25,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import java.io.Serializable;
-import java.math.BigInteger;
+
 import java.util.HashMap;
 
 import static org.mockito.Mockito.*;
@@ -42,8 +40,6 @@ public class WorkerMetricCollectorServiceImplTest {
     @Autowired
     PerfMetricCollector perfMetricCollector;
     @Autowired
-    PercentCPUByProcess percentCPUByProcess;
-    @Autowired
     @Qualifier("consumptionFastEventBus")
     private FastEventBus fastEventBus;
 
@@ -56,15 +52,6 @@ public class WorkerMetricCollectorServiceImplTest {
         workerMetricCollectorService.collectPerfMetrics();
         verify(fastEventBus, times(1)).dispatch(refEq(event));
     }
-//    @Test
-//    public void testCpuUsage() {
-//        BigInteger fact = BigInteger.valueOf(1);
-//        for (int i = 1; i <= 87858; i++) {
-//            fact = fact.multiply(BigInteger.valueOf(i));
-//            System.out.println(percentCPUByProcess.getCurrentValue());
-//        }
-//    }
-
 
     @Configuration
     public static class MyTestConfig {
@@ -75,9 +62,5 @@ public class WorkerMetricCollectorServiceImplTest {
         public PerfMetricCollector perfMetricCollector() {return mock(PerfMetricCollector.class);}
         @Bean
         public FastEventBus consumptionFastEventBus() {return mock(FastEventBusImpl.class);}
-//    @Bean public EventBus eventBus() {return mock(EventBus.class);}
-        @Bean
-        public PercentCPUByProcess percentCPUByProcess() {return mock(PercentCPUByProcess.class);}
-
     }
 }
