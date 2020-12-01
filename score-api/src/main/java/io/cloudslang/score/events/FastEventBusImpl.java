@@ -16,7 +16,8 @@
 
 package io.cloudslang.score.events;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class FastEventBusImpl implements FastEventBus {

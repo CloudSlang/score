@@ -289,14 +289,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         <addPrimaryKey tableName="OO_WORKER_GROUPS" columnNames="WORKER_ID,GROUP_NAME"
                        constraintName="OO_WORKER_GROUPS_PK"/>
     </changeSet>
-    <changeSet id="Add PERCENTAGE_UTILIZATION column to OO_WORKER_NODES" author="engine">
-        <addColumn tableName="OO_WORKER_NODES">
-            <column name="PERCENTAGE_UTILIZATION" type="INTEGER"/>
-        </addColumn>
-        <rollback>
-            <dropColumn tableName="OO_WORKER_NODES" columnName="PERCENTAGE_UTILIZATION"/>
-        </rollback>
-    </changeSet>
 
     <changeSet id="create OO_WORKER_LOCKS" author="engine">
         <createTable tableName="OO_WORKER_LOCKS">
@@ -323,5 +315,14 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
                 <constraints nullable="false"/>
             </column>
         </createTable>
+    </changeSet>
+
+    <changeSet id="Add PERCENTAGE_UTILIZATION column to OO_WORKER_NODES" author="engine">
+        <addColumn tableName="OO_WORKER_NODES">
+            <column name="PERCENTAGE_UTILIZATION" type="INTEGER"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="OO_WORKER_NODES" columnName="PERCENTAGE_UTILIZATION"/>
+        </rollback>
     </changeSet>
 </databaseChangeLog>
