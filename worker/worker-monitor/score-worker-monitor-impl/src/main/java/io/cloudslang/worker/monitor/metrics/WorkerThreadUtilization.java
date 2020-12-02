@@ -15,11 +15,8 @@
  */
 package io.cloudslang.worker.monitor.metrics;
 
-import io.cloudslang.worker.management.services.WorkerManager;
 import io.cloudslang.worker.monitor.metric.WorkerPerfMetric;
 import io.cloudslang.worker.monitor.service.MetricKeyValue;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -27,13 +24,12 @@ import java.util.Map;
 
 public class WorkerThreadUtilization implements WorkerPerfMetric {
 
-    private final WorkerManager workerManager;
-    @Autowired
-    @Qualifier("numberOfExecutionThreads")
+    private int runningTaskCount;
     private Integer numberOfThreads;
 
-    public WorkerThreadUtilization(WorkerManager workerManager) {
-        this.workerManager = workerManager;
+    public WorkerThreadUtilization(int runningTaskCount,int numberOfThreads) {
+        this.runningTaskCount=runningTaskCount;
+        this.numberOfThreads=numberOfThreads;
     }
 
     @Override
@@ -44,6 +40,6 @@ public class WorkerThreadUtilization implements WorkerPerfMetric {
     }
 
     public int getCurrentValue() {
-        return ((workerManager.getRunningTasksCount() * 100) / numberOfThreads);
+        return ((runningTaskCount * 100) / numberOfThreads);
     }
 }

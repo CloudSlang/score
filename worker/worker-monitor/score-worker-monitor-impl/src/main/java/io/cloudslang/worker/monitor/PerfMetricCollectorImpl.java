@@ -17,15 +17,13 @@ package io.cloudslang.worker.monitor;
 
 import io.cloudslang.worker.management.services.WorkerManager;
 import io.cloudslang.worker.monitor.metric.WorkerPerfMetric;
-import io.cloudslang.worker.monitor.metrics.PercentCPUByProcess;
-import io.cloudslang.worker.monitor.metrics.DiskUsagePerProcess;
-import io.cloudslang.worker.monitor.metrics.PercentHeapUtilization;
-import io.cloudslang.worker.monitor.metrics.PercentMemoryByProcess;
+import io.cloudslang.worker.monitor.metrics.*;
 import io.cloudslang.worker.monitor.service.MetricKeyValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,13 +33,19 @@ import java.util.Map;
 public class PerfMetricCollectorImpl implements PerfMetricCollector {
 
     @Autowired
+    private WorkerManager workerManager;
+
+    @Autowired
     @Qualifier("numberOfExecutionThreads")
     private Integer numberOfThreads;
 
-    @Autowired
-    private WorkerManager workerManager;
-
     List<WorkerPerfMetric> workerPerfMetrics;
+
+    @PostConstruct
+    public void init() {
+        int runningTaskCount = workerManager.getRunningTasksCount();
+        workerPerfMetrics.add(new WorkerThreadUtilization(runningTaskCount,numberOfThreads));
+    }
 
     public PerfMetricCollectorImpl() { createMetrics(); }
 
@@ -51,7 +55,6 @@ public class PerfMetricCollectorImpl implements PerfMetricCollector {
         workerPerfMetrics.add(new DiskUsagePerProcess());
         workerPerfMetrics.add(new PercentMemoryByProcess());
         workerPerfMetrics.add(new PercentHeapUtilization());
-        //workerPerfMetrics.add(new ThreadCountUtilization());
     }
 
     @Override
@@ -63,7 +66,6 @@ public class PerfMetricCollectorImpl implements PerfMetricCollector {
         }
         currentValues.put(MetricKeyValue.WORKER_ID,workerManager.getWorkerUuid());
         currentValues.put(MetricKeyValue.WORKER_MEASURED_TIME,System.currentTimeMillis());
-        currentValues.put(MetricKeyValue.THREAD_UTILIZATION,((workerManager.getRunningTasksCount()*100)/numberOfThreads));
         return currentValues;
     }
 }

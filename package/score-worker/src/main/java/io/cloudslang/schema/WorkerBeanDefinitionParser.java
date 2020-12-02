@@ -88,14 +88,12 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(SessionDataHandlerImpl.class, "sessionDataHandler");
 		put(SynchronizationManagerImpl.class, null);
 		put(WorkerConfigurationServiceImpl.class, "workerConfiguration");
-
 		//Monitors
 		put(WorkerExecutionMonitorServiceImpl.class, "workerExecutionMonitorService");
 		put(WorkerMonitorsImpl.class, "workerMonitorsImpl");
 		put(ScheduledWorkerLoadMonitor.class, "scheduledWorkerLoadMonitor");
 		put(PercentCPUByProcess.class, "percentCPUByProcess");
 		put(DiskUsagePerProcess.class, "diskUsagePerProcess");
-		put(WorkerThreadUtilization.class, "threadCountUtilization");
 		put(PercentMemoryByProcess.class, "percentMemoryByProcess");
 		put(PerfMetricCollectorImpl.class,"perfMetricCollector");
 		put(WorkerMetricCollectorServiceImpl.class,"workerMetricCollectorService");
