@@ -52,9 +52,11 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -414,10 +416,10 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     private TempExecutionEnvironment generateTempResourcesForExec(String script) throws IOException {
         Path execTempDirectory = Files.createTempDirectory("python_execution");
         File tempUserScript = File.createTempFile(PYTHON_SCRIPT_FILENAME, PYTHON_SUFFIX, execTempDirectory.toFile());
-        FileUtils.writeStringToFile(tempUserScript, script, UTF_8);
+        Files.write(tempUserScript.toPath(), script.getBytes(UTF_8), StandardOpenOption.CREATE);
 
-        File mainScriptFile = new File(execTempDirectory.toString(), MAIN_PY);
-        FileUtils.writeByteArrayToFile(mainScriptFile, ResourceScriptResolver.loadExecScriptAsBytes());
+        Path mainScriptPath = Paths.get(execTempDirectory.toString(), MAIN_PY);
+        Files.write(mainScriptPath, ResourceScriptResolver.loadExecScriptAsBytes(), StandardOpenOption.CREATE);
 
         String tempUserScriptName = FilenameUtils.getName(tempUserScript.toString());
         return new TempExecutionEnvironment(tempUserScriptName, MAIN_PY, execTempDirectory.toFile());
@@ -425,8 +427,9 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
 
     private TempEvalEnvironment generateTempResourcesForEval() throws IOException {
         Path execTempDirectory = Files.createTempDirectory("python_expression");
-        File evalScriptFile = new File(execTempDirectory.toString(), EVAL_PY);
-        FileUtils.writeByteArrayToFile(evalScriptFile, ResourceScriptResolver.loadEvalScriptAsBytes());
+
+        Path evalScriptPath = Paths.get(execTempDirectory.toString(), EVAL_PY);
+        Files.write(evalScriptPath, ResourceScriptResolver.loadEvalScriptAsBytes(), StandardOpenOption.CREATE);
 
         return new TempEvalEnvironment(EVAL_PY, execTempDirectory.toFile());
     }
