@@ -71,7 +71,6 @@ import static io.cloudslang.runtime.impl.python.external.ExternalPythonExecution
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.apache.commons.io.FileUtils.deleteQuietly;
 
 public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalPythonProcessRunService {
 
@@ -80,9 +79,9 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     private static final String EVAL_PY = "eval.py";
     private static final String MAIN_PY = "main.py";
     private static final String PYTHON_SUFFIX = ".py";
-    private static final long EXECUTION_TIMEOUT = Long.getLong("python.timeout", 30) * 60 * 1000;
-    private static final long EVALUATION_TIMEOUT = Long.getLong("python.evaluation.timeout", 3) * 60 * 1000;
-    private static final long RESOURCE_CLEANUP_DELAY_SECONDS = Long.getLong("python.resourceCleaner.delay", 30);
+    private static final long EXECUTION_TIMEOUT = Long.getLong("python.timeout", 30L) * 60L * 1000L;
+    private static final long EVALUATION_TIMEOUT = Long.getLong("python.evaluation.timeout", 3L) * 60L * 1000L;
+    private static final long RESOURCE_CLEANUP_DELAY_SECONDS = Long.getLong("python.resourceCleaner.delay", 30L);
     private static final String PYTHON_FILENAME_SCRIPT_EXTENSION = ".py\"";
     private static final int PYTHON_FILENAME_DELIMITERS = 6;
     private static final ObjectMapper objectMapper;
