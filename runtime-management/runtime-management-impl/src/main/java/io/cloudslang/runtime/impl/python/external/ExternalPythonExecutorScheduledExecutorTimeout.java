@@ -25,6 +25,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.cloudslang.runtime.api.python.ExternalPythonProcessRunService;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
+import io.cloudslang.runtime.api.python.PythonPermissionService;
 import io.cloudslang.runtime.impl.python.external.model.TempEnvironment;
 import io.cloudslang.runtime.impl.python.external.model.TempEvalEnvironment;
 import io.cloudslang.runtime.impl.python.external.model.TempExecutionEnvironment;
@@ -55,15 +56,12 @@ import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
@@ -72,6 +70,7 @@ import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 import static io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine.SCHEDULED_EXECUTOR_STRATEGY;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 
 public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalPythonProcessRunService {
@@ -83,11 +82,16 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     private static final String PYTHON_SUFFIX = ".py";
     private static final long EXECUTION_TIMEOUT = Long.getLong("python.timeout", 30) * 60 * 1000;
     private static final long EVALUATION_TIMEOUT = Long.getLong("python.evaluation.timeout", 3) * 60 * 1000;
+    private static final long RESOURCE_CLEANUP_DELAY_SECONDS = Long.getLong("python.resourceCleaner.delay", 30);
     private static final String PYTHON_FILENAME_SCRIPT_EXTENSION = ".py\"";
     private static final int PYTHON_FILENAME_DELIMITERS = 6;
     private static final ObjectMapper objectMapper;
+    private static final PythonResourceCleanupHolder cleanupResourcesHolder = new PythonResourceCleanupHolder();
     private static final ScheduledThreadPoolExecutor timeoutScheduledExecutor;
+    private static final ScheduledThreadPoolExecutor cleanupResourcesScheduler;
     private static final ThreadFactory testThreadFactory;
+    private static final PythonPermissionService permissionService = (SystemUtils.IS_OS_WINDOWS) ? new WindowsPermissionsServiceImpl()
+            : new PosixPermissionServiceImpl();
 
     static {
         JsonFactory factory = new JsonFactory();
@@ -112,6 +116,22 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     }
 
     static {
+        final ThreadFactory threadFactory = new ThreadFactoryBuilder()
+                .setNameFormat("python-resource-cleaner-%d")
+                .setDaemon(true)
+                .build();
+
+        int nrThreads = Integer.getInteger("python.resourceCleaner.threadCount", 1);
+        ScheduledThreadPoolExecutor scheduledExecutor = new ScheduledThreadPoolExecutor(nrThreads, threadFactory);
+        scheduledExecutor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
+        scheduledExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+        scheduledExecutor.setRemoveOnCancelPolicy(true);
+        scheduledExecutor.setRejectedExecutionHandler(new AbortPolicy());
+        cleanupResourcesScheduler = scheduledExecutor;
+        scheduledExecutor.scheduleAtFixedRate(cleanupResourcesHolder, RESOURCE_CLEANUP_DELAY_SECONDS, RESOURCE_CLEANUP_DELAY_SECONDS, SECONDS);
+    }
+
+    static {
         testThreadFactory = new ThreadFactoryBuilder()
                 .setNameFormat("python-test-%d")
                 .setDaemon(true)
@@ -125,7 +145,6 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
             String pythonPath = checkPythonPath();
             tempExecutionEnvironment = generateTempResourcesForExec(script);
             String payload = generatePayloadForExec(tempExecutionEnvironment.getUserScriptName(), inputs);
-            addFilePermissions(tempExecutionEnvironment.getParentFolder());
 
             return runPythonExecutionProcess(pythonPath, payload, tempExecutionEnvironment);
 
@@ -134,9 +153,8 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
             logger.error(message, e);
             throw new RuntimeException(message);
         } finally {
-            if ((tempExecutionEnvironment != null) && !deleteQuietly(tempExecutionEnvironment.getParentFolder())) {
-                logger.warn(String.format("Failed to cleanup python execution resources {%s}",
-                        tempExecutionEnvironment.getParentFolder()));
+            if (tempExecutionEnvironment != null) {
+                cleanupResourcesHolder.addResource(tempExecutionEnvironment.getParentFolder().getAbsolutePath());
             }
         }
     }
@@ -160,7 +178,6 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
             String pythonPath = checkPythonPath();
             tempTestEnvironment = generateTempResourcesForEval();
             String payload = generatePayloadForEval(expression, prepareEnvironmentScript, context);
-            addFilePermissions(tempTestEnvironment.getParentFolder());
 
             return runPythonTestProcess(pythonPath, payload, tempTestEnvironment, context, evaluationTimeout);
 
@@ -169,9 +186,8 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
             logger.error(message, e);
             throw new RuntimeException(message);
         } finally {
-            if ((tempTestEnvironment != null) && !deleteQuietly(tempTestEnvironment.getParentFolder())) {
-                logger.warn(String.format("Failed to cleanup python execution resources {%s}",
-                        tempTestEnvironment.getParentFolder()));
+            if (tempTestEnvironment != null) {
+                cleanupResourcesHolder.addResource(tempTestEnvironment.getParentFolder().getAbsolutePath());
             }
         }
     }
@@ -183,7 +199,6 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
             String pythonPath = checkPythonPath();
             tempEvalEnvironment = generateTempResourcesForEval();
             String payload = generatePayloadForEval(expression, prepareEnvironmentScript, context);
-            addFilePermissions(tempEvalEnvironment.getParentFolder());
 
             return runPythonEvalProcess(pythonPath, payload, tempEvalEnvironment, context,
                     ExternalPythonExecutorScheduledExecutorTimeout.EVALUATION_TIMEOUT);
@@ -193,26 +208,8 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
             logger.error(message, e);
             throw new RuntimeException(message);
         } finally {
-            if ((tempEvalEnvironment != null) && !deleteQuietly(tempEvalEnvironment.getParentFolder())) {
-                logger.warn(String.format("Failed to cleanup python execution resources {%s}",
-                        tempEvalEnvironment.getParentFolder()));
-            }
-        }
-    }
-
-    private void addFilePermissions(File file) throws IOException {
-        Set<PosixFilePermission> filePermissions = new HashSet<>();
-        filePermissions.add(PosixFilePermission.OWNER_READ);
-
-        File[] fileChildren = file.listFiles();
-
-        if (fileChildren != null) {
-            for (File child : fileChildren) {
-                if (SystemUtils.IS_OS_WINDOWS) {
-                    child.setReadOnly();
-                } else {
-                    Files.setPosixFilePermissions(child.toPath(), filePermissions);
-                }
+            if (tempEvalEnvironment != null) {
+                cleanupResourcesHolder.addResource(tempEvalEnvironment.getParentFolder().getAbsolutePath());
             }
         }
     }
@@ -419,7 +416,12 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
         File mainScriptFile = new File(execTempDirectory.toString(), MAIN_PY);
         FileUtils.writeByteArrayToFile(mainScriptFile, ResourceScriptResolver.loadExecScriptAsBytes());
 
+
         String tempUserScriptName = FilenameUtils.getName(tempUserScript.toString());
+
+        permissionService.setPermission(tempUserScript);
+        permissionService.setPermission(mainScriptFile);
+
         return new TempExecutionEnvironment(tempUserScriptName, MAIN_PY, execTempDirectory.toFile());
     }
 
@@ -427,6 +429,8 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
         Path execTempDirectory = Files.createTempDirectory("python_expression");
         File evalScriptFile = new File(execTempDirectory.toString(), EVAL_PY);
         FileUtils.writeByteArrayToFile(evalScriptFile, ResourceScriptResolver.loadEvalScriptAsBytes());
+
+        permissionService.setPermission(evalScriptFile);
 
         return new TempEvalEnvironment(EVAL_PY, execTempDirectory.toFile());
     }
