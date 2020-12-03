@@ -5,8 +5,6 @@ import re
 from io import StringIO
 from lxml import etree
 
-
-# noinspection PyMethodMayBeStatic
 class PythonAgentExecutor(object):
 
     def __get_accessed_method(self, key):
@@ -69,13 +67,13 @@ class PythonAgentExecutor(object):
 
         get_from_smaller_context = self.get_from_smaller_context
         accessed_resources_set = set()
-        context = payload["context"]
+        context = payload['context']
 
-        if "sys_prop" in context:
-            sys_prop = context["sys_prop"]
+        if 'sys_prop' in context:
+            sys_prop = context['sys_prop']
             accessed = self.__get_accessed_method
 
-        env_setup = payload["envSetup"]
+        env_setup = payload['envSetup']
         get_sp = None
         get = None
         cs_append = None
@@ -93,22 +91,23 @@ class PythonAgentExecutor(object):
         try:
             raw_inputs = input().encode(sys.stdin.encoding).decode()
             payload = json.loads(raw_inputs)
-            expression = payload["expression"]
-            context = payload["context"]
+            expression = payload['expression']
+            context = payload['context']
             self.__init_context(payload)
 
-            smaller_context = AccessAwareDict({"get_sp": get_sp, "get": get,
-                                               "cs_append": cs_append,
-                                               "cs_prepend": cs_prepend,
-                                               "cs_replace": cs_replace,
-                                               "cs_round": cs_round,
-                                               "cs_extract_number": cs_extract_number,
-                                               "cs_substring": cs_substring,
-                                               "cs_to_upper": cs_to_upper,
-                                               "cs_to_lower": cs_to_lower,
-                                               "cs_regex": self.cs_regex,
-                                               "cs_xpath_query": self.cs_xpath_query,
-                                               "cs_json_query": self.cs_json_query,
+            smaller_context = AccessAwareDict({'get_sp': get_sp,
+                                               'get': get,
+                                               'cs_append': cs_append,
+                                               'cs_prepend': cs_prepend,
+                                               'cs_replace': cs_replace,
+                                               'cs_round': cs_round,
+                                               'cs_extract_number': cs_extract_number,
+                                               'cs_substring': cs_substring,
+                                               'cs_to_upper': cs_to_upper,
+                                               'cs_to_lower': cs_to_lower,
+                                               'cs_regex': self.cs_regex,
+                                               'cs_xpath_query': self.cs_xpath_query,
+                                               'cs_json_query': self.cs_json_query,
                                                })
 
             for x in dir(__builtins__):
@@ -139,20 +138,19 @@ class PythonAgentExecutor(object):
                     return_type = 'list'
 
                 elif return_type == '_Element':
-                    expr_result = etree.tostring(expr_result, encoding="UTF-8").decode("UTF-8")
+                    expr_result = etree.tostring(expr_result, encoding='UTF-8').decode('UTF-8')
                     return_type = 'str'
 
-                # all types are turned into str or list except for int, bool and list
                 if return_type not in ['str', 'int', 'bool', 'list']:
                     return_type = 'str'
 
-                final_result = {"returnResult": expr_result,
-                                "accessedResources": list(accessed_resources_set),
-                                "returnType": return_type}
+                final_result = {'returnResult': expr_result,
+                                'accessedResources': list(accessed_resources_set),
+                                'returnType': return_type}
             finally:
                 self.__enable_standard_io(old_io)
         except Exception as e:
-            final_result = {"exception": str(e)}
+            final_result = {'exception': str(e)}
 
         print(json.dumps(final_result))
 
@@ -161,7 +159,7 @@ class AccessAwareDict(dict):
     def __getitem__(self, name):
         accessed_resources_set.add(name)
         if not self.__contains__(name):
-            raise NameError(f"name '{name}' is not defined")
+            raise NameError('name ' + name + ' is not defined')
         return self.get(name)
 
 if __name__ == '__main__':

@@ -18,23 +18,37 @@ package io.cloudslang.runtime.impl.python.external;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
+import static org.apache.commons.io.IOUtils.readLines;
 import static org.apache.commons.io.IOUtils.toByteArray;
+import static org.apache.commons.lang3.StringUtils.join;
 
 
 public class ResourceScriptResolver {
 
     private static final byte[] execScriptBytes;
     private static final byte[] evalScriptBytes;
+    private static final String evalScriptString;
 
     static {
         execScriptBytes = loadScriptFromResource("main.py");
         evalScriptBytes = loadScriptFromResource("eval.py");
+        evalScriptString = loadScriptFromResourceAsString("eval.py");
     }
 
     private static byte[] loadScriptFromResource(String resourceName) {
         try (InputStream stream = ResourceScriptResolver.class.getClassLoader().getResourceAsStream(resourceName)) {
             return toByteArray(requireNonNull(stream, "Could not locate resource '" + resourceName + "'"));
+        } catch (IOException ioEx) {
+            throw new RuntimeException("Could not load resource '" + resourceName + "': ", ioEx);
+        }
+    }
+
+    private static String loadScriptFromResourceAsString(String resourceName) {
+        try (InputStream stream = ResourceScriptResolver.class.getClassLoader().getResourceAsStream(resourceName)) {
+            InputStream safeStream = requireNonNull(stream, "Could not locate resource '" + resourceName + "'");
+            return join(readLines(safeStream, UTF_8), "\n");
         } catch (IOException ioEx) {
             throw new RuntimeException("Could not load resource '" + resourceName + "': ", ioEx);
         }
@@ -46,6 +60,10 @@ public class ResourceScriptResolver {
 
     public static byte[] loadEvalScriptAsBytes() {
         return evalScriptBytes;
+    }
+
+    public static String loadEvalScriptAsString() {
+        return evalScriptString;
     }
 
 }

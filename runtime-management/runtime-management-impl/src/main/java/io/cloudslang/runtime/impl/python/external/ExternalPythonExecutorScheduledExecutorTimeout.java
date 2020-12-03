@@ -178,25 +178,17 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
 
     private PythonEvaluationResult getPythonEvaluationResult(String expression, String prepareEnvironmentScript,
                                                              Map<String, Serializable> context) {
-        TempEvalEnvironment tempEvalEnvironment = null;
         try {
             String pythonPath = checkPythonPath();
-            tempEvalEnvironment = generateTempResourcesForEval();
             String payload = generatePayloadForEval(expression, prepareEnvironmentScript, context);
-            addFilePermissions(tempEvalEnvironment.getParentFolder());
 
-            return runPythonEvalProcess(pythonPath, payload, tempEvalEnvironment, context,
+            return runPythonEvalProcess(pythonPath, payload, context,
                     ExternalPythonExecutorScheduledExecutorTimeout.EVALUATION_TIMEOUT);
 
         } catch (IOException e) {
             String message = "Failed to generate execution resources";
             logger.error(message, e);
             throw new RuntimeException(message);
-        } finally {
-            if ((tempEvalEnvironment != null) && !deleteQuietly(tempEvalEnvironment.getParentFolder())) {
-                logger.warn(String.format("Failed to cleanup python execution resources {%s}",
-                        tempEvalEnvironment.getParentFolder()));
-            }
         }
     }
 
@@ -260,10 +252,9 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     }
 
     private PythonEvaluationResult runPythonEvalProcess(String pythonPath, String payload,
-                                                        TempEvalEnvironment executionEnvironment,
                                                         Map<String, Serializable> context, long timeout) {
 
-        ProcessBuilder processBuilder = preparePythonProcess(executionEnvironment, pythonPath);
+        ProcessBuilder processBuilder = preparePythonProcessForEval(pythonPath, ResourceScriptResolver.loadEvalScriptAsString());
 
         try {
             String returnResult = getResult(payload, processBuilder, timeout);
@@ -411,6 +402,16 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
         return processBuilder;
     }
 
+    private ProcessBuilder preparePythonProcessForEval(String pythonPath, String evalPyCode) {
+        ProcessBuilder processBuilder = new ProcessBuilder(Arrays.asList(
+                Paths.get(pythonPath, "python").toString(),
+                "-c",
+                evalPyCode)
+        );
+        processBuilder.environment().clear();
+        return processBuilder;
+    }
+
     private TempExecutionEnvironment generateTempResourcesForExec(String script) throws IOException {
         Path execTempDirectory = Files.createTempDirectory("python_execution");
         File tempUserScript = File.createTempFile(PYTHON_SCRIPT_FILENAME, PYTHON_SUFFIX, execTempDirectory.toFile());
@@ -421,14 +422,6 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
 
         String tempUserScriptName = FilenameUtils.getName(tempUserScript.toString());
         return new TempExecutionEnvironment(tempUserScriptName, MAIN_PY, execTempDirectory.toFile());
-    }
-
-    private TempEvalEnvironment generateTempResourcesForEval() throws IOException {
-        Path execTempDirectory = Files.createTempDirectory("python_expression");
-        File evalScriptFile = new File(execTempDirectory.toString(), EVAL_PY);
-        FileUtils.writeByteArrayToFile(evalScriptFile, ResourceScriptResolver.loadEvalScriptAsBytes());
-
-        return new TempEvalEnvironment(EVAL_PY, execTempDirectory.toFile());
     }
 
     private String generatePayloadForEval(String expression, String prepareEnvironmentScript,
@@ -451,6 +444,14 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
         payload.put("script_name", FilenameUtils.removeExtension(userScript));
         payload.put("inputs", parsedInputs);
         return objectMapper.writeValueAsString(payload);
+    }
+
+    private TempEvalEnvironment generateTempResourcesForEval() throws IOException {
+        Path execTempDirectory = Files.createTempDirectory("python_expression");
+        File evalScriptFile = new File(execTempDirectory.toString(), EVAL_PY);
+        FileUtils.writeByteArrayToFile(evalScriptFile, ResourceScriptResolver.loadEvalScriptAsBytes());
+
+        return new TempEvalEnvironment(EVAL_PY, execTempDirectory.toFile());
     }
 
     private String formatException(String exception, List<String> traceback) {
