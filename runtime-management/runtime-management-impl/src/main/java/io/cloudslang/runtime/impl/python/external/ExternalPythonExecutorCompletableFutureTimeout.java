@@ -287,7 +287,9 @@ public class ExternalPythonExecutorCompletableFutureTimeout implements ExternalP
 
     private ProcessBuilder preparePythonProcessForEval(String pythonPath, String evalPyCode) {
         // Must make sure that the eval.py evalPyCode does not contain the " character in its contents
-        // otherwise an error will be thrown
+        // otherwise an error will be thrown when running python -c "import json\nimport sys..."
+        // code from eval.py separated using \n character
+        // Also do not use comments for the same reason in eval.py
         // Use 'string' for Python strings instead of "string"
         ProcessBuilder processBuilder = new ProcessBuilder(Arrays.asList(
                 Paths.get(pythonPath, "python").toString(),
