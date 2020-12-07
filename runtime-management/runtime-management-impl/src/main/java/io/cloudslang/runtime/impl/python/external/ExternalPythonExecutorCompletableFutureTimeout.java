@@ -158,7 +158,7 @@ public class ExternalPythonExecutorCompletableFutureTimeout implements ExternalP
                     executorService);
 
         } catch (IOException e) {
-            String message = "Failed to generate execution resources";
+            String message = "Failed to evaluate Python expression";
             logger.error(message, e);
             throw new RuntimeException(message);
         }

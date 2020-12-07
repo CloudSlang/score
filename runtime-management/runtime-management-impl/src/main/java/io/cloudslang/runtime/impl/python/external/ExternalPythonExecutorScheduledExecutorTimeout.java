@@ -161,7 +161,7 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
             return runPythonTestProcess(pythonPath, payload, context, evaluationTimeout);
 
         } catch (IOException e) {
-            String message = "Failed to generate execution resources";
+            String message = "Failed to test Python expression";
             logger.error(message, e);
             throw new RuntimeException(message);
         }
@@ -176,7 +176,7 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
                     ExternalPythonExecutorScheduledExecutorTimeout.EVALUATION_TIMEOUT);
 
         } catch (IOException e) {
-            String message = "Failed to generate execution resources";
+            String message = "Failed to evaluate Python expression";
             logger.error(message, e);
             throw new RuntimeException(message);
         }
@@ -245,10 +245,8 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
                                                         Map<String, Serializable> context, long timeout) {
 
         ProcessBuilder processBuilder = preparePythonProcessForEval(pythonPath, loadEvalScriptAsString());
-
         try {
             String returnResult = getResult(payload, processBuilder, timeout);
-
             EvaluationResults scriptResults = objectMapper.readValue(returnResult, EvaluationResults.class);
             String exception = scriptResults.getException();
             if (!StringUtils.isEmpty(exception)) {
