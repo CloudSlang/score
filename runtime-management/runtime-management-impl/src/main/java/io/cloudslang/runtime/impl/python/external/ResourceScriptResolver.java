@@ -46,7 +46,9 @@ public class ResourceScriptResolver {
     }
 
     private static String loadScriptFromResourceAsString(String resourceName) {
-        try (InputStream stream = ResourceScriptResolver.class.getClassLoader().getResourceAsStream(resourceName)) {
+        try (InputStream stream = requireNonNull(ResourceScriptResolver.class.getClassLoader(),
+                "Could not get not-null classloader")
+                .getResourceAsStream(resourceName)) {
             InputStream safeStream = requireNonNull(stream, "Could not locate resource '" + resourceName + "'");
             // Must make sure that the eval.py does not have " character in its source.
             return join(readLines(safeStream, UTF_8), "\n");
