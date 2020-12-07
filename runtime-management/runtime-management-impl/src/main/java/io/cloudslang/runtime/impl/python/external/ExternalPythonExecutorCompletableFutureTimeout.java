@@ -26,7 +26,6 @@ import io.cloudslang.runtime.api.python.ExternalPythonProcessRunService;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.impl.python.external.model.TempEnvironment;
-import io.cloudslang.runtime.impl.python.external.model.TempEvalEnvironment;
 import io.cloudslang.runtime.impl.python.external.model.TempExecutionEnvironment;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -42,7 +41,6 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -66,6 +64,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeoutException;
 
 import static io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine.COMPLETABLE_EXECUTOR_STRATEGY;
+import static io.cloudslang.runtime.impl.python.external.ResourceScriptResolver.loadEvalScriptAsString;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -150,25 +149,16 @@ public class ExternalPythonExecutorCompletableFutureTimeout implements ExternalP
 
     private PythonEvaluationResult getPythonEvaluationResult(String expression, String prepareEnvironmentScript,
             Map<String, Serializable> context, long evaluationTimeout, ExecutorService executorService) {
-        TempEvalEnvironment tempEvalEnvironment = null;
         try {
             String pythonPath = checkPythonPath();
-            tempEvalEnvironment = generateTempResourcesForEval();
             String payload = generatePayloadForEval(expression, prepareEnvironmentScript, context);
-            addFilePermissions(tempEvalEnvironment.getParentFolder());
-
-            return runPythonEvalProcess(pythonPath, payload, tempEvalEnvironment, context, evaluationTimeout,
+            return runPythonEvalProcess(pythonPath, payload, context, evaluationTimeout,
                     executorService);
 
         } catch (IOException e) {
-            String message = "Failed to generate execution resources";
+            String message = "Failed to evaluate Python expression";
             logger.error(message, e);
             throw new RuntimeException(message);
-        } finally {
-            if ((tempEvalEnvironment != null) && !deleteQuietly(tempEvalEnvironment.getParentFolder())) {
-                logger.warn(String.format("Failed to cleanup python execution resources {%s}",
-                        tempEvalEnvironment.getParentFolder()));
-            }
         }
     }
 
@@ -232,10 +222,9 @@ public class ExternalPythonExecutorCompletableFutureTimeout implements ExternalP
     }
 
     private PythonEvaluationResult runPythonEvalProcess(String pythonPath, String payload,
-            TempEvalEnvironment executionEnvironment,
             Map<String, Serializable> context, long timeout, ExecutorService executorService) {
 
-        ProcessBuilder processBuilder = preparePythonProcess(executionEnvironment, pythonPath);
+        ProcessBuilder processBuilder = preparePythonProcessForEval(pythonPath, loadEvalScriptAsString());
 
         try {
             String returnResult = getResult(payload, processBuilder, timeout, executorService);
@@ -294,6 +283,21 @@ public class ExternalPythonExecutorCompletableFutureTimeout implements ExternalP
         return processBuilder;
     }
 
+    private ProcessBuilder preparePythonProcessForEval(String pythonPath, String evalPyCode) {
+        // Must make sure that the eval.py evalPyCode does not contain the " character in its contents
+        // otherwise an error will be thrown when running python -c "import json\nimport sys..."
+        // code from eval.py separated using \n character
+        // Also do not use comments for the same reason in eval.py
+        // Use 'string' for Python strings instead of "string"
+        ProcessBuilder processBuilder = new ProcessBuilder(Arrays.asList(
+                Paths.get(pythonPath, "python").toString(),
+                "-c",
+                evalPyCode)
+        );
+        processBuilder.environment().clear();
+        return processBuilder;
+    }
+
     private TempExecutionEnvironment generateTempResourcesForExec(String script) throws IOException {
         Path execTempDirectory = Files.createTempDirectory("python_execution");
         File tempUserScript = File.createTempFile(PYTHON_SCRIPT_FILENAME, PYTHON_SUFFIX, execTempDirectory.toFile());
@@ -304,14 +308,6 @@ public class ExternalPythonExecutorCompletableFutureTimeout implements ExternalP
 
         String tempUserScriptName = FilenameUtils.getName(tempUserScript.toString());
         return new TempExecutionEnvironment(tempUserScriptName, MAIN_PY, execTempDirectory.toFile());
-    }
-
-    private TempEvalEnvironment generateTempResourcesForEval() throws IOException {
-        Path execTempDirectory = Files.createTempDirectory("python_expression");
-        File evalScriptFile = new File(execTempDirectory.toString(), EVAL_PY);
-        FileUtils.writeByteArrayToFile(evalScriptFile, ResourceScriptResolver.loadEvalScriptAsBytes());
-
-        return new TempEvalEnvironment(EVAL_PY, execTempDirectory.toFile());
     }
 
     private String generatePayloadForEval(String expression, String prepareEnvironmentScript,
