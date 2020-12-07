@@ -310,14 +310,6 @@ public class ExternalPythonExecutorCompletableFutureTimeout implements ExternalP
         return new TempExecutionEnvironment(tempUserScriptName, MAIN_PY, execTempDirectory.toFile());
     }
 
-    private TempEvalEnvironment generateTempResourcesForEval() throws IOException {
-        Path execTempDirectory = Files.createTempDirectory("python_expression");
-        File evalScriptFile = new File(execTempDirectory.toString(), EVAL_PY);
-        FileUtils.writeByteArrayToFile(evalScriptFile, ResourceScriptResolver.loadEvalScriptAsBytes());
-
-        return new TempEvalEnvironment(EVAL_PY, execTempDirectory.toFile());
-    }
-
     private String generatePayloadForEval(String expression, String prepareEnvironmentScript,
             Map<String, Serializable> context) throws JsonProcessingException {
         HashMap<String, Serializable> payload = new HashMap<>(4);
