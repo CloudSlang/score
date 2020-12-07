@@ -27,14 +27,14 @@ import static org.apache.commons.lang3.StringUtils.join;
 
 public class ResourceScriptResolver {
 
-    private static final byte[] execScriptBytes;
-    private static final byte[] evalScriptBytes;
-    private static final String evalScriptString;
+    private static final byte[] execScriptAsBytes;
+    private static final byte[] evalScriptAsBytes;
+    private static final String evalScriptAsString;
 
     static {
-        execScriptBytes = loadScriptFromResource("main.py");
-        evalScriptBytes = loadScriptFromResource("eval.py");
-        evalScriptString = loadScriptFromResourceAsString("eval.py");
+        execScriptAsBytes = loadScriptFromResource("main.py");
+        evalScriptAsBytes = loadScriptFromResource("eval.py");
+        evalScriptAsString = loadScriptFromResourceAsString("eval.py");
     }
 
     private static byte[] loadScriptFromResource(String resourceName) {
@@ -48,6 +48,7 @@ public class ResourceScriptResolver {
     private static String loadScriptFromResourceAsString(String resourceName) {
         try (InputStream stream = ResourceScriptResolver.class.getClassLoader().getResourceAsStream(resourceName)) {
             InputStream safeStream = requireNonNull(stream, "Could not locate resource '" + resourceName + "'");
+            // Must make sure that the eval.py does not have " character in its source.
             return join(readLines(safeStream, UTF_8), "\n");
         } catch (IOException ioEx) {
             throw new RuntimeException("Could not load resource '" + resourceName + "': ", ioEx);
@@ -55,15 +56,15 @@ public class ResourceScriptResolver {
     }
 
     public static byte[] loadExecScriptAsBytes() {
-        return execScriptBytes;
+        return execScriptAsBytes;
     }
 
     public static byte[] loadEvalScriptAsBytes() {
-        return evalScriptBytes;
+        return evalScriptAsBytes;
     }
 
     public static String loadEvalScriptAsString() {
-        return evalScriptString;
+        return evalScriptAsString;
     }
 
 }

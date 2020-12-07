@@ -43,7 +43,6 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -70,6 +69,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 
 import static io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine.SCHEDULED_EXECUTOR_STRATEGY;
+import static io.cloudslang.runtime.impl.python.external.ResourceScriptResolver.loadEvalScriptAsString;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
@@ -254,7 +254,7 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     private PythonEvaluationResult runPythonEvalProcess(String pythonPath, String payload,
                                                         Map<String, Serializable> context, long timeout) {
 
-        ProcessBuilder processBuilder = preparePythonProcessForEval(pythonPath, ResourceScriptResolver.loadEvalScriptAsString());
+        ProcessBuilder processBuilder = preparePythonProcessForEval(pythonPath, loadEvalScriptAsString());
 
         try {
             String returnResult = getResult(payload, processBuilder, timeout);
@@ -403,6 +403,9 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     }
 
     private ProcessBuilder preparePythonProcessForEval(String pythonPath, String evalPyCode) {
+        // Must make sure that the eval.py evalPyCode does not contain the " character in its contents
+        // otherwise an error will be thrown
+        // Use 'string' for Python strings instead of "string"
         ProcessBuilder processBuilder = new ProcessBuilder(Arrays.asList(
                 Paths.get(pythonPath, "python").toString(),
                 "-c",
