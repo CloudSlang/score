@@ -28,17 +28,17 @@ import static org.apache.commons.lang3.StringUtils.join;
 public class ResourceScriptResolver {
 
     private static final byte[] execScriptAsBytes;
-    private static final byte[] evalScriptAsBytes;
     private static final String evalScriptAsString;
 
     static {
         execScriptAsBytes = loadScriptFromResource("main.py");
-        evalScriptAsBytes = loadScriptFromResource("eval.py");
         evalScriptAsString = loadScriptFromResourceAsString("eval.py");
     }
 
     private static byte[] loadScriptFromResource(String resourceName) {
-        try (InputStream stream = ResourceScriptResolver.class.getClassLoader().getResourceAsStream(resourceName)) {
+        try (InputStream stream = requireNonNull(ResourceScriptResolver.class.getClassLoader(),
+                "Could not get not-null classloader")
+                .getResourceAsStream(resourceName)) {
             return toByteArray(requireNonNull(stream, "Could not locate resource '" + resourceName + "'"));
         } catch (IOException ioEx) {
             throw new RuntimeException("Could not load resource '" + resourceName + "': ", ioEx);
@@ -57,10 +57,6 @@ public class ResourceScriptResolver {
 
     public static byte[] loadExecScriptAsBytes() {
         return execScriptAsBytes;
-    }
-
-    public static byte[] loadEvalScriptAsBytes() {
-        return evalScriptAsBytes;
     }
 
     public static String loadEvalScriptAsString() {
