@@ -181,7 +181,6 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
         try {
             String pythonPath = checkPythonPath();
             String payload = generatePayloadForEval(expression, prepareEnvironmentScript, context);
-
             return runPythonEvalProcess(pythonPath, payload, context,
                     ExternalPythonExecutorScheduledExecutorTimeout.EVALUATION_TIMEOUT);
 
