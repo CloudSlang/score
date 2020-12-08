@@ -38,7 +38,7 @@ class PythonAgentExecutor(object):
         f = StringIO(str)
         tree = etree.parse(f)
         r = tree.xpath(xpath)
-        return json.dumps(list(map(lambda val: etree.tostring(val, encoding="UTF-8").decode("UTF-8"), r))) if r is not None and len(r) > 0 else None
+        return json.dumps(list(map(lambda val: etree.tostring(val, encoding='UTF-8').decode('UTF-8'), r))) if r is not None and len(r) > 0 else None
 
     def cs_json_query(self, str, json_path):
         json_data = json.loads(str)
