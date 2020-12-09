@@ -290,5 +290,5 @@ public interface WorkerNodeService {
      * @param encodedPassword the newly encoded password of the worker
      */
     void updateMigratedPassword(String workerUuid, String encodedPassword);
-    void updateWorkerBusynessValue(String uuid, int workerBusynessValue);
+    void updateWorkerBusynessValue(String uuid, String workerBusynessValue);
 }

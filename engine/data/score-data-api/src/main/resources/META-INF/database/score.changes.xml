@@ -319,7 +319,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
     <changeSet id="Add PERCENTAGE_UTILIZATION column to OO_WORKER_NODES" author="engine">
         <addColumn tableName="OO_WORKER_NODES">
-            <column name="PERCENTAGE_UTILIZATION" type="INTEGER"/>
+            <column name="PERCENTAGE_UTILIZATION" type="VARCHAR(255)"/>
         </addColumn>
         <rollback>
             <dropColumn tableName="OO_WORKER_NODES" columnName="PERCENTAGE_UTILIZATION"/>
