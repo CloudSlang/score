@@ -74,7 +74,7 @@ public class OutboundBufferTest {
 	 * Makes sure the buffer aggregates messages and dispatches them in bulk
 	 */
 	@Test
-	public void testAggregation() throws InterruptedException {
+	public void testAggregation() throws Exception {
 		List<DummyMsg1> messages = Arrays.asList(new DummyMsg1(), new DummyMsg1());
 
 		for (DummyMsg1 message : messages) {
@@ -128,7 +128,7 @@ public class OutboundBufferTest {
 	 * @throws InterruptedException
 	 */
 	@Test
-	public void testConsumerBlocking() throws InterruptedException {
+	public void testConsumerBlocking() throws Exception {
 		Thread thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -164,7 +164,7 @@ public class OutboundBufferTest {
 	}
 
 	@Test
-	public void longevityTest() throws InterruptedException {
+	public void longevityTest() throws Exception {
 		int THREADS_NUM = 5;
 		long CHECK_DURATION = 5*1000L;
 		long INFO_FREQUENCY = 2*1000L;

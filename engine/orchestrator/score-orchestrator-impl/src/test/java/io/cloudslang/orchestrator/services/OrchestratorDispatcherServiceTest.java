@@ -24,6 +24,7 @@ import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import io.cloudslang.orchestrator.entities.Message;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -74,7 +75,7 @@ public class OrchestratorDispatcherServiceTest {
     }
 
     @Test
-    public void simpleDispatchTest(){
+    public void simpleDispatchTest() throws Exception {
         List<Message> messages = new ArrayList<>();
         messages.add(new ExecutionMessage());
 
@@ -94,7 +95,7 @@ public class OrchestratorDispatcherServiceTest {
     }
 
     @Test
-    public void firstDispatchTest(){
+    public void firstDispatchTest() throws Exception {
         List<Message> messages = new ArrayList<>();
         messages.add(new ExecutionMessage());
 
@@ -113,7 +114,7 @@ public class OrchestratorDispatcherServiceTest {
     }
 
     @Test
-    public void sameBulkDispatchTest(){
+    public void sameBulkDispatchTest() throws Exception {
         List<Message> messages = new ArrayList<>();
         messages.add(new ExecutionMessage());
 
@@ -132,8 +133,9 @@ public class OrchestratorDispatcherServiceTest {
         Mockito.verify(workerNodeService, times(0)).updateBulkNumber(uuid, newBulkNumber);
     }
     
-    @Test
-        public void dispatchAfterRecoveryTest(){
+    @Test(expected = Exception.class)
+    
+        public void dispatchAfterRecoveryTest() throws Exception {
             List<Message> messages = new ArrayList<>();
             messages.add(new ExecutionMessage());
     

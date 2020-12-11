@@ -52,7 +52,7 @@ public final class OrchestratorDispatcherServiceImpl implements OrchestratorDisp
 
     @Override
     @Transactional
-    public void dispatch(List<? extends Serializable> messages, String bulkNumber, String wrv, String workerUuid) {
+    public void dispatch(List<? extends Serializable> messages, String bulkNumber, String wrv, String workerUuid) throws Exception {
         //lock to synchronize with the recovery job
         workerLockService.lock(workerUuid);
         Validate.notNull(messages, "Messages list is null");
@@ -70,6 +70,7 @@ public final class OrchestratorDispatcherServiceImpl implements OrchestratorDisp
         else if (!currentWRV.equals(wrv)) {
             logger.warn("Orchestrator got messages from worker: " + workerUuid + " with wrong WRV:" + wrv
                     + " Current WRV is: " + currentWRV + ". Discarding...");
+            throw new Exception("Worker already recovered by orchestrator");
         } else {
             dispatch(messages);
             workerNodeService.updateBulkNumber(workerUuid, bulkNumber);

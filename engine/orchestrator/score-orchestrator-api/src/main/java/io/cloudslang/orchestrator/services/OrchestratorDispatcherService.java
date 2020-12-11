@@ -36,5 +36,5 @@ public interface OrchestratorDispatcherService {
      * @param wrv the worker recovery version, needed for recovery
      * @param workerUuid the id of the dispatching worker
      */
-	void dispatch(List<? extends Serializable> messages, String bulkNumber, String wrv, String workerUuid);
+	void dispatch(List<? extends Serializable> messages, String bulkNumber, String wrv, String workerUuid) throws Exception;
 }

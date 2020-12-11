@@ -212,7 +212,11 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
                 if (logger.isDebugEnabled()) {
                     logger.debug("Dispatch start with bulk number: " + bulkNumber);
                 }
-                dispatcherService.dispatch(optimizedBulk, bulkNumber, wrv, workerUuid);
+                try {
+                    dispatcherService.dispatch(optimizedBulk, bulkNumber, wrv, workerUuid);
+                } catch (Exception e) {
+                    recoveryManager.doRecovery();
+                }
                 if (executionsActivityListener != null) {
                     executionsActivityListener
                             .onHalt(extract(optimizedBulk, on(ExecutionMessage.class).getExecStateId()));
