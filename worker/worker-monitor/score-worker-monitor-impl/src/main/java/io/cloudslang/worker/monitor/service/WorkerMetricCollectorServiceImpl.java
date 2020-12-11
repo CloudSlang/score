@@ -24,31 +24,58 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class WorkerMetricCollectorServiceImpl implements WorkerMetricCollectorService {
     protected static final Logger logger = LogManager.getLogger(WorkerMetricCollectorServiceImpl.class);
+    static int capacity = Integer.parseInt(System.getProperty("Number.Of.Samples.To.Collect", "10"));
+    private LinkedBlockingQueue<Map<MetricKeyValue, Serializable>> collectMetricQueue = new LinkedBlockingQueue<Map<MetricKeyValue, Serializable>>(capacity);
     @Autowired
     PerfMetricCollector perfMetricCollector;
     @Autowired
     @Qualifier("consumptionFastEventBus")
     private FastEventBus fastEventBus;
+    private boolean flag = true;
 
     @Override
     public void collectPerfMetrics() {
+        while(flag==false);
         if (logger.isDebugEnabled()) {
             logger.debug("Collecting Worker Metrics");
         }
         try {
             Map<MetricKeyValue, Serializable> metricInfo = perfMetricCollector.collectMetric();
+            collectMetricQueue.put(metricInfo);
             if (logger.isDebugEnabled()) {
                 logger.debug("Sending Worker Metric Info:[" + metricInfo + "]");
             }
-            ScoreEvent scoreEvent = new ScoreEvent(EventConstants.WORKER_PERFORMANCE_MONITOR, (Serializable) metricInfo);
-            fastEventBus.dispatch(scoreEvent);
+        } catch (Exception e) {
+            logger.error("Failed to load metric into queue", e);
+        }
+    }
 
+    @Override
+    public void collectPerfMetricsInBatches() {
+        flag=false;
+        try {
+            Map<Integer,Map<MetricKeyValue, Serializable>> metricData = convertQueueToHashMap(collectMetricQueue);
+            ScoreEvent scoreEvent = new ScoreEvent(EventConstants.WORKER_PERFORMANCE_MONITOR, (Serializable) metricData);
+            fastEventBus.dispatch(scoreEvent);
+            collectMetricQueue.clear();
         } catch (Exception e) {
             logger.error("Failed to dispatch metric info event", e);
         }
+        flag=true;
+    }
+    private Map<Integer,Map<MetricKeyValue, Serializable>> convertQueueToHashMap(LinkedBlockingQueue<Map<MetricKeyValue, Serializable>> metricQueue) {
+        Map<Integer,Map<MetricKeyValue, Serializable>> metricData = new HashMap<>();
+        for(int i=0;i<metricQueue.size();i++) {
+            metricData.put(i,metricQueue.peek());
+        }
+        return metricData;
     }
 }
