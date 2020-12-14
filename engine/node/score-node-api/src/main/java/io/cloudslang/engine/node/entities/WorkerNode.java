@@ -121,7 +121,7 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
     private String versionId = "";
 
 	@Column(name = "PERCENTAGE_UTILIZATION")
-	private Integer workerBusynessValue;
+	private String workerBusynessValue;
 
     @Override
     public String getUuid() {
@@ -289,11 +289,11 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
     }
 
 	@Override
-	public int getWorkerBusynessValue() {
+	public String getWorkerBusynessValue() {
 		return workerBusynessValue;
 	}
 
-	public void setWorkerBusynessValue(Integer workerBusynessValue) {
+	public void setWorkerBusynessValue(String workerBusynessValue) {
 		this.workerBusynessValue = workerBusynessValue;
 	}
 

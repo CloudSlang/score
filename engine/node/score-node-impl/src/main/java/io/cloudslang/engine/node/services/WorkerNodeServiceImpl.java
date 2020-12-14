@@ -105,7 +105,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
         worker.setStatus(WorkerStatus.FAILED);
         worker.setPassword(password);
         worker.setGroups(Arrays.asList(WorkerNode.DEFAULT_WORKER_GROUPS));
-        worker.setWorkerBusynessValue(0);
+        worker.setWorkerBusynessValue("NA");
         workerNodeRepository.save(worker);
         workerLockService.create(uuid);
     }
@@ -311,7 +311,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 
     @Override
     @Transactional
-    public void updateWorkerBusynessValue(String uuid, int workerBusynessValue)
+    public void updateWorkerBusynessValue(String uuid, String workerBusynessValue)
     {
         WorkerNode worker = workerNodeRepository.findByUuid(uuid);
         if (worker == null) {

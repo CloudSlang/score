@@ -19,7 +19,6 @@ import io.cloudslang.worker.monitor.service.MetricKeyValue;
 import oshi.SystemInfo;
 import oshi.hardware.GlobalMemory;
 import oshi.software.os.OSProcess;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;

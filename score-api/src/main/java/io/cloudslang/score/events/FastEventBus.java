@@ -17,6 +17,8 @@
 package io.cloudslang.score.events;
 
 
+import java.util.Set;
+
 public interface FastEventBus {
 
     /**
@@ -24,12 +26,12 @@ public interface FastEventBus {
      *
      * @param eventHandler - the handler of the events
      */
-    void registerEventListener(UninterruptibleScoreEventListener eventHandler);
+    void registerEventListener(UninterruptibleScoreEventListener eventHandler, Set<String> eventTypes);
 
     /**
      * dispatch the given event
      *
-     * @param event score event to dispatch
+     * @param eventWrappers score event to dispatch
      */
-    void dispatch(ScoreEvent event);
+    void dispatch(ScoreEvent... eventWrappers);
 }

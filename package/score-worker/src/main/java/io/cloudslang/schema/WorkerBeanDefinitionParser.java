@@ -88,14 +88,12 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(SessionDataHandlerImpl.class, "sessionDataHandler");
 		put(SynchronizationManagerImpl.class, null);
 		put(WorkerConfigurationServiceImpl.class, "workerConfiguration");
-
 		//Monitors
 		put(WorkerExecutionMonitorServiceImpl.class, "workerExecutionMonitorService");
 		put(WorkerMonitorsImpl.class, "workerMonitorsImpl");
 		put(ScheduledWorkerLoadMonitor.class, "scheduledWorkerLoadMonitor");
 		put(PercentCPUByProcess.class, "percentCPUByProcess");
 		put(DiskUsagePerProcess.class, "diskUsagePerProcess");
-		put(WorkerThreadUtilization.class, "threadCountUtilization");
 		put(PercentMemoryByProcess.class, "percentMemoryByProcess");
 		put(PerfMetricCollectorImpl.class,"perfMetricCollector");
 		put(WorkerMetricCollectorServiceImpl.class,"workerMetricCollectorService");
@@ -114,7 +112,8 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 			new ConfValue().NAME("interruptCanceledInterval").DEFAULT(30000L),
 			new ConfValue().NAME("statisticsInterval").DEFAULT(1000L),
 			new ConfValue().NAME("scheduledWorkerMonitorInterval").DEFAULT(10000L),
-			new ConfValue().NAME("scheduledPerfMetricCollectionInterval").DEFAULT(60000L),
+			new ConfValue().NAME("scheduledPerfMetricCollectionInterval").DEFAULT(6000L),
+			new ConfValue().NAME("scheduledQueueMetricCollectionInterval").DEFAULT(30000L),
 			new ConfValue().NAME("workerMonitorRefreshInterval").DEFAULT(300000L)
 
 	);

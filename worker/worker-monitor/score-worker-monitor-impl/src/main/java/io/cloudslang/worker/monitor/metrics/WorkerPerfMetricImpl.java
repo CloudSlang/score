@@ -19,7 +19,6 @@ import io.cloudslang.worker.monitor.metric.WorkerPerfMetric;
 import oshi.SystemInfo;
 import oshi.software.os.OSProcess;
 import oshi.software.os.OperatingSystem;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 

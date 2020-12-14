@@ -20,7 +20,6 @@ import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.software.os.OSProcess;
 import oshi.software.os.OperatingSystem;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +38,7 @@ public class PercentCPUByProcess extends WorkerPerfMetricImpl {
         OperatingSystem operatingSystem = systemInfo.getOperatingSystem();
         CentralProcessor processor = systemInfo.getHardware().getProcessor();
         int cpuNumber = processor.getLogicalProcessorCount();
-        int pid = getCurrentProcessId();//current pid
+        int pid = getCurrentProcessId();
         oldProcess = operatingSystem.getProcess(pid);
         OSProcess osProcess = operatingSystem.getProcess(pid);
         double cpuUsed = (osProcess.getProcessCpuLoadBetweenTicks(oldProcess) * 100) / cpuNumber;

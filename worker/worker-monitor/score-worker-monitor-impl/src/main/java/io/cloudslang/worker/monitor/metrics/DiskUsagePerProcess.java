@@ -17,7 +17,6 @@ package io.cloudslang.worker.monitor.metrics;
 
 import io.cloudslang.worker.monitor.service.MetricKeyValue;
 import oshi.software.os.OSProcess;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;

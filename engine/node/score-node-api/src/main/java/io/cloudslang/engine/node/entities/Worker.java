@@ -52,5 +52,5 @@ public interface Worker {
 
 	String getVersionId();
 
-	int getWorkerBusynessValue();
+	String getWorkerBusynessValue();
 }
