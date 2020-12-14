@@ -16,7 +16,7 @@
         <task:scheduled ref="workerExecutionMonitorService" method="executeScheduledWorkerMonitors" fixed-delay="#{scheduledWorkerMonitorInterval}"/>
         <task:scheduled ref="workerExecutionMonitorService" method="collectMonitorInformation" fixed-delay="#{workerMonitorRefreshInterval}"/>
         <task:scheduled ref="workerMetricCollectorService" method="collectPerfMetrics" fixed-delay="#{scheduledPerfMetricCollectionInterval}"/>
-        <task:scheduled ref="workerMetricCollectorService" method="collectPerfMetricsInBatches" fixed-delay="#{scheduledQueueMetricCollectionInterval}"/>
+        <task:scheduled ref="workerMetricCollectorService" method="dispatchPerfMetric" fixed-delay="#{scheduledMetricDispatchInterval}"/>
 	</task:scheduled-tasks>
 
     <!--

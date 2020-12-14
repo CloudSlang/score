@@ -28,12 +28,15 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.io.Serializable;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = WorkerMetricCollectorServiceImplTest.MyTestConfig.class)
 public class WorkerMetricCollectorServiceImplTest {
+    private LinkedBlockingQueue<Map<MetricKeyValue, Serializable>> collectMetricQueue = new LinkedBlockingQueue<Map<MetricKeyValue, Serializable>>(10);
 
     @Autowired
     WorkerMetricCollectorService workerMetricCollectorService;
@@ -46,11 +49,12 @@ public class WorkerMetricCollectorServiceImplTest {
 
     @Test
     public void testWorkerMetricCollectorService() throws InterruptedException {
-        HashMap<MetricKeyValue, Serializable> monitorInfo = new HashMap<>();
-        when(perfMetricCollector.collectMetric()).thenReturn(monitorInfo);
-        ScoreEvent event = new ScoreEvent(EventConstants.WORKER_PERFORMANCE_MONITOR, monitorInfo);
-        workerMetricCollectorService.collectPerfMetrics();
-        verify(fastEventBus, times(1)).dispatch(refEq(event));
+        Map<MetricKeyValue, Serializable> monitorInfo1 = new HashMap<>();
+        Map<MetricKeyValue, Serializable> monitorInfo2 = new HashMap<>();
+        collectMetricQueue.put(monitorInfo1);
+        collectMetricQueue.put(monitorInfo2);
+        workerMetricCollectorService.dispatchPerfMetric();
+        verify(fastEventBus, times(1)).dispatch(anyObject());
     }
 
     @Configuration

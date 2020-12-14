@@ -60,7 +60,7 @@ public class WorkerMetricCollectorServiceImpl implements WorkerMetricCollectorSe
     }
 
     @Override
-    public void collectPerfMetricsInBatches() {
+    public void dispatchPerfMetric() {
         reLock.lock();
         try {
             Map<Integer,Map<MetricKeyValue, Serializable>> metricData = convertQueueToHashMap(collectMetricQueue);
