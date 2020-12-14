@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class WorkerMetricCollectorServiceImpl implements WorkerMetricCollectorService {
     protected static final Logger logger = LogManager.getLogger(WorkerMetricCollectorServiceImpl.class);
@@ -39,14 +40,14 @@ public class WorkerMetricCollectorServiceImpl implements WorkerMetricCollectorSe
     @Autowired
     @Qualifier("consumptionFastEventBus")
     private FastEventBus fastEventBus;
-    private boolean flag = true;
+    private final ReentrantLock reLock = new ReentrantLock();
 
     @Override
     public void collectPerfMetrics() {
-        while(flag==false);
         if (logger.isDebugEnabled()) {
             logger.debug("Collecting Worker Metrics");
         }
+        while (reLock.isLocked());
         try {
             Map<MetricKeyValue, Serializable> metricInfo = perfMetricCollector.collectMetric();
             collectMetricQueue.put(metricInfo);
@@ -60,7 +61,7 @@ public class WorkerMetricCollectorServiceImpl implements WorkerMetricCollectorSe
 
     @Override
     public void collectPerfMetricsInBatches() {
-        flag=false;
+        reLock.lock();
         try {
             Map<Integer,Map<MetricKeyValue, Serializable>> metricData = convertQueueToHashMap(collectMetricQueue);
             ScoreEvent scoreEvent = new ScoreEvent(EventConstants.WORKER_PERFORMANCE_MONITOR, (Serializable) metricData);
@@ -68,8 +69,9 @@ public class WorkerMetricCollectorServiceImpl implements WorkerMetricCollectorSe
             collectMetricQueue.clear();
         } catch (Exception e) {
             logger.error("Failed to dispatch metric info event", e);
+        } finally {
+            reLock.unlock();
         }
-        flag=true;
     }
     private Map<Integer,Map<MetricKeyValue, Serializable>> convertQueueToHashMap(LinkedBlockingQueue<Map<MetricKeyValue, Serializable>> metricQueue) {
         Map<Integer,Map<MetricKeyValue, Serializable>> metricData = new HashMap<>();
