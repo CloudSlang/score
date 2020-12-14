@@ -26,7 +26,6 @@ import io.cloudslang.runtime.api.python.ExternalPythonProcessRunService;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.impl.python.external.model.TempEnvironment;
-import io.cloudslang.runtime.impl.python.external.model.TempEvalEnvironment;
 import io.cloudslang.runtime.impl.python.external.model.TempExecutionEnvironment;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -43,7 +42,6 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -70,6 +68,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 
 import static io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine.SCHEDULED_EXECUTOR_STRATEGY;
+import static io.cloudslang.runtime.impl.python.external.ResourceScriptResolver.loadEvalScriptAsString;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
@@ -155,48 +154,30 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
 
     private PythonEvaluationResult getPythonTestResult(String expression, String prepareEnvironmentScript,
                                                        Map<String, Serializable> context, long evaluationTimeout) {
-        TempEvalEnvironment tempTestEnvironment = null;
         try {
             String pythonPath = checkPythonPath();
-            tempTestEnvironment = generateTempResourcesForEval();
             String payload = generatePayloadForEval(expression, prepareEnvironmentScript, context);
-            addFilePermissions(tempTestEnvironment.getParentFolder());
-
-            return runPythonTestProcess(pythonPath, payload, tempTestEnvironment, context, evaluationTimeout);
+            return runPythonTestProcess(pythonPath, payload, context, evaluationTimeout);
 
         } catch (IOException e) {
-            String message = "Failed to generate execution resources";
+            String message = "Failed to test Python expression";
             logger.error(message, e);
             throw new RuntimeException(message);
-        } finally {
-            if ((tempTestEnvironment != null) && !deleteQuietly(tempTestEnvironment.getParentFolder())) {
-                logger.warn(String.format("Failed to cleanup python execution resources {%s}",
-                        tempTestEnvironment.getParentFolder()));
-            }
         }
     }
 
     private PythonEvaluationResult getPythonEvaluationResult(String expression, String prepareEnvironmentScript,
                                                              Map<String, Serializable> context) {
-        TempEvalEnvironment tempEvalEnvironment = null;
         try {
             String pythonPath = checkPythonPath();
-            tempEvalEnvironment = generateTempResourcesForEval();
             String payload = generatePayloadForEval(expression, prepareEnvironmentScript, context);
-            addFilePermissions(tempEvalEnvironment.getParentFolder());
-
-            return runPythonEvalProcess(pythonPath, payload, tempEvalEnvironment, context,
+            return runPythonEvalProcess(pythonPath, payload, context,
                     ExternalPythonExecutorScheduledExecutorTimeout.EVALUATION_TIMEOUT);
 
         } catch (IOException e) {
-            String message = "Failed to generate execution resources";
+            String message = "Failed to evaluate Python expression";
             logger.error(message, e);
             throw new RuntimeException(message);
-        } finally {
-            if ((tempEvalEnvironment != null) && !deleteQuietly(tempEvalEnvironment.getParentFolder())) {
-                logger.warn(String.format("Failed to cleanup python execution resources {%s}",
-                        tempEvalEnvironment.getParentFolder()));
-            }
         }
     }
 
@@ -260,14 +241,11 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     }
 
     private PythonEvaluationResult runPythonEvalProcess(String pythonPath, String payload,
-                                                        TempEvalEnvironment executionEnvironment,
                                                         Map<String, Serializable> context, long timeout) {
 
-        ProcessBuilder processBuilder = preparePythonProcess(executionEnvironment, pythonPath);
-
+        ProcessBuilder processBuilder = preparePythonProcessForEval(pythonPath, loadEvalScriptAsString());
         try {
             String returnResult = getResult(payload, processBuilder, timeout);
-
             EvaluationResults scriptResults = objectMapper.readValue(returnResult, EvaluationResults.class);
             String exception = scriptResults.getException();
             if (!StringUtils.isEmpty(exception)) {
@@ -285,11 +263,9 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     }
 
     private PythonEvaluationResult runPythonTestProcess(String pythonPath, String payload,
-                                                        TempEvalEnvironment executionEnvironment,
                                                         Map<String, Serializable> context, long timeout) {
 
-        ProcessBuilder processBuilder = preparePythonProcess(executionEnvironment, pythonPath);
-
+        ProcessBuilder processBuilder = preparePythonProcessForEval(pythonPath, loadEvalScriptAsString());
         try {
             final ExternalPythonTestRunnable testRunnable = new ExternalPythonTestRunnable(processBuilder, payload);
             Thread threadTest = testThreadFactory.newThread(testRunnable);
@@ -411,6 +387,21 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
         return processBuilder;
     }
 
+    private ProcessBuilder preparePythonProcessForEval(String pythonPath, String evalPyCode) {
+        // Must make sure that the eval.py evalPyCode does not contain the " character in its contents
+        // otherwise an error will be thrown when running python -c "import json\nimport sys..."
+        // code from eval.py separated using \n character
+        // Also do not use comments for the same reason in eval.py
+        // Use 'string' for Python strings instead of "string"
+        ProcessBuilder processBuilder = new ProcessBuilder(Arrays.asList(
+                Paths.get(pythonPath, "python").toString(),
+                "-c",
+                evalPyCode)
+        );
+        processBuilder.environment().clear();
+        return processBuilder;
+    }
+
     private TempExecutionEnvironment generateTempResourcesForExec(String script) throws IOException {
         Path execTempDirectory = Files.createTempDirectory("python_execution");
         File tempUserScript = File.createTempFile(PYTHON_SCRIPT_FILENAME, PYTHON_SUFFIX, execTempDirectory.toFile());
@@ -421,14 +412,6 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
 
         String tempUserScriptName = FilenameUtils.getName(tempUserScript.toString());
         return new TempExecutionEnvironment(tempUserScriptName, MAIN_PY, execTempDirectory.toFile());
-    }
-
-    private TempEvalEnvironment generateTempResourcesForEval() throws IOException {
-        Path execTempDirectory = Files.createTempDirectory("python_expression");
-        File evalScriptFile = new File(execTempDirectory.toString(), EVAL_PY);
-        FileUtils.writeByteArrayToFile(evalScriptFile, ResourceScriptResolver.loadEvalScriptAsBytes());
-
-        return new TempEvalEnvironment(EVAL_PY, execTempDirectory.toFile());
     }
 
     private String generatePayloadForEval(String expression, String prepareEnvironmentScript,
