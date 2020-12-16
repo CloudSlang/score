@@ -20,7 +20,10 @@ import io.cloudslang.engine.node.entities.WorkerKeepAliveInfo;
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.orchestrator.services.EngineVersionService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
+import io.cloudslang.worker.management.queue.WorkerQueueDetailsContainer;
+import io.cloudslang.worker.management.queue.WorkerQueueDetailsHolder;
 import io.cloudslang.worker.management.monitor.WorkerStateUpdateService;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -103,6 +106,11 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
     @Autowired
     private WorkerStateUpdateService workerStateUpdateService;
 
+    @Autowired
+    private WorkerQueueDetailsContainer workerQueueDetailsContainer;
+
+    private final AtomicReference<WorkerQueueDetailsHolder> queueDetailsUpdater;
+
     private int keepAliveFailCount = 0;
 
     private ExecutorService executorService;
@@ -118,6 +126,10 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
     private int threadPoolVersion = 0;
 
     private boolean newCancelBehaviour;
+
+    public WorkerManager() {
+        queueDetailsUpdater = new AtomicReference<>(new WorkerQueueDetailsHolder());
+    }
 
     @PostConstruct
     private void init() {
@@ -203,6 +215,9 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
                         logger.warn("Got new WRV from Orchestrator during keepAlive(). Going to reload...");
                         recoveryManager.doRecovery();
                     }
+                    queueDetailsUpdater.set(new WorkerQueueDetailsHolder(workerKeepAliveInfo.getQueueDetails()));
+                    workerQueueDetailsContainer.setLatestQueueDetails(queueDetailsUpdater.get().getLatestVersion());
+
                     keepAliveFailCount = 0;
                 } catch (Exception e) {
                     keepAliveFailCount++;

@@ -30,6 +30,7 @@ import io.cloudslang.worker.management.WorkerRegistration;
 import io.cloudslang.worker.management.monitor.ScheduledWorkerLoadMonitor;
 import io.cloudslang.worker.management.monitor.WorkerMonitorsImpl;
 import io.cloudslang.worker.management.monitor.WorkerStateUpdateServiceImpl;
+import io.cloudslang.worker.management.queue.WorkerQueueDetailsContainer;
 import io.cloudslang.worker.management.services.InBuffer;
 import io.cloudslang.worker.management.services.OutboundBufferImpl;
 import io.cloudslang.worker.management.services.RetryTemplate;
@@ -79,6 +80,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
         put(SessionDataHandlerImpl.class, "sessionDataHandler");
 		put(SynchronizationManagerImpl.class, null);
         put(WorkerConfigurationServiceImpl.class, "workerConfiguration");
+        put(WorkerQueueDetailsContainer.class, "workerQueueDetailsContainer");
 
         //Monitors
         put(WorkerExecutionMonitorServiceImpl.class, "workerExecutionMonitorService");

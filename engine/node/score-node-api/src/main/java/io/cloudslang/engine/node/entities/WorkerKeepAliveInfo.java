@@ -24,10 +24,12 @@ public class WorkerKeepAliveInfo implements Serializable {
 
     private final String workerRecoveryVersion;
     private final boolean active;
+    private final QueueDetails queueDetails;
 
-    public WorkerKeepAliveInfo(String workerRecoveryVersion, boolean active) {
+    public WorkerKeepAliveInfo(String workerRecoveryVersion, boolean active, QueueDetails queueDetails) {
         this.workerRecoveryVersion = workerRecoveryVersion;
         this.active = active;
+        this.queueDetails = queueDetails;
     }
 
     public String getWorkerRecoveryVersion() {
@@ -38,4 +40,7 @@ public class WorkerKeepAliveInfo implements Serializable {
         return active;
     }
 
+    public QueueDetails getQueueDetails() {
+        return queueDetails;
+    }
 }
