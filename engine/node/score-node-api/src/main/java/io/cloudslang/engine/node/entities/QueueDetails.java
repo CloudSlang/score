@@ -15,30 +15,52 @@
  */
 package io.cloudslang.engine.node.entities;
 
-import io.cloudslang.engine.data.AbstractIdentifiable;
-import java.util.Objects;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import java.io.Serializable;
 
-@Entity
-@Table(name = "OO_QUEUE_DETAILS")
-public class QueueDetails extends AbstractIdentifiable {
+public class QueueDetails implements Serializable {
 
-	@Column(name = "QUEUE_HOST", nullable = false)
+	private static final long serialVersionUID = 2376774713855414142L;
+
 	private String queueHost;
-	@Column(name = "QUEUE_PORT", nullable = false)
 	private int queuePort;
-	@Column(name = "QUEUE_USERNAME", nullable = false)
 	private String queueUsername;
-	@Column(name = "QUEUE_PASSWORD", nullable = false)
-	private String queuePassword;
-	@Column(name = "VHOST", nullable = false)
+	private char[] queuePassword;
 	private String vhost;
-	@Column(name = "VERSION", nullable = false)
-	private int queueVersion;
-	@Column(name = "ID", nullable = false, unique = true)
-	private Long id;
+	private int version;
+	private String exchangeName;
+	private String exchangeType;
+	private String robotResultsQueue;
+	private String robotResultsKey;
+	private String robotGroupQueuePrefix;
+	private boolean useTls;
+	private String serverTruststorePath;
+	private char[] serverTruststorePass;
+	private String tlsVersion;
+	private String truststoreType;
+	private String startupQueue;
+	private String startupKey;
+	private int startupRetries;
+	private long startupRetryTimeout;
+	private String heartbeatsQueue;
+	private String heartbeatsKey;
+	private int heartbeatsRetries;
+	private long heartbeatsRetryTimeout;
+	private String heartbeatsAckQueuePrefix;
+	private String shutdownQueue;
+	private String shutdownKey;
+	private int shutdownRetries;
+	private long shutdownRetryTimeout;
+	private String stepStateQueue;
+	private String stepStateKey;
+	private long stepStateRetryInterval;
+	private String runQueue;
+	private String runKey;
+	private String insightsFlowQueue;
+	private String insightsFlowKey;
+	private String insightsRunQueue;
+	private String insightsRunKey;
+	private String insightsEntitlementsQueue;
+	private String insightsEntitlementsKey;
 
 	public String getQueueHost() {
 		return queueHost;
@@ -60,15 +82,15 @@ public class QueueDetails extends AbstractIdentifiable {
 		return queueUsername;
 	}
 
-	public void setQueueUsername(String queueUser) {
-		this.queueUsername = queueUser;
+	public void setQueueUsername(String queueUsername) {
+		this.queueUsername = queueUsername;
 	}
 
-	public String getQueuePassword() {
+	public char[] getQueuePassword() {
 		return queuePassword;
 	}
 
-	public void setQueuePassword(String queuePassword) {
+	public void setQueuePassword(char[] queuePassword) {
 		this.queuePassword = queuePassword;
 	}
 
@@ -80,39 +102,283 @@ public class QueueDetails extends AbstractIdentifiable {
 		this.vhost = vhost;
 	}
 
-	public int getQueueVersion() {
-		return queueVersion;
+	public int getVersion() {
+		return version;
 	}
 
-	public void setQueueVersion(int queueVersion) {
-		this.queueVersion = queueVersion;
+	public void setVersion(int version) {
+		this.version = version;
 	}
 
-	public Long getId() {
-		return id;
+	public String getExchangeName() {
+		return exchangeName;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public void setExchangeName(String exchangeName) {
+		this.exchangeName = exchangeName;
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		QueueDetails that = (QueueDetails) o;
-		return queuePort == that.queuePort && Objects.equals(queueHost, that.queueHost) && Objects
-			.equals(queueUsername, that.queueUsername) && Objects.equals(queuePassword, that.queuePassword)
-			&& Objects.equals(vhost, that.vhost);
+	public String getExchangeType() {
+		return exchangeType;
 	}
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(queueHost, queuePort, queueUsername, queuePassword, vhost);
+	public void setExchangeType(String exchangeType) {
+		this.exchangeType = exchangeType;
 	}
 
+	public String getRobotResultsQueue() {
+		return robotResultsQueue;
+	}
+
+	public void setRobotResultsQueue(String robotResultsQueue) {
+		this.robotResultsQueue = robotResultsQueue;
+	}
+
+	public String getRobotResultsKey() {
+		return robotResultsKey;
+	}
+
+	public void setRobotResultsKey(String robotResultsKey) {
+		this.robotResultsKey = robotResultsKey;
+	}
+
+	public String getRobotGroupQueuePrefix() {
+		return robotGroupQueuePrefix;
+	}
+
+	public void setRobotGroupQueuePrefix(String robotGroupQueuePrefix) {
+		this.robotGroupQueuePrefix = robotGroupQueuePrefix;
+	}
+
+	public boolean isUseTls() {
+		return useTls;
+	}
+
+	public void setUseTls(boolean useTls) {
+		this.useTls = useTls;
+	}
+
+	public String getServerTruststorePath() {
+		return serverTruststorePath;
+	}
+
+	public void setServerTruststorePath(String serverTruststorePath) {
+		this.serverTruststorePath = serverTruststorePath;
+	}
+
+	public char[] getServerTruststorePass() {
+		return serverTruststorePass;
+	}
+
+	public void setServerTruststorePass(char[] serverTruststorePass) {
+		this.serverTruststorePass = serverTruststorePass;
+	}
+
+	public String getTlsVersion() {
+		return tlsVersion;
+	}
+
+	public void setTlsVersion(String tlsVersion) {
+		this.tlsVersion = tlsVersion;
+	}
+
+	public String getTruststoreType() {
+		return truststoreType;
+	}
+
+	public void setTruststoreType(String truststoreType) {
+		this.truststoreType = truststoreType;
+	}
+
+	public String getStartupQueue() {
+		return startupQueue;
+	}
+
+	public void setStartupQueue(String startupQueue) {
+		this.startupQueue = startupQueue;
+	}
+
+	public String getStartupKey() {
+		return startupKey;
+	}
+
+	public void setStartupKey(String startupKey) {
+		this.startupKey = startupKey;
+	}
+
+	public int getStartupRetries() {
+		return startupRetries;
+	}
+
+	public void setStartupRetries(int startupRetries) {
+		this.startupRetries = startupRetries;
+	}
+
+	public long getStartupRetryTimeout() {
+		return startupRetryTimeout;
+	}
+
+	public void setStartupRetryTimeout(long startupRetryTimeout) {
+		this.startupRetryTimeout = startupRetryTimeout;
+	}
+
+	public String getHeartbeatsQueue() {
+		return heartbeatsQueue;
+	}
+
+	public void setHeartbeatsQueue(String heartbeatsQueue) {
+		this.heartbeatsQueue = heartbeatsQueue;
+	}
+
+	public String getHeartbeatsKey() {
+		return heartbeatsKey;
+	}
+
+	public void setHeartbeatsKey(String heartbeatsKey) {
+		this.heartbeatsKey = heartbeatsKey;
+	}
+
+	public int getHeartbeatsRetries() {
+		return heartbeatsRetries;
+	}
+
+	public void setHeartbeatsRetries(int heartbeatsRetries) {
+		this.heartbeatsRetries = heartbeatsRetries;
+	}
+
+	public long getHeartbeatsRetryTimeout() {
+		return heartbeatsRetryTimeout;
+	}
+
+	public void setHeartbeatsRetryTimeout(long heartbeatsRetryTimeout) {
+		this.heartbeatsRetryTimeout = heartbeatsRetryTimeout;
+	}
+
+	public String getHeartbeatsAckQueuePrefix() {
+		return heartbeatsAckQueuePrefix;
+	}
+
+	public void setHeartbeatsAckQueuePrefix(String heartbeatsAckQueuePrefix) {
+		this.heartbeatsAckQueuePrefix = heartbeatsAckQueuePrefix;
+	}
+
+	public String getShutdownQueue() {
+		return shutdownQueue;
+	}
+
+	public void setShutdownQueue(String shutdownQueue) {
+		this.shutdownQueue = shutdownQueue;
+	}
+
+	public String getShutdownKey() {
+		return shutdownKey;
+	}
+
+	public void setShutdownKey(String shutdownKey) {
+		this.shutdownKey = shutdownKey;
+	}
+
+	public int getShutdownRetries() {
+		return shutdownRetries;
+	}
+
+	public void setShutdownRetries(int shutdownRetries) {
+		this.shutdownRetries = shutdownRetries;
+	}
+
+	public long getShutdownRetryTimeout() {
+		return shutdownRetryTimeout;
+	}
+
+	public void setShutdownRetryTimeout(long shutdownRetryTimeout) {
+		this.shutdownRetryTimeout = shutdownRetryTimeout;
+	}
+
+	public String getStepStateQueue() {
+		return stepStateQueue;
+	}
+
+	public void setStepStateQueue(String stepStateQueue) {
+		this.stepStateQueue = stepStateQueue;
+	}
+
+	public String getStepStateKey() {
+		return stepStateKey;
+	}
+
+	public void setStepStateKey(String stepStateKey) {
+		this.stepStateKey = stepStateKey;
+	}
+
+	public long getStepStateRetryInterval() {
+		return stepStateRetryInterval;
+	}
+
+	public void setStepStateRetryInterval(long stepStateRetryInterval) {
+		this.stepStateRetryInterval = stepStateRetryInterval;
+	}
+
+	public String getRunQueue() {
+		return runQueue;
+	}
+
+	public void setRunQueue(String runQueue) {
+		this.runQueue = runQueue;
+	}
+
+	public String getRunKey() {
+		return runKey;
+	}
+
+	public void setRunKey(String runKey) {
+		this.runKey = runKey;
+	}
+
+	public String getInsightsFlowQueue() {
+		return insightsFlowQueue;
+	}
+
+	public void setInsightsFlowQueue(String insightsFlowQueue) {
+		this.insightsFlowQueue = insightsFlowQueue;
+	}
+
+	public String getInsightsFlowKey() {
+		return insightsFlowKey;
+	}
+
+	public void setInsightsFlowKey(String insightsFlowKey) {
+		this.insightsFlowKey = insightsFlowKey;
+	}
+
+	public String getInsightsRunQueue() {
+		return insightsRunQueue;
+	}
+
+	public void setInsightsRunQueue(String insightsRunQueue) {
+		this.insightsRunQueue = insightsRunQueue;
+	}
+
+	public String getInsightsRunKey() {
+		return insightsRunKey;
+	}
+
+	public void setInsightsRunKey(String insightsRunKey) {
+		this.insightsRunKey = insightsRunKey;
+	}
+
+	public String getInsightsEntitlementsQueue() {
+		return insightsEntitlementsQueue;
+	}
+
+	public void setInsightsEntitlementsQueue(String insightsEntitlementsQueue) {
+		this.insightsEntitlementsQueue = insightsEntitlementsQueue;
+	}
+
+	public String getInsightsEntitlementsKey() {
+		return insightsEntitlementsKey;
+	}
+
+	public void setInsightsEntitlementsKey(String insightsEntitlementsKey) {
+		this.insightsEntitlementsKey = insightsEntitlementsKey;
+	}
 }

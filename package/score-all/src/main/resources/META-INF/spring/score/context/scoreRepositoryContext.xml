@@ -17,8 +17,7 @@
 		<repository:include-filter type="regex" expression="io.cloudslang.orchestrator.repositories.RunningExecutionPlanRepository"/>
 		<repository:include-filter type="regex" expression="io.cloudslang.orchestrator.repositories.FinishedBranchRepository"/>
 		<repository:include-filter type="regex" expression="io.cloudslang.orchestrator.repositories.ExecutionStateRepository"/>
-		<repository:include-filter type="regex" expression="io.cloudslang.engine.node.repositories.WorkerLockRepository"/>
-		<repository:include-filter type="regex" expression="io.cloudslang.engine.node.repositories.QueueConfigRepository"/>
+        <repository:include-filter type="regex" expression="io.cloudslang.engine.node.repositories.WorkerLockRepository"/>
 	</jpa:repositories>
 
 </beans>

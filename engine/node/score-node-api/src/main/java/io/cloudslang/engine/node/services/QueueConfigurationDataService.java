@@ -13,27 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.worker.management.queue;
+
+package io.cloudslang.engine.node.services;
 
 import io.cloudslang.engine.node.entities.QueueDetails;
-import java.io.Serializable;
-import org.springframework.stereotype.Component;
 
-@Component
-public class WorkerQueueDetailsContainer implements Serializable {
-
-	private QueueDetails queueDetails;
-
-	public WorkerQueueDetailsContainer() {
-		this.queueDetails = null;
-	}
-
-	public QueueDetails getQueueConfiguration() {
-		return queueDetails;
-	}
-
-	public synchronized void setQueueConfiguration(QueueDetails queueDetails) {
-		this.queueDetails = queueDetails;
-	}
-
+public interface QueueConfigurationDataService {
+	QueueDetails getQueueConfigurations();
 }

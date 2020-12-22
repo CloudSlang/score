@@ -16,6 +16,7 @@
 
 package io.cloudslang.schema;
 
+import io.cloudslang.engine.node.services.StubQueueConfigurationDataServiceImpl;
 import io.cloudslang.runtime.impl.sequential.DefaultSequentialExecutionServiceImpl;
 import io.cloudslang.score.events.EventBusImpl;
 import io.cloudslang.score.events.FastEventBusImpl;
@@ -147,6 +148,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		registerRobotAvailabilityService(element, parserContext);
 		registerExecutionPreconditionService(element, parserContext);
 		registerExecutionPostconditionService(element, parserContext);
+		registerQueueConfigurationDataService(element, parserContext);
 	}
 
 	private void registerSequentialExecution(Element element, ParserContext parserContext) {
@@ -209,6 +211,16 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		}
 		new XmlBeanDefinitionReader(parserContext.getRegistry())
 				.loadBeanDefinitions("META-INF/spring/score/context/scoreWorkerSchedulerContext.xml");
+	}
+
+	private void registerQueueConfigurationDataService(Element element, ParserContext parserContext) {
+		String registerQueueConfigurationDataService = element.getAttribute("registerQueueConfigurationDataService");
+		if (!FALSE.toString().equals(registerQueueConfigurationDataService)) {
+			new BeanRegistrator(parserContext)
+				.NAME("queueConfigurationDataService")
+				.CLASS(StubQueueConfigurationDataServiceImpl.class)
+				.register();
+		}
 	}
 
 	@Override

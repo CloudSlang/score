@@ -21,7 +21,6 @@ import com.google.common.collect.Multimap;
 import io.cloudslang.engine.node.entities.QueueDetails;
 import io.cloudslang.engine.node.entities.WorkerKeepAliveInfo;
 import io.cloudslang.engine.node.entities.WorkerNode;
-import io.cloudslang.engine.node.repositories.QueueConfigRepository;
 import io.cloudslang.engine.node.repositories.WorkerNodeRepository;
 import io.cloudslang.engine.versioning.services.VersionService;
 import io.cloudslang.score.api.nodes.WorkerStatus;
@@ -54,8 +53,6 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
     @Autowired
     private WorkerNodeRepository workerNodeRepository;
 
-    @Autowired
-    private QueueConfigRepository queueConfigRepository;
 
     @Autowired
     private WorkerLockService workerLockService;
@@ -65,6 +62,9 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 
     @Autowired(required = false)
     private List<LoginListener> loginListeners;
+
+    @Autowired
+    private QueueConfigurationDataService queueConfigurationDataService;
 
     @Override
     @Transactional
@@ -95,8 +95,8 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
         logger.debug(
                 "Got keepAlive for Worker with uuid=" + uuid + " and update its ackVersion to " + version + " isActive"
                         + active);
-        QueueDetails queueDetails = queueConfigRepository.findLatestConfiguration();
-        return new WorkerKeepAliveInfo(worker.getWorkerRecoveryVersion(), active, queueDetails);
+        QueueDetails queueDetails = queueConfigurationDataService.getQueueConfigurations();
+		return new WorkerKeepAliveInfo(worker.getWorkerRecoveryVersion(), active, queueDetails);
     }
 
     @Override

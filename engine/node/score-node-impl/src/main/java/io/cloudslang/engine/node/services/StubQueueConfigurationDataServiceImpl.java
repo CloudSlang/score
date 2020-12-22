@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.engine.node.repositories;
+package io.cloudslang.engine.node.services;
 
 import io.cloudslang.engine.node.entities.QueueDetails;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
-public interface QueueConfigRepository extends JpaRepository<QueueDetails, Long> {
+public class StubQueueConfigurationDataServiceImpl implements QueueConfigurationDataService {
 
-	@Query("select q from QueueDetails q")
-	QueueDetails findLatestConfiguration();
+	@Override
+	public QueueDetails getQueueConfigurations() {
+		return null;
+	}
 }
