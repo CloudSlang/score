@@ -20,4 +20,10 @@ import io.cloudslang.engine.node.entities.QueueDetails;
 
 public interface QueueConfigurationDataService {
 	QueueDetails getQueueConfigurations();
+
+	boolean testQueueConnection(QueueDetails queueDetailsVO);
+
+	QueueDetails retrieveQueueConfiguration();
+
+	void configureQueueParameters(QueueDetails queueDetailsVO);
 }
