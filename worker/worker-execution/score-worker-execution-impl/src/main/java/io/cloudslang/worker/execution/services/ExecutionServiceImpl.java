@@ -17,6 +17,7 @@
 package io.cloudslang.worker.execution.services;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.cloudslang.orchestrator.services.AplsLicensingService;
 import io.cloudslang.orchestrator.services.PauseResumeService;
 import io.cloudslang.score.api.ControlActionMetadata;
 import io.cloudslang.score.api.ExecutionPlan;
@@ -105,6 +106,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     @Autowired
     private WorkerConfigurationService workerConfigurationService;
+
+    @Autowired
+    private AplsLicensingService licensingService;
 
     @Autowired
     private EventBus eventBus;
@@ -360,6 +364,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             to.getSystemContext().setBranchId(branchId);
             newExecutions.add(to);
             dispatchBranchStartEvent(executionId, splitId, branchId, currStep);
+            checkoutBeginLane(executionId, to.getSystemContext(), count);
         }
         return newExecutions;
     }
@@ -382,9 +387,19 @@ public final class ExecutionServiceImpl implements ExecutionService {
             String branchId = splitUuid + ":" + branchIndexInSplitStep;
             to.getSystemContext().setBranchId(branchId);
             dispatchBranchStartEvent(executionId, splitUuid, branchId, currStep);
+            checkoutBeginLane(executionId, to.getSystemContext(), count);
             newExecutions.add(to);
         }
         return newExecutions;
+    }
+
+    private void checkoutBeginLane(Long executionId, SystemContext systemContext, int branchNumber) {
+        Integer parallelismLevel = (Integer) systemContext.getLevelParallelism();
+        if (parallelismLevel != null) {
+            if (parallelismLevel == 1 || (parallelismLevel > 1 && branchNumber > 1)) {
+                licensingService.checkoutBeginLane(executionId.toString());
+            }
+        }
     }
 
     @Override

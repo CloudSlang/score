@@ -35,7 +35,6 @@ import io.cloudslang.orchestrator.repositories.FinishedBranchRepository;
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
 import org.apache.commons.lang.StringUtils;
 import io.cloudslang.score.api.EndBranchDataContainer;
-import io.cloudslang.score.facade.entities.Execution;
 import org.apache.commons.lang.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -63,6 +62,7 @@ import static io.cloudslang.score.events.EventConstants.EXECUTION_ID;
 import static io.cloudslang.score.events.EventConstants.SPLIT_ID;
 import static io.cloudslang.score.facade.TempConstants.MI_REMAINING_BRANCHES_CONTEXT_KEY;
 import static io.cloudslang.score.facade.execution.ExecutionStatus.CANCELED;
+import static io.cloudslang.score.lang.ExecutionRuntimeServices.SC_NESTED_FOR_PARALLELISM_LEVEL;
 import static java.lang.Long.parseLong;
 import static java.lang.String.valueOf;
 import static java.util.EnumSet.of;
@@ -87,6 +87,9 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
     @Autowired
     private ExecutionQueueRepository executionQueueRepository;
+
+    @Autowired
+    private AplsLicensingService licensingService;
 
     @Autowired
     @Qualifier("consumptionFastEventBus")
@@ -219,6 +222,15 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         // add each finished branch to it's parent
         for (FinishedBranch finishedBranch : finishedBranches) {
             dispatchBranchFinishedEvent(finishedBranch.getExecutionId(), finishedBranch.getSplitId(), finishedBranch.getBranchId());
+
+            Integer parallelismLevel = (Integer) finishedBranch.getBranchContexts().getSystemContext().get(SC_NESTED_FOR_PARALLELISM_LEVEL);
+            if (parallelismLevel != null) {
+                int branchNumber = Integer.parseInt(finishedBranch.getBranchId().split(":")[1]);
+                if (parallelismLevel == 1 || (parallelismLevel > 1 && branchNumber > 1)) {
+                    licensingService.checkinEndLane(finishedBranch.getExecutionId());
+                }
+            }
+
             SuspendedExecution suspendedExecution = suspendedMap.get(finishedBranch.getSplitId());
             if (suspendedExecution != null) {
                 finishedBranch.connectToSuspendedExecution(suspendedExecution);
