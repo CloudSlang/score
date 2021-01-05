@@ -205,13 +205,12 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
     public void workerKeepAlive() {
         if (!recoveryManager.isInRecovery()) {
             if (endOfInit) {
-                WorkerQueueDetailsHolder queueDetailsHolder = null;
                 try {
                     WorkerKeepAliveInfo workerKeepAliveInfo = workerNodeService.newKeepAlive(workerUuid);
                     String newWrv = workerKeepAliveInfo.getWorkerRecoveryVersion();
                     workerStateUpdateService.setEnableState(workerKeepAliveInfo.isActive());
                     String currentWrv = recoveryManager.getWRV();
-                    queueDetailsHolder = new WorkerQueueDetailsHolder(workerKeepAliveInfo.getQueueDetails());
+                    queueDetailsUpdater.set(new WorkerQueueDetailsHolder(workerKeepAliveInfo.getQueueDetails()));
                     //do not update it!!! if it is different than we have - restart worker (clean state)
                     if (!currentWrv.equals(newWrv)) {
                         logger.warn("Got new WRV from Orchestrator during keepAlive(). Going to reload...");
@@ -226,11 +225,9 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
                                 + " times. Invoking worker internal recovery...");
                         recoveryManager.doRecovery();
                     }
+                    queueDetailsUpdater.set(new WorkerQueueDetailsHolder());
                 } finally {
-                    if (queueDetailsHolder != null) {
-                        queueDetailsUpdater.set(queueDetailsHolder);
-                        workerQueueDetailsContainer.setQueueConfiguration(queueDetailsHolder.getLatestQueueDetails());
-                    }
+                    workerQueueDetailsContainer = new WorkerQueueDetailsContainer(queueDetailsUpdater.get().getLatestQueueDetails());
                 }
             }
         } else {
