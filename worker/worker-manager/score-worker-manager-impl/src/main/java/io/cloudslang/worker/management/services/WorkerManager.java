@@ -229,7 +229,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
                 } finally {
                     if (queueDetailsHolder != null) {
                         queueDetailsUpdater.set(queueDetailsHolder);
-                        workerQueueDetailsContainer.setQueueConfiguration(queueDetailsUpdater.get().setLatestQueueDetails());
+                        workerQueueDetailsContainer.setQueueConfiguration(queueDetailsHolder.getLatestQueueDetails());
                     }
                 }
             }

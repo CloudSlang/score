@@ -29,7 +29,7 @@ public class WorkerQueueDetailsHolder {
 		this.queueDetails = queueDetails;
 	}
 
-	public QueueDetails setLatestQueueDetails() {
+	public QueueDetails getLatestQueueDetails() {
 		return queueDetails;
 	}
 

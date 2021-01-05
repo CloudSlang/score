@@ -53,7 +53,6 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
     @Autowired
     private WorkerNodeRepository workerNodeRepository;
 
-
     @Autowired
     private WorkerLockService workerLockService;
 
