@@ -24,8 +24,8 @@ public class WorkerQueueDetailsContainer implements Serializable {
 
 	private QueueDetails queueDetails;
 
-	public WorkerQueueDetailsContainer(QueueDetails queueDetails) {
-		this.queueDetails = queueDetails;
+	public WorkerQueueDetailsContainer() {
+		this.queueDetails = null;
 	}
 
 	public QueueDetails getQueueConfiguration() {
