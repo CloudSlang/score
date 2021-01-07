@@ -22,9 +22,9 @@ public class WorkerKeepAliveInfo implements Serializable {
 
     private static final long serialVersionUID = -7807186903493660070L;
 
-    private final String workerRecoveryVersion;
-    private final boolean active;
-    private final QueueDetails queueDetails;
+    private String workerRecoveryVersion;
+    private boolean active;
+    private QueueDetails queueDetails;
 
     public WorkerKeepAliveInfo(String workerRecoveryVersion, boolean active, QueueDetails queueDetails) {
         this.workerRecoveryVersion = workerRecoveryVersion;

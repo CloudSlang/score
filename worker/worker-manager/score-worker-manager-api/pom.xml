@@ -32,10 +32,5 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>score-orchestrator-api</artifactId>
 		</dependency>
-
-    <dependency>
-      <groupId>io.cloudslang</groupId>
-      <artifactId>score-node-api</artifactId>
-    </dependency>
   </dependencies>
 </project>

@@ -23,19 +23,4 @@ public class StubQueueConfigurationDataServiceImpl implements QueueConfiguration
 	public QueueDetails getQueueConfigurations() {
 		return null;
 	}
-
-	@Override
-	public boolean testQueueConnection(QueueDetails queueDetailsVO) {
-		return false;
-	}
-
-	@Override
-	public QueueDetails retrieveQueueConfiguration() {
-		return null;
-	}
-
-	@Override
-	public void configureQueueParameters(QueueDetails queueDetailsVO) {
-
-	}
 }

@@ -22,7 +22,7 @@ public class WorkerQueueDetailsHolder {
 	private final QueueDetails queueDetails;
 
 	public WorkerQueueDetailsHolder() {
-		this.queueDetails = new QueueDetails();
+		this.queueDetails = null;
 	}
 
 	public WorkerQueueDetailsHolder(QueueDetails queueDetails) {

@@ -15,25 +15,24 @@
  */
 package io.cloudslang.worker.management.queue;
 
-import io.cloudslang.engine.node.entities.QueueDetails;
-import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicReference;
 import org.springframework.stereotype.Component;
 
 @Component
-public class WorkerQueueDetailsContainer implements Serializable {
+public class WorkerQueueDetailsContainer {
 
-	private QueueDetails queueDetails;
+	private final AtomicReference<WorkerQueueDetailsHolder> queueDetailsUpdated;
 
 	public WorkerQueueDetailsContainer() {
-		this.queueDetails = null;
+		this.queueDetailsUpdated = new AtomicReference<>(new WorkerQueueDetailsHolder());
 	}
 
-	public QueueDetails getQueueConfiguration() {
-		return queueDetails;
+	public WorkerQueueDetailsHolder getQueueConfiguration() {
+		return queueDetailsUpdated.get();
 	}
 
-	public synchronized void setQueueConfiguration(QueueDetails queueDetails) {
-		this.queueDetails = queueDetails;
+	public void setQueueConfiguration(WorkerQueueDetailsHolder queueDetails) {
+		this.queueDetailsUpdated.set(queueDetails);
 	}
 
 }
