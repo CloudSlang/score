@@ -20,7 +20,6 @@ import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.orchestrator.entities.Message;
 import io.cloudslang.orchestrator.services.OrchestratorDispatcherService;
 import io.cloudslang.worker.management.ExecutionsActivityListener;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +27,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -37,6 +35,8 @@ import java.util.UUID;
 
 import static ch.lambdaj.Lambda.extract;
 import static ch.lambdaj.Lambda.on;
+import static java.lang.Integer.getInteger;
+import static java.lang.Long.getLong;
 import static java.util.Collections.addAll;
 
 public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListener {
@@ -68,22 +68,24 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 
     private int currentWeight;
     private int bufferMapCapacity;
-    private HashMap<String, LinkedList<Message>> buffer;
+    private HashMap<String, ArrayList<Message>> buffer;
 
     private final int maxBufferWeight;
     private final int maxBulkWeight;
     private final int retryAmount;
     private final long retryDelay;
+    private final int arrayAllocationCapacity;
 
     public OutboundBufferImpl() {
         this.currentWeight = 0;
         this.bufferMapCapacity = getMapCapacity(20);
         this.buffer = getInitialBuffer();
 
-        this.maxBufferWeight = Integer.getInteger("out.buffer.max.buffer.weight", defaultBufferCapacity());
-        this.maxBulkWeight = Integer.getInteger("out.buffer.max.bulk.weight", 1500);
-        this.retryAmount = Integer.getInteger("out.buffer.retry.number", 5);
-        this.retryDelay = Long.getLong("out.buffer.retry.delay", 5000);
+        this.maxBufferWeight = getInteger("out.buffer.max.buffer.weight", defaultBufferCapacity());
+        this.maxBulkWeight = getInteger("out.buffer.max.bulk.weight", 1500);
+        this.retryAmount = getInteger("out.buffer.retry.number", 5);
+        this.retryDelay = getLong("out.buffer.retry.delay", 5000);
+        this.arrayAllocationCapacity = getInteger("out.buffer.arrayAllocationCapacity", 100);
 
         logger.info("maxBufferWeight = " + maxBufferWeight);
     }
@@ -91,7 +93,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
     @PostConstruct
     public void initialize() {
         // Compute the buffer map capacity based on the number of threads as default, such as to prevent rehashing
-        this.bufferMapCapacity = Integer.getInteger("out.buffer.entries", getMapCapacity(numberOfThreads));
+        this.bufferMapCapacity = getInteger("out.buffer.entries", getMapCapacity(numberOfThreads));
         this.buffer = getInitialBuffer();
     }
 
@@ -103,7 +105,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         }
     }
 
-    private HashMap<String, LinkedList<Message>> getInitialBuffer() {
+    private HashMap<String, ArrayList<Message>> getInitialBuffer() {
         return new HashMap<>(bufferMapCapacity);
     }
 
@@ -122,11 +124,11 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
             }
 
             // Put message into the buffer, intentionally not using merge function because of extra if
-            LinkedList<Message> oldValue = buffer.get(executionId);
-            if (oldValue == null) {
-                buffer.put(executionId, getMutableListWrapper(messageToAdd));
-            } else {
+            ArrayList<Message> oldValue = buffer.get(executionId);
+            if (oldValue != null) {
                 oldValue.add(messageToAdd);
+            } else {
+                buffer.put(executionId, getMutableListOf(messageToAdd));
             }
             currentWeight += messageToAddWeight;
         } catch (InterruptedException ex) {
@@ -137,10 +139,10 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         }
     }
 
-    private LinkedList<Message> getMutableListWrapper(Message messageToAdd) {
-        LinkedList<Message> list = new LinkedList<>();
-        list.add(messageToAdd);
-        return list;
+    private ArrayList<Message> getMutableListOf(Message messageToAdd) {
+        ArrayList<Message> newValue = new ArrayList<>(arrayAllocationCapacity);
+        newValue.add(messageToAdd);
+        return newValue;
     }
 
     private Message validateAndGetMessageToPut(final Message[] messages) {
@@ -159,7 +161,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 
     @Override
     public void drain() {
-        HashMap<String, LinkedList<Message>> bufferToDrain;
+        HashMap<String, ArrayList<Message>> bufferToDrain;
         try {
             syncManager.startDrain();
             while (buffer.isEmpty()) {
@@ -182,11 +184,11 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         drainInternal(bufferToDrain);
     }
 
-    private void drainInternal(HashMap<String, LinkedList<Message>> bufferToDrain) {
+    private void drainInternal(HashMap<String, ArrayList<Message>> bufferToDrain) {
         int bulkWeight = 0;
         List<Message> bulk = new LinkedList<>();
         try {
-            for (LinkedList<Message> value : bufferToDrain.values()) {
+            for (ArrayList<Message> value : bufferToDrain.values()) {
                 List<Message> convertedList = expandCompoundMessages(value);
                 List<Message> optimizedList = convertedList.get(0).shrink(convertedList);
                 int optimizedWeight = optimizedList.stream().mapToInt(Message::getWeight).sum();
@@ -210,7 +212,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         }
     }
 
-    private List<Message> expandCompoundMessages(LinkedList<Message> value) {
+    private List<Message> expandCompoundMessages(ArrayList<Message> value) {
         int compoundMessages = 0, compoundMessageSize = 0;
         for (Message crt : value) {
             if (crt instanceof CompoundMessage) {
@@ -234,7 +236,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
     }
 
     private void drainBulk(final List<Message> bulkToDrain) {
-        //Bulk number is the same for all retries! This is done to prevent duplications when we insert with retries
+        // Bulk number is the same for all retries! This is done to prevent duplications when we insert with retries
         final String bulkNumber = UUID.randomUUID().toString();
 
         retryTemplate.retry(retryAmount, retryDelay, new RetryTemplate.RetryCallback() {
@@ -323,16 +325,16 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
 
 
     private int defaultBufferCapacity() {
-        Long maxMemory = Runtime.getRuntime().maxMemory();
+        long maxMemory = Runtime.getRuntime().maxMemory();
         if (maxMemory < 0.5 * GB) {
-            return 10000;
+            return 10_000;
         }
-        if (maxMemory < 1 * GB) {
-            return 15000;
+        if (maxMemory < GB) {
+            return 15_000;
         }
         if (maxMemory < 2 * GB) {
-            return 30000;
+            return 30_000;
         }
-        return 60000;
+        return 60_000;
     }
 }
