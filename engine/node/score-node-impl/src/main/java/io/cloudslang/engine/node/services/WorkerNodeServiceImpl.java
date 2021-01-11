@@ -18,6 +18,7 @@ package io.cloudslang.engine.node.services;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import io.cloudslang.engine.node.entities.QueueDetails;
 import io.cloudslang.engine.node.entities.WorkerKeepAliveInfo;
 import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.node.repositories.WorkerNodeRepository;
@@ -61,6 +62,9 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
     @Autowired(required = false)
     private List<LoginListener> loginListeners;
 
+    @Autowired
+    private QueueConfigurationDataService queueConfigurationDataService;
+
     @Override
     @Transactional
     public String keepAlive(String uuid) {
@@ -90,7 +94,8 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
         logger.debug(
                 "Got keepAlive for Worker with uuid=" + uuid + " and update its ackVersion to " + version + " isActive"
                         + active);
-        return new WorkerKeepAliveInfo(worker.getWorkerRecoveryVersion(), active);
+        QueueDetails queueDetails = queueConfigurationDataService.getQueueConfigurations();
+		return new WorkerKeepAliveInfo(worker.getWorkerRecoveryVersion(), active, queueDetails);
     }
 
     @Override

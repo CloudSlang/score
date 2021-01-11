@@ -445,5 +445,11 @@ public class WorkerNodeServiceTest {
         WorkerLockService workerLockService() {
             return mock(WorkerLockService.class);
         }
+
+        @Bean
+        QueueConfigurationDataService queueConfigurationDataService() {
+            return mock(QueueConfigurationDataService.class);
+        }
+
     }
 }
