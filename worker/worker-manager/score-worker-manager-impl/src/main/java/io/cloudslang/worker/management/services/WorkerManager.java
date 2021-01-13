@@ -109,8 +109,6 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
     @Autowired
     private WorkerQueueDetailsContainer workerQueueDetailsContainer;
 
-    private final AtomicReference<WorkerQueueDetailsHolder> queueDetailsUpdater;
-
     private int keepAliveFailCount = 0;
 
     private ExecutorService executorService;
@@ -126,10 +124,6 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
     private int threadPoolVersion = 0;
 
     private boolean newCancelBehaviour;
-
-    public WorkerManager() {
-        this.queueDetailsUpdater = new AtomicReference<>(new WorkerQueueDetailsHolder());
-    }
 
     @PostConstruct
     private void init() {
