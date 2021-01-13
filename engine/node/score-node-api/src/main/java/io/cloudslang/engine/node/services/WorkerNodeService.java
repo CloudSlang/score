@@ -291,5 +291,7 @@ public interface WorkerNodeService {
      */
     void updateMigratedPassword(String workerUuid, String encodedPassword);
 
-    void updateQueueSync(String workerUuid, boolean isQueueSync);
+    void updateQueueSyncByUuid(String workerUuid, boolean isQueueSync);
+
+    void updateQueueSync(boolean isQueueSync);
 }
