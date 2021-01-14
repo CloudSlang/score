@@ -26,26 +26,29 @@ public class QueueDetails implements Serializable {
 	private String username;
 	private char[] password;
 	private String virtualHost;
+	private boolean useTls;
 	private int version;
 	private QueueAdditionalDetails queueAdditionalDetails;
 
 	public QueueDetails() {
 	}
 
-	public QueueDetails(String host, int port, String username, char[] password, String virtualHost) {
+	public QueueDetails(String host, int port, String username, char[] password, String virtualHost, boolean useTls) {
 		this.host = host;
 		this.port = port;
 		this.username = username;
 		this.password = password;
 		this.virtualHost = virtualHost;
+		this.useTls = useTls;
 	}
 
-	public QueueDetails(String host, int port, String username, char[] password, String virtualHost, int version) {
+	public QueueDetails(String host, int port, String username, char[] password, String virtualHost, boolean useTls, int version) {
 		this.host = host;
 		this.port = port;
 		this.username = username;
 		this.password = password;
 		this.virtualHost = virtualHost;
+		this.useTls = useTls;
 		this.version = version;
 	}
 
@@ -87,6 +90,14 @@ public class QueueDetails implements Serializable {
 
 	public void setVirtualHost(String virtualHost) {
 		this.virtualHost = virtualHost;
+	}
+
+	public boolean isUseTls() {
+		return useTls;
+	}
+
+	public void setUseTls(boolean useTls) {
+		this.useTls = useTls;
 	}
 
 	public int getVersion() {
