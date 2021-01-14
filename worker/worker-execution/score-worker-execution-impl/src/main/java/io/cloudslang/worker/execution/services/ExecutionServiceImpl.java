@@ -364,7 +364,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             to.getSystemContext().setBranchId(branchId);
             newExecutions.add(to);
             dispatchBranchStartEvent(executionId, splitId, branchId, currStep);
-            checkoutBeginLane(executionId, to.getSystemContext(), count);
+            checkoutBeginLane(executionId, branchId, to.getSystemContext(), count);
         }
         return newExecutions;
     }
@@ -387,17 +387,18 @@ public final class ExecutionServiceImpl implements ExecutionService {
             String branchId = splitUuid + ":" + branchIndexInSplitStep;
             to.getSystemContext().setBranchId(branchId);
             dispatchBranchStartEvent(executionId, splitUuid, branchId, currStep);
-            checkoutBeginLane(executionId, to.getSystemContext(), count);
+            checkoutBeginLane(executionId, branchId, to.getSystemContext(), count);
             newExecutions.add(to);
         }
         return newExecutions;
     }
 
-    private void checkoutBeginLane(Long executionId, SystemContext systemContext, int branchNumber) {
+    private void checkoutBeginLane(Long executionId, String branchId, SystemContext systemContext, int branchNumber) {
         Integer parallelismLevel = (Integer) systemContext.getLevelParallelism();
         if (parallelismLevel != null) {
             if (parallelismLevel == 1 || (parallelismLevel > 1 && branchNumber > 1)) {
-                licensingService.checkoutBeginLane(executionId.toString());
+                licensingService.checkoutBeginLane(executionId.toString(), branchId,
+                        (Long)systemContext.get(SC_TIMEOUT_START_TIME), (Integer)systemContext.get(SC_TIMEOUT_MINS));
             }
         }
     }

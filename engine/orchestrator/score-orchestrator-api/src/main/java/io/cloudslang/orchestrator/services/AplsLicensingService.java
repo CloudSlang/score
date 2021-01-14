@@ -17,7 +17,7 @@ package io.cloudslang.orchestrator.services;
 
 public interface AplsLicensingService {
 
-    void checkoutBeginLane(String executionId);
+    void checkoutBeginLane(String executionId, String branchId, long executionStartTimeMillis, int executionTimeoutMinutes);
 
-    void checkinEndLane(String executionId);
+    void checkinEndLane(String executionId, String branchId);
 }

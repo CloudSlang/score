@@ -227,7 +227,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             if (parallelismLevel != null) {
                 int branchNumber = Integer.parseInt(finishedBranch.getBranchId().split(":")[1]);
                 if (parallelismLevel == 1 || (parallelismLevel > 1 && branchNumber > 1)) {
-                    licensingService.checkinEndLane(finishedBranch.getExecutionId());
+                    licensingService.checkinEndLane(finishedBranch.getExecutionId(), finishedBranch.getBranchId());
                 }
             }
 
