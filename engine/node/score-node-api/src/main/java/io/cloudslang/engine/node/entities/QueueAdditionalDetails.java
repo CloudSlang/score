@@ -26,7 +26,6 @@ public class QueueAdditionalDetails implements Serializable {
 	private String robotResultsQueue;
 	private String robotResultsKey;
 	private String robotGroupQueuePrefix;
-	private boolean useTls;
 	private String serverTruststorePath;
 	private char[] serverTruststorePass;
 	private String tlsVersion;
@@ -94,14 +93,6 @@ public class QueueAdditionalDetails implements Serializable {
 
 	public void setRobotGroupQueuePrefix(String robotGroupQueuePrefix) {
 		this.robotGroupQueuePrefix = robotGroupQueuePrefix;
-	}
-
-	public boolean isUseTls() {
-		return useTls;
-	}
-
-	public void setUseTls(boolean useTls) {
-		this.useTls = useTls;
 	}
 
 	public String getServerTruststorePath() {
