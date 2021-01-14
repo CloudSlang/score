@@ -267,6 +267,25 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
     }
 
     @Override
+    @Transactional
+    public void updateQueueSyncByUuid(String workerUuid, boolean isQueueSync) {
+        WorkerNode worker = workerNodeRepository.findByUuid(workerUuid);
+        if (worker == null) {
+            throw new IllegalStateException("No worker was found by the specified UUID:" + workerUuid);
+        }
+        worker.setQueueSync(isQueueSync);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void updateQueueSync(boolean isQueueSync) {
+        List<WorkerNode> workers = workerNodeRepository.findAll();
+        for (WorkerNode w : workers) {
+            w.setQueueSync(isQueueSync);
+        }
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<String> readNonRespondingWorkers() {
         long systemVersion = versionService.getCurrentVersion(MSG_RECOVERY_VERSION_NAME);

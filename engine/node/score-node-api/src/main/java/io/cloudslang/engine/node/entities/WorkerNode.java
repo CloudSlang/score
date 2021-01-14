@@ -120,6 +120,9 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
     @Column(name = "VERSION_ID", length = 48, nullable = false)
     private String versionId = "";
 
+    @Column(name = "QUEUE_SYNC", nullable = false)
+    private boolean queueSync = false;
+
     @Override
     public String getUuid() {
         return uuid;
@@ -285,6 +288,14 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
         this.versionId = versionId;
     }
 
+    public boolean isQueueSync() {
+        return queueSync;
+    }
+
+    public void setQueueSync(boolean queueSync) {
+        this.queueSync = queueSync;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -295,6 +306,7 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
         if (active != that.active) return false;
         if (deleted != that.deleted) return false;
         if (ackVersion != that.ackVersion) return false;
+        if (queueSync != that.queueSync) return false;
         if (uuid != null ? !uuid.equals(that.uuid) : that.uuid != null) return false;
         if (status != that.status) return false;
         if (hostName != null ? !hostName.equals(that.hostName) : that.hostName != null) return false;
@@ -329,6 +341,7 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
         result = 31 * result + (dotNetVersion != null ? dotNetVersion.hashCode() : 0);
         result = 31 * result + (ackTime != null ? ackTime.hashCode() : 0);
         result = 31 * result + (deleted ? 1 : 0);
+        result = 31 * result + (queueSync ? 1 : 0);
         result = 31 * result + (int) (ackVersion ^ (ackVersion >>> 32));
         result = 31 * result + (groups != null ? groups.hashCode() : 0);
         result = 31 * result + (bulkNumber != null ? bulkNumber.hashCode() : 0);
@@ -358,6 +371,7 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
                 ", workerRecoveryVersion='" + workerRecoveryVersion + '\'' +
                 ", version='" + version + '\'' +
                 ", versionId='" + versionId + '\'' +
+                ", queueSync='" + queueSync + '\'' +
                 '}';
     }
 }
