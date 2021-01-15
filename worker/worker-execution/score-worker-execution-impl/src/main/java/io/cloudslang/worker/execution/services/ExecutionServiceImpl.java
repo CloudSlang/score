@@ -394,6 +394,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     private void checkoutBeginLane(Long executionId, String branchId, SystemContext systemContext, int branchNumber) {
+        if ("NON_BLOCKING".equals(systemContext.get("STEP_TYPE"))) {
+            return;
+        }
+
         Integer parallelismLevel = (Integer) systemContext.getLevelParallelism();
         if (parallelismLevel != null) {
             if (parallelismLevel == 1 || (parallelismLevel > 1 && branchNumber > 1)) {

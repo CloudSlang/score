@@ -223,11 +223,13 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         for (FinishedBranch finishedBranch : finishedBranches) {
             dispatchBranchFinishedEvent(finishedBranch.getExecutionId(), finishedBranch.getSplitId(), finishedBranch.getBranchId());
 
-            Integer parallelismLevel = (Integer) finishedBranch.getBranchContexts().getSystemContext().get(SC_NESTED_FOR_PARALLELISM_LEVEL);
-            if (parallelismLevel != null) {
-                int branchNumber = Integer.parseInt(finishedBranch.getBranchId().split(":")[1]);
-                if (parallelismLevel == 1 || (parallelismLevel > 1 && branchNumber > 1)) {
-                    licensingService.checkinEndLane(finishedBranch.getExecutionId(), finishedBranch.getBranchId());
+            if (!"NON_BLOCKING".equals(finishedBranch.getBranchContexts().getSystemContext().get("STEP_TYPE"))) {
+                Integer parallelismLevel = (Integer) finishedBranch.getBranchContexts().getSystemContext().get(SC_NESTED_FOR_PARALLELISM_LEVEL);
+                if (parallelismLevel != null) {
+                    int branchNumber = Integer.parseInt(finishedBranch.getBranchId().split(":")[1]);
+                    if (parallelismLevel == 1 || (parallelismLevel > 1 && branchNumber > 1)) {
+                        licensingService.checkinEndLane(finishedBranch.getExecutionId(), finishedBranch.getBranchId());
+                    }
                 }
             }
 
