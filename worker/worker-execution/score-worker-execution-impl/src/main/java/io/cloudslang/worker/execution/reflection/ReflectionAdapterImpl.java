@@ -22,7 +22,6 @@ import io.cloudslang.score.lang.ExecutionRuntimeServices;
 import io.cloudslang.worker.execution.model.StepActionDataHolder.ReadonlyStepActionDataAccessor;
 import io.cloudslang.worker.execution.services.SessionDataHandler;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
-import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jctools.maps.NonBlockingHashMap;
@@ -94,7 +93,8 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
             logger.debug("Executing control action [" + actionMetadata.getClassName() + '.' + actionMetadata.getMethodName() + ']');
         }
         try {
-            String key = actionMetadata.getClassName() + '.' + actionMetadata.getMethodName();;
+            String key = actionMetadata.getClassName() + '.' + actionMetadata.getMethodName();
+            ;
             ImmutableTriple<Object, Method, String[]> tripleValue = concurrentMap.get(key);
             if (tripleValue == null) { // Nothing is cached, need to compute everything
                 Class<?> actionClass = forName(actionMetadata.getClassName());
