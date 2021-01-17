@@ -81,9 +81,8 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
         return executionRuntimeServices != null ? executionRuntimeServices.getParentRunningId() : getExecutionIdFromActionData(accessor);
     }
 
-    private static String getExceptionMessage(ControlActionMetadata actionMetadata) {
-        return "Failed to run the action! Class: " + actionMetadata.getClassName() + ", method: "
-                + actionMetadata.getMethodName();
+    private static String getExceptionMessage(ControlActionMetadata metadata) {
+        return "Failed to run the action! Class: " + metadata.getClassName() + ", method: " + metadata.getMethodName();
     }
 
     @Override
