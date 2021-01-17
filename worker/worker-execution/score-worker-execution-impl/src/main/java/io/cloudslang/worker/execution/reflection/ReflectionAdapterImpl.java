@@ -104,7 +104,6 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
                 tripleValue = ImmutableTriple.of(bean, method, parameterNames);
                 concurrentMap.put(key, tripleValue);
             }
-
             Object actionBean = tripleValue.getLeft();
             Method actionMethod = tripleValue.getMiddle();
             String[] parameterNames = tripleValue.getRight();
