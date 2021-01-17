@@ -23,6 +23,8 @@ import net.jpountz.lz4.LZ4FrameOutputStream.BLOCKSIZE;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -67,7 +69,7 @@ public class ExecutionMessageConverter {
             ByteArrayInputStream is = new ByteArrayInputStream(bytes);
             skipPayloadMetaData(is);
 
-            ois = new ObjectInputStream(new LZ4FrameInputStream(is));
+            ois = new ObjectInputStream(new BufferedInputStream(new LZ4FrameInputStream(is)));
             // noinspection unchecked
             return (T) ois.readObject();
         } catch (IOException | ClassNotFoundException ex) {
@@ -83,7 +85,7 @@ public class ExecutionMessageConverter {
             ByteArrayOutputStream baos = new ByteArrayOutputStream(SIZE);
             initPayloadMetaData(baos);
 
-            oos = new ObjectOutputStream(new LZ4FrameOutputStream(baos, BLOCKSIZE.SIZE_256KB));
+            oos = new ObjectOutputStream(new BufferedOutputStream(new LZ4FrameOutputStream(baos, BLOCKSIZE.SIZE_256KB)));
             oos.writeObject(obj);
             oos.flush();
 
