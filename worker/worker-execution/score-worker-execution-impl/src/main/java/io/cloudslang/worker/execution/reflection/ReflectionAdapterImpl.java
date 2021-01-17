@@ -55,16 +55,16 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
     private static final String CONCURRENT_MAP_STRATEGY = "concurrent-map";
     private static final int MAP_CAPACITY = Integer.getInteger("reflectionAdapter.mapCapacity", 5_000);
     private static final String MAP_STRATEGY = System.getProperty("reflectionAdapter.mapStrategy", CONCURRENT_MAP_STRATEGY);
-    private static final Supplier<ConcurrentMap<String, Triple<Object, Method, String[]>>> MAP_CONCURRENT_SUPPLIER =
+    private static final Supplier<ConcurrentMap<String, ImmutableTriple<Object, Method, String[]>>> MAP_CONCURRENT_SUPPLIER =
             () -> new ConcurrentHashMap<>(MAP_CAPACITY);
-    private static final Supplier<ConcurrentMap<String, Triple<Object, Method, String[]>>> MAP_NONBLOCKING_SUPPLIER =
+    private static final Supplier<ConcurrentMap<String, ImmutableTriple<Object, Method, String[]>>> MAP_NONBLOCKING_SUPPLIER =
             () -> new NonBlockingHashMap<>(MAP_CAPACITY);
 
     @Autowired
     private SessionDataHandler sessionDataHandler;
     private ApplicationContext applicationContext;
     private final ParameterNameDiscoverer parameterNameDiscoverer;
-    private final ConcurrentMap<String, Triple<Object, Method, String[]>> concurrentMap;
+    private final ConcurrentMap<String, ImmutableTriple<Object, Method, String[]>> concurrentMap;
 
     public ReflectionAdapterImpl() {
         this.parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
@@ -95,7 +95,7 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
         }
         try {
             String key = actionMetadata.getClassName() + '.' + actionMetadata.getMethodName();;
-            Triple<Object, Method, String[]> tripleValue = concurrentMap.get(key);
+            ImmutableTriple<Object, Method, String[]> tripleValue = concurrentMap.get(key);
             if (tripleValue == null) { // Nothing is cached, need to compute everything
                 Class<?> actionClass = forName(actionMetadata.getClassName());
                 Object bean = doLoadActionBean(actionClass);
