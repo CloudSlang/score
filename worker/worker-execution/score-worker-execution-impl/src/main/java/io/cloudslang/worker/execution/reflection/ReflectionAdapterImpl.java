@@ -86,19 +86,19 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
     }
 
     @Override
-    public Object executeControlAction(ControlActionMetadata actionMetadata, ReadonlyStepActionDataAccessor accessor) {
-        notNull(actionMetadata, "Action metadata is null");
+    public Object executeControlAction(ControlActionMetadata metadata, ReadonlyStepActionDataAccessor accessor) {
+        notNull(metadata, "Action metadata is null");
         if (logger.isDebugEnabled()) {
-            logger.debug("Executing control action [" + actionMetadata.getClassName() + '.' + actionMetadata.getMethodName() + ']');
+            logger.debug("Executing control action [" + metadata.getClassName() + '.' + metadata.getMethodName() + ']');
         }
         try {
-            String key = actionMetadata.getClassName() + '.' + actionMetadata.getMethodName();
+            String key = metadata.getClassName() + '.' + metadata.getMethodName();
             ;
             ImmutableTriple<Object, Method, String[]> tripleValue = concurrentMap.get(key);
             if (tripleValue == null) { // Nothing is cached, need to compute everything
-                Class<?> actionClass = forName(actionMetadata.getClassName());
+                Class<?> actionClass = forName(metadata.getClassName());
                 Object bean = doLoadActionBean(actionClass);
-                Method method = doLoadActionMethod(actionMetadata, actionClass);
+                Method method = doLoadActionMethod(metadata, actionClass);
                 String[] parameterNames = parameterNameDiscoverer.getParameterNames(method);
                 tripleValue = ImmutableTriple.of(bean, method, parameterNames);
                 concurrentMap.put(key, tripleValue);
@@ -113,21 +113,20 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
             Object result = actionMethod.invoke(actionBean, arguments);
             clearStateAfterInvocation(accessor);
             if (logger.isDebugEnabled()) {
-                logger.debug("Control action [" + actionMetadata.getClassName() + '.' + actionMetadata.getMethodName() + "] done");
+                logger.debug("Control action [" + metadata.getClassName() + '.' + metadata.getMethodName() + "] done");
             }
             return result;
         } catch (IllegalArgumentException ex) {
-            String message =
-                    "Failed to run the action! Wrong arguments were passed to class: " + actionMetadata.getClassName()
-                            + ", method: " + actionMetadata.getMethodName()
-                            + ", reason: " + ex.getMessage();
+            String message = "Failed to run the action! Wrong arguments were passed to class: " + metadata.getClassName()
+                    + ", method: " + metadata.getMethodName()
+                    + ", reason: " + ex.getMessage();
             throw new FlowExecutionException(message, ex);
         } catch (InvocationTargetException ex) {
             String message = ex.getTargetException() == null ? ex.getMessage() : ex.getTargetException().getMessage();
-            logger.error(getExceptionMessage(actionMetadata) + ", reason: " + message, ex);
+            logger.error(getExceptionMessage(metadata) + ", reason: " + message, ex);
             throw new FlowExecutionException(message, ex);
         } catch (Exception ex) {
-            throw new FlowExecutionException(getExceptionMessage(actionMetadata) + ", reason: " + ex.getMessage(), ex);
+            throw new FlowExecutionException(getExceptionMessage(metadata) + ", reason: " + ex.getMessage(), ex);
         }
     }
 
