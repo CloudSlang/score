@@ -21,9 +21,11 @@ import io.cloudslang.score.exceptions.FlowExecutionException;
 import io.cloudslang.score.lang.ExecutionRuntimeServices;
 import io.cloudslang.worker.execution.model.StepActionDataHolder.ReadonlyStepActionDataAccessor;
 import io.cloudslang.worker.execution.services.SessionDataHandler;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jctools.maps.NonBlockingHashMap;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -36,31 +38,38 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Supplier;
 
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.GLOBAL_SESSION_OBJECT;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.NON_SERIALIZABLE_EXECUTION_DATA;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SESSION_OBJECT;
 import static java.lang.Class.forName;
+import static org.apache.commons.lang.Validate.notNull;
+import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationContextAware {
-
     private static final Logger logger = LogManager.getLogger(ReflectionAdapterImpl.class);
+    private static final String NONBLOCKING_MAP_STRATEGY = "nonblocking-map";
+    private static final String CONCURRENT_MAP_STRATEGY = "concurrent-map";
+    private static final int MAP_CAPACITY = Integer.getInteger("reflectionAdapter.mapCapacity", 5_000);
+    private static final String MAP_STRATEGY = System.getProperty("reflectionAdapter.mapStrategy", CONCURRENT_MAP_STRATEGY);
+    private static final Supplier<ConcurrentMap<String, Triple<Object, Method, String[]>>> MAP_CONCURRENT_SUPPLIER =
+            () -> new ConcurrentHashMap<>(MAP_CAPACITY);
+    private static final Supplier<ConcurrentMap<String, Triple<Object, Method, String[]>>> MAP_NONBLOCKING_SUPPLIER =
+            () -> new NonBlockingHashMap<>(MAP_CAPACITY);
 
     @Autowired
     private SessionDataHandler sessionDataHandler;
     private ApplicationContext applicationContext;
     private final ParameterNameDiscoverer parameterNameDiscoverer;
-
-    private final Map<String, Object> cacheBeans;
-    private final Map<String, Method> cacheMethods;
-    private final Map<String, String[]> cacheParamNames;
+    private final ConcurrentMap<String, Triple<Object, Method, String[]>> concurrentMap;
 
     public ReflectionAdapterImpl() {
         this.parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
-        this.cacheBeans = new ConcurrentHashMap<>();
-        this.cacheMethods = new ConcurrentHashMap<>();
-        this.cacheParamNames = new ConcurrentHashMap<>();
+        this.concurrentMap = equalsIgnoreCase(MAP_STRATEGY, NONBLOCKING_MAP_STRATEGY) ?
+                MAP_NONBLOCKING_SUPPLIER.get() : MAP_CONCURRENT_SUPPLIER.get();
     }
 
     private static Long getExecutionIdFromActionData(ReadonlyStepActionDataAccessor accessor) {
@@ -80,14 +89,26 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 
     @Override
     public Object executeControlAction(ControlActionMetadata actionMetadata, ReadonlyStepActionDataAccessor accessor) {
-        Validate.notNull(actionMetadata, "Action metadata is null");
+        notNull(actionMetadata, "Action metadata is null");
         if (logger.isDebugEnabled()) {
             logger.debug("Executing control action [" + actionMetadata.getClassName() + '.' + actionMetadata.getMethodName() + ']');
         }
         try {
-            Object actionBean = getActionBean(actionMetadata);
-            Method actionMethod = getActionMethod(actionMetadata);
-            Object[] arguments = buildParametersArray(actionMethod, accessor);
+            String key = actionMetadata.getClassName() + '.' + actionMetadata.getMethodName();;
+            Triple<Object, Method, String[]> tripleValue = concurrentMap.get(key);
+            if (tripleValue == null) { // Nothing is cached, need to compute everything
+                Class<?> actionClass = forName(actionMetadata.getClassName());
+                Object bean = doLoadActionBean(actionClass);
+                Method method = doLoadActionMethod(actionMetadata, actionClass);
+                String[] parameterNames = parameterNameDiscoverer.getParameterNames(method);
+                tripleValue = ImmutableTriple.of(bean, method, parameterNames);
+                concurrentMap.put(key, tripleValue);
+            }
+
+            Object actionBean = tripleValue.getLeft();
+            Method actionMethod = tripleValue.getMiddle();
+            String[] parameterNames = tripleValue.getRight();
+            Object[] arguments = buildParametersArray(accessor, parameterNames);
             if (logger.isDebugEnabled()) {
                 logger.debug("Invoking...");
             }
@@ -118,55 +139,35 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
         sessionDataHandler.setSessionDataInactive(executionId, getRunningExecutionIdFromActionData(accessor));
     }
 
-    private Object getActionBean(ControlActionMetadata actionMetadata)
-            throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-        Object bean = cacheBeans.get(actionMetadata.getClassName());
-        if (bean == null) {
-            Class<?> actionClass = forName(actionMetadata.getClassName());
-            try {
-                bean = applicationContext.getBean(actionClass);
-            } catch (Exception ignore) {
-                // Not a spring bean
-            }
-            if (bean == null) {
-                bean = actionClass.newInstance();
-            }
-            cacheBeans.put(actionMetadata.getClassName(), bean);
+    private Object doLoadActionBean(final Class<?> actionClass) throws InstantiationException, IllegalAccessException {
+        Object bean = null;
+        try {
+            bean = applicationContext.getBean(actionClass);
+        } catch (Exception ignore) {
+            // Not a spring bean
         }
-        return bean;
+        return (bean != null) ? bean : actionClass.newInstance();
     }
 
-    private Method getActionMethod(ControlActionMetadata metadata) throws ClassNotFoundException {
-        String key = metadata.getClassName() + '.' + metadata.getMethodName();
-        Method actionMethod = cacheMethods.get(key);
+    private Method doLoadActionMethod(final ControlActionMetadata metadata, final Class<?> actionClass) throws ClassNotFoundException {
+        Method actionMethod = null;
+        final String metadataMethodName = metadata.getMethodName();
+        for (Method method : actionClass.getMethods()) {
+            if (method.getName().equals(metadataMethodName)) {
+                actionMethod = method;
+                break;
+            }
+        }
         if (actionMethod != null) {
             return actionMethod;
         } else {
-            for (Method method : forName(metadata.getClassName()).getMethods()) {
-                if (method.getName().equals(metadata.getMethodName())) {
-                    actionMethod = method;
-                    cacheMethods.put(key, method);
-                    break;
-                }
-            }
-            if (actionMethod != null) {
-                return actionMethod;
-            } else {
-                String message = "Method: " + metadata.getMethodName() + " was not found in class:  " + metadata.getClassName();
-                logger.error(message);
-                throw new FlowExecutionException(message);
-            }
+            String message = "Method: " + metadataMethodName + " was not found in class:  " + metadata.getClassName();
+            logger.error(message);
+            throw new FlowExecutionException(message);
         }
     }
 
-    private Object[] buildParametersArray(Method actionMethod, ReadonlyStepActionDataAccessor accessor) {
-        String actionFullName = actionMethod.getDeclaringClass().getName() + "." + actionMethod.getName();
-        String[] paramNames = cacheParamNames.get(actionFullName);
-        if (paramNames == null) {
-            paramNames = parameterNameDiscoverer.getParameterNames(actionMethod);
-            cacheParamNames.put(actionFullName, paramNames);
-        }
-
+    private Object[] buildParametersArray(ReadonlyStepActionDataAccessor accessor, String[] paramNames) {
         Object[] args = new Object[paramNames.length];
         for (int counter = 0; counter < args.length; counter++) {
             String paramName = paramNames[counter];
