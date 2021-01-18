@@ -93,7 +93,6 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
         }
         try {
             String key = metadata.getClassName() + '.' + metadata.getMethodName();
-            ;
             ImmutableTriple<Object, Method, String[]> tripleValue = concurrentMap.get(key);
             if (tripleValue == null) { // Nothing is cached, need to compute everything
                 Class<?> actionClass = forName(metadata.getClassName());
