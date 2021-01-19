@@ -20,7 +20,10 @@ import io.cloudslang.engine.node.entities.WorkerKeepAliveInfo;
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.orchestrator.services.EngineVersionService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
+import io.cloudslang.worker.management.queue.WorkerQueueDetailsContainer;
+import io.cloudslang.worker.management.queue.WorkerQueueDetailsHolder;
 import io.cloudslang.worker.management.monitor.WorkerStateUpdateService;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -102,6 +105,9 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 
     @Autowired
     private WorkerStateUpdateService workerStateUpdateService;
+
+    @Autowired
+    private WorkerQueueDetailsContainer workerQueueDetailsContainer;
 
     private int keepAliveFailCount = 0;
 
@@ -193,11 +199,13 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
     public void workerKeepAlive() {
         if (!recoveryManager.isInRecovery()) {
             if (endOfInit) {
+                WorkerQueueDetailsHolder queueDetailsHolder = null;
                 try {
                     WorkerKeepAliveInfo workerKeepAliveInfo = workerNodeService.newKeepAlive(workerUuid);
                     String newWrv = workerKeepAliveInfo.getWorkerRecoveryVersion();
                     workerStateUpdateService.setEnableState(workerKeepAliveInfo.isActive());
                     String currentWrv = recoveryManager.getWRV();
+                    queueDetailsHolder = new WorkerQueueDetailsHolder(workerKeepAliveInfo.getQueueDetails());
                     //do not update it!!! if it is different than we have - restart worker (clean state)
                     if (!currentWrv.equals(newWrv)) {
                         logger.warn("Got new WRV from Orchestrator during keepAlive(). Going to reload...");
@@ -211,6 +219,10 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
                         logger.error("Failed sending keepAlive for " + KEEP_ALIVE_FAIL_LIMIT
                                 + " times. Invoking worker internal recovery...");
                         recoveryManager.doRecovery();
+                    }
+                } finally {
+                    if (queueDetailsHolder != null) {
+                        workerQueueDetailsContainer.setQueueConfiguration(queueDetailsHolder);
                     }
                 }
             }

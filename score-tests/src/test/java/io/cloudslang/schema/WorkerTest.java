@@ -18,6 +18,7 @@ package io.cloudslang.schema;
 
 import io.cloudslang.engine.queue.services.ExecutionQueueService;
 import io.cloudslang.orchestrator.services.*;
+import io.cloudslang.worker.management.queue.WorkerQueueDetailsContainer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,6 +128,11 @@ public class WorkerTest {
 		@Bean
 		AplsLicensingService aplsLicensingService() {
 			return mock(AplsLicensingService.class);
+		}
+
+		@Bean
+		public WorkerQueueDetailsContainer workerQueueDetailsContainer() {
+			return mock(WorkerQueueDetailsContainer.class);
 		}
 	}
 

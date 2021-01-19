@@ -17,6 +17,7 @@
 package io.cloudslang.schema;
 
 import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
+import io.cloudslang.engine.node.services.QueueConfigurationDataService;
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
@@ -205,6 +206,11 @@ public class EngineTest {
         @Bean
         public AplsLicensingService aplsLicensingService() {
             return mock(AplsLicensingService.class);
+        }
+
+        @Bean
+        public QueueConfigurationDataService queueConfigurationDataService() {
+            return mock(QueueConfigurationDataService.class);
         }
     }
 

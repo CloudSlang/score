@@ -13,44 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.cloudslang.worker.management.queue;
 
-package io.cloudslang.engine.node.entities;
+import java.util.concurrent.atomic.AtomicReference;
+import org.springframework.stereotype.Component;
 
-import io.cloudslang.score.api.nodes.WorkerStatus;
+@Component
+public class WorkerQueueDetailsContainer {
 
-import java.util.List;
+	private final AtomicReference<WorkerQueueDetailsHolder> queueDetailsUpdated;
 
-/**
- * User:
- * Date: 08/11/2O12
- */
-public interface Worker {
+	public WorkerQueueDetailsContainer() {
+		this.queueDetailsUpdated = new AtomicReference<>(new WorkerQueueDetailsHolder());
+	}
 
-	String getUuid();
+	public WorkerQueueDetailsHolder getQueueConfiguration() {
+		return queueDetailsUpdated.get();
+	}
 
-	boolean isActive();
+	public void setQueueConfiguration(WorkerQueueDetailsHolder queueDetails) {
+		this.queueDetailsUpdated.set(queueDetails);
+	}
 
-    WorkerStatus getStatus();
-
-	String getHostName();
-
-	String getInstallPath();
-
-	String getDescription();
-
-	String getOs();
-
-	String getJvm();
-
-	String getDotNetVersion();
-
-	List<String> getGroups();
-
-    boolean isDeleted();
-
-	String getVersion();
-
-	String getVersionId();
-
-	boolean isQueueSync();
 }

@@ -23,7 +23,7 @@
     <parent>
         <artifactId>package</artifactId>
         <groupId>io.cloudslang</groupId>
-        <version>0.3.201-SNAPSHOT</version>
+        <version>0.3.215-SNAPSHOT</version>
     </parent>
 
     <artifactId>score-worker</artifactId>
@@ -47,6 +47,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>runtime-management-impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.cloudslang</groupId>
+            <artifactId>score-node-impl</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

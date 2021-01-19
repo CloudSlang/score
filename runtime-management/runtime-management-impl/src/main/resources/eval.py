@@ -134,8 +134,8 @@ class PythonAgentExecutor(object):
                     return_type = 'list'
 
                 elif return_type == 'dict':
-                    expr_result = str(list(expr_result.keys()))
-                    return_type = 'list'
+                    expr_result = json.dumps(expr_result)
+                    return_type = 'str'
 
                 elif return_type == '_Element':
                     expr_result = etree.tostring(expr_result, encoding='UTF-8').decode('UTF-8')
@@ -144,7 +144,7 @@ class PythonAgentExecutor(object):
                 if return_type not in ['str', 'int', 'bool', 'list']:
                     return_type = 'str'
 
-                final_result = {'returnResult': expr_result,
+                final_result = {'returnResult': str(expr_result),
                                 'accessedResources': list(accessed_resources_set),
                                 'returnType': return_type}
             finally:

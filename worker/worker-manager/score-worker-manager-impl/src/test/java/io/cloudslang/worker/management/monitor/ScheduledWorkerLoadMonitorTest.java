@@ -19,6 +19,7 @@ package io.cloudslang.worker.management.monitor;
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.orchestrator.services.EngineVersionService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
+import io.cloudslang.worker.management.queue.WorkerQueueDetailsContainer;
 import io.cloudslang.worker.management.services.OutboundBuffer;
 import io.cloudslang.worker.management.services.WorkerConfigurationUtils;
 import io.cloudslang.worker.management.services.WorkerManager;
@@ -155,6 +156,11 @@ public class ScheduledWorkerLoadMonitorTest {
         @Bean
         public WorkerVersionService workerVersionService() {
             return mock(WorkerVersionService.class);
+        }
+
+        @Bean
+        public WorkerQueueDetailsContainer workerQueueDetailsContainer() {
+            return mock(WorkerQueueDetailsContainer.class);
         }
 
         @Bean

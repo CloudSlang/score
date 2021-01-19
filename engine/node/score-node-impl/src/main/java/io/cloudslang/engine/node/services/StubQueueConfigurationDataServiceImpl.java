@@ -13,44 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.cloudslang.engine.node.services;
 
-package io.cloudslang.engine.node.entities;
+import io.cloudslang.engine.node.entities.QueueDetails;
 
-import io.cloudslang.score.api.nodes.WorkerStatus;
+public class StubQueueConfigurationDataServiceImpl implements QueueConfigurationDataService {
 
-import java.util.List;
-
-/**
- * User:
- * Date: 08/11/2O12
- */
-public interface Worker {
-
-	String getUuid();
-
-	boolean isActive();
-
-    WorkerStatus getStatus();
-
-	String getHostName();
-
-	String getInstallPath();
-
-	String getDescription();
-
-	String getOs();
-
-	String getJvm();
-
-	String getDotNetVersion();
-
-	List<String> getGroups();
-
-    boolean isDeleted();
-
-	String getVersion();
-
-	String getVersionId();
-
-	boolean isQueueSync();
+	@Override
+	public QueueDetails getQueueConfigurations() {
+		return null;
+	}
 }
