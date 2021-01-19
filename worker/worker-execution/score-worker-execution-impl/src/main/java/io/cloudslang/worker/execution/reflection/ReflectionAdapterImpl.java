@@ -96,10 +96,10 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
             ImmutableTriple<Object, Method, String[]> tripleValue = concurrentMap.get(key);
             if (tripleValue == null) { // Nothing is cached, need to compute everything
                 Class<?> actionClass = forName(metadata.getClassName());
-                Object bean = doLoadActionBean(actionClass);
+                Object invokingObject = doLoadActionBean(actionClass);
                 Method method = doLoadActionMethod(metadata, actionClass);
                 String[] parameterNames = parameterNameDiscoverer.getParameterNames(method);
-                tripleValue = ImmutableTriple.of(bean, method, parameterNames);
+                tripleValue = ImmutableTriple.of(invokingObject, method, parameterNames);
                 concurrentMap.put(key, tripleValue);
             }
             Object actionBean = tripleValue.getLeft();
