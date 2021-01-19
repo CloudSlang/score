@@ -136,13 +136,13 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
     }
 
     private Object doLoadActionBean(final Class<?> actionClass) throws InstantiationException, IllegalAccessException {
-        Object bean = null;
+        Object object = null;
         try {
-            bean = applicationContext.getBean(actionClass);
+            object = applicationContext.getBean(actionClass);
         } catch (Exception ignore) {
-            // Not a spring bean
+            // Not a spring object
         }
-        return (bean != null) ? bean : actionClass.newInstance();
+        return (object != null) ? object : actionClass.newInstance();
     }
 
     private Method doLoadActionMethod(final ControlActionMetadata metadata, final Class<?> actionClass) throws ClassNotFoundException {
