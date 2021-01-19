@@ -89,7 +89,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     private ExecutionQueueRepository executionQueueRepository;
 
     @Autowired
-    private AplsLicensingService licensingService;
+    private AplsLicensingService aplsLicensingService;
 
     @Autowired
     @Qualifier("consumptionFastEventBus")
@@ -228,7 +228,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
                 if (parallelismLevel != null) {
                     int branchNumber = Integer.parseInt(finishedBranch.getBranchId().split(":")[1]);
                     if (parallelismLevel == 1 || (parallelismLevel > 1 && branchNumber > 1)) {
-                        licensingService.checkinEndLane(finishedBranch.getExecutionId(), finishedBranch.getBranchId());
+                        aplsLicensingService.checkinEndLane(finishedBranch.getExecutionId(), finishedBranch.getBranchId());
                     }
                 }
             }

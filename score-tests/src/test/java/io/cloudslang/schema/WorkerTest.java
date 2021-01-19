@@ -123,6 +123,11 @@ public class WorkerTest {
 		SuspendedExecutionService suspendedExecution() {
 			return mock(SuspendedExecutionService.class);
 		}
+
+		@Bean
+		AplsLicensingService aplsLicensingService() {
+			return mock(AplsLicensingService.class);
+		}
 	}
 
 }

@@ -90,6 +90,9 @@ public class SplitJoinServiceTest {
     @Mock
     private ExecutionMessageConverter converter;
 
+    @Mock
+    private AplsLicensingService aplsLicensingService;
+
     @Captor
     private ArgumentCaptor<List<ExecutionMessage>> queueDispatcherDispatchCaptor;
 

@@ -55,6 +55,7 @@ import io.cloudslang.orchestrator.services.ScoreImpl;
 import io.cloudslang.orchestrator.services.ScorePauseResumeImpl;
 import io.cloudslang.orchestrator.services.ScoreTriggeringImpl;
 import io.cloudslang.orchestrator.services.SplitJoinServiceImpl;
+import io.cloudslang.orchestrator.services.StubAplsLicensingServiceImpl;
 import io.cloudslang.orchestrator.services.StubPauseResumeServiceImpl;
 import io.cloudslang.orchestrator.services.SuspendedExecutionCleanerServiceImpl;
 import io.cloudslang.orchestrator.services.SuspendedExecutionServiceImpl;
@@ -172,6 +173,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
         registerPauseResume(element,parserContext);
 		registerWorkerNodeService(element, parserContext);
 		registerEngineVersionService(element, parserContext);
+		registerAplsLicensingService(element, parserContext);
     }
 
     private void registerPauseResume(Element element, ParserContext parserContext){
@@ -192,6 +194,13 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		String registerEngineVersionService = element.getAttribute("registerEngineVersionService");
 		if(!registerEngineVersionService.equals(Boolean.FALSE.toString())){
 			new BeanRegistrator(parserContext).CLASS(EngineVersionServiceImpl.class).register();
+		}
+	}
+
+	private void registerAplsLicensingService(Element element, ParserContext parserContext){
+		String registerAplsLicensingService = element.getAttribute("registerAplsLicensingService");
+		if(!registerAplsLicensingService.equals(Boolean.FALSE.toString())){
+			new BeanRegistrator(parserContext).CLASS(StubAplsLicensingServiceImpl.class).register();
 		}
 	}
 
