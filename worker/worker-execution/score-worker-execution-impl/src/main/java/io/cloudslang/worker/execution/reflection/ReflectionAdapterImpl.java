@@ -102,14 +102,14 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
                 tripleValue = ImmutableTriple.of(invokingObject, method, parameterNames);
                 concurrentMap.put(key, tripleValue);
             }
-            Object actionBean = tripleValue.getLeft();
+            Object actionObject = tripleValue.getLeft();
             Method actionMethod = tripleValue.getMiddle();
             String[] parameterNames = tripleValue.getRight();
             Object[] arguments = buildParametersArray(accessor, parameterNames);
             if (logger.isDebugEnabled()) {
                 logger.debug("Invoking...");
             }
-            Object result = actionMethod.invoke(actionBean, arguments);
+            Object result = actionMethod.invoke(actionObject, arguments);
             clearStateAfterInvocation(accessor);
             if (logger.isDebugEnabled()) {
                 logger.debug("Control action [" + metadata.getClassName() + '.' + metadata.getMethodName() + "] done");
