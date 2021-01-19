@@ -52,7 +52,7 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
     private static final Logger logger = LogManager.getLogger(ReflectionAdapterImpl.class);
     private static final String NONBLOCKING_MAP_STRATEGY = "nonblocking-map";
     private static final String CONCURRENT_MAP_STRATEGY = "concurrent-map";
-    private static final int MAP_CAPACITY = Integer.getInteger("reflectionAdapter.mapCapacity", 1_000);
+    private static final int MAP_CAPACITY = Integer.getInteger("reflectionAdapter.mapCapacity", 200);
     private static final String MAP_STRATEGY = System.getProperty("reflectionAdapter.mapStrategy", NONBLOCKING_MAP_STRATEGY);
     private static final Supplier<ConcurrentMap<String, ImmutableTriple<Object, Method, String[]>>> MAP_CONCURRENT_SUPPLIER =
             () -> new ConcurrentHashMap<>(MAP_CAPACITY);
