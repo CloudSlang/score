@@ -19,7 +19,6 @@ package io.cloudslang.dependency.impl.services;
 import io.cloudslang.dependency.api.services.DependencyService;
 import io.cloudslang.dependency.api.services.MavenConfig;
 import io.cloudslang.score.events.EventBus;
-import io.cloudslang.score.events.EventConstants;
 import io.cloudslang.score.events.ScoreEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,7 +27,6 @@ import org.apache.logging.log4j.core.appender.RollingFileAppender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -70,13 +68,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static io.cloudslang.dependency.api.services.MavenConfig.SEPARATOR;
+import static io.cloudslang.score.events.EventConstants.MAVEN_DEPENDENCY_BUILD;
+import static io.cloudslang.score.events.EventConstants.MAVEN_DEPENDENCY_BUILD_FINISHED;
 import static java.lang.System.getProperty;
+import static java.lang.Thread.currentThread;
+import static org.apache.commons.lang3.StringUtils.endsWithIgnoreCase;
+import static org.springframework.util.StringUtils.arrayToDelimitedString;
 
 /**
  * @author Alexander Eskin
@@ -87,23 +89,22 @@ public class DependencyServiceImpl implements DependencyService {
     private static final Logger logger = LogManager.getLogger(DependencyServiceImpl.class);
 
     private static final String MAVEN_LAUNCHER_CLASS_NAME = "org.codehaus.plexus.classworlds.launcher.Launcher";
-    private static final String MAVEN_LANUCHER_METHOD_NAME = "mainWithExitCode";
+    private static final String MAVEN_LAUNCHER_METHOD_NAME = "mainWithExitCode";
+
     private static final String PATH_FILE_EXTENSION = "path";
-    private static final String GAV_DELIMITER = ":";
     private static final String PATH_FILE_DELIMITER = ";";
+
     private static final int MINIMAL_GAV_PARTS = 3;
     private static final int MAXIMAL_GAV_PARTS = 5;
+    private static final String GAV_DELIMITER = ":";
     private static final String GAV_SEPARATOR = "_";
-
-    private Method launcherMethod;
 
     @Value("#{systemProperties['" + MavenConfig.MAVEN_HOME + "']}")
     private String mavenHome;
 
     private ClassLoader mavenClassLoader;
-
-    private Method MAVEN_EXECUTE_METHOD;
-
+    private Method launcherMethod;
+    private Method mavenExecuteMethod;
     private String mavenLogFolder;
 
     @Autowired
@@ -127,22 +128,22 @@ public class DependencyServiceImpl implements DependencyService {
                 URL[] mavenJarUrls = getUrls(libDir);
 
                 mavenClassLoader = new URLClassLoader(mavenJarUrls, parentClassLoader);
-                MAVEN_EXECUTE_METHOD = Class.forName(MAVEN_LAUNCHER_CLASS_NAME, true, mavenClassLoader).
-                        getMethod(MAVEN_LANUCHER_METHOD_NAME, String[].class);
+                mavenExecuteMethod = Class.forName(MAVEN_LAUNCHER_CLASS_NAME, true, mavenClassLoader).
+                        getMethod(MAVEN_LAUNCHER_METHOD_NAME, String[].class);
                 initMavenLogs();
             }
         }
     }
 
     private void initMavenLogs() {
-        File mavenLogFolderFile = new File(new File(calculateLogFolderPath()), MavenConfig.MAVEN_FOLDER);
-        if (!mavenLogFolderFile.exists()) {
-            boolean dirsCreated = mavenLogFolderFile.mkdirs();
+        File mavenLogFolder = new File(new File(calculateLogFolderPath()), MavenConfig.MAVEN_FOLDER);
+        if (!mavenLogFolder.exists()) {
+            boolean dirsCreated = mavenLogFolder.mkdirs();
             if (!dirsCreated) {
-                logger.error("Failed to create maven log directories " + mavenLogFolderFile.getAbsolutePath());
+                logger.error("Failed to create maven log directories " + mavenLogFolder.getAbsolutePath());
             }
         }
-        this.mavenLogFolder = mavenLogFolderFile.getAbsolutePath();
+        this.mavenLogFolder = mavenLogFolder.getAbsolutePath();
     }
 
     private String calculateLogFolderPath() {
@@ -169,12 +170,7 @@ public class DependencyServiceImpl implements DependencyService {
     }
 
     private URL[] getUrls(File libDir) throws MalformedURLException {
-        File[] mavenJars = libDir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return StringUtils.endsWithIgnoreCase(name, "jar");
-            }
-        });
+        File[] mavenJars = libDir.listFiles((dir, name) -> endsWithIgnoreCase(name, "jar"));
 
         URL[] mavenJarUrls = new URL[mavenJars.length];
         for (int i = 0; i < mavenJarUrls.length; i++) {
@@ -195,7 +191,7 @@ public class DependencyServiceImpl implements DependencyService {
                 if (!file.exists()) {
                     lock.lock();
                     try {
-                        //double check if file was just created
+                        // double check if file was just created
                         if (!file.exists()) {
                             buildDependencyFile(gav);
                         }
@@ -205,7 +201,7 @@ public class DependencyServiceImpl implements DependencyService {
                 }
                 dependencyList = parse(file);
                 resolvedResources.addAll(dependencyList);
-            } catch (IOException|InterruptedException e) {
+            } catch (IOException | InterruptedException e) {
                 throw new IllegalStateException(e);
             }
         }
@@ -245,21 +241,17 @@ public class DependencyServiceImpl implements DependencyService {
     }
 
     private void sendMavenDependencyBuildFinishedEvent(String[] gav) throws InterruptedException {
-        String message = String.format("Download complete for artifact with gav: %s ",
-                StringUtils.arrayToDelimitedString(gav, ":"));
-
-        Map<String, Serializable> data = new HashMap<>();
-        data.put(EventConstants.MAVEN_DEPENDENCY_BUILD_FINISHED, message);
-        dispatchEvent(new ScoreEvent(EventConstants.MAVEN_DEPENDENCY_BUILD_FINISHED, (Serializable) data));
+        HashMap<String, Serializable> data = new HashMap<>(2);
+        data.put(MAVEN_DEPENDENCY_BUILD_FINISHED,
+                "Download complete for artifact with gav: " + arrayToDelimitedString(gav, ":"));
+        dispatchEvent(new ScoreEvent(MAVEN_DEPENDENCY_BUILD_FINISHED, data));
     }
 
     private void sendMavenDependencyBuildEvent(String[] gav) throws InterruptedException {
-        String message = String.format("Downloading artifact with gav: %s ",
-                StringUtils.arrayToDelimitedString(gav, ":"));
-
-        Map<String, Serializable> data = new HashMap<>();
-        data.put(EventConstants.MAVEN_DEPENDENCY_BUILD, message);
-        dispatchEvent(new ScoreEvent(EventConstants.MAVEN_DEPENDENCY_BUILD, (Serializable) data));
+        HashMap<String, Serializable> data = new HashMap<>(2);
+        data.put(MAVEN_DEPENDENCY_BUILD,
+                "Downloading artifact with gav: " + arrayToDelimitedString(gav, ":"));
+        dispatchEvent(new ScoreEvent(MAVEN_DEPENDENCY_BUILD, data));
     }
 
     private void dispatchEvent(ScoreEvent eventWrapper) throws InterruptedException {
@@ -276,16 +268,17 @@ public class DependencyServiceImpl implements DependencyService {
     }
 
     private void invokeMavenLauncher(String[] args) throws Exception {
-        ClassLoader origCL = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(mavenClassLoader);
+        final Thread currentThread = currentThread();
+        ClassLoader originalClassLoader = currentThread.getContextClassLoader();
+        currentThread.setContextClassLoader(mavenClassLoader);
         try {
-            int exitCode = (Integer) MAVEN_EXECUTE_METHOD.invoke(null, new Object[]{args});
+            int exitCode = (Integer) mavenExecuteMethod.invoke(null, new Object[]{args});
             if (exitCode != 0) {
-                throw new RuntimeException("mvn " + StringUtils.arrayToDelimitedString(args, " ") + " returned " +
-                        exitCode + ", see log for details");
+                throw new RuntimeException("mvn " + arrayToDelimitedString(args, " ")
+                        + " returned " + exitCode + ", see log for details");
             }
         } finally {
-            Thread.currentThread().setContextClassLoader(origCL);
+            currentThread.setContextClassLoader(originalClassLoader);
         }
     }
 
@@ -377,7 +370,7 @@ public class DependencyServiceImpl implements DependencyService {
     }
 
     private String getResourceString(String[] gav, boolean transitive) {
-        //if not transitive, use type "pom"
+        // if not transitive, use type "pom"
         String[] newGav = new String[Math.max(4, gav.length)];
         System.arraycopy(gav, 0, newGav, 0, gav.length);
         if (!transitive) {
@@ -387,7 +380,7 @@ public class DependencyServiceImpl implements DependencyService {
                 newGav[3] = "jar";
             }
         }
-        return StringUtils.arrayToDelimitedString(newGav, GAV_DELIMITER);
+        return arrayToDelimitedString(newGav, GAV_DELIMITER);
     }
 
     private String getPathFileName(String[] gav) {
@@ -395,7 +388,7 @@ public class DependencyServiceImpl implements DependencyService {
     }
 
     private String getFileName(String[] gav, String extension) {
-        return getArtifactID(gav) + '-' + getVersion(gav) + "." + extension;
+        return getArtifactId(gav) + '-' + getVersion(gav) + "." + extension;
     }
 
     private List<String> parse(File file) throws IOException {
@@ -411,23 +404,25 @@ public class DependencyServiceImpl implements DependencyService {
 
     private String getResourceFolderPath(String[] gav) {
         return mavenConfig.getLocalMavenRepoPath() + SEPARATOR +
-                getGroupIDPath(gav) + SEPARATOR + getArtifactID(gav) + SEPARATOR + getVersion(gav);
+                getGroupIdPath(gav) + SEPARATOR +
+                getArtifactId(gav) + SEPARATOR +
+                getVersion(gav);
     }
 
     private String[] extractGav(String resource) {
         String[] gav = resource.split(GAV_DELIMITER);
-        if ((gav.length < MINIMAL_GAV_PARTS) || (gav.length > MAXIMAL_GAV_PARTS)) {//at least g:a:v at maximum g:a:v:p:c
+        if ((gav.length < MINIMAL_GAV_PARTS) || (gav.length > MAXIMAL_GAV_PARTS)) { //at least g:a:v at maximum g:a:v:p:c
             throw new IllegalArgumentException("Unexpected resource format: " + resource +
                     ", should be <group ID>:<artifact ID>:<version> or <group ID>:<artifact ID>:<version>:<packaging> or <group ID>:<artifact ID>:<version>:<packaging>:<classifier>");
         }
         return gav;
     }
 
-    private String getGroupIDPath(String[] gav) {
+    private String getGroupIdPath(String[] gav) {
         return gav[0].replace('.', SEPARATOR);
     }
 
-    private String getArtifactID(String[] gav) {
+    private String getArtifactId(String[] gav) {
         return gav[1];
     }
 
