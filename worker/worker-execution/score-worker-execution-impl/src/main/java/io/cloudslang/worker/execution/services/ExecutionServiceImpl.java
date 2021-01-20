@@ -58,6 +58,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -234,7 +235,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
             String branchIdToCheckoutLicense = (String) execution.getSystemContext().get(BRANCH_ID_TO_CHECK_OUT_LICENSE);
             if (StringUtils.isNotBlank(branchIdToCheckoutLicense) && StringUtils.equals(branchIdToCheckoutLicense, execution.getSystemContext().getBranchId())) {
                 aplsLicensingService.checkoutBeginLane(execution.getExecutionId().toString(), branchIdToCheckoutLicense,
-                        (Long)execution.getSystemContext().get(SC_TIMEOUT_START_TIME), (Integer)execution.getSystemContext().get(SC_TIMEOUT_MINS));
+                        Optional.ofNullable((Long)execution.getSystemContext().get(SC_TIMEOUT_START_TIME)).orElse(0L),
+                        Optional.ofNullable((Integer)execution.getSystemContext().get(SC_TIMEOUT_MINS)).orElse(0));
             }
         } finally {
             execution.getSystemContext().remove(BRANCH_ID_TO_CHECK_OUT_LICENSE);
