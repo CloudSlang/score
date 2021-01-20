@@ -16,6 +16,7 @@
 
 package io.cloudslang.dependency.impl.services;
 
+import com.google.common.base.Splitter;
 import io.cloudslang.dependency.api.services.DependencyService;
 import io.cloudslang.dependency.api.services.MavenConfig;
 import io.cloudslang.score.events.EventBus;
@@ -54,7 +55,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
@@ -64,7 +64,6 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -72,13 +71,15 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static com.google.common.collect.ImmutableList.copyOf;
 import static io.cloudslang.dependency.api.services.MavenConfig.SEPARATOR;
 import static io.cloudslang.score.events.EventConstants.MAVEN_DEPENDENCY_BUILD;
 import static io.cloudslang.score.events.EventConstants.MAVEN_DEPENDENCY_BUILD_FINISHED;
+import static java.lang.System.arraycopy;
 import static java.lang.System.getProperty;
 import static java.lang.Thread.currentThread;
-import static org.apache.commons.lang3.StringUtils.endsWithIgnoreCase;
 import static org.springframework.util.StringUtils.arrayToDelimitedString;
+import static org.springframework.util.StringUtils.endsWithIgnoreCase;
 
 /**
  * @author Alexander Eskin
@@ -348,14 +349,11 @@ public class DependencyServiceImpl implements DependencyService {
         if (!resourceFolder.exists() || !resourceFolder.isDirectory()) {
             throw new IllegalStateException("Directory " + resourceFolder.getPath() + " not found");
         }
-        File[] files = resourceFolder.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.toLowerCase().endsWith(".jar") || name.toLowerCase().endsWith(".zip");
-            }
-        });
-        //we suppose that there should be either 1 jar or 1 zip
-        if (files.length == 0) {
+        File[] files = resourceFolder.listFiles(
+                (dir, name) -> endsWithIgnoreCase(name, ".jar") || endsWithIgnoreCase(name, ".zip")
+        );
+        // We suppose that there should be either 1 jar or 1 zip
+        if ((files == null) || (files.length == 0)) {
             throw new IllegalStateException("No resource is found in " + resourceFolder.getPath());
         }
         File resourceFile = files[0];
@@ -372,7 +370,7 @@ public class DependencyServiceImpl implements DependencyService {
     private String getResourceString(String[] gav, boolean transitive) {
         // if not transitive, use type "pom"
         String[] newGav = new String[Math.max(4, gav.length)];
-        System.arraycopy(gav, 0, newGav, 0, gav.length);
+        arraycopy(gav, 0, newGav, 0, gav.length);
         if (!transitive) {
             newGav[3] = "pom";
         } else {
@@ -394,11 +392,10 @@ public class DependencyServiceImpl implements DependencyService {
     private List<String> parse(File file) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
             String line = reader.readLine();
-            if (line.startsWith(PATH_FILE_DELIMITER)) {
-                line = line.substring(PATH_FILE_DELIMITER.length());
-            }
-            String[] paths = line.split(PATH_FILE_DELIMITER);
-            return Arrays.asList(paths);
+            Iterable<String> paths = Splitter.on(PATH_FILE_DELIMITER)
+                    .omitEmptyStrings()
+                    .split(line);
+            return copyOf(paths);
         }
     }
 
