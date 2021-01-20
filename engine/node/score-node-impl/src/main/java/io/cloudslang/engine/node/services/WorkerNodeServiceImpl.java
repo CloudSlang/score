@@ -277,7 +277,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public void updateQueueSync(boolean isQueueSync) {
         List<WorkerNode> workers = workerNodeRepository.findAll();
         for (WorkerNode w : workers) {
