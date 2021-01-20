@@ -50,6 +50,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringReader;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -311,7 +312,7 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
             case BOOLEAN:
                 return Boolean.valueOf(results.getReturnResult());
             case INTEGER:
-                return Integer.valueOf(results.getReturnResult());
+                return new BigInteger(results.getReturnResult());
             case LIST:
                 return objectMapper.readValue(results.getReturnResult(), new TypeReference<ArrayList<Serializable>>() {
                 });
