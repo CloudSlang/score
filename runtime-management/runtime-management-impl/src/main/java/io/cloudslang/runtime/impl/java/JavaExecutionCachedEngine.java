@@ -29,7 +29,6 @@ import java.util.Set;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 
-
 public class JavaExecutionCachedEngine extends ExecutionEngine implements JavaExecutionEngine {
     private static final int CACHE_SIZE = Integer.getInteger("java.executor.cache.size", 200);
 
