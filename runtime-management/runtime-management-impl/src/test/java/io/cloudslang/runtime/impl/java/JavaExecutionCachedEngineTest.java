@@ -72,7 +72,6 @@ public class JavaExecutionCachedEngineTest extends AbsExecutionCachedEngineTest 
     @Autowired
     private JavaExecutionCachedEngine javaExecutionEngine;
 
-
     @Test
     public void testExecuteIsCalledOnceWithCorrectParams() {
         final JavaExecutor javaExecutor1 = mock(JavaExecutor.class);
