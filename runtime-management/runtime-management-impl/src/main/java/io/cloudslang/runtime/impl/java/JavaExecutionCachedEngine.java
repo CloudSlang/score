@@ -16,48 +16,54 @@
 
 package io.cloudslang.runtime.impl.java;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.google.common.annotations.VisibleForTesting;
 import io.cloudslang.dependency.api.services.DependencyService;
 import io.cloudslang.runtime.api.java.JavaExecutionParametersProvider;
-import io.cloudslang.runtime.impl.ExecutionCachedEngine;
-import org.python.google.common.collect.Sets;
+import io.cloudslang.runtime.impl.ExecutionEngine;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Set;
 
-/**
- * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
- */
-public class JavaExecutionCachedEngine extends ExecutionCachedEngine<JavaExecutor> implements JavaExecutionEngine {
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
+
+
+public class JavaExecutionCachedEngine extends ExecutionEngine implements JavaExecutionEngine {
+    private static final int CACHE_SIZE = Integer.getInteger("java.executor.cache.size", 200);
+
     @Autowired
     private DependencyService dependencyService;
 
-    @Value("#{systemProperties['" + JavaExecutionConfigurationConsts.JAVA_EXECUTOR_CACHE_SIZE + "'] != null ? systemProperties['" + JavaExecutionConfigurationConsts.JAVA_EXECUTOR_CACHE_SIZE + "'] : " + JavaExecutionConfigurationConsts.JAVA_EXECUTOR_CACHE_DEFAULT_SIZE + "}")
-    private int cacheSize;
+    private final Cache<String, JavaExecutor> executorCache;
+
+    public JavaExecutionCachedEngine() {
+        this.executorCache = Caffeine.newBuilder()
+                .maximumSize(CACHE_SIZE)
+                .build();
+    }
 
     @Override
     public Object execute(String dependency, String className, String methodName, JavaExecutionParametersProvider parametersProvider) {
-        JavaExecutor executor = allocateExecutor((dependency == null || dependency.isEmpty()) ? Sets.<String>newHashSet() :
-                Sets.newHashSet(dependency));
-        try {
-            return executor.execute(className, methodName, parametersProvider);
-        } finally {
-            releaseExecutor(executor);
+        Set<String> dependencies = (dependency == null || dependency.isEmpty()) ? emptySet() : singleton(dependency);
+        String dependenciesKey = generatedDependenciesKey(dependencies);
+        JavaExecutor executor = getExecutorFromCache(dependenciesKey);
+        if (executor == null) {
+            final JavaExecutor createdExecutor = createNewExecutor(dependencies);
+            executor = executorCache.get(dependenciesKey, k -> createdExecutor);
         }
+        return executor.execute(className, methodName, parametersProvider);
     }
 
-    @Override
-    protected DependencyService getDependencyService() {
-        return dependencyService;
+    @VisibleForTesting
+    JavaExecutor createNewExecutor(Set<String> dependencies) {
+        return new JavaExecutor(dependencyService.getDependencies(dependencies));
     }
 
-    @Override
-    protected int getCacheSize() {
-        return cacheSize;
+    @VisibleForTesting
+    JavaExecutor getExecutorFromCache(String dependenciesKey) {
+        return executorCache.getIfPresent(dependenciesKey);
     }
 
-    @Override
-    protected JavaExecutor createNewExecutor(Set<String> filePaths) {
-        return new JavaExecutor(filePaths);
-    }
 }
