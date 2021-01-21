@@ -15,14 +15,15 @@
  */
 package io.cloudslang.worker.monitor.service;
 
-public enum MetricKeyValue {
+public enum WorkerPerformanceMetric {
     WORKER_ID,
     WORKER_MEASURED_TIME,
     CPU_USAGE,
     MEMORY_USAGE,
     HEAP_SIZE,
     THREAD_UTILIZATION,
-    DISK_USAGE;
+    DISK_WRITE_USAGE,
+    DISK_READ_USAGE;
 
-    MetricKeyValue() { }
+    WorkerPerformanceMetric() { }
 }

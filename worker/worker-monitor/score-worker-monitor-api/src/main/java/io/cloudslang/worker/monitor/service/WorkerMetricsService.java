@@ -15,8 +15,8 @@
  */
 package io.cloudslang.worker.monitor.service;
 
-public interface WorkerMetricCollectorService {
+public interface WorkerMetricsService {
 
-    void dispatchPerfMetric();
-    void collectPerfMetrics();
+    void dispatchPerformanceMetrics();
+    void collectPerformanceMetrics();
 }

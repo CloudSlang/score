@@ -15,41 +15,36 @@
  */
 package io.cloudslang.worker.monitor.service;
 
+import io.cloudslang.score.events.EventBus;
 import io.cloudslang.score.events.EventConstants;
-import io.cloudslang.score.events.FastEventBus;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.worker.monitor.PerfMetricCollector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.locks.ReentrantLock;
 
-public class WorkerMetricCollectorServiceImpl implements WorkerMetricCollectorService {
-    protected static final Logger logger = LogManager.getLogger(WorkerMetricCollectorServiceImpl.class);
-    static int capacity = Integer.parseInt(System.getProperty("Number.Of.Samples.To.Collect", "10"));
-    private LinkedBlockingQueue<Map<MetricKeyValue, Serializable>> collectMetricQueue = new LinkedBlockingQueue<Map<MetricKeyValue, Serializable>>(capacity);
+public class WorkerMetricsServiceImpl implements WorkerMetricsService {
+    protected static final Logger logger = LogManager.getLogger(WorkerMetricsServiceImpl.class);
+    static int capacity = Integer.getInteger("metrics.collection.sampleCount", 10);
+    private LinkedBlockingQueue<Map<WorkerPerformanceMetric, Serializable>> collectMetricQueue = new LinkedBlockingQueue<Map<WorkerPerformanceMetric, Serializable>>(capacity);
     @Autowired
     PerfMetricCollector perfMetricCollector;
     @Autowired
-    @Qualifier("consumptionFastEventBus")
-    private FastEventBus fastEventBus;
-    private final ReentrantLock reLock = new ReentrantLock();
+    private EventBus eventBus;
 
     @Override
-    public void collectPerfMetrics() {
+    public void collectPerformanceMetrics() {
         if (logger.isDebugEnabled()) {
             logger.debug("Collecting Worker Metrics");
         }
-        while (reLock.isLocked());
         try {
-            Map<MetricKeyValue, Serializable> metricInfo = perfMetricCollector.collectMetric();
+            Map<WorkerPerformanceMetric, Serializable> metricInfo = perfMetricCollector.collectMetrics();
             collectMetricQueue.put(metricInfo);
             if (logger.isDebugEnabled()) {
                 logger.debug("Sending Worker Metric Info:[" + metricInfo + "]");
@@ -60,23 +55,22 @@ public class WorkerMetricCollectorServiceImpl implements WorkerMetricCollectorSe
     }
 
     @Override
-    public void dispatchPerfMetric() {
-        reLock.lock();
+    public void dispatchPerformanceMetrics() {
         try {
-            Map<Integer,Map<MetricKeyValue, Serializable>> metricData = convertQueueToHashMap(collectMetricQueue);
+            Map<Integer,Map<WorkerPerformanceMetric, Serializable>> metricData = convertQueueToHashMap(collectMetricQueue);
             ScoreEvent scoreEvent = new ScoreEvent(EventConstants.WORKER_PERFORMANCE_MONITOR, (Serializable) metricData);
-            fastEventBus.dispatch(scoreEvent);
-            collectMetricQueue.clear();
+            eventBus.dispatch(scoreEvent);
         } catch (Exception e) {
             logger.error("Failed to dispatch metric info event", e);
-        } finally {
-            reLock.unlock();
         }
     }
-    private Map<Integer,Map<MetricKeyValue, Serializable>> convertQueueToHashMap(LinkedBlockingQueue<Map<MetricKeyValue, Serializable>> metricQueue) {
-        Map<Integer,Map<MetricKeyValue, Serializable>> metricData = new HashMap<>();
-        for(int i=0;i<metricQueue.size();i++) {
-            metricData.put(i,metricQueue.peek());
+
+    private Map<Integer,Map<WorkerPerformanceMetric, Serializable>> convertQueueToHashMap(LinkedBlockingQueue<Map<WorkerPerformanceMetric, Serializable>> metricQueue) {
+        Map<Integer,Map<WorkerPerformanceMetric, Serializable>> metricData = new HashMap<>();
+        List<Map<WorkerPerformanceMetric, Serializable>> metricList = new ArrayList<>();
+        metricQueue.drainTo(metricList);
+        for(int i=0;i<metricList.size();i++) {
+            metricData.put(i,metricList.get(i));
         }
         return metricData;
     }

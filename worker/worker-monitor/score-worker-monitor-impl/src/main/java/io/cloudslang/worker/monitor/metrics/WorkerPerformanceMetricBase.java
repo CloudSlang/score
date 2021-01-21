@@ -22,18 +22,14 @@ import oshi.software.os.OperatingSystem;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public abstract class WorkerPerfMetricImpl implements WorkerPerfMetric {
+public abstract class WorkerPerformanceMetricBase implements WorkerPerfMetric {
 
-    public int getCurrentProcessId() {
+    protected OSProcess getProcess() {
         SystemInfo systemInfo = new SystemInfo();
         OperatingSystem operatingSystem = systemInfo.getOperatingSystem();
-        return operatingSystem.getProcessId();
-    }
-
-    protected OSProcess getProcess(int pid){
-        SystemInfo si = new SystemInfo();
-        OperatingSystem os = si.getOperatingSystem();
-        return os.getProcess(pid);
+        int processId = operatingSystem.getProcessId();
+        OSProcess osProcess = operatingSystem.getProcess(processId);
+        return osProcess;
     }
 
     protected double formatTo2Decimal(double value) {

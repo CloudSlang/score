@@ -15,29 +15,37 @@
  */
 package io.cloudslang.worker.monitor.metrics;
 
-import io.cloudslang.worker.monitor.service.MetricKeyValue;
+import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
+import javafx.util.Pair;
 import oshi.SystemInfo;
 import oshi.hardware.GlobalMemory;
 import oshi.software.os.OSProcess;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
-public class PercentMemoryByProcess extends WorkerPerfMetricImpl {
+import javax.annotation.PostConstruct;
+import java.io.Serializable;
+
+public class MemoryUtilizationService extends WorkerPerformanceMetricBase {
+
+    private long usedRamProcess;
+    private OSProcess process;
+    private long totalRam;
+
+    @PostConstruct
+    public void init() {
+        SystemInfo si = new SystemInfo();
+        process = getProcess();
+        GlobalMemory globalMemory = si.getHardware().getMemory();
+        this.totalRam = globalMemory.getTotal();
+    }
+
     @Override
-    public Map<MetricKeyValue, Serializable> measure() {
-        Map<MetricKeyValue, Serializable> memUsage = new HashMap<>();
-        memUsage.put(MetricKeyValue.MEMORY_USAGE, getCurrentValue());
+    public Pair<WorkerPerformanceMetric, Serializable> measure() {
+        Pair<WorkerPerformanceMetric, Serializable> memUsage = new Pair<>(WorkerPerformanceMetric.MEMORY_USAGE, getCurrentValue());
         return memUsage;
     }
 
     public double getCurrentValue() {
-        SystemInfo si = new SystemInfo();
-        int pid = getCurrentProcessId();
-        OSProcess process = getProcess(pid);
-        GlobalMemory globalMemory = si.getHardware().getMemory();
-        long usedRamProcess = process.getResidentSetSize();
-        long totalRam = globalMemory.getTotal();
+        this.usedRamProcess = process.getResidentSetSize();
         double ramUsed = (double) (usedRamProcess * 100 / totalRam);
         return formatTo2Decimal(ramUsed);
     }

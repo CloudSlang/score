@@ -15,32 +15,39 @@
  */
 package io.cloudslang.worker.monitor.metrics;
 
-import io.cloudslang.worker.monitor.service.MetricKeyValue;
+import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
+import javafx.util.Pair;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.software.os.OSProcess;
 import oshi.software.os.OperatingSystem;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
-public class PercentCPUByProcess extends WorkerPerfMetricImpl {
+import javax.annotation.PostConstruct;
+import java.io.Serializable;
+
+public class CpuUtilizationService extends WorkerPerformanceMetricBase {
     private static OSProcess oldProcess;
+//    private CentralProcessor processor;
+
+//    @PostConstruct
+//    public void init() {
+//        SystemInfo systemInfo = new SystemInfo();
+//        CentralProcessor processor = systemInfo.getHardware().getProcessor();
+//    }
+
     @Override
-    public Map<MetricKeyValue, Serializable> measure() {
-        Map<MetricKeyValue, Serializable> cpuUsage = new HashMap<>();
-        cpuUsage.put(MetricKeyValue.CPU_USAGE, getCurrentValue());
+    public Pair<WorkerPerformanceMetric, Serializable> measure() {
+        Pair<WorkerPerformanceMetric, Serializable> cpuUsage = new Pair<>(WorkerPerformanceMetric.CPU_USAGE,getCurrentValue());
         return cpuUsage;
     }
 
     public double getCurrentValue() {
         SystemInfo systemInfo = new SystemInfo();
-        OperatingSystem operatingSystem = systemInfo.getOperatingSystem();
         CentralProcessor processor = systemInfo.getHardware().getProcessor();
+        oldProcess = getProcess();
+        OSProcess osProcess = getProcess();
+        //Gets CPU usage of this process since a previous snapshot of the same process, provided as a parameter.
         int cpuNumber = processor.getLogicalProcessorCount();
-        int pid = getCurrentProcessId();
-        oldProcess = operatingSystem.getProcess(pid);
-        OSProcess osProcess = operatingSystem.getProcess(pid);
         double cpuUsed = (osProcess.getProcessCpuLoadBetweenTicks(oldProcess) * 100) / cpuNumber;
         oldProcess = osProcess;
         return formatTo2Decimal(cpuUsed);

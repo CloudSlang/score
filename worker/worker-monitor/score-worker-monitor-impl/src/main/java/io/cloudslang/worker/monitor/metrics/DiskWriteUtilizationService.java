@@ -15,32 +15,33 @@
  */
 package io.cloudslang.worker.monitor.metrics;
 
-import io.cloudslang.worker.monitor.metric.WorkerPerfMetric;
 import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
 import javafx.util.Pair;
+import oshi.software.os.OSProcess;
 
+import javax.annotation.PostConstruct;
 import java.io.Serializable;
-import java.util.function.IntSupplier;
 
-public class WorkerThreadUtilization implements WorkerPerfMetric {
+public class DiskWriteUtilizationService extends WorkerPerformanceMetricBase {
 
-    private IntSupplier runningTaskCount;
-    private final int numberOfThreads;
+    private OSProcess process;
 
-    public WorkerThreadUtilization(IntSupplier runningTaskCount,int numberOfThreads) {
-        if (runningTaskCount==null)
-            throw new IllegalArgumentException("parameter 'runningTaskCount' cannot be null");
-        this.runningTaskCount=runningTaskCount;
-        this.numberOfThreads=numberOfThreads;
+    @PostConstruct
+    public void init() {
+        this.process = getProcess();
     }
 
     @Override
     public Pair<WorkerPerformanceMetric, Serializable> measure() {
-        Pair<WorkerPerformanceMetric, Serializable> threadUtilization = new Pair<>(WorkerPerformanceMetric.THREAD_UTILIZATION, getCurrentValue());
-        return threadUtilization;
+        Pair<WorkerPerformanceMetric, Serializable> diskWriteUsage = new Pair<>(WorkerPerformanceMetric.DISK_WRITE_USAGE, getCurrentValue());
+        return diskWriteUsage;
     }
 
-    public int getCurrentValue() {
-        return ((runningTaskCount.getAsInt() * 100) / numberOfThreads);
+    public long getCurrentValue() {
+        long writeBytes = 0;
+        if (process != null) {
+            writeBytes = process.getBytesWritten();
+        }
+        return writeBytes;
     }
 }

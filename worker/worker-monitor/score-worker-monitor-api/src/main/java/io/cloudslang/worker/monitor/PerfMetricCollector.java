@@ -15,12 +15,12 @@
  */
 package io.cloudslang.worker.monitor;
 
-import io.cloudslang.worker.monitor.service.MetricKeyValue;
+import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
 
 import java.io.Serializable;
 import java.util.Map;
 
 public interface PerfMetricCollector {
 
-    Map<MetricKeyValue, Serializable> collectMetric();
+    Map<WorkerPerformanceMetric, Serializable> collectMetrics();
 }
