@@ -15,9 +15,13 @@
         <task:scheduled ref="sessionDataHandler" method="sessionTimeOutScheduler" fixed-rate="60000"/>
         <task:scheduled ref="workerExecutionMonitorService" method="executeScheduledWorkerMonitors" fixed-delay="#{scheduledWorkerMonitorInterval}"/>
         <task:scheduled ref="workerExecutionMonitorService" method="collectMonitorInformation" fixed-delay="#{workerMonitorRefreshInterval}"/>
-        <task:scheduled ref="workerMetricCollectorService" method="collectPerfMetrics" fixed-delay="#{scheduledPerfMetricCollectionInterval}"/>
-        <task:scheduled ref="workerMetricCollectorService" method="collectPerfMetricsInBatches" fixed-delay="#{scheduledQueueMetricCollectionInterval}"/>
 	</task:scheduled-tasks>
+
+    <task:scheduler id="scoreWorkerMetricScheduler" pool-size="2" />
+    <task:scheduled-tasks scheduler="scoreWorkerMetricScheduler">
+        <task:scheduled ref="workerMetricCollectorService" method="collectPerformanceMetrics" fixed-delay="#{scheduledPerfMetricCollectionInterval}"/>
+        <task:scheduled ref="workerMetricCollectorService" method="dispatchPerformanceMetrics" fixed-delay="#{scheduledMetricDispatchInterval}"/>
+    </task:scheduled-tasks>
 
     <!--
     This is a dedicated scheduler with fixed pool size of 1

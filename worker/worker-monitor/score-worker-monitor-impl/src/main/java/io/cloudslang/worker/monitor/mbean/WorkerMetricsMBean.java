@@ -16,9 +16,10 @@
 package io.cloudslang.worker.monitor.mbean;
 
 import io.cloudslang.worker.management.services.WorkerManager;
-import io.cloudslang.worker.monitor.metrics.PercentCPUByProcess;
-import io.cloudslang.worker.monitor.metrics.DiskUsagePerProcess;
-import io.cloudslang.worker.monitor.metrics.PercentMemoryByProcess;
+import io.cloudslang.worker.monitor.metrics.CpuUtilizationService;
+import io.cloudslang.worker.monitor.metrics.DiskReadUtilizationService;
+import io.cloudslang.worker.monitor.metrics.DiskWriteUtilizationService;
+import io.cloudslang.worker.monitor.metrics.MemoryUtilizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
@@ -28,11 +29,13 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 public class WorkerMetricsMBean {
 
     @Autowired
-    PercentCPUByProcess percentCPUByProcess;
+    private CpuUtilizationService cpuUtilizationService;
     @Autowired
-    DiskUsagePerProcess diskUsagePerProcess;
+    private DiskReadUtilizationService diskReadUtilizationService;
     @Autowired
-    PercentMemoryByProcess percentMemoryByProcess;
+    private MemoryUtilizationService memoryUtilizationService;
+    @Autowired
+    private DiskWriteUtilizationService diskWriteUtilizationService;
     @Autowired
     private WorkerManager workerManager;
     @Autowired
@@ -41,18 +44,21 @@ public class WorkerMetricsMBean {
 
     @ManagedAttribute(description = "Current Cpu Usage")
     public double getCpuUsage() {
-        return percentCPUByProcess.getCurrentValue();
+        return cpuUtilizationService.getCurrentValue();
     }
 
     @ManagedAttribute(description = "Current Memory Usage")
     public double getMemoryUsage() {
-        return percentMemoryByProcess.getCurrentValue();
+        return memoryUtilizationService.getCurrentValue();
     }
 
-    @ManagedAttribute(description = "Current Disk Usage")
-    public long getDiskUsage() {
-        return diskUsagePerProcess.getCurrentValue();
+    @ManagedAttribute(description = "Current Disk Read Usage")
+    public long getDiskReadUsage() {
+        return diskReadUtilizationService.getCurrentValue();
     }
+
+    @ManagedAttribute(description = "Current Disk Write Usage")
+    public long getDiskWriteUsage() { return diskWriteUtilizationService.getCurrentValue(); }
 
     @ManagedAttribute(description = "Running Tasks Count")
     public double getWorkerThreadsUsage() {
