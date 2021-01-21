@@ -390,13 +390,14 @@ public class DependencyServiceImpl implements DependencyService {
     }
 
     private List<String> parse(File file) throws IOException {
+        String line;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
-            String line = reader.readLine();
-            Iterable<String> paths = Splitter.on(PATH_FILE_DELIMITER)
-                    .omitEmptyStrings()
-                    .split(line);
-            return copyOf(paths);
+            line = reader.readLine();
         }
+        Iterable<String> paths = Splitter.on(PATH_FILE_DELIMITER)
+                .omitEmptyStrings()
+                .split(line);
+        return copyOf(paths);
     }
 
     private String getResourceFolderPath(String[] gav) {
