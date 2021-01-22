@@ -44,21 +44,35 @@ public class PerformanceMetricsCollector implements PerfMetricCollector {
 
     List<WorkerPerfMetric> workerPerfMetrics;
 
+    @Autowired
+    private CpuUtilizationService cpuUtilizationService;
+    @Autowired
+    private MemoryUtilizationService memoryUtilizationService;
+    @Autowired
+    private DiskReadUtilizationService diskReadUtilizationService;
+    @Autowired
+    private DiskWriteUtilizationService diskWriteUtilizationService;
+    @Autowired
+    private WorkerThreadUtilization workerThreadUtilization;
+    @Autowired
+    private HeapUtilizationService heapUtilizationService;
+
     @PostConstruct
     public void init() {
-        IntSupplier runningTaskCount = () -> workerManager.getRunningTasksCount();
-        workerPerfMetrics.add(new WorkerThreadUtilization(runningTaskCount,numberOfThreads));
+        createMetrics();
+//        workerPerfMetrics.add(new WorkerThreadUtilization(workerManager,numberOfThreads));
     }
 
-    public PerformanceMetricsCollector() { createMetrics(); }
+    public PerformanceMetricsCollector() { }
 
     private void createMetrics() {
         workerPerfMetrics = new ArrayList<>();
-        workerPerfMetrics.add(new CpuUtilizationService());
-        workerPerfMetrics.add(new DiskReadUtilizationService());
-        workerPerfMetrics.add(new MemoryUtilizationService());
-        workerPerfMetrics.add(new HeapUtilizationService());
-        workerPerfMetrics.add(new DiskWriteUtilizationService());
+        workerPerfMetrics.add(cpuUtilizationService);
+        workerPerfMetrics.add(diskReadUtilizationService);
+        workerPerfMetrics.add(memoryUtilizationService);
+        workerPerfMetrics.add(heapUtilizationService);
+        workerPerfMetrics.add(diskWriteUtilizationService);
+        workerPerfMetrics.add(workerThreadUtilization);
     }
 
     @Override

@@ -15,24 +15,32 @@
  */
 package io.cloudslang.worker.monitor.metrics;
 
+import io.cloudslang.worker.management.services.WorkerManager;
 import io.cloudslang.worker.monitor.metric.WorkerPerfMetric;
 import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
 import javafx.util.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
+import javax.annotation.PostConstruct;
 import java.io.Serializable;
 import java.util.function.IntSupplier;
 
 public class WorkerThreadUtilization implements WorkerPerfMetric {
 
-    private IntSupplier runningTaskCount;
-    private final int numberOfThreads;
+    @Autowired
+    private WorkerManager workerManager;
 
-    public WorkerThreadUtilization(IntSupplier runningTaskCount,int numberOfThreads) {
-        if (runningTaskCount==null)
-            throw new IllegalArgumentException("parameter 'runningTaskCount' cannot be null");
-        this.runningTaskCount=runningTaskCount;
-        this.numberOfThreads=numberOfThreads;
-    }
+    @Autowired
+    @Qualifier("numberOfExecutionThreads")
+    private int numberOfThreads;
+
+//    public WorkerThreadUtilization(IntSupplier runningTaskCount,int numberOfThreads) {
+//        if (runningTaskCount==null)
+//            throw new IllegalArgumentException("parameter 'runningTaskCount' cannot be null");
+//        this.runningTaskCount=runningTaskCount;
+//        this.numberOfThreads=numberOfThreads;
+//    }
 
     @Override
     public Pair<WorkerPerformanceMetric, Serializable> measure() {
@@ -41,6 +49,6 @@ public class WorkerThreadUtilization implements WorkerPerfMetric {
     }
 
     public int getCurrentValue() {
-        return ((runningTaskCount.getAsInt() * 100) / numberOfThreads);
+        return ((workerManager.getRunningTasksCount() * 100) / numberOfThreads);
     }
 }
