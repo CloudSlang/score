@@ -23,7 +23,6 @@ import javax.annotation.PostConstruct;
 import java.io.Serializable;
 
 public class DiskWriteUtilizationService extends WorkerPerformanceMetricBase {
-
     private OSProcess process;
 
     @PostConstruct

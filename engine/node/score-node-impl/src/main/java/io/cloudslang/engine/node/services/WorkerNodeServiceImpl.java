@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 
 
@@ -311,8 +310,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 
     @Override
     @Transactional
-    public void updateWorkerBusynessValue(String uuid, String workerBusynessValue)
-    {
+    public void updateWorkerBusynessValue(String uuid, String workerBusynessValue) {
         WorkerNode worker = workerNodeRepository.findByUuid(uuid);
         if (worker == null) {
             throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);

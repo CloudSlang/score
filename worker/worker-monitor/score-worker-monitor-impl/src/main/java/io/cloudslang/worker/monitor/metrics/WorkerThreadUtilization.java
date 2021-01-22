@@ -22,9 +22,7 @@ import javafx.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import javax.annotation.PostConstruct;
 import java.io.Serializable;
-import java.util.function.IntSupplier;
 
 public class WorkerThreadUtilization implements WorkerPerfMetric {
 
@@ -35,12 +33,6 @@ public class WorkerThreadUtilization implements WorkerPerfMetric {
     @Qualifier("numberOfExecutionThreads")
     private int numberOfThreads;
 
-//    public WorkerThreadUtilization(IntSupplier runningTaskCount,int numberOfThreads) {
-//        if (runningTaskCount==null)
-//            throw new IllegalArgumentException("parameter 'runningTaskCount' cannot be null");
-//        this.runningTaskCount=runningTaskCount;
-//        this.numberOfThreads=numberOfThreads;
-//    }
 
     @Override
     public Pair<WorkerPerformanceMetric, Serializable> measure() {

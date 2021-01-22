@@ -18,7 +18,6 @@ package io.cloudslang.worker.monitor.metrics;
 import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
 import javafx.util.Pair;
 import java.io.Serializable;
-
 import static java.lang.Runtime.getRuntime;
 
 public class HeapUtilizationService extends WorkerPerformanceMetricBase {

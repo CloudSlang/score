@@ -20,7 +20,6 @@ import javafx.util.Pair;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.software.os.OSProcess;
-import oshi.software.os.OperatingSystem;
 
 import javax.annotation.PostConstruct;
 import java.io.Serializable;
@@ -38,7 +37,7 @@ public class CpuUtilizationService extends WorkerPerformanceMetricBase {
 
     @Override
     public Pair<WorkerPerformanceMetric, Serializable> measure() {
-        Pair<WorkerPerformanceMetric, Serializable> cpuUsage = new Pair<>(WorkerPerformanceMetric.CPU_USAGE,getCurrentValue());
+        Pair<WorkerPerformanceMetric, Serializable> cpuUsage = new Pair<>(WorkerPerformanceMetric.CPU_USAGE, getCurrentValue());
         return cpuUsage;
     }
 

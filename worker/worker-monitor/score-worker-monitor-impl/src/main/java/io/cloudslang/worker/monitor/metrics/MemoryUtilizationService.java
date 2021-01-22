@@ -20,7 +20,6 @@ import javafx.util.Pair;
 import oshi.SystemInfo;
 import oshi.hardware.GlobalMemory;
 import oshi.software.os.OSProcess;
-
 import javax.annotation.PostConstruct;
 import java.io.Serializable;
 
