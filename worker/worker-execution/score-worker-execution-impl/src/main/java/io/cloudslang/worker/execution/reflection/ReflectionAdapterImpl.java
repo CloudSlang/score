@@ -100,7 +100,7 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
                 Method method = doLoadActionMethod(metadata, actionClass);
                 String[] parameterNames = parameterNameDiscoverer.getParameterNames(method);
                 tripleValue = ImmutableTriple.of(invokingObject, method, parameterNames);
-                concurrentMap.put(key, tripleValue);
+                concurrentMap.putIfAbsent(key, tripleValue);
             }
             Object actionObject = tripleValue.getLeft();
             Method actionMethod = tripleValue.getMiddle();
