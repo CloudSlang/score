@@ -167,13 +167,15 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
         Object[] args = new Object[paramNames.length];
         for (int counter = 0; counter < args.length; counter++) {
             String paramName = paramNames[counter];
-            if (NON_SERIALIZABLE_EXECUTION_DATA.equals(paramName)) {
+            if (!NON_SERIALIZABLE_EXECUTION_DATA.equals(paramName)) {
+                args[counter] = accessor.getValue(paramName);
+            } else {
                 final Long executionId = getExecutionIdFromActionData(accessor);
                 final Long runningId = getRunningExecutionIdFromActionData(accessor);
                 final Map<String, Object> globalSessionsExecutionData = sessionDataHandler.getGlobalSessionsExecutionData(executionId);
                 final Map<String, Object> sessionObjectExecutionData = sessionDataHandler.getSessionsExecutionData(executionId, runningId);
 
-                Map<String, Map<String, Object>> nonSerializableExecutionData = new HashMap<>(2);
+                Map<String, Map<String, Object>> nonSerializableExecutionData = new HashMap<>(3);
                 nonSerializableExecutionData.put(GLOBAL_SESSION_OBJECT, globalSessionsExecutionData);
                 nonSerializableExecutionData.put(SESSION_OBJECT, sessionObjectExecutionData);
                 args[counter] = nonSerializableExecutionData;
@@ -181,11 +183,8 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
                 // and set the session data as active, so that it won't be cleared
                 sessionDataHandler.setGlobalSessionDataActive(executionId);
                 sessionDataHandler.setSessionDataActive(executionId, runningId);
-            } else {
-                args[counter] = accessor.getValue(paramName);
             }
         }
-
         return args;
     }
 
