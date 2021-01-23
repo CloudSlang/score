@@ -145,7 +145,7 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
         return (object != null) ? object : actionClass.newInstance();
     }
 
-    private Method doLoadActionMethod(final ControlActionMetadata metadata, final Class<?> actionClass) throws ClassNotFoundException {
+    private Method doLoadActionMethod(final ControlActionMetadata metadata, final Class<?> actionClass) {
         Method actionMethod = null;
         final String metadataMethodName = metadata.getMethodName();
         for (Method method : actionClass.getMethods()) {
