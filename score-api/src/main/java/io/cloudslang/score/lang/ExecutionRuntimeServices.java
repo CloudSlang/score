@@ -101,6 +101,8 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String SC_NESTED_FOR_PARALLELISM_LEVEL = "SC_NESTED_FOR_PARALLELISM_LEVEL";
 
+    private static final String LIC_SWITCH_MODE = "LIC_SWITCH_MODE";
+
     protected Map<String, Serializable> contextMap;
 
     public ExecutionRuntimeServices() {
@@ -519,6 +521,10 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public String removeRobotGroupName() {
         return removeFromMap(ROBOT_GROUP_NAME);
+    }
+
+    public String getLicSwitchMode() {
+        return removeFromMap(LIC_SWITCH_MODE);
     }
 
     public void setPreconditionNotFulfilled() {
