@@ -67,6 +67,8 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeoutException;
 
+import static io.cloudslang.orchestrator.services.AplsLicensingService.BRANCH_ID_TO_CHECK_IN_LICENSE;
+import static io.cloudslang.orchestrator.services.AplsLicensingService.BRANCH_ID_TO_CHECK_OUT_LICENSE;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.ACTION_TYPE;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SEQUENTIAL;
 import static io.cloudslang.score.events.EventConstants.BRANCH_ID;
@@ -124,8 +126,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
     private static final int DEFAULT_PLATFORM_LEVEL_OPERATION_TIMEOUT_IN_SECONDS = 24 * 60 * 60; // seconds in a day
     private static final int DEFAULT_PLATFORM_LEVEL_WAIT_PERIOD_FOR_TIMEOUT_IN_SECONDS = 5 * 60; // 5 minutes
     private static final long DEFAULT_PLATFORM_LEVEL_WAIT_PAUSE_FOR_TIMEOUT_IN_MILLIS = 200; // 200 milliseconds
-
-    public static final String BRANCH_ID_TO_CHECK_OUT_LICENSE = "BRANCH_ID_TO_CHECK_OUT_LICENSE";
 
     private final long operationTimeoutMillis;
     private final long waitPauseForTimeoutMillis;
@@ -234,9 +234,11 @@ public final class ExecutionServiceImpl implements ExecutionService {
         try {
             String branchIdToCheckoutLicense = (String) execution.getSystemContext().get(BRANCH_ID_TO_CHECK_OUT_LICENSE);
             if (StringUtils.isNotBlank(branchIdToCheckoutLicense) && StringUtils.equals(branchIdToCheckoutLicense, execution.getSystemContext().getBranchId())) {
-                aplsLicensingService.checkoutBeginLane(execution.getExecutionId().toString(), branchIdToCheckoutLicense,
-                        Optional.ofNullable((Long)execution.getSystemContext().get(SC_TIMEOUT_START_TIME)).orElse(0L),
-                        Optional.ofNullable((Integer)execution.getSystemContext().get(SC_TIMEOUT_MINS)).orElse(0));
+                String executionId = execution.getExecutionId().toString();
+                Long executionStartTimeMillis = Optional.ofNullable((Long)execution.getSystemContext().get(SC_TIMEOUT_START_TIME)).orElse(0L);
+                Integer executionTimeoutMinutes = Optional.ofNullable((Integer)execution.getSystemContext().get(SC_TIMEOUT_MINS)).orElse(0);
+                aplsLicensingService.checkoutBeginLane(executionId, branchIdToCheckoutLicense, executionStartTimeMillis, executionTimeoutMinutes);
+                execution.getSystemContext().put(BRANCH_ID_TO_CHECK_IN_LICENSE, execution.getSystemContext().getBranchId());
             }
         } finally {
             execution.getSystemContext().remove(BRANCH_ID_TO_CHECK_OUT_LICENSE);

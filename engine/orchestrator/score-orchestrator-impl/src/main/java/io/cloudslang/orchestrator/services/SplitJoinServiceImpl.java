@@ -22,10 +22,6 @@ import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.entities.StartNewBranchPayload;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
-import io.cloudslang.score.events.EventConstants;
-import io.cloudslang.score.events.FastEventBus;
-import io.cloudslang.score.events.ScoreEvent;
-import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.orchestrator.entities.BranchContexts;
 import io.cloudslang.orchestrator.entities.FinishedBranch;
 import io.cloudslang.orchestrator.entities.SplitMessage;
@@ -33,8 +29,12 @@ import io.cloudslang.orchestrator.entities.SuspendedExecution;
 import io.cloudslang.orchestrator.enums.SuspendedExecutionReason;
 import io.cloudslang.orchestrator.repositories.FinishedBranchRepository;
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
-import org.apache.commons.lang.StringUtils;
 import io.cloudslang.score.api.EndBranchDataContainer;
+import io.cloudslang.score.events.EventConstants;
+import io.cloudslang.score.events.FastEventBus;
+import io.cloudslang.score.events.ScoreEvent;
+import io.cloudslang.score.facade.entities.Execution;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,13 +56,13 @@ import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.MULTI_IN
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.NON_BLOCKING;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL_LOOP;
+import static io.cloudslang.orchestrator.services.AplsLicensingService.BRANCH_ID_TO_CHECK_IN_LICENSE;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.FINISHED_CHILD_BRANCHES_DATA;
 import static io.cloudslang.score.events.EventConstants.BRANCH_ID;
 import static io.cloudslang.score.events.EventConstants.EXECUTION_ID;
 import static io.cloudslang.score.events.EventConstants.SPLIT_ID;
 import static io.cloudslang.score.facade.TempConstants.MI_REMAINING_BRANCHES_CONTEXT_KEY;
 import static io.cloudslang.score.facade.execution.ExecutionStatus.CANCELED;
-import static io.cloudslang.score.lang.ExecutionRuntimeServices.SC_NESTED_FOR_PARALLELISM_LEVEL;
 import static java.lang.Long.parseLong;
 import static java.lang.String.valueOf;
 import static java.util.EnumSet.of;
@@ -223,15 +223,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         for (FinishedBranch finishedBranch : finishedBranches) {
             dispatchBranchFinishedEvent(finishedBranch.getExecutionId(), finishedBranch.getSplitId(), finishedBranch.getBranchId());
 
-            if (!"NON_BLOCKING".equals(finishedBranch.getBranchContexts().getSystemContext().get("STEP_TYPE"))) {
-                Integer parallelismLevel = (Integer) finishedBranch.getBranchContexts().getSystemContext().get(SC_NESTED_FOR_PARALLELISM_LEVEL);
-                if (parallelismLevel != null) {
-                    int branchNumber = Integer.parseInt(finishedBranch.getBranchId().split(":")[1]);
-                    if (parallelismLevel == 1 || (parallelismLevel > 1 && branchNumber > 1)) {
-                        aplsLicensingService.checkinEndLane(finishedBranch.getExecutionId(), finishedBranch.getBranchId());
-                    }
-                }
-            }
+            chekinLicenseForLaneIfRequired(finishedBranch);
 
             SuspendedExecution suspendedExecution = suspendedMap.get(finishedBranch.getSplitId());
             if (suspendedExecution != null) {
@@ -253,6 +245,13 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         }
         if (!suspendedExecutionsForMiWithOneBranch.isEmpty()) {
             joinMiBranchesAndSendToQueue(suspendedExecutionsForMiWithOneBranch);
+        }
+    }
+
+    private void chekinLicenseForLaneIfRequired(FinishedBranch finishedBranch) {
+        String branchIdToCheckinLicense = (String) finishedBranch.getBranchContexts().getSystemContext().get(BRANCH_ID_TO_CHECK_IN_LICENSE);
+        if (StringUtils.isNotBlank(branchIdToCheckinLicense) && StringUtils.equals(branchIdToCheckinLicense, finishedBranch.getBranchId())) {
+            aplsLicensingService.checkinEndLane(finishedBranch.getExecutionId(), finishedBranch.getBranchId());
         }
     }
 
