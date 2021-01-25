@@ -41,10 +41,12 @@ import io.cloudslang.worker.management.services.WorkerManager;
 import io.cloudslang.worker.management.services.WorkerManagerMBean;
 import io.cloudslang.worker.management.services.WorkerRecoveryManagerImpl;
 import io.cloudslang.worker.management.services.WorkerVersionServiceImpl;
-import io.cloudslang.worker.monitor.metrics.CpuUtilizationService;
-import io.cloudslang.worker.monitor.metrics.DiskReadUtilizationService;
 import io.cloudslang.worker.monitor.metrics.DiskWriteUtilizationService;
+import io.cloudslang.worker.monitor.metrics.DiskReadUtilizationService;
+import io.cloudslang.worker.monitor.metrics.WorkerThreadUtilization;
 import io.cloudslang.worker.monitor.metrics.MemoryUtilizationService;
+import io.cloudslang.worker.monitor.metrics.CpuUtilizationService;
+import io.cloudslang.worker.monitor.metrics.HeapUtilizationService;
 import io.cloudslang.worker.monitor.PerformanceMetricsCollector;
 import io.cloudslang.worker.monitor.service.WorkerMetricsServiceImpl;
 import io.cloudslang.worker.monitor.mbean.WorkerMetricsMBean;
@@ -95,8 +97,10 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(DiskReadUtilizationService.class, "diskReadUtilizationService");
 		put(DiskWriteUtilizationService.class, "diskWriteUtilizationService");
 		put(MemoryUtilizationService.class, "memoryUtilizationService");
-		put(PerformanceMetricsCollector.class,"perfMetricCollector");
-		put(WorkerMetricsServiceImpl.class,"workerMetricCollectorService");
+		put(PerformanceMetricsCollector.class, "perfMetricCollector");
+		put(WorkerMetricsServiceImpl.class, "workerMetricCollectorService");
+		put(HeapUtilizationService.class, "heapUtilizationService");
+		put(WorkerThreadUtilization.class, "workerThreadUtilization");
 	}};
 
 	private List<ConfValue> configurationValues = Arrays.asList(

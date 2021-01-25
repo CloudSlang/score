@@ -311,8 +311,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 
     @Override
     @Transactional
-    public void updateWorkerBusynessValue(String uuid, String workerBusynessValue)
-    {
+    public void updateWorkerBusynessValue(String uuid, String workerBusynessValue) {
         WorkerNode worker = workerNodeRepository.findByUuid(uuid);
         if (worker == null) {
             throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);

@@ -58,11 +58,13 @@ public class WorkerMetricsMBean {
     }
 
     @ManagedAttribute(description = "Current Disk Write Usage")
-    public long getDiskWriteUsage() { return diskWriteUtilizationService.getCurrentValue(); }
+    public long getDiskWriteUsage() {
+        return diskWriteUtilizationService.getCurrentValue();
+    }
 
     @ManagedAttribute(description = "Running Tasks Count")
     public double getWorkerThreadsUsage() {
-        return ((double)workerManager.getRunningTasksCount() * 100) / numberOfThreads;
+        return ((double) workerManager.getRunningTasksCount() * 100) / numberOfThreads;
     }
 
 }

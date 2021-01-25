@@ -25,5 +25,6 @@ public enum WorkerPerformanceMetric {
     DISK_WRITE_USAGE,
     DISK_READ_USAGE;
 
-    WorkerPerformanceMetric() { }
+    WorkerPerformanceMetric() {
+    }
 }

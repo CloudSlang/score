@@ -20,34 +20,31 @@ import javafx.util.Pair;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.software.os.OSProcess;
-import oshi.software.os.OperatingSystem;
 
 import javax.annotation.PostConstruct;
 import java.io.Serializable;
 
 public class CpuUtilizationService extends WorkerPerformanceMetricBase {
     private static OSProcess oldProcess;
-//    private CentralProcessor processor;
+    private int cpuNumber;
 
-//    @PostConstruct
-//    public void init() {
-//        SystemInfo systemInfo = new SystemInfo();
-//        CentralProcessor processor = systemInfo.getHardware().getProcessor();
-//    }
+    @PostConstruct
+    public void init() {
+        SystemInfo systemInfo = new SystemInfo();
+        CentralProcessor processor = systemInfo.getHardware().getProcessor();
+        this.cpuNumber = processor.getLogicalProcessorCount();
+    }
 
     @Override
     public Pair<WorkerPerformanceMetric, Serializable> measure() {
-        Pair<WorkerPerformanceMetric, Serializable> cpuUsage = new Pair<>(WorkerPerformanceMetric.CPU_USAGE,getCurrentValue());
+        Pair<WorkerPerformanceMetric, Serializable> cpuUsage = new Pair<>(WorkerPerformanceMetric.CPU_USAGE, getCurrentValue());
         return cpuUsage;
     }
 
     public double getCurrentValue() {
-        SystemInfo systemInfo = new SystemInfo();
-        CentralProcessor processor = systemInfo.getHardware().getProcessor();
         oldProcess = getProcess();
         OSProcess osProcess = getProcess();
-        //Gets CPU usage of this process since a previous snapshot of the same process, provided as a parameter.
-        int cpuNumber = processor.getLogicalProcessorCount();
+        //getProcessCpuLoadBetweenTicks​(OSProcess oldProcess) : Gets CPU usage of this process since a previous snapshot of the same process, provided as a parameter.
         double cpuUsed = (osProcess.getProcessCpuLoadBetweenTicks(oldProcess) * 100) / cpuNumber;
         oldProcess = osProcess;
         return formatTo2Decimal(cpuUsed);

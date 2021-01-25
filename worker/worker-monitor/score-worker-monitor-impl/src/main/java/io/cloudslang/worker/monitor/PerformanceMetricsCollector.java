@@ -17,11 +17,15 @@ package io.cloudslang.worker.monitor;
 
 import io.cloudslang.worker.management.services.WorkerManager;
 import io.cloudslang.worker.monitor.metric.WorkerPerfMetric;
-import io.cloudslang.worker.monitor.metrics.*;
+import io.cloudslang.worker.monitor.metrics.CpuUtilizationService;
+import io.cloudslang.worker.monitor.metrics.DiskReadUtilizationService;
+import io.cloudslang.worker.monitor.metrics.DiskWriteUtilizationService;
+import io.cloudslang.worker.monitor.metrics.HeapUtilizationService;
+import io.cloudslang.worker.monitor.metrics.MemoryUtilizationService;
+import io.cloudslang.worker.monitor.metrics.WorkerThreadUtilization;
 import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
 import javafx.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -30,35 +34,42 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.IntSupplier;
 
 @Component
 public class PerformanceMetricsCollector implements PerfMetricCollector {
 
+    List<WorkerPerfMetric> workerPerfMetrics;
     @Autowired
     private WorkerManager workerManager;
-
     @Autowired
-    @Qualifier("numberOfExecutionThreads")
-    private int numberOfThreads;
+    private CpuUtilizationService cpuUtilizationService;
+    @Autowired
+    private MemoryUtilizationService memoryUtilizationService;
+    @Autowired
+    private DiskReadUtilizationService diskReadUtilizationService;
+    @Autowired
+    private DiskWriteUtilizationService diskWriteUtilizationService;
+    @Autowired
+    private WorkerThreadUtilization workerThreadUtilization;
+    @Autowired
+    private HeapUtilizationService heapUtilizationService;
 
-    List<WorkerPerfMetric> workerPerfMetrics;
+    public PerformanceMetricsCollector() {
+    }
 
     @PostConstruct
     public void init() {
-        IntSupplier runningTaskCount = () -> workerManager.getRunningTasksCount();
-        workerPerfMetrics.add(new WorkerThreadUtilization(runningTaskCount,numberOfThreads));
+        createMetrics();
     }
-
-    public PerformanceMetricsCollector() { createMetrics(); }
 
     private void createMetrics() {
         workerPerfMetrics = new ArrayList<>();
-        workerPerfMetrics.add(new CpuUtilizationService());
-        workerPerfMetrics.add(new DiskReadUtilizationService());
-        workerPerfMetrics.add(new MemoryUtilizationService());
-        workerPerfMetrics.add(new HeapUtilizationService());
-        workerPerfMetrics.add(new DiskWriteUtilizationService());
+        workerPerfMetrics.add(cpuUtilizationService);
+        workerPerfMetrics.add(diskReadUtilizationService);
+        workerPerfMetrics.add(memoryUtilizationService);
+        workerPerfMetrics.add(heapUtilizationService);
+        workerPerfMetrics.add(diskWriteUtilizationService);
+        workerPerfMetrics.add(workerThreadUtilization);
     }
 
     @Override
@@ -67,10 +78,10 @@ public class PerformanceMetricsCollector implements PerfMetricCollector {
         for (WorkerPerfMetric metric :
                 workerPerfMetrics) {
             Pair<WorkerPerformanceMetric, Serializable> currentPair = metric.measure();
-            currentValues.put(currentPair.getKey(),currentPair.getValue());
+            currentValues.put(currentPair.getKey(), currentPair.getValue());
         }
-        currentValues.put(WorkerPerformanceMetric.WORKER_ID,workerManager.getWorkerUuid());
-        currentValues.put(WorkerPerformanceMetric.WORKER_MEASURED_TIME,System.currentTimeMillis());
+        currentValues.put(WorkerPerformanceMetric.WORKER_ID, workerManager.getWorkerUuid());
+        currentValues.put(WorkerPerformanceMetric.WORKER_MEASURED_TIME, System.currentTimeMillis());
         return currentValues;
     }
 }
