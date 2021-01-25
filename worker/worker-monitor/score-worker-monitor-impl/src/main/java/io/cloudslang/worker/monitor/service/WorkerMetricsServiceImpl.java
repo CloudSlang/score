@@ -58,7 +58,7 @@ public class WorkerMetricsServiceImpl implements WorkerMetricsService {
     @Override
     public void dispatchPerformanceMetrics() {
         try {
-            Map<Integer, Map<WorkerPerformanceMetric, Serializable>> metricData = convertQueueToHashMap(collectMetricQueue);
+            List<Map<WorkerPerformanceMetric, Serializable>> metricData = getCurrentBatch(collectMetricQueue);
             ScoreEvent scoreEvent = new ScoreEvent(EventConstants.WORKER_PERFORMANCE_MONITOR, (Serializable) metricData);
             eventBus.dispatch(scoreEvent);
         } catch (Exception e) {
@@ -66,13 +66,10 @@ public class WorkerMetricsServiceImpl implements WorkerMetricsService {
         }
     }
 
-    private Map<Integer, Map<WorkerPerformanceMetric, Serializable>> convertQueueToHashMap(LinkedBlockingQueue<Map<WorkerPerformanceMetric, Serializable>> metricQueue) {
-        Map<Integer, Map<WorkerPerformanceMetric, Serializable>> metricData = new HashMap<>();
+    private List<Map<WorkerPerformanceMetric, Serializable>> getCurrentBatch(LinkedBlockingQueue<Map<WorkerPerformanceMetric, Serializable>> metricQueue) {
         List<Map<WorkerPerformanceMetric, Serializable>> metricList = new ArrayList<>();
         metricQueue.drainTo(metricList);
-        for (int i = 0; i < metricList.size(); i++) {
-            metricData.put(i, metricList.get(i));
-        }
-        return metricData;
+
+        return metricList;
     }
 }
