@@ -52,6 +52,7 @@ public class JavaExecutionCachedEngine extends ExecutionEngine implements JavaEx
             final JavaExecutor createdExecutor = createNewExecutor(dependencies);
             executor = executorCache.get(dependenciesKey, k -> createdExecutor);
         }
+        //noinspection ConstantConditions
         return executor.execute(className, methodName, parametersProvider);
     }
 
