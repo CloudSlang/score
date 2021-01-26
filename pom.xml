@@ -421,6 +421,11 @@
                 <version>1.7.1</version>
             </dependency>
 
+            <dependency>
+                <groupId>javafx</groupId>
+                <artifactId>javafx</artifactId>
+                <version>2.2.7</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
