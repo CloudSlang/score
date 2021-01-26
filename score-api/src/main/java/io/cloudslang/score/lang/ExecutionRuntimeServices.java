@@ -524,7 +524,7 @@ public class ExecutionRuntimeServices implements Serializable {
     }
 
     public String getLicSwitchMode() {
-        return removeFromMap(LIC_SWITCH_MODE);
+        return getFromMap(LIC_SWITCH_MODE);
     }
 
     public void setPreconditionNotFulfilled() {
