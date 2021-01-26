@@ -24,6 +24,7 @@ import io.cloudslang.worker.execution.reflection.ReflectionAdapterImpl;
 import io.cloudslang.worker.execution.services.ExecutionServiceImpl;
 import io.cloudslang.worker.execution.services.ScoreRobotAvailabilityServiceImpl;
 import io.cloudslang.worker.execution.services.SessionDataHandlerImpl;
+import io.cloudslang.worker.execution.services.StubAplsLicensingServiceImpl;
 import io.cloudslang.worker.execution.services.StubExecutionPostconditionService;
 import io.cloudslang.worker.execution.services.StubExecutionPreconditionService;
 import io.cloudslang.worker.management.WorkerConfigurationServiceImpl;
@@ -149,6 +150,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		registerExecutionPreconditionService(element, parserContext);
 		registerExecutionPostconditionService(element, parserContext);
 		registerQueueConfigurationDataService(element, parserContext);
+		registerAplsLicensingService(element, parserContext);
 	}
 
 	private void registerSequentialExecution(Element element, ParserContext parserContext) {
@@ -220,6 +222,16 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 				.NAME("queueConfigurationDataService")
 				.CLASS(StubQueueConfigurationDataServiceImpl.class)
 				.register();
+		}
+	}
+
+	private void registerAplsLicensingService(Element element, ParserContext parserContext) {
+		String registerAplsLicensingService = element.getAttribute("registerAplsLicensingService");
+		if (!FALSE.toString().equals(registerAplsLicensingService)) {
+			new BeanRegistrator(parserContext)
+					.NAME("aplsLicensingService")
+					.CLASS(StubAplsLicensingServiceImpl.class)
+					.register();
 		}
 	}
 

@@ -63,6 +63,7 @@ import static io.cloudslang.score.events.EventConstants.EXECUTION_ID;
 import static io.cloudslang.score.events.EventConstants.SPLIT_ID;
 import static io.cloudslang.score.facade.TempConstants.MI_REMAINING_BRANCHES_CONTEXT_KEY;
 import static io.cloudslang.score.facade.execution.ExecutionStatus.CANCELED;
+import static io.cloudslang.score.lang.ExecutionRuntimeServices.LIC_SWITCH_MODE;
 import static java.lang.Long.parseLong;
 import static java.lang.String.valueOf;
 import static java.util.EnumSet.of;
@@ -223,7 +224,9 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         for (FinishedBranch finishedBranch : finishedBranches) {
             dispatchBranchFinishedEvent(finishedBranch.getExecutionId(), finishedBranch.getSplitId(), finishedBranch.getBranchId());
 
-            chekinLicenseForLaneIfRequired(finishedBranch);
+            String branchIdToCheckinLicense = (String) finishedBranch.getBranchContexts().getSystemContext().get(BRANCH_ID_TO_CHECK_IN_LICENSE);
+            String licSwitchMode = (String) finishedBranch.getBranchContexts().getSystemContext().get(LIC_SWITCH_MODE);
+            checkinLicenseForLaneIfRequired(finishedBranch.getExecutionId(), finishedBranch.getBranchId(), licSwitchMode, branchIdToCheckinLicense);
 
             SuspendedExecution suspendedExecution = suspendedMap.get(finishedBranch.getSplitId());
             if (suspendedExecution != null) {
@@ -248,10 +251,9 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         }
     }
 
-    private void chekinLicenseForLaneIfRequired(FinishedBranch finishedBranch) {
-        String branchIdToCheckinLicense = (String) finishedBranch.getBranchContexts().getSystemContext().get(BRANCH_ID_TO_CHECK_IN_LICENSE);
-        if (StringUtils.isNotBlank(branchIdToCheckinLicense) && StringUtils.equals(branchIdToCheckinLicense, finishedBranch.getBranchId())) {
-            aplsLicensingService.checkinEndLane(finishedBranch.getExecutionId(), finishedBranch.getBranchId());
+    private void checkinLicenseForLaneIfRequired(String executionId, String branchId, String licSwitchMode, String branchIdToCheckinLicense) {
+        if (StringUtils.isNotEmpty(branchIdToCheckinLicense) && StringUtils.equals(branchIdToCheckinLicense, branchId)) {
+            aplsLicensingService.checkinEndLane(executionId, branchId, licSwitchMode);
         }
     }
 

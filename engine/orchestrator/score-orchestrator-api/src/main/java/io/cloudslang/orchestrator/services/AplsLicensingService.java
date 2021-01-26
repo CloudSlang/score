@@ -17,10 +17,10 @@ package io.cloudslang.orchestrator.services;
 
 public interface AplsLicensingService {
 
-    String BRANCH_ID_TO_CHECK_OUT_LICENSE = "BRANCH_ID_TO_CHECK_OUT_LICENSE";
-    String BRANCH_ID_TO_CHECK_IN_LICENSE = "BRANCH_ID_TO_CHECK_IN_LICENSE";
+    String BRANCH_ID_TO_CHECK_OUT_LICENSE = "BRANCH_ID_CHECKOUT";
+    String BRANCH_ID_TO_CHECK_IN_LICENSE = "BRANCH_ID_CHECKIN";
 
-    void checkoutBeginLane(String executionId, String branchId, long executionStartTimeMillis, int executionTimeoutMinutes);
+    void checkoutBeginLane(String executionId, String branchId, String licSwitchMode, long executionStartTimeMillis, int executionTimeoutMinutes);
 
-    void checkinEndLane(String executionId, String branchId);
+    void checkinEndLane(String executionId, String branchId, String licSwitchMode);
 }

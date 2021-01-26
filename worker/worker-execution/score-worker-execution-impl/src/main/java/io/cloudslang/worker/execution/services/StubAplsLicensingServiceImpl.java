@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package io.cloudslang.orchestrator.services;
+package io.cloudslang.worker.execution.services;
+
+import io.cloudslang.orchestrator.services.AplsLicensingService;
 
 public class StubAplsLicensingServiceImpl implements AplsLicensingService {
 
     @Override
-    public void checkoutBeginLane(String executionId, String branchId, long executionStartTimeMillis, int executionTimeoutMinutes) {
+    public void checkoutBeginLane(String executionId, String branchId, String licSwitchMode, long executionStartTimeMillis, int executionTimeoutMinutes) {
 
     }
 
     @Override
-    public void checkinEndLane(String executionId, String branchId) {
+    public void checkinEndLane(String executionId, String branchId, String licSwitchMode) {
 
     }
 }

@@ -83,6 +83,7 @@ import static io.cloudslang.score.facade.TempConstants.SC_TIMEOUT_MINS;
 import static io.cloudslang.score.facade.TempConstants.SC_TIMEOUT_START_TIME;
 import static io.cloudslang.score.facade.execution.PauseReason.NO_ROBOTS_IN_GROUP;
 import static io.cloudslang.score.facade.execution.PauseReason.PENDING_ROBOT;
+import static io.cloudslang.score.lang.ExecutionRuntimeServices.LIC_SWITCH_MODE;
 import static java.lang.Boolean.getBoolean;
 import static java.lang.Integer.getInteger;
 import static java.lang.Long.MAX_VALUE;
@@ -181,7 +182,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 return handleCancelledFlow(execution) ? execution : null;
             }
 
-            chekoutLicenseForLaneIfRequired(execution);
+            checkoutLicenseForLaneIfRequired(execution);
 
             // Dump the bus events before execution of steps
             dumpBusEvents(execution);
@@ -230,14 +231,15 @@ public final class ExecutionServiceImpl implements ExecutionService {
         }
     }
 
-    private void chekoutLicenseForLaneIfRequired(Execution execution) {
+    private void checkoutLicenseForLaneIfRequired(Execution execution) {
         try {
             String branchIdToCheckoutLicense = (String) execution.getSystemContext().get(BRANCH_ID_TO_CHECK_OUT_LICENSE);
-            if (StringUtils.isNotBlank(branchIdToCheckoutLicense) && StringUtils.equals(branchIdToCheckoutLicense, execution.getSystemContext().getBranchId())) {
+            if (StringUtils.isNotEmpty(branchIdToCheckoutLicense) && StringUtils.equals(branchIdToCheckoutLicense, execution.getSystemContext().getBranchId())) {
                 String executionId = execution.getExecutionId().toString();
-                Long executionStartTimeMillis = Optional.ofNullable((Long)execution.getSystemContext().get(SC_TIMEOUT_START_TIME)).orElse(0L);
-                Integer executionTimeoutMinutes = Optional.ofNullable((Integer)execution.getSystemContext().get(SC_TIMEOUT_MINS)).orElse(0);
-                aplsLicensingService.checkoutBeginLane(executionId, branchIdToCheckoutLicense, executionStartTimeMillis, executionTimeoutMinutes);
+                Long executionStartTimeMillis = Optional.ofNullable((Long) execution.getSystemContext().get(SC_TIMEOUT_START_TIME)).orElse(0L);
+                Integer executionTimeoutMinutes = Optional.ofNullable((Integer) execution.getSystemContext().get(SC_TIMEOUT_MINS)).orElse(0);
+                String licSwitchMode = (String) execution.getSystemContext().get(LIC_SWITCH_MODE);
+                aplsLicensingService.checkoutBeginLane(executionId, branchIdToCheckoutLicense, licSwitchMode, executionStartTimeMillis, executionTimeoutMinutes);
                 execution.getSystemContext().put(BRANCH_ID_TO_CHECK_IN_LICENSE, execution.getSystemContext().getBranchId());
             }
         } finally {
@@ -415,16 +417,15 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     private void addCheckoutLaneFlagToContext(String branchId, SystemContext systemContext, int branchNumber) {
-        if ("NON_BLOCKING".equals(systemContext.get("STEP_TYPE"))) {
-            return;
-        }
-
         Integer parallelismLevel = (Integer) systemContext.getLevelParallelism();
-        if (parallelismLevel != null) {
-            if (parallelismLevel == 1 || (parallelismLevel > 1 && branchNumber > 1)) {
-                systemContext.put(BRANCH_ID_TO_CHECK_OUT_LICENSE, branchId);
-            }
+        boolean nonBlocking = "NON_BLOCKING".equals(systemContext.get("STEP_TYPE"));
+        if (!nonBlocking && parallelismLevelToCheckout(parallelismLevel, branchNumber)) {
+            systemContext.put(BRANCH_ID_TO_CHECK_OUT_LICENSE, branchId);
         }
+    }
+
+    private boolean parallelismLevelToCheckout(Integer parallelismLevel, int branchNumber) {
+        return parallelismLevel != null && (parallelismLevel == 1 || (parallelismLevel > 1 && branchNumber > 1));
     }
 
     @Override
