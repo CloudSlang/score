@@ -13,46 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.cloudslang.worker.management.queue;
 
-package io.cloudslang.engine.node.entities;
+import io.cloudslang.engine.node.entities.QueueDetails;
 
-import io.cloudslang.score.api.nodes.WorkerStatus;
+public class WorkerQueueDetailsHolder {
 
-import java.util.List;
+	private final QueueDetails queueDetails;
 
-/**
- * User:
- * Date: 08/11/2O12
- */
-public interface Worker {
+	public WorkerQueueDetailsHolder() {
+		this.queueDetails = null;
+	}
 
-	String getUuid();
+	public WorkerQueueDetailsHolder(QueueDetails queueDetails) {
+		this.queueDetails = queueDetails;
+	}
 
-	boolean isActive();
+	public QueueDetails getLatestQueueDetails() {
+		return queueDetails;
+	}
 
-    WorkerStatus getStatus();
-
-	String getHostName();
-
-	String getInstallPath();
-
-	String getDescription();
-
-	String getOs();
-
-	String getJvm();
-
-	String getDotNetVersion();
-
-	List<String> getGroups();
-
-    boolean isDeleted();
-
-	String getVersion();
-
-	String getVersionId();
-
-	boolean isQueueSync();
-
-	String getWorkerBusynessValue();
 }

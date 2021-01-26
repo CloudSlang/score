@@ -20,6 +20,7 @@ import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.orchestrator.services.EngineVersionService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
 import io.cloudslang.worker.management.monitor.WorkerStateUpdateService;
+import io.cloudslang.worker.management.queue.WorkerQueueDetailsContainer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -269,6 +270,11 @@ public class WorkerManagerTest {
 			EngineVersionService service =  mock(EngineVersionService.class);
 			when(service.getEngineVersionId()).thenReturn("123");
 			return service;
+		}
+
+		@Bean
+		public WorkerQueueDetailsContainer workerQueueDetailsContainer() {
+			return mock(WorkerQueueDetailsContainer.class);
 		}
 	}
 }

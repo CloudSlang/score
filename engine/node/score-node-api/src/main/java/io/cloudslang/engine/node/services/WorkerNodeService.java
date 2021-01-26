@@ -290,6 +290,10 @@ public interface WorkerNodeService {
      * @param encodedPassword the newly encoded password of the worker
      */
     void updateMigratedPassword(String workerUuid, String encodedPassword);
+
+    void updateQueueSyncByUuid(String workerUuid, boolean isQueueSync);
+
+    void updateQueueSync(boolean isQueueSync);
     /**
      * updates worker's busyness value
      *

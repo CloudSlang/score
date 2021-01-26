@@ -65,6 +65,7 @@
 			<xsd:attribute type="xsd:boolean" name="registerRobotAvailabilityService"/>
 			<xsd:attribute type="xsd:boolean" name="registerExecutionPreconditionService"/>
 			<xsd:attribute type="xsd:boolean" name="registerExecutionPostconditionService"/>
+			<xsd:attribute type="xsd:boolean" name="registerQueueConfigurationDataService"/>
 		</xsd:complexType>
 	</xsd:element>
 </xsd:schema>

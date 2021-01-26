@@ -14,45 +14,10 @@
  * limitations under the License.
  */
 
-package io.cloudslang.engine.node.entities;
+package io.cloudslang.engine.node.services;
 
-import io.cloudslang.score.api.nodes.WorkerStatus;
+import io.cloudslang.engine.node.entities.QueueDetails;
 
-import java.util.List;
-
-/**
- * User:
- * Date: 08/11/2O12
- */
-public interface Worker {
-
-	String getUuid();
-
-	boolean isActive();
-
-    WorkerStatus getStatus();
-
-	String getHostName();
-
-	String getInstallPath();
-
-	String getDescription();
-
-	String getOs();
-
-	String getJvm();
-
-	String getDotNetVersion();
-
-	List<String> getGroups();
-
-    boolean isDeleted();
-
-	String getVersion();
-
-	String getVersionId();
-
-	boolean isQueueSync();
-
-	String getWorkerBusynessValue();
+public interface QueueConfigurationDataService {
+	QueueDetails getQueueConfigurations();
 }

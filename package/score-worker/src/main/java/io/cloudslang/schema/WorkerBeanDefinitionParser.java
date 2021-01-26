@@ -16,6 +16,7 @@
 
 package io.cloudslang.schema;
 
+import io.cloudslang.engine.node.services.StubQueueConfigurationDataServiceImpl;
 import io.cloudslang.runtime.impl.sequential.DefaultSequentialExecutionServiceImpl;
 import io.cloudslang.score.events.EventBusImpl;
 import io.cloudslang.score.events.FastEventBusImpl;
@@ -30,6 +31,7 @@ import io.cloudslang.worker.management.WorkerRegistration;
 import io.cloudslang.worker.management.monitor.ScheduledWorkerLoadMonitor;
 import io.cloudslang.worker.management.monitor.WorkerMonitorsImpl;
 import io.cloudslang.worker.management.monitor.WorkerStateUpdateServiceImpl;
+import io.cloudslang.worker.management.queue.WorkerQueueDetailsContainer;
 import io.cloudslang.worker.management.services.InBuffer;
 import io.cloudslang.worker.management.services.OutboundBufferImpl;
 import io.cloudslang.worker.management.services.RetryTemplate;
@@ -86,13 +88,15 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(WorkerMetricsMBean.class, "io.cloudslang.worker.monitor.mbean.WorkerMetricsMBean");
 		put(WorkerRecoveryManagerImpl.class, null);
 		put(ReflectionAdapterImpl.class, null);
-		put(SessionDataHandlerImpl.class, "sessionDataHandler");
+        put(SessionDataHandlerImpl.class, "sessionDataHandler");
 		put(SynchronizationManagerImpl.class, null);
-		put(WorkerConfigurationServiceImpl.class, "workerConfiguration");
-		//Monitors
-		put(WorkerExecutionMonitorServiceImpl.class, "workerExecutionMonitorService");
-		put(WorkerMonitorsImpl.class, "workerMonitorsImpl");
-		put(ScheduledWorkerLoadMonitor.class, "scheduledWorkerLoadMonitor");
+        put(WorkerConfigurationServiceImpl.class, "workerConfiguration");
+        put(WorkerQueueDetailsContainer.class, "workerQueueDetailsContainer");
+
+        //Monitors
+        put(WorkerExecutionMonitorServiceImpl.class, "workerExecutionMonitorService");
+        put(WorkerMonitorsImpl.class, "workerMonitorsImpl");
+        put(ScheduledWorkerLoadMonitor.class, "scheduledWorkerLoadMonitor");
 		put(CpuUtilizationService.class, "cpuUtilizationService");
 		put(DiskReadUtilizationService.class, "diskReadUtilizationService");
 		put(DiskWriteUtilizationService.class, "diskWriteUtilizationService");
@@ -114,12 +118,11 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 			new ConfValue().NAME("keepAliveInterval").DEFAULT(10000L),
 			new ConfValue().NAME("configRefreshInterval").DEFAULT(1000L),
 			new ConfValue().NAME("interruptCanceledInterval").DEFAULT(30000L),
-			new ConfValue().NAME("statisticsInterval").DEFAULT(1000L),
-			new ConfValue().NAME("scheduledWorkerMonitorInterval").DEFAULT(10000L),
-			new ConfValue().NAME("workerMonitorRefreshInterval").DEFAULT(300000L),
+            new ConfValue().NAME("statisticsInterval").DEFAULT(1000L),
+            new ConfValue().NAME("scheduledWorkerMonitorInterval").DEFAULT(10000L),
+            new ConfValue().NAME("workerMonitorRefreshInterval").DEFAULT(300000L),
 			new ConfValue().NAME("scheduledPerfMetricCollectionInterval").DEFAULT(5000L),
 			new ConfValue().NAME("scheduledMetricDispatchInterval").DEFAULT(30000L)
-
 	);
 
 	@Override
@@ -165,6 +168,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		registerRobotAvailabilityService(element, parserContext);
 		registerExecutionPreconditionService(element, parserContext);
 		registerExecutionPostconditionService(element, parserContext);
+		registerQueueConfigurationDataService(element, parserContext);
 	}
 
 	private void registerSequentialExecution(Element element, ParserContext parserContext) {
@@ -227,6 +231,16 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		}
 		new XmlBeanDefinitionReader(parserContext.getRegistry())
 				.loadBeanDefinitions("META-INF/spring/score/context/scoreWorkerSchedulerContext.xml");
+	}
+
+	private void registerQueueConfigurationDataService(Element element, ParserContext parserContext) {
+		String registerQueueConfigurationDataService = element.getAttribute("registerQueueConfigurationDataService");
+		if (!FALSE.toString().equals(registerQueueConfigurationDataService)) {
+			new BeanRegistrator(parserContext)
+				.NAME("queueConfigurationDataService")
+				.CLASS(StubQueueConfigurationDataServiceImpl.class)
+				.register();
+		}
 	}
 
 	@Override
