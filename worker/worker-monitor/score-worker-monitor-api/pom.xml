@@ -28,6 +28,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>score-worker-monitor-api</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-base</artifactId>
+            <version>11</version>
+        </dependency>
+        <!-- Thanks for using https://jar-download.com -->
+
+    </dependencies>
 
 
 </project>
