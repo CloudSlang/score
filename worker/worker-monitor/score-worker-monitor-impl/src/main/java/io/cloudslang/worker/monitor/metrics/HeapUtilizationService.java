@@ -16,7 +16,7 @@
 package io.cloudslang.worker.monitor.metrics;
 
 import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 import java.io.Serializable;
 import static java.lang.Runtime.getRuntime;
 
@@ -24,7 +24,7 @@ public class HeapUtilizationService extends WorkerPerformanceMetricBase {
 
     @Override
     public Pair<WorkerPerformanceMetric, Serializable> measure() {
-        Pair<WorkerPerformanceMetric, Serializable> heapUsage = new Pair<>(WorkerPerformanceMetric.HEAP_SIZE, getCurrentValue());
+        Pair<WorkerPerformanceMetric, Serializable> heapUsage = Pair.of(WorkerPerformanceMetric.HEAP_SIZE, getCurrentValue());
         return heapUsage;
     }
 

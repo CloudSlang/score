@@ -16,7 +16,7 @@
 package io.cloudslang.worker.monitor.metrics;
 
 import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 import oshi.software.os.OSProcess;
 
 import javax.annotation.PostConstruct;
@@ -32,7 +32,7 @@ public class DiskReadUtilizationService extends WorkerPerformanceMetricBase {
 
     @Override
     public Pair<WorkerPerformanceMetric, Serializable> measure() {
-        Pair<WorkerPerformanceMetric, Serializable> diskUsage = new Pair<>(WorkerPerformanceMetric.DISK_READ_USAGE, getCurrentValue());
+        Pair<WorkerPerformanceMetric, Serializable> diskUsage = Pair.of(WorkerPerformanceMetric.DISK_READ_USAGE, getCurrentValue());
         return diskUsage;
     }
 

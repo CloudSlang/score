@@ -24,7 +24,7 @@ import io.cloudslang.worker.monitor.metrics.HeapUtilizationService;
 import io.cloudslang.worker.monitor.metrics.MemoryUtilizationService;
 import io.cloudslang.worker.monitor.metrics.WorkerThreadUtilization;
 import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

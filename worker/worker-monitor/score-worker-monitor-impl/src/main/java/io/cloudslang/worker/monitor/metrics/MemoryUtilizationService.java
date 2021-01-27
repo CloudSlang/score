@@ -16,7 +16,7 @@
 package io.cloudslang.worker.monitor.metrics;
 
 import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 import oshi.SystemInfo;
 import oshi.hardware.GlobalMemory;
 import oshi.software.os.OSProcess;
@@ -39,7 +39,7 @@ public class MemoryUtilizationService extends WorkerPerformanceMetricBase {
 
     @Override
     public Pair<WorkerPerformanceMetric, Serializable> measure() {
-        Pair<WorkerPerformanceMetric, Serializable> memUsage = new Pair<>(WorkerPerformanceMetric.MEMORY_USAGE, getCurrentValue());
+        Pair<WorkerPerformanceMetric, Serializable> memUsage = Pair.of(WorkerPerformanceMetric.MEMORY_USAGE, getCurrentValue());
         return memUsage;
     }
 

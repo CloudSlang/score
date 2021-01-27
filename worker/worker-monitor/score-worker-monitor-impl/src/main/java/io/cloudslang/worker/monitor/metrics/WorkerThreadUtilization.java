@@ -18,7 +18,7 @@ package io.cloudslang.worker.monitor.metrics;
 import io.cloudslang.worker.management.services.WorkerManager;
 import io.cloudslang.worker.monitor.metric.WorkerPerfMetric;
 import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -36,7 +36,7 @@ public class WorkerThreadUtilization implements WorkerPerfMetric {
 
     @Override
     public Pair<WorkerPerformanceMetric, Serializable> measure() {
-        Pair<WorkerPerformanceMetric, Serializable> threadUtilization = new Pair<>(WorkerPerformanceMetric.THREAD_UTILIZATION, getCurrentValue());
+        Pair<WorkerPerformanceMetric, Serializable> threadUtilization = Pair.of(WorkerPerformanceMetric.THREAD_UTILIZATION, getCurrentValue());
         return threadUtilization;
     }
 

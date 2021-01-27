@@ -16,7 +16,7 @@
 package io.cloudslang.worker.monitor.metric;
 
 import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.Serializable;
 
