@@ -583,7 +583,7 @@ public class ExecutionRuntimeServices implements Serializable {
     }
 
     private <T> T removeFromMap(String key) {
-        //noinspection unchecked
+        // noinspection unchecked
         return (T) contextMap.remove(key);
     }
 
