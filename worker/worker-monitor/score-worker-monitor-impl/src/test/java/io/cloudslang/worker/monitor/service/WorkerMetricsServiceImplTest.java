@@ -20,6 +20,7 @@ import io.cloudslang.orchestrator.services.EngineVersionService;
 import io.cloudslang.score.events.EventBus;
 import io.cloudslang.worker.management.WorkerConfigurationService;
 import io.cloudslang.worker.management.monitor.WorkerStateUpdateService;
+import io.cloudslang.worker.management.queue.WorkerQueueDetailsContainer;
 import io.cloudslang.worker.management.services.SynchronizationManager;
 import io.cloudslang.worker.management.services.SynchronizationManagerImpl;
 import io.cloudslang.worker.management.services.WorkerConfigurationUtils;
@@ -211,6 +212,11 @@ public class WorkerMetricsServiceImplTest {
         @Bean
         String workerUuid() {
             return CREDENTIAL_UUID;
+        }
+
+        @Bean
+        public WorkerQueueDetailsContainer workerQueueDetailsContainer() {
+            return mock(WorkerQueueDetailsContainer.class);
         }
 
     }
