@@ -24,7 +24,6 @@ import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import io.cloudslang.orchestrator.entities.Message;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -37,7 +36,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
@@ -75,7 +73,7 @@ public class OrchestratorDispatcherServiceTest {
     }
 
     @Test
-    public void simpleDispatchTest() throws Exception {
+    public void simpleDispatchTest() throws WorkerAlreadyRecoveredException {
         List<Message> messages = new ArrayList<>();
         messages.add(new ExecutionMessage());
 
@@ -95,7 +93,7 @@ public class OrchestratorDispatcherServiceTest {
     }
 
     @Test
-    public void firstDispatchTest() throws Exception {
+    public void firstDispatchTest() throws WorkerAlreadyRecoveredException {
         List<Message> messages = new ArrayList<>();
         messages.add(new ExecutionMessage());
 
@@ -114,7 +112,7 @@ public class OrchestratorDispatcherServiceTest {
     }
 
     @Test
-    public void sameBulkDispatchTest() throws Exception {
+    public void sameBulkDispatchTest() throws WorkerAlreadyRecoveredException {
         List<Message> messages = new ArrayList<>();
         messages.add(new ExecutionMessage());
 
@@ -135,7 +133,7 @@ public class OrchestratorDispatcherServiceTest {
     
     @Test(expected = Exception.class)
     
-        public void dispatchAfterRecoveryTest() throws Exception {
+        public void dispatchAfterRecoveryTest() throws WorkerAlreadyRecoveredException {
             List<Message> messages = new ArrayList<>();
             messages.add(new ExecutionMessage());
     

@@ -20,13 +20,13 @@ import ch.lambdaj.group.Group;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.orchestrator.entities.Message;
 import io.cloudslang.orchestrator.services.OrchestratorDispatcherService;
+import io.cloudslang.orchestrator.services.WorkerAlreadyRecoveredException;
 import io.cloudslang.worker.management.ExecutionsActivityListener;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -214,7 +214,8 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
                 }
                 try {
                     dispatcherService.dispatch(optimizedBulk, bulkNumber, wrv, workerUuid);
-                } catch (Exception e) {
+                } catch (WorkerAlreadyRecoveredException e) {
+                    logger.info("The central server has already recovered this worker. Triggering recovery for the worker");
                     recoveryManager.doRecovery();
                 }
                 if (executionsActivityListener != null) {
