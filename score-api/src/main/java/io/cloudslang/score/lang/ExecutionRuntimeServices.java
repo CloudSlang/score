@@ -103,8 +103,6 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public static final String LIC_SWITCH_MODE = "LIC_SWITCH_MODE";
 
-    private static final String LIC_SWITCH_MODE = "LIC_SWITCH_MODE";
-
     protected Map<String, Serializable> contextMap;
 
     public ExecutionRuntimeServices() {
