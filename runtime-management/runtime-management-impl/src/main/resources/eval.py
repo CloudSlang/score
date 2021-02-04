@@ -141,10 +141,6 @@ class PythonAgentExecutor(object):
                     expr_result = etree.tostring(expr_result, encoding='UTF-8').decode('UTF-8')
                     return_type = 'str'
 
-                else:
-                    expr_result_str = str(expr_result)
-                    expr_result = expr_result_str is not None if expr_result_str else ''
-
                 if return_type not in ['str', 'int', 'bool', 'list']:
                     return_type = 'str'
 
