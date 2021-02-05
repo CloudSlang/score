@@ -144,7 +144,7 @@ class PythonAgentExecutor(object):
                 if return_type not in ['str', 'int', 'bool', 'list']:
                     return_type = 'str'
 
-                final_result = {'returnResult': str(expr_result),
+                final_result = {'returnResult': expr_result,
                                 'accessedResources': list(accessed_resources_set),
                                 'returnType': return_type}
             finally:
