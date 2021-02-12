@@ -17,7 +17,7 @@ package io.cloudslang.orchestrator.services;
 
 public interface AplsLicensingService {
 
-    boolean checkoutUiStep(String executionId, String branchId);
+    boolean incrementUiStep(String executionId, String branchId);
 
-    void checkinUiStep(String executionId, String branchId);
+    void decrementUiStep(String executionId, String branchId);
 }
