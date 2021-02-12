@@ -32,6 +32,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class WorkerMetricsServiceImpl implements WorkerMetricsService {
     protected static final Logger logger = LogManager.getLogger(WorkerMetricsServiceImpl.class);
     static int capacity = Integer.getInteger("metrics.collection.sampleCount", 10);
+    boolean disabled = Boolean.getBoolean("disable.worker.monitoring");
     @Autowired
     PerfMetricCollector perfMetricCollector;
     private LinkedBlockingQueue<Map<WorkerPerformanceMetric, Serializable>> collectMetricQueue = new LinkedBlockingQueue<Map<WorkerPerformanceMetric, Serializable>>(capacity);
@@ -40,14 +41,16 @@ public class WorkerMetricsServiceImpl implements WorkerMetricsService {
 
     @Override
     public void collectPerformanceMetrics() {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Collecting Worker Metrics");
-        }
         try {
-            Map<WorkerPerformanceMetric, Serializable> metricInfo = perfMetricCollector.collectMetrics();
-            collectMetricQueue.put(metricInfo);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Sending Worker Metric Info:[" + metricInfo + "]");
+            if(!disabled) {
+                Map<WorkerPerformanceMetric, Serializable> metricInfo = perfMetricCollector.collectMetrics();
+                collectMetricQueue.put(metricInfo);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Collected worker metric "+ metricInfo.size());
+                }
+            }
+            else{
+                Thread.sleep(100);
             }
         } catch (Exception e) {
             logger.error("Failed to load metric into queue", e);
@@ -57,9 +60,17 @@ public class WorkerMetricsServiceImpl implements WorkerMetricsService {
     @Override
     public void dispatchPerformanceMetrics() {
         try {
-            List<Map<WorkerPerformanceMetric, Serializable>> metricData = getCurrentBatch(collectMetricQueue);
-            ScoreEvent scoreEvent = new ScoreEvent(EventConstants.WORKER_PERFORMANCE_MONITOR, (Serializable) metricData);
-            eventBus.dispatch(scoreEvent);
+            if(!disabled) {
+                List<Map<WorkerPerformanceMetric, Serializable>> metricData = getCurrentBatch(collectMetricQueue);
+                ScoreEvent scoreEvent = new ScoreEvent(EventConstants.WORKER_PERFORMANCE_MONITOR, (Serializable) metricData);
+                eventBus.dispatch(scoreEvent);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Dispatched worker metric "+ metricData.size());
+                }
+            }
+            else{
+                Thread.sleep(100);
+            }
         } catch (Exception e) {
             logger.error("Failed to dispatch metric info event", e);
         }
