@@ -19,8 +19,10 @@
 
     <task:scheduler id="scoreWorkerMetricScheduler" pool-size="2" />
     <task:scheduled-tasks scheduler="scoreWorkerMetricScheduler">
-        <task:scheduled ref="workerMetricCollectorService" method="collectPerformanceMetrics" fixed-delay="#{scheduledPerfMetricCollectionInterval}"/>
-        <task:scheduled ref="workerMetricCollectorService" method="dispatchPerformanceMetrics" fixed-delay="#{scheduledMetricDispatchInterval}"/>
+        <task:scheduled ref="workerMetricCollectorService" method="collectPerformanceMetrics"
+                        fixed-delay= "#{T(org.apache.commons.lang3.StringUtils).isNotEmpty(systemProperties['metric.collection.interval']) ? systemProperties['metric.collection.interval'] : 10000}"/>
+        <task:scheduled ref="workerMetricCollectorService" method="dispatchPerformanceMetrics"
+                        fixed-delay="#{T(org.apache.commons.lang3.StringUtils).isNotEmpty(systemProperties['metric.dispatch.interval']) ? systemProperties['metric.dispatch.interval'] : 60000}"/>
     </task:scheduled-tasks>
 
     <!--
