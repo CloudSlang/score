@@ -34,8 +34,7 @@ public class HeapUtilizationService extends WorkerPerformanceMetricBase {
         long freeMemory = getRuntime().freeMemory();
         double allocatedMemory = totalMemory - freeMemory;
         long maxMemory = getRuntime().maxMemory();
-        double presumableFreeMemory = maxMemory - allocatedMemory;
-        double percentageHeapUsed = (presumableFreeMemory / formatTo2Decimal(maxMemory)) * 100;
+        double percentageHeapUsed = (allocatedMemory / formatTo2Decimal(maxMemory)) * 100;
         return formatTo2Decimal(percentageHeapUsed);
     }
 
