@@ -23,4 +23,8 @@ public interface AplsLicensingService {
     void checkoutBeginLane(String executionId, String branchId, String licSwitchMode, long executionStartTimeMillis, int executionTimeoutMinutes);
 
     void checkinEndLane(String executionId, String branchId, String licSwitchMode);
+
+    boolean checkoutUiStep(String executionId, String branchId);
+
+    void checkinUiStep(String executionId, String branchId);
 }

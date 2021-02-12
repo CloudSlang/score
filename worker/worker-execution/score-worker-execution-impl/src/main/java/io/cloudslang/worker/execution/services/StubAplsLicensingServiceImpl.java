@@ -29,4 +29,14 @@ public class StubAplsLicensingServiceImpl implements AplsLicensingService {
     public void checkinEndLane(String executionId, String branchId, String licSwitchMode) {
 
     }
+
+    @Override
+    public boolean checkoutUiStep(String executionId, String branchId) {
+        return true;
+    }
+
+    @Override
+    public void checkinUiStep(String executionId, String branchId) {
+
+    }
 }
