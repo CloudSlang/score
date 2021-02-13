@@ -51,6 +51,7 @@ import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyObject;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -64,6 +65,10 @@ public class WorkerMetricsServiceImplTest {
     private WorkerMetricsService workerMetricsService;
     @Autowired
     private PerfMetricCollector perfMetricCollector;
+
+    @Autowired
+    WorkerStateUpdateService workerStateUpdateService;
+
     @Autowired
     private EventBus eventBus;
 
@@ -74,6 +79,14 @@ public class WorkerMetricsServiceImplTest {
         workerMetricsService.collectPerformanceMetrics();
         workerMetricsService.dispatchPerformanceMetrics();
         verify(eventBus, times(1)).dispatch(anyObject());
+    }
+
+    @Test
+    public void testNoMetricCollectionWhenDisabledFromCentral() throws InterruptedException {
+        reset(perfMetricCollector);
+        when(workerStateUpdateService.isMonitoringDisabled()).thenReturn(true);
+        workerMetricsService.collectPerformanceMetrics();
+        verify(perfMetricCollector, times(0)).collectMetrics();
     }
 
     private Map<WorkerPerformanceMetric, Serializable> createWorkerPerformanceMetrics() {

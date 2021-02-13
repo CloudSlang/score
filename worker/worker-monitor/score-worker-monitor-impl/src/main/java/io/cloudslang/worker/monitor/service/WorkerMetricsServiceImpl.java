@@ -18,6 +18,7 @@ package io.cloudslang.worker.monitor.service;
 import io.cloudslang.score.events.EventBus;
 import io.cloudslang.score.events.EventConstants;
 import io.cloudslang.score.events.ScoreEvent;
+import io.cloudslang.worker.management.monitor.WorkerStateUpdateService;
 import io.cloudslang.worker.monitor.PerfMetricCollector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,6 +36,10 @@ public class WorkerMetricsServiceImpl implements WorkerMetricsService {
     boolean disabled = Boolean.getBoolean("disable.worker.monitoring");
     @Autowired
     PerfMetricCollector perfMetricCollector;
+
+    @Autowired
+    private WorkerStateUpdateService workerStateUpdateService;
+
     private LinkedBlockingQueue<Map<WorkerPerformanceMetric, Serializable>> collectMetricQueue = new LinkedBlockingQueue<Map<WorkerPerformanceMetric, Serializable>>(capacity);
     @Autowired
     private EventBus eventBus;
@@ -42,7 +47,7 @@ public class WorkerMetricsServiceImpl implements WorkerMetricsService {
     @Override
     public void collectPerformanceMetrics() {
         try {
-            if(!disabled) {
+            if(!isMonitoringDisabled()) {
                 Map<WorkerPerformanceMetric, Serializable> metricInfo = perfMetricCollector.collectMetrics();
                 collectMetricQueue.put(metricInfo);
                 if (logger.isDebugEnabled()) {
@@ -57,10 +62,14 @@ public class WorkerMetricsServiceImpl implements WorkerMetricsService {
         }
     }
 
+    private boolean isMonitoringDisabled() {
+        return disabled || workerStateUpdateService.isMonitoringDisabled();
+    }
+
     @Override
     public void dispatchPerformanceMetrics() {
         try {
-            if(!disabled) {
+            if(!isMonitoringDisabled()) {
                 List<Map<WorkerPerformanceMetric, Serializable>> metricData = getCurrentBatch(collectMetricQueue);
                 ScoreEvent scoreEvent = new ScoreEvent(EventConstants.WORKER_PERFORMANCE_MONITOR, (Serializable) metricData);
                 eventBus.dispatch(scoreEvent);

@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 
 
@@ -48,6 +47,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
     private static final Logger logger = LogManager.getLogger(WorkerNodeServiceImpl.class);
 
     private static final long MAX_VERSION_GAP_ALLOWED = Long.getLong("max.allowed.version.gap.worker.recovery", 2);
+    private static boolean disableMonitoring = Boolean.getBoolean("worker.monitoring.disable");
     private static final String MSG_RECOVERY_VERSION_NAME = "MSG_RECOVERY_VERSION";
 
     @Autowired
@@ -95,7 +95,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
                 "Got keepAlive for Worker with uuid=" + uuid + " and update its ackVersion to " + version + " isActive"
                         + active);
         QueueDetails queueDetails = queueConfigurationDataService.getQueueConfigurations();
-		return new WorkerKeepAliveInfo(worker.getWorkerRecoveryVersion(), active, queueDetails);
+		return new WorkerKeepAliveInfo(worker.getWorkerRecoveryVersion(), active, queueDetails,disableMonitoring);
     }
 
     @Override
