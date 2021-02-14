@@ -28,9 +28,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -64,6 +67,22 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 
     @Autowired
     private QueueConfigurationDataService queueConfigurationDataService;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
+
+    @PostConstruct
+    void setWorkerMonitoring(){
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+
+        if(disableMonitoring) {
+            logger.info("Monitoring is disabled,setting busyness status as not available for all workers");
+            transactionTemplate.executeWithoutResult(transactionStatus -> {
+                readAllWorkersUuids().stream().forEach(uuid -> updateWorkerBusynessValue(uuid,"NA") );
+            });
+        }
+    }
+//readAllWorkersUuids().stream().forEach(uuid -> updateWorkerBusynessValue(uuid,"NA") );
 
     @Override
     @Transactional
