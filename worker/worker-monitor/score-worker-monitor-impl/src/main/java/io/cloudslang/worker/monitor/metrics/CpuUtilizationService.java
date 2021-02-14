@@ -42,9 +42,7 @@ public class CpuUtilizationService extends WorkerPerformanceMetricBase {
     }
 
     public double getCurrentValue() {
-        oldProcess = getProcess();
         OSProcess osProcess = getProcess();
-        //getProcessCpuLoadBetweenTicks​(OSProcess oldProcess) : Gets CPU usage of this process since a previous snapshot of the same process, provided as a parameter.
         double cpuUsed = (osProcess.getProcessCpuLoadBetweenTicks(oldProcess) * 100) / cpuNumber;
         oldProcess = osProcess;
         return formatTo2Decimal(cpuUsed);
