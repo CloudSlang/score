@@ -33,7 +33,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class WorkerMetricsServiceImpl implements WorkerMetricsService {
     protected static final Logger logger = LogManager.getLogger(WorkerMetricsServiceImpl.class);
     static int capacity = Integer.getInteger("metrics.collection.sampleCount", 10);
-    boolean disabled = Boolean.getBoolean("disable.worker.monitoring");
+    boolean disabled = Boolean.getBoolean("worker.monitoring.disable");
     @Autowired
     PerfMetricCollector perfMetricCollector;
 
