@@ -31,12 +31,12 @@ public class StubAplsLicensingServiceImpl implements AplsLicensingService {
     }
 
     @Override
-    public boolean checkoutUiStep(String executionId, String branchId) {
+    public boolean incrementUiStep(String executionId, String branchId) {
         return true;
     }
 
     @Override
-    public void checkinUiStep(String executionId, String branchId) {
+    public void decrementUiStep(String executionId, String branchId) {
 
     }
 }
