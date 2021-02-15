@@ -22,7 +22,7 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>worker-monitor</artifactId>
-        <version>0.3.221-SNAPSHOT</version>
+        <version>0.3.222-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -68,7 +68,7 @@
         <dependency>
             <groupId>io.cloudslang</groupId>
             <artifactId>score-worker-manager-impl</artifactId>
-            <version>0.3.221-SNAPSHOT</version>
+            <version>0.3.222-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
