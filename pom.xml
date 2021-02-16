@@ -21,7 +21,7 @@
 
     <groupId>io.cloudslang</groupId>
     <artifactId>score-parent</artifactId>
-    <version>0.3.222-SNAPSHOT</version>
+    <version>0.3.223-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -420,7 +420,6 @@
                 <artifactId>lz4-java</artifactId>
                 <version>1.7.1</version>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 

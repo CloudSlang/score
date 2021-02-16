@@ -53,4 +53,6 @@ public interface Worker {
 	String getVersionId();
 
 	boolean isQueueSync();
+
+	String getWorkerBusynessValue();
 }

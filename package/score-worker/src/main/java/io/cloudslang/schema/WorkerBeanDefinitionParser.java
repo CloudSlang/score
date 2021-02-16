@@ -43,6 +43,15 @@ import io.cloudslang.worker.management.services.WorkerManager;
 import io.cloudslang.worker.management.services.WorkerManagerMBean;
 import io.cloudslang.worker.management.services.WorkerRecoveryManagerImpl;
 import io.cloudslang.worker.management.services.WorkerVersionServiceImpl;
+import io.cloudslang.worker.monitor.metrics.DiskWriteUtilizationService;
+import io.cloudslang.worker.monitor.metrics.DiskReadUtilizationService;
+import io.cloudslang.worker.monitor.metrics.WorkerThreadUtilization;
+import io.cloudslang.worker.monitor.metrics.MemoryUtilizationService;
+import io.cloudslang.worker.monitor.metrics.CpuUtilizationService;
+import io.cloudslang.worker.monitor.metrics.HeapUtilizationService;
+import io.cloudslang.worker.monitor.PerformanceMetricsCollector;
+import io.cloudslang.worker.monitor.service.WorkerMetricsServiceImpl;
+import io.cloudslang.worker.monitor.mbean.WorkerMetricsMBean;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
@@ -76,6 +85,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(RetryTemplate.class, null);
 		put(SimpleExecutionRunnableFactory.class, null);
 		put(WorkerManagerMBean.class, "io.cloudslang.worker.management.services.WorkerManagerMBean");
+		put(WorkerMetricsMBean.class, "io.cloudslang.worker.monitor.mbean.WorkerMetricsMBean");
 		put(WorkerRecoveryManagerImpl.class, null);
 		put(ReflectionAdapterImpl.class, null);
         put(SessionDataHandlerImpl.class, "sessionDataHandler");
@@ -87,6 +97,14 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
         put(WorkerExecutionMonitorServiceImpl.class, "workerExecutionMonitorService");
         put(WorkerMonitorsImpl.class, "workerMonitorsImpl");
         put(ScheduledWorkerLoadMonitor.class, "scheduledWorkerLoadMonitor");
+		put(CpuUtilizationService.class, "cpuUtilizationService");
+		put(DiskReadUtilizationService.class, "diskReadUtilizationService");
+		put(DiskWriteUtilizationService.class, "diskWriteUtilizationService");
+		put(MemoryUtilizationService.class, "memoryUtilizationService");
+		put(PerformanceMetricsCollector.class, "perfMetricCollector");
+		put(WorkerMetricsServiceImpl.class, "workerMetricCollectorService");
+		put(HeapUtilizationService.class, "heapUtilizationService");
+		put(WorkerThreadUtilization.class, "workerThreadUtilization");
 	}};
 
 	private List<ConfValue> configurationValues = Arrays.asList(
@@ -102,7 +120,9 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 			new ConfValue().NAME("interruptCanceledInterval").DEFAULT(30000L),
             new ConfValue().NAME("statisticsInterval").DEFAULT(1000L),
             new ConfValue().NAME("scheduledWorkerMonitorInterval").DEFAULT(10000L),
-            new ConfValue().NAME("workerMonitorRefreshInterval").DEFAULT(300000L)
+            new ConfValue().NAME("workerMonitorRefreshInterval").DEFAULT(300000L),
+			new ConfValue().NAME("scheduledPerfMetricCollectionInterval").DEFAULT(5000L),
+			new ConfValue().NAME("scheduledMetricDispatchInterval").DEFAULT(30000L)
 	);
 
 	@Override
