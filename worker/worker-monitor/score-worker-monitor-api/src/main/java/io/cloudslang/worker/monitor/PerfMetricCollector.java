@@ -13,31 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.worker.management.monitor;
+package io.cloudslang.worker.monitor;
 
+import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
 
-public class WorkerStateUpdateServiceImpl implements WorkerStateUpdateService {
+import java.io.Serializable;
+import java.util.Map;
 
-    private boolean active;
-    private boolean monitorWorker;
+public interface PerfMetricCollector {
 
-    @Override
-    public synchronized boolean isWorkerEnabled() {
-        return active;
-    }
-
-    @Override
-    public synchronized void setEnableState(boolean newState) {
-         active = newState;
-    }
-
-    @Override
-    public boolean isMonitoringDisabled() {
-        return monitorWorker;
-    }
-
-    @Override
-    public void setMonitoringState(boolean doMonitor) {
-        monitorWorker = doMonitor;
-    }
+    Map<WorkerPerformanceMetric, Serializable> collectMetrics();
 }

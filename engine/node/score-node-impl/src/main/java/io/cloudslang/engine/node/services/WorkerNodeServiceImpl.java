@@ -28,9 +28,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -38,7 +41,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 
@@ -48,6 +50,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
     private static final Logger logger = LogManager.getLogger(WorkerNodeServiceImpl.class);
 
     private static final long MAX_VERSION_GAP_ALLOWED = Long.getLong("max.allowed.version.gap.worker.recovery", 2);
+    private static boolean disableMonitoring = Boolean.getBoolean("global.worker.monitoring.disable");
     private static final String MSG_RECOVERY_VERSION_NAME = "MSG_RECOVERY_VERSION";
 
     @Autowired
@@ -64,6 +67,22 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 
     @Autowired
     private QueueConfigurationDataService queueConfigurationDataService;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
+
+    @PostConstruct
+    void setWorkerMonitoring(){
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+
+        if(disableMonitoring) {
+            logger.info("Monitoring is disabled,setting busyness status as not available for all workers");
+            transactionTemplate.executeWithoutResult(transactionStatus -> {
+                readAllWorkersUuids().stream().forEach(uuid -> updateWorkerBusynessValue(uuid,"NA") );
+            });
+        }
+    }
+//readAllWorkersUuids().stream().forEach(uuid -> updateWorkerBusynessValue(uuid,"NA") );
 
     @Override
     @Transactional
@@ -95,7 +114,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
                 "Got keepAlive for Worker with uuid=" + uuid + " and update its ackVersion to " + version + " isActive"
                         + active);
         QueueDetails queueDetails = queueConfigurationDataService.getQueueConfigurations();
-		return new WorkerKeepAliveInfo(worker.getWorkerRecoveryVersion(), active, queueDetails);
+		return new WorkerKeepAliveInfo(worker.getWorkerRecoveryVersion(), active, queueDetails,disableMonitoring);
     }
 
     @Override
@@ -110,6 +129,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
         worker.setStatus(WorkerStatus.FAILED);
         worker.setPassword(password);
         worker.setGroups(Arrays.asList(WorkerNode.DEFAULT_WORKER_GROUPS));
+        worker.setWorkerBusynessValue("NA");
         workerNodeRepository.save(worker);
         workerLockService.create(uuid);
     }
@@ -330,6 +350,16 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
             throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
         }
         worker.setStatus(status);
+    }
+
+    @Override
+    @Transactional
+    public void updateWorkerBusynessValue(String uuid, String workerBusynessValue) {
+        WorkerNode worker = workerNodeRepository.findByUuid(uuid);
+        if (worker == null) {
+            throw new IllegalStateException("no worker was found by the specified UUID:" + uuid);
+        }
+        worker.setWorkerBusynessValue(workerBusynessValue);
     }
 
     @Override

@@ -13,31 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.worker.management.monitor;
+package io.cloudslang.worker.monitor.service;
 
+public interface WorkerMetricsService {
 
-public class WorkerStateUpdateServiceImpl implements WorkerStateUpdateService {
+    void dispatchPerformanceMetrics();
 
-    private boolean active;
-    private boolean monitorWorker;
-
-    @Override
-    public synchronized boolean isWorkerEnabled() {
-        return active;
-    }
-
-    @Override
-    public synchronized void setEnableState(boolean newState) {
-         active = newState;
-    }
-
-    @Override
-    public boolean isMonitoringDisabled() {
-        return monitorWorker;
-    }
-
-    @Override
-    public void setMonitoringState(boolean doMonitor) {
-        monitorWorker = doMonitor;
-    }
+    void collectPerformanceMetrics();
 }

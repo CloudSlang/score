@@ -420,7 +420,6 @@
                 <artifactId>lz4-java</artifactId>
                 <version>1.7.1</version>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 

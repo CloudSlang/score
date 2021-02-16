@@ -13,31 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.worker.management.monitor;
+package io.cloudslang.worker.monitor.service;
 
+public enum WorkerPerformanceMetric {
+    WORKER_ID,
+    WORKER_MEASURED_TIME,
+    CPU_USAGE,
+    MEMORY_USAGE,
+    HEAP_SIZE,
+    THREAD_UTILIZATION,
+    DISK_WRITE_USAGE,
+    DISK_READ_USAGE;
 
-public class WorkerStateUpdateServiceImpl implements WorkerStateUpdateService {
-
-    private boolean active;
-    private boolean monitorWorker;
-
-    @Override
-    public synchronized boolean isWorkerEnabled() {
-        return active;
-    }
-
-    @Override
-    public synchronized void setEnableState(boolean newState) {
-         active = newState;
-    }
-
-    @Override
-    public boolean isMonitoringDisabled() {
-        return monitorWorker;
-    }
-
-    @Override
-    public void setMonitoringState(boolean doMonitor) {
-        monitorWorker = doMonitor;
+    WorkerPerformanceMetric() {
     }
 }
