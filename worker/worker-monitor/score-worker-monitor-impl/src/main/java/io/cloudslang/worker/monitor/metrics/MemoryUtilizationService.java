@@ -20,6 +20,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import oshi.SystemInfo;
 import oshi.hardware.GlobalMemory;
 import oshi.software.os.OSProcess;
+
 import javax.annotation.PostConstruct;
 import java.io.Serializable;
 
@@ -45,7 +46,7 @@ public class MemoryUtilizationService extends WorkerPerformanceMetricBase {
 
     public double getCurrentValue() {
         this.usedRamProcess = process.getResidentSetSize();
-        double ramUsed = (double) (usedRamProcess * 100 / totalRam);
+        double ramUsed =  ((double)usedRamProcess * 100 / totalRam);
         return formatTo2Decimal(ramUsed);
     }
 }
