@@ -123,6 +123,9 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
     @Column(name = "QUEUE_SYNC", nullable = false)
     private boolean queueSync = false;
 
+	@Column(name = "PERCENTAGE_UTILIZATION")
+	private String workerBusynessValue;
+
     @Override
     public String getUuid() {
         return uuid;
@@ -295,6 +298,15 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
     public void setQueueSync(boolean queueSync) {
         this.queueSync = queueSync;
     }
+
+	@Override
+	public String getWorkerBusynessValue() {
+		return workerBusynessValue;
+	}
+
+	public void setWorkerBusynessValue(String workerBusynessValue) {
+		this.workerBusynessValue = workerBusynessValue;
+	}
 
     @Override
     public boolean equals(Object o) {

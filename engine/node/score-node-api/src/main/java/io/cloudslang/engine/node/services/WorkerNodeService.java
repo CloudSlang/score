@@ -294,4 +294,11 @@ public interface WorkerNodeService {
     void updateQueueSyncByUuid(String workerUuid, boolean isQueueSync);
 
     void updateQueueSync(boolean isQueueSync);
+    /**
+     * updates worker's busyness value
+     *
+     * @param uuid the uuid of the worker to be updated
+     * @param workerBusynessValue the newly added busyness value
+     */
+    void updateWorkerBusynessValue(String uuid, String workerBusynessValue);
 }

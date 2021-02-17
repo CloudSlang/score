@@ -19,4 +19,6 @@ package io.cloudslang.worker.management.monitor;
 public interface WorkerStateUpdateService {
     boolean isWorkerEnabled();
     void setEnableState(boolean newState);
+    boolean isMonitoringDisabled();
+    void setMonitoringState(boolean disable);
 }
