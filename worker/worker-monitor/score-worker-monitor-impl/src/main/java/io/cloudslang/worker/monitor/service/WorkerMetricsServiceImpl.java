@@ -31,58 +31,58 @@ import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class WorkerMetricsServiceImpl implements WorkerMetricsService {
-    protected static final Logger logger = LogManager.getLogger(WorkerMetricsServiceImpl.class);
-    static int capacity = Integer.getInteger("metrics.collection.sampleCount", Integer.MAX_VALUE);
-    boolean disabled = Boolean.getBoolean("worker.monitoring.disable");
-    @Autowired
-    PerfMetricCollector perfMetricCollector;
+	protected static final Logger logger = LogManager.getLogger(WorkerMetricsServiceImpl.class);
+	static int capacity = Integer.getInteger("metrics.collection.sampleCount", Integer.MAX_VALUE);
+	boolean disabled = Boolean.getBoolean("worker.monitoring.disable");
+	@Autowired
+	PerfMetricCollector perfMetricCollector;
 
-    @Autowired
-    private WorkerStateUpdateService workerStateUpdateService;
+	@Autowired
+	private WorkerStateUpdateService workerStateUpdateService;
 
-    private LinkedBlockingQueue<Map<WorkerPerformanceMetric, Serializable>> collectMetricQueue = new LinkedBlockingQueue<Map<WorkerPerformanceMetric, Serializable>>(capacity);
-    @Autowired
-    private EventBus eventBus;
+	private LinkedBlockingQueue<Map<WorkerPerformanceMetric, Serializable>> collectMetricQueue = new LinkedBlockingQueue<Map<WorkerPerformanceMetric, Serializable>>(capacity);
+	@Autowired
+	private EventBus eventBus;
 
-    @Override
-    public void collectPerformanceMetrics() {
-        try {
-            if(!isMonitoringDisabled()) {
-                Map<WorkerPerformanceMetric, Serializable> metricInfo = perfMetricCollector.collectMetrics();
-                collectMetricQueue.put(metricInfo);
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Collected worker metric "+ metricInfo.size());
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Failed to load metric into queue", e);
-        }
-    }
+	@Override
+	public void collectPerformanceMetrics() {
+		try {
+			if (!isMonitoringDisabled()) {
+				Map<WorkerPerformanceMetric, Serializable> metricInfo = perfMetricCollector.collectMetrics();
+				collectMetricQueue.put(metricInfo);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Collected worker metric " + metricInfo.size());
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Failed to load metric into queue", e);
+		}
+	}
 
-    private boolean isMonitoringDisabled() {
-        return disabled || workerStateUpdateService.isMonitoringDisabled();
-    }
+	private boolean isMonitoringDisabled() {
+		return disabled || workerStateUpdateService.isMonitoringDisabled();
+	}
 
-    @Override
-    public void dispatchPerformanceMetrics() {
-        try {
-            if(!isMonitoringDisabled()) {
-                List<Map<WorkerPerformanceMetric, Serializable>> metricData = getCurrentBatch(collectMetricQueue);
-                ScoreEvent scoreEvent = new ScoreEvent(EventConstants.WORKER_PERFORMANCE_MONITOR, (Serializable) metricData);
-                eventBus.dispatch(scoreEvent);
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Dispatched worker metric "+ metricData.size());
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Failed to dispatch metric info event", e);
-        }
-    }
+	@Override
+	public void dispatchPerformanceMetrics() {
+		try {
+			if (!isMonitoringDisabled()) {
+				List<Map<WorkerPerformanceMetric, Serializable>> metricData = getCurrentBatch(collectMetricQueue);
+				ScoreEvent scoreEvent = new ScoreEvent(EventConstants.WORKER_PERFORMANCE_MONITOR, (Serializable) metricData);
+				eventBus.dispatch(scoreEvent);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Dispatched worker metric " + metricData.size());
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Failed to dispatch metric info event", e);
+		}
+	}
 
-    private List<Map<WorkerPerformanceMetric, Serializable>> getCurrentBatch(LinkedBlockingQueue<Map<WorkerPerformanceMetric, Serializable>> metricQueue) {
-        List<Map<WorkerPerformanceMetric, Serializable>> metricList = new ArrayList<>();
-        metricQueue.drainTo(metricList);
+	private List<Map<WorkerPerformanceMetric, Serializable>> getCurrentBatch(LinkedBlockingQueue<Map<WorkerPerformanceMetric, Serializable>> metricQueue) {
+		List<Map<WorkerPerformanceMetric, Serializable>> metricList = new ArrayList<>();
+		metricQueue.drainTo(metricList);
 
-        return metricList;
-    }
+		return metricList;
+	}
 }

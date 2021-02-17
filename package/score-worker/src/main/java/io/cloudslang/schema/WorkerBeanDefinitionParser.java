@@ -85,7 +85,6 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(RetryTemplate.class, null);
 		put(SimpleExecutionRunnableFactory.class, null);
 		put(WorkerManagerMBean.class, "io.cloudslang.worker.management.services.WorkerManagerMBean");
-		put(WorkerMetricsMBean.class, "io.cloudslang.worker.monitor.mbean.WorkerMetricsMBean");
 		put(WorkerRecoveryManagerImpl.class, null);
 		put(ReflectionAdapterImpl.class, null);
         put(SessionDataHandlerImpl.class, "sessionDataHandler");
@@ -98,6 +97,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
         put(WorkerMonitorsImpl.class, "workerMonitorsImpl");
         put(ScheduledWorkerLoadMonitor.class, "scheduledWorkerLoadMonitor");
 		put(CpuUtilizationService.class, "cpuUtilizationService");
+		//Metrics
 		put(DiskReadUtilizationService.class, "diskReadUtilizationService");
 		put(DiskWriteUtilizationService.class, "diskWriteUtilizationService");
 		put(MemoryUtilizationService.class, "memoryUtilizationService");
@@ -105,6 +105,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(WorkerMetricsServiceImpl.class, "workerMetricCollectorService");
 		put(HeapUtilizationService.class, "heapUtilizationService");
 		put(WorkerThreadUtilization.class, "workerThreadUtilization");
+		put(WorkerMetricsMBean.class, "io.cloudslang.worker.monitor.mbean.WorkerMetricsMBean");
 	}};
 
 	private List<ConfValue> configurationValues = Arrays.asList(
