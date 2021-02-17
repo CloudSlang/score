@@ -32,7 +32,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class WorkerMetricsServiceImpl implements WorkerMetricsService {
     protected static final Logger logger = LogManager.getLogger(WorkerMetricsServiceImpl.class);
-    static int capacity = Integer.getInteger("metrics.collection.sampleCount", 10);
+    static int capacity = Integer.getInteger("metrics.collection.sampleCount", Integer.MAX_VALUE);
     boolean disabled = Boolean.getBoolean("worker.monitoring.disable");
     @Autowired
     PerfMetricCollector perfMetricCollector;
@@ -54,9 +54,6 @@ public class WorkerMetricsServiceImpl implements WorkerMetricsService {
                     logger.debug("Collected worker metric "+ metricInfo.size());
                 }
             }
-            else{
-                Thread.sleep(100);
-            }
         } catch (Exception e) {
             logger.error("Failed to load metric into queue", e);
         }
@@ -76,9 +73,6 @@ public class WorkerMetricsServiceImpl implements WorkerMetricsService {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Dispatched worker metric "+ metricData.size());
                 }
-            }
-            else{
-                Thread.sleep(100);
             }
         } catch (Exception e) {
             logger.error("Failed to dispatch metric info event", e);
