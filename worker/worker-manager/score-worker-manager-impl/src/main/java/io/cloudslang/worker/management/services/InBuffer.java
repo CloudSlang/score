@@ -154,7 +154,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
                     if (!workerStateUpdateService.isWorkerEnabled()) {
                         logger.debug("Worker is disabled, skipping polling.");
                         syncManager.finishGetMessages(); // Release all locks before going to sleep
-                        Thread.sleep(1000);
+                        Thread.sleep(3000);
                         continue;
                     }
 
