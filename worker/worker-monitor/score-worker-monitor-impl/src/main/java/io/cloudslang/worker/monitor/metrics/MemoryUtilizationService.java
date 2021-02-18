@@ -26,27 +26,25 @@ import java.io.Serializable;
 
 public class MemoryUtilizationService extends WorkerPerformanceMetricBase {
 
-	private long usedRamProcess;
-	private OSProcess process;
-	private long totalRam;
+    private OSProcess process;
+    private long totalRam;
 
-	@PostConstruct
-	public void init() {
-		SystemInfo si = new SystemInfo();
-		process = getProcess();
-		GlobalMemory globalMemory = si.getHardware().getMemory();
-		this.totalRam = globalMemory.getTotal();
-	}
+    @PostConstruct
+    public void init() {
+        SystemInfo si = new SystemInfo();
+        process = getProcess();
+        GlobalMemory globalMemory = si.getHardware().getMemory();
+        this.totalRam = globalMemory.getTotal();
+    }
 
-	@Override
-	public Pair<WorkerPerformanceMetric, Serializable> measure() {
-		Pair<WorkerPerformanceMetric, Serializable> memUsage = Pair.of(WorkerPerformanceMetric.MEMORY_USAGE, getCurrentValue());
-		return memUsage;
-	}
+    @Override
+    public Pair<WorkerPerformanceMetric, Serializable> measure() {
+        return Pair.of(WorkerPerformanceMetric.MEMORY_USAGE, getCurrentValue());
+    }
 
     public double getCurrentValue() {
-        this.usedRamProcess = process.getResidentSetSize();
-        double ramUsed =  ((double)usedRamProcess * 100 / totalRam);
+        long usedRamProcess = process.getResidentSetSize();
+        double ramUsed = ((double) usedRamProcess * 100 / totalRam);
         return formatTo2Decimal(ramUsed);
     }
 }
