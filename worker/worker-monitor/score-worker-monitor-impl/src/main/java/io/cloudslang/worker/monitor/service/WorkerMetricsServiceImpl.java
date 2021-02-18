@@ -31,17 +31,18 @@ import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class WorkerMetricsServiceImpl implements WorkerMetricsService {
-    protected static final Logger logger = LogManager.getLogger(WorkerMetricsServiceImpl.class);
-    boolean disabled = Boolean.getBoolean("worker.monitoring.disable");
-    @Autowired
-    PerfMetricCollector perfMetricCollector;
+	protected static final Logger logger = LogManager.getLogger(WorkerMetricsServiceImpl.class);
+	static int capacity = Integer.getInteger("metrics.collection.sampleCount", Integer.MAX_VALUE);
+	boolean disabled = Boolean.getBoolean("worker.monitoring.disable");
+	@Autowired
+	PerfMetricCollector perfMetricCollector;
 
     @Autowired
     private WorkerStateUpdateService workerStateUpdateService;
 
-    private LinkedBlockingQueue<Map<WorkerPerformanceMetric, Serializable>> collectMetricQueue = new LinkedBlockingQueue<Map<WorkerPerformanceMetric, Serializable>>(Integer.MAX_VALUE);
-    @Autowired
-    private EventBus eventBus;
+	private LinkedBlockingQueue<Map<WorkerPerformanceMetric, Serializable>> collectMetricQueue = new LinkedBlockingQueue<Map<WorkerPerformanceMetric, Serializable>>(capacity);
+	@Autowired
+	private EventBus eventBus;
 
     @Override
     public void collectPerformanceMetrics() {

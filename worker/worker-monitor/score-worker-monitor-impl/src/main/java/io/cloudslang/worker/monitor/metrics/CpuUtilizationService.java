@@ -25,26 +25,26 @@ import javax.annotation.PostConstruct;
 import java.io.Serializable;
 
 public class CpuUtilizationService extends WorkerPerformanceMetricBase {
-    private static OSProcess oldProcess;
-    private int cpuNumber;
+	private static OSProcess oldProcess;
+	private int cpuNumber;
 
-    @PostConstruct
-    public void init() {
-        SystemInfo systemInfo = new SystemInfo();
-        CentralProcessor processor = systemInfo.getHardware().getProcessor();
-        this.cpuNumber = processor.getLogicalProcessorCount();
-    }
+	@PostConstruct
+	public void init() {
+		SystemInfo systemInfo = new SystemInfo();
+		CentralProcessor processor = systemInfo.getHardware().getProcessor();
+		this.cpuNumber = processor.getLogicalProcessorCount();
+	}
 
-    @Override
-    public Pair<WorkerPerformanceMetric, Serializable> measure() {
-        Pair<WorkerPerformanceMetric, Serializable> cpuUsage = Pair.of(WorkerPerformanceMetric.CPU_USAGE,getCurrentValue());
-        return cpuUsage;
-    }
+	@Override
+	public Pair<WorkerPerformanceMetric, Serializable> measure() {
+		Pair<WorkerPerformanceMetric, Serializable> cpuUsage = Pair.of(WorkerPerformanceMetric.CPU_USAGE, getCurrentValue());
+		return cpuUsage;
+	}
 
-    public double getCurrentValue() {
-        OSProcess osProcess = getProcess();
-        double cpuUsed = (osProcess.getProcessCpuLoadBetweenTicks(oldProcess) * 100) / cpuNumber;
-        oldProcess = osProcess;
-        return formatTo2Decimal(cpuUsed);
-    }
+	public double getCurrentValue() {
+		OSProcess osProcess = getProcess();
+		double cpuUsed = (osProcess.getProcessCpuLoadBetweenTicks(oldProcess) * 100) / cpuNumber;
+		oldProcess = osProcess;
+		return formatTo2Decimal(cpuUsed);
+	}
 }
