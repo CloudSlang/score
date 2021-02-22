@@ -35,7 +35,13 @@ class PythonAgentExecutor(object):
         return json.dumps(result)
 
     def cs_xpath_query(self, str, xpath):
-        f = StringIO(str)
+        new_str = str
+        if str.startswith('<?xml'):
+            header_content = str.split('>', 1)
+            if len(header_content) == 2:
+                new_str = header_content[1]
+
+        f = StringIO(new_str)
         tree = etree.parse(f)
         r = tree.xpath(xpath)
         return json.dumps(list(map(lambda val: etree.tostring(val, encoding='UTF-8').decode('UTF-8'), r))) if r is not None and len(r) > 0 else None
