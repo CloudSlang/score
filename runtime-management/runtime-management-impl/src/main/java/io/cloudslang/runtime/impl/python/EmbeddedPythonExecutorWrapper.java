@@ -17,6 +17,8 @@ package io.cloudslang.runtime.impl.python;
 
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
+import io.cloudslang.runtime.impl.python.security.BoundStringWriter;
+import org.apache.commons.io.input.NullInputStream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,20 +38,27 @@ import org.python.core.PyType;
 import org.python.util.PythonInterpreter;
 
 import java.io.Serializable;
+import java.io.Writer;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
+import static org.apache.commons.io.output.NullOutputStream.NULL_OUTPUT_STREAM;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 public class EmbeddedPythonExecutorWrapper {
     private static final Logger logger = LogManager.getLogger(PythonExecutor.class);
     private static final int retriesForNoModuleFound = 3;
-    private static final String NO_MODULE_NAMED_ISSUE = "No module named";
     private static final int exceptionMaxLength = Integer.getInteger("input.error.max.length", 1000);
+    private static final Supplier<RuntimeException> outputStreamLengthExceededSupplier =
+            () -> new IllegalStateException("Cannot exceed threshold for python standard output stream.");
+    private static final Supplier<RuntimeException> errorStreamLengthExceededSupplier =
+            () -> new IllegalStateException("Cannot exceed threshold for python standard error stream.");
+    private static final String noModuleNamedIssue = "No module named";
 
     private final PythonInterpreter pythonInterpreter;
     private final AtomicBoolean closed;
@@ -80,22 +89,31 @@ public class EmbeddedPythonExecutorWrapper {
      */
     public PythonExecutionResult exec(String script, Map<String, Serializable> callArguments) {
         validateInterpreter();
-        prepareInterpreterContext(callArguments);
-
-        Exception originalExc = null;
-        for (int i = 0; i < retriesForNoModuleFound; i++) {
-            try {
-                return doExec(script);
-            } catch (Exception exc) {
-                if (!isNoModuleFoundIssue(exc)) {
-                    throw new RuntimeException("Error executing python script: " + exc, exc);
-                }
-                if (originalExc == null) {
-                    originalExc = exc;
+        Writer outputWriter = new BoundStringWriter(outputStreamLengthExceededSupplier);
+        Writer errorWriter = new BoundStringWriter(errorStreamLengthExceededSupplier);
+        try {
+            pythonInterpreter.setOut(outputWriter);
+            pythonInterpreter.setErr(errorWriter);
+            pythonInterpreter.setIn(new NullInputStream(0));
+            prepareInterpreterContext(callArguments);
+            Exception originalExc = null;
+            for (int i = 0; i < retriesForNoModuleFound; i++) {
+                try {
+                    return doExec(script);
+                } catch (Exception exc) {
+                    if (!isNoModuleFoundIssue(exc)) {
+                        throw new RuntimeException("Error executing python script: " + exc, exc);
+                    }
+                    if (originalExc == null) {
+                        originalExc = exc;
+                    }
                 }
             }
+            throw new RuntimeException("Error executing python script: " + originalExc, originalExc);
+        } finally {
+            logger.info("Script output: " + outputWriter.toString());
+            logger.error("Script error: " + errorWriter.toString());
         }
-        throw new RuntimeException("Error executing python script: " + originalExc, originalExc);
     }
 
     /**
@@ -104,6 +122,9 @@ public class EmbeddedPythonExecutorWrapper {
     public PythonEvaluationResult eval(String prepareEnvironmentScript, String expr, Map<String, Serializable> context) {
         validateInterpreter();
         try {
+            pythonInterpreter.setOut(NULL_OUTPUT_STREAM);
+            pythonInterpreter.setErr(NULL_OUTPUT_STREAM);
+            pythonInterpreter.setIn(new NullInputStream(0));
             prepareInterpreterContext(context);
             Serializable eval = doEval(prepareEnvironmentScript, expr);
             return new PythonEvaluationResult(eval, getPythonLocals());
@@ -152,7 +173,7 @@ public class EmbeddedPythonExecutorWrapper {
         if (e instanceof PyException) {
             PyException pyException = (PyException) e;
             String message = pyException.value.toString();
-            return message.contains(NO_MODULE_NAMED_ISSUE);
+            return message.contains(noModuleNamedIssue);
         }
         return false;
     }

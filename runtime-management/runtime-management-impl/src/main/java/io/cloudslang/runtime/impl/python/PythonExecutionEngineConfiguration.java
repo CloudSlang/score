@@ -57,11 +57,11 @@ public class PythonExecutionEngineConfiguration {
 
         String value = System.getProperty(PYTHON_EXECUTOR_ENGINE, pooledAndCachedEngine);
 
-        if (StringUtils.equals(value, pooledAndCachedEngine)) {
+        if (StringUtils.equalsIgnoreCase(value, pooledAndCachedEngine)) {
             return new PythonExecutionPooledAndCachedEngine();
-        } else if (StringUtils.equals(value, cacheEngine)) {
+        } else if (StringUtils.equalsIgnoreCase(value, cacheEngine)) {
             return new PythonExecutionCachedEngine();
-        } else if (StringUtils.equals(value, simpleEngine)) {
+        } else if (StringUtils.equalsIgnoreCase(value, simpleEngine)) {
             return new PythonExecutionNotCachedEngine();
         } else {
             return new PythonExecutionPooledAndCachedEngine();
