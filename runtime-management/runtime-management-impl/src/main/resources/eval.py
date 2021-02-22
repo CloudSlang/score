@@ -35,10 +35,11 @@ class PythonAgentExecutor(object):
         return json.dumps(result)
 
     def cs_xpath_query(self, str, xpath):
+        new_str = str
         if str.startswith('<?xml'):
-            new_str = str.split('>', 1)[1]
-        else:
-            new_str = str
+            header_content = str.split('>', 1)
+            if len(header_content) == 2:
+                new_str = header_content[1]
 
         f = StringIO(new_str)
         tree = etree.parse(f)
