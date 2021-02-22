@@ -35,9 +35,8 @@ class PythonAgentExecutor(object):
         return json.dumps(result)
 
     def cs_xpath_query(self, str, xpath):
-        first_line = str.split('\n', 1)[0]
-        if '<?xml' in first_line and 'encoding=' in first_line:
-            new_str = str.split('\n', 1)[1]
+        if str.startswith('<?xml'):
+            new_str = str.split('>', 1)[1]
         else:
             new_str = str
 
