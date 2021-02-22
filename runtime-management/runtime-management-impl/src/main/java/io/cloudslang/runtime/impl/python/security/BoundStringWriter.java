@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 
 public class BoundStringWriter extends StringWriter {
     private static final int defaultMaxChars = Integer.getInteger("jython.standardStreams.maxLength", 1000);
-    private static final int nullStringLength = 4;
+    private static final int nullStringLength = "null".length();
 
     private final Supplier<RuntimeException> exceptionSupplier;
     private final int maxChars;
