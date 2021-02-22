@@ -20,12 +20,15 @@ import io.cloudslang.dependency.impl.services.DependenciesManagementConfiguratio
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonRuntimeServiceImpl;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import java.util.concurrent.Semaphore;
+
+import static io.cloudslang.runtime.impl.python.PythonExecutionConfigurationConsts.PYTHON_EXECUTOR_ENGINE;
 
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
@@ -48,10 +51,21 @@ public class PythonExecutionEngineConfiguration {
 
     @Bean(name = "jythonExecutionEngine")
     PythonExecutionEngine pythonExecutionEngine() {
-        String noCacheEngine = PythonExecutionNotCachedEngine.class.getSimpleName();
+        String pooledAndCachedEngine = PythonExecutionPooledAndCachedEngine.class.getSimpleName();
         String cacheEngine = PythonExecutionCachedEngine.class.getSimpleName();
-        return System.getProperty(PythonExecutionConfigurationConsts.PYTHON_EXECUTOR_ENGINE, cacheEngine).equals(noCacheEngine) ?
-                new PythonExecutionNotCachedEngine() : new PythonExecutionCachedEngine();
+        String simpleEngine = PythonExecutionNotCachedEngine.class.getSimpleName();
+
+        String value = System.getProperty(PYTHON_EXECUTOR_ENGINE, pooledAndCachedEngine);
+
+        if (StringUtils.equals(value, pooledAndCachedEngine)) {
+            return new PythonExecutionPooledAndCachedEngine();
+        } else if (StringUtils.equals(value, cacheEngine)) {
+            return new PythonExecutionCachedEngine();
+        } else if (StringUtils.equals(value, simpleEngine)) {
+            return new PythonExecutionNotCachedEngine();
+        } else {
+            return new PythonExecutionPooledAndCachedEngine();
+        }
     }
 
     @Bean(name = "externalPythonExecutionEngine")

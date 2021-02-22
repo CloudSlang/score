@@ -27,9 +27,11 @@ import java.util.Set;
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
 public interface PythonExecutionEngine {
+
     PythonExecutionResult exec(Set<String> dependencies, String script, Map<String, Serializable> vars);
 
     PythonEvaluationResult eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars);
 
     PythonEvaluationResult test(String prepareEnvironmentScript, String script, Map<String, Serializable> vars, long timeout);
+
 }
