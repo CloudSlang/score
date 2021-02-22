@@ -17,7 +17,7 @@ package io.cloudslang.runtime.impl.python;
 
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
-import io.cloudslang.runtime.impl.python.security.BoundStringWriter;
+import io.cloudslang.runtime.impl.python.security.BoundedStringWriter;
 import org.apache.commons.io.input.NullInputStream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -89,8 +89,8 @@ public class EmbeddedPythonExecutorWrapper {
      */
     public PythonExecutionResult exec(String script, Map<String, Serializable> callArguments) {
         validateInterpreter();
-        Writer outputWriter = new BoundStringWriter(outputStreamLengthExceededSupplier);
-        Writer errorWriter = new BoundStringWriter(errorStreamLengthExceededSupplier);
+        Writer outputWriter = new BoundedStringWriter(outputStreamLengthExceededSupplier);
+        Writer errorWriter = new BoundedStringWriter(errorStreamLengthExceededSupplier);
         try {
             pythonInterpreter.setOut(outputWriter);
             pythonInterpreter.setErr(errorWriter);

@@ -18,14 +18,14 @@ package io.cloudslang.runtime.impl.python.security;
 import java.io.StringWriter;
 import java.util.function.Supplier;
 
-public class BoundStringWriter extends StringWriter {
+public class BoundedStringWriter extends StringWriter {
     private static final int defaultMaxChars = Integer.getInteger("jython.standardStreams.maxLength", 1000);
     private static final int nullStringLength = "null".length();
 
     private final Supplier<RuntimeException> exceptionSupplier;
     private final int maxChars;
 
-    public BoundStringWriter(Supplier<RuntimeException> exceptionSupplier) {
+    public BoundedStringWriter(Supplier<RuntimeException> exceptionSupplier) {
         super();
         this.maxChars = defaultMaxChars;
         this.exceptionSupplier = exceptionSupplier;
