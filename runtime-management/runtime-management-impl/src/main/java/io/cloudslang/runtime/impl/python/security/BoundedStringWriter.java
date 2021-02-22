@@ -23,6 +23,7 @@ import java.util.function.Supplier;
  * when attempting to write more than 'maxChars' characters to the buffer
  */
 public class BoundedStringWriter extends StringWriter {
+
     private static final int defaultMaxChars = Integer.getInteger("jython.standardStreams.maxLength", 1000);
     private static final int nullStringLength = "null".length();
 
