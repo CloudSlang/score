@@ -30,7 +30,11 @@ import java.util.Set;
 import static java.util.Collections.emptySet;
 
 /**
- * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
+ * Please prefer io.cloudslang.runtime.impl.python.PythonExecutionPooledAndCachedEngine instead of this implementation
+ * because of enhanced functionality and security in the former.
+ * Works with io.cloudslang.runtime.impl.python.PythonExecutor that uses ThreadLocal state
+ * and a shared PythonExecutor.GLOBAL_INTERPRETER for no depedencies python.
+ * Uses a cache of PythonExecutor for python with dependencies.
  */
 public class PythonExecutionCachedEngine extends ExecutionCachedEngine<PythonExecutor> implements PythonExecutionEngine {
     @Autowired

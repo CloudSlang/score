@@ -57,9 +57,8 @@ import java.util.Map;
 
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.ACTION_TYPE;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SEQUENTIAL;
-import static io.cloudslang.score.facade.execution.PauseReason.NO_ROBOTS_IN_GROUP;
 import static java.lang.Boolean.TRUE;
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -394,7 +393,7 @@ public class ExecutionServiceTest {
             System.clearProperty("enable.new.timeout");
             return executionService;
         }
-        
+
 		@Bean
 		public WorkerConfigurationService getWorkerConfigurationService() {
 			WorkerConfigurationService serviceMock = mock(WorkerConfigurationService.class);

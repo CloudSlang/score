@@ -17,13 +17,12 @@
 package io.cloudslang.orchestrator.services;
 
 
-import io.cloudslang.score.facade.execution.ExecutionStatus;
-import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.orchestrator.entities.ExecutionState;
 import io.cloudslang.orchestrator.repositories.ExecutionStateRepository;
-import org.junit.Rule;
+import io.cloudslang.score.facade.entities.Execution;
+import io.cloudslang.score.facade.execution.ExecutionStatus;
+import org.junit.Assert;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -64,21 +63,18 @@ public class ExecutionStateServiceTest {
     @Autowired
     private ExecutionSerializationUtil executionSerializationUtil;
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     @Test
     public void testReadByExecutionId_NullValue() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.readByExecutionId(null);
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.readByExecutionId(null));
+        Assert.assertEquals("executionId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testReadByExecutionId_EmptyValue() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.readByExecutionId(null);
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.readByExecutionId(null));
+        Assert.assertEquals("executionId cannot be null or empty", exception.getMessage());
     }
 
     @Test
@@ -92,30 +88,30 @@ public class ExecutionStateServiceTest {
 
     @Test
     public void testReadByExecutionIdAndBranchId_ExecutionIdNull() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.readByExecutionIdAndBranchId(null, "asd");
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.readByExecutionIdAndBranchId(null, "asd"));
+        Assert.assertEquals("executionId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testReadByExecutionIdAndBranchId_ExecutionIdEmpty() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.readByExecutionIdAndBranchId(null, "asd");
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.readByExecutionIdAndBranchId(null, "asd"));
+        Assert.assertEquals("executionId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testReadByExecutionIdAndBranchId_BranchIdNull() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.readByExecutionIdAndBranchId(123L, null);
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.readByExecutionIdAndBranchId(123L, null));
+        Assert.assertEquals("branchId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testReadByExecutionIdAndBranchId_BranchIdEmpty() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.readByExecutionIdAndBranchId(123L, "      ");
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.readByExecutionIdAndBranchId(123L, "      "));
+        Assert.assertEquals("branchId cannot be null or empty", exception.getMessage());
     }
 
     @Test
@@ -153,16 +149,16 @@ public class ExecutionStateServiceTest {
 
     @Test
     public void testreadCancelledExecution_NullValue() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.readCancelledExecution(null);
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.readCancelledExecution(null));
+        Assert.assertEquals("executionId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testreadCancelledExecution_EmptyValue() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.readCancelledExecution(null);
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.readCancelledExecution(null));
+        Assert.assertEquals("executionId cannot be null or empty", exception.getMessage());
     }
 
     @Test
@@ -177,16 +173,16 @@ public class ExecutionStateServiceTest {
 
     @Test
     public void testcreateParentExecution_NullExecutionId() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.createParentExecution(null);
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.createParentExecution(null));
+        Assert.assertEquals("executionId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testcreateParentExecution_EmptyExecutionId() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.createParentExecution(null);
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.createParentExecution(null));
+        Assert.assertEquals("executionId cannot be null or empty", exception.getMessage());
     }
 
     @Test
@@ -198,30 +194,30 @@ public class ExecutionStateServiceTest {
 
     @Test
     public void testCreateExecutionState_NullExecutionId() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.createExecutionState(null, "Asdfsdf");
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.createExecutionState(null, "Asdfsdf"));
+        Assert.assertEquals("executionId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testCreateExecutionState_EmptyExecutionId() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.createExecutionState(null, "Asdfsdf");
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.createExecutionState(null, "Asdfsdf"));
+        Assert.assertEquals("executionId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testCreateExecutionState_NullBranchId() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.createExecutionState(123L, null);
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.createExecutionState(123L, null));
+        Assert.assertEquals("branchId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testCreateExecutionState_EmptyBranchId() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.createExecutionState(123L, "          ");
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.createExecutionState(123L, "          "));
+        Assert.assertEquals("branchId cannot be null or empty", exception.getMessage());
     }
 
     @Test
@@ -235,30 +231,30 @@ public class ExecutionStateServiceTest {
 
     @Test
     public void testReadExecutionObject_NullExecutionId() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.readExecutionObject(null, "Asdfsdf");
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.readExecutionObject(null, "Asdfsdf"));
+        Assert.assertEquals("executionId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testReadExecutionObject_EmptyExecutionId() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.readExecutionObject(null, "Asdfsdf");
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.readExecutionObject(null, "Asdfsdf"));
+        Assert.assertEquals("executionId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testReadExecutionObject_NullBranchId() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.readExecutionObject(123L, null);
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.readExecutionObject(123L, null));
+        Assert.assertEquals("branchId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testReadExecutionObject_EmptyBranchId() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.readExecutionObject(123L, "          ");
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.readExecutionObject(123L, "          "));
+        Assert.assertEquals("branchId cannot be null or empty", exception.getMessage());
     }
 
     @Test
@@ -267,7 +263,7 @@ public class ExecutionStateServiceTest {
         String branchId = UUID.randomUUID().toString();
 
         Execution expectedExecution = new Execution();
-        byte[] runObjectBytes = new byte[] {0,0,0};
+        byte[] runObjectBytes = new byte[]{0, 0, 0};
         ExecutionState executionState = new ExecutionState();
         executionState.setExecutionObject(runObjectBytes);
 
@@ -294,30 +290,30 @@ public class ExecutionStateServiceTest {
 
     @Test
     public void testUpdateExecutionObject_NullExecutionId() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.updateExecutionObject(null, "Asdfsdf", null);
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.updateExecutionObject(null, "Asdfsdf", null));
+        Assert.assertEquals("executionId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testUpdateExecutionObject_EmptyExecutionId() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.updateExecutionObject(null, "Asdfsdf", null);
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.updateExecutionObject(null, "Asdfsdf", null));
+        Assert.assertEquals("executionId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testUpdateExecutionObject_NullBranchId() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.updateExecutionObject(123L, null, null);
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.updateExecutionObject(123L, null, null));
+        Assert.assertEquals("branchId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testUpdateExecutionObject_EmptyBranchId() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.updateExecutionObject(123L, "          ", null);
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.updateExecutionObject(123L, "          ", null));
+        Assert.assertEquals("branchId cannot be null or empty", exception.getMessage());
     }
 
     @Test
@@ -326,7 +322,7 @@ public class ExecutionStateServiceTest {
         String branchId = UUID.randomUUID().toString();
         Execution execution = new Execution();
 
-        byte[] runObjectBytes = new byte[] {0,0,0};
+        byte[] runObjectBytes = new byte[]{0, 0, 0};
         ExecutionState executionState = Mockito.mock(ExecutionState.class);
 
         when(executionStateRepository.findByExecutionIdAndBranchId(executionId, branchId)).thenReturn(executionState);
@@ -338,37 +334,37 @@ public class ExecutionStateServiceTest {
 
     @Test
     public void testUpdateExecutionStateStatus_NullExecutionId() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.updateExecutionStateStatus(null, "Asdfsdf", null);
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.updateExecutionStateStatus(null, "Asdfsdf", null));
+        Assert.assertEquals("executionId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testUpdateExecutionStateStatus_EmptyExecutionId() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.updateExecutionStateStatus(null, "Asdfsdf", null);
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.updateExecutionStateStatus(null, "Asdfsdf", null));
+        Assert.assertEquals("executionId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testUpdateExecutionStateStatus_NullBranchId() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.updateExecutionStateStatus(123L, null, null);
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.updateExecutionStateStatus(123L, null, null));
+        Assert.assertEquals("branchId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testUpdateExecutionStateStatus_EmptyBranchId() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.updateExecutionStateStatus(123L, "          ", null);
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.updateExecutionStateStatus(123L, "          ", null));
+        Assert.assertEquals("branchId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testUpdateExecutionStateStatus_NullStatus() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("status cannot be null");
-        executionStateService.updateExecutionStateStatus(123L, "asdasd", null);
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.updateExecutionStateStatus(123L, "asdasd", null));
+        Assert.assertEquals("status cannot be null", exception.getMessage());
     }
 
     @Test
@@ -387,30 +383,30 @@ public class ExecutionStateServiceTest {
 
     @Test
     public void testDeleteExecutionState_NullExecutionId() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.deleteExecutionState(null, "Asdfsdf");
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.deleteExecutionState(null, "Asdfsdf"));
+        Assert.assertEquals("executionId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testDeleteExecutionState_EmptyExecutionId() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("executionId cannot be null or empty");
-        executionStateService.deleteExecutionState(null, "Asdfsdf");
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.deleteExecutionState(null, "Asdfsdf"));
+        Assert.assertEquals("executionId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testDeleteExecutionState_NullBranchId() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.deleteExecutionState(123L, null);
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.deleteExecutionState(123L, null));
+        Assert.assertEquals("branchId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testDeleteExecutionState_EmptyBranchId() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("branchId cannot be null or empty");
-        executionStateService.deleteExecutionState(123L, "          ");
+        IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
+                () -> executionStateService.deleteExecutionState(123L, "          "));
+        Assert.assertEquals("branchId cannot be null or empty", exception.getMessage());
     }
 
     @Test

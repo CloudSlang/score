@@ -17,9 +17,9 @@
 package io.cloudslang.runtime.impl;
 
 import io.cloudslang.dependency.api.services.DependencyService;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -65,7 +65,7 @@ public abstract class ExecutionCachedEngine<T extends Executor> extends Executio
         } finally {
             lock.unlock();
         }
-        if(candidateForRemove != null) {
+        if (candidateForRemove != null) {
             candidateForRemove.close();
         }
         return executor;
@@ -76,6 +76,8 @@ public abstract class ExecutionCachedEngine<T extends Executor> extends Executio
     }
 
     protected abstract DependencyService getDependencyService();
+
     protected abstract int getCacheSize();
+
     protected abstract T createNewExecutor(Set<String> filePaths);
 }
