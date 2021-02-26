@@ -24,7 +24,6 @@ import io.cloudslang.worker.execution.services.SessionDataHandler;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jctools.maps.NonBlockingHashMap;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -38,7 +37,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.Supplier;
 
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.EXECUTION_RUNTIME_SERVICES;
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.GLOBAL_SESSION_OBJECT;
@@ -46,7 +44,6 @@ import static io.cloudslang.score.api.execution.ExecutionParametersConsts.NON_SE
 import static io.cloudslang.score.api.execution.ExecutionParametersConsts.SESSION_OBJECT;
 import static java.lang.Class.forName;
 import static org.apache.commons.lang.Validate.notNull;
-import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationContextAware {
     private static final Logger logger = LogManager.getLogger(ReflectionAdapterImpl.class);
