@@ -23,7 +23,7 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>runtime-management</artifactId>
-        <version>0.3.211-SNAPSHOT</version>
+        <version>0.3.227-SNAPSHOT</version>
     </parent>
 
     <artifactId>runtime-management-impl</artifactId>
@@ -110,6 +110,16 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.vibur</groupId>
+            <artifactId>vibur-object-pool</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
         </dependency>
 
     </dependencies>

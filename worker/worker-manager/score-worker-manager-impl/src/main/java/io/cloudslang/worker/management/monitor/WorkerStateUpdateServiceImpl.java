@@ -19,6 +19,7 @@ package io.cloudslang.worker.management.monitor;
 public class WorkerStateUpdateServiceImpl implements WorkerStateUpdateService {
 
     private boolean active;
+    private boolean monitorWorker;
 
     @Override
     public synchronized boolean isWorkerEnabled() {
@@ -30,4 +31,13 @@ public class WorkerStateUpdateServiceImpl implements WorkerStateUpdateService {
          active = newState;
     }
 
+    @Override
+    public boolean isMonitoringDisabled() {
+        return monitorWorker;
+    }
+
+    @Override
+    public void setMonitoringState(boolean doMonitor) {
+        monitorWorker = doMonitor;
+    }
 }

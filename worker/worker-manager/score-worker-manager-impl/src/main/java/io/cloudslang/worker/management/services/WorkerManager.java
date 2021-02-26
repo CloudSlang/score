@@ -20,10 +20,9 @@ import io.cloudslang.engine.node.entities.WorkerKeepAliveInfo;
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.orchestrator.services.EngineVersionService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
+import io.cloudslang.worker.management.monitor.WorkerStateUpdateService;
 import io.cloudslang.worker.management.queue.WorkerQueueDetailsContainer;
 import io.cloudslang.worker.management.queue.WorkerQueueDetailsHolder;
-import io.cloudslang.worker.management.monitor.WorkerStateUpdateService;
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,7 +35,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Collection;
@@ -204,6 +202,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
                     WorkerKeepAliveInfo workerKeepAliveInfo = workerNodeService.newKeepAlive(workerUuid);
                     String newWrv = workerKeepAliveInfo.getWorkerRecoveryVersion();
                     workerStateUpdateService.setEnableState(workerKeepAliveInfo.isActive());
+                    workerStateUpdateService.setMonitoringState(workerKeepAliveInfo.shouldMonitor());
                     String currentWrv = recoveryManager.getWRV();
                     queueDetailsHolder = new WorkerQueueDetailsHolder(workerKeepAliveInfo.getQueueDetails());
                     //do not update it!!! if it is different than we have - restart worker (clean state)
