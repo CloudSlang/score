@@ -50,14 +50,7 @@ import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationContextAware {
     private static final Logger logger = LogManager.getLogger(ReflectionAdapterImpl.class);
-    private static final String NONBLOCKING_MAP_STRATEGY = "nonblocking-map";
-    private static final String CONCURRENT_MAP_STRATEGY = "concurrent-map";
     private static final int MAP_CAPACITY = Integer.getInteger("reflectionAdapter.mapCapacity", 200);
-    private static final String MAP_STRATEGY = System.getProperty("reflectionAdapter.mapStrategy", NONBLOCKING_MAP_STRATEGY);
-    private static final Supplier<ConcurrentMap<String, ImmutableTriple<Object, Method, String[]>>> MAP_CONCURRENT_SUPPLIER =
-            () -> new ConcurrentHashMap<>(MAP_CAPACITY);
-    private static final Supplier<ConcurrentMap<String, ImmutableTriple<Object, Method, String[]>>> MAP_NONBLOCKING_SUPPLIER =
-            () -> new NonBlockingHashMap<>(MAP_CAPACITY);
 
     @Autowired
     private SessionDataHandler sessionDataHandler;
@@ -67,8 +60,7 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 
     public ReflectionAdapterImpl() {
         this.parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
-        this.concurrentMap = equalsIgnoreCase(MAP_STRATEGY, CONCURRENT_MAP_STRATEGY) ?
-                MAP_CONCURRENT_SUPPLIER.get() : MAP_NONBLOCKING_SUPPLIER.get();
+        this.concurrentMap = new ConcurrentHashMap<>(MAP_CAPACITY);
     }
 
     private static Long getExecutionIdFromActionData(ReadonlyStepActionDataAccessor accessor) {
