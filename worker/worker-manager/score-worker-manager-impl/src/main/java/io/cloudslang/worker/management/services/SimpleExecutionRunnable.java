@@ -335,6 +335,11 @@ public class SimpleExecutionRunnable implements Runnable {
         }
     }
 
+    private boolean isDebuggerMode(Execution execution) {
+        return execution.getSystemContext().containsKey(TempConstants.DEBUGGER_MODE)
+                && (Boolean)execution.getSystemContext().get(TempConstants.DEBUGGER_MODE);
+    }
+
     private boolean shouldChangeWorkerGroup(Execution nextStepExecution) {
         // Here we check if we can continue to run in current thread - depends on the group
         if (nextStepExecution.getSystemContext().shouldCheckGroup()) {
@@ -350,7 +355,7 @@ public class SimpleExecutionRunnable implements Runnable {
             boolean canRunInThisWorker = (groupName == null)
                     || workerConfigurationService.isMemberOf(groupName) || isStickyToThisWorker(groupName);
 
-            if (!canRunInThisWorker) {
+            if (!canRunInThisWorker && !isDebuggerMode(nextStepExecution)) {
                 //set current step to finished
                 executionMessage.setStatus(ExecStatus.FINISHED);
                 executionMessage.incMsgSeqId();
