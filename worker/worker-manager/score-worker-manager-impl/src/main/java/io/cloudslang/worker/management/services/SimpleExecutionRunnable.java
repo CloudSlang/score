@@ -337,7 +337,7 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private boolean isDebuggerMode(Execution execution) {
         return execution.getSystemContext().containsKey(TempConstants.DEBUGGER_MODE)
-                && (Boolean)execution.getSystemContext().get(TempConstants.DEBUGGER_MODE);
+                && (Boolean) execution.getSystemContext().get(TempConstants.DEBUGGER_MODE);
     }
 
     private boolean shouldChangeWorkerGroup(Execution nextStepExecution) {
