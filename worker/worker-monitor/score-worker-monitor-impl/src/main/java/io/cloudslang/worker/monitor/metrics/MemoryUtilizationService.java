@@ -15,37 +15,39 @@
  */
 package io.cloudslang.worker.monitor.metrics;
 
+import io.cloudslang.worker.monitor.metric.WorkerPerfMetric;
 import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
 import org.apache.commons.lang3.tuple.Pair;
 import oshi.SystemInfo;
 import oshi.hardware.GlobalMemory;
 import oshi.software.os.OSProcess;
+
 import javax.annotation.PostConstruct;
 import java.io.Serializable;
 
-public class MemoryUtilizationService extends WorkerPerformanceMetricBase {
+import static io.cloudslang.worker.monitor.metric.WorkerPerfMetric.formatTo2Decimal;
+import static io.cloudslang.worker.monitor.service.WorkerPerformanceMetric.MEMORY_USAGE;
 
-    private long usedRamProcess;
-    private OSProcess process;
+public class MemoryUtilizationService implements WorkerPerfMetric {
+
     private long totalRam;
 
     @PostConstruct
     public void init() {
         SystemInfo si = new SystemInfo();
-        process = getProcess();
         GlobalMemory globalMemory = si.getHardware().getMemory();
-        this.totalRam = globalMemory.getTotal();
+        totalRam = globalMemory.getTotal();
     }
 
     @Override
-    public Pair<WorkerPerformanceMetric, Serializable> measure() {
-        Pair<WorkerPerformanceMetric, Serializable> memUsage = Pair.of(WorkerPerformanceMetric.MEMORY_USAGE, getCurrentValue());
-        return memUsage;
+    public Pair<WorkerPerformanceMetric, Serializable> measure(OSProcess crtProcess, OSProcess oldProcess) {
+        return Pair.of(MEMORY_USAGE, getCurrentValue(crtProcess));
     }
 
-    public double getCurrentValue() {
-        this.usedRamProcess = process.getResidentSetSize();
-        double ramUsed = (double) (usedRamProcess * 100 / totalRam);
+    public double getCurrentValue(OSProcess crtProcess) {
+        double usedRamProcess = (double) crtProcess.getResidentSetSize();
+        double ramUsed = (usedRamProcess / totalRam) * 100;
         return formatTo2Decimal(ramUsed);
     }
+
 }

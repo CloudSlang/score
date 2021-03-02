@@ -21,8 +21,11 @@ import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import oshi.software.os.OSProcess;
 
 import java.io.Serializable;
+
+import static io.cloudslang.worker.monitor.service.WorkerPerformanceMetric.THREAD_UTILIZATION;
 
 public class WorkerThreadUtilization implements WorkerPerfMetric {
 
@@ -33,11 +36,9 @@ public class WorkerThreadUtilization implements WorkerPerfMetric {
     @Qualifier("numberOfExecutionThreads")
     private int numberOfThreads;
 
-
     @Override
-    public Pair<WorkerPerformanceMetric, Serializable> measure() {
-        Pair<WorkerPerformanceMetric, Serializable> threadUtilization = Pair.of(WorkerPerformanceMetric.THREAD_UTILIZATION, getCurrentValue());
-        return threadUtilization;
+    public Pair<WorkerPerformanceMetric, Serializable> measure(OSProcess crtProcess, OSProcess oldProcess) {
+        return Pair.of(THREAD_UTILIZATION, getCurrentValue());
     }
 
     public int getCurrentValue() {

@@ -15,32 +15,23 @@
  */
 package io.cloudslang.worker.monitor.metrics;
 
+import io.cloudslang.worker.monitor.metric.WorkerPerfMetric;
 import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
 import org.apache.commons.lang3.tuple.Pair;
 import oshi.software.os.OSProcess;
 
-import javax.annotation.PostConstruct;
 import java.io.Serializable;
 
-public class DiskReadUtilizationService extends WorkerPerformanceMetricBase {
-    private OSProcess process;
+import static io.cloudslang.worker.monitor.service.WorkerPerformanceMetric.DISK_READ_USAGE;
 
-    @PostConstruct
-    public void init() {
-        this.process = getProcess();
-    }
+public class DiskReadUtilizationService implements WorkerPerfMetric {
 
     @Override
-    public Pair<WorkerPerformanceMetric, Serializable> measure() {
-        Pair<WorkerPerformanceMetric, Serializable> diskUsage = Pair.of(WorkerPerformanceMetric.DISK_READ_USAGE, getCurrentValue());
-        return diskUsage;
+    public Pair<WorkerPerformanceMetric, Serializable> measure(OSProcess crtProcess, OSProcess oldProcess) {
+        return Pair.of(DISK_READ_USAGE, getCurrentValue(crtProcess, oldProcess));
     }
 
-    public long getCurrentValue() {
-        long readBytes = 0;
-        if (process != null) {
-            readBytes = process.getBytesRead();
-        }
-        return readBytes;
+    public long getCurrentValue(OSProcess crtProcess, OSProcess oldProcess) {
+        return crtProcess.getBytesRead() - ((oldProcess != null) ? oldProcess.getBytesRead() : 0);
     }
 }

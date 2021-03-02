@@ -15,6 +15,7 @@
  */
 package io.cloudslang.worker.monitor.metrics;
 
+import io.cloudslang.worker.monitor.metric.WorkerPerfMetric;
 import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
 import org.apache.commons.lang3.tuple.Pair;
 import oshi.SystemInfo;
@@ -24,27 +25,27 @@ import oshi.software.os.OSProcess;
 import javax.annotation.PostConstruct;
 import java.io.Serializable;
 
-public class CpuUtilizationService extends WorkerPerformanceMetricBase {
-    private static OSProcess oldProcess;
+import static io.cloudslang.worker.monitor.metric.WorkerPerfMetric.formatTo2Decimal;
+import static io.cloudslang.worker.monitor.service.WorkerPerformanceMetric.CPU_USAGE;
+
+public class CpuUtilizationService implements WorkerPerfMetric {
+
     private int cpuNumber;
 
     @PostConstruct
     public void init() {
         SystemInfo systemInfo = new SystemInfo();
         CentralProcessor processor = systemInfo.getHardware().getProcessor();
-        this.cpuNumber = processor.getLogicalProcessorCount();
+        cpuNumber = processor.getLogicalProcessorCount();
     }
 
     @Override
-    public Pair<WorkerPerformanceMetric, Serializable> measure() {
-        Pair<WorkerPerformanceMetric, Serializable> cpuUsage = Pair.of(WorkerPerformanceMetric.CPU_USAGE,getCurrentValue());
-        return cpuUsage;
+    public Pair<WorkerPerformanceMetric, Serializable> measure(OSProcess crtProcess, OSProcess oldProcess) {
+        return Pair.of(CPU_USAGE, getCurrentValue(crtProcess, oldProcess));
     }
 
-    public double getCurrentValue() {
-        OSProcess osProcess = getProcess();
-        double cpuUsed = (osProcess.getProcessCpuLoadBetweenTicks(oldProcess) * 100) / cpuNumber;
-        oldProcess = osProcess;
+    public double getCurrentValue(OSProcess crtProcess, OSProcess oldProcess) {
+        double cpuUsed = (crtProcess.getProcessCpuLoadBetweenTicks(oldProcess) * 100) / cpuNumber;
         return formatTo2Decimal(cpuUsed);
     }
 }

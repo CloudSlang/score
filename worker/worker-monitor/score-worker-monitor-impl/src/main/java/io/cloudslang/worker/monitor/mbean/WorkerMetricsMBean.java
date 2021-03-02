@@ -24,42 +24,75 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
+import oshi.software.os.OSProcess;
+
+import static io.cloudslang.worker.monitor.metric.WorkerPerfMetric.getProcess;
 
 @ManagedResource(description = "Worker Metrics API")
 public class WorkerMetricsMBean {
 
     @Autowired
     private CpuUtilizationService cpuUtilizationService;
+
     @Autowired
     private DiskReadUtilizationService diskReadUtilizationService;
-    @Autowired
-    private MemoryUtilizationService memoryUtilizationService;
+
     @Autowired
     private DiskWriteUtilizationService diskWriteUtilizationService;
+
+    @Autowired
+    private MemoryUtilizationService memoryUtilizationService;
+
     @Autowired
     private WorkerManager workerManager;
+
     @Autowired
     @Qualifier("numberOfExecutionThreads")
     private Integer numberOfThreads;
 
-    @ManagedAttribute(description = "Current Cpu Usage")
-    public double getCpuUsage() {
-        return cpuUtilizationService.getCurrentValue();
+    private OSProcess prevCpuProcess;
+    private OSProcess prevDiskReadProcess;
+    private OSProcess prevDiskWriteProcess;
+
+    public WorkerMetricsMBean() {
+        this.prevCpuProcess = getProcess();
+        this.prevDiskReadProcess = getProcess();
+        this.prevDiskWriteProcess = getProcess();
     }
 
-    @ManagedAttribute(description = "Current Memory Usage")
-    public double getMemoryUsage() {
-        return memoryUtilizationService.getCurrentValue();
+    @ManagedAttribute(description = "Current Cpu Usage")
+    public double getCpuUsage() {
+        OSProcess crtProcess = getProcess();
+        try {
+            return cpuUtilizationService.getCurrentValue(crtProcess, prevCpuProcess);
+        } finally {
+            prevCpuProcess = crtProcess;
+        }
     }
 
     @ManagedAttribute(description = "Current Disk Read Usage")
     public long getDiskReadUsage() {
-        return diskReadUtilizationService.getCurrentValue();
+        OSProcess crtProcess = getProcess();
+        try {
+            return diskReadUtilizationService.getCurrentValue(crtProcess, prevDiskReadProcess);
+        } finally {
+            prevDiskReadProcess = crtProcess;
+        }
     }
 
     @ManagedAttribute(description = "Current Disk Write Usage")
     public long getDiskWriteUsage() {
-        return diskWriteUtilizationService.getCurrentValue();
+        OSProcess crtProcess = getProcess();
+        try {
+            return diskWriteUtilizationService.getCurrentValue(crtProcess, prevDiskWriteProcess);
+        } finally {
+            prevDiskWriteProcess = crtProcess;
+        }
+    }
+
+    @ManagedAttribute(description = "Current Memory Usage")
+    public double getMemoryUsage() {
+        return memoryUtilizationService.getCurrentValue(getProcess());
     }
 
     @ManagedAttribute(description = "Running Tasks Count")

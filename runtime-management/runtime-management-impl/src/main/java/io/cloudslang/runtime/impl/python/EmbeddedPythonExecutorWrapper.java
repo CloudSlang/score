@@ -19,7 +19,6 @@ import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.impl.python.security.BoundedStringWriter;
 import org.apache.commons.io.input.NullInputStream;
-import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.python.core.Py;
@@ -111,8 +110,14 @@ public class EmbeddedPythonExecutorWrapper {
             }
             throw new RuntimeException("Error executing python script: " + originalExc, originalExc);
         } finally {
-            logger.info("Script output: " + outputWriter.toString());
-            logger.error("Script error: " + errorWriter.toString());
+            String standardStreamOutput = outputWriter.toString();
+            if (isNotEmpty(standardStreamOutput)) {
+                logger.info("Script output: " + standardStreamOutput);
+            }
+            String standardStreamError = errorWriter.toString();
+            if (isNotEmpty(standardStreamError)) {
+                logger.error("Script error: " + standardStreamError);
+            }
         }
     }
 
@@ -259,7 +264,7 @@ public class EmbeddedPythonExecutorWrapper {
 
     private String handleExceptionSpecialCases(String message) {
         String processedMessage = message;
-        if (StringUtils.isNotEmpty(message) && message.contains("get_sp") && message.contains("not defined")) {
+        if (isNotEmpty(message) && message.contains("get_sp") && message.contains("not defined")) {
             processedMessage = message + ". Make sure to use correct syntax for the function: " +
                     "get_sp('fully.qualified.name', optional_default_value).";
         }

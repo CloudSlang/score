@@ -15,22 +15,27 @@
  */
 package io.cloudslang.worker.monitor.metrics;
 
+import io.cloudslang.worker.monitor.metric.WorkerPerfMetric;
 import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
 import org.apache.commons.lang3.tuple.Pair;
+import oshi.software.os.OSProcess;
+
 import java.io.Serializable;
+
+import static io.cloudslang.worker.monitor.metric.WorkerPerfMetric.formatTo2Decimal;
+import static io.cloudslang.worker.monitor.service.WorkerPerformanceMetric.HEAP_SIZE;
 import static java.lang.Runtime.getRuntime;
 
-public class HeapUtilizationService extends WorkerPerformanceMetricBase {
+public class HeapUtilizationService implements WorkerPerfMetric {
 
     @Override
-    public Pair<WorkerPerformanceMetric, Serializable> measure() {
-        Pair<WorkerPerformanceMetric, Serializable> heapUsage = Pair.of(WorkerPerformanceMetric.HEAP_SIZE, getCurrentValue());
-        return heapUsage;
+    public Pair<WorkerPerformanceMetric, Serializable> measure(OSProcess crtProcess, OSProcess oldProcess) {
+        return Pair.of(HEAP_SIZE, getCurrentValue());
     }
 
     public double getCurrentValue() {
         // Get current size of heap in bytes
-        long totalMemory = Runtime.getRuntime().totalMemory();
+        long totalMemory = getRuntime().totalMemory();
         long freeMemory = getRuntime().freeMemory();
         double allocatedMemory = totalMemory - freeMemory;
         long maxMemory = getRuntime().maxMemory();
