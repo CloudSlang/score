@@ -66,6 +66,7 @@
 			<xsd:attribute type="xsd:boolean" name="registerExecutionPreconditionService"/>
 			<xsd:attribute type="xsd:boolean" name="registerExecutionPostconditionService"/>
 			<xsd:attribute type="xsd:boolean" name="registerQueueConfigurationDataService"/>
+			<xsd:attribute type="xsd:boolean" name="registerAplsLicensingService"/>
 		</xsd:complexType>
 	</xsd:element>
 </xsd:schema>

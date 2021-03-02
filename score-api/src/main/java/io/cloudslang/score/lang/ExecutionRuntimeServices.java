@@ -99,9 +99,9 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public static final String ENTERPRISE_MODE = "ENTERPRISE_MODE";
 
-    private static final String SC_NESTED_FOR_PARALLELISM_LEVEL = "SC_NESTED_FOR_PARALLELISM_LEVEL";
+    public static final String SC_NESTED_FOR_PARALLELISM_LEVEL = "SC_NESTED_FOR_PARALLELISM_LEVEL";
 
-    private static final String LIC_SWITCH_MODE = "LIC_SWITCH_MODE";
+    public static final String LIC_SWITCH_MODE = "LIC_SWITCH_MODE";
 
     protected Map<String, Serializable> contextMap;
 
@@ -587,7 +587,7 @@ public class ExecutionRuntimeServices implements Serializable {
     }
 
     private <T> T removeFromMap(String key) {
-        //noinspection unchecked
+        // noinspection unchecked
         return (T) contextMap.remove(key);
     }
 

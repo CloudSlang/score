@@ -16,6 +16,7 @@
 
 package io.cloudslang.worker.execution.services;
 
+import io.cloudslang.orchestrator.services.AplsLicensingService;
 import io.cloudslang.orchestrator.services.CancelExecutionService;
 import io.cloudslang.orchestrator.services.PauseResumeService;
 import io.cloudslang.score.api.ControlActionMetadata;
@@ -436,6 +437,10 @@ public class ExecutionServiceTest {
 			return mock(RobotAvailabilityService.class);
 		}
 
+		@Bean
+		public AplsLicensingService aplsLicensingService() {
+			return mock(AplsLicensingService.class);
+		}
 	}
 }
 
