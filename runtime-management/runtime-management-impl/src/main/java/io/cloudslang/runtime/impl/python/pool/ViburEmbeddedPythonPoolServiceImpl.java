@@ -20,7 +20,6 @@ import io.cloudslang.runtime.impl.python.EmbeddedPythonExecutorWrapper;
 import org.vibur.objectpool.ConcurrentPool;
 import org.vibur.objectpool.util.ConcurrentLinkedQueueCollection;
 
-import static java.lang.Integer.getInteger;
 import static java.lang.Long.getLong;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -29,15 +28,15 @@ public class ViburEmbeddedPythonPoolServiceImpl implements ViburEmbeddedPythonPo
     private final ConcurrentPool<EmbeddedPythonExecutorWrapper> poolService;
     private final long timeout;
 
-    public ViburEmbeddedPythonPoolServiceImpl(int numberOfThreads) {
-        final int minPoolSize = getInteger("jython.executor.minPoolSize", numberOfThreads);
-        final int maxPoolSize = getInteger("jython.executor.maxPoolSize", numberOfThreads);
-        this.poolService = new ConcurrentPool<>(new ConcurrentLinkedQueueCollection<>(),
+    public ViburEmbeddedPythonPoolServiceImpl(ConcurrentLinkedQueueCollection<EmbeddedPythonExecutorWrapper> collection,
+                                              int minPoolSize, int maxPoolSize) {
+
+        this.poolService = new ConcurrentPool<>(collection,
                 new ViburEmbeddedPythonFactory(),
                 minPoolSize,
                 maxPoolSize,
                 false);
-        this.timeout = getLong("jython.executor.checkoutTimeoutSeconds", 10 * 60L); // 10 minutes
+        this.timeout = getLong("jython.executor.checkoutTimeoutSeconds", 3 * 60 * 60L); // 3 hours
     }
 
     @Override

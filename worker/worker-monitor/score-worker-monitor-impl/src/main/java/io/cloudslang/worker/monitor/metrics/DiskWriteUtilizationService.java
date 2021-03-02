@@ -15,32 +15,23 @@
  */
 package io.cloudslang.worker.monitor.metrics;
 
+import io.cloudslang.worker.monitor.metric.WorkerPerfMetric;
 import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
 import org.apache.commons.lang3.tuple.Pair;
 import oshi.software.os.OSProcess;
 
-import javax.annotation.PostConstruct;
 import java.io.Serializable;
 
-public class DiskWriteUtilizationService extends WorkerPerformanceMetricBase {
-    private OSProcess process;
+import static io.cloudslang.worker.monitor.service.WorkerPerformanceMetric.DISK_WRITE_USAGE;
 
-    @PostConstruct
-    public void init() {
-        this.process = getProcess();
-    }
+public class DiskWriteUtilizationService implements WorkerPerfMetric {
 
     @Override
-    public Pair<WorkerPerformanceMetric, Serializable> measure() {
-        Pair<WorkerPerformanceMetric, Serializable> diskWriteUsage = Pair.of(WorkerPerformanceMetric.DISK_WRITE_USAGE, getCurrentValue());
-        return diskWriteUsage;
+    public Pair<WorkerPerformanceMetric, Serializable> measure(OSProcess crtProcess, OSProcess oldProcess) {
+        return Pair.of(DISK_WRITE_USAGE, getCurrentValue(crtProcess, oldProcess));
     }
 
-    public long getCurrentValue() {
-        long writeBytes = 0;
-        if (process != null) {
-            writeBytes = process.getBytesWritten();
-        }
-        return writeBytes;
+    public long getCurrentValue(OSProcess crtProcess, OSProcess oldProcess) {
+        return crtProcess.getBytesWritten() - ((oldProcess != null) ? oldProcess.getBytesWritten() : 0);
     }
 }

@@ -17,9 +17,27 @@ package io.cloudslang.worker.monitor.metric;
 
 import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
 import org.apache.commons.lang3.tuple.Pair;
+import oshi.SystemInfo;
+import oshi.software.os.OSProcess;
+import oshi.software.os.OperatingSystem;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+import static java.util.Objects.requireNonNull;
 
 public interface WorkerPerfMetric {
-    Pair<WorkerPerformanceMetric, Serializable> measure();
+    Pair<WorkerPerformanceMetric, Serializable> measure(OSProcess crtProcess, OSProcess oldProcess);
+
+    static double formatTo2Decimal(double value) {
+        return new BigDecimal(value).setScale(2, RoundingMode.HALF_EVEN).doubleValue();
+    }
+
+    static OSProcess getProcess() {
+        SystemInfo systemInfo = new SystemInfo();
+        OperatingSystem operatingSystem = systemInfo.getOperatingSystem();
+        int processId = operatingSystem.getProcessId();
+        return requireNonNull(operatingSystem.getProcess(processId), "OSProcess is null");
+    }
 }

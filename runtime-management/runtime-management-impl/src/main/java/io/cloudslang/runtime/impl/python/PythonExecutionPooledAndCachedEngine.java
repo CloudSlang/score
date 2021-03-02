@@ -26,14 +26,21 @@ import io.cloudslang.runtime.impl.python.pool.ViburEmbeddedPythonPoolService;
 import io.cloudslang.runtime.impl.python.pool.ViburEmbeddedPythonPoolServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.vibur.objectpool.util.ConcurrentLinkedQueueCollection;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
+import static java.lang.Boolean.parseBoolean;
 import static java.lang.Integer.getInteger;
+import static java.lang.Math.max;
+import static java.lang.Runtime.getRuntime;
+import static java.util.concurrent.Executors.newFixedThreadPool;
 
 /**
  * Uses io.cloudslang.runtime.impl.python.EmbeddedPythonExecutorWrapper that brings more security
@@ -56,10 +63,43 @@ public class PythonExecutionPooledAndCachedEngine extends ExecutionEngine implem
 
     @PostConstruct
     public void init() {
-        this.pythonExecutorPool = new ViburEmbeddedPythonPoolServiceImpl(numberOfThreads);
         this.cachedExecutors = Caffeine.newBuilder()
                 .maximumSize(getInteger("jython.executor.cacheSize", numberOfThreads * 4 / 3))
                 .build();
+        doSetPythonExecutorPool();
+    }
+
+    private void doSetPythonExecutorPool() {
+        final boolean useExternalPython = !parseBoolean(System.getProperty("use.jython.expressions", "true"));
+        // 25% of number of thread, in case of external python expression evaluation
+        // 75% of number of threads in case of jython expression evaluation
+        int defaultPoolSize = useExternalPython ? max(2, numberOfThreads / 4) : max(2, numberOfThreads * 3 / 4);
+        int maxPoolSize = getInteger("jython.executor.maxPoolSize", defaultPoolSize);
+        if (maxPoolSize > 100) { // 100 = hard limit for EmbeddedPythonExecutorWrapper pools
+            maxPoolSize = 100;
+        }
+        ExecutorService executorService = newFixedThreadPool(max(2, getRuntime().availableProcessors()));
+        ConcurrentLinkedQueueCollection<EmbeddedPythonExecutorWrapper> collection =
+                new ConcurrentLinkedQueueCollection<>();
+        for (int i = 0; i < maxPoolSize; i++) {
+            executorService.submit(() -> {
+                try {
+                    collection.offerLast(new EmbeddedPythonExecutorWrapper());
+                } catch (Exception ignored) {
+                }
+            });
+        }
+        try {
+            executorService.shutdown();
+            //noinspection ResultOfMethodCallIgnored
+            executorService.awaitTermination(7, TimeUnit.MINUTES);
+            executorService.shutdownNow();
+        } catch (Exception ignored) {
+        }
+        while (collection.size() < maxPoolSize) {
+            collection.offerLast(new EmbeddedPythonExecutorWrapper());
+        }
+        this.pythonExecutorPool = new ViburEmbeddedPythonPoolServiceImpl(collection, maxPoolSize, maxPoolSize);
     }
 
     @Override

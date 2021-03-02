@@ -27,6 +27,7 @@ import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import oshi.software.os.OSProcess;
 
 import javax.annotation.PostConstruct;
 import java.io.Serializable;
@@ -35,26 +36,38 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.cloudslang.worker.monitor.metric.WorkerPerfMetric.getProcess;
+
 @Component
 public class PerformanceMetricsCollector implements PerfMetricCollector {
 
     List<WorkerPerfMetric> workerPerfMetrics;
+
     @Autowired
     private WorkerManager workerManager;
+
     @Autowired
     private CpuUtilizationService cpuUtilizationService;
+
     @Autowired
     private MemoryUtilizationService memoryUtilizationService;
+
     @Autowired
     private DiskReadUtilizationService diskReadUtilizationService;
+
     @Autowired
     private DiskWriteUtilizationService diskWriteUtilizationService;
+
     @Autowired
     private WorkerThreadUtilization workerThreadUtilization;
+
     @Autowired
     private HeapUtilizationService heapUtilizationService;
 
+    private OSProcess oldProcess;
+
     public PerformanceMetricsCollector() {
+        this.oldProcess = getProcess();
     }
 
     @PostConstruct
@@ -63,7 +76,7 @@ public class PerformanceMetricsCollector implements PerfMetricCollector {
     }
 
     private void createMetrics() {
-        workerPerfMetrics = new ArrayList<>();
+        workerPerfMetrics = new ArrayList<>(6);
         workerPerfMetrics.add(cpuUtilizationService);
         workerPerfMetrics.add(diskReadUtilizationService);
         workerPerfMetrics.add(memoryUtilizationService);
@@ -74,14 +87,20 @@ public class PerformanceMetricsCollector implements PerfMetricCollector {
 
     @Override
     public Map<WorkerPerformanceMetric, Serializable> collectMetrics() {
-        Map<WorkerPerformanceMetric, Serializable> currentValues = new HashMap<>();
-        for (WorkerPerfMetric metric :
-                workerPerfMetrics) {
-            Pair<WorkerPerformanceMetric, Serializable> currentPair = metric.measure();
-            currentValues.put(currentPair.getKey(), currentPair.getValue());
+        Map<WorkerPerformanceMetric, Serializable> currentValues = new HashMap<>(11);
+
+        OSProcess crtProcess = getProcess();
+        try {
+            for (WorkerPerfMetric metric : workerPerfMetrics) {
+                Pair<WorkerPerformanceMetric, Serializable> measurement = metric.measure(crtProcess, oldProcess);
+                currentValues.put(measurement.getKey(), measurement.getValue());
+            }
+            currentValues.put(WorkerPerformanceMetric.WORKER_ID, workerManager.getWorkerUuid());
+            currentValues.put(WorkerPerformanceMetric.WORKER_MEASURED_TIME, System.currentTimeMillis());
+            return currentValues;
+        } finally {
+            oldProcess = crtProcess;
         }
-        currentValues.put(WorkerPerformanceMetric.WORKER_ID, workerManager.getWorkerUuid());
-        currentValues.put(WorkerPerformanceMetric.WORKER_MEASURED_TIME, System.currentTimeMillis());
-        return currentValues;
     }
+
 }
