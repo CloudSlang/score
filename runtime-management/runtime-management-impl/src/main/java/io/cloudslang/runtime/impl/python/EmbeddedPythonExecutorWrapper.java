@@ -47,7 +47,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import static org.apache.commons.io.output.NullOutputStream.NULL_OUTPUT_STREAM;
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 public class EmbeddedPythonExecutorWrapper {
     private static final Logger logger = LogManager.getLogger(PythonExecutor.class);
@@ -282,7 +282,7 @@ public class EmbeddedPythonExecutorWrapper {
         pythonInterpreter.set("true", Boolean.TRUE);
         pythonInterpreter.set("false", Boolean.FALSE);
         // Prepare environment if required
-        if (org.apache.commons.lang3.StringUtils.isNotEmpty(prepareEnvironmentScript)) {
+        if (isNotEmpty(prepareEnvironmentScript)) {
             pythonInterpreter.exec(prepareEnvironmentScript);
         }
         PyObject evalResultPyObject = pythonInterpreter.eval(script);
