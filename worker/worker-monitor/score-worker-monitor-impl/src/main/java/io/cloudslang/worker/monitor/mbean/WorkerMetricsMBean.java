@@ -38,10 +38,10 @@ public class WorkerMetricsMBean {
     private DiskReadUtilizationService diskReadUtilizationService;
 
     @Autowired
-    private MemoryUtilizationService memoryUtilizationService;
+    private DiskWriteUtilizationService diskWriteUtilizationService;
 
     @Autowired
-    private DiskWriteUtilizationService diskWriteUtilizationService;
+    private MemoryUtilizationService memoryUtilizationService;
 
     @Autowired
     private WorkerManager workerManager;
@@ -50,53 +50,49 @@ public class WorkerMetricsMBean {
     @Qualifier("numberOfExecutionThreads")
     private Integer numberOfThreads;
 
-    private OSProcess oldProcess;
+    private OSProcess prevCpuProcess;
+    private OSProcess prevDiskReadProcess;
+    private OSProcess prevDiskWriteProcess;
 
     public WorkerMetricsMBean() {
-        this.oldProcess = getProcess();
+        this.prevCpuProcess = getProcess();
+        this.prevDiskReadProcess = getProcess();
+        this.prevDiskWriteProcess = getProcess();
     }
 
     @ManagedAttribute(description = "Current Cpu Usage")
     public double getCpuUsage() {
-        OSProcess process = getProcess();
+        OSProcess crtProcess = getProcess();
         try {
-            return cpuUtilizationService.getCurrentValue(process, oldProcess);
+            return cpuUtilizationService.getCurrentValue(crtProcess, prevCpuProcess);
         } finally {
-            oldProcess = process;
-        }
-
-    }
-
-    @ManagedAttribute(description = "Current Memory Usage")
-    public double getMemoryUsage() {
-        OSProcess process = getProcess();
-        try {
-            return memoryUtilizationService.getCurrentValue(process);
-        } finally {
-            oldProcess = process;
+            prevCpuProcess = crtProcess;
         }
     }
 
     @ManagedAttribute(description = "Current Disk Read Usage")
     public long getDiskReadUsage() {
-        OSProcess process = getProcess();
+        OSProcess crtProcess = getProcess();
         try {
-            return diskReadUtilizationService.getCurrentValue(process, oldProcess);
+            return diskReadUtilizationService.getCurrentValue(crtProcess, prevDiskReadProcess);
         } finally {
-            oldProcess = process;
+            prevDiskReadProcess = crtProcess;
         }
-
     }
 
     @ManagedAttribute(description = "Current Disk Write Usage")
     public long getDiskWriteUsage() {
-        OSProcess process = getProcess();
+        OSProcess crtProcess = getProcess();
         try {
-            return diskWriteUtilizationService.getCurrentValue(process, oldProcess);
+            return diskWriteUtilizationService.getCurrentValue(crtProcess, prevDiskWriteProcess);
         } finally {
-            oldProcess = process;
+            prevDiskWriteProcess = crtProcess;
         }
+    }
 
+    @ManagedAttribute(description = "Current Memory Usage")
+    public double getMemoryUsage() {
+        return memoryUtilizationService.getCurrentValue(getProcess());
     }
 
     @ManagedAttribute(description = "Running Tasks Count")
