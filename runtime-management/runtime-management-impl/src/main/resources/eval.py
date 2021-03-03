@@ -155,10 +155,13 @@ class PythonAgentExecutor(object):
                                 'returnType': return_type}
             finally:
                 self.__enable_standard_io(old_io)
+
+            final_result = json.dumps(final_result)
+
         except Exception as e:
             final_result = {'exception': str(e)}
 
-        print(json.dumps(final_result))
+        print(final_result)
 
 
 class AccessAwareDict(dict):
