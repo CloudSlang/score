@@ -76,6 +76,13 @@ public class BeanRegistrator{
 		return this;
 	}
 
+	public BeanRegistrator addDestroyMethod() {
+		// Since we are doing dynamic bean registration, the destroy method must be named onPreDestroy
+		// and must be annotated with @PreDestroy
+		builder.setDestroyMethodName("onPreDestroy");
+		return this;
+	}
+
 	public void register(){
 		BeanDefinition beanDefinition = builder.getBeanDefinition();
 

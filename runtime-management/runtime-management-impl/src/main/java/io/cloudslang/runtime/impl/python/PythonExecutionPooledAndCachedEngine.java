@@ -160,7 +160,7 @@ public class PythonExecutionPooledAndCachedEngine extends ExecutionEngine implem
     }
 
     @PreDestroy
-    public void closeResources() {
+    public void onPreDestroy() {
         pythonExecutorPool.close();
         try {
             cachedExecutors.asMap().values().forEach(EmbeddedPythonExecutorWrapper::close);

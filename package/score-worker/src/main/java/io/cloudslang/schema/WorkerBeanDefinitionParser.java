@@ -62,6 +62,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
+import javax.annotation.PreDestroy;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -152,10 +154,23 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private void registerBeans(ParserContext parserContext){
 		BeanRegistrator beanRegistrator = new BeanRegistrator(parserContext);
 		for (Map.Entry<Class<?>,String> entry : beans.entrySet()) {
-			beanRegistrator
+			Class<?> theClass = entry.getKey();
+			BeanRegistrator instance = beanRegistrator
 					.NAME(entry.getValue())
-					.CLASS(entry.getKey())
-					.register();
+					.CLASS(theClass);
+			if (getReflectedOnPreDestroyMethod(theClass) != null) {
+				instance.addDestroyMethod();
+			}
+			instance.register();
+		}
+	}
+
+	private Method getReflectedOnPreDestroyMethod(Class<?> classObject) {
+		try {
+			Method m = classObject.getMethod("onPreDestroy", (Class<?>[]) null);
+			return ((m.getReturnType() == Void.TYPE) && (m.getAnnotation(PreDestroy.class) != null)) ? m : null;
+		} catch (Exception exception) {
+			return null;
 		}
 	}
 

@@ -94,7 +94,7 @@ public class MergedConfigurationServiceImpl implements MergedConfigurationServic
     }
 
     @PreDestroy
-    public void destroy() {
+    public void onPreDestroy() {
         try {
             scheduledExecutor.shutdown();
             scheduledExecutor.shutdownNow();

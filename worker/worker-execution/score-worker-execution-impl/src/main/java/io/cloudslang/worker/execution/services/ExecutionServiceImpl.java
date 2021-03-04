@@ -142,7 +142,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     @PreDestroy
-    public void destroy() {
+    public void onPreDestroy() {
         executorService.shutdown();
         try {
             executorService.awaitTermination(30, SECONDS);
