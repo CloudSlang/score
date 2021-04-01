@@ -59,7 +59,7 @@ public class PartitionTemplateImpl implements PartitionTemplate, BeanNameAware {
 
 	@PostConstruct
 	void registerPartitionGroup() {
-        PartitionGroup partitionGroup = service.readPartitionGroup(groupName);
+        /*PartitionGroup partitionGroup = service.readPartitionGroup(groupName);
  		if (partitionGroup == null) {
 			service.createPartitionGroup(groupName, groupSize, timeThreshold, sizeThreshold);
 		} else {
@@ -70,7 +70,7 @@ public class PartitionTemplateImpl implements PartitionTemplate, BeanNameAware {
                 // update the partition group with the new values
                 service.updatePartitionGroup(groupName, groupSize, timeThreshold, sizeThreshold);
             }
-        }
+        }*/
 	}
 
 	@Override

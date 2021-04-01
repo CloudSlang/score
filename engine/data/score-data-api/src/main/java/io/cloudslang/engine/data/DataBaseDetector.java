@@ -19,6 +19,7 @@ package io.cloudslang.engine.data;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -39,6 +40,7 @@ public class DataBaseDetector {
 	private final static String ORACLE_PRODUCT_NAME = "Oracle";
 
 	@Autowired
+	@Qualifier("coreDataSource")
 	private DataSource dataSource;
 
 	public boolean isMssql() {

@@ -24,19 +24,11 @@ import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.entities.StartNewBranchPayload;
 import io.cloudslang.engine.queue.services.StatementAwareJdbcTemplateWrapper;
 import io.cloudslang.orchestrator.services.ExecutionStateService;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Iterator;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -51,9 +43,15 @@ import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.springframework.util.CollectionUtils;
 
 import static java.lang.Long.parseLong;
 
@@ -329,6 +327,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     private IdentityGenerator idGen;
 
     @Autowired
+    @Qualifier("coreDataSource")
     private DataSource dataSource;
 
     @Autowired
