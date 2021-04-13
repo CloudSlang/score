@@ -58,6 +58,7 @@ public class ExternalPythonTestRunnable implements Runnable {
                 returnResult.append(line);
             }
             String retValue = returnResult.toString();
+            retValue = retValue.replace("\\\\n","\\n");
             result.set(retValue);
             exception.set(null);
         } catch (IOException ioException) {
