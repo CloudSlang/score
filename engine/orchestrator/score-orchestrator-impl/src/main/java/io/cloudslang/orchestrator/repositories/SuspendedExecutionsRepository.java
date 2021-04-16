@@ -49,12 +49,6 @@ public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedEx
             @Param("suspensionReasons") EnumSet<SuspendedExecutionReason> suspensionReasons,
             Pageable pageRequest);
 
-    @Query("select se.executionId from SuspendedExecution se " +
-            "left join io.cloudslang.orchestrator.entities.ExecutionState es " +
-            "on se.executionId = cast(es.executionId as string)" +
-            "where es.executionId IS NULL")
-    List<String> collectCompletedSuspendedExecutions(Pageable pageable);
-
     @Query("delete from SuspendedExecution se where se.executionId in :ids")
     @Modifying
     int deleteByIds(@Param("ids") Collection<String> ids);
