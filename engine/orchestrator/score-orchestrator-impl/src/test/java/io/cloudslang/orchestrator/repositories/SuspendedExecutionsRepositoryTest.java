@@ -44,9 +44,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.MULTI_INSTANCE;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.NON_BLOCKING;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL;
+import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL_LOOP;
 import static java.util.EnumSet.of;
+import static java.util.stream.Collectors.toSet;
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -184,18 +188,22 @@ public class SuspendedExecutionsRepositoryTest {
         contexts.put("flowContext", "");
 
         Execution exec = new Execution(2L, 0L, contexts);
-        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec, PARALLEL, false);
+        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 0,
+                exec, PARALLEL, false);
 
         repository.save(suspendedExecution);
 
-        List<String> read = repository.collectCompletedSuspendedExecutions(PageRequest.of(0, 100));
+        PageRequest pageRequest = PageRequest.of(0, 100);
+        List<SuspendedExecution> read = repository.findFinishedSuspendedExecutions(
+                of(PARALLEL, NON_BLOCKING, PARALLEL_LOOP, MULTI_INSTANCE), pageRequest);
 
         Assert.assertNotNull(read);
-        Assert.assertEquals(read.get(0), "111");
+        Assert.assertEquals(read.get(0).getExecutionId(), "111");
 
-        repository.deleteByIds(read);
+        repository.deleteByIds(read.stream().map(SuspendedExecution::getExecutionId).collect(toSet()));
 
-        Assert.assertEquals(repository.collectCompletedSuspendedExecutions(PageRequest.of(0, 100)).size(), 0);
+        Assert.assertEquals(repository.findFinishedSuspendedExecutions(
+                of(PARALLEL, NON_BLOCKING, PARALLEL_LOOP, MULTI_INSTANCE), pageRequest).size(), 0);
     }
 
 
