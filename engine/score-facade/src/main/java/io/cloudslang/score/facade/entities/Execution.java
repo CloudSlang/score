@@ -55,6 +55,14 @@ public class Execution implements Serializable {
         }
     }
 
+    public String getRobotSessionAlias() {
+        return systemContext.getRobotSessionAlias();
+    }
+
+    public void setRobotSessionAlias(String alias) {
+        systemContext.setRobotSessionAlias(alias);
+    }
+
     public String getGroupName() {
         return systemContext.getWorkerGroupName();
     }

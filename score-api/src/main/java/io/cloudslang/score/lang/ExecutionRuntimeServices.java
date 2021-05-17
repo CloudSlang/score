@@ -29,7 +29,6 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,6 +101,8 @@ public class ExecutionRuntimeServices implements Serializable {
     public static final String SC_NESTED_FOR_PARALLELISM_LEVEL = "SC_NESTED_FOR_PARALLELISM_LEVEL";
 
     public static final String LIC_SWITCH_MODE = "LIC_SWITCH_MODE";
+
+    private static final String ROBOT_SESSION_ALIAS = "ROBOT_SESSION_ALIAS";
 
     protected Map<String, Serializable> contextMap;
 
@@ -324,6 +325,10 @@ public class ExecutionRuntimeServices implements Serializable {
         return getFromMap(ROBOT_GROUP_NAME);
     }
 
+    public String getRobotSessionAlias() {
+        return getFromMap(ROBOT_SESSION_ALIAS);
+    }
+
     /**
      * This flag is set if the current execution step needs to go through group resolving
      */
@@ -521,6 +526,14 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public String removeRobotGroupName() {
         return removeFromMap(ROBOT_GROUP_NAME);
+    }
+
+    public void setRobotSessionAlias(String sessionAlias) {
+        contextMap.put(ROBOT_SESSION_ALIAS, sessionAlias);
+    }
+
+    public String removeRobotSessionAlias() {
+        return removeFromMap(ROBOT_SESSION_ALIAS);
     }
 
     public String getLicSwitchMode() {
