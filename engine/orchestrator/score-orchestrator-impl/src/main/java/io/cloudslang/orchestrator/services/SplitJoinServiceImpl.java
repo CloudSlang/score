@@ -230,15 +230,15 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
             SuspendedExecution suspendedExecution = suspendedMap.get(finishedBranch.getSplitId());
             if (suspendedExecution != null) {
-                finishedBranch.connectToSuspendedExecution(suspendedExecution);
+                boolean shouldProcessBranch = finishedBranch.connectToSuspendedExecution(suspendedExecution);
                 if (suspendedExecution.getSuspensionReason() == MULTI_INSTANCE) {
                     // start a new branch
                     if (!finishedBranch.getBranchContexts().isBranchCancelled()) {
                         startNewBranch(suspendedExecution);
                     }
-                    processFinishedBranch(finishedBranch, suspendedExecution, suspendedExecutionsForMiWithOneBranch);
+                    processFinishedBranch(finishedBranch, suspendedExecution, suspendedExecutionsForMiWithOneBranch, shouldProcessBranch);
                 } else {
-                    processFinishedBranch(finishedBranch, suspendedExecution, suspendedExecutionsWithOneBranch);
+                    processFinishedBranch(finishedBranch, suspendedExecution, suspendedExecutionsWithOneBranch, shouldProcessBranch);
                 }
             }
         }
@@ -259,10 +259,11 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
     private void processFinishedBranch(FinishedBranch finishedBranch,
                                        SuspendedExecution suspendedExecution,
-                                       List<SuspendedExecution> suspendedExecutionsWithOneBranch) {
+                                       List<SuspendedExecution> suspendedExecutionsWithOneBranch,
+                                       boolean shouldProcessBranch) {
         if (suspendedExecution.getNumberOfBranches() == 1) {
             suspendedExecutionsWithOneBranch.add(suspendedExecution);
-        } else {
+        } else if (shouldProcessBranch) {
             finishedBranchRepository.save(finishedBranch);
         }
     }
