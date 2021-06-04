@@ -112,7 +112,7 @@ public class SuspendedExecutionsRepositoryTest {
 
         SuspendedExecution suspendedExecutionRead = read.get(0);
         Assert.assertTrue(suspendedExecutionRead.getFinishedBranches().size() == 1);
-        Assert.assertTrue(suspendedExecutionRead.getFinishedBranches().get(0).getSplitId().equals("888"));
+        Assert.assertTrue(suspendedExecutionRead.getFinishedBranches().iterator().next().getSplitId().equals("888"));
     }
 
     @Test

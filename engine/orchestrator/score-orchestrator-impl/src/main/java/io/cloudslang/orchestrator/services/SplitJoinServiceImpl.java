@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static ch.lambdaj.Lambda.convert;
 import static ch.lambdaj.Lambda.extract;
@@ -230,15 +231,15 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
             SuspendedExecution suspendedExecution = suspendedMap.get(finishedBranch.getSplitId());
             if (suspendedExecution != null) {
-                finishedBranch.connectToSuspendedExecution(suspendedExecution);
+                boolean shouldProcessBranch = finishedBranch.connectToSuspendedExecution(suspendedExecution);
                 if (suspendedExecution.getSuspensionReason() == MULTI_INSTANCE) {
                     // start a new branch
                     if (!finishedBranch.getBranchContexts().isBranchCancelled()) {
                         startNewBranch(suspendedExecution);
                     }
-                    processFinishedBranch(finishedBranch, suspendedExecution, suspendedExecutionsForMiWithOneBranch);
+                    processFinishedBranch(finishedBranch, suspendedExecution, suspendedExecutionsForMiWithOneBranch, shouldProcessBranch);
                 } else {
-                    processFinishedBranch(finishedBranch, suspendedExecution, suspendedExecutionsWithOneBranch);
+                    processFinishedBranch(finishedBranch, suspendedExecution, suspendedExecutionsWithOneBranch, shouldProcessBranch);
                 }
             }
         }
@@ -259,10 +260,11 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
     private void processFinishedBranch(FinishedBranch finishedBranch,
                                        SuspendedExecution suspendedExecution,
-                                       List<SuspendedExecution> suspendedExecutionsWithOneBranch) {
+                                       List<SuspendedExecution> suspendedExecutionsWithOneBranch,
+                                       boolean shouldProcessBranch) {
         if (suspendedExecution.getNumberOfBranches() == 1) {
             suspendedExecutionsWithOneBranch.add(suspendedExecution);
-        } else {
+        } else if (shouldProcessBranch) {
             finishedBranchRepository.save(finishedBranch);
         }
     }
@@ -332,7 +334,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             execution.getSystemContext().remove(FINISHED_CHILD_BRANCHES_DATA);
             execution.getSystemContext().put("CURRENT_PROCESSED__SPLIT_ID", se.getSplitId());
             joinMiSplit(se, execution);
-            List<FinishedBranch> finishedBranches = se.getFinishedBranches();
+            Set<FinishedBranch> finishedBranches = se.getFinishedBranches();
             long nrOfNewFinishedBranches = finishedBranches.stream()
                     .filter(finishedBranch -> !finishedBranch.getBranchContexts().isBranchCancelled())
                     .count();
@@ -384,7 +386,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
     private Execution joinSplit(SuspendedExecution suspendedExecution) {
 
-        List<FinishedBranch> finishedBranches = suspendedExecution.getFinishedBranches();
+        Set<FinishedBranch> finishedBranches = suspendedExecution.getFinishedBranches();
         Execution exec = suspendedExecution.getExecutionObj();
 
         Validate.isTrue(suspendedExecution.getNumberOfBranches().equals(finishedBranches.size()),
@@ -414,7 +416,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     }
 
     private void joinMiSplit(SuspendedExecution suspendedExecution, Execution exec) {
-        List<FinishedBranch> finishedBranches = suspendedExecution.getFinishedBranches();
+        Set<FinishedBranch> finishedBranches = suspendedExecution.getFinishedBranches();
 
         if (logger.isDebugEnabled()) {
             logger.debug("Joining execution " + exec.getExecutionId());

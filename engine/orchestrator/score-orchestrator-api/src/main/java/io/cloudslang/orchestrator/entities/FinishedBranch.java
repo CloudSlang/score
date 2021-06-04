@@ -73,9 +73,9 @@ public class FinishedBranch extends AbstractIdentifiable {
         this.branchContexts = branchContexts;
     }
 
-    public void connectToSuspendedExecution(SuspendedExecution suspendedExecution) {
+    public boolean connectToSuspendedExecution(SuspendedExecution suspendedExecution) {
         this.suspendedExecution = suspendedExecution;
-        suspendedExecution.getFinishedBranches().add(this); //bi directional connection
+        return suspendedExecution.getFinishedBranches().add(this); //bi directional connection
     }
 
     public SuspendedExecution getSuspendedExecution() {

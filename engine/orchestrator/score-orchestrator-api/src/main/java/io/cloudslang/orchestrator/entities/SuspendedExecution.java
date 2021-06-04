@@ -20,9 +20,17 @@ import io.cloudslang.orchestrator.enums.SuspendedExecutionReason;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.engine.data.AbstractIdentifiable;
 
-import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Column;
+import javax.persistence.Enumerated;
+import javax.persistence.Basic;
+import javax.persistence.Embedded;
+import javax.persistence.OneToMany;
+import javax.persistence.CascadeType;
+import javax.persistence.FetchType;
+import java.util.HashSet;
+import java.util.Set;
 
 import static javax.persistence.EnumType.STRING;
 
@@ -62,7 +70,7 @@ public class SuspendedExecution extends AbstractIdentifiable {
     private ExecutionObjEntity executionObj;
 
     @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy="suspendedExecution")
-    private List<FinishedBranch> finishedBranches = new ArrayList<>();
+    private Set<FinishedBranch> finishedBranches = new HashSet<>();
 
     private SuspendedExecution() {
     }
@@ -117,11 +125,11 @@ public class SuspendedExecution extends AbstractIdentifiable {
         this.executionObj = new ExecutionObjEntity(executionObj);
     }
 
-    public List<FinishedBranch> getFinishedBranches() {
+    public Set<FinishedBranch> getFinishedBranches() {
         return finishedBranches;
     }
 
-    public void setFinishedBranches(List<FinishedBranch> finishedBranches) {
+    public void setFinishedBranches(Set<FinishedBranch> finishedBranches) {
         this.finishedBranches = finishedBranches;
     }
 
