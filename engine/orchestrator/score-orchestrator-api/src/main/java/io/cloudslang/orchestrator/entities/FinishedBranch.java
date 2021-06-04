@@ -75,11 +75,7 @@ public class FinishedBranch extends AbstractIdentifiable {
 
     public boolean connectToSuspendedExecution(SuspendedExecution suspendedExecution) {
         this.suspendedExecution = suspendedExecution;
-        if (!suspendedExecution.getFinishedBranches().contains(this)) {
-            suspendedExecution.getFinishedBranches().add(this); //bi directional connection
-            return true;
-        }
-        return false;
+        return suspendedExecution.getFinishedBranches().add(this); //bi directional connection
     }
 
     public SuspendedExecution getSuspendedExecution() {
