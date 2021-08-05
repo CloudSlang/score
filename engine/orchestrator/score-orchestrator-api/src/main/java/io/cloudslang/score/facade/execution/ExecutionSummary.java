@@ -47,6 +47,14 @@ public class ExecutionSummary implements Serializable {
     private boolean autoResume;
     private LicenseType licenseType;
     private Long licenseConsumption;
+    private String cpName;
+    private String cpVersion;
+
+    public String getCpName() { return cpName; }
+    public void setCpName(String cpName) { this.cpName = cpName; }
+
+    public String getCpVersion() { return cpVersion; }
+    public void setCpVersion(String cpVersion) { this.cpVersion = cpVersion; }
 
     public String getExecutionId() {
         return executionId;
