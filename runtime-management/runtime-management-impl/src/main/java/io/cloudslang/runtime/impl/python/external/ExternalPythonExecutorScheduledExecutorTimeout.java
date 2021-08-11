@@ -418,10 +418,31 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     private String generatePayloadForEval(String expression, String prepareEnvironmentScript,
                                           Map<String, Serializable> context) throws JsonProcessingException {
         HashMap<String, Serializable> payload = new HashMap<>(4);
+        if (expression.indexOf('$') != -1) {
+            expression = collectExpressionVariable(expression, context);
+        }
         payload.put("expression", expression);
         payload.put("envSetup", prepareEnvironmentScript);
         payload.put("context", (Serializable) context);
         return objectMapper.writeValueAsString(payload);
+    }
+
+    private String collectExpressionVariable(String expression, Map<String, Serializable> context) {
+        String resultantExpr = expression;
+        for (int i = 0 ; i < expression.length() ; i++) {
+            int firstIndex = expression.indexOf("$", i);
+            int lastIndex = expression.indexOf("}", i);
+            if (firstIndex == -1 || lastIndex == -1 ) {
+                break;
+            }
+            String result = expression.substring(firstIndex, lastIndex+1);
+            String exprVar = result.substring(2,result.length()-1);
+            if (context.containsKey(exprVar)) {
+                resultantExpr = resultantExpr.replace(result,context.get(exprVar).toString());
+            }
+            i = lastIndex;
+        }
+        return resultantExpr;
     }
 
     private String generatePayloadForExec(String userScript, Map<String, Serializable> inputs) throws
