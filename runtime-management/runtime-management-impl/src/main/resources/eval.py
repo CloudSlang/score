@@ -70,6 +70,7 @@ class PythonAgentExecutor(object):
         global accessed
         global accessed_resources_set
         global get_from_smaller_context
+        global get_sp_var
 
         get_from_smaller_context = self.get_from_smaller_context
         accessed_resources_set = set()
@@ -90,6 +91,7 @@ class PythonAgentExecutor(object):
         cs_substring = None
         cs_to_upper = None
         cs_to_lower = None
+        get_sp_var = None
         exec (env_setup, globals())
 
     def main(self):
@@ -114,6 +116,7 @@ class PythonAgentExecutor(object):
                                                'cs_regex': self.cs_regex,
                                                'cs_xpath_query': self.cs_xpath_query,
                                                'cs_json_query': self.cs_json_query,
+                                               'get_sp_var': get_sp_var,
                                                })
 
             for x in dir(__builtins__):
