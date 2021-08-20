@@ -21,7 +21,7 @@
 	<parent>
 		<groupId>io.cloudslang</groupId>
 		<artifactId>worker-manager</artifactId>
-		<version>0.3.239</version>
+		<version>0.3.240-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
