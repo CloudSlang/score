@@ -62,6 +62,7 @@ import io.cloudslang.orchestrator.services.WorkerDbSupportServiceImpl;
 import io.cloudslang.schema.context.ScoreDatabaseContext;
 import io.cloudslang.schema.context.ScoreDefaultDatasourceContext;
 import io.cloudslang.worker.execution.services.ExternalExecutionServiceImpl;
+import io.cloudslang.orchestrator.services.FinishedExecutionStateCleanerServiceImpl;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -124,6 +125,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
         put(ScoreEngineJobsImpl.class,"scoreEngineJobs");
 		put(BusyWorkersServiceImpl.class,"busyWorkersService");
 		put(MergedConfigurationServiceImpl.class,"MergedConfigurationService");
+		put(FinishedExecutionStateCleanerServiceImpl.class, null);
 	}};
 
 	@Override

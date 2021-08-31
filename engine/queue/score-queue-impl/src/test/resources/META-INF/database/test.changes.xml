@@ -80,4 +80,26 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="Create OO_EXECUTION_STATE" author="engine">
+        <createTable tableName="OO_EXECUTION_STATE">
+            <column name="ID" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="EXECUTION_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="BRANCH_ID" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STATUS" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="EXECUTION_OBJECT" type="${blob.type}"></column>
+			<column name="UPDATE_TIME" type="BIGINT"></column>
+        </createTable>
+
+        <addUniqueConstraint tableName="OO_EXECUTION_STATE" columnNames="EXECUTION_ID, BRANCH_ID"
+          constraintName="OO_EXECUTION_STATE_UC"/>
+    </changeSet>
+
 </databaseChangeLog>

@@ -41,10 +41,14 @@ import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Date;
 import java.util.Properties;
 import java.util.UUID;
+import org.junit.After;
+import org.junit.Before;
 
 import static org.fest.assertions.Assertions.assertThat;
+import org.springframework.data.domain.PageRequest;
 
 /**
  * User:
@@ -56,6 +60,11 @@ public class ExecutionStateRepositoryTest {
 
     @Autowired
     private ExecutionStateRepository executionStateRepository;
+
+    @Before
+    public void cleanRepository() {
+        executionStateRepository.deleteAll();
+    }
 
     @Test
     public void testFindExecutionIdByStatuses() {
@@ -73,8 +82,18 @@ public class ExecutionStateRepositoryTest {
         executionState.setStatus(status);
         executionState.setExecutionId(123L);
         executionState.setBranchId(UUID.randomUUID().toString());
+        executionState.setUpdateTime(new Date().getTime());
         executionStateRepository.saveAndFlush(executionState);
         return executionState;
+    }
+
+    @Test
+    public void findByStatusInAndUpdateTimeLessThanEqual() {
+        ExecutionState canceledExecutionState = createExecutionState(ExecutionStatus.CANCELED);
+        ExecutionState completedExecutionState = createExecutionState(ExecutionStatus.COMPLETED);
+        createExecutionState(ExecutionStatus.PENDING_CANCEL);
+        List<Long> executionIds = executionStateRepository.findByStatusInAndUpdateTimeLessThanEqual(Arrays.asList(ExecutionStatus.CANCELED, ExecutionStatus.COMPLETED), new Date().getTime(), new PageRequest(0, 100));
+        assertThat(executionIds).containsExactly(canceledExecutionState.getExecutionId(), completedExecutionState.getExecutionId());
     }
 
     @Configuration

@@ -25,6 +25,7 @@ import io.cloudslang.orchestrator.services.SuspendedExecutionCleanerService;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import io.cloudslang.orchestrator.services.FinishedExecutionStateCleanerService;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -55,6 +56,9 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
 
     @Autowired
     private LargeMessagesMonitorService largeMessagesMonitorService;
+
+    @Autowired
+    private FinishedExecutionStateCleanerService finishedExecutionStateCleanerService;
 
     private final Logger logger = Logger.getLogger(getClass());
 
@@ -195,6 +199,18 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
             if (logger.isDebugEnabled()) logger.debug("finished MiContextsMediatorJob in " + stopWatch);
         } catch (Exception ex) {
             logger.error("MiContextsMediatorJob failed", ex);
+        }
+    }
+    @Override
+    public void cleanFinishedExecutionState() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("started in CleanFinishedExecutionState method");
+        }
+
+        try {
+            finishedExecutionStateCleanerService.cleanFinishedExecutionState();
+        } catch (Exception e) {
+            logger.error("Can't run finished execution state cleaner job. : " + e);
         }
     }
 }

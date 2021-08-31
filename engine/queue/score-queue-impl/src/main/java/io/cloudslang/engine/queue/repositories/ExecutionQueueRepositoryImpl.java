@@ -40,13 +40,8 @@ import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.lang.Long.parseLong;
 
@@ -66,17 +61,19 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     private static final String MYSQL = "mysql";
     private static final String MSSQL = "Microsoft";
 
-    final private String SELECT_FINISHED_STEPS_IDS =  " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES " +
-            " WHERE " +
-            "        (STATUS = "+ExecStatus.TERMINATED.getNumber()+") OR " +
-            "        (STATUS = "+ExecStatus.FAILED.getNumber()+") OR " +
-            "        (STATUS = "+ExecStatus.FINISHED.getNumber()+") ";
-
+    // Note : Do not join the below queries using a OR clause as it has proved to more expensive
+    final private String SELECT_FINISHED_STEPS_IDS_1 = "SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES EQ WHERE EQ.STATUS IN (6,7,8)" ;
+    final private String SELECT_FINISHED_STEPS_IDS_2 =  "SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES EQ WHERE (EQ.EXEC_STATE_ID IN "
+            + "(SELECT DISTINCT STATES.ID FROM OO_EXECUTION_STATES STATES JOIN OO_EXECUTION_STATE ES ON STATES.MSG_ID = CAST(ES.EXECUTION_ID AS VARCHAR(255)) "
+            + "WHERE ES.STATUS IN('COMPLETED','CANCELED','SYSTEM_FAILURE') ))";
     final private String QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES = "DELETE FROM OO_EXECUTION_QUEUES " +
             " WHERE EXEC_STATE_ID in (:ids)";
 
     final private String QUERY_DELETE_FINISHED_STEPS_FROM_STATES = "DELETE FROM OO_EXECUTION_STATES " +
             " WHERE ID in (:ids)";
+
+    final private String QUERY_DELETE_EXECS_STATES_MAPPINGS = "DELETE FROM OO_EXECS_STATES_EXECS_MAPPINGS " +
+            " WHERE EXEC_STATE_ID in (:ids)";
 
     final private String QUERY_MESSAGES_WITHOUT_ACK_SQL =
             "SELECT EXEC_STATE_ID,      " +
@@ -598,30 +595,43 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     }
 
     @Override
-    public void deleteFinishedSteps(Set<Long> ids) {
-        if (ids == null || ids.size() == 0) {
+    public void deleteFinishedSteps(Set<Long> stepIds) {
+        if (stepIds == null || stepIds.size() == 0) {
             return;
         }
 
-        // Access STATES first and then QUEUES - same order as ExecutionQueueService#enqueue (prevents deadlocks on MSSQL)
-        String query = QUERY_DELETE_FINISHED_STEPS_FROM_STATES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
+        Iterable<List<Long>> lists = Iterables.partition(stepIds, 1000);
+        Iterator itr = lists.iterator();
 
-        Object[] args = ids.toArray(new Object[ids.size()]);
-        logSQL(query, args);
+        while(itr.hasNext()) {
+            List ids = (List) itr.next();
+            // Access STATES first and then QUEUES - same order as ExecutionQueueService#enqueue (prevents deadlocks on MSSQL)
+            String query = QUERY_DELETE_FINISHED_STEPS_FROM_STATES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
 
-        int deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
+            Object[] args = ids.toArray(new Object[ids.size()]);
+            logSQL(query, args);
 
-        if(logger.isDebugEnabled()){
-            logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_STATES table.");
-        }
+            int deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
 
-        query = QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
-        logSQL(query,args);
+            if(logger.isDebugEnabled()){
+                logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_STATES table.");
+            }
 
-        deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
+            query = QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
+            logSQL(query,args);
 
-        if(logger.isDebugEnabled()){
-            logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_QUEUES table.");
+            deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
+
+            if(logger.isDebugEnabled()){
+                logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_QUEUES table.");
+            }
+
+            query = QUERY_DELETE_EXECS_STATES_MAPPINGS.replace(":ids", StringUtils.repeat("?", ",", ids.size()));
+            logSQL(query, args);
+            deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECS_STATES_EXECS_MAPPINGS table.");
+            }
         }
     }
 
@@ -629,9 +639,14 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     public Set<Long> getFinishedExecStateIds() {
         getFinishedExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
         try {
-            List<Long> result = doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, SELECT_FINISHED_STEPS_IDS, new SingleColumnRowMapper<>(Long.class));
+            Set<Long> result;
 
-            return new HashSet<>(result);
+            result = doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, SELECT_FINISHED_STEPS_IDS_1,
+                    new SingleColumnRowMapper<>(Long.class)).stream().collect(Collectors.toSet());
+            result.addAll((Set<Long>) doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, SELECT_FINISHED_STEPS_IDS_2,
+                    new SingleColumnRowMapper<>(Long.class)).stream().collect(Collectors.toSet()));
+
+            return result;
         } finally {
             getFinishedExecStateIdsJdbcTemplate.clearStatementBatchSize();
         }
