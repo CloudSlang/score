@@ -121,7 +121,6 @@ public class QueueListenerImpl implements QueueListener {
             Boolean isBranch = isBranch(execution);
             if (!isBranch) {
                 scoreEvents.add(scoreEventFactory.createFinishedEvent(execution));
-                executionStateService.deleteExecutionState(Long.valueOf(executionMessage.getMsgId()), ExecutionSummary.EMPTY_BRANCH);
             } else {
                 branches.add(execution);
                 scoreEvents.add(scoreEventFactory.createFinishedBranchEvent(execution));
