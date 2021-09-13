@@ -32,6 +32,7 @@ import java.util.Map;
  * A POJO which serves as an holder for the contexts and exception (if exists) of a finished branch
  */
 public class EndBranchDataContainer implements Serializable {
+    private static final long serialVersionUID = -6628394134724967947L;
     private final Map<String, Serializable> contexts;
     private final Map<String, Serializable> systemContext;
     private final String exception;

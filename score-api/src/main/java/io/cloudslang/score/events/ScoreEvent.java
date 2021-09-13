@@ -25,7 +25,8 @@ import java.util.Map;
  */
 public class ScoreEvent implements Serializable {
 
-	private String eventType;
+    private static final long serialVersionUID = -9190059094032864954L;
+    private String eventType;
     private String languageName;
 	private Serializable data;
     private Map<String, ? extends  Serializable> metadata;
