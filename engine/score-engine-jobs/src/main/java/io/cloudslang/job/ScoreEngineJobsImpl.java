@@ -71,8 +71,12 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
     public void cleanQueueJob() {
         try {
             Set<Long> ids = queueCleanerService.getFinishedExecStateIds();
-            if (logger.isDebugEnabled())
+            Set<Long> jobCompletedIds = queueCleanerService.getFlowCompletedExecStateIds();
+            ids.addAll(jobCompletedIds);
+
+            if (logger.isDebugEnabled()) {
                 logger.debug("Will clean from queue the next Exec state ids amount:" + ids.size());
+            }
 
             Set<Long> execIds = new HashSet<>();
 
@@ -87,6 +91,8 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
             if (execIds.size() > 0) {
                 queueCleanerService.cleanFinishedSteps(execIds);
             }
+
+            queueCleanerService.deleteOrphanSteps();
         } catch (Exception e) {
             logger.error("Can't run queue cleaner job.", e);
         }
