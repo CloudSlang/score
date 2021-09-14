@@ -48,8 +48,9 @@ public class SuspendedExecutionCleanerServiceImpl implements SuspendedExecutionC
 
     private void cleanupSuspendedExecutions(Integer bulkSize) {
         for (int i = 1; i <= bulkSize / SPLIT_SIZE; i++) {
-            Collection<String> toBeDeleted = suspendedExecutionsRepository.collectCompletedSuspendedExecutions(new PageRequest(0, SPLIT_SIZE));
+            Collection<String> toBeDeleted = suspendedExecutionsRepository.listAllCompletedSuspendedExecution(SPLIT_SIZE);
             if (!CollectionUtils.isEmpty(toBeDeleted)) {
+                logger.debug("suspended execution cleaner job deleted" + toBeDeleted.toString() + " ids");
                 suspendedExecutionsRepository.deleteByIds(toBeDeleted);
             }
         }
