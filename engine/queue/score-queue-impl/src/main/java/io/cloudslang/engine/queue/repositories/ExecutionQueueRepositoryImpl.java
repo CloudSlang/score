@@ -616,26 +616,10 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         if (ids == null || ids.size() == 0) {
             return;
         }
+        for (List<Long> currentPartition : Iterables.partition(ids, 1000)) {
+            deleteIdsFromTable(currentPartition, QUERY_DELETE_FINISHED_STEPS_FROM_STATES, "OO_EXECUTION_STATES");
 
-        // Access STATES first and then QUEUES - same order as ExecutionQueueService#enqueue (prevents deadlocks on MSSQL)
-        String query = QUERY_DELETE_FINISHED_STEPS_FROM_STATES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
-
-        Object[] args = ids.toArray(new Object[ids.size()]);
-        logSQL(query, args);
-
-        int deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
-
-        if(logger.isDebugEnabled()){
-            logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_STATES table.");
-        }
-
-        query = QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
-        logSQL(query,args);
-
-        deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
-
-        if(logger.isDebugEnabled()){
-            logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_QUEUES table.");
+            deleteIdsFromTable(currentPartition, QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES, "OO_EXECUTION_QUEUES");
         }
     }
 
