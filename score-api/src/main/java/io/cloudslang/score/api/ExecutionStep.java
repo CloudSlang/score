@@ -27,6 +27,7 @@ import java.util.Map;
 
 public class ExecutionStep implements Serializable {
 
+    private static final long serialVersionUID = -2446600690127912598L;
     private Long execStepId;
 
     private ControlActionMetadata action;
