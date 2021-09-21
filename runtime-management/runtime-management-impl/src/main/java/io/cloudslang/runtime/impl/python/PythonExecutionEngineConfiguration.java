@@ -44,9 +44,28 @@ public class PythonExecutionEngineConfiguration {
 
     @Bean(name = "externalPythonRuntimeService")
     public PythonRuntimeService externalPythonRuntimeService() {
-        Integer pythonProcessPermits = Integer.getInteger("python.concurrent.execution.permits", 30);
+
+        Integer pythonProcessPermits = calculatePythonConcurrentExecutions();
         Integer pythonTestingProcessPermits = Integer.getInteger("python.testing.concurrent.execution.permits", 10);
         return new ExternalPythonRuntimeServiceImpl(new Semaphore(pythonProcessPermits), new Semaphore(pythonTestingProcessPermits));
+    }
+
+    private int calculatePythonConcurrentExecutions() {
+        Integer numberOfExecutionThreads = Integer.getInteger("worker.numberOfExecutionThreads");
+        int numberOfPythonExecutionThreads = (int) Math.max(Math.min(0.7 * numberOfExecutionThreads, 100.0), 1);
+        boolean isValid = validateBoundryCondition(numberOfPythonExecutionThreads);
+        if (!isValid) {
+            throw new RuntimeException("Invalid Parameter provided for python.concurrentExecutions i.e., " + numberOfPythonExecutionThreads);
+        }
+        return numberOfPythonExecutionThreads;
+    }
+
+    private boolean validateBoundryCondition(int value) {
+        boolean isValid = false;
+        if (value >= 1 && value <= 100) {
+            isValid = true;
+        }
+        return isValid;
     }
 
     @Bean(name = "jythonExecutionEngine")

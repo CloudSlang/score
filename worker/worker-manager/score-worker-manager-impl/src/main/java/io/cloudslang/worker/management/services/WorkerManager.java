@@ -137,7 +137,8 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
                 new WorkerThreadFactory(valueOf(incrementAndGetTreadPoolVersion()) + "_WorkerExecutionThread"));
 
         mapOfRunningTasks = new ConcurrentHashMap<>(numberOfThreads);
-        newCancelBehaviour = parseBoolean(getProperty("enable.new.cancel.execution", FALSE.toString()));
+//        newCancelBehaviour = parseBoolean(getProperty("enable.new.cancel.execution", "true"));
+        newCancelBehaviour = true;
     }
 
     public void addExecution(long executionId, Runnable runnable) {

@@ -53,7 +53,7 @@ public final class LargeMessagesMonitorServiceImpl implements LargeMessagesMonit
     @Override
     @Transactional
     public void monitor() {
-        if (!parseBoolean(getProperty("score.poll.use.large.message.query", "true"))) {
+        if (!parseBoolean(getProperty("worker.poll.largeMessageStrategy.enabled", "true"))) {
             return;
         }
 

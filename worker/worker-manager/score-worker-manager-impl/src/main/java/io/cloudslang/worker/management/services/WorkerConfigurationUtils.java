@@ -38,8 +38,8 @@ public class WorkerConfigurationUtils {
 
     private static final long MEMORY_THRESHOLD = 50_000_000L; // 50 Mega byte
 
-    private static final String WORKER_INBUFFER_SIZE = "worker.inbuffer.size";
-    private static final String WORKER_INBUFFER_MIN_SIZE = "worker.inbuffer.minSize";
+    private static final String WORKER_INBUFFER_SIZE = "worker.inBuffer.size";
+    private static final String WORKER_INBUFFER_MIN_SIZE = "worker.inBuffer.minSize";
     private static final String ENABLE_NEW_INBUFFER = "enable.new.inbuffer";
 
     private static final String INBUFFER_IMPLEMENTATION_KEY = "worker.inbuffer.strategy";
@@ -70,7 +70,8 @@ public class WorkerConfigurationUtils {
     }
 
     public boolean isNewInbuffer() {
-        return Boolean.getBoolean(ENABLE_NEW_INBUFFER);
+//        return Boolean.parseBoolean(System.getProperty(ENABLE_NEW_INBUFFER,"true"));
+        return true;
     }
 
     public BlockingQueue<Runnable> getBlockingQueue(int executionThreadsCount, int capacity) {

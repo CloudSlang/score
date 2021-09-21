@@ -360,7 +360,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         updateExecutionStateStatusJdbcTemplate = new JdbcTemplate(dataSource);
         deletePendingExecutionStateJdbcTemplate = new JdbcTemplate(dataSource);
 
-        useLargeMessageQuery = Boolean.parseBoolean(System.getProperty("score.poll.use.large.message.query", "true"));
+        useLargeMessageQuery = Boolean.parseBoolean(System.getProperty("worker.poll.largeMessageStrategy.enabled", "true"));
 
         String dbms = getDatabaseProductName();
 
