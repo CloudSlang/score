@@ -70,7 +70,6 @@ public class WorkerConfigurationUtils {
     }
 
     public boolean isNewInbuffer() {
-//        return Boolean.parseBoolean(System.getProperty(ENABLE_NEW_INBUFFER,"true"));
         return true;
     }
 
