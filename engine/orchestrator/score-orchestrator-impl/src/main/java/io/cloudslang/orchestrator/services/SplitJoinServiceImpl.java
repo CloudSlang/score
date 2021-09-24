@@ -154,11 +154,11 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         queueMessages.addAll(branchTriggerMessages);
         queueMessages.addAll(stepFinishMessages);
 
-        // write new branches and end of step messages to queue
-        queueDispatcherService.dispatch(queueMessages);
-
         // save the suspended parent entities
         suspendedExecutionsRepository.saveAll(suspendedParents);
+
+        // write new branches and end of step messages to queue
+        queueDispatcherService.dispatch(queueMessages);
     }
 
     private List<ExecutionMessage> prepareExecutionMessages(List<Execution> executions, boolean active) {
@@ -333,14 +333,19 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             Execution execution = se.getExecutionObj();
             execution.getSystemContext().remove(FINISHED_CHILD_BRANCHES_DATA);
             execution.getSystemContext().put("CURRENT_PROCESSED__SPLIT_ID", se.getSplitId());
-            joinMiSplit(se, execution);
+
             Set<FinishedBranch> finishedBranches = se.getFinishedBranches();
+            long mergedBranches = se.getMergedBranches();
+            Integer totalNumberOfBranches = se.getNumberOfBranches();
+
+            joinMiSplit(finishedBranches, execution);
             long nrOfNewFinishedBranches = finishedBranches.stream()
                     .filter(finishedBranch -> !finishedBranch.getBranchContexts().isBranchCancelled())
                     .count();
-            se.setMergedBranches(se.getMergedBranches() + nrOfNewFinishedBranches);
-            execution.getSystemContext().put(MI_REMAINING_BRANCHES_CONTEXT_KEY, valueOf(se.getNumberOfBranches() - se.getMergedBranches()));
-            if (se.getMergedBranches() == se.getNumberOfBranches()) {
+            long updatedMergedBranches = mergedBranches + nrOfNewFinishedBranches;
+            se.setMergedBranches(updatedMergedBranches);
+            execution.getSystemContext().put(MI_REMAINING_BRANCHES_CONTEXT_KEY, valueOf(totalNumberOfBranches - updatedMergedBranches));
+            if (updatedMergedBranches == totalNumberOfBranches) {
                 mergedSuspendedExecutions.add(se);
             } else {
                 se.setLocked(true);
@@ -415,8 +420,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         return exec;
     }
 
-    private void joinMiSplit(SuspendedExecution suspendedExecution, Execution exec) {
-        Set<FinishedBranch> finishedBranches = suspendedExecution.getFinishedBranches();
+    private void joinMiSplit(Set<FinishedBranch> finishedBranches, Execution exec) {
 
         if (logger.isDebugEnabled()) {
             logger.debug("Joining execution " + exec.getExecutionId());

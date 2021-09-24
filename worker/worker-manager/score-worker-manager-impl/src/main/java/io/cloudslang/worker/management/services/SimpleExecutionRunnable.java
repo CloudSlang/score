@@ -536,16 +536,19 @@ public class SimpleExecutionRunnable implements Runnable {
             int totalNumberOfLanes = miInputs.size();
             int currentNumberOfLanes = 0;
             String commonSplitUuid = randomUUID().toString();
+            ArrayList<SplitMessage> splitMessages = new ArrayList<>(totalNumberOfLanes);
             while (currentNumberOfLanes != totalNumberOfLanes) {
                 List<Execution> newExecutions = executionService.executeSplitForMi(execution, commonSplitUuid,
                         currentNumberOfLanes);
-
-                String splitId = getSplitId(newExecutions);
                 currentNumberOfLanes += newExecutions.size();
-                SplitMessage splitMessage = new SplitMessage(splitId, SerializationUtils.clone(execution), newExecutions,
-                        totalNumberOfLanes, currentNumberOfLanes == totalNumberOfLanes);
-                outBuffer.put(splitMessage);
+
+                if (newExecutions.size() > 0) {
+                    SplitMessage splitMessage = new SplitMessage(commonSplitUuid, SerializationUtils.clone(execution), newExecutions,
+                            totalNumberOfLanes, currentNumberOfLanes == totalNumberOfLanes);
+                    splitMessages.add(splitMessage);
+                }
             }
+            outBuffer.put(splitMessages.toArray(new SplitMessage[0]));
         } catch (InterruptedException e) {
             logger.warn("Thread was interrupted! Exiting the execution... ", e);
         }
