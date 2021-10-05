@@ -193,4 +193,45 @@ public class SuspendedExecutionsRepositoryTest {
 		    return new DataBaseDetector();
 	    }
     }
+
+    @Test
+    public void deleteCompletedSuspendedTest() {
+
+        Map<String, String> contexts = new HashMap<>();
+        contexts.put("flowContext", "");
+
+        Execution exec = new Execution(2L, 0L, contexts);
+        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec);
+
+        repository.save(suspendedExecution);
+
+        List<String> read = repository.collectCompletedSuspendedExecutions(new PageRequest(0, 100));
+
+        Assert.assertNotNull(read);
+        Assert.assertEquals(read.get(0), "111");
+
+        repository.deleteByIds(read);
+
+        Assert.assertEquals(repository.collectCompletedSuspendedExecutions(new PageRequest(0, 100)).size(), 0);
+    }
+
+
+    @Test
+    public void collectCompletedSuspendedTest() {
+
+        Map<String, String> contexts = new HashMap<>();
+        contexts.put("flowContext", "");
+
+        Execution exec = new Execution(2L, 0L, contexts);
+        SuspendedExecution suspendedExecution = new SuspendedExecution("111", "888", 5, exec);
+
+        repository.save(suspendedExecution);
+
+        List<String> read = repository.collectCompletedSuspendedExecutions(new PageRequest(0, 100));
+
+        Assert.assertNotNull(read);
+        Assert.assertEquals(read.get(0), "111");
+    }
+
+    
 }

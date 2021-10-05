@@ -23,7 +23,7 @@ import io.cloudslang.orchestrator.services.SplitJoinService;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import io.cloudslang.orchestrator.services.SuspendedExecutionCleanerService;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -47,6 +47,9 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
 
     @Autowired
     private ExecutionRecoveryService executionRecoveryService;
+
+    @Autowired
+    private SuspendedExecutionCleanerService suspendedExecutionCleanerService;
 
     private final Logger logger = Logger.getLogger(getClass());
 
@@ -132,6 +135,23 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
         }
         catch (Exception e){
             logger.error("Can't run queue recovery job.",e);
+        }
+    }
+
+    /**
+     * clean suspended executions
+     */
+    @Override
+    public void cleanSuspendedExecutionsJob() {
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("CleanSuspendedExecutionJob woke up at " + new Date());
+        }
+
+        try {
+            suspendedExecutionCleanerService.cleanupSuspendedExecutions();
+        } catch (Exception e) {
+            logger.error("Can't run suspended execution cleaner job.", e);
         }
     }
 

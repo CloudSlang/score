@@ -13,35 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.cloudslang.orchestrator.repositories;
 
-package io.cloudslang.job;
+import java.util.List;
 
-/**
- * User: wahnonm
- * Date: 13/08/14
- * Time: 10:35
- */
-public interface ScoreEngineJobs {
+public interface SuspendedExecutionCustomRepository {
 
-    /**
-     * job that clean the finished steps from the queue
-     */
-    void cleanQueueJob();
-
-    /**
-     * job that join all the suspended execution of brunches that finished
-     */
-    void joinFinishedSplitsJob();
-
-    /**
-     * job that update version number - we use it instead of time
-     */
-    void recoveryVersionJob();
-
-    /**
-     *  job that recover workers that didn't send keep alive
-     */
-    void executionRecoveryJob();
-
-    void cleanSuspendedExecutionsJob();
+    List<String> listAllCompletedSuspendedExecution(int pageSize);
 }
