@@ -66,6 +66,16 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     private static final String MYSQL = "mysql";
     private static final String MSSQL = "Microsoft";
 
+    final private String SELECT_FLOW_COMPLETED_STEPS_IDS = " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES "
+            + "WHERE EXEC_STATE_ID IN "
+            + "(SELECT DISTINCT ESS.ID FROM OO_EXECUTION_STATES ESS JOIN OO_EXECUTION_SUMMARY ES ON "
+            + "ESS.MSG_ID = ES.EXECUTION_ID "
+            + "AND ES.END_TIME_LONG  IS NOT NULL)";
+
+    final private String SELECT_ORPHAN_STEPS_IDS = " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES "
+            + "WHERE EXEC_STATE_ID NOT IN "
+            + "(SELECT DISTINCT ESS.ID FROM OO_EXECUTION_STATES ESS)";
+
     final private String SELECT_FINISHED_STEPS_IDS =  " SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES " +
             " WHERE " +
             "        (STATUS = "+ExecStatus.TERMINATED.getNumber()+") OR " +
@@ -308,6 +318,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     private StatementAwareJdbcTemplateWrapper findLargeJdbcTemplate;
     private StatementAwareJdbcTemplateWrapper findExecIDsJdbcTemplate;
     private StatementAwareJdbcTemplateWrapper getFirstPendingBranchJdbcTemplate;
+    private StatementAwareJdbcTemplateWrapper getFlowCompletedExecStateIdsJdbcTemplate;
+    private StatementAwareJdbcTemplateWrapper getOrphanExecStateIdsJdbcTemplate;
 
 	private JdbcTemplate insertExecutionJdbcTemplate;
 	private JdbcTemplate deleteFinishedStepsJdbcTemplate;
@@ -338,6 +350,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         findLargeJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "findLargeJdbcTemplate");
         findExecIDsJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "findExecIDsJdbcTemplate");
         getFirstPendingBranchJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "getFirstPendingBranchJdbcTemplate");
+        getOrphanExecStateIdsJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "getOrphanExecStateIdsJdbcTemplate");
+        getFlowCompletedExecStateIdsJdbcTemplate = new StatementAwareJdbcTemplateWrapper(dataSource, "getFlowCompletedExecStateIdsJdbcTemplate");
 
         insertExecutionJdbcTemplate = new JdbcTemplate(dataSource);
         deleteFinishedStepsJdbcTemplate = new JdbcTemplate(dataSource);
@@ -602,27 +616,34 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         if (ids == null || ids.size() == 0) {
             return;
         }
+        for (List<Long> currentPartition : Iterables.partition(ids, 1000)) {
+            deleteIdsFromTable(currentPartition, QUERY_DELETE_FINISHED_STEPS_FROM_STATES, "OO_EXECUTION_STATES");
+            deleteIdsFromTable(currentPartition, QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES, "OO_EXECUTION_QUEUES");
+        }
+    }
 
-        // Access STATES first and then QUEUES - same order as ExecutionQueueService#enqueue (prevents deadlocks on MSSQL)
-        String query = QUERY_DELETE_FINISHED_STEPS_FROM_STATES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
+    private int deleteIdsFromTable(List<Long> ids, String deleteQuery, final String tableName) {
+        String query = deleteQuery.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
 
         Object[] args = ids.toArray(new Object[ids.size()]);
         logSQL(query, args);
 
         int deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
-
-        if(logger.isDebugEnabled()){
-            logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_STATES table.");
+        if (logger.isDebugEnabled()) {
+            logger.debug("Deleted " + deletedRows + " rows of finished steps from " + tableName + " table.");
+        }
+        return deletedRows;
         }
 
-        query = QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES.replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
-        logSQL(query,args);
+    @Override
+    public int deleteOrphanSteps() {
 
-        deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
-
-        if(logger.isDebugEnabled()){
-            logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_QUEUES table.");
+        Set<Long> stepIds = getOrphanExecStateIds();
+        int deletedRows = 0;
+        for (List<Long> partition : Iterables.partition(stepIds, 1000)) {
+            deletedRows += deleteIdsFromTable(partition, QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES, "OO_EXECUTION_QUEUES");
         }
+        return deletedRows;
     }
 
     @Override
@@ -637,6 +658,29 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         }
     }
 
+    @Override
+    public Set<Long> getFlowCompletedExecStateIds() {
+        getFlowCompletedExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
+        try {
+            List<Long> result = doSelectWithTemplate(getFlowCompletedExecStateIdsJdbcTemplate, SELECT_FLOW_COMPLETED_STEPS_IDS, new SingleColumnRowMapper<>(Long.class));
+
+            return new HashSet<>(result);
+        } finally {
+            getFlowCompletedExecStateIdsJdbcTemplate.clearStatementBatchSize();
+        }
+    }
+
+    @Override
+    public Set<Long> getOrphanExecStateIds() {
+        getOrphanExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
+        try {
+            List<Long> result = doSelectWithTemplate(getOrphanExecStateIdsJdbcTemplate, SELECT_ORPHAN_STEPS_IDS, new SingleColumnRowMapper<>(Long.class));
+
+            return new HashSet<>(result);
+        } finally {
+            getOrphanExecStateIdsJdbcTemplate.clearStatementBatchSize();
+        }
+    }
 
     public List<ExecutionMessage> pollMessagesWithoutAck(int maxSize, long minVersionAllowed) {
         pollMessagesWithoutAckJdbcTemplate.setStatementBatchSize(maxSize);
