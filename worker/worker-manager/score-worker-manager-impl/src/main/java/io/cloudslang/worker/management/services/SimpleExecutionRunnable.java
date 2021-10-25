@@ -540,12 +540,14 @@ public class SimpleExecutionRunnable implements Runnable {
             while (currentNumberOfLanes != totalNumberOfLanes) {
                 List<Execution> newExecutions = executionService.executeSplitForMi(execution, commonSplitUuid,
                         currentNumberOfLanes);
-                currentNumberOfLanes += newExecutions.size();
 
-                if (newExecutions.size() > 0) {
+                if (newExecutions != null && newExecutions.size() > 0) {
+                    currentNumberOfLanes += newExecutions.size();
                     SplitMessage splitMessage = new SplitMessage(commonSplitUuid, SerializationUtils.clone(execution), newExecutions,
                             totalNumberOfLanes, currentNumberOfLanes == totalNumberOfLanes);
                     splitMessages.add(splitMessage);
+                } else {
+                    throw new RuntimeException("Cannot execute split step. Split executions are null or empty");
                 }
             }
             outBuffer.put(splitMessages.toArray(new SplitMessage[0]));
@@ -581,6 +583,6 @@ public class SimpleExecutionRunnable implements Runnable {
         if (newExecutions != null && newExecutions.size() > 0) {
             return newExecutions.get(0).getSystemContext().getSplitId();
         }
-        throw new RuntimeException("Split executions list is null or empty!!!");
+        throw new RuntimeException("Cannot execute split step. Split executions are null or empty");
     }
 }
