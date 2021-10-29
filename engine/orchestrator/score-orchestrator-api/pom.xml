@@ -23,7 +23,7 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>orchestrator</artifactId>
-        <version>0.3.246</version>
+        <version>0.3.247-SNAPSHOT</version>
     </parent>
 
     <artifactId>score-orchestrator-api</artifactId>
