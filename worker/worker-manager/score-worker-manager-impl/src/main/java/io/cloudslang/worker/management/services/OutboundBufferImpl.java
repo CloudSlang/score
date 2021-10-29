@@ -115,10 +115,15 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         try {
             syncManager.startPutMessages();
             // We need to check if the current thread was interrupted while waiting for the lock (ExecutionThread or InBufferThread in ackMessages)
+            boolean isDebugEnabled = logger.isDebugEnabled();
             while (currentWeight >= maxBufferWeight) {
-                logger.info("Outbound buffer is full. Waiting...");
+                if (isDebugEnabled) {
+                    logger.debug("Outbound buffer is full. Waiting...");
+                }
                 syncManager.waitForDrain();
-                logger.info("Outbound buffer drained. Finished waiting.");
+                if (isDebugEnabled) {
+                    logger.debug("Outbound buffer drained. Finished waiting.");
+                }
             }
 
             // Put message into the buffer, intentionally not using merge function because of extra if
