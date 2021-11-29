@@ -26,6 +26,7 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import oshi.software.os.OSProcess;
 
+import static java.lang.Boolean.getBoolean;
 import static io.cloudslang.worker.monitor.metric.WorkerPerfMetric.getProcess;
 
 @ManagedResource(description = "Worker Metrics API")
@@ -55,9 +56,12 @@ public class WorkerMetricsMBean {
     private OSProcess prevDiskWriteProcess;
 
     public WorkerMetricsMBean() {
-        this.prevCpuProcess = getProcess();
-        this.prevDiskReadProcess = getProcess();
-        this.prevDiskWriteProcess = getProcess();
+        boolean disabled = getBoolean("worker.monitoring.disable");
+        if (!disabled) {
+            this.prevCpuProcess = getProcess();
+            this.prevDiskReadProcess = getProcess();
+            this.prevDiskWriteProcess = getProcess();
+        }
     }
 
     @ManagedAttribute(description = "Current Cpu Usage")

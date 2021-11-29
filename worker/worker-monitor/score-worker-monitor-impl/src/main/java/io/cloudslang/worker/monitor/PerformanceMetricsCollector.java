@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.Boolean.getBoolean;
 import static io.cloudslang.worker.monitor.metric.WorkerPerfMetric.getProcess;
 
 @Component
@@ -67,7 +68,10 @@ public class PerformanceMetricsCollector implements PerfMetricCollector {
     private OSProcess oldProcess;
 
     public PerformanceMetricsCollector() {
-        this.oldProcess = getProcess();
+        boolean disabled = getBoolean("worker.monitoring.disable");
+        if (!disabled) {
+            this.oldProcess = getProcess();
+        }
     }
 
     @PostConstruct
