@@ -23,7 +23,7 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>dependency-management</artifactId>
-        <version>0.3.249</version>
+        <version>0.3.250-SNAPSHOT</version>
     </parent>
 
     <artifactId>dependency-management-impl</artifactId>
