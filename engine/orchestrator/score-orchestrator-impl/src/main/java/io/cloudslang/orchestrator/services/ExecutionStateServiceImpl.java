@@ -16,17 +16,12 @@
 
 package io.cloudslang.orchestrator.services;
 
-import static io.cloudslang.orchestrator.entities.ExecutionState.EMPTY_BRANCH;
-import static io.cloudslang.score.facade.execution.ExecutionStatus.CANCELED;
-import static io.cloudslang.score.facade.execution.ExecutionStatus.PENDING_CANCEL;
-import static org.springframework.util.CollectionUtils.isEmpty;
-
+import io.cloudslang.orchestrator.entities.ExecutionState;
+import io.cloudslang.orchestrator.repositories.ExecutionStateRepository;
+import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.execution.ExecutionActionException;
 import io.cloudslang.score.facade.execution.ExecutionActionResult;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
-import io.cloudslang.score.facade.entities.Execution;
-import io.cloudslang.orchestrator.entities.ExecutionState;
-import io.cloudslang.orchestrator.repositories.ExecutionStateRepository;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +30,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+
+import static io.cloudslang.orchestrator.entities.ExecutionState.EMPTY_BRANCH;
+import static io.cloudslang.score.facade.execution.ExecutionStatus.CANCELED;
+import static io.cloudslang.score.facade.execution.ExecutionStatus.PENDING_CANCEL;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 /**
  * User:
@@ -107,9 +108,12 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         validateExecutionId(executionId);
         Validate.notNull(status, "status cannot be null");
         validateBranchId(branchId);
-        ExecutionState executionState = findByExecutionIdAndBranchId(executionId, branchId);
-        executionState.setStatus(status);
-        executionState.setUpdateTime(updateDate.getTime());
+        Optional<ExecutionState> executionState = findByExecutionIdAndBranchIdNoException(executionId, branchId);
+        if (executionState.isPresent()) {
+            ExecutionState executionState1 = executionState.get();
+            executionState1.setStatus(status);
+            executionState1.setUpdateTime(updateDate.getTime());
+        }
     }
 
     @Override
@@ -150,6 +154,14 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
             throw new ExecutionActionException("Could not find execution state. executionId:  " + executionId + ", branchId: " + branchId, ExecutionActionResult.FAILED_NOT_FOUND);
         }
         return executionState;
+    }
+
+    private Optional<ExecutionState> findByExecutionIdAndBranchIdNoException(Long executionId, String branchId) {
+        ExecutionState executionState = executionStateRepository.findByExecutionIdAndBranchId(executionId, branchId);
+        if (executionState == null) {
+            return Optional.empty();
+        }
+        return Optional.of(executionState);
     }
 
     private List<ExecutionStatus> getCancelStatuses() {
