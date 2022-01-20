@@ -617,10 +617,10 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         if (stepIds == null || stepIds.size() == 0) {
             return;
         }
-        Set<Long> result = getCanceledExecStateIds();
-        if (!CollectionUtils.isEmpty(result)) {
-            stepIds.addAll(result);
-        }
+//        Set<Long> result = getCanceledExecStateIds();
+//        if (!CollectionUtils.isEmpty(result)) {
+//            stepIds.addAll(result);
+//        }
         Iterable<List<Long>> lists = Iterables.partition(stepIds, 1000);
         Iterator itr = lists.iterator();
 
@@ -647,15 +647,15 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                 logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_QUEUES table.");
             }
 
-            if (!CollectionUtils.isEmpty(result)) {
-                query = QUERY_DELETE_EXECS_STATES_MAPPINGS.replace(":ids", StringUtils.repeat("?", ",", ids.size()));
-                logSQL(query, args);
-                deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args);
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECS_STATES_EXECS_MAPPINGS table.");
-                }
-                executionStateService.deleteCanceledExecutionStates();
-            }
+//            if (!CollectionUtils.isEmpty(result)) {
+//                query = QUERY_DELETE_EXECS_STATES_MAPPINGS.replace(":ids", StringUtils.repeat("?", ",", ids.size()));
+//                logSQL(query, args);
+//                deletedRows = deleteFinishedStepsJdbcTemplate.update(query, args);
+//                if (logger.isDebugEnabled()) {
+//                    logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECS_STATES_EXECS_MAPPINGS table.");
+//                }
+//                executionStateService.deleteCanceledExecutionStates();
+//            }
         }
     }
 
