@@ -413,11 +413,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                 ExecutionMessage msg = stateMessages.get(i);
                 ps.setLong(1, msg.getExecStateId());
                 ps.setString(2, msg.getMsgId());
-                if (isH2Database) {
-                    ps.setBinaryStream(3, new ByteArrayInputStream(msg.getPayload().getData()));
-                } else {
-                    ps.setBytes(3, msg.getPayload().getData());
-                }
+                setBinaryStreamForPreparedStatement(ps, 3, msg.getPayload().getData());
                 ps.setLong(4, msg.getPayloadSize());
                 ps.setInt(5, msg.isActive() ? 1 : 0);
             }
@@ -427,6 +423,14 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                 return stateMessages.size();
             }
         });
+    }
+
+    public void setBinaryStreamForPreparedStatement(PreparedStatement ps, int i, byte[] data) throws SQLException {
+        if (isH2Database) {
+            ps.setBinaryStream(i, new ByteArrayInputStream(data));
+        } else {
+            ps.setBytes(i, data);
+        }
     }
 
     @Override
@@ -578,8 +582,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         try {
             RowMapper<ExecutionMessage> rowMapper = (rs, rowNum) -> {
                 try {
-                    byte[] payload;
-                    payload = isH2Database ? toByteArray(rs.getBinaryStream("PAYLOAD")) :
+                    byte[] payload = isH2Database ? toByteArray(rs.getBinaryStream("PAYLOAD")) :
                             rs.getBytes("PAYLOAD");
                     return new ExecutionMessage(
                             rs.getLong("EXEC_STATE_ID"),
@@ -591,7 +594,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                             rs.getInt("MSG_SEQ_ID"),
                             rs.getLong("CREATE_TIME"));
                 } catch (IOException e) {
-                    throw new RuntimeException();
+                    throw new RuntimeException("Failed to poll messages: " + e.getMessage());
                 }
             };
             List<ExecutionMessage> executionMessages = doSelectWithTemplate(
