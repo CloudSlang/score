@@ -45,7 +45,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
           p:transactionManager-ref="transactionManager" />
 
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"    >
-        <property name="url" value="jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1;MVCC=TRUE;LOCK_TIMEOUT=5000"/>
+        <property name="url" value="jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=5000;NON_KEYWORDS=VALUE,DAY,MONTH,YEAR;MODE=LEGACY"/>
         <property name="driverClassName" value="org.h2.Driver"/>
         <property name="username" value="sa"/>
         <property name="password" value="sa"/>

@@ -20,13 +20,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.jdbc.dialect.internal.StandardDialectResolver;
-import org.hibernate.engine.jdbc.dialect.spi.DatabaseMetaDataDialectResolutionInfoAdapter;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolver;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
 
 /**
  * Created with IntelliJ IDEA.
@@ -52,6 +48,8 @@ public class ScoreDialectResolver implements DialectResolver {
 
         if ("MySQL".equals(databaseName)) {
             return new ScoreMySQLDialect();
+        } else if ("H2".equals(databaseName)) {
+            return new ScoreH2Dialect();
         }
         return dialectResolver.resolveDialect(metaData);
     }
