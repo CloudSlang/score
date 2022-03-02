@@ -16,7 +16,9 @@
 
 package io.cloudslang.engine.dialects;
 
-public class ScoreH2Dialect extends org.hibernate.dialect.H2Dialect {
+import org.hibernate.dialect.H2Dialect;
+
+public class ScoreH2Dialect extends H2Dialect {
 
     @Override
     public String toBooleanValueString(boolean bool) {
