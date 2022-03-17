@@ -40,7 +40,7 @@ import static java.lang.Boolean.getBoolean;
 import static java.lang.Long.parseLong;
 import static java.lang.Thread.currentThread;
 import static java.util.UUID.randomUUID;
-
+import org.apache.commons.lang3.SerializationUtils;
 
 public class SimpleExecutionRunnable implements Runnable {
 
@@ -530,7 +530,7 @@ public class SimpleExecutionRunnable implements Runnable {
 
                 String splitId = getSplitId(newExecutions);
                 currentNumberOfLanes += newExecutions.size();
-                SplitMessage splitMessage = new SplitMessage(splitId, execution, newExecutions,
+                SplitMessage splitMessage = new SplitMessage(splitId, SerializationUtils.clone(execution), newExecutions,
                         totalNumberOfLanes, currentNumberOfLanes == totalNumberOfLanes);
                 outBuffer.put(splitMessage);
             }
