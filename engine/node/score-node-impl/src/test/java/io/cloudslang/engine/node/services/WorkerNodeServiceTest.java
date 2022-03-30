@@ -401,6 +401,7 @@ public class WorkerNodeServiceTest {
                 setProperty("hibernate.cache.use_second_level_cache", "false");
                 setProperty("hibernate.order_updates", "true");
                 setProperty("hibernate.order_inserts", "true");
+                setProperty("hibernate.dialect_resolvers", "io.cloudslang.engine.dialects.ScoreDialectResolver");
             }};
         }
 
