@@ -20,7 +20,8 @@ public enum LicenseType {
     CONCURRENT_BOT(0),
     HOURLY(1),
     INSTANT_ON(2),
-    CONCURRENT_HOURLY(3);
+    CONCURRENT_HOURLY(3),
+    SUITE_LICENSE(4);
 
     private final int code;
 

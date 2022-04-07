@@ -83,6 +83,7 @@ import static io.cloudslang.score.facade.TempConstants.SC_TIMEOUT_MINS;
 import static io.cloudslang.score.facade.TempConstants.SC_TIMEOUT_START_TIME;
 import static io.cloudslang.score.facade.execution.PauseReason.NO_ROBOTS_IN_GROUP;
 import static io.cloudslang.score.facade.execution.PauseReason.PENDING_ROBOT;
+import static io.cloudslang.score.lang.ExecutionRuntimeServices.LICENSE_TYPE;
 import static io.cloudslang.score.lang.ExecutionRuntimeServices.LIC_SWITCH_MODE;
 import static java.lang.Boolean.getBoolean;
 import static java.lang.Integer.getInteger;
@@ -233,6 +234,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     private void checkoutLicenseForLaneIfRequired(Execution execution) {
         try {
+            String licenseType = (String) execution.getSystemContext().get(LICENSE_TYPE);
+            if (StringUtils.equalsIgnoreCase(licenseType, "SUITE_LICENSE")) {
+                return ;
+            }
             String branchIdToCheckoutLicense = (String) execution.getSystemContext().get(BRANCH_ID_TO_CHECK_OUT_LICENSE);
             if (StringUtils.isNotEmpty(branchIdToCheckoutLicense) && StringUtils.equals(branchIdToCheckoutLicense, execution.getSystemContext().getBranchId())) {
                 String executionId = execution.getExecutionId().toString();
