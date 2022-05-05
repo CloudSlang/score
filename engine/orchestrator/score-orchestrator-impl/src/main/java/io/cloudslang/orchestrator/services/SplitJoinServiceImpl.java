@@ -225,7 +225,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             dispatchBranchFinishedEvent(finishedBranch.getExecutionId(), finishedBranch.getSplitId(), finishedBranch.getBranchId());
 
             String branchIdToCheckinLicense = (String) finishedBranch.getBranchContexts().getSystemContext().get(BRANCH_ID_TO_CHECK_IN_LICENSE);
-            checkinLicenseForLaneIfRequired(finishedBranch.getExecutionId(), finishedBranch.getBranchId(), "OO", branchIdToCheckinLicense);
+            checkinLicenseForLaneIfRequired(finishedBranch.getExecutionId(), finishedBranch.getBranchId(), branchIdToCheckinLicense);
 
             SuspendedExecution suspendedExecution = suspendedMap.get(finishedBranch.getSplitId());
             if (suspendedExecution != null) {
@@ -250,9 +250,9 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         }
     }
 
-    private void checkinLicenseForLaneIfRequired(String executionId, String branchId, String licSwitchMode, String branchIdToCheckinLicense) {
+    private void checkinLicenseForLaneIfRequired(String executionId, String branchId, String branchIdToCheckinLicense) {
         if (StringUtils.isNotEmpty(branchIdToCheckinLicense) && StringUtils.equals(branchIdToCheckinLicense, branchId)) {
-            aplsLicensingService.checkinEndLane(executionId, branchId, licSwitchMode);
+            aplsLicensingService.checkinEndLane(executionId, branchId);
         }
     }
 

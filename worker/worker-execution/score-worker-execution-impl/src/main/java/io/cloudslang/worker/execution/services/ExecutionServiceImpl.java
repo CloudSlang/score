@@ -242,7 +242,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 String executionId = execution.getExecutionId().toString();
                 Long executionStartTimeMillis = Optional.ofNullable((Long) execution.getSystemContext().get(SC_TIMEOUT_START_TIME)).orElse(0L);
                 Integer executionTimeoutMinutes = Optional.ofNullable((Integer) execution.getSystemContext().get(SC_TIMEOUT_MINS)).orElse(0);
-                aplsLicensingService.checkoutBeginLane(executionId, branchIdToCheckoutLicense, "OO", executionStartTimeMillis, executionTimeoutMinutes);
+                aplsLicensingService.checkoutBeginLane(executionId, branchIdToCheckoutLicense, executionStartTimeMillis, executionTimeoutMinutes);
                 execution.getSystemContext().put(BRANCH_ID_TO_CHECK_IN_LICENSE, execution.getSystemContext().getBranchId());
             }
         } finally {
