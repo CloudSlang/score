@@ -84,7 +84,6 @@ import static io.cloudslang.score.facade.TempConstants.SC_TIMEOUT_START_TIME;
 import static io.cloudslang.score.facade.execution.PauseReason.NO_ROBOTS_IN_GROUP;
 import static io.cloudslang.score.facade.execution.PauseReason.PENDING_ROBOT;
 import static io.cloudslang.score.lang.ExecutionRuntimeServices.LICENSE_TYPE;
-import static io.cloudslang.score.lang.ExecutionRuntimeServices.LIC_SWITCH_MODE;
 import static java.lang.Boolean.getBoolean;
 import static java.lang.Integer.getInteger;
 import static java.lang.Long.MAX_VALUE;
@@ -243,8 +242,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
                 String executionId = execution.getExecutionId().toString();
                 Long executionStartTimeMillis = Optional.ofNullable((Long) execution.getSystemContext().get(SC_TIMEOUT_START_TIME)).orElse(0L);
                 Integer executionTimeoutMinutes = Optional.ofNullable((Integer) execution.getSystemContext().get(SC_TIMEOUT_MINS)).orElse(0);
-                String licSwitchMode = (String) execution.getSystemContext().get(LIC_SWITCH_MODE);
-                aplsLicensingService.checkoutBeginLane(executionId, branchIdToCheckoutLicense, licSwitchMode, executionStartTimeMillis, executionTimeoutMinutes);
+                aplsLicensingService.checkoutBeginLane(executionId, branchIdToCheckoutLicense, executionStartTimeMillis, executionTimeoutMinutes);
                 execution.getSystemContext().put(BRANCH_ID_TO_CHECK_IN_LICENSE, execution.getSystemContext().getBranchId());
             }
         } finally {

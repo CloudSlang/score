@@ -21,12 +21,12 @@ import io.cloudslang.orchestrator.services.AplsLicensingService;
 public class StubAplsLicensingServiceImpl implements AplsLicensingService {
 
     @Override
-    public void checkoutBeginLane(String executionId, String branchId, String licSwitchMode, long executionStartTimeMillis, int executionTimeoutMinutes) {
+    public void checkoutBeginLane(String executionId, String branchId, long executionStartTimeMillis, int executionTimeoutMinutes) {
 
     }
 
     @Override
-    public void checkinEndLane(String executionId, String branchId, String licSwitchMode) {
+    public void checkinEndLane(String executionId, String branchId) {
 
     }
 
