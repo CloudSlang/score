@@ -24,10 +24,13 @@ import oshi.software.os.OperatingSystem;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import static java.util.Objects.requireNonNull;
 
 public interface WorkerPerfMetric {
+    Logger logger = LogManager.getLogger(WorkerPerfMetric.class);
     Pair<WorkerPerformanceMetric, Serializable> measure(OSProcess crtProcess, OSProcess oldProcess);
 
     static double formatTo2Decimal(double value) {
@@ -38,6 +41,7 @@ public interface WorkerPerfMetric {
         SystemInfo systemInfo = new SystemInfo();
         OperatingSystem operatingSystem = systemInfo.getOperatingSystem();
         int processId = operatingSystem.getProcessId();
+        logger.debug("Process id is " + processId);
         return requireNonNull(operatingSystem.getProcess(processId), "OSProcess is null");
     }
 }
