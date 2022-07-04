@@ -5,11 +5,11 @@
 
     <task:scheduler id="scoreOrchestratorScheduler" pool-size="3"/>
     <task:scheduled-tasks scheduler="scoreOrchestratorScheduler">
-        <task:scheduled ref="scoreEngineJobs" method="joinFinishedSplitsJob" fixed-delay="1000" initial-delay="1000" />
-        <task:scheduled ref="scoreEngineJobs" method="cleanQueueJob" fixed-delay="60000" initial-delay="120000" />
-        <task:scheduled ref="scoreEngineJobs" method="recoveryVersionJob" fixed-delay="30000" initial-delay="6000" />
-        <task:scheduled ref="scoreEngineJobs" method="executionRecoveryJob" fixed-delay="120000" initial-delay="120000" />
-        <task:scheduled ref="scoreEngineJobs" method="monitorLargeMessagesJob" fixed-delay="#{systemProperties['queue.large.message.monitor.delay'] ?: 60000}" initial-delay="1000" />
+<!--        <task:scheduled ref="scoreEngineJobs" method="joinFinishedSplitsJob" fixed-delay="1000" initial-delay="1000" />-->
+<!--        <task:scheduled ref="scoreEngineJobs" method="cleanQueueJob" fixed-delay="60000" initial-delay="120000" />-->
+<!--        <task:scheduled ref="scoreEngineJobs" method="recoveryVersionJob" fixed-delay="30000" initial-delay="6000" />-->
+<!--        <task:scheduled ref="scoreEngineJobs" method="executionRecoveryJob" fixed-delay="120000" initial-delay="120000" />-->
+<!--        <task:scheduled ref="scoreEngineJobs" method="monitorLargeMessagesJob" fixed-delay="#{systemProperties['queue.large.message.monitor.delay'] ?: 60000}" initial-delay="1000" />-->
         <task:scheduled ref="busyWorkersService" method="findBusyWorkers" fixed-delay="200" initial-delay="200" />
         <task:scheduled ref="busyWorkersService" method="clearBusyWorkers" fixed-delay="5000" initial-delay="5000" />
     </task:scheduled-tasks>
