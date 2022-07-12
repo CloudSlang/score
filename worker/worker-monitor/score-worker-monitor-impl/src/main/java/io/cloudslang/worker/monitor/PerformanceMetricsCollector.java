@@ -67,12 +67,18 @@ public class PerformanceMetricsCollector implements PerfMetricCollector {
     private OSProcess oldProcess;
 
     public PerformanceMetricsCollector() {
-        this.oldProcess = getProcess();
+        boolean isDisabled = Boolean.getBoolean("worker.monitoring.disable");
+        if (!isDisabled) {
+            this.oldProcess = getProcess();
+        }
     }
 
     @PostConstruct
     public void init() {
-        createMetrics();
+        boolean isDisabled = Boolean.getBoolean("worker.monitoring.disable");
+        if (!isDisabled) {
+            createMetrics();
+        }
     }
 
     private void createMetrics() {

@@ -55,9 +55,12 @@ public class WorkerMetricsMBean {
     private OSProcess prevDiskWriteProcess;
 
     public WorkerMetricsMBean() {
-        this.prevCpuProcess = getProcess();
-        this.prevDiskReadProcess = getProcess();
-        this.prevDiskWriteProcess = getProcess();
+        boolean isDisabled = Boolean.getBoolean("worker.monitoring.disable");
+        if (!isDisabled) {
+            this.prevCpuProcess = getProcess();
+            this.prevDiskReadProcess = getProcess();
+            this.prevDiskWriteProcess = getProcess();
+        }
     }
 
     @ManagedAttribute(description = "Current Cpu Usage")
