@@ -20,19 +20,20 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.orchestrator.entities.MergedConfigurationDataContainer;
 import io.cloudslang.orchestrator.model.MergedConfigurationHolder;
+import io.timeandspace.cronscheduler.CronScheduler;
+import io.timeandspace.cronscheduler.CronSchedulerBuilder;
+import io.timeandspace.cronscheduler.OneShotTasksShutdownPolicy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.lang.Long.getLong;
@@ -46,6 +47,7 @@ public class MergedConfigurationServiceImpl implements MergedConfigurationServic
     private static final Logger log = LogManager.getLogger(MergedConfigurationServiceImpl.class);
     private static final long MERGED_CONFIGURATION_PERIODIC_REFRESH_MILLIS = getLong("worker.mergedConfiguration.refreshDelayMillis", 1_800L);
     private static final long MERGED_CONFIGURATION_INITIAL_DELAY_MILLIS = getLong("worker.mergedConfiguration.initialDelayMillis", 1_000L);
+    static final private long syncInterval = Long.getLong("cron.scheduler.sync.period", 60_000L);
 
     @Autowired
     private CancelExecutionService cancelExecutionService;
@@ -57,25 +59,26 @@ public class MergedConfigurationServiceImpl implements MergedConfigurationServic
     private WorkerNodeService workerNodeService;
 
     // Intentionally not a Spring bean as this an internal executor dedicated to the MergedConfigurationService only
-    private final ScheduledThreadPoolExecutor scheduledExecutor;
+    private final CronScheduler cronScheduler;
 
     // Used to store the latest state of the MergedConfigurationHolder object,
     // periodically reloaded every worker.mergedConfiguration.refreshIntervalInMillis millis
     private final AtomicReference<MergedConfigurationHolder> mergedConfigHolderReference;
 
     public MergedConfigurationServiceImpl() {
-        this.scheduledExecutor = getScheduledExecutor();
+        this.cronScheduler = getCronSchedulerExecutor();
         // Initially value points to an empty state
         this.mergedConfigHolderReference = new AtomicReference<>(new MergedConfigurationHolder());
     }
 
     @PostConstruct
     protected void schedulePeriodicRefreshOfMergedConfiguration() {
-        Runnable refreshMergedConfigRunnable = new RefreshMergedConfigurationRunnable(cancelExecutionService,
-                pauseResumeService, workerNodeService, mergedConfigHolderReference);
         final long initialDelay = MERGED_CONFIGURATION_INITIAL_DELAY_MILLIS;
         final long periodicDelay = MERGED_CONFIGURATION_PERIODIC_REFRESH_MILLIS;
-        scheduledExecutor.scheduleWithFixedDelay(refreshMergedConfigRunnable, initialDelay, periodicDelay, MILLISECONDS);
+        cronScheduler.scheduleAtFixedRateSkippingToLatest(initialDelay, periodicDelay, MILLISECONDS, runTimeMillis -> {
+            new RefreshMergedConfigurationRunnable(cancelExecutionService,
+                    pauseResumeService, workerNodeService, mergedConfigHolderReference);
+        });
     }
 
     /**
@@ -96,26 +99,22 @@ public class MergedConfigurationServiceImpl implements MergedConfigurationServic
     @PreDestroy
     public void destroy() {
         try {
-            scheduledExecutor.shutdown();
-            scheduledExecutor.shutdownNow();
+            cronScheduler.shutdown(OneShotTasksShutdownPolicy.DISCARD_DELAYED);
+            cronScheduler.shutdownNow();
         } catch (Exception failedShutdownEx) {
             log.error("Could not shutdown merged configuration container executor: ", failedShutdownEx);
         }
     }
 
-    private ScheduledThreadPoolExecutor getScheduledExecutor() {
-        final ThreadFactory threadFactory = new ThreadFactoryBuilder()
+    private CronScheduler getCronSchedulerExecutor() {
+    final ThreadFactory threadFactory = new ThreadFactoryBuilder()
                 .setNameFormat("merged-config-refresher-%d")
                 .setDaemon(true)
                 .build();
-
-        // Intentionally 1 thread
-        ScheduledThreadPoolExecutor scheduledExecutor = new ScheduledThreadPoolExecutor(1, threadFactory);
-        scheduledExecutor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
-        scheduledExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
-        scheduledExecutor.setRemoveOnCancelPolicy(true);
-        scheduledExecutor.setRejectedExecutionHandler(new DiscardPolicy());
-        return scheduledExecutor;
+        Duration syncPeriod = Duration.ofMillis(syncInterval);
+        CronSchedulerBuilder cronSchedulerBuilder = CronScheduler.newBuilder(syncPeriod);
+        cronSchedulerBuilder.setThreadFactory(threadFactory);
+        return cronSchedulerBuilder.build();
     }
 
     private static class RefreshMergedConfigurationRunnable implements Runnable {
@@ -126,9 +125,9 @@ public class MergedConfigurationServiceImpl implements MergedConfigurationServic
         private final AtomicReference<MergedConfigurationHolder> ref;
 
         public RefreshMergedConfigurationRunnable(CancelExecutionService cancelExecutionService,
-                PauseResumeService pauseResumeService,
-                WorkerNodeService workerNodeService,
-                AtomicReference<MergedConfigurationHolder> ref) {
+                                                  PauseResumeService pauseResumeService,
+                                                  WorkerNodeService workerNodeService,
+                                                  AtomicReference<MergedConfigurationHolder> ref) {
 
             this.cancelExecutionService = cancelExecutionService;
             this.pauseResumeService = pauseResumeService;
