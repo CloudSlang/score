@@ -29,11 +29,11 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 
 import static io.cloudslang.score.events.EventConstants.BRANCH_ID;
 import static java.lang.Boolean.TRUE;
@@ -102,6 +102,8 @@ public class ExecutionRuntimeServices implements Serializable {
     public static final String SC_NESTED_FOR_PARALLELISM_LEVEL = "SC_NESTED_FOR_PARALLELISM_LEVEL";
 
     public static final String LICENSE_TYPE = "LICENSE_TYPE";
+
+    public static final String UNAUTHORIZED_FLOWS = "UNAUTHORIZED_FLOWS";
 
     protected Map<String, Serializable> contextMap;
 
@@ -489,6 +491,14 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public Map<String, ? extends Serializable> getMetaData() {
         return (Map<String, Serializable>) contextMap.get(METADATA);
+    }
+
+    public void setUnauthorizedFlows(Set<String> unauthorizedFlows) {
+        contextMap.put(UNAUTHORIZED_FLOWS, (Serializable) unauthorizedFlows);
+    }
+
+    public Set<String> getUnauthorizedFlows() {
+        return (Set<String>) contextMap.get(UNAUTHORIZED_FLOWS);
     }
 
     public void setConsumerWorkerId(String consumerWorkerId) {
