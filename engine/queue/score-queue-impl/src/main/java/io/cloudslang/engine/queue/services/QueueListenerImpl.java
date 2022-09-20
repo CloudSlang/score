@@ -172,7 +172,7 @@ public class QueueListenerImpl implements QueueListener {
         //do nothing
     }
 
-    private Long pauseExecution(Execution execution, PauseReason pauseReason) {
+    private Long pauseExecution(Execution execution, PauseReason pauseReason, boolean updateParentExecObject) {
         String branchId = execution.getSystemContext().getBranchId();
 
         ExecutionSummary pe = pauseResumeService.readPausedExecution(execution.getExecutionId(), branchId);
@@ -183,11 +183,11 @@ public class QueueListenerImpl implements QueueListener {
             // When cancel execution and no worker in group it should return to be paused without any termination type
             execution.getSystemContext().setFlowTerminationType(null);
             pauseId = pauseResumeService.pauseExecution(execution.getExecutionId(), branchId, pauseReason);
-            pauseResumeService.writeExecutionObject(execution.getExecutionId(), branchId, execution);
+            pauseResumeService.writeExecutionObject(execution.getExecutionId(), branchId, execution, updateParentExecObject);
         } else {
             pauseId = null;
             //If yes - just write the object
-            pauseResumeService.writeExecutionObject(execution.getExecutionId(), branchId, execution);
+            pauseResumeService.writeExecutionObject(execution.getExecutionId(), branchId, execution, updateParentExecObject);
         }
         return pauseId;
     }
@@ -198,10 +198,10 @@ public class QueueListenerImpl implements QueueListener {
         for (ExecutionMessage executionMessage : messages) {
             execution = extractExecution(executionMessage);
             if (failedBecauseNoWorker(execution)) {
-                Long pauseID = pauseExecution(execution, PauseReason.NO_WORKERS_IN_GROUP);
+                Long pauseID = pauseExecution(execution, PauseReason.NO_WORKERS_IN_GROUP, true);
                 events.add(scoreEventFactory.createNoWorkerEvent(execution, pauseID));
             } else if (failedBecausePreconditionNotFulfilled(execution)) {
-                pauseExecution(execution, PauseReason.PRECONDITION_NOT_FULFILLED);
+                pauseExecution(execution, PauseReason.PRECONDITION_NOT_FULFILLED, false);
             } else if (isBranch(execution)) {
                 splitJoinService.endBranch(Arrays.asList(execution));
                 events.add(scoreEventFactory.createFailedBranchEvent(execution));

@@ -60,7 +60,7 @@ public class StubPauseResumeServiceImpl implements PauseResumeService {
     }
 
     @Override
-    public PauseReason writeExecutionObject(Long executionId, String branchId, Execution execution) {
+    public PauseReason writeExecutionObject(Long executionId, String branchId, Execution execution, boolean updateParentExecObject) {
         return null;
     }
 
