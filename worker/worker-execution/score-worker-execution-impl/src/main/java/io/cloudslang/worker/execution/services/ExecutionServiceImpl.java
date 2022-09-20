@@ -501,7 +501,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         // dump bus events here because out side is too late
         dumpBusEvents(execution);
         // Write execution to the db! Pay attention - do not do anything to the execution or its context after this line!!!
-        pauseService.writeExecutionObject(executionId, branchId, execution);
+        pauseService.writeExecutionObject(executionId, branchId, execution, false);
         if (logger.isDebugEnabled()) {
             logger.debug("Execution with execution_id: " + execution.getExecutionId() + " is paused!");
         }

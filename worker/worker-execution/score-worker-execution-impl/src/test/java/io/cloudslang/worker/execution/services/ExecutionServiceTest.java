@@ -140,7 +140,7 @@ public class ExecutionServiceTest {
 
 		boolean result = executionService.handlePausedFlow(exe);
 
-		Mockito.verify(pauseResumeService, VerificationModeFactory.times(1)).writeExecutionObject(executionId, branch_id, exe);
+		Mockito.verify(pauseResumeService, VerificationModeFactory.times(1)).writeExecutionObject(executionId, branch_id, exe, false);
 		assertTrue(result);
 	}
 
@@ -167,7 +167,7 @@ public class ExecutionServiceTest {
 		boolean result = executionService.handlePausedFlow(exe);
 
 		Mockito.verify(pauseResumeService, VerificationModeFactory.times(1)).pauseExecution(executionId, branch_id, PauseReason.USER_PAUSED);
-		Mockito.verify(pauseResumeService, VerificationModeFactory.times(1)).writeExecutionObject(executionId, branch_id, exe);
+		Mockito.verify(pauseResumeService, VerificationModeFactory.times(1)).writeExecutionObject(executionId, branch_id, exe, false);
 		assertTrue(result);
 	}
 
