@@ -79,6 +79,7 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
 
         // create execution message
         ExecutionMessage message = createExecutionMessage(execution);
+        //TODO: Update OO_EXECUTION_PRIORITIES table with execution id and priority from triggering props.
         enqueue(message);
         return executionId;
     }
