@@ -82,6 +82,8 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 
     private BlockingQueue<Runnable> inBuffer;
 
+    private BlockingQueue<Runnable> priorityInBuffer;
+
     @Autowired
     @Qualifier("numberOfExecutionThreads")
     private Integer numberOfThreads;
@@ -123,18 +125,30 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 
     private boolean newCancelBehaviour;
 
+    public static ThreadPoolExecutor priorityExecutorService;
+
     @PostConstruct
     private void init() {
         logger.info("Initialize worker with UUID: " + workerUuid);
         System.setProperty("worker.uuid", workerUuid); //do not remove!!!
 
         inBuffer = workerConfigurationUtils.getBlockingQueue(numberOfThreads, capacity);
+        priorityInBuffer = workerConfigurationUtils.getBlockingQueue(numberOfThreads, capacity);
 
+        int currentThreadVersion = incrementAndGetTreadPoolVersion();
         executorService = new ThreadPoolExecutor(numberOfThreads,
                 numberOfThreads,
                 Long.MAX_VALUE, TimeUnit.NANOSECONDS,
                 inBuffer,
-                new WorkerThreadFactory(valueOf(incrementAndGetTreadPoolVersion()) + "_WorkerExecutionThread"));
+                new WorkerThreadFactory(valueOf(currentThreadVersion) + "_WorkerExecutionThread"));
+
+        //TODO: calculate the priority thread pool executor service capacity from a system property.
+        priorityExecutorService = new ThreadPoolExecutor(numberOfThreads,
+                numberOfThreads,
+                Long.MAX_VALUE, TimeUnit.NANOSECONDS,
+                priorityInBuffer,
+                new WorkerThreadFactory(valueOf(currentThreadVersion) + "_WorkerExecutionThreadPriority"));
+
 
         mapOfRunningTasks = new ConcurrentHashMap<>(numberOfThreads);
         newCancelBehaviour = parseBoolean(getProperty("enable.new.cancel.execution", FALSE.toString()));
@@ -145,6 +159,14 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
         // it is possible we will have step x + 1 of an execution plan that is in the map of running tasks,
         // but step x did not yet clean itself from the map
         Future future = executorService.submit(runnable);
+        mapOfRunningTasks.merge(executionId, newQueue(future), this::addLists);
+    }
+
+    public void addExecution(long executionId, Runnable runnable, boolean isCritical) {
+        // Since we can offer to thread pool queue from SimpleExecutionRunnable run method
+        // it is possible we will have step x + 1 of an execution plan that is in the map of running tasks,
+        // but step x did not yet clean itself from the map
+        Future future = isCritical ?  priorityExecutorService.submit(runnable) : executorService.submit(runnable);
         mapOfRunningTasks.merge(executionId, newQueue(future), this::addLists);
     }
 
@@ -171,6 +193,10 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 
     public int getInBufferSize() {
         return inBuffer.size();
+    }
+
+    public int getPriorityInBufferSize() {
+        return priorityInBuffer.size();
     }
 
     @SuppressWarnings("unused")
@@ -374,12 +400,23 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 
         mapOfRunningTasks.clear();
 
+        int currentThreadVersion = getTreadPoolVersion();
+
         //Make new executor
         executorService = new ThreadPoolExecutor(numberOfThreads,
                 numberOfThreads,
                 Long.MAX_VALUE, TimeUnit.NANOSECONDS,
                 inBuffer,
-                new WorkerThreadFactory(valueOf(getTreadPoolVersion()) + "_WorkerExecutionThread"));
+                new WorkerThreadFactory(valueOf(currentThreadVersion) + "_WorkerExecutionThread"));
+
+        //TODO: calculate the capacity from system property
+        priorityExecutorService = new ThreadPoolExecutor(numberOfThreads,
+                numberOfThreads,
+                Long.MAX_VALUE, TimeUnit.NANOSECONDS,
+                priorityInBuffer,
+                new WorkerThreadFactory(valueOf(currentThreadVersion) + "_WorkerExecutionThreadPriority"));
+
+
     }
 
     private synchronized int getTreadPoolVersion() {

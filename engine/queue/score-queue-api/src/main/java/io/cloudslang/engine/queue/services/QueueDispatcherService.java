@@ -48,6 +48,8 @@ public interface QueueDispatcherService {
      */
 	List<ExecutionMessage> poll(String uuid, int maxSize, long workerPollingMemory);
 
+    List<ExecutionMessage> pollWithPriority(String uuid, int maxSize, long workerPollingMemory, int priority);
+
     /**
      *
      * Dispatch one message to the queue

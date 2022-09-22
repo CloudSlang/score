@@ -119,6 +119,32 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "      ) AND " +
                     "      (q.MSG_VERSION < ?)  ";
 
+
+    final private String QUERY_WORKER_LEGACY_MEMORY_HANDLING_SQL_PRIORITY =
+            "SELECT EXEC_STATE_ID,      " +
+                    "       ASSIGNED_WORKER,      " +
+                    "       EXEC_GROUP ,       " +
+                    "       STATUS,       " +
+                    "       PAYLOAD,       " +
+                    "       MSG_SEQ_ID ,      " +
+                    "       MSG_ID," +
+                    "       q.CREATE_TIME, " +
+                    "       p.EXECUTION_ID, " +
+                    "       p.PRIORITY " +
+                    " FROM  OO_EXECUTION_QUEUES q,  " +
+                    "      OO_EXECUTION_STATES s   " +
+                    " INNER JOIN OO_EXECUTION_PRIORITIES p ON s.MSG_ID = p.EXECUTION_ID " +
+                    " WHERE  " +
+                    "      (q.ASSIGNED_WORKER =  ?)  AND " +
+                    "      (q.STATUS IN (:status)) AND " +
+                    " 	   (s.ACTIVE = 1) AND " +
+                    " (q.EXEC_STATE_ID = s.ID) AND " +
+                    " (p.PRIORITY = :priority) AND " +
+                    " (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
+                    "              FROM OO_EXECUTION_QUEUES qq " +
+                    "              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
+                    " ORDER BY q.CREATE_TIME  ";
+
     final private String QUERY_WORKER_LEGACY_MEMORY_HANDLING_SQL =
             "SELECT EXEC_STATE_ID,      " +
                     "       ASSIGNED_WORKER,      " +
@@ -127,14 +153,18 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       PAYLOAD,       " +
                     "       MSG_SEQ_ID ,      " +
                     "       MSG_ID," +
-                    "       q.CREATE_TIME " +
+                    "       q.CREATE_TIME, " +
+                    "       p.EXECUTION_ID, " +
+                    "       p.PRIORITY " +
                     " FROM  OO_EXECUTION_QUEUES q,  " +
                     "      OO_EXECUTION_STATES s   " +
+                    " INNER JOIN OO_EXECUTION_PRIORITIES p ON s.MSG_ID = p.EXECUTION_ID " +
                     " WHERE  " +
                     "      (q.ASSIGNED_WORKER =  ?)  AND " +
                     "      (q.STATUS IN (:status)) AND " +
                     " 	   (s.ACTIVE = 1) AND " +
                     " (q.EXEC_STATE_ID = s.ID) AND " +
+                    " (p.PRIORITY = 0) AND " +
                     " (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
                     "              FROM OO_EXECUTION_QUEUES qq " +
                     "              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
@@ -341,6 +371,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
     private boolean isH2Database = false;
 
+    private String workerQueryPriority;
+
     @PostConstruct
     public void init() {
         //We use dedicated JDBCTemplates for each query since JDBCTemplate is state-full object and we have different settings for each query.
@@ -370,6 +402,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         String dbms = getDatabaseProductName();
 
         isH2Database = isH2Database(dbms);
+
+        workerQueryPriority = QUERY_WORKER_LEGACY_MEMORY_HANDLING_SQL_PRIORITY;
 
         if (useLargeMessageQuery) {
             if (isMssql(dbms)) {
@@ -547,6 +581,18 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
         String sqlStat = workerQuery.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
 
+        return executePoll(maxSize, sqlStat, args);
+    }
+
+    public List<ExecutionMessage> pollWithPriority(
+            String workerId, int maxSize, long workerPollingMemory, int priority, ExecStatus... statuses) {
+
+        Object[] args = useLargeMessageQuery ?
+                preparePollArgs(workerId, workerPollingMemory, statuses) :
+                prepareStdPollArgs(workerId, statuses);
+
+        String sqlStat = workerQueryPriority.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
+        sqlStat = sqlStat.replaceAll(":priority", Integer.toString(priority));
         return executePoll(maxSize, sqlStat, args);
     }
 

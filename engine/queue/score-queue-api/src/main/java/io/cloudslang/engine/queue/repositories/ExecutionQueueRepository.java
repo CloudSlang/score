@@ -34,6 +34,8 @@ public interface ExecutionQueueRepository {
 
     List<ExecutionMessage> poll(String workerId, int maxSize, long workerPollingMemory, ExecStatus... statuses);
 
+	List<ExecutionMessage> pollWithPriority(String workerId, int maxSize, long workerPollingMemory, int priority, ExecStatus... statuses);
+
 	List<ExecutionMessage> pollRecovery(String workerId, int maxSize, ExecStatus... statuses);
 
 	List<ExecutionMessage> pollMessagesWithoutAck(int maxSize,long minVersionAllowed);

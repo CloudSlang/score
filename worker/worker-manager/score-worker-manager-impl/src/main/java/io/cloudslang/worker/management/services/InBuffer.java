@@ -35,6 +35,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static ch.lambdaj.Lambda.extract;
@@ -159,16 +160,17 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
                     }
 
                     int inBufferSize = workerManager.getInBufferSize();
+                    int priorityInBufferSize = workerManager.getPriorityInBufferSize();
                     long totalMemory = getRuntime().totalMemory();
                     long freeMemory = getRuntime().freeMemory();
 
-                    if (needToPoll(inBufferSize, totalMemory, freeMemory)) {
-                        int messagesToGet = !newInBufferBehaviour ? (capacity - inBufferSize) : (newInBufferSize - inBufferSize);
+                    if (needToPoll(priorityInBufferSize, totalMemory, freeMemory)) {
+                        int messagesToGet = !newInBufferBehaviour ? (capacity - inBufferSize) : (newInBufferSize - priorityInBufferSize);
 
                         if (logger.isDebugEnabled()) {
                             logger.debug("Polling messages from queue (max " + messagesToGet + ")");
                         }
-                        List<ExecutionMessage> newMessages = queueDispatcher.poll(workerUuid, messagesToGet, freeMemory);
+                        List<ExecutionMessage> newMessages = queueDispatcher.pollWithPriority(workerUuid, messagesToGet, freeMemory, ExecutionPriority.HIGH.getPriority());
                         if (executionsActivityListener != null) {
                             executionsActivityListener.onActivate(extract(newMessages, on(ExecutionMessage.class).getExecStateId()));
                         }
@@ -180,19 +182,49 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
                             // We must acknowledge the messages that we took from the queue
                             ackMessages(newMessages);
                             for (ExecutionMessage msg : newMessages) {
-                                addExecutionMessageInner(msg);
+                                addExecutionMessageInner(msg, true);
                             }
-
-                            syncManager.finishGetMessages(); // Release all locks before going to sleep
-                            Thread.sleep(coolDownPollingMillis / 8); // Cool down - sleep a while
-                        } else {
-                            syncManager.finishGetMessages(); // Release all locks before going to sleep
-                            Thread.sleep(coolDownPollingMillis); // If there are no messages - sleep a while
                         }
-                    } else {
-                        syncManager.finishGetMessages(); // Release all locks before going to sleep
-                        Thread.sleep(coolDownPollingMillis); // If the buffer is not empty enough yet or in recovery - sleep a while
                     }
+                    if (needToPoll(inBufferSize, totalMemory, freeMemory)) {
+                        int messagesToGet = !newInBufferBehaviour ? (capacity - inBufferSize) : (newInBufferSize - inBufferSize);
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Polling messages from queue (max " + messagesToGet + ")");
+                        }
+
+                        List<ExecutionMessage> newMessages = new ArrayList<>(messagesToGet);
+
+                        newMessages.addAll(queueDispatcher.pollWithPriority(workerUuid, messagesToGet, freeMemory, ExecutionPriority.HIGH.getPriority()));
+
+
+                        if(newMessages.size() < messagesToGet) {
+                            newMessages.addAll(queueDispatcher.pollWithPriority(workerUuid, messagesToGet - newMessages.size(), freeMemory, ExecutionPriority.MEDIUM.getPriority()));
+                        }
+
+                        if(newMessages.size() < messagesToGet) {
+                            //TODO: you can make use of the same pollWithPriroity(ExecutionPriority.LOW.getPriority()) instead of older method
+                            //TODO: Change all the queries to poll with priority
+                            newMessages.addAll(queueDispatcher.poll(workerUuid, messagesToGet - newMessages.size(), freeMemory));
+                        }
+
+                        if (executionsActivityListener != null) {
+                            executionsActivityListener.onActivate(extract(newMessages, on(ExecutionMessage.class).getExecStateId()));
+                        }
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Received " + newMessages.size() + " messages from queue");
+                        }
+
+                        if (!newMessages.isEmpty()) {
+                            // We must acknowledge the messages that we took from the queue
+                            ackMessages(newMessages);
+                            for (ExecutionMessage msg : newMessages) {
+                                addExecutionMessageInner(msg, false);
+                            }
+                        }
+                    }
+                    syncManager.finishGetMessages(); // Release all locks before going to sleep
+                    Thread.sleep(coolDownPollingMillis / 8); // Cool down - sleep a while
                 }
             } catch (InterruptedException ex) {
                 logger.error("Fill InBuffer thread was interrupted... ", ex);
@@ -244,24 +276,37 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     }
 
 
-    public void addExecutionMessage(ExecutionMessage msg) throws InterruptedException {
+    public void addExecutionMessage(ExecutionMessage msg, boolean isCritical) throws InterruptedException {
         try {
             syncManager.startGetMessages(); // This is a public method that can push new executions from outside - from execution threads
             // We need to check if the current execution thread was interrupted while waiting for the lock
             if (Thread.currentThread().isInterrupted()) {
                 throw new InterruptedException("Thread was interrupted while waiting on the lock in fillBufferPeriodically()!");
             }
-            addExecutionMessageInner(msg);
+            addExecutionMessageInner(msg, isCritical);
         } finally {
             syncManager.finishGetMessages();
         }
     }
 
-    private void addExecutionMessageInner(ExecutionMessage msg) {
+//    private void addExecutionMessageInner(ExecutionMessage msg) {
+//        SimpleExecutionRunnable simpleExecutionRunnable = simpleExecutionRunnableFactory.getObject();
+//        simpleExecutionRunnable.setExecutionMessage(msg);
+//        long executionId = parseLong(msg.getMsgId());
+//        workerManager.addExecution(executionId, simpleExecutionRunnable);
+//    }
+
+    private void addExecutionMessageInner(ExecutionMessage msg, boolean isCritical) {
         SimpleExecutionRunnable simpleExecutionRunnable = simpleExecutionRunnableFactory.getObject();
+        if(isCritical) {
+            simpleExecutionRunnable.setCritical(true);
+        }
+        else {
+            simpleExecutionRunnable.setCritical(false);
+        }
         simpleExecutionRunnable.setExecutionMessage(msg);
         long executionId = parseLong(msg.getMsgId());
-        workerManager.addExecution(executionId, simpleExecutionRunnable);
+        workerManager.addExecution(executionId, simpleExecutionRunnable, isCritical);
     }
 
     @Override

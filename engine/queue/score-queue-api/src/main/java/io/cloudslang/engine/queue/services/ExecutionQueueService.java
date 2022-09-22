@@ -51,6 +51,8 @@ public interface ExecutionQueueService {
      */
     List<ExecutionMessage> poll(String workerId, int maxSize, long workerPollingMemory, ExecStatus... statuses);
 
+    List<ExecutionMessage> pollWithPriority(String workerId, int maxSize, long workerPollingMemory, int priority, ExecStatus... statuses);
+
     /**
      *
      * polls messages from the queue

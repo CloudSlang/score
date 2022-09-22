@@ -70,6 +70,16 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private final WorkerManager workerManager;
 
+    public boolean isCritical() {
+        return isCritical;
+    }
+
+    public void setCritical(boolean critical) {
+        isCritical = critical;
+    }
+
+    private boolean isCritical = false;
+
     public SimpleExecutionRunnable(ExecutionService executionService,
                                    OutboundBuffer outBuffer,
                                    InBuffer inBuffer,
@@ -121,7 +131,7 @@ public class SimpleExecutionRunnable implements Runnable {
             if (executionService.isSplitStep(execution)) {
                 executeSplitStep(execution);
             } else {
-                executeRegularStep(execution);
+                executeRegularStep(execution, isCritical);
             }
         } catch (InterruptedException interruptedException) {
 
@@ -156,7 +166,7 @@ public class SimpleExecutionRunnable implements Runnable {
         }
     }
 
-    private void executeRegularStep(Execution execution) throws InterruptedException {
+    private void executeRegularStep(Execution execution, boolean isCritical) throws InterruptedException {
         Execution nextStepExecution;
         long startTime = System.currentTimeMillis();
 
@@ -164,10 +174,10 @@ public class SimpleExecutionRunnable implements Runnable {
             // Actually execute the step and get the execution object of the next step
             nextStepExecution = executionService.execute(execution);
         }
-        while (!shouldStop(nextStepExecution, startTime));
+        while (!shouldStop(nextStepExecution, startTime, isCritical));
     }
 
-    private boolean shouldStop(Execution nextStepExecution, long startTime) {
+    private boolean shouldStop(Execution nextStepExecution, long startTime, boolean isCritical) {
         // We should stop if
         // 1. Thread was interrupted
         // 2. execution was paused
@@ -185,11 +195,54 @@ public class SimpleExecutionRunnable implements Runnable {
                 isMiRunning(nextStepExecution) ||
                 isSplitStep(nextStepExecution) ||
                 shouldChangeWorkerGroup(nextStepExecution) ||
-                isPersistStep(nextStepExecution) ||
-                isRecoveryCheckpoint(nextStepExecution) ||
+                isPersistStep(nextStepExecution, isCritical) ||
+                isRecoveryCheckpoint(nextStepExecution, isCritical) ||
                 preconditionNotFulfilled(nextStepExecution) ||
-                isRunningTooLong(startTime, nextStepExecution);
+                isRunningTooLong(startTime, nextStepExecution, isCritical);
     }
+
+
+//    private boolean isCriticalExecutionRunning(Execution nextStepExecution, boolean isCritical) {
+//        //Here we check if we need to go to queue to persist the step context - we can do it with shortcut to InBuffer!!!!!!!!
+//
+//
+//        System.out.println("queue size = " + WorkerManager.priorityExecutorService.getActiveCount());
+//        if (!isCritical && WorkerManager.priorityExecutorService.getActiveCount() != 0) {
+//            // Clean the persist key
+//            nextStepExecution.getSystemContext().removeStepPersist();
+//
+//            // Set current step to finished
+//            executionMessage.setStatus(ExecStatus.FINISHED);
+//            executionMessage.incMsgSeqId();
+//
+//            executionMessage.setStepPersist(true);
+//            executionMessage.setStepPersistId(nextStepExecution.getSystemContext().getStepPersistId());
+//            // Clean the persist data
+//            nextStepExecution.getSystemContext().removeStepPersistID();
+//
+//            // Set the payload to the current step and not from the message that could be several micro step behind
+//            executionMessage.setPayload(converter.createPayload(nextStepExecution));
+//
+//            ExecutionMessage inProgressMessage = createInProgressExecutionMessage(nextStepExecution);
+//            ExecutionMessage[] executionMessagesToSend = new ExecutionMessage[]{executionMessage,
+//                    inProgressMessage}; // For the outBuffer
+//
+//            ExecutionMessage inProgressMessageForInBuffer = (ExecutionMessage) inProgressMessage.clone();
+//            inProgressMessageForInBuffer
+//                    .setPayload(null); // We do not need the payload for the inBuffer shortcut, we have execution there
+//
+//            try {
+//                // The order is important
+//                outBuffer.put(executionMessagesToSend);
+//                //inBuffer.addExecutionMessage(inProgressMessageForInBuffer, isCritical);
+//            } catch (InterruptedException e) {
+//                logger.warn("Thread was interrupted! Exiting the execution... ", e);
+//            }
+//            return true;
+//        } else {
+//            return false;
+//        }
+//    }
 
     private boolean isMiRunning(Execution nextStepExecution) {
         return nextStepExecution.getSystemContext().containsKey(MI_REMAINING_BRANCHES_CONTEXT_KEY);
@@ -240,7 +293,7 @@ public class SimpleExecutionRunnable implements Runnable {
         }
     }
 
-    private boolean isRecoveryCheckpoint(Execution nextStepExecution) {
+    private boolean isRecoveryCheckpoint(Execution nextStepExecution, boolean isCritical) {
         // Here we check if we need to go to queue to persist - we can do it with shortcut to InBuffer
         if (!isRecoveryDisabled && nextStepExecution.getSystemContext()
                 .containsKey(TempConstants.IS_RECOVERY_CHECKPOINT)) {
@@ -265,7 +318,7 @@ public class SimpleExecutionRunnable implements Runnable {
             try {
                 // The order is important
                 outBuffer.put(executionMessagesToSend);
-                inBuffer.addExecutionMessage(inProgressMessageForInBuffer);
+                inBuffer.addExecutionMessage(inProgressMessageForInBuffer, isCritical);
             } catch (InterruptedException e) {
                 logger.warn("Thread was interrupted! Exiting the execution... ", e);
             }
@@ -275,7 +328,7 @@ public class SimpleExecutionRunnable implements Runnable {
         }
     }
 
-    private boolean isPersistStep(Execution nextStepExecution) {
+    private boolean isPersistStep(Execution nextStepExecution, boolean isCritical) {
         //Here we check if we need to go to queue to persist the step context - we can do it with shortcut to InBuffer!!!!!!!!
         if (nextStepExecution.getSystemContext().isStepPersist()) {
             // Clean the persist key
@@ -304,7 +357,7 @@ public class SimpleExecutionRunnable implements Runnable {
             try {
                 // The order is important
                 outBuffer.put(executionMessagesToSend);
-                inBuffer.addExecutionMessage(inProgressMessageForInBuffer);
+                inBuffer.addExecutionMessage(inProgressMessageForInBuffer, isCritical);
             } catch (InterruptedException e) {
                 logger.warn("Thread was interrupted! Exiting the execution... ", e);
             }
@@ -414,7 +467,7 @@ public class SimpleExecutionRunnable implements Runnable {
     }
 
 
-    private boolean isRunningTooLong(long startTime, Execution nextStepExecution) {
+    private boolean isRunningTooLong(long startTime, Execution nextStepExecution, boolean isCritical) {
 
         // Return true if running more than 60 seconds. (this is not enforced, just a weak check)
         // to prevent starvation of other executions
@@ -435,7 +488,7 @@ public class SimpleExecutionRunnable implements Runnable {
             try {
                 // The order is important
                 outBuffer.put(executionMessagesToSend);
-                inBuffer.addExecutionMessage(inProgressMessageForInBuffer);
+                inBuffer.addExecutionMessage(inProgressMessageForInBuffer, isCritical);
             } catch (InterruptedException e) {
                 logger.warn("Thread was interrupted! Exiting the execution... ", e);
             }
