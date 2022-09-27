@@ -525,7 +525,6 @@ public class SimpleExecutionRunnable implements Runnable {
         executionMessage.setPayload(null);
         executionMessage.incMsgSeqId();
         try {
-            outBuffer.put(executionMessage);
             @SuppressWarnings("unchecked")
             ArrayList<String> miInputs = (ArrayList<String>) execution.getSystemContext().get("MI_INPUTS");
             int totalNumberOfLanes = miInputs.size();
@@ -545,7 +544,9 @@ public class SimpleExecutionRunnable implements Runnable {
                     throw new RuntimeException("Cannot execute split step. Split executions are null or empty");
                 }
             }
-            outBuffer.put(splitMessages.toArray(new SplitMessage[0]));
+            SplitMessage[] messages = splitMessages.toArray(new SplitMessage[0]);
+            outBuffer.put(executionMessage);
+            outBuffer.put(messages);
         } catch (InterruptedException e) {
             logger.warn("Thread was interrupted! Exiting the execution... ", e);
         }
