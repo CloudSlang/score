@@ -31,6 +31,7 @@ import oshi.software.os.OSProcess;
 
 import javax.annotation.PostConstruct;
 import java.io.Serializable;
+import java.lang.Boolean;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +68,10 @@ public class PerformanceMetricsCollector implements PerfMetricCollector {
     private OSProcess oldProcess;
 
     public PerformanceMetricsCollector() {
-        this.oldProcess = getProcess();
+        boolean isDisabled = Boolean.getBoolean("worker.monitoring.disable");
+        if (!isDisabled) {
+            this.oldProcess = getProcess();
+        }
     }
 
     @PostConstruct

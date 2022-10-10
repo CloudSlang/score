@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import oshi.software.os.OSProcess;
+import java.lang.Boolean;
 
 import static io.cloudslang.worker.monitor.metric.WorkerPerfMetric.getProcess;
 
@@ -55,9 +56,12 @@ public class WorkerMetricsMBean {
     private OSProcess prevDiskWriteProcess;
 
     public WorkerMetricsMBean() {
-        this.prevCpuProcess = getProcess();
-        this.prevDiskReadProcess = getProcess();
-        this.prevDiskWriteProcess = getProcess();
+        boolean isDisabled = Boolean.getBoolean("worker.monitoring.disable");
+        if (!isDisabled) {
+            this.prevCpuProcess = getProcess();
+            this.prevDiskReadProcess = getProcess();
+            this.prevDiskWriteProcess = getProcess();
+        }
     }
 
     @ManagedAttribute(description = "Current Cpu Usage")

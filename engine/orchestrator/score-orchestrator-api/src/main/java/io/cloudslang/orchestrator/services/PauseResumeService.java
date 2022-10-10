@@ -70,7 +70,7 @@ public interface PauseResumeService {
      * @param execution - object to persist
      * @return the pause reason of the paused execution
      */
-    PauseReason writeExecutionObject(Long executionId, String branchId, Execution execution);
+    PauseReason writeExecutionObject(Long executionId, String branchId, Execution execution, boolean updateParentExecObject);
 
     /**
      * Uses caching Returns list of strings: each one of form: executionId:branchId
