@@ -17,7 +17,7 @@ package io.cloudslang.score.facade.execution;
 
 public enum LicenseType {
     UNDEFINED(-1),
-    CONCURRENT_BOT(0),
+    CONCURRENT_WORKFLOWS(0),
     HOURLY(1),
     INSTANT_ON(2),
     CONCURRENT_HOURLY(3),
