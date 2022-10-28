@@ -34,9 +34,12 @@ public class CpuUtilizationService implements WorkerPerfMetric {
 
     @PostConstruct
     public void init() {
-        SystemInfo systemInfo = new SystemInfo();
-        CentralProcessor processor = systemInfo.getHardware().getProcessor();
-        cpuNumber = processor.getLogicalProcessorCount();
+        boolean isDisabled = Boolean.getBoolean("worker.monitoring.disable");
+        if (!isDisabled) {
+            SystemInfo systemInfo = new SystemInfo();
+            CentralProcessor processor = systemInfo.getHardware().getProcessor();
+            cpuNumber = processor.getLogicalProcessorCount();
+        }
     }
 
     @Override
