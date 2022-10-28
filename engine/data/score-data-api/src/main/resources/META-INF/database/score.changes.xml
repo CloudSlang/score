@@ -57,7 +57,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
             <column name="STATUS" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="EXECUTION_OBJECT" type="${blob.type}"></column>
+            <column name="EXECUTION_OBJECT" type="${blob.stream.type}"></column>
             <column name="UPDATE_TIME" type="BIGINT"></column>
         </createTable>
 
@@ -165,7 +165,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
                 <constraints nullable="false"/>
             </column>
             <column name="BRANCH_EXCEPTION" type="${clob.type}"></column>
-            <column name="BRANCH_CONTEXT" type="${blob.type}"></column>
+            <column name="BRANCH_CONTEXT" type="${blob.stream.type}"></column>
             <column name="SUSPENDED_EXECUTION_ID" type="BIGINT"></column>
         </createTable>
 
