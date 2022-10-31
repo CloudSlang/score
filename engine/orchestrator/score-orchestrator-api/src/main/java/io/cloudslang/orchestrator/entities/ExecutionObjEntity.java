@@ -17,6 +17,7 @@
 package io.cloudslang.orchestrator.entities;
 
 import io.cloudslang.score.facade.entities.Execution;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -30,11 +31,10 @@ import javax.persistence.Lob;
 @Embeddable
 public class ExecutionObjEntity {
 
-
     @Lob
     @Column(name = "EXECUTION_OBJECT")
+    @Type(type = "io.cloudslang.orchestrator.entities.ExecutionByteaTypeDescriptor")
     private Execution executionObj;
-
 
     public Execution getExecutionObj() {
         return executionObj;
@@ -44,14 +44,12 @@ public class ExecutionObjEntity {
         this.executionObj = executionObj;
     }
 
-    public ExecutionObjEntity(){
+    public ExecutionObjEntity() {
 
     }
 
-    public ExecutionObjEntity(Execution executionObj){
-           this.executionObj = executionObj;
+    public ExecutionObjEntity(Execution executionObj) {
+        this.executionObj = executionObj;
     }
-
-
 
 }
