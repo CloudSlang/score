@@ -84,6 +84,7 @@ import static io.cloudslang.score.facade.TempConstants.SC_TIMEOUT_START_TIME;
 import static io.cloudslang.score.facade.execution.PauseReason.NO_ROBOTS_IN_GROUP;
 import static io.cloudslang.score.facade.execution.PauseReason.PENDING_ROBOT;
 import static io.cloudslang.score.lang.ExecutionRuntimeServices.LICENSE_TYPE;
+import static io.cloudslang.score.lang.ExecutionRuntimeServices.SPLIT_DATA;
 import static java.lang.Boolean.getBoolean;
 import static java.lang.Integer.getInteger;
 import static java.lang.Long.MAX_VALUE;
@@ -320,7 +321,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
     @Override
     public List<Execution> executeSplitForMi(Execution execution,
                                              String splitUuid,
-                                             int nrOfAlreadyCreatedBranches) throws InterruptedException {
+                                             int nrOfAlreadyCreatedBranches,
+                                             boolean isCsParallel) throws InterruptedException {
         try {
             ExecutionStep currStep = loadExecutionStep(execution);
             // Check if this execution was paused
@@ -329,7 +331,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             }
             // dum bus event
             dumpBusEvents(execution);
-            executeSplitStep(execution, currStep);
+            executeSplitStep(execution, currStep); // addBranches
             failFlowIfSplitStepFailed(execution);
 
             dumpBusEvents(execution);
@@ -339,7 +341,9 @@ public final class ExecutionServiceImpl implements ExecutionService {
             List<Execution> newExecutions = createChildExecutionsForMi(execution.getExecutionId(), newBranches,
                     splitUuid, nrOfAlreadyCreatedBranches, currStep);
 
-            Serializable miInputs = execution.getSystemContext().get("MI_INPUTS");
+            Serializable miInputs = isCsParallel ?
+                    execution.getSystemContext().get(SPLIT_DATA) :
+                    execution.getSystemContext().get("MI_INPUTS");
             if (miInputs == null) {
                 // Run the navigation since we don't have any inputs left to process
                 navigate(execution, currStep);

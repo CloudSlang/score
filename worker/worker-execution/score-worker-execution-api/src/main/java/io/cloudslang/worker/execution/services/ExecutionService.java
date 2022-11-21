@@ -61,7 +61,8 @@ public interface ExecutionService {
 
     List<Execution> executeSplitForMi(Execution execution,
                                       String splitId,
-                                      int nrOfAlreadyCreatedBranches) throws InterruptedException;
+                                      int nrOfAlreadyCreatedBranches,
+                                      boolean isCsParallel) throws InterruptedException;
 
     boolean isSplitStep(Execution execution);
 }

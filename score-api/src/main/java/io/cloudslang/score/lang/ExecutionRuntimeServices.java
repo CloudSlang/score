@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 
@@ -104,6 +105,14 @@ public class ExecutionRuntimeServices implements Serializable {
     public static final String LICENSE_TYPE = "LICENSE_TYPE";
 
     public static final String UNAUTHORIZED_FLOWS = "UNAUTHORIZED_FLOWS";
+
+    private static final String REMAINING_BRANCHES = "REMAINING_BRANCHES";
+
+    public static final String THROTTLE_SIZE = "THROTTLE_SIZE";
+
+    public static final String SPLIT_DATA_SIZE = "SPLIT_DATA_SIZE";
+
+    public static final String SPLIT_DATA = "SPLIT_DATA";
 
     protected Map<String, Serializable> contextMap;
 
@@ -275,6 +284,57 @@ public class ExecutionRuntimeServices implements Serializable {
     public void removeStepPersistID() {
         removeFromMap(STEP_PERSIST_ID);
     }
+
+    public void setRemainingBranches(String remainingBranches) {
+        contextMap.put(REMAINING_BRANCHES, remainingBranches);
+    }
+
+    public String getRemainingBranches() {
+        return getFromMap(REMAINING_BRANCHES);
+    }
+
+    public void removeRemainingBranches() {
+        removeFromMap(REMAINING_BRANCHES);
+    }
+
+    public void setThrottleSize(Integer throttleSize) {
+        contextMap.put(THROTTLE_SIZE, throttleSize);
+    }
+
+    public Integer getThrottleSize() {
+        return getFromMap(THROTTLE_SIZE);
+    }
+
+    public void removeThrottleSize() {
+        removeFromMap(THROTTLE_SIZE);
+    }
+
+    public void setSplitDataSize(Integer splitDataSize) {
+        Objects.requireNonNull(splitDataSize, "splitDataSize cannot be set to null");
+        contextMap.put(SPLIT_DATA_SIZE, splitDataSize);
+    }
+
+    public Integer getSplitDataSize() {
+        return getFromMap(SPLIT_DATA_SIZE);
+    }
+
+    public void removeSplitDataSize() {
+        removeFromMap(SPLIT_DATA_SIZE);
+    }
+
+    public void setSplitData(ArrayList<? extends Serializable> splitData) {
+        contextMap.put(SPLIT_DATA, splitData);
+    }
+
+    public ArrayList<? extends Serializable> getSplitData() {
+        return getFromMap(SPLIT_DATA);
+    }
+
+    public void removeSplitData() {
+        removeFromMap(SPLIT_DATA);
+    }
+
+
 
     /**
      * @return the execution id
@@ -460,6 +520,8 @@ public class ExecutionRuntimeServices implements Serializable {
         contextMapForBranch.remove(NEW_SPLIT_ID);
         contextMapForBranch.remove(BRANCH_ID);
         contextMapForBranch.remove(BRANCH_DATA);
+        contextMapForBranch.remove(SPLIT_DATA_SIZE);
+        contextMapForBranch.remove(SPLIT_DATA);
         contextMapForBranch.put(SCORE_EVENTS_QUEUE, new ArrayDeque<>());
 
         ArrayList<StartBranchDataContainer> branches = getFromMap(BRANCH_DATA);

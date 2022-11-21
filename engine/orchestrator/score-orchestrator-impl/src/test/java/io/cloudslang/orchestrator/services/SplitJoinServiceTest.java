@@ -57,6 +57,7 @@ import java.util.UUID;
 import static ch.lambdaj.Lambda.having;
 import static ch.lambdaj.Lambda.on;
 import static ch.lambdaj.Lambda.select;
+import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.MULTI_INSTANCE;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.NON_BLOCKING;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL_LOOP;
@@ -188,9 +189,9 @@ public class SplitJoinServiceTest {
         context.put("someData", "1");
 
         suspendedExecution.getFinishedBranches().add(createFinishedBranch(splitId, splitId + "1", context, new HashMap<String, Serializable>()));
-        Mockito.when(suspendedExecutionsRepository.findFinishedSuspendedExecutions(eq(of(PARALLEL, NON_BLOCKING, PARALLEL_LOOP)), any(Pageable.class))).thenReturn(Arrays.asList(suspendedExecution));
+        Mockito.when(suspendedExecutionsRepository.findUnmergedSuspendedExecutions(eq(of(MULTI_INSTANCE, PARALLEL_LOOP)), any(Pageable.class))).thenReturn(Arrays.asList(suspendedExecution));
 
-        int joinedSplits = splitJoinService.joinFinishedSplits(1);
+        int joinedSplits = splitJoinService.joinFinishedMiBranches(1);
         assertThat(joinedSplits, is(1));
 
         Mockito.verify(converter).createPayload(suspendedExecution.getExecutionObj());
@@ -207,9 +208,9 @@ public class SplitJoinServiceTest {
         String splitId = UUID.randomUUID().toString();
         SuspendedExecution suspendedExecution = createSuspendedExecution(splitId, 1);
         suspendedExecution.getFinishedBranches().add(createFinishedBranch(splitId, splitId + "1", new HashMap<String, Serializable>(), new HashMap<String, Serializable>()));
-        Mockito.when(suspendedExecutionsRepository.findFinishedSuspendedExecutions(eq(of(PARALLEL, NON_BLOCKING, PARALLEL_LOOP)), any(Pageable.class))).thenReturn(Arrays.asList(suspendedExecution));
+        Mockito.when(suspendedExecutionsRepository.findUnmergedSuspendedExecutions(eq(of(MULTI_INSTANCE, PARALLEL_LOOP)), any(Pageable.class))).thenReturn(Arrays.asList(suspendedExecution));
 
-        int joinedSplits = splitJoinService.joinFinishedSplits(1);
+        int joinedSplits = splitJoinService.joinFinishedMiBranches(1);
         assertThat(joinedSplits, is(1));
 
         Mockito.verify(suspendedExecutionsRepository).deleteAll(Arrays.asList(suspendedExecution));
@@ -224,9 +225,9 @@ public class SplitJoinServiceTest {
         context.put("haha", "lala");
 
         suspendedExecution.getFinishedBranches().add(createFinishedBranch(splitId, splitId + "1", context, branchSystemContext));
-        Mockito.when(suspendedExecutionsRepository.findFinishedSuspendedExecutions(eq(of(PARALLEL, NON_BLOCKING, PARALLEL_LOOP)), any(Pageable.class))).thenReturn(Arrays.asList(suspendedExecution));
+        Mockito.when(suspendedExecutionsRepository.findUnmergedSuspendedExecutions(eq(of(MULTI_INSTANCE, PARALLEL_LOOP)), any(Pageable.class))).thenReturn(Arrays.asList(suspendedExecution));
 
-        int joinedSplits = splitJoinService.joinFinishedSplits(1);
+        int joinedSplits = splitJoinService.joinFinishedMiBranches(1);
         assertThat(joinedSplits, is(1));
 
         Mockito.verify(converter).createPayload(converterCaptor.capture());
