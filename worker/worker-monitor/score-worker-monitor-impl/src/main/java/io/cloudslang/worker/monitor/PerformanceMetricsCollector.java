@@ -76,7 +76,10 @@ public class PerformanceMetricsCollector implements PerfMetricCollector {
 
     @PostConstruct
     public void init() {
-        createMetrics();
+        boolean isDisabled = Boolean.getBoolean("worker.monitoring.disable");
+        if (!isDisabled) {
+            createMetrics();
+        }
     }
 
     private void createMetrics() {

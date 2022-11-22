@@ -34,9 +34,12 @@ public class MemoryUtilizationService implements WorkerPerfMetric {
 
     @PostConstruct
     public void init() {
-        SystemInfo si = new SystemInfo();
-        GlobalMemory globalMemory = si.getHardware().getMemory();
-        totalRam = globalMemory.getTotal();
+        boolean isDisabled = Boolean.getBoolean("worker.monitoring.disable");
+        if (!isDisabled) {
+            SystemInfo si = new SystemInfo();
+            GlobalMemory globalMemory = si.getHardware().getMemory();
+            totalRam = globalMemory.getTotal();
+        }
     }
 
     @Override
