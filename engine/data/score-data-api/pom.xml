@@ -23,7 +23,7 @@
     <parent>
         <artifactId>data</artifactId>
         <groupId>io.cloudslang</groupId>
-        <version>0.3.282</version>
+        <version>0.3.283-SNAPSHOT</version>
     </parent>
 
     <artifactId>score-data-api</artifactId>
