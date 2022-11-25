@@ -760,11 +760,13 @@ public final class ExecutionServiceImpl implements ExecutionService {
             execution.setGroupName(group);
         }
 
-        if (isDebuggerMode(execution.getSystemContext())) {
-            if (!StringUtils.isEmpty(group) && useDefaultGroup(execution)) {
-                execution.setGroupName(null);
-            }
-        }
+        // Removing isDebuggerMode() check. Defect OCTCR19F1753456.
+
+//        if (isDebuggerMode(execution.getSystemContext())) {
+//            if (!StringUtils.isEmpty(group) && useDefaultGroup(execution)) {
+//                execution.setGroupName(null);
+//            }
+//        }
     }
 
     private void createErrorEvent(String ex, String logMessage, String errorType, SystemContext systemContext)

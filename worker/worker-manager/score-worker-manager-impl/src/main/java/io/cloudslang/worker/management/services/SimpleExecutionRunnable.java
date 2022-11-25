@@ -354,8 +354,8 @@ public class SimpleExecutionRunnable implements Runnable {
             // Next step should run in this worker because of "sticky worker" feature
             boolean canRunInThisWorker = (groupName == null)
                     || workerConfigurationService.isMemberOf(groupName) || isStickyToThisWorker(groupName);
-
-            if (!canRunInThisWorker && !isDebuggerMode(nextStepExecution)) {
+            // Removing isDebuggerMode() check. Defect OCTCR19F1753456.
+            if (!canRunInThisWorker) {
                 //set current step to finished
                 executionMessage.setStatus(ExecStatus.FINISHED);
                 executionMessage.incMsgSeqId();
