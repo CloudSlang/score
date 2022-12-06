@@ -36,7 +36,9 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static java.lang.Boolean.parseBoolean;
+import static io.cloudslang.runtime.api.python.enums.PythonStrategy.JYTHON;
+import static io.cloudslang.runtime.api.python.enums.PythonStrategy.PYTHON_SERVER;
+import static io.cloudslang.runtime.api.python.enums.PythonStrategy.getPythonStrategy;
 import static java.lang.Integer.getInteger;
 import static java.lang.Math.max;
 import static java.lang.Runtime.getRuntime;
@@ -70,7 +72,7 @@ public class PythonExecutionPooledAndCachedEngine extends ExecutionEngine implem
     }
 
     private void doSetPythonExecutorPool() {
-        final boolean useExternalPython = !parseBoolean(System.getProperty("use.jython.expressions", "true"));
+        final boolean useExternalPython = getPythonStrategy(System.getProperty("python.expressionsEval"), PYTHON_SERVER) != JYTHON;
         // 25% of number of thread, in case of external python expression evaluation
         // 75% of number of threads in case of jython expression evaluation
         int defaultPoolSize = useExternalPython ? max(2, numberOfThreads / 4) : max(2, numberOfThreads * 3 / 4);
