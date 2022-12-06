@@ -16,7 +16,7 @@
 package io.cloudslang.runtime.api.python.enums;
 
 import static java.util.Arrays.stream;
-import static org.apache.commons.lang3.StringUtils.endsWithIgnoreCase;
+import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 import static org.apache.commons.lang3.Validate.notNull;
 
 public enum PythonStrategy {
@@ -34,7 +34,7 @@ public enum PythonStrategy {
     public static PythonStrategy getPythonStrategy(final String givenStrategy, final PythonStrategy defaultStrategy) {
         notNull(defaultStrategy, "Default strategy cannot be null.");
         return stream(PythonStrategy.values())
-                .filter(strategy -> endsWithIgnoreCase(strategy.getStrategyName(), givenStrategy))
+                .filter(strategy -> equalsIgnoreCase(strategy.getStrategyName(), givenStrategy))
                 .findFirst()
                 .orElse(defaultStrategy);
     }
