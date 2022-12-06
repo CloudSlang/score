@@ -72,7 +72,7 @@ public class PythonExecutionPooledAndCachedEngine extends ExecutionEngine implem
     }
 
     private void doSetPythonExecutorPool() {
-        final boolean useExternalPython = getPythonStrategy(System.getProperty("python.expressionsEval"), PYTHON_SERVER) == JYTHON;
+        final boolean useExternalPython = getPythonStrategy(System.getProperty("python.expressionsEval"), PYTHON_SERVER) != JYTHON;
         // 25% of number of thread, in case of external python expression evaluation
         // 75% of number of threads in case of jython expression evaluation
         int defaultPoolSize = useExternalPython ? max(2, numberOfThreads / 4) : max(2, numberOfThreads * 3 / 4);
