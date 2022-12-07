@@ -16,10 +16,11 @@
 
 package io.cloudslang.orchestrator.entities;
 
+import io.cloudslang.engine.data.AbstractIdentifiable;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.score.facade.execution.ExecutionSummary;
-import io.cloudslang.engine.data.AbstractIdentifiable;
 import org.apache.commons.lang.builder.EqualsBuilder;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -38,7 +39,7 @@ import java.util.Arrays;
  */
 @Entity
 @Table(name = "OO_EXECUTION_STATE",
-		uniqueConstraints = {@UniqueConstraint(name = "OO_EXECUTION_STATE_UC", columnNames = {"EXECUTION_ID", "BRANCH_ID"})})
+        uniqueConstraints = {@UniqueConstraint(name = "OO_EXECUTION_STATE_UC", columnNames = {"EXECUTION_ID", "BRANCH_ID"})})
 public class ExecutionState extends AbstractIdentifiable {
 
     public static final String EMPTY_BRANCH = "EMPTY";
@@ -55,6 +56,7 @@ public class ExecutionState extends AbstractIdentifiable {
 
     @Column(name = "EXECUTION_OBJECT")
     @Lob
+    @Type(type = "org.hibernate.type.ImageType")
     @Basic(fetch = FetchType.LAZY)
     private byte[] executionObject;
 
@@ -93,9 +95,13 @@ public class ExecutionState extends AbstractIdentifiable {
         this.executionObject = executionObj;
     }
 
-    public Long getUpdateTime() { return updateTime; }
+    public Long getUpdateTime() {
+        return updateTime;
+    }
 
-    public void setUpdateTime(Long updateTime) { this.updateTime = updateTime; }
+    public void setUpdateTime(Long updateTime) {
+        this.updateTime = updateTime;
+    }
 
     @Override
     public boolean equals(Object obj) {

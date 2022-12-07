@@ -20,6 +20,7 @@ import io.cloudslang.engine.data.AbstractIdentifiable;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -57,13 +58,15 @@ public class FinishedBranch extends AbstractIdentifiable {
 
     @Column(name = "BRANCH_CONTEXT", nullable = false, updatable = false)
     @Lob
+    @Type(type = "io.cloudslang.orchestrator.entities.BranchContextByteaTypeDescriptor")
     private BranchContexts branchContexts;
 
     @ManyToOne
-    @JoinColumn(name="SUSPENDED_EXECUTION_ID", nullable = false, updatable = false)
+    @JoinColumn(name = "SUSPENDED_EXECUTION_ID", nullable = false, updatable = false)
     private SuspendedExecution suspendedExecution;
 
-    public FinishedBranch() {}
+    public FinishedBranch() {
+    }
 
     public FinishedBranch(String executionId, String branchId, String splitId, String branchException, BranchContexts branchContexts) {
         this.executionId = executionId;

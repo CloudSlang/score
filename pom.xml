@@ -21,7 +21,7 @@
 
     <groupId>io.cloudslang</groupId>
     <artifactId>score-parent</artifactId>
-    <version>0.3.281-SNAPSHOT</version>
+    <version>0.3.284-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -219,7 +219,7 @@
             <dependency>
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-core</artifactId>
-                <version>3.4.2</version>
+                <version>4.9.0</version>
             </dependency>
 
             <dependency>

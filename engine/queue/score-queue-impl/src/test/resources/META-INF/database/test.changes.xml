@@ -16,6 +16,12 @@
 	<property name="timestamp.type" dbms="postgresql" value="timestamp"/>
 	<property name="timestamp.type" dbms="h2" value="timestamp"/>
 
+	<property name="blob.stream.type" dbms="oracle" value=" blob"/>
+	<property name="blob.stream.type" dbms="mssql" value="image"/>
+	<property name="blob.stream.type" dbms="mysql" value="longblob"/>
+	<property name="blob.stream.type" dbms="postgresql" value="bytea"/>
+	<property name="blob.stream.type" dbms="h2" value="image"/>
+
 	<changeSet id="create OO_EXECUTION_STATES" author="engine">
 		<createTable tableName="OO_EXECUTION_STATES">
 			<column name="ID" type="bigint">
@@ -94,7 +100,7 @@
             <column name="STATUS" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="EXECUTION_OBJECT" type="${blob.type}"></column>
+            <column name="EXECUTION_OBJECT" type="${blob.stream.type}"></column>
 			<column name="UPDATE_TIME" type="BIGINT"></column>
         </createTable>
 

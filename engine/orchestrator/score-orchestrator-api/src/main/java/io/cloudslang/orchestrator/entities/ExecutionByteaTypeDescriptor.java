@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package io.cloudslang.engine.dialects;
+package io.cloudslang.orchestrator.entities;
 
-import org.hibernate.dialect.H2Dialect;
+import io.cloudslang.score.facade.entities.Execution;
+import org.hibernate.type.AbstractSingleColumnStandardBasicType;
+import org.hibernate.type.descriptor.java.SerializableTypeDescriptor;
+import org.hibernate.type.descriptor.sql.LongVarbinaryTypeDescriptor;
 
-import java.sql.Types;
+public class ExecutionByteaTypeDescriptor extends AbstractSingleColumnStandardBasicType<Execution> {
 
-public class ScoreH2Dialect extends H2Dialect {
-
-    public ScoreH2Dialect() {
-        super();
-        registerColumnType(Types.LONGVARBINARY, "binary");
+    public ExecutionByteaTypeDescriptor() {
+        super(LongVarbinaryTypeDescriptor.INSTANCE, new SerializableTypeDescriptor<>(Execution.class));
     }
 
-    @Override
-    public String toBooleanValueString(boolean bool) {
-        return String.valueOf(bool);
+    public String getName() {
+        return Execution.class.getName();
     }
 }
