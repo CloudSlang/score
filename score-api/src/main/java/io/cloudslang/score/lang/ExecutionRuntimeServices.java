@@ -114,6 +114,8 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public static final String SPLIT_DATA = "SPLIT_DATA";
 
+    private static final String PARALLEL_TEMPORARY_CONTEXT = "PARALLEL_TEMPORARY_CONTEXT";
+
     protected Map<String, Serializable> contextMap;
 
     public ExecutionRuntimeServices() {
@@ -332,6 +334,18 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public void removeSplitData() {
         removeFromMap(SPLIT_DATA);
+    }
+
+    public void setParallelTemporaryContext(ArrayList<Map<String, Serializable>> parallelTemporaryContext) {
+        contextMap.put(PARALLEL_TEMPORARY_CONTEXT, parallelTemporaryContext);
+    }
+
+    public ArrayList<Map<String, Serializable>> getParallelTemporaryContext() {
+        return getFromMap(PARALLEL_TEMPORARY_CONTEXT);
+    }
+
+    public void removeParallelTemporaryContext() {
+        removeFromMap(PARALLEL_TEMPORARY_CONTEXT);
     }
 
 
