@@ -319,10 +319,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     @Override
-    public List<Execution> executeSplitForMi(Execution execution,
+    public List<Execution> executeSplitForMiAndParallelLoop(Execution execution,
                                              String splitUuid,
                                              int nrOfAlreadyCreatedBranches,
-                                             boolean isCsParallel) throws InterruptedException {
+                                             String splitDataKey) throws InterruptedException {
         try {
             ExecutionStep currStep = loadExecutionStep(execution);
             // Check if this execution was paused
@@ -331,7 +331,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             }
             // dum bus event
             dumpBusEvents(execution);
-            executeSplitStep(execution, currStep); // addBranches
+            executeSplitStep(execution, currStep);
             failFlowIfSplitStepFailed(execution);
 
             dumpBusEvents(execution);
@@ -341,10 +341,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
             List<Execution> newExecutions = createChildExecutionsForMi(execution.getExecutionId(), newBranches,
                     splitUuid, nrOfAlreadyCreatedBranches, currStep);
 
-            Serializable miInputs = isCsParallel ?
-                    execution.getSystemContext().get(SPLIT_DATA) :
-                    execution.getSystemContext().get("MI_INPUTS");
-            if (miInputs == null) {
+            Serializable splitDataValue = execution.getSystemContext().get(splitDataKey);
+            if (splitDataValue == null) {
                 // Run the navigation since we don't have any inputs left to process
                 navigate(execution, currStep);
             }

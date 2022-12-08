@@ -108,7 +108,7 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String REMAINING_BRANCHES = "REMAINING_BRANCHES";
 
-    public static final String THROTTLE_SIZE = "THROTTLE_SIZE";
+    private static final String THROTTLE_SIZE = "THROTTLE_SIZE";
 
     public static final String SPLIT_DATA_SIZE = "SPLIT_DATA_SIZE";
 
@@ -320,8 +320,8 @@ public class ExecutionRuntimeServices implements Serializable {
         return getFromMap(SPLIT_DATA_SIZE);
     }
 
-    public void removeSplitDataSize() {
-        removeFromMap(SPLIT_DATA_SIZE);
+    public Integer removeSplitDataSize() {
+        return removeFromMap(SPLIT_DATA_SIZE);
     }
 
     public void setSplitData(ArrayList<? extends Serializable> splitData) {
