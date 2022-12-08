@@ -567,7 +567,7 @@ public class SimpleExecutionRunnable implements Runnable {
             int totalNumberOfLanes = 0;
             int currentNumberOfLanes = 0;
             String commonSplitUuid = randomUUID().toString();
-            ArrayList<SplitMessage> splitMessages = new ArrayList<>(totalNumberOfLanes);
+            ArrayList<SplitMessage> splitMessages = new ArrayList<>();
             do {
                 List<Execution> newExecutions = executionService.executeSplitForMiAndParallelLoop(execution, commonSplitUuid,
                         currentNumberOfLanes, SPLIT_DATA);

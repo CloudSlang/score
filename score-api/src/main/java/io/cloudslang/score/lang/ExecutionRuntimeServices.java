@@ -348,8 +348,6 @@ public class ExecutionRuntimeServices implements Serializable {
         removeFromMap(PARALLEL_TEMPORARY_CONTEXT);
     }
 
-
-
     /**
      * @return the execution id
      */
