@@ -23,7 +23,7 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>engine</artifactId>
-        <version>0.3.284-SNAPSHOT</version>
+        <version>0.3.284</version>
     </parent>
 
     <artifactId>orchestrator</artifactId>
