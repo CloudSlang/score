@@ -230,7 +230,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             SuspendedExecution suspendedExecution = suspendedMap.get(finishedBranch.getSplitId());
             if (suspendedExecution != null) {
                 boolean shouldProcessBranch = finishedBranch.connectToSuspendedExecution(suspendedExecution);
-                if (suspendedExecution.getSuspensionReason() == MULTI_INSTANCE) {
+                if (of(MULTI_INSTANCE, PARALLEL_LOOP).contains(suspendedExecution.getSuspensionReason())) {
                     // start a new branch
                     if (!finishedBranch.getBranchContexts().isBranchCancelled()) {
                         startNewBranch(suspendedExecution);
@@ -290,7 +290,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
         // 1. Find all suspended executions that have all their branches ended
         PageRequest pageRequest = PageRequest.of(0, bulkSize);
-        List<SuspendedExecution> suspendedExecutions = suspendedExecutionsRepository.findFinishedSuspendedExecutions(of(PARALLEL, NON_BLOCKING, PARALLEL_LOOP), pageRequest);
+        List<SuspendedExecution> suspendedExecutions = suspendedExecutionsRepository.findFinishedSuspendedExecutions(of(PARALLEL, NON_BLOCKING), pageRequest);
 
         return joinAndSendToQueue(suspendedExecutions);
     }
@@ -310,7 +310,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     public int joinFinishedMiBranches(int bulkSize) {
         // 1. Find all suspended executions that have all their branches ended
         PageRequest pageRequest = PageRequest.of(0, bulkSize);
-        List<SuspendedExecution> suspendedExecutions = suspendedExecutionsRepository.findUnmergedSuspendedExecutions(of(MULTI_INSTANCE), pageRequest);
+        List<SuspendedExecution> suspendedExecutions = suspendedExecutionsRepository.findUnmergedSuspendedExecutions(of(MULTI_INSTANCE, PARALLEL_LOOP), pageRequest);
 
         return joinMiBranchesAndSendToQueue(suspendedExecutions);
     }

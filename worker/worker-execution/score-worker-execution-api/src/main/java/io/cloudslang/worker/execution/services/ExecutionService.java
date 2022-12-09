@@ -59,9 +59,10 @@ public interface ExecutionService {
      */
     List<Execution> executeSplitForNonBlockAndParallel(Execution execution) throws InterruptedException;
 
-    List<Execution> executeSplitForMi(Execution execution,
-                                      String splitId,
-                                      int nrOfAlreadyCreatedBranches) throws InterruptedException;
+    List<Execution> executeSplitForMiAndParallelLoop(Execution execution,
+                                                     String splitId,
+                                                     int nrOfAlreadyCreatedBranches,
+                                                     String splitDataKey) throws InterruptedException;
 
     boolean isSplitStep(Execution execution);
 }

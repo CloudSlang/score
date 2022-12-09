@@ -29,6 +29,7 @@ import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.worker.execution.services.ExecutionService;
 import io.cloudslang.worker.management.WorkerConfigurationService;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,12 +37,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL_LOOP;
 import static io.cloudslang.score.facade.TempConstants.MI_REMAINING_BRANCHES_CONTEXT_KEY;
+import static io.cloudslang.score.lang.ExecutionRuntimeServices.SPLIT_DATA;
+import static io.cloudslang.score.lang.ExecutionRuntimeServices.SPLIT_DATA_SIZE;
 import static java.lang.Boolean.getBoolean;
 import static java.lang.Long.parseLong;
 import static java.lang.Thread.currentThread;
 import static java.util.UUID.randomUUID;
-import org.apache.commons.lang3.SerializationUtils;
 
 public class SimpleExecutionRunnable implements Runnable {
 
@@ -495,9 +498,13 @@ public class SimpleExecutionRunnable implements Runnable {
 
     private void executeSplitStep(Execution execution) throws InterruptedException {
         Serializable stepTypeSerializable = execution.getSystemContext().get("STEP_TYPE");
-        String stepType = stepTypeSerializable != null ? stepTypeSerializable.toString() : null;
+        String stepType = stepTypeSerializable != null ? stepTypeSerializable.toString() : PARALLEL_LOOP.toString();
+        String languageName = execution.getSystemContext().getLanguageName();
+
         if (StringUtils.equals(stepType, "MULTI_INSTANCE")) {
             executeMiStep(execution);
+        } else if (StringUtils.equals(stepType, "PARALLEL_LOOP") && StringUtils.equals(languageName, "CloudSlang")) {
+            executeParallelLoopStep(execution);
         } else {
             executeParallelAndNonBlocking(execution);
         }
@@ -532,8 +539,8 @@ public class SimpleExecutionRunnable implements Runnable {
             String commonSplitUuid = randomUUID().toString();
             ArrayList<SplitMessage> splitMessages = new ArrayList<>(totalNumberOfLanes);
             while (currentNumberOfLanes != totalNumberOfLanes) {
-                List<Execution> newExecutions = executionService.executeSplitForMi(execution, commonSplitUuid,
-                        currentNumberOfLanes);
+                List<Execution> newExecutions = executionService.executeSplitForMiAndParallelLoop(execution, commonSplitUuid,
+                        currentNumberOfLanes, "MI_INPUTS");
 
                 if (newExecutions != null && newExecutions.size() > 0) {
                     currentNumberOfLanes += newExecutions.size();
@@ -544,6 +551,40 @@ public class SimpleExecutionRunnable implements Runnable {
                     throw new RuntimeException("Cannot execute split step. Split executions are null or empty");
                 }
             }
+            SplitMessage[] messages = splitMessages.toArray(new SplitMessage[0]);
+            outBuffer.put(executionMessage);
+            outBuffer.put(messages);
+        } catch (InterruptedException e) {
+            logger.warn("Thread was interrupted! Exiting the execution... ", e);
+        }
+    }
+
+    private void executeParallelLoopStep(Execution execution) {
+        executionMessage.setStatus(ExecStatus.FINISHED);
+        executionMessage.setPayload(null);
+        executionMessage.incMsgSeqId();
+        try {
+            int totalNumberOfLanes = 0;
+            int currentNumberOfLanes = 0;
+            String commonSplitUuid = randomUUID().toString();
+            ArrayList<SplitMessage> splitMessages = new ArrayList<>();
+            do {
+                List<Execution> newExecutions = executionService.executeSplitForMiAndParallelLoop(execution, commonSplitUuid,
+                        currentNumberOfLanes, SPLIT_DATA);
+
+                if (totalNumberOfLanes == 0) {
+                    totalNumberOfLanes = (Integer) execution.getSystemContext().get(SPLIT_DATA_SIZE);
+                }
+
+                if (newExecutions != null && newExecutions.size() > 0) {
+                    currentNumberOfLanes += newExecutions.size();
+                    SplitMessage splitMessage = new SplitMessage(commonSplitUuid, SerializationUtils.clone(execution), newExecutions,
+                            totalNumberOfLanes, currentNumberOfLanes == totalNumberOfLanes);
+                    splitMessages.add(splitMessage);
+                } else {
+                    throw new RuntimeException("Cannot execute split step. Split executions are null or empty");
+                }
+            } while (currentNumberOfLanes != totalNumberOfLanes);
             SplitMessage[] messages = splitMessages.toArray(new SplitMessage[0]);
             outBuffer.put(executionMessage);
             outBuffer.put(messages);

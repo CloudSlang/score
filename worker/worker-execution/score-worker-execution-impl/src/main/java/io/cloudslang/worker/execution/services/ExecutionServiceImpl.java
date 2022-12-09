@@ -50,7 +50,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -235,7 +234,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
         try {
             String licenseType = (String) execution.getSystemContext().get(LICENSE_TYPE);
             if (StringUtils.equalsIgnoreCase(licenseType, "SUITE_LICENSE")) {
-                return ;
+                return;
             }
             String branchIdToCheckoutLicense = (String) execution.getSystemContext().get(BRANCH_ID_TO_CHECK_OUT_LICENSE);
             if (StringUtils.isNotEmpty(branchIdToCheckoutLicense) && StringUtils.equals(branchIdToCheckoutLicense, execution.getSystemContext().getBranchId())) {
@@ -318,9 +317,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     @Override
-    public List<Execution> executeSplitForMi(Execution execution,
-                                             String splitUuid,
-                                             int nrOfAlreadyCreatedBranches) throws InterruptedException {
+    public List<Execution> executeSplitForMiAndParallelLoop(Execution execution,
+                                                            String splitUuid,
+                                                            int nrOfAlreadyCreatedBranches,
+                                                            String splitDataKey) throws InterruptedException {
         try {
             ExecutionStep currStep = loadExecutionStep(execution);
             // Check if this execution was paused
@@ -339,8 +339,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
             List<Execution> newExecutions = createChildExecutionsForMi(execution.getExecutionId(), newBranches,
                     splitUuid, nrOfAlreadyCreatedBranches, currStep);
 
-            Serializable miInputs = execution.getSystemContext().get("MI_INPUTS");
-            if (miInputs == null) {
+            Serializable splitDataValue = execution.getSystemContext().get(splitDataKey);
+            if (splitDataValue == null) {
                 // Run the navigation since we don't have any inputs left to process
                 navigate(execution, currStep);
             }
@@ -374,8 +374,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     private List<Execution> createChildExecutionsForNonBlockingAndParallel(Long executionId,
-                                                                                  List<StartBranchDataContainer> newBranches,
-                                                                                  ExecutionStep currStep) {
+                                                                           List<StartBranchDataContainer> newBranches,
+                                                                           ExecutionStep currStep) {
         List<Execution> newExecutions = new ArrayList<>();
         String splitId = UUID.randomUUID().toString();
         ListIterator<StartBranchDataContainer> listIterator = newBranches.listIterator();
@@ -396,10 +396,10 @@ public final class ExecutionServiceImpl implements ExecutionService {
     }
 
     private List<Execution> createChildExecutionsForMi(Long executionId,
-                                                              List<StartBranchDataContainer> newBranches,
-                                                              String splitUuid,
-                                                              int nrOfAlreadyCreatedBranches,
-                                                              ExecutionStep currStep) {
+                                                       List<StartBranchDataContainer> newBranches,
+                                                       String splitUuid,
+                                                       int nrOfAlreadyCreatedBranches,
+                                                       ExecutionStep currStep) {
         List<Execution> newExecutions = new ArrayList<>();
         ListIterator<StartBranchDataContainer> listIterator = newBranches.listIterator();
         int count = 0;
