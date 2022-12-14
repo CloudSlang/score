@@ -53,6 +53,7 @@ import javax.annotation.PreDestroy;
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -525,7 +526,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
             // If the user pressed Pause on the Parent then we need to pause the branch (the parent is in the Suspended table).
         } else if (branchId != null && workerConfigurationService.isExecutionPaused(executionId, null)) {
             ExecutionSummary execSummary = pauseService.readPausedExecution(executionId, null);
-            if (execSummary != null && execSummary.getStatus().equals(ExecutionStatus.PENDING_PAUSE)) {
+            if (execSummary != null && EnumSet.of(ExecutionStatus.PENDING_PAUSE, ExecutionStatus.PAUSED).contains(execSummary.getStatus())) {
                 PauseReason reason = execSummary.getPauseReason();
                 // we only care about User-Paused here!
                 // we don't want to Pause if the parent is paused due to branch_paused! (other branch is paused for some reason
