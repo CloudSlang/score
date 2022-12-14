@@ -116,6 +116,8 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String PARALLEL_TEMPORARY_CONTEXT = "PARALLEL_TEMPORARY_CONTEXT";
 
+    private static final String BRANCH_EXCEPTION = "BRANCH_EXCEPTION";
+
     protected Map<String, Serializable> contextMap;
 
     public ExecutionRuntimeServices() {
@@ -337,6 +339,8 @@ public class ExecutionRuntimeServices implements Serializable {
     }
 
     public void setParallelTemporaryContext(ArrayList<Map<String, Serializable>> parallelTemporaryContext) {
+        Validate.isTrue(!contextMap.containsKey(PARALLEL_TEMPORARY_CONTEXT),
+                "not allowed to overwrite temporary branches context");
         contextMap.put(PARALLEL_TEMPORARY_CONTEXT, parallelTemporaryContext);
     }
 
@@ -346,6 +350,14 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public void removeParallelTemporaryContext() {
         removeFromMap(PARALLEL_TEMPORARY_CONTEXT);
+    }
+
+    public Boolean removeBranchErrorKey() {
+        return removeFromMap(BRANCH_EXCEPTION);
+    }
+
+    public void setBranchErrorKey() {
+        contextMap.put(BRANCH_EXCEPTION, TRUE);
     }
 
     /**
@@ -534,6 +546,7 @@ public class ExecutionRuntimeServices implements Serializable {
         contextMapForBranch.remove(BRANCH_DATA);
         contextMapForBranch.remove(SPLIT_DATA_SIZE);
         contextMapForBranch.remove(SPLIT_DATA);
+        contextMapForBranch.remove(PARALLEL_TEMPORARY_CONTEXT);
         contextMapForBranch.put(SCORE_EVENTS_QUEUE, new ArrayDeque<>());
 
         ArrayList<StartBranchDataContainer> branches = getFromMap(BRANCH_DATA);
