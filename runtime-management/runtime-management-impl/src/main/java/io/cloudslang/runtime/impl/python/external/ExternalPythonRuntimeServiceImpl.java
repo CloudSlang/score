@@ -15,11 +15,13 @@
  */
 package io.cloudslang.runtime.impl.python.external;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Resource;
 import java.io.Serializable;
@@ -34,6 +36,9 @@ public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
     private final Semaphore executionControlSemaphore;
 
     private final Semaphore testingControlSemaphore;
+
+    @Autowired
+    private ExternalPythonServerService externalPythonServerService;
 
     public ExternalPythonRuntimeServiceImpl(Semaphore executionControlSemaphore, Semaphore testingControlSemaphore) {
         this.executionControlSemaphore = executionControlSemaphore;
@@ -71,26 +76,11 @@ public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
 
     @Override
     public PythonEvaluationResult eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
+        logger.info("CUSTOM EVAL IS STARTED");
         try {
-            if (executionControlSemaphore.tryAcquire(1L, TimeUnit.SECONDS)) {
-                try {
-                    return externalPythonExecutionEngine.eval(prepareEnvironmentScript, script, vars);
-                } finally {
-                    executionControlSemaphore.release();
-                }
-            } else {
-                logger.warn("Maximum number of python processes has been reached. Waiting for a python process to finish. " +
-                        "You can configure the number of concurrent python executions by setting " +
-                        "'python.concurrent.execution.permits' system property.");
-                executionControlSemaphore.acquire();
-                try {
-                    logger.info("Acquired a permit for a new python process. Continuing with execution...");
-                    return externalPythonExecutionEngine.eval(prepareEnvironmentScript, script, vars);
-                } finally {
-                    executionControlSemaphore.release();
-                }
-            }
-        } catch (InterruptedException ie) {
+            return externalPythonServerService.evalOnExternalPythonServer(script, prepareEnvironmentScript, vars);
+        } catch (JsonProcessingException ie) {
+            logger.error(ie);
             throw new ExternalPythonScriptException("Execution was interrupted while waiting for a python permit.");
         }
     }
