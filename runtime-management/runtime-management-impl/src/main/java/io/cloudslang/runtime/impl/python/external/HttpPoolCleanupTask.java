@@ -53,10 +53,7 @@ public class HttpPoolCleanupTask extends TimerTask implements Runnable {
 
     @Override
     public void run() {
-        try {
-            cleanup();
-        } catch (Exception cleanupException) {
-        }
+        cleanup();
     }
 
     private void cleanup() {

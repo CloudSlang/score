@@ -47,7 +47,7 @@ import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON;
 public class ExternalPythonServerServiceImpl implements ExternalPythonServerService {
 
     private static final Logger logger = LogManager.getLogger(ExternalPythonServerServiceImpl.class);
-    private static final String EXTERNAL_PYTHON_PORT = System.getProperty("python.port");
+    private static final String EXTERNAL_PYTHON_PORT = getPythonPort(System.getProperty("python.port"));
     private static final String EXTERNAL_PYTHON_SERVER_URL = "https://localhost:" + EXTERNAL_PYTHON_PORT;
     private static final String EXTERNAL_PYTHON_SERVER_EVAL_PATH = "/worker/rest/v1/expressions";
 
@@ -69,15 +69,16 @@ public class ExternalPythonServerServiceImpl implements ExternalPythonServerServ
 
     private PythonEvaluationResult getPythonEvaluationResult(String expression, String prepareEnvironmentScript,
                                                              Map<String, Serializable> context) throws JsonProcessingException {
+        String accessedResources = "accessed_resources_set";
         String payload = generatePayloadForEval(expression, prepareEnvironmentScript, context);
         EvaluationResults scriptResults = executeRequestOnPythonServer("POST", payload);
 
         String exception = scriptResults.getException();
-        if (!StringUtils.isEmpty(exception)) {
+        if (StringUtils.isNotEmpty(exception)) {
             logger.error(String.format("Failed to execute script {%s}", exception));
             throw new ExternalPythonEvalException(exception);
         }
-        context.put("accessed_resources_set", (Serializable) scriptResults.getAccessedResources());
+        context.put(accessedResources, (Serializable) scriptResults.getAccessedResources());
         return new PythonEvaluationResult(processReturnResult(scriptResults), context);
     }
 
@@ -105,11 +106,18 @@ public class ExternalPythonServerServiceImpl implements ExternalPythonServerServ
 
     private String generatePayloadForEval(String expression, String prepareEnvironmentScript,
                                           Map<String, Serializable> context) throws JsonProcessingException {
-        HashMap<String, Serializable> payload = new HashMap<>(4);
+        HashMap<String, Serializable> payload = new HashMap<>(3);
         payload.put("expression", expression);
         payload.put("envSetup", prepareEnvironmentScript);
         payload.put("context", (Serializable) context);
         return objectMapper.writeValueAsString(payload);
+    }
+
+    private static String getPythonPort(String pythonPort) {
+        String defaultPort = "8001";
+        if (pythonPort != null)
+            return pythonPort;
+        return defaultPort;
     }
 
     private Serializable processReturnResult(EvaluationResults results) throws JsonProcessingException {
