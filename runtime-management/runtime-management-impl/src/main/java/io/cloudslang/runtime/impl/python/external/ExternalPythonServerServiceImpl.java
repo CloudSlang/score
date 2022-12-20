@@ -29,11 +29,14 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.springframework.stereotype.Service;
 
 import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Base64.getEncoder;
@@ -97,9 +100,22 @@ public class ExternalPythonServerServiceImpl implements ExternalPythonServerServ
         return objectMapper.readValue(scriptResponse.readEntity(String.class), EvaluationResults.class);
     }
 
+    private Properties readFromPropertiesFiles() {
+        String filename = "pythonServer.properties";
+        Properties prop = new Properties();
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream(filename)) {
+            prop.load(input);
+        } catch (IOException exception) {
+            logger.error(String.format("Failed to read from file", exception));
+            throw new RuntimeException(exception);
+        }
+        return prop;
+    }
+
     private String getBasicAuthorizationHeaderValue() {
-        String username = "administrator";
-        String password = "password";
+        Properties prop = readFromPropertiesFiles();
+        String username = prop.getProperty("username");
+        String password = prop.getProperty("password");
         String encodedAuth = getEncoder().encodeToString((username + ":" + password).getBytes(UTF_8));
         return "Basic " + encodedAuth;
     }
