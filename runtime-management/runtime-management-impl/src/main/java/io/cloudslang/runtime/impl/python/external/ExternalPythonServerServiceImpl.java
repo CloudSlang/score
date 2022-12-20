@@ -52,7 +52,7 @@ public class ExternalPythonServerServiceImpl implements ExternalPythonServerServ
     private static final Logger logger = LogManager.getLogger(ExternalPythonServerServiceImpl.class);
     private static final String EXTERNAL_PYTHON_PORT = System.getProperty("python.port", String.valueOf(8001));
     private static final String EXTERNAL_PYTHON_SERVER_URL = "https://localhost:" + EXTERNAL_PYTHON_PORT;
-    private static final String EXTERNAL_PYTHON_SERVER_EVAL_PATH = "/worker/rest/v1/expressions";
+    private static final String EXTERNAL_PYTHON_SERVER_EVAL_PATH = "/rest/v1/eval";
 
     private final ResteasyClient restEasyClient;
     private final ObjectMapper objectMapper;
