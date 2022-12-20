@@ -90,33 +90,8 @@ public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
                 logger.error(ie);
                 throw new ExternalPythonScriptException("Execution was interrupted while waiting for a python permit.");
             }
-
-            //case PYTHON.equals(PYTHON_EVALUATOR)
-        } else {
-            try {
-                if (executionControlSemaphore.tryAcquire(1L, TimeUnit.SECONDS)) {
-                    try {
-                        return externalPythonExecutionEngine.eval(prepareEnvironmentScript, script, vars);
-                    } finally {
-                        executionControlSemaphore.release();
-                    }
-                } else {
-                    logger.warn("Maximum number of python processes has been reached. Waiting for a python process to finish. " +
-                            "You can configure the number of concurrent python executions by setting " +
-                            "'python.concurrent.execution.permits' system property.");
-                    executionControlSemaphore.acquire();
-                    try {
-                        logger.info("Acquired a permit for a new python process. Continuing with execution...");
-                        return externalPythonExecutionEngine.eval(prepareEnvironmentScript, script, vars);
-                    } finally {
-                        executionControlSemaphore.release();
-                    }
-                }
-            } catch (InterruptedException ie) {
-                throw new ExternalPythonScriptException("Execution was interrupted while waiting for a python permit.");
-            }
-        }
-
+        } else
+            return evalForPythonCase(prepareEnvironmentScript, script, vars);
     }
 
     @Override
@@ -144,4 +119,30 @@ public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
             throw new ExternalPythonScriptException("Execution was interrupted while waiting for a python permit.");
         }
     }
+
+    private PythonEvaluationResult evalForPythonCase(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
+        try {
+            if (executionControlSemaphore.tryAcquire(1L, TimeUnit.SECONDS)) {
+                try {
+                    return externalPythonExecutionEngine.eval(prepareEnvironmentScript, script, vars);
+                } finally {
+                    executionControlSemaphore.release();
+                }
+            } else {
+                logger.warn("Maximum number of python processes has been reached. Waiting for a python process to finish. " +
+                        "You can configure the number of concurrent python executions by setting " +
+                        "'python.concurrent.execution.permits' system property.");
+                executionControlSemaphore.acquire();
+                try {
+                    logger.info("Acquired a permit for a new python process. Continuing with execution...");
+                    return externalPythonExecutionEngine.eval(prepareEnvironmentScript, script, vars);
+                } finally {
+                    executionControlSemaphore.release();
+                }
+            }
+        } catch (InterruptedException ie) {
+            throw new ExternalPythonScriptException("Execution was interrupted while waiting for a python permit.");
+        }
+    }
+
 }

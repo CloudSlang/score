@@ -50,7 +50,7 @@ import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON;
 public class ExternalPythonServerServiceImpl implements ExternalPythonServerService {
 
     private static final Logger logger = LogManager.getLogger(ExternalPythonServerServiceImpl.class);
-    private static final String EXTERNAL_PYTHON_PORT = getPythonPort(System.getProperty("python.port"));
+    private static final String EXTERNAL_PYTHON_PORT = System.getProperty("python.port", String.valueOf(8001));
     private static final String EXTERNAL_PYTHON_SERVER_URL = "https://localhost:" + EXTERNAL_PYTHON_PORT;
     private static final String EXTERNAL_PYTHON_SERVER_EVAL_PATH = "/worker/rest/v1/expressions";
 
@@ -127,13 +127,6 @@ public class ExternalPythonServerServiceImpl implements ExternalPythonServerServ
         payload.put("envSetup", prepareEnvironmentScript);
         payload.put("context", (Serializable) context);
         return objectMapper.writeValueAsString(payload);
-    }
-
-    private static String getPythonPort(String pythonPort) {
-        String defaultPort = "8001";
-        if (pythonPort != null)
-            return pythonPort;
-        return defaultPort;
     }
 
     private Serializable processReturnResult(EvaluationResults results) throws JsonProcessingException {
