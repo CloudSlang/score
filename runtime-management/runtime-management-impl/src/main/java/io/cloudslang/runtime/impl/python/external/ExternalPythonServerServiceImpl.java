@@ -22,12 +22,15 @@ import com.fasterxml.jackson.core.json.JsonWriteFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
+import io.cloudslang.runtime.api.python.PythonExecutionResult;
+import io.cloudslang.runtime.api.python.PythonRuntimeService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,6 +40,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Base64.getEncoder;
@@ -47,28 +53,96 @@ import static org.jboss.resteasy.util.HttpHeaderNames.CONTENT_TYPE;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON;
 
 @Service
-public class ExternalPythonServerServiceImpl implements ExternalPythonServerService {
+public class ExternalPythonServerServiceImpl implements PythonRuntimeService {
 
     private static final Logger logger = LogManager.getLogger(ExternalPythonServerServiceImpl.class);
     private static final String EXTERNAL_PYTHON_PORT = System.getProperty("python.port", String.valueOf(8001));
     private static final String EXTERNAL_PYTHON_SERVER_URL = "https://localhost:" + EXTERNAL_PYTHON_PORT;
     private static final String EXTERNAL_PYTHON_SERVER_EVAL_PATH = "/rest/v1/eval";
 
+    private final Semaphore executionControlSemaphore;
+
+    private final Semaphore testingControlSemaphore;
     private final ResteasyClient restEasyClient;
     private final ObjectMapper objectMapper;
 
-    public ExternalPythonServerServiceImpl(StatefulRestEasyClientsHolder statefulRestEasyClient) {
+    @Resource(name = "externalPythonExecutionEngine")
+    private ExternalPythonExecutionEngine externalPythonExecutionEngine;
+
+    public ExternalPythonServerServiceImpl(StatefulRestEasyClientsHolder statefulRestEasyClient,
+                                           Semaphore executionControlSemaphore,
+                                           Semaphore testingControlSemaphore) {
         this.restEasyClient = statefulRestEasyClient.getRestEasyClient();
         JsonFactory factory = new JsonFactory();
         factory.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
         factory.enable(JsonWriteFeature.ESCAPE_NON_ASCII.mappedFeature());
         this.objectMapper = new ObjectMapper(factory);
+        this.executionControlSemaphore = executionControlSemaphore;
+        this.testingControlSemaphore = testingControlSemaphore;
     }
 
     @Override
-    public PythonEvaluationResult evalOnExternalPythonServer(String script, String prepareEnvironmentScript, Map<String, Serializable> vars) throws JsonProcessingException {
-        return getPythonEvaluationResult(script, prepareEnvironmentScript, vars);
+    public PythonEvaluationResult eval(String script, String prepareEnvironmentScript, Map<String, Serializable> vars) {
+        try {
+            return getPythonEvaluationResult(script, prepareEnvironmentScript, vars);
+        } catch (JsonProcessingException ie) {
+            logger.error(ie);
+            throw new ExternalPythonScriptException("Execution was interrupted while waiting for a python permit.");
+        }
     }
+
+    @Override
+    public PythonExecutionResult exec(Set<String> dependencies, String script, Map<String, Serializable> vars) {
+        try {
+            if (executionControlSemaphore.tryAcquire(1L, TimeUnit.SECONDS)) {
+                try {
+                    return externalPythonExecutionEngine.exec(dependencies, script, vars);
+                } finally {
+                    executionControlSemaphore.release();
+                }
+            } else {
+                logger.warn("Maximum number of python processes has been reached. Waiting for a python process to finish. " +
+                        "You can configure the number of concurrent python executions by setting " +
+                        "'python.concurrent.execution.permits' system property.");
+                executionControlSemaphore.acquire();
+                try {
+                    logger.info("Acquired a permit for a new python process. Continuing with execution...");
+                    return externalPythonExecutionEngine.exec(dependencies, script, vars);
+                } finally {
+                    executionControlSemaphore.release();
+                }
+            }
+        } catch (InterruptedException ie) {
+            throw new ExternalPythonScriptException("Execution was interrupted while waiting for a python permit.");
+        }
+    }
+
+    @Override
+    public PythonEvaluationResult test(String prepareEnvironmentScript, String script, Map<String, Serializable> vars, long timeout) {
+        try {
+            if (testingControlSemaphore.tryAcquire(1L, TimeUnit.SECONDS)) {
+                try {
+                    return externalPythonExecutionEngine.test(prepareEnvironmentScript, script, vars, timeout);
+                } finally {
+                    testingControlSemaphore.release();
+                }
+            } else {
+                logger.warn("Maximum number of python processes has been reached. Waiting for a python process to finish. " +
+                        "You can configure the number of concurrent python executions by setting " +
+                        "'python.testing.concurrent.execution.permits' system property.");
+                testingControlSemaphore.acquire();
+                try {
+                    logger.info("Acquired a permit for a new python process. Continuing with execution...");
+                    return externalPythonExecutionEngine.test(prepareEnvironmentScript, script, vars, timeout);
+                } finally {
+                    testingControlSemaphore.release();
+                }
+            }
+        } catch (InterruptedException ie) {
+            throw new ExternalPythonScriptException("Execution was interrupted while waiting for a python permit.");
+        }
+    }
+
 
     private PythonEvaluationResult getPythonEvaluationResult(String expression, String prepareEnvironmentScript,
                                                              Map<String, Serializable> context) throws JsonProcessingException {
