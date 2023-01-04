@@ -108,4 +108,14 @@
           constraintName="OO_EXECUTION_STATE_UC"/>
     </changeSet>
 
+	<changeSet id="Add SPLIT_ID column to OO_EXECS_STATES_EXECS_MAPPINGS" author="engine">
+		<addColumn tableName="OO_EXECS_STATES_EXECS_MAPPINGS">
+			<column name="SPLIT_ID" type="VARCHAR(255)"/>
+		</addColumn>
+
+		<rollback>
+			<dropColumn tableName="OO_EXECS_STATES_EXECS_MAPPINGS" columnName="SPLIT_ID"/>
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

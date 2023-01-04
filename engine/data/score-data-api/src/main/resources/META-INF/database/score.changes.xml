@@ -326,4 +326,15 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
             <dropColumn tableName="OO_WORKER_NODES" columnName="PERCENTAGE_UTILIZATION"/>
         </rollback>
     </changeSet>
+
+    <changeSet id="Add SPLIT_ID column to OO_EXECS_STATES_EXECS_MAPPINGS" author="engine">
+        <addColumn tableName="OO_EXECS_STATES_EXECS_MAPPINGS">
+            <column name="SPLIT_ID" type="VARCHAR(255)"/>
+        </addColumn>
+
+        <rollback>
+            <dropColumn tableName="OO_EXECS_STATES_EXECS_MAPPINGS" columnName="SPLIT_ID"/>
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>

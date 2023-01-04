@@ -59,6 +59,8 @@ public interface ExecutionQueueRepository {
 
 	StartNewBranchPayload getFirstPendingBranch(final long executionId);
 
+	StartNewBranchPayload getFirstPendingBranchBySplitId(final String splitId);
+
 	void activatePendingExecutionStateForAnExecution(final long executionId);
 
 	void deletePendingExecutionState(final long executionStatesId);
