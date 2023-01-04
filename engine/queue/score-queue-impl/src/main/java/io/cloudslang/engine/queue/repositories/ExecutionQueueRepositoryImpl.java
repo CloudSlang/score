@@ -287,7 +287,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
     final private String INSERT_QUEUE = "INSERT INTO OO_EXECUTION_QUEUES (ID, EXEC_STATE_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS,MSG_SEQ_ID, CREATE_TIME,MSG_VERSION) VALUES (?, ?, ?, ?, ?, ?,?,?)";
 
-    final private String INSERT_EXECUTION_STATE_MAPPING = "INSERT INTO OO_EXECS_STATES_EXECS_MAPPINGS (ID, EXEC_STATE_ID, EXEC_ID) VALUES (?, ?, ?)";
+    final private String INSERT_EXECUTION_STATE_MAPPING = "INSERT INTO OO_EXECS_STATES_EXECS_MAPPINGS (ID, EXEC_STATE_ID, EXEC_ID, SPLIT_ID) VALUES (?, ?, ?, ?)";
 
     private static final String QUERY_PAYLOAD_BY_EXECUTION_IDS = "SELECT ID, PAYLOAD FROM OO_EXECUTION_STATES WHERE ID IN (:IDS)";
 
@@ -474,6 +474,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                 preparedStatement.setLong(1, idGen.next());
                 preparedStatement.setLong(2, executionMessage.getExecStateId());
                 preparedStatement.setLong(3, parseLong(executionMessage.getMsgId()));
+                preparedStatement.setString(4, executionMessage.getSplitId());
             }
 
             @Override
@@ -488,6 +489,21 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         final String sql = "SELECT ID, EXEC_STATE_ID FROM OO_EXECS_STATES_EXECS_MAPPINGS WHERE EXEC_ID = ?";
         getFirstPendingBranchJdbcTemplate.setStatementBatchSize(1);
         Object[] inputs = {executionId};
+        StartNewBranchPayload startNewBranchPayload = null;
+        try {
+            startNewBranchPayload = getFirstPendingBranchJdbcTemplate.queryForObject(sql, inputs,
+                    (resultSet, rowNumber) -> new StartNewBranchPayload(resultSet.getLong("EXEC_STATE_ID"),
+                            resultSet.getLong("ID")));
+        } catch (EmptyResultDataAccessException ignored) {
+        }
+        return startNewBranchPayload;
+    }
+
+    @Override
+    public StartNewBranchPayload getFirstPendingBranchBySplitId(final String splitId) {
+        final String sql = "SELECT ID, EXEC_STATE_ID FROM OO_EXECS_STATES_EXECS_MAPPINGS WHERE SPLIT_ID = ?";
+        getFirstPendingBranchJdbcTemplate.setStatementBatchSize(1);
+        Object[] inputs = {splitId};
         StartNewBranchPayload startNewBranchPayload = null;
         try {
             startNewBranchPayload = getFirstPendingBranchJdbcTemplate.queryForObject(sql, inputs,
