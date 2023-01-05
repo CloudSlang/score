@@ -35,6 +35,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.annotation.PostConstruct;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Result;
@@ -205,7 +206,7 @@ public class DependencyServiceImpl implements DependencyService {
                 }
                 dependencyList = parse(file);
                 resolvedResources.addAll(dependencyList);
-            } catch (IOException|InterruptedException e) {
+            } catch (IOException | InterruptedException e) {
                 throw new IllegalStateException(e);
             }
         }
@@ -331,7 +332,14 @@ public class DependencyServiceImpl implements DependencyService {
 
     private void removeByXpathExpression(String pomFilePath, String expression) throws SAXException, IOException, ParserConfigurationException, XPathExpressionException, TransformerException {
         File xmlFile = new File(pomFilePath);
-        Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xmlFile);
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        documentBuilderFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        documentBuilderFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        documentBuilderFactory.setExpandEntityReferences(false);
+
+        Document doc = documentBuilderFactory.newDocumentBuilder().parse(xmlFile);
         XPath xpath = XPathFactory.newInstance().newXPath();
         NodeList nl = (NodeList) xpath.compile(expression).
                 evaluate(doc, XPathConstants.NODESET);
@@ -342,7 +350,13 @@ public class DependencyServiceImpl implements DependencyService {
                 node.getParentNode().removeChild(node);
             }
 
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            transformerFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            transformerFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            transformerFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+
+            Transformer transformer = transformerFactory.newTransformer();
             // need to convert to file and then to path to override a problem with spaces
             Result output = new StreamResult(new File(pomFilePath).getPath());
             Source input = new DOMSource(doc);
