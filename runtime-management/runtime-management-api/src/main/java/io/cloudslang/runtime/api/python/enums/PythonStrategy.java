@@ -21,7 +21,7 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 public enum PythonStrategy {
 
-    PYTHON_SERVER("python-server"),
+    PYTHON_EXECUTOR("python-executor"),
     PYTHON("python"),
     JYTHON("jython");
 
