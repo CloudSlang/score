@@ -31,7 +31,7 @@ import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import static io.cloudslang.runtime.api.python.enums.PythonStrategy.PYTHON_SERVER;
+import static io.cloudslang.runtime.api.python.enums.PythonStrategy.PYTHON_EXECUTOR;
 import static io.cloudslang.runtime.api.python.enums.PythonStrategy.getPythonStrategy;
 
 public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
@@ -42,7 +42,7 @@ public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
     private final Semaphore testingControlSemaphore;
 
     private static final PythonStrategy PYTHON_EVALUATOR =
-            getPythonStrategy(System.getProperty("python.expressionsEval"), PYTHON_SERVER);
+            getPythonStrategy(System.getProperty("python.expressionsEval"), PYTHON_EXECUTOR);
 
     @Autowired
     private ExternalPythonServerService externalPythonServerService;
@@ -83,7 +83,7 @@ public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
 
     @Override
     public PythonEvaluationResult eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
-        if (PYTHON_SERVER.equals(PYTHON_EVALUATOR)) {
+        if (PYTHON_EXECUTOR.equals(PYTHON_EVALUATOR)) {
             try {
                 return externalPythonServerService.evalOnExternalPythonServer(script, prepareEnvironmentScript, vars);
             } catch (JsonProcessingException ie) {
