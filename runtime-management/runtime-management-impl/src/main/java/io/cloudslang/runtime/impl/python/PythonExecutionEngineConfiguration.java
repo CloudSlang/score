@@ -20,7 +20,10 @@ import io.cloudslang.dependency.impl.services.DependenciesManagementConfiguratio
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonRuntimeServiceImpl;
+import io.cloudslang.runtime.impl.python.external.ExternalPythonServerServiceImpl;
+import io.cloudslang.runtime.impl.python.external.StatefulRestEasyClientsHolder;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -37,6 +40,9 @@ import static io.cloudslang.runtime.impl.python.PythonExecutionConfigurationCons
 @ComponentScan("io.cloudslang.runtime.impl.python")
 @Import({DependenciesManagementConfiguration.class})
 public class PythonExecutionEngineConfiguration {
+    @Autowired
+    private StatefulRestEasyClientsHolder statefulRestEasyClient;
+
     @Bean(name = "jythonRuntimeService")
     public PythonRuntimeService pythonRuntimeService() {
         return new PythonRuntimeServiceImpl();
@@ -47,6 +53,13 @@ public class PythonExecutionEngineConfiguration {
         Integer pythonProcessPermits = Integer.getInteger("python.concurrent.execution.permits", 30);
         Integer pythonTestingProcessPermits = Integer.getInteger("python.testing.concurrent.execution.permits", 10);
         return new ExternalPythonRuntimeServiceImpl(new Semaphore(pythonProcessPermits), new Semaphore(pythonTestingProcessPermits));
+    }
+
+    @Bean(name = "externalPythonServerService")
+    public PythonRuntimeService externalPythonServerService() {
+        Integer pythonProcessPermits = Integer.getInteger("python.concurrent.execution.permits", 30);
+        Integer pythonTestingProcessPermits = Integer.getInteger("python.testing.concurrent.execution.permits", 10);
+        return new ExternalPythonServerServiceImpl(statefulRestEasyClient, new Semaphore(pythonProcessPermits), new Semaphore(pythonTestingProcessPermits));
     }
 
     @Bean(name = "jythonExecutionEngine")

@@ -15,14 +15,11 @@
  */
 package io.cloudslang.runtime.impl.python.external;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
-import io.cloudslang.runtime.api.python.enums.PythonStrategy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Resource;
 import java.io.Serializable;
@@ -31,21 +28,12 @@ import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import static io.cloudslang.runtime.api.python.enums.PythonStrategy.PYTHON_EXECUTOR;
-import static io.cloudslang.runtime.api.python.enums.PythonStrategy.getPythonStrategy;
-
 public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
     private static final Logger logger = LogManager.getLogger(ExternalPythonRuntimeServiceImpl.class);
 
     private final Semaphore executionControlSemaphore;
 
     private final Semaphore testingControlSemaphore;
-
-    private static final PythonStrategy PYTHON_EVALUATOR =
-            getPythonStrategy(System.getProperty("python.expressionsEval"), PYTHON_EXECUTOR);
-
-    @Autowired
-    private ExternalPythonServerService externalPythonServerService;
 
     public ExternalPythonRuntimeServiceImpl(Semaphore executionControlSemaphore, Semaphore testingControlSemaphore) {
         this.executionControlSemaphore = executionControlSemaphore;
@@ -82,19 +70,6 @@ public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
     }
 
     @Override
-    public PythonEvaluationResult eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
-        if (PYTHON_EXECUTOR.equals(PYTHON_EVALUATOR)) {
-            try {
-                return externalPythonServerService.evalOnExternalPythonServer(script, prepareEnvironmentScript, vars);
-            } catch (JsonProcessingException ie) {
-                logger.error(ie);
-                throw new ExternalPythonScriptException("Execution was interrupted while waiting for a python permit.");
-            }
-        } else
-            return evalForPythonCase(prepareEnvironmentScript, script, vars);
-    }
-
-    @Override
     public PythonEvaluationResult test(String prepareEnvironmentScript, String script, Map<String, Serializable> vars, long timeout) {
         try {
             if (testingControlSemaphore.tryAcquire(1L, TimeUnit.SECONDS)) {
@@ -120,7 +95,8 @@ public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
         }
     }
 
-    private PythonEvaluationResult evalForPythonCase(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
+    @Override
+    public PythonEvaluationResult eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
         try {
             if (executionControlSemaphore.tryAcquire(1L, TimeUnit.SECONDS)) {
                 try {
