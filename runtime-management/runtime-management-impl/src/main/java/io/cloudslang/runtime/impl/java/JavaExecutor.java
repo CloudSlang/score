@@ -26,6 +26,7 @@ import org.apache.logging.log4j.Logger;
 import org.python.google.common.collect.Sets;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -77,7 +78,8 @@ public class JavaExecutor implements Executor {
         PARENT_CLASS_LOADER = new URLClassLoader(parentUrls, parentClassLoader);
     }
 
-    private final ClassLoader classLoader;
+    private ClassLoader classLoader;
+    private final boolean usingNewlyConstructedClassLoader;
 
     JavaExecutor(Set<String> filePaths) {
         logger.info("Creating java classloader with [" + filePaths.size() + "] dependencies [" + filePaths + "]");
@@ -91,9 +93,11 @@ public class JavaExecutor implements Executor {
                 }
             }
             classLoader = new URLClassLoader(result.toArray(new URL[result.size()]), PARENT_CLASS_LOADER);
+            usingNewlyConstructedClassLoader = true;
         } else {
             // no dependencies - use application classloader
             classLoader = getClass().getClassLoader();
+            usingNewlyConstructedClassLoader = false;
         }
     }
 
@@ -237,5 +241,14 @@ public class JavaExecutor implements Executor {
 
     @Override
     public void close() {
+        if (usingNewlyConstructedClassLoader) {
+            try {
+                ((URLClassLoader) classLoader).close();
+            } catch (IOException ignored) {
+
+            } finally {
+                classLoader = null;
+            }
+        }
     }
 }
