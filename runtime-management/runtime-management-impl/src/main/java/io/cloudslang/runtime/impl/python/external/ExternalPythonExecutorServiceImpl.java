@@ -49,9 +49,9 @@ import static org.jboss.resteasy.util.HttpHeaderNames.AUTHORIZATION;
 import static org.jboss.resteasy.util.HttpHeaderNames.CONTENT_TYPE;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON;
 
-public class ExternalPythonServerServiceImpl extends ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
+public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
 
-    private static final Logger logger = LogManager.getLogger(ExternalPythonServerServiceImpl.class);
+    private static final Logger logger = LogManager.getLogger(ExternalPythonExecutorServiceImpl.class);
     private static final String EXTERNAL_PYTHON_PORT = System.getProperty("python.port", String.valueOf(8001));
     private static final String EXTERNAL_PYTHON_EXECUTOR_URL = "https://localhost:" + EXTERNAL_PYTHON_PORT;
     private static final String EXTERNAL_PYTHON_EXECUTOR_EVAL_PATH = "/rest/v1/eval";
@@ -59,7 +59,7 @@ public class ExternalPythonServerServiceImpl extends ExternalPythonRuntimeServic
     private final ResteasyClient restEasyClient;
     private final ObjectMapper objectMapper;
 
-    public ExternalPythonServerServiceImpl(StatefulRestEasyClientsHolder statefulRestEasyClient,
+    public ExternalPythonExecutorServiceImpl(StatefulRestEasyClientsHolder statefulRestEasyClient,
                                            Semaphore executionControlSemaphore,
                                            Semaphore testingControlSemaphore) {
         super(executionControlSemaphore, testingControlSemaphore);
