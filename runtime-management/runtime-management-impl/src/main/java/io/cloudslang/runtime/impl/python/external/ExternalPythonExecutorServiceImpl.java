@@ -89,6 +89,7 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
                     USERNAME = matcher.group(1);
                 } else if ((matcher = passwordPattern.matcher(line)).matches()) {
                     PASSWORD = matcher.group(1);
+                    break;
                 }
             }
         } catch (IOException e) {
