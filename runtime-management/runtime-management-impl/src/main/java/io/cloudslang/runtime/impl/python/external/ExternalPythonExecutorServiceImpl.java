@@ -25,6 +25,7 @@ import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.LineIterator;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,6 +41,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.io.File.separator;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -66,14 +69,28 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
     static {
         String appHome = System.getProperty("app.home");
         String PYTHON_PROPERTIES_FILE_NAME = "python-executor.properties";
-        File pythonProp = FileUtils.getFile(appHome + separator + "conf" + separator + PYTHON_PROPERTIES_FILE_NAME);
+        File pythonPropFile = FileUtils.getFile(appHome + separator + "conf" + separator + PYTHON_PROPERTIES_FILE_NAME);
+        Pattern portPattern = compile("executor\\.port=(.*)$");
+        Pattern usernamePattern = compile("users\\.1\\.username=(.*)$");
+        Pattern passwordPattern = compile("users\\.1\\.password=(.*)$");
+        Matcher matcher;
+
         try {
-            String data = FileUtils.readFileToString(pythonProp, UTF_8);
-            String pythonPort = compile("executor\\.port=(.*)$").matcher(data).group(1);
-            EXTERNAL_PYTHON_EXECUTOR_URL = "https://localhost:" + pythonPort;
-            // First user inside folder is reserved for python eval
-            USERNAME = compile("users\\.1\\.username=(.*)$").matcher(data).group(1);
-            PASSWORD = compile("users\\.1\\.password=(.*)$").matcher(data).group(1);
+            LineIterator lineIterator = FileUtils.lineIterator(pythonPropFile, UTF_8.name());
+
+            log.info("Reading properties from " + PYTHON_PROPERTIES_FILE_NAME);
+
+            String line;
+            while (lineIterator.hasNext()) {
+                line = lineIterator.nextLine();
+                if ((matcher = portPattern.matcher(line)).find()) {
+                    EXTERNAL_PYTHON_EXECUTOR_URL = "https://localhost:" + matcher.group(1);
+                } else if ((matcher = usernamePattern.matcher(line)).matches()) {
+                    USERNAME = matcher.group(1);
+                } else if ((matcher = passwordPattern.matcher(line)).matches()) {
+                    PASSWORD = matcher.group(1);
+                }
+            }
         } catch (IOException e) {
             log.error("Failed to read " + PYTHON_PROPERTIES_FILE_NAME, e);
         }
