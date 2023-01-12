@@ -60,8 +60,7 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
     private static final String EXTERNAL_PYTHON_EXECUTOR_EVAL_PATH = "/rest/v1/eval";
 
     private static String EXTERNAL_PYTHON_EXECUTOR_URL;
-    private static String USERNAME;
-    private static String PASSWORD;
+    private static String ENCODED_AUTH;
 
     private final ResteasyClient restEasyClient;
     private final ObjectMapper objectMapper;
@@ -81,17 +80,20 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
             log.info("Reading properties from " + PYTHON_PROPERTIES_FILE_NAME);
 
             String line;
+            String username = "";
+            String password = "";
             while (lineIterator.hasNext()) {
                 line = lineIterator.nextLine();
                 if ((matcher = portPattern.matcher(line)).find()) {
                     EXTERNAL_PYTHON_EXECUTOR_URL = "https://localhost:" + matcher.group(1);
                 } else if ((matcher = usernamePattern.matcher(line)).matches()) {
-                    USERNAME = matcher.group(1);
+                    username = matcher.group(1);
                 } else if ((matcher = passwordPattern.matcher(line)).matches()) {
-                    PASSWORD = matcher.group(1);
+                    password = matcher.group(1);
                     break;
                 }
             }
+            ENCODED_AUTH = getEncoder().encodeToString((username + ":" + password).getBytes(UTF_8));
         } catch (IOException e) {
             log.error("Failed to read " + PYTHON_PROPERTIES_FILE_NAME, e);
         }
@@ -152,16 +154,11 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
                 .request()
                 .accept(APPLICATION_JSON_TYPE)
                 .header(CONTENT_TYPE, APPLICATION_JSON)
-                .header(AUTHORIZATION, getBasicAuthorizationHeaderValue())
+                .header(AUTHORIZATION, ENCODED_AUTH)
                 .build(method, entity(payload, APPLICATION_JSON_TYPE))
                 .invoke();
 
         return objectMapper.readValue(scriptResponse.readEntity(String.class), EvaluationResults.class);
-    }
-
-    private String getBasicAuthorizationHeaderValue() {
-        String encodedAuth = getEncoder().encodeToString((USERNAME + ":" + PASSWORD).getBytes(UTF_8));
-        return "Basic " + encodedAuth;
     }
 
     private String generatePayloadForEval(String expression, String prepareEnvironmentScript,
