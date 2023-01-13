@@ -29,6 +29,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,6 +78,10 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
         } catch (JsonProcessingException ie) {
             logger.error(ie);
             throw new ExternalPythonScriptException("Execution was interrupted while waiting for a python permit.");
+        }
+        catch (ProcessingException exception) {
+            logger.error("Could not evaluate expressions on python executor, retrying with python");
+            throw new ExternalPythonScriptException("Python server is down or can't process the execution of the python expression");
         }
     }
 
