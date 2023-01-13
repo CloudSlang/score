@@ -76,7 +76,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     // Note : Do not join the below queries using a OR clause as it has proved to more expensive
     final private String SELECT_FINISHED_STEPS_IDS_1 = "SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES EQ WHERE EQ.STATUS IN (6,7,8)" ;
     final private String SELECT_FINISHED_STEPS_IDS_2 =  "SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES EQ WHERE (EQ.EXEC_STATE_ID IN "
-            + "(SELECT DISTINCT STATES.ID FROM OO_EXECUTION_STATES STATES JOIN OO_EXECUTION_STATE ES ON STATES.MSG_ID = CAST(ES.EXECUTION_ID AS VARCHAR(255)) "
+            + "(SELECT DISTINCT STATES.ID FROM OO_EXECUTION_STATES STATES JOIN OO_EXECUTION_STATE ES ON STATES.MSG_ID = CAST(ES.EXECUTION_ID AS NVARCHAR(64)) "
             + "WHERE ES.STATUS IN('COMPLETED','CANCELED','SYSTEM_FAILURE') ))";
     final private String QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES = "DELETE FROM OO_EXECUTION_QUEUES " +
             " WHERE EXEC_STATE_ID in (:ids)";
@@ -110,7 +110,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
             "SELECT COUNT(*)  " +
                     "  FROM  OO_EXECUTION_QUEUES  q  " +
                     "  WHERE " +
-                    "      (q.ASSIGNED_WORKER  = ? ) AND " +
+                    "      (q.ASSIGNED_WORKER  = CAST(? AS NVARCHAR(40))) AND " +
                     "      (q.STATUS  = ? ) AND " +
                     "     (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
                     "                  FROM OO_EXECUTION_QUEUES qq " +
@@ -132,7 +132,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     " FROM  OO_EXECUTION_QUEUES q,  " +
                     "      OO_EXECUTION_STATES s   " +
                     " WHERE  " +
-                    "      (q.ASSIGNED_WORKER =  ?)  AND " +
+                    "      (q.ASSIGNED_WORKER =  CAST(? AS NVARCHAR(40)))  AND " +
                     "      (q.STATUS IN (:status)) AND " +
                     " 	   (s.ACTIVE = 1) AND " +
                     " (q.EXEC_STATE_ID = s.ID) AND " +
@@ -162,7 +162,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       SUM(PAYLOAD_SIZE) OVER (ORDER BY q.CREATE_TIME ASC) AS total " +
                     "   FROM OO_EXECUTION_QUEUES q, " +
                     "       OO_EXECUTION_STATES s " +
-                    "   WHERE (q.ASSIGNED_WORKER = ?)  AND " +
+                    "   WHERE (q.ASSIGNED_WORKER = CAST(? AS NVARCHAR(40)))  AND " +
                     "       (q.STATUS IN (:status)) AND " +
                     "       (s.PAYLOAD_SIZE < ?) AND " +
                     " 	    (s.ACTIVE = 1) AND " +
@@ -195,7 +195,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       SUM(PAYLOAD_SIZE) OVER (ORDER BY q.CREATE_TIME ASC) AS total " +
                     "   FROM OO_EXECUTION_QUEUES q, " +
                     "       OO_EXECUTION_STATES s " +
-                    "   WHERE (q.ASSIGNED_WORKER = ?)  AND " +
+                    "   WHERE (q.ASSIGNED_WORKER = CAST(? AS NVARCHAR(40)))  AND " +
                     "       (q.STATUS IN (:status)) AND " +
                     "       (s.PAYLOAD_SIZE < ?) AND " +
                     " 	    (s.ACTIVE = 1) AND " +
@@ -227,7 +227,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       (@csum:=@csum + PAYLOAD_SIZE) AS total " +
                     "   FROM OO_EXECUTION_QUEUES q, " +
                     "       OO_EXECUTION_STATES s JOIN(SELECT @csum:=0) c " +
-                    "   WHERE (q.ASSIGNED_WORKER = ?)  AND " +
+                    "   WHERE (q.ASSIGNED_WORKER = CAST(? AS NVARCHAR(40)))  AND " +
                     "       (q.STATUS IN (:status)) AND " +
                     "       (s.PAYLOAD_SIZE < ?) AND " +
                     " 	    (s.ACTIVE = 1) AND " +
@@ -251,7 +251,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     " FROM  OO_EXECUTION_QUEUES q,  " +
                     "       OO_EXECUTION_STATES s1   " +
                     " WHERE  " +
-                    "      (q.ASSIGNED_WORKER =  ?)  AND " +
+                    "      (q.ASSIGNED_WORKER =  cast(? as NVARCHAR(40)))  AND " +
                     "      (q.STATUS IN (:status)) AND " +
                     " q.EXEC_STATE_ID = s1.ID AND" +
                     " (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
