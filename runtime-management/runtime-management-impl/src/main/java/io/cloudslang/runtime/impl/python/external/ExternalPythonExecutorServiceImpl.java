@@ -33,6 +33,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import javax.ws.rs.ProcessingException;
 import javax.annotation.PostConstruct;
 import javax.ws.rs.core.Response;
 import java.io.Serializable;
@@ -94,6 +95,9 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
         } catch (JsonProcessingException ie) {
             logger.error(ie);
             throw new ExternalPythonScriptException("Execution was interrupted while waiting for a python permit.");
+        }
+        catch (ProcessingException exception) {
+            throw new ExternalPythonScriptException("Python server is down or can't process the execution of the python expression");
         }
     }
 
