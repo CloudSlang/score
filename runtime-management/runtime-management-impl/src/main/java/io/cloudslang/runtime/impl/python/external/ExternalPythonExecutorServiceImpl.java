@@ -80,7 +80,6 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
             throw new ExternalPythonScriptException("Execution was interrupted while waiting for a python permit.");
         }
         catch (ProcessingException exception) {
-            logger.error("Could not evaluate expressions on python executor, retrying with python");
             throw new ExternalPythonScriptException("Python server is down or can't process the execution of the python expression");
         }
     }
