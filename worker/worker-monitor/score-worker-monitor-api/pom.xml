@@ -20,7 +20,7 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>worker-monitor</artifactId>
-        <version>0.3.292</version>
+        <version>0.3.293-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
