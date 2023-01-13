@@ -23,17 +23,18 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
+import io.cloudslang.runtime.api.python.PythonExecutorConfigurationDataService;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.LineIterator;
+import io.cloudslang.runtime.api.python.entities.PythonExecutorDetails;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
+import javax.annotation.PostConstruct;
 import javax.ws.rs.core.Response;
-import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -41,13 +42,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import static java.io.File.separator;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Base64.getEncoder;
-import static java.util.regex.Pattern.compile;
 import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static org.jboss.resteasy.util.HttpHeaderNames.AUTHORIZATION;
@@ -55,8 +52,8 @@ import static org.jboss.resteasy.util.HttpHeaderNames.CONTENT_TYPE;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON;
 
 public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
+    private static final Logger logger = LogManager.getLogger(ExternalPythonExecutorServiceImpl.class);
 
-    private static final Logger log = LogManager.getLogger(ExternalPythonExecutorServiceImpl.class);
     private static final String EXTERNAL_PYTHON_EXECUTOR_EVAL_PATH = "/rest/v1/eval";
 
     private static String EXTERNAL_PYTHON_EXECUTOR_URL;
@@ -65,38 +62,18 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
     private final ResteasyClient restEasyClient;
     private final ObjectMapper objectMapper;
 
-    static {
-        String appHome = System.getProperty("app.home");
-        String PYTHON_PROPERTIES_FILE_NAME = "python-executor.properties";
-        File pythonPropFile = FileUtils.getFile(appHome + separator + "conf" + separator + PYTHON_PROPERTIES_FILE_NAME);
-        Pattern portPattern = compile("executor\\.port=(.*)$");
-        Pattern usernamePattern = compile("users\\.1\\.username=(.*)$");
-        Pattern passwordPattern = compile("users\\.1\\.password=(.*)$");
-        Matcher matcher;
+    @Autowired
+    @Qualifier("pythonExecutorConfigurationDataService")
+    PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService;
 
-        try {
-            LineIterator lineIterator = FileUtils.lineIterator(pythonPropFile, UTF_8.name());
-
-            log.info("Reading properties from " + PYTHON_PROPERTIES_FILE_NAME);
-
-            String line;
-            String username = "";
-            String password = "";
-            while (lineIterator.hasNext()) {
-                line = lineIterator.nextLine();
-                if ((matcher = portPattern.matcher(line)).find()) {
-                    EXTERNAL_PYTHON_EXECUTOR_URL = "https://localhost:" + matcher.group(1);
-                } else if ((matcher = usernamePattern.matcher(line)).matches()) {
-                    username = matcher.group(1);
-                } else if ((matcher = passwordPattern.matcher(line)).matches()) {
-                    password = matcher.group(1);
-                    break;
-                }
-            }
-            ENCODED_AUTH = getEncoder().encodeToString((username + ":" + password).getBytes(UTF_8));
-        } catch (IOException e) {
-            log.error("Failed to read " + PYTHON_PROPERTIES_FILE_NAME, e);
-        }
+    @PostConstruct
+    void initPythonExecutorConfigurationDetails() {
+        PythonExecutorDetails pythonExecutorDetails = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
+        String port = pythonExecutorDetails.getPort();
+        String username = pythonExecutorDetails.getRuntimeUsername();
+        String password = pythonExecutorDetails.getRuntimePassword();
+        EXTERNAL_PYTHON_EXECUTOR_URL = "https://localhost:" + port;
+        ENCODED_AUTH = "Basic " + getEncoder().encodeToString((username + ":" + password).getBytes(UTF_8));
     }
 
     public ExternalPythonExecutorServiceImpl(StatefulRestEasyClientsHolder statefulRestEasyClient,
@@ -115,7 +92,7 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
         try {
             return getPythonEvaluationResult(script, prepareEnvironmentScript, vars);
         } catch (JsonProcessingException ie) {
-            log.error(ie);
+            logger.error(ie);
             throw new ExternalPythonScriptException("Execution was interrupted while waiting for a python permit.");
         }
     }
@@ -139,7 +116,7 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
 
         String exception = scriptResults.getException();
         if (StringUtils.isNotEmpty(exception)) {
-            log.error(String.format("Failed to execute script {%s}", exception));
+            logger.error(String.format("Failed to execute script {%s}", exception));
             throw new ExternalPythonEvalException(exception);
         }
         context.put(accessedResources, (Serializable) scriptResults.getAccessedResources());
