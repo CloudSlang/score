@@ -34,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.ws.rs.ProcessingException;
-import javax.annotation.PostConstruct;
 import javax.ws.rs.core.Response;
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -44,8 +43,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Base64.getEncoder;
 import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static org.jboss.resteasy.util.HttpHeaderNames.AUTHORIZATION;
@@ -67,16 +64,6 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
     @Qualifier("pythonExecutorConfigurationDataService")
     PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService;
 
-    @PostConstruct
-    void initPythonExecutorConfigurationDetails() {
-        PythonExecutorDetails pythonExecutorDetails = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
-        String port = pythonExecutorDetails.getPort();
-        String username = pythonExecutorDetails.getRuntimeUsername();
-        String password = pythonExecutorDetails.getRuntimePassword();
-        EXTERNAL_PYTHON_EXECUTOR_URL = "https://localhost:" + port;
-        ENCODED_AUTH = "Basic " + getEncoder().encodeToString((username + ":" + password).getBytes(UTF_8));
-    }
-
     public ExternalPythonExecutorServiceImpl(StatefulRestEasyClientsHolder statefulRestEasyClient,
                                            Semaphore executionControlSemaphore,
                                            Semaphore testingControlSemaphore) {
@@ -86,6 +73,9 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
         factory.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
         factory.enable(JsonWriteFeature.ESCAPE_NON_ASCII.mappedFeature());
         this.objectMapper = new ObjectMapper(factory);
+        PythonExecutorDetails pythonExecutorDetails = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
+        EXTERNAL_PYTHON_EXECUTOR_URL = pythonExecutorDetails.getUrl();
+        ENCODED_AUTH = pythonExecutorDetails.getRuntimeEncodedAuth();
     }
 
     @Override

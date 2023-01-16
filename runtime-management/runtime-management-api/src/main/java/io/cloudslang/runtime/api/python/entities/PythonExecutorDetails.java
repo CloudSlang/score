@@ -18,20 +18,18 @@ package io.cloudslang.runtime.api.python.entities;
 public class PythonExecutorDetails {
 
     private String port;
-    private String runtimeUsername;
-    private String runtimePassword;
-    private String lifecycleUsername;
-    private String lifecyclePassword;
+    private String url;
+    private String runtimeEncodedAuth;
+    private String lifecycleEncodedAuth;
 
     public PythonExecutorDetails() {
     }
 
-    public PythonExecutorDetails(String port, String runtimeUsername, String runtimePassword, String lifecycleUsername, String lifecyclePassword) {
+    public PythonExecutorDetails(String port, String url, String runtimeEncodedAuth, String lifecycleEncodedAuth) {
         this.port = port;
-        this.runtimeUsername = runtimeUsername;
-        this.runtimePassword = runtimePassword;
-        this.lifecycleUsername = lifecycleUsername;
-        this.lifecyclePassword = lifecyclePassword;
+        this.url = url;
+        this.runtimeEncodedAuth = runtimeEncodedAuth;
+        this.lifecycleEncodedAuth = lifecycleEncodedAuth;
     }
 
     public String getPort() {
@@ -42,35 +40,27 @@ public class PythonExecutorDetails {
         this.port = port;
     }
 
-    public String getRuntimeUsername() {
-        return runtimeUsername;
+    public String getUrl() {
+        return url;
     }
 
-    public void setRuntimeUsername(String runtimeUsername) {
-        this.runtimeUsername = runtimeUsername;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
-    public String getRuntimePassword() {
-        return runtimePassword;
+    public String getRuntimeEncodedAuth() {
+        return runtimeEncodedAuth;
     }
 
-    public void setRuntimePassword(String runtimePassword) {
-        this.runtimePassword = runtimePassword;
+    public void setRuntimeEncodedAuth(String runtimeEncodedAuth) {
+        this.runtimeEncodedAuth = runtimeEncodedAuth;
     }
 
-    public String getLifecycleUsername() {
-        return lifecycleUsername;
+    public String getLifecycleEncodedAuth() {
+        return lifecycleEncodedAuth;
     }
 
-    public void setLifecycleUsername(String lifecycleUsername) {
-        this.lifecycleUsername = lifecycleUsername;
-    }
-
-    public String getLifecyclePassword() {
-        return lifecyclePassword;
-    }
-
-    public void setLifecyclePassword(String lifecyclePassword) {
-        this.lifecyclePassword = lifecyclePassword;
+    public void setLifecycleEncodedAuth(String lifecycleEncodedAuth) {
+        this.lifecycleEncodedAuth = lifecycleEncodedAuth;
     }
 }
