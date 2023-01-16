@@ -67,6 +67,7 @@
 			<xsd:attribute type="xsd:boolean" name="registerExecutionPostconditionService"/>
 			<xsd:attribute type="xsd:boolean" name="registerQueueConfigurationDataService"/>
 			<xsd:attribute type="xsd:boolean" name="registerAplsLicensingService"/>
+			<xsd:attribute type="xsd:boolean" name="registerPythonExecutorConfigurationDataService"/>
 		</xsd:complexType>
 	</xsd:element>
 </xsd:schema>

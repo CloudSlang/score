@@ -23,27 +23,26 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
+import io.cloudslang.runtime.api.python.PythonExecutorConfigurationDataService;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
+import io.cloudslang.runtime.api.python.entities.PythonExecutorDetails;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Base64.getEncoder;
 import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static org.jboss.resteasy.util.HttpHeaderNames.AUTHORIZATION;
@@ -51,14 +50,19 @@ import static org.jboss.resteasy.util.HttpHeaderNames.CONTENT_TYPE;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON;
 
 public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
-
     private static final Logger logger = LogManager.getLogger(ExternalPythonExecutorServiceImpl.class);
-    private static final String EXTERNAL_PYTHON_PORT = System.getProperty("python.port", String.valueOf(8001));
-    private static final String EXTERNAL_PYTHON_EXECUTOR_URL = "https://localhost:" + EXTERNAL_PYTHON_PORT;
+
     private static final String EXTERNAL_PYTHON_EXECUTOR_EVAL_PATH = "/rest/v1/eval";
+
+    private static String EXTERNAL_PYTHON_EXECUTOR_URL;
+    private static String ENCODED_AUTH;
 
     private final ResteasyClient restEasyClient;
     private final ObjectMapper objectMapper;
+
+    @Autowired
+    @Qualifier("pythonExecutorConfigurationDataService")
+    PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService;
 
     public ExternalPythonExecutorServiceImpl(StatefulRestEasyClientsHolder statefulRestEasyClient,
                                            Semaphore executionControlSemaphore,
@@ -69,6 +73,9 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
         factory.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
         factory.enable(JsonWriteFeature.ESCAPE_NON_ASCII.mappedFeature());
         this.objectMapper = new ObjectMapper(factory);
+        PythonExecutorDetails pythonExecutorDetails = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
+        EXTERNAL_PYTHON_EXECUTOR_URL = pythonExecutorDetails.getUrl();
+        ENCODED_AUTH = pythonExecutorDetails.getRuntimeEncodedAuth();
     }
 
     @Override
@@ -118,31 +125,11 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
                 .request()
                 .accept(APPLICATION_JSON_TYPE)
                 .header(CONTENT_TYPE, APPLICATION_JSON)
-                .header(AUTHORIZATION, getBasicAuthorizationHeaderValue())
+                .header(AUTHORIZATION, ENCODED_AUTH)
                 .build(method, entity(payload, APPLICATION_JSON_TYPE))
                 .invoke();
 
         return objectMapper.readValue(scriptResponse.readEntity(String.class), EvaluationResults.class);
-    }
-
-    private Properties readFromPropertiesFiles() {
-        String filename = "pythonServer.properties";
-        Properties prop = new Properties();
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream(filename)) {
-            prop.load(input);
-        } catch (IOException exception) {
-            logger.error(String.format("Failed to read from file", exception));
-            throw new RuntimeException(exception);
-        }
-        return prop;
-    }
-
-    private String getBasicAuthorizationHeaderValue() {
-        Properties prop = readFromPropertiesFiles();
-        String username = prop.getProperty("username");
-        String password = prop.getProperty("password");
-        String encodedAuth = getEncoder().encodeToString((username + ":" + password).getBytes(UTF_8));
-        return "Basic " + encodedAuth;
     }
 
     private String generatePayloadForEval(String expression, String prepareEnvironmentScript,
