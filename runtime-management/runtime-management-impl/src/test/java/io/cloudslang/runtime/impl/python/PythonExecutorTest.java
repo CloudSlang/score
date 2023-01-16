@@ -23,7 +23,9 @@ import io.cloudslang.dependency.impl.services.MavenConfigImpl;
 import io.cloudslang.dependency.impl.services.utils.UnzipUtil;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
+import io.cloudslang.runtime.api.python.PythonExecutorConfigurationDataService;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
+import io.cloudslang.runtime.api.python.entities.PythonExecutorDetails;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonExecutorServiceImpl;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonRuntimeServiceImpl;
@@ -329,6 +331,11 @@ public class PythonExecutorTest {
         @Bean(name = "jythonRuntimeService")
         public PythonRuntimeService pythonRuntimeService() {
             return new PythonRuntimeServiceImpl();
+        }
+
+        @Bean(name = "pythonExecutorConfigurationDataService")
+        public PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService() {
+            return PythonExecutorDetails::new;
         }
 
         @Bean(name = "externalPythonExecutorService")

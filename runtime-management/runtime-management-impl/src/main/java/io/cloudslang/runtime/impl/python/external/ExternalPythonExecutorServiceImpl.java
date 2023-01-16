@@ -33,6 +33,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import javax.annotation.PostConstruct;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
 import java.io.Serializable;
@@ -64,6 +65,13 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
     @Qualifier("pythonExecutorConfigurationDataService")
     PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService;
 
+    @PostConstruct
+    void initPythonExecutorDetails() {
+        PythonExecutorDetails pythonExecutorDetails = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
+        EXTERNAL_PYTHON_EXECUTOR_URL = pythonExecutorDetails.getUrl();
+        ENCODED_AUTH = pythonExecutorDetails.getRuntimeEncodedAuth();
+    }
+
     public ExternalPythonExecutorServiceImpl(StatefulRestEasyClientsHolder statefulRestEasyClient,
                                            Semaphore executionControlSemaphore,
                                            Semaphore testingControlSemaphore) {
@@ -73,9 +81,6 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
         factory.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
         factory.enable(JsonWriteFeature.ESCAPE_NON_ASCII.mappedFeature());
         this.objectMapper = new ObjectMapper(factory);
-        PythonExecutorDetails pythonExecutorDetails = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
-        EXTERNAL_PYTHON_EXECUTOR_URL = pythonExecutorDetails.getUrl();
-        ENCODED_AUTH = pythonExecutorDetails.getRuntimeEncodedAuth();
     }
 
     @Override
