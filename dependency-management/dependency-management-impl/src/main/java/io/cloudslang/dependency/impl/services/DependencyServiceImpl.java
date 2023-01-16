@@ -35,13 +35,11 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.annotation.PostConstruct;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
@@ -76,6 +74,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static io.cloudslang.dependency.api.services.MavenConfig.SEPARATOR;
+import static io.cloudslang.dependency.impl.services.utils.XmlDocUtils.getSecuredDocumentFactory;
+import static io.cloudslang.dependency.impl.services.utils.XmlDocUtils.getSecuredTransformerFactory;
 import static java.lang.System.getProperty;
 
 /**
@@ -331,7 +331,7 @@ public class DependencyServiceImpl implements DependencyService {
 
     private void removeByXpathExpression(String pomFilePath, String expression) throws SAXException, IOException, ParserConfigurationException, XPathExpressionException, TransformerException {
         File xmlFile = new File(pomFilePath);
-        Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xmlFile);
+        Document doc = getSecuredDocumentFactory().newDocumentBuilder().parse(xmlFile);
         XPath xpath = XPathFactory.newInstance().newXPath();
         NodeList nl = (NodeList) xpath.compile(expression).
                 evaluate(doc, XPathConstants.NODESET);
@@ -342,7 +342,7 @@ public class DependencyServiceImpl implements DependencyService {
                 node.getParentNode().removeChild(node);
             }
 
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            Transformer transformer = getSecuredTransformerFactory().newTransformer();
             // need to convert to file and then to path to override a problem with spaces
             Result output = new StreamResult(new File(pomFilePath).getPath());
             Source input = new DOMSource(doc);
