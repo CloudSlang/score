@@ -45,9 +45,6 @@ public class XmlDocUtils {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
 
         try {
-            transformerFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-            transformerFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-            transformerFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             transformerFactory.setFeature(FEATURE_SECURE_PROCESSING, true);
         } catch (TransformerConfigurationException ignore) {
         }
