@@ -170,13 +170,12 @@ public class PythonExecutorLifecycleManagerImpl implements PythonExecutorLifecyc
             tries ++;
             if (isAlive()) {
                 logger.info("Python Executor was successfully started");
-                killPythonExecutorProcess();
                 return;
             }
             try {
                 TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
-                logger.error(e);
+                logger.warn("Interrupted while waiting for Python Executor to start");
             }
         }
 
@@ -200,7 +199,7 @@ public class PythonExecutorLifecycleManagerImpl implements PythonExecutorLifecyc
             try {
                 TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
-                logger.error(e);
+                logger.warn("Interrupted while waiting for Python Executor to stop");
             }
         }
 
