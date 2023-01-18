@@ -18,6 +18,7 @@ package io.cloudslang.runtime.impl.python.external;
 import io.cloudslang.runtime.api.python.PythonExecutorConfigurationDataService;
 import io.cloudslang.runtime.api.python.PythonExecutorLifecycleManager;
 import io.cloudslang.runtime.api.python.entities.PythonExecutorDetails;
+import io.cloudslang.runtime.api.python.enums.PythonStrategy;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,6 +34,8 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import static io.cloudslang.runtime.api.python.enums.PythonStrategy.PYTHON_EXECUTOR;
+import static io.cloudslang.runtime.api.python.enums.PythonStrategy.getPythonStrategy;
 import static java.io.File.separator;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static org.jboss.resteasy.util.HttpHeaderNames.AUTHORIZATION;
@@ -42,6 +45,7 @@ import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON;
 @Service("pythonExecutorLifecycleManager")
 public class PythonExecutorLifecycleManagerImpl implements PythonExecutorLifecycleManager {
     private static final Logger logger = LogManager.getLogger(PythonExecutorLifecycleManagerImpl.class);
+    private static final PythonStrategy PYTHON_EVALUATOR = getPythonStrategy(System.getProperty("python.expressionsEval"), PYTHON_EXECUTOR);
     private static final String OO_HOME_PATH = System.getProperty("oo.home");
     private static final String PYTHON_EXECUTOR_PATH = OO_HOME_PATH + separator + "python-executor";
     private static final String EXTERNAL_PYTHON_EXECUTOR_STOP_PATH = "/rest/v1/stop";
@@ -64,7 +68,9 @@ public class PythonExecutorLifecycleManagerImpl implements PythonExecutorLifecyc
         EXTERNAL_PYTHON_EXECUTOR_URL = pythonExecutorDetails.getUrl();
         ENCODED_AUTH = pythonExecutorDetails.getLifecycleEncodedAuth();
         restEasyClient = statefulRestEasyClientsHolder.getRestEasyClient();
-        start();
+        if (PYTHON_EVALUATOR.equals(PYTHON_EXECUTOR)) {
+            start();
+        }
     }
 
     @Override
