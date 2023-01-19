@@ -47,12 +47,13 @@ public class PythonExecutorLifecycleManagerImpl implements PythonExecutorLifecyc
     private static final Logger logger = LogManager.getLogger(PythonExecutorLifecycleManagerImpl.class);
     private static final PythonStrategy PYTHON_EVALUATOR = getPythonStrategy(System.getProperty("python.expressionsEval"), PYTHON_EXECUTOR);
     private static final String OO_HOME_PATH = System.getProperty("oo.home");
-    private static final String PYTHON_EXECUTOR_PATH = OO_HOME_PATH + separator + "python-executor";
+    private static final String PYTHON_EXECUTOR_BIN_PATH = OO_HOME_PATH + separator + "python-executor" + separator + "bin";
     private static final String EXTERNAL_PYTHON_EXECUTOR_STOP_PATH = "/rest/v1/stop";
     private static final String EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH = "/rest/v1/health";
-    private static ResteasyClient restEasyClient;
+    private static String PYTHON_EXECUTOR_PORT;
     private static String EXTERNAL_PYTHON_EXECUTOR_URL;
     private static String ENCODED_AUTH;
+    private static ResteasyClient restEasyClient;
     private static Process pythonExecutorProcess;
 
     @Autowired
@@ -65,6 +66,7 @@ public class PythonExecutorLifecycleManagerImpl implements PythonExecutorLifecyc
     @PostConstruct
     void initPythonExecutorDetails() {
         PythonExecutorDetails pythonExecutorDetails = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
+        PYTHON_EXECUTOR_PORT = pythonExecutorDetails.getPort();
         EXTERNAL_PYTHON_EXECUTOR_URL = pythonExecutorDetails.getUrl();
         ENCODED_AUTH = pythonExecutorDetails.getLifecycleEncodedAuth();
         restEasyClient = statefulRestEasyClientsHolder.getRestEasyClient();
@@ -147,9 +149,9 @@ public class PythonExecutorLifecycleManagerImpl implements PythonExecutorLifecyc
     }
 
     private void startProcess(String startPythonExecutor) {
-        ProcessBuilder pb = new ProcessBuilder(PYTHON_EXECUTOR_PATH + separator + startPythonExecutor);
+        ProcessBuilder pb = new ProcessBuilder(PYTHON_EXECUTOR_BIN_PATH + separator + startPythonExecutor, PYTHON_EXECUTOR_PORT);
         try {
-            logger.info("Starting Python Executor on port: " + pythonExecutorConfigurationDataService.getPythonExecutorConfiguration().getPort());
+            logger.info("Starting Python Executor on port: " + PYTHON_EXECUTOR_PORT);
             pythonExecutorProcess = pb.start();
         } catch (IOException e) {
             logger.error("Failed to start Python Executor", e);
