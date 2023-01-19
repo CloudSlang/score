@@ -44,15 +44,15 @@ import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON;
 
 @Service("pythonExecutorLifecycleManager")
 public class PythonExecutorLifecycleManagerImpl implements PythonExecutorLifecycleManager {
+
     private static final Logger logger = LogManager.getLogger(PythonExecutorLifecycleManagerImpl.class);
     private static final PythonStrategy PYTHON_EVALUATOR = getPythonStrategy(System.getProperty("python.expressionsEval"), PYTHON_EXECUTOR);
-    private static final String OO_HOME_PATH = System.getProperty("oo.home");
-    private static final String PYTHON_EXECUTOR_BIN_PATH = OO_HOME_PATH + separator + "python-executor" + separator + "bin";
     private static final String EXTERNAL_PYTHON_EXECUTOR_STOP_PATH = "/rest/v1/stop";
     private static final String EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH = "/rest/v1/health";
     private static String PYTHON_EXECUTOR_PORT;
     private static String EXTERNAL_PYTHON_EXECUTOR_URL;
     private static String ENCODED_AUTH;
+    private static String PYTHON_EXECUTOR_BIN_PATH;
     private static ResteasyClient restEasyClient;
     private static Process pythonExecutorProcess;
 
@@ -69,10 +69,15 @@ public class PythonExecutorLifecycleManagerImpl implements PythonExecutorLifecyc
         PYTHON_EXECUTOR_PORT = pythonExecutorDetails.getPort();
         EXTERNAL_PYTHON_EXECUTOR_URL = pythonExecutorDetails.getUrl();
         ENCODED_AUTH = pythonExecutorDetails.getLifecycleEncodedAuth();
+        PYTHON_EXECUTOR_BIN_PATH = pythonExecutorDetails.getPythonExecutorPath() + separator + "bin";
         restEasyClient = statefulRestEasyClientsHolder.getRestEasyClient();
         if (PYTHON_EVALUATOR.equals(PYTHON_EXECUTOR)) {
-            start();
+            doStartPythonExecutor();
         }
+    }
+
+    private void doStartPythonExecutor() {
+        start();
     }
 
     @Override
@@ -83,7 +88,7 @@ public class PythonExecutorLifecycleManagerImpl implements PythonExecutorLifecyc
             return;
         }
 
-        killPythonExecutorProcess();
+        destroyPythonExecutorProcess();
 
         if (isWindows()) {
             startWindowsProcess();
@@ -163,13 +168,9 @@ public class PythonExecutorLifecycleManagerImpl implements PythonExecutorLifecyc
     }
 
     private void waitToStart() {
-        int retries = 20;
-        int tries = 0;
-
         logger.info("Waiting to start");
 
-        while (tries < retries) {
-            tries ++;
+        for (int tries = 0; tries < 20; tries++) {
             if (isAlive()) {
                 logger.info("Python Executor was successfully started");
                 return;
@@ -182,20 +183,16 @@ public class PythonExecutorLifecycleManagerImpl implements PythonExecutorLifecyc
         }
 
         logger.error("Python Executor didn't successfully start in the allocated time");
-        killPythonExecutorProcess();
+        destroyPythonExecutorProcess();
     }
 
     private void waitToStop() {
-        int retries = 20;
-        int tries = 0;
-
         logger.info("Waiting to stop");
 
-        while (tries < retries) {
-            tries ++;
+        for (int tries = 0; tries < 20; tries++) {
             if (!isAlive()) {
                 logger.info("Python Executor was successfully stopped");
-                killPythonExecutorProcess();
+                destroyPythonExecutorProcess();
                 return;
             }
             try {
@@ -206,10 +203,10 @@ public class PythonExecutorLifecycleManagerImpl implements PythonExecutorLifecyc
         }
 
         logger.error("Python Executor didn't successfully stop in the allocated time");
-        killPythonExecutorProcess();
+        destroyPythonExecutorProcess();
     }
 
-    private void killPythonExecutorProcess() {
+    private void destroyPythonExecutorProcess() {
         if (pythonExecutorProcess != null) {
             pythonExecutorProcess.destroy();
             pythonExecutorProcess = null;
