@@ -21,15 +21,17 @@ public class PythonExecutorDetails {
     private String url;
     private String runtimeEncodedAuth;
     private String lifecycleEncodedAuth;
+    private String sourceLocation;
 
     public PythonExecutorDetails() {
     }
 
-    public PythonExecutorDetails(String port, String url, String runtimeEncodedAuth, String lifecycleEncodedAuth) {
+    public PythonExecutorDetails(String port, String url, String runtimeEncodedAuth, String lifecycleEncodedAuth, String sourceLocation) {
         this.port = port;
         this.url = url;
         this.runtimeEncodedAuth = runtimeEncodedAuth;
         this.lifecycleEncodedAuth = lifecycleEncodedAuth;
+        this.sourceLocation = sourceLocation;
     }
 
     public String getPort() {
@@ -62,5 +64,13 @@ public class PythonExecutorDetails {
 
     public void setLifecycleEncodedAuth(String lifecycleEncodedAuth) {
         this.lifecycleEncodedAuth = lifecycleEncodedAuth;
+    }
+
+    public String getSourceLocation() {
+        return sourceLocation;
+    }
+
+    public void setSourceLocation(String sourceLocation) {
+        this.sourceLocation = sourceLocation;
     }
 }
