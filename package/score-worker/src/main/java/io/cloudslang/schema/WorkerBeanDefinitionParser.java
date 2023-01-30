@@ -17,6 +17,8 @@
 package io.cloudslang.schema;
 
 import io.cloudslang.engine.node.services.StubQueueConfigurationDataServiceImpl;
+import io.cloudslang.runtime.impl.python.external.PythonExecutorLifecycleManagerServiceImpl;
+import io.cloudslang.runtime.impl.python.external.StatefulRestEasyClientsHolder;
 import io.cloudslang.runtime.impl.python.external.StubPythonExecutorConfigurationDataServiceImpl;
 import io.cloudslang.runtime.impl.sequential.DefaultSequentialExecutionServiceImpl;
 import io.cloudslang.score.events.EventBusImpl;
@@ -94,6 +96,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(SynchronizationManagerImpl.class, null);
         put(WorkerConfigurationServiceImpl.class, "workerConfiguration");
         put(WorkerQueueDetailsContainer.class, "workerQueueDetailsContainer");
+        put(PythonExecutorLifecycleManagerServiceImpl.class, "pythonExecutorLifecycleManagerService");
 
         //Monitors
         put(WorkerExecutionMonitorServiceImpl.class, "workerExecutionMonitorService");
@@ -124,7 +127,8 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
             new ConfValue().NAME("scheduledWorkerMonitorInterval").DEFAULT(10000L),
             new ConfValue().NAME("workerMonitorRefreshInterval").DEFAULT(300000L),
 			new ConfValue().NAME("scheduledPerfMetricCollectionInterval").DEFAULT(5000L),
-			new ConfValue().NAME("scheduledMetricDispatchInterval").DEFAULT(30000L)
+			new ConfValue().NAME("scheduledMetricDispatchInterval").DEFAULT(30000L),
+			new ConfValue().NAME("pythonExecutorKeepAliveInterval").DEFAULT(30000L)
 	);
 
 	@Override

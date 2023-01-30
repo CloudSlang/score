@@ -42,7 +42,7 @@ import static org.jboss.resteasy.util.HttpHeaderNames.AUTHORIZATION;
 import static org.jboss.resteasy.util.HttpHeaderNames.CONTENT_TYPE;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON;
 
-@Service("PythonExecutorLifecycleManagerService")
+@Service("pythonExecutorLifecycleManagerService")
 public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutorLifecycleManagerService {
 
     private static final Logger logger = LogManager.getLogger(PythonExecutorLifecycleManagerServiceImpl.class);
@@ -91,29 +91,18 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     @PreDestroy
     @Override
     public void stop() {
-        logger.info("A request to stop the Python Executor was sent");
-        if (!isAlive()) {
-            logger.info("Python Executor was already stopped");
+        doStopPythonExecutor();
+    }
+
+    @SuppressWarnings("unused")
+    // Scheduled in xml
+    public void pythonExecutorKeepAlive() {
+        if (isAlive()) {
+            logger.info("Python Executor is up and running");
             return;
         }
 
-        PythonExecutorDetails pythonExecutorConfiguration = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
-        Response response = restEasyClient
-                .target(pythonExecutorConfiguration.getUrl())
-                .path(EXTERNAL_PYTHON_EXECUTOR_STOP_PATH)
-                .request()
-                .accept(APPLICATION_JSON_TYPE)
-                .header(CONTENT_TYPE, APPLICATION_JSON)
-                .header(AUTHORIZATION, pythonExecutorConfiguration.getLifecycleEncodedAuth())
-                .build("POST")
-                .invoke();
-
-        int statusCode = response.getStatus();
-        if (statusCode == 200) {
-            waitToStop();
-        } else {
-            logger.error("Failed to stop the Python Executor, response: " + statusCode);
-        }
+        doStartPythonExecutor();
     }
 
     private void doStartPythonExecutor() {
@@ -157,13 +146,11 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         try {
             logger.info("Starting Python Executor on port: " + pythonExecutorConfiguration.getPort());
             pythonExecutorProcess = pb.start();
-        } catch (IOException e) {
-            logger.error("Failed to start Python Executor", e);
+        } catch (IOException ioException) {
+            logger.error("Failed to start Python Executor", ioException);
+        } catch (Exception exception) {
+            logger.error("An error occurred while trying to start the Python Executor", exception);
         }
-    }
-
-    private boolean isWindows() {
-        return SystemUtils.IS_OS_WINDOWS;
     }
 
     private void waitToStart() {
@@ -183,6 +170,32 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
 
         logger.error("Python executor did not start successfully within the allocated time");
         destroyPythonExecutorProcess();
+    }
+
+    private void doStopPythonExecutor() {
+        logger.info("A request to stop the Python Executor was sent");
+        if (!isAlive()) {
+            logger.info("Python Executor was already stopped");
+            return;
+        }
+
+        PythonExecutorDetails pythonExecutorConfiguration = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
+        Response response = restEasyClient
+                .target(pythonExecutorConfiguration.getUrl())
+                .path(EXTERNAL_PYTHON_EXECUTOR_STOP_PATH)
+                .request()
+                .accept(APPLICATION_JSON_TYPE)
+                .header(CONTENT_TYPE, APPLICATION_JSON)
+                .header(AUTHORIZATION, pythonExecutorConfiguration.getLifecycleEncodedAuth())
+                .build("POST")
+                .invoke();
+
+        int statusCode = response.getStatus();
+        if (statusCode == 200) {
+            waitToStop();
+        } else {
+            logger.error("Failed to stop the Python Executor, response: " + statusCode);
+        }
     }
 
     private void waitToStop() {
@@ -210,5 +223,9 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
             pythonExecutorProcess.destroy();
             pythonExecutorProcess = null;
         }
+    }
+
+    private boolean isWindows() {
+        return SystemUtils.IS_OS_WINDOWS;
     }
 }
