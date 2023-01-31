@@ -29,8 +29,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
-
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
@@ -38,6 +38,7 @@ import static io.cloudslang.runtime.api.python.enums.PythonStrategy.PYTHON_EXECU
 import static io.cloudslang.runtime.api.python.enums.PythonStrategy.getPythonStrategy;
 import static java.io.File.separator;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
+import static org.apache.commons.lang.StringUtils.containsIgnoreCase;
 import static org.jboss.resteasy.util.HttpHeaderNames.AUTHORIZATION;
 import static org.jboss.resteasy.util.HttpHeaderNames.CONTENT_TYPE;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON;
@@ -64,6 +65,11 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         }
     }
 
+    @PreDestroy
+    public void destroy() {
+        doStopPythonExecutor();
+    }
+
     @Override
     public void start() {
         doStartPythonExecutor();
@@ -71,27 +77,56 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
 
     @Override
     public boolean isAlive() {
-        Response response;
-        try {
-            response = restEasyClient
-                    .target(pythonExecutorConfigurationDataService.getPythonExecutorConfiguration().getUrl())
-                    .path(EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH)
-                    .request()
-                    .accept(APPLICATION_JSON_TYPE)
-                    .header(CONTENT_TYPE, APPLICATION_JSON)
-                    .build("GET")
-                    .invoke();
-        } catch (Exception e) {
-            return false;
-        }
-
-        return response.getStatus() == 200;
+        return isAlivePythonExecutor();
     }
 
-    @PreDestroy
     @Override
     public void stop() {
         doStopPythonExecutor();
+    }
+
+    private boolean isAlivePythonExecutor() {
+        try (Response response = restEasyClient
+                .target(pythonExecutorConfigurationDataService.getPythonExecutorConfiguration().getUrl())
+                .path(EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH)
+                .request()
+                .accept(APPLICATION_JSON_TYPE)
+                .header(CONTENT_TYPE, APPLICATION_JSON)
+                .build("GET")
+                .invoke()) {
+            return response.getStatus() == 200;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private void doStopPythonExecutor() {
+        logger.info("A request to stop the Python Executor was sent");
+        if (!isAlivePythonExecutor()) {
+            logger.info("Python Executor was already stopped");
+            return;
+        }
+
+        PythonExecutorDetails pythonExecutorConfiguration = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
+        try (Response response = restEasyClient
+                .target(pythonExecutorConfiguration.getUrl())
+                .path(EXTERNAL_PYTHON_EXECUTOR_STOP_PATH)
+                .request()
+                .accept(APPLICATION_JSON_TYPE)
+                .header(CONTENT_TYPE, APPLICATION_JSON)
+                .header(AUTHORIZATION, pythonExecutorConfiguration.getLifecycleEncodedAuth())
+                .build("POST")
+                .invoke()) {
+
+            if (response.getStatus() == 200) {
+                waitToStop();
+            }
+        } catch (ProcessingException processingEx) {
+            // Might not get a response if server gets shutdown immediately
+            if (containsIgnoreCase(processingEx.getMessage(), "RESTEASY004655: Unable to invoke request")) {
+                waitToStop();
+            }
+        }
     }
 
     @SuppressWarnings("unused")
@@ -107,7 +142,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
 
     private void doStartPythonExecutor() {
         logger.info("A request to start the Python Executor was sent");
-        if (isAlive()) {
+        if (isAlivePythonExecutor()) {
             logger.info("Python Executor is already running");
             return;
         }
@@ -157,7 +192,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         logger.info("Waiting to start");
 
         for (int tries = 0; tries < START_STOP_RETRIES_COUNT; tries++) {
-            if (isAlive()) {
+            if (isAlivePythonExecutor()) {
                 logger.info("Python Executor was successfully started");
                 return;
             }
@@ -172,37 +207,11 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         destroyPythonExecutorProcess();
     }
 
-    private void doStopPythonExecutor() {
-        logger.info("A request to stop the Python Executor was sent");
-        if (!isAlive()) {
-            logger.info("Python Executor was already stopped");
-            return;
-        }
-
-        PythonExecutorDetails pythonExecutorConfiguration = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
-        Response response = restEasyClient
-                .target(pythonExecutorConfiguration.getUrl())
-                .path(EXTERNAL_PYTHON_EXECUTOR_STOP_PATH)
-                .request()
-                .accept(APPLICATION_JSON_TYPE)
-                .header(CONTENT_TYPE, APPLICATION_JSON)
-                .header(AUTHORIZATION, pythonExecutorConfiguration.getLifecycleEncodedAuth())
-                .build("POST")
-                .invoke();
-
-        int statusCode = response.getStatus();
-        if (statusCode == 200) {
-            waitToStop();
-        } else {
-            logger.error("Failed to stop the Python Executor, response: " + statusCode);
-        }
-    }
-
     private void waitToStop() {
         logger.info("Waiting to stop");
 
         for (int tries = 0; tries < START_STOP_RETRIES_COUNT; tries++) {
-            if (!isAlive()) {
+            if (!isAlivePythonExecutor()) {
                 logger.info("Python Executor was successfully stopped");
                 destroyPythonExecutorProcess();
                 return;
