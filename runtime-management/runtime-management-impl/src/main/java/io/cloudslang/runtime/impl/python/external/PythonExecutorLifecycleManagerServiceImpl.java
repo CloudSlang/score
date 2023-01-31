@@ -133,7 +133,6 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     // Scheduled in xml
     public void pythonExecutorKeepAlive() {
         if (isAlivePythonExecutor()) {
-            logger.info("Python Executor is up and running");
             return;
         }
 
