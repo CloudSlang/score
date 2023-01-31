@@ -132,7 +132,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     @SuppressWarnings("unused")
     // Scheduled in xml
     public void pythonExecutorKeepAlive() {
-        if (isAlive()) {
+        if (isAlivePythonExecutor()) {
             logger.info("Python Executor is up and running");
             return;
         }
