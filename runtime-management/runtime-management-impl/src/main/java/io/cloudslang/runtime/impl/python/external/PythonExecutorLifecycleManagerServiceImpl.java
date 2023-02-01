@@ -43,7 +43,7 @@ import static org.jboss.resteasy.util.HttpHeaderNames.AUTHORIZATION;
 import static org.jboss.resteasy.util.HttpHeaderNames.CONTENT_TYPE;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON;
 
-@Service("PythonExecutorLifecycleManagerService")
+@Service("pythonExecutorLifecycleManagerService")
 public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutorLifecycleManagerService {
 
     private static final Logger logger = LogManager.getLogger(PythonExecutorLifecycleManagerServiceImpl.class);
@@ -129,6 +129,16 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         }
     }
 
+    @SuppressWarnings("unused")
+    // Scheduled in xml
+    public void pythonExecutorKeepAlive() {
+        if (isAlivePythonExecutor()) {
+            return;
+        }
+
+        doStartPythonExecutor();
+    }
+
     private void doStartPythonExecutor() {
         logger.info("A request to start the Python Executor was sent");
         if (isAlivePythonExecutor()) {
@@ -170,13 +180,11 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         try {
             logger.info("Starting Python Executor on port: " + pythonExecutorConfiguration.getPort());
             pythonExecutorProcess = pb.start();
-        } catch (IOException e) {
-            logger.error("Failed to start Python Executor", e);
+        } catch (IOException ioException) {
+            logger.error("Failed to start Python Executor", ioException);
+        } catch (Exception exception) {
+            logger.error("An error occurred while trying to start the Python Executor", exception);
         }
-    }
-
-    private boolean isWindows() {
-        return SystemUtils.IS_OS_WINDOWS;
     }
 
     private void waitToStart() {
@@ -223,5 +231,9 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
             pythonExecutorProcess.destroy();
             pythonExecutorProcess = null;
         }
+    }
+
+    private boolean isWindows() {
+        return SystemUtils.IS_OS_WINDOWS;
     }
 }

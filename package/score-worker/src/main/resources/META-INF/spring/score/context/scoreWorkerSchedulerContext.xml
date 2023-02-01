@@ -15,6 +15,7 @@
         <task:scheduled ref="sessionDataHandler" method="sessionTimeOutScheduler" fixed-rate="60000"/>
         <task:scheduled ref="workerExecutionMonitorService" method="executeScheduledWorkerMonitors" fixed-delay="#{scheduledWorkerMonitorInterval}"/>
         <task:scheduled ref="workerExecutionMonitorService" method="collectMonitorInformation" fixed-delay="#{workerMonitorRefreshInterval}"/>
+        <task:scheduled ref="pythonExecutorLifecycleManagerService" method="pythonExecutorKeepAlive" fixed-delay="#{pythonExecutorKeepAliveInterval}"/>
 	</task:scheduled-tasks>
 
     <task:scheduler id="scoreWorkerMetricScheduler" pool-size="2" />
