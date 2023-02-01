@@ -175,8 +175,6 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
                         startPythonExecutor,
                 pythonExecutorConfiguration.getPort());
         pb.directory(FileUtils.getFile(pythonExecutorConfiguration.getSourceLocation() + separator + "bin"));
-        pb.redirectErrorStream(true);
-        pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
         try {
             logger.info("Starting Python Executor on port: " + pythonExecutorConfiguration.getPort());
             pythonExecutorProcess = pb.start();
