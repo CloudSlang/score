@@ -763,12 +763,8 @@ public final class ExecutionServiceImpl implements ExecutionService {
         if (group != null) {
             execution.setGroupName(group);
         }
+        // Removed debugger mode check. This will allow user to remotely debug flows from studio/designer on specific worker group. Defect OCTCR19F1753456.
 
-        if (isDebuggerMode(execution.getSystemContext())) {
-            if (!StringUtils.isEmpty(group) && useDefaultGroup(execution)) {
-                execution.setGroupName(null);
-            }
-        }
     }
 
     private void createErrorEvent(String ex, String logMessage, String errorType, SystemContext systemContext)
