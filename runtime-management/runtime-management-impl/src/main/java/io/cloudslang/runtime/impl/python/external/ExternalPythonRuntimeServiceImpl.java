@@ -70,6 +70,32 @@ public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
     }
 
     @Override
+    public PythonEvaluationResult test(String prepareEnvironmentScript, String script, Map<String, Serializable> vars, long timeout) {
+        try {
+            if (testingControlSemaphore.tryAcquire(1L, TimeUnit.SECONDS)) {
+                try {
+                    return externalPythonExecutionEngine.test(prepareEnvironmentScript, script, vars, timeout);
+                } finally {
+                    testingControlSemaphore.release();
+                }
+            } else {
+                logger.warn("Maximum number of python processes has been reached. Waiting for a python process to finish. " +
+                        "You can configure the number of concurrent python executions by setting " +
+                        "'python.testing.concurrent.execution.permits' system property.");
+                testingControlSemaphore.acquire();
+                try {
+                    logger.info("Acquired a permit for a new python process. Continuing with execution...");
+                    return externalPythonExecutionEngine.test(prepareEnvironmentScript, script, vars, timeout);
+                } finally {
+                    testingControlSemaphore.release();
+                }
+            }
+        } catch (InterruptedException ie) {
+            throw new ExternalPythonScriptException("Execution was interrupted while waiting for a python permit.");
+        }
+    }
+
+    @Override
     public PythonEvaluationResult eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
         try {
             if (executionControlSemaphore.tryAcquire(1L, TimeUnit.SECONDS)) {
@@ -95,29 +121,4 @@ public class ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
         }
     }
 
-    @Override
-    public PythonEvaluationResult test(String prepareEnvironmentScript, String script, Map<String, Serializable> vars, long timeout) {
-        try {
-            if (testingControlSemaphore.tryAcquire(1L, TimeUnit.SECONDS)) {
-                try {
-                    return externalPythonExecutionEngine.test(prepareEnvironmentScript, script, vars, timeout);
-                } finally {
-                    testingControlSemaphore.release();
-                }
-            } else {
-                logger.warn("Maximum number of python processes has been reached. Waiting for a python process to finish. " +
-                        "You can configure the number of concurrent python executions by setting " +
-                        "'python.testing.concurrent.execution.permits' system property.");
-                testingControlSemaphore.acquire();
-                try {
-                    logger.info("Acquired a permit for a new python process. Continuing with execution...");
-                    return externalPythonExecutionEngine.test(prepareEnvironmentScript, script, vars, timeout);
-                } finally {
-                    testingControlSemaphore.release();
-                }
-            }
-        } catch (InterruptedException ie) {
-            throw new ExternalPythonScriptException("Execution was interrupted while waiting for a python permit.");
-        }
-    }
 }

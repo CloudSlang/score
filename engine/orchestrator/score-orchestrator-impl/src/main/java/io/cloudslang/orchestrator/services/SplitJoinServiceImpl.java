@@ -130,7 +130,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
         for (SplitMessage splitMessage : splitMessages) {
             if (splitMessage.isExecutable()) {
-                branchTriggerMessages.addAll(prepareExecutionMessages(splitMessage.getChildren(), true));
+                branchTriggerMessages.addAll(prepareExecutionMessages(splitMessage.getChildren(), splitMessage.getSplitId(), true));
 
                 Serializable stepTypeSerializable = splitMessage.getParent()
                         .getSystemContext().get("STEP_TYPE");
@@ -145,7 +145,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
                         stepType,
                         false));
             } else {
-                branchTriggerMessages.addAll(prepareExecutionMessages(splitMessage.getChildren(), false));
+                branchTriggerMessages.addAll(prepareExecutionMessages(splitMessage.getChildren(), splitMessage.getSplitId(), false));
             }
         }
 
@@ -160,17 +160,19 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         queueDispatcherService.dispatch(queueMessages);
     }
 
-    private List<ExecutionMessage> prepareExecutionMessages(List<Execution> executions, boolean active) {
+    private List<ExecutionMessage> prepareExecutionMessages(List<Execution> executions, String splitId, boolean active) {
         return executions.stream()
-                .map(execution -> convertExecutionToExecutionMessage(active, execution))
+                .map(execution -> convertExecutionToExecutionMessage(active, splitId, execution))
                 .collect(toList());
     }
 
-    private ExecutionMessage convertExecutionToExecutionMessage(boolean active, Execution execution) {
+    private ExecutionMessage convertExecutionToExecutionMessage(boolean active, String splitId, Execution execution) {
         ExecutionMessage executionMessage = new ExecutionMessage(execution.getExecutionId().toString(),
                 converter.createPayload(execution));
         setWorkerGroupOnCSParallelLoopBranches(execution, executionMessage);
         executionMessage.setActive(active);
+        executionMessage.setSplitId(splitId);
+
         return executionMessage;
     }
 
@@ -230,7 +232,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             SuspendedExecution suspendedExecution = suspendedMap.get(finishedBranch.getSplitId());
             if (suspendedExecution != null) {
                 boolean shouldProcessBranch = finishedBranch.connectToSuspendedExecution(suspendedExecution);
-                if (suspendedExecution.getSuspensionReason() == MULTI_INSTANCE) {
+                if (of(MULTI_INSTANCE, PARALLEL_LOOP).contains(suspendedExecution.getSuspensionReason())) {
                     // start a new branch
                     if (!finishedBranch.getBranchContexts().isBranchCancelled()) {
                         startNewBranch(suspendedExecution);
@@ -268,7 +270,11 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     }
 
     private void startNewBranch(final SuspendedExecution suspendedExecution) {
-        StartNewBranchPayload startNewBranchPayload = executionQueueRepository.getFirstPendingBranch(parseLong(suspendedExecution.getExecutionId()));
+        final String splitId = suspendedExecution.getSplitId();
+        // splitId being null or empty is an extra-safety measure, it shouldn't happen on normal executions
+        StartNewBranchPayload startNewBranchPayload = StringUtils.isNotBlank(splitId)
+                ? executionQueueRepository.getFirstPendingBranchBySplitId(splitId)
+                : executionQueueRepository.getFirstPendingBranch(parseLong(suspendedExecution.getExecutionId()));
         if (startNewBranchPayload != null) {
             executionQueueRepository.activatePendingExecutionStateForAnExecution(startNewBranchPayload.getPendingExecutionStateId());
             executionQueueRepository.deletePendingExecutionState(startNewBranchPayload.getPendingExecutionMapingId());
@@ -290,7 +296,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
         // 1. Find all suspended executions that have all their branches ended
         PageRequest pageRequest = PageRequest.of(0, bulkSize);
-        List<SuspendedExecution> suspendedExecutions = suspendedExecutionsRepository.findFinishedSuspendedExecutions(of(PARALLEL, NON_BLOCKING, PARALLEL_LOOP), pageRequest);
+        List<SuspendedExecution> suspendedExecutions = suspendedExecutionsRepository.findFinishedSuspendedExecutions(of(PARALLEL, NON_BLOCKING), pageRequest);
 
         return joinAndSendToQueue(suspendedExecutions);
     }
@@ -310,7 +316,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     public int joinFinishedMiBranches(int bulkSize) {
         // 1. Find all suspended executions that have all their branches ended
         PageRequest pageRequest = PageRequest.of(0, bulkSize);
-        List<SuspendedExecution> suspendedExecutions = suspendedExecutionsRepository.findUnmergedSuspendedExecutions(of(MULTI_INSTANCE), pageRequest);
+        List<SuspendedExecution> suspendedExecutions = suspendedExecutionsRepository.findUnmergedSuspendedExecutions(of(MULTI_INSTANCE, PARALLEL_LOOP), pageRequest);
 
         return joinMiBranchesAndSendToQueue(suspendedExecutions);
     }

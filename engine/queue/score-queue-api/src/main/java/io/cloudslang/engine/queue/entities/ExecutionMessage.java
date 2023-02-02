@@ -59,6 +59,7 @@ public class ExecutionMessage implements Message, Cloneable {
     private transient Execution executionObject;
 
     private boolean active;
+    private String splitId;
 
     public ExecutionMessage() {
         execStateId = EMPTY_EXEC_STATE_ID;
@@ -274,6 +275,14 @@ public class ExecutionMessage implements Message, Cloneable {
 
     private int getPayloadSize(Payload payload) {
         return payload != null ? payload.getData().length : 0;
+    }
+
+    public void setSplitId(String splitId) {
+        this.splitId = splitId;
+    }
+
+    public String getSplitId() {
+        return splitId;
     }
 
     @Override
