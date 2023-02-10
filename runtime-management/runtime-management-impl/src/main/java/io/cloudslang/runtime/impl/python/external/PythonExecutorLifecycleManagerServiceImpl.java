@@ -60,9 +60,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
                                                      @Qualifier("pythonExecutorConfigurationDataService") PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService) {
         this.restEasyClient = statefulRestEasyClientsHolder.getRestEasyClient();
         this.pythonExecutorConfigurationDataService = pythonExecutorConfigurationDataService;
-        if (PYTHON_EVALUATOR.equals(PYTHON_EXECUTOR)) {
-            doStartPythonExecutor();
-        }
+        doStartPythonExecutor();
     }
 
     @PreDestroy
@@ -105,6 +103,9 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     }
 
     private void doStopPythonExecutor() {
+        if (!PYTHON_EVALUATOR.equals(PYTHON_EXECUTOR)) {
+            return;
+        }
         logger.info("A request to stop the Python Executor was sent");
         if (!isAlivePythonExecutor()) {
             logger.info("Python Executor was already stopped");
@@ -144,6 +145,9 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     }
 
     private void doStartPythonExecutor() {
+        if (!PYTHON_EVALUATOR.equals(PYTHON_EXECUTOR)) {
+            return;
+        }
         logger.info("A request to start the Python Executor was sent");
         if (isAlivePythonExecutor()) {
             logger.info("Python Executor is already running");
