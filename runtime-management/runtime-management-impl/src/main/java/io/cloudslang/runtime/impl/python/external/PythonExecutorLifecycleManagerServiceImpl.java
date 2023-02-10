@@ -67,6 +67,10 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
 
     @PreDestroy
     public void destroy() {
+        if (!PYTHON_EVALUATOR.equals(PYTHON_EXECUTOR)) {
+            return;
+        }
+
         doStopPythonExecutor();
     }
 
@@ -132,7 +136,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     @SuppressWarnings("unused")
     // Scheduled in xml
     public void pythonExecutorKeepAlive() {
-        if (isAlivePythonExecutor()) {
+        if (!PYTHON_EVALUATOR.equals(PYTHON_EXECUTOR) || isAlivePythonExecutor()) {
             return;
         }
 
