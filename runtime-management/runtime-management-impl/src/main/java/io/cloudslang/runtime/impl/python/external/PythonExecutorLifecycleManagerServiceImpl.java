@@ -15,6 +15,7 @@
  */
 package io.cloudslang.runtime.impl.python.external;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.cloudslang.runtime.api.python.PythonExecutorConfigurationDataService;
 import io.cloudslang.runtime.api.python.PythonExecutorLifecycleManagerService;
 import io.cloudslang.runtime.api.python.entities.PythonExecutorDetails;
@@ -25,19 +26,22 @@ import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.scheduling.support.PeriodicTrigger;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static io.cloudslang.runtime.api.python.enums.PythonStrategy.PYTHON_EXECUTOR;
 import static io.cloudslang.runtime.api.python.enums.PythonStrategy.getPythonStrategy;
 import static java.io.File.separator;
+import static java.lang.Long.getLong;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static org.apache.commons.lang.StringUtils.containsIgnoreCase;
 import static org.jboss.resteasy.util.HttpHeaderNames.AUTHORIZATION;
@@ -52,8 +56,9 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     private static final String EXTERNAL_PYTHON_EXECUTOR_STOP_PATH = "/rest/v1/stop";
     private static final String EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH = "/rest/v1/health";
     private static final int START_STOP_RETRIES_COUNT = 20;
-    private static final int PYTHON_EXECUTOR_KEEP_ALIVE_INTERVAL = 30000;
-    private static ThreadPoolTaskScheduler threadPoolTaskScheduler;
+    private static final int PYTHON_EXECUTOR_INITIAL_DELAY = 5000;
+    private static final long PYTHON_EXECUTOR_KEEP_ALIVE_INTERVAL = getLong("python.executor.keepAliveDelayMillis", 30000);
+    private static ScheduledThreadPoolExecutor scheduledExecutor;
     private static Process pythonExecutorProcess;
     private final ResteasyClient restEasyClient;
     private final PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService;
@@ -71,10 +76,15 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
 
     @PreDestroy
     public void destroy() {
-        if (threadPoolTaskScheduler != null) {
-            threadPoolTaskScheduler.destroy();
-        }
+
         doStopPythonExecutor();
+
+        try {
+            scheduledExecutor.shutdown();
+            scheduledExecutor.shutdownNow();
+        } catch (Exception failedShutdownEx) {
+            logger.error("Could not shutdown executor: ", failedShutdownEx);
+        }
     }
 
     @Override
@@ -235,21 +245,6 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         doStartPythonExecutor();
     }
 
-    private void createKeepAliveJob() {
-        threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
-        threadPoolTaskScheduler.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
-        threadPoolTaskScheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
-        threadPoolTaskScheduler.setDaemon(true);
-        threadPoolTaskScheduler.setThreadNamePrefix("pythonExecutor-");
-        threadPoolTaskScheduler.afterPropertiesSet();
-
-        PeriodicTrigger periodicTrigger = new PeriodicTrigger(PYTHON_EXECUTOR_KEEP_ALIVE_INTERVAL);
-        periodicTrigger.setFixedRate(true);
-        periodicTrigger.setInitialDelay(PYTHON_EXECUTOR_KEEP_ALIVE_INTERVAL);
-
-        threadPoolTaskScheduler.schedule(this::pythonExecutorKeepAlive, periodicTrigger);
-    }
-
     private void destroyPythonExecutorProcess() {
         if (pythonExecutorProcess != null) {
             pythonExecutorProcess.destroy();
@@ -259,5 +254,27 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
 
     private boolean isWindows() {
         return SystemUtils.IS_OS_WINDOWS;
+    }
+
+    private void createKeepAliveJob() {
+        scheduledExecutor = getScheduledExecutor();
+        scheduledExecutor.scheduleWithFixedDelay(this::pythonExecutorKeepAlive,
+                PYTHON_EXECUTOR_INITIAL_DELAY, PYTHON_EXECUTOR_KEEP_ALIVE_INTERVAL, MILLISECONDS);
+    }
+
+    private ScheduledThreadPoolExecutor getScheduledExecutor() {
+        final ThreadFactory threadFactory = new ThreadFactoryBuilder()
+                .setNameFormat("python-executor-keepalive-%d")
+                .setDaemon(true)
+                .build();
+
+        // Intentionally 1 thread
+        ScheduledThreadPoolExecutor scheduledExecutor = new ScheduledThreadPoolExecutor(1, threadFactory);
+        scheduledExecutor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
+        scheduledExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+        scheduledExecutor.setRemoveOnCancelPolicy(true);
+        scheduledExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardPolicy());
+
+        return scheduledExecutor;
     }
 }
