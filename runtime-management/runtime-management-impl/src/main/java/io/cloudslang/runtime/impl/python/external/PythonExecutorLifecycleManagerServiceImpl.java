@@ -18,7 +18,6 @@ package io.cloudslang.runtime.impl.python.external;
 import io.cloudslang.runtime.api.python.PythonExecutorConfigurationDataService;
 import io.cloudslang.runtime.api.python.PythonExecutorLifecycleManagerService;
 import io.cloudslang.runtime.api.python.entities.PythonExecutorDetails;
-import io.cloudslang.runtime.api.python.enums.PythonStrategy;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.LogManager;
@@ -49,7 +48,7 @@ import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON;
 public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutorLifecycleManagerService {
 
     private static final Logger logger = LogManager.getLogger(PythonExecutorLifecycleManagerServiceImpl.class);
-    private static final PythonStrategy PYTHON_EVALUATOR = getPythonStrategy(System.getProperty("python.expressionsEval"), PYTHON_EXECUTOR);
+    private static final boolean IS_PYTHON_EXECUTOR_EVAL = getPythonStrategy(System.getProperty("python.expressionsEval"), PYTHON_EXECUTOR).equals(PYTHON_EXECUTOR);
     private static final String EXTERNAL_PYTHON_EXECUTOR_STOP_PATH = "/rest/v1/stop";
     private static final String EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH = "/rest/v1/health";
     private static final int START_STOP_RETRIES_COUNT = 20;
@@ -64,7 +63,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
                                                      @Qualifier("pythonExecutorConfigurationDataService") PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService) {
         this.restEasyClient = statefulRestEasyClientsHolder.getRestEasyClient();
         this.pythonExecutorConfigurationDataService = pythonExecutorConfigurationDataService;
-        if (PYTHON_EVALUATOR.equals(PYTHON_EXECUTOR)) {
+        if (IS_PYTHON_EXECUTOR_EVAL) {
             createKeepAliveJob();
             doStartPythonExecutor();
         }
@@ -109,7 +108,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     }
 
     private void doStopPythonExecutor() {
-        if (!PYTHON_EVALUATOR.equals(PYTHON_EXECUTOR)) {
+        if (!IS_PYTHON_EXECUTOR_EVAL) {
             return;
         }
         logger.info("A request to stop the Python Executor was sent");
@@ -141,7 +140,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     }
 
     private void doStartPythonExecutor() {
-        if (!PYTHON_EVALUATOR.equals(PYTHON_EXECUTOR)) {
+        if (!IS_PYTHON_EXECUTOR_EVAL) {
             return;
         }
         logger.info("A request to start the Python Executor was sent");
