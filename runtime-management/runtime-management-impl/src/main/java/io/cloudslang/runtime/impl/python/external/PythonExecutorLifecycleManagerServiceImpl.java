@@ -76,13 +76,15 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
 
     @PreDestroy
     public void destroy() {
-        try {
-            scheduledExecutor.shutdown();
-            scheduledExecutor.shutdownNow();
-        } catch (Exception failedShutdownEx) {
-            logger.error("Could not shutdown executor: ", failedShutdownEx);
-        } finally {
-            doStopPythonExecutor();
+        if (IS_PYTHON_EXECUTOR_EVAL) {
+            try {
+                scheduledExecutor.shutdown();
+                scheduledExecutor.shutdownNow();
+            } catch (Exception failedShutdownEx) {
+                logger.error("Could not shutdown executor: ", failedShutdownEx);
+            } finally {
+                doStopPythonExecutor();
+            }
         }
     }
 
