@@ -124,8 +124,7 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
             new ConfValue().NAME("scheduledWorkerMonitorInterval").DEFAULT(10000L),
             new ConfValue().NAME("workerMonitorRefreshInterval").DEFAULT(300000L),
 			new ConfValue().NAME("scheduledPerfMetricCollectionInterval").DEFAULT(5000L),
-			new ConfValue().NAME("scheduledMetricDispatchInterval").DEFAULT(30000L),
-			new ConfValue().NAME("pythonExecutorKeepAliveInterval").DEFAULT(30000L)
+			new ConfValue().NAME("scheduledMetricDispatchInterval").DEFAULT(30000L)
 	);
 
 	@Override
