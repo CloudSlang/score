@@ -18,8 +18,8 @@ package io.cloudslang.runtime.impl.python;
 
 import io.cloudslang.dependency.impl.services.DependenciesManagementConfiguration;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
+import io.cloudslang.runtime.impl.python.executor.ExternalPythonExecutorServiceImpl;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine;
-import io.cloudslang.runtime.impl.python.external.ExternalPythonExecutorServiceImpl;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonRuntimeServiceImpl;
 import io.cloudslang.runtime.impl.python.external.StatefulRestEasyClientsHolder;
 import org.apache.commons.lang3.StringUtils;
@@ -56,7 +56,7 @@ public class PythonExecutionEngineConfiguration {
     public PythonRuntimeService externalPythonExecutorService(StatefulRestEasyClientsHolder statefulRestEasyClient) {
         Integer pythonProcessPermits = Integer.getInteger("python.concurrent.execution.permits", 30);
         Integer pythonTestingProcessPermits = Integer.getInteger("python.testing.concurrent.execution.permits", 10);
-        return new ExternalPythonExecutorServiceImpl(statefulRestEasyClient, new Semaphore(pythonProcessPermits), new Semaphore(pythonTestingProcessPermits));
+        return new ExternalPythonExecutorServiceImpl(new Semaphore(pythonProcessPermits), new Semaphore(pythonTestingProcessPermits));
     }
 
     @Bean(name = "jythonExecutionEngine")
