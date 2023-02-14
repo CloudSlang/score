@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.runtime.impl.python.external;
+package io.cloudslang.runtime.impl.python.executor;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -23,17 +23,17 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
-import io.cloudslang.runtime.api.python.PythonExecutorConfigurationDataService;
+import io.cloudslang.runtime.api.python.PythonExecutorCommunicationService;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
-import io.cloudslang.runtime.api.python.entities.PythonExecutorDetails;
+import io.cloudslang.runtime.impl.python.external.EvaluationResults;
+import io.cloudslang.runtime.impl.python.external.ExternalPythonEvalException;
+import io.cloudslang.runtime.impl.python.external.ExternalPythonRuntimeServiceImpl;
+import io.cloudslang.runtime.impl.python.external.ExternalPythonScriptException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
-import javax.annotation.PostConstruct;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
 import java.io.Serializable;
@@ -44,39 +44,26 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 
-import static javax.ws.rs.client.Entity.entity;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static org.jboss.resteasy.util.HttpHeaderNames.AUTHORIZATION;
-import static org.jboss.resteasy.util.HttpHeaderNames.CONTENT_TYPE;
-import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON;
-
 public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
     private static final Logger logger = LogManager.getLogger(ExternalPythonExecutorServiceImpl.class);
 
-    private static final String EXTERNAL_PYTHON_EXECUTOR_EVAL_PATH = "/rest/v1/eval";
-
     private static String EXTERNAL_PYTHON_EXECUTOR_URL;
     private static String ENCODED_AUTH;
-
-    private final ResteasyClient restEasyClient;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    @Qualifier("pythonExecutorConfigurationDataService")
-    PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService;
+    PythonExecutorCommunicationService pythonExecutorCommunicationService;
 
-    @PostConstruct
-    void initPythonExecutorDetails() {
-        PythonExecutorDetails pythonExecutorDetails = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
-        EXTERNAL_PYTHON_EXECUTOR_URL = pythonExecutorDetails.getUrl();
-        ENCODED_AUTH = pythonExecutorDetails.getRuntimeEncodedAuth();
-    }
+//    @PostConstruct
+//    void initPythonExecutorDetails() {
+//        PythonExecutorDetails pythonExecutorDetails = pythonExecutorCommunicationService.getPythonExecutorConfiguration();
+//        EXTERNAL_PYTHON_EXECUTOR_URL = pythonExecutorDetails.getUrl();
+//        ENCODED_AUTH = pythonExecutorDetails.getRuntimeEncodedAuth();
+//    }
 
-    public ExternalPythonExecutorServiceImpl(StatefulRestEasyClientsHolder statefulRestEasyClient,
-                                           Semaphore executionControlSemaphore,
-                                           Semaphore testingControlSemaphore) {
+    public ExternalPythonExecutorServiceImpl(Semaphore executionControlSemaphore,
+                                             Semaphore testingControlSemaphore) {
         super(executionControlSemaphore, testingControlSemaphore);
-        this.restEasyClient = statefulRestEasyClient.getRestEasyClient();
         JsonFactory factory = new JsonFactory();
         factory.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
         factory.enable(JsonWriteFeature.ESCAPE_NON_ASCII.mappedFeature());
@@ -90,8 +77,7 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
         } catch (JsonProcessingException ie) {
             logger.error(ie);
             throw new ExternalPythonScriptException("Execution was interrupted while waiting for a python permit.");
-        }
-        catch (ProcessingException exception) {
+        } catch (ProcessingException exception) {
             throw new ExternalPythonScriptException("Python server is down or can't process the execution of the python expression");
         }
     }
@@ -124,16 +110,7 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
 
 
     private EvaluationResults executeRequestOnPythonServer(String method, String payload) throws JsonProcessingException {
-        Response scriptResponse = restEasyClient
-                .target(EXTERNAL_PYTHON_EXECUTOR_URL)
-                .path(EXTERNAL_PYTHON_EXECUTOR_EVAL_PATH)
-                .request()
-                .accept(APPLICATION_JSON_TYPE)
-                .header(CONTENT_TYPE, APPLICATION_JSON)
-                .header(AUTHORIZATION, ENCODED_AUTH)
-                .build(method, entity(payload, APPLICATION_JSON_TYPE))
-                .invoke();
-
+        Response scriptResponse = pythonExecutorCommunicationService.executeRequestOnPythonServer(method, payload);
         return objectMapper.readValue(scriptResponse.readEntity(String.class), EvaluationResults.class);
     }
 

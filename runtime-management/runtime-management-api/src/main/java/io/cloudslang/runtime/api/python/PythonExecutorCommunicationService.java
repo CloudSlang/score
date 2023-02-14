@@ -13,10 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.runtime.impl.python.external;
+package io.cloudslang.runtime.api.python;
 
-public class ExternalPythonEvalException extends RuntimeException {
-    public ExternalPythonEvalException(String message) {
-        super(message);
-    }
+import io.cloudslang.runtime.api.python.entities.PythonExecutorDetails;
+
+import javax.ws.rs.core.Response;
+
+public interface PythonExecutorCommunicationService {
+
+    boolean isAlivePythonExecutor();
+
+    Response stopPythonExecutor();
+
+    PythonExecutorDetails getPythonExecutorConfiguration();
+
+    Response executeRequestOnPythonServer(String method, String payload);
 }
