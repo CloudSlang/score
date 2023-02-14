@@ -46,20 +46,10 @@ import java.util.concurrent.Semaphore;
 
 public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
     private static final Logger logger = LogManager.getLogger(ExternalPythonExecutorServiceImpl.class);
-
-    private static String EXTERNAL_PYTHON_EXECUTOR_URL;
-    private static String ENCODED_AUTH;
     private final ObjectMapper objectMapper;
 
     @Autowired
     PythonExecutorCommunicationService pythonExecutorCommunicationService;
-
-//    @PostConstruct
-//    void initPythonExecutorDetails() {
-//        PythonExecutorDetails pythonExecutorDetails = pythonExecutorCommunicationService.getPythonExecutorConfiguration();
-//        EXTERNAL_PYTHON_EXECUTOR_URL = pythonExecutorDetails.getUrl();
-//        ENCODED_AUTH = pythonExecutorDetails.getRuntimeEncodedAuth();
-//    }
 
     public ExternalPythonExecutorServiceImpl(Semaphore executionControlSemaphore,
                                              Semaphore testingControlSemaphore) {

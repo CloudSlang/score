@@ -38,9 +38,6 @@ public class PythonExecutorCommunicationServiceImpl implements PythonExecutorCom
     private static final String EXTERNAL_PYTHON_EXECUTOR_STOP_PATH = "/rest/v1/stop";
     private static final String EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH = "/rest/v1/health";
     private static final String EXTERNAL_PYTHON_EXECUTOR_EVAL_PATH = "/rest/v1/eval";
-//    private static String EXTERNAL_PYTHON_EXECUTOR_URL;
-//    private static String ENCODED_AUTH;
-
     private final ResteasyClient restEasyClient;
 
     private final PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService;
