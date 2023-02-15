@@ -17,10 +17,12 @@ package io.cloudslang.runtime.impl.python.executor;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.cloudslang.runtime.api.python.PythonExecutorCommunicationService;
+import io.cloudslang.runtime.api.python.PythonExecutorConfigurationDataService;
 import io.cloudslang.runtime.api.python.PythonExecutorLifecycleManagerService;
 import io.cloudslang.runtime.api.python.entities.PythonExecutorDetails;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +41,6 @@ import static io.cloudslang.runtime.api.python.enums.PythonStrategy.getPythonStr
 import static java.io.File.separator;
 import static java.lang.Long.getLong;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static org.apache.commons.lang.StringUtils.containsIgnoreCase;
 
 @Service("pythonExecutorLifecycleManagerService")
@@ -55,10 +56,14 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     private static ScheduledThreadPoolExecutor scheduledExecutor;
     private static Process pythonExecutorProcess;
     private final PythonExecutorCommunicationService pythonExecutorCommunicationService;
+    private final PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService;
+
 
     @Autowired
-    public PythonExecutorLifecycleManagerServiceImpl(PythonExecutorCommunicationService pythonExecutorCommunicationService) {
+    public PythonExecutorLifecycleManagerServiceImpl(PythonExecutorCommunicationService pythonExecutorCommunicationService,
+                                                     PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService) {
         this.pythonExecutorCommunicationService = pythonExecutorCommunicationService;
+        this.pythonExecutorConfigurationDataService = pythonExecutorConfigurationDataService;
         if (IS_PYTHON_EXECUTOR_EVAL) {
             createKeepAliveJob();
             doStartPythonExecutor();
@@ -86,7 +91,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
 
     @Override
     public boolean isAlive() {
-        return pythonExecutorCommunicationService.isAlivePythonExecutor();
+        return isAlivePythonExecutor();
     }
 
     @Override
@@ -94,18 +99,29 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         doStopPythonExecutor();
     }
 
+    private boolean isAlivePythonExecutor() {
+        try {
+            Pair<Integer, String> response = pythonExecutorCommunicationService.performRequest(EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH, "GET", null, null);
+            return response.getLeft() == 200;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     private void doStopPythonExecutor() {
         if (!IS_PYTHON_EXECUTOR_EVAL) {
             return;
         }
         logger.info("A request to stop the Python Executor was sent");
-        if (!pythonExecutorCommunicationService.isAlivePythonExecutor()) {
+        if (!isAlivePythonExecutor()) {
             logger.info("Python Executor was already stopped");
             return;
         }
 
         try {
-            if (pythonExecutorCommunicationService.stopPythonExecutor().getStatus() == 200) {
+            if (pythonExecutorCommunicationService.performRequest(
+                    EXTERNAL_PYTHON_EXECUTOR_STOP_PATH, "POST", null,
+                    pythonExecutorConfigurationDataService.getPythonExecutorConfiguration().getLifecycleEncodedAuth()).getLeft() == 200) {
                 waitToStop();
             }
         } catch (ProcessingException processingEx) {
@@ -121,7 +137,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
             return;
         }
         logger.info("A request to start the Python Executor was sent");
-        if (pythonExecutorCommunicationService.isAlivePythonExecutor()) {
+        if (isAlivePythonExecutor()) {
             logger.info("Python Executor is already running");
             return;
         }
@@ -146,7 +162,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     }
 
     private void startProcess(String startPythonExecutor) {
-        PythonExecutorDetails pythonExecutorConfiguration = pythonExecutorCommunicationService.getPythonExecutorConfiguration();
+        PythonExecutorDetails pythonExecutorConfiguration = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
         ProcessBuilder pb = new ProcessBuilder(
                 pythonExecutorConfiguration.getSourceLocation() +
                         separator +
@@ -169,7 +185,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         logger.info("Waiting to start");
 
         for (int tries = 0; tries < START_STOP_RETRIES_COUNT; tries++) {
-            if (pythonExecutorCommunicationService.isAlivePythonExecutor()) {
+            if (isAlivePythonExecutor()) {
                 logger.info("Python Executor was successfully started");
                 return;
             }
@@ -188,7 +204,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         logger.info("Waiting to stop");
 
         for (int tries = 0; tries < START_STOP_RETRIES_COUNT; tries++) {
-            if (!pythonExecutorCommunicationService.isAlivePythonExecutor()) {
+            if (!isAlivePythonExecutor()) {
                 logger.info("Python Executor was successfully stopped");
                 destroyPythonExecutorProcess();
                 return;
@@ -205,7 +221,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     }
 
     private void pythonExecutorKeepAlive() {
-        if (pythonExecutorCommunicationService.isAlivePythonExecutor()) {
+        if (isAlivePythonExecutor()) {
             return;
         }
 

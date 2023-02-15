@@ -19,11 +19,16 @@ import io.cloudslang.runtime.api.python.PythonExecutorCommunicationService;
 import io.cloudslang.runtime.api.python.PythonExecutorConfigurationDataService;
 import io.cloudslang.runtime.api.python.entities.PythonExecutorDetails;
 import io.cloudslang.runtime.impl.python.external.StatefulRestEasyClientsHolder;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Response;
 
 import static javax.ws.rs.client.Entity.entity;
@@ -32,14 +37,10 @@ import static org.jboss.resteasy.util.HttpHeaderNames.AUTHORIZATION;
 import static org.jboss.resteasy.util.HttpHeaderNames.CONTENT_TYPE;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON;
 
-@Service("pythonExecutorCommunicationServiceImpl")
+@Service("pythonExecutorCommunicationService")
 public class PythonExecutorCommunicationServiceImpl implements PythonExecutorCommunicationService {
 
-    private static final String EXTERNAL_PYTHON_EXECUTOR_STOP_PATH = "/rest/v1/stop";
-    private static final String EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH = "/rest/v1/health";
-    private static final String EXTERNAL_PYTHON_EXECUTOR_EVAL_PATH = "/rest/v1/eval";
     private final ResteasyClient restEasyClient;
-
     private final PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService;
 
     @Autowired
@@ -49,51 +50,75 @@ public class PythonExecutorCommunicationServiceImpl implements PythonExecutorCom
         this.pythonExecutorConfigurationDataService = pythonExecutorConfigurationDataService;
     }
 
-    @Override
-    public boolean isAlivePythonExecutor() {
-        try (Response response = restEasyClient
-                .target(pythonExecutorConfigurationDataService.getPythonExecutorConfiguration().getUrl())
-                .path(EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH)
-                .request()
-                .accept(APPLICATION_JSON_TYPE)
-                .header(CONTENT_TYPE, APPLICATION_JSON)
-                .build("GET")
-                .invoke()) {
-            return response.getStatus() == 200;
-        } catch (Exception e) {
-            return false;
+    public Pair<Integer, String> performRequest(String path,
+                                                String method,
+                                                String requestPayload,
+                                                String auth) {
+        return executeRequest(
+                path,
+                method,
+                requestPayload,
+                auth
+        );
+    }
+
+    private Pair<Integer, String> executeRequest(String path,
+                                                 String method,
+                                                 @Nullable String requestPayload,
+                                                 String auth) {
+
+        Invocation request = null;
+        if (auth != null) {
+            request = buildRequest(path, method, requestPayload, auth);
+        } else {
+            request = buildRequest(path, method, requestPayload);
+        }
+
+        try (Response response = request.invoke()) {
+            return ImmutablePair.of(
+                    response.getStatus(),
+                    response.readEntity(String.class)
+            );
         }
     }
 
-    @Override
-    public Response stopPythonExecutor() {
-        PythonExecutorDetails pythonExecutorConfiguration = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
-        return restEasyClient
-                .target(pythonExecutorConfiguration.getUrl())
-                .path(EXTERNAL_PYTHON_EXECUTOR_STOP_PATH)
+    private Invocation buildRequest(String path,
+                                    String method,
+                                    @Nullable String requestPayload,
+                                    String auth) {
+
+        PythonExecutorDetails pythonExecutorDetails = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
+        Invocation.Builder request = restEasyClient
+                .target(pythonExecutorDetails.getUrl())
+                .path(path)
                 .request()
                 .accept(APPLICATION_JSON_TYPE)
                 .header(CONTENT_TYPE, APPLICATION_JSON)
-                .header(AUTHORIZATION, pythonExecutorConfiguration.getLifecycleEncodedAuth())
-                .build("POST")
-                .invoke();
+                .header(AUTHORIZATION, auth);
+
+        Entity<String> entity = (requestPayload == null
+                ? null : entity(requestPayload, APPLICATION_JSON_TYPE));
+
+        return request.build(method, entity);
     }
 
-    @Override
-    public Response executeRequestOnPythonServer(String method, String payload) {
-        return restEasyClient
-                .target(getPythonExecutorConfiguration().getUrl())
-                .path(EXTERNAL_PYTHON_EXECUTOR_EVAL_PATH)
+    private Invocation buildRequest(String path,
+                                    String method,
+                                    @Nullable String requestPayload) {
+
+        PythonExecutorDetails pythonExecutorDetails = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
+        Invocation.Builder request = restEasyClient
+                .target(pythonExecutorDetails.getUrl())
+                .path(path)
                 .request()
                 .accept(APPLICATION_JSON_TYPE)
-                .header(CONTENT_TYPE, APPLICATION_JSON)
-                .header(AUTHORIZATION, getPythonExecutorConfiguration().getRuntimeEncodedAuth())
-                .build(method, entity(payload, APPLICATION_JSON_TYPE))
-                .invoke();
+                .header(CONTENT_TYPE, APPLICATION_JSON);
+
+        Entity<String> entity = (requestPayload == null
+                ? null : entity(requestPayload, APPLICATION_JSON_TYPE));
+
+        return request.build(method, entity);
     }
 
-    @Override
-    public PythonExecutorDetails getPythonExecutorConfiguration() {
-        return pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
-    }
+
 }

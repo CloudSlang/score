@@ -24,18 +24,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.api.python.PythonExecutorCommunicationService;
+import io.cloudslang.runtime.api.python.PythonExecutorConfigurationDataService;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
+import io.cloudslang.runtime.api.python.entities.PythonExecutorDetails;
 import io.cloudslang.runtime.impl.python.external.EvaluationResults;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonEvalException;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonRuntimeServiceImpl;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonScriptException;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.ws.rs.ProcessingException;
-import javax.ws.rs.core.Response;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -46,10 +49,14 @@ import java.util.concurrent.Semaphore;
 
 public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServiceImpl implements PythonRuntimeService {
     private static final Logger logger = LogManager.getLogger(ExternalPythonExecutorServiceImpl.class);
+    private static final String EXTERNAL_PYTHON_EXECUTOR_EVAL_PATH = "/rest/v1/eval";
     private final ObjectMapper objectMapper;
 
     @Autowired
     PythonExecutorCommunicationService pythonExecutorCommunicationService;
+    @Autowired
+    @Qualifier("pythonExecutorConfigurationDataService")
+    PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService;
 
     public ExternalPythonExecutorServiceImpl(Semaphore executionControlSemaphore,
                                              Semaphore testingControlSemaphore) {
@@ -100,8 +107,9 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
 
 
     private EvaluationResults executeRequestOnPythonServer(String method, String payload) throws JsonProcessingException {
-        Response scriptResponse = pythonExecutorCommunicationService.executeRequestOnPythonServer(method, payload);
-        return objectMapper.readValue(scriptResponse.readEntity(String.class), EvaluationResults.class);
+        PythonExecutorDetails pythonExecutorDetails = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
+        Pair<Integer, String> scriptResponse = pythonExecutorCommunicationService.performRequest(EXTERNAL_PYTHON_EXECUTOR_EVAL_PATH, method, payload, pythonExecutorDetails.getRuntimeEncodedAuth());
+        return objectMapper.readValue(scriptResponse.getRight(), EvaluationResults.class);
     }
 
     private String generatePayloadForEval(String expression, String prepareEnvironmentScript,

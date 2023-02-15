@@ -341,7 +341,9 @@ public class PythonExecutorTest {
 
         @Bean(name = "pythonExecutorCommunicationService")
         public PythonExecutorCommunicationServiceImpl pythonExecutorCommunicationService() {
-            return new PythonExecutorCommunicationServiceImpl(mock(StatefulRestEasyClientsHolder.class), mock(PythonExecutorConfigurationDataService.class));
+            return new PythonExecutorCommunicationServiceImpl(
+                    mock(StatefulRestEasyClientsHolder.class),
+                    mock(PythonExecutorConfigurationDataService.class));
         }
 
         @Bean(name = "externalPythonExecutorService")

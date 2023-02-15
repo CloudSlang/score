@@ -15,17 +15,12 @@
  */
 package io.cloudslang.runtime.api.python;
 
-import io.cloudslang.runtime.api.python.entities.PythonExecutorDetails;
-
-import javax.ws.rs.core.Response;
+import org.apache.commons.lang3.tuple.Pair;
 
 public interface PythonExecutorCommunicationService {
 
-    boolean isAlivePythonExecutor();
-
-    Response stopPythonExecutor();
-
-    PythonExecutorDetails getPythonExecutorConfiguration();
-
-    Response executeRequestOnPythonServer(String method, String payload);
+    Pair<Integer, String> performRequest(String path,
+                                         String method,
+                                         String requestPayload,
+                                         String auth);
 }
