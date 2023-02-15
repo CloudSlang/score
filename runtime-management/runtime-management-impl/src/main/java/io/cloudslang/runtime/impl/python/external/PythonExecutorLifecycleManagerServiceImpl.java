@@ -59,6 +59,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     private static final int START_STOP_RETRIES_COUNT = 20;
     private static final int PYTHON_EXECUTOR_INITIAL_DELAY = 30000;
     private static final long PYTHON_EXECUTOR_KEEP_ALIVE_INTERVAL = getLong("python.executor.keepAliveDelayMillis", 30000);
+
     private static boolean isAlivePythonExecutorValue = false;
     private static ScheduledThreadPoolExecutor scheduledExecutor;
     private static Process pythonExecutorProcess;
@@ -170,8 +171,9 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         logger.info("A request to start the Python Executor was sent");
         if (isAlivePythonExecutor()) {
             // Do not attempt to start because the python executor is running under other process
-            if (!isAlivePythonExecutorValue) return;
-            logger.info("Python Executor is already running");
+            if (isAlivePythonExecutorValue) {
+                logger.info("Python Executor is already running");
+            }
             return;
         }
 
