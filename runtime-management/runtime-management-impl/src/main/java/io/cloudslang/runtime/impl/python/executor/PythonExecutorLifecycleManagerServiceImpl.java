@@ -101,7 +101,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
 
     private boolean isAlivePythonExecutor() {
         try {
-            Pair<Integer, String> response = pythonExecutorCommunicationService.performRequest(EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH, "GET", null, null);
+            Pair<Integer, String> response = pythonExecutorCommunicationService.performNoAuthRequest(EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH, "GET", null);
             return response.getLeft() == 200;
         } catch (Exception e) {
             return false;
@@ -119,9 +119,8 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         }
 
         try {
-            if (pythonExecutorCommunicationService.performRequest(
-                    EXTERNAL_PYTHON_EXECUTOR_STOP_PATH, "POST", null,
-                    pythonExecutorConfigurationDataService.getPythonExecutorConfiguration().getLifecycleEncodedAuth()).getLeft() == 200) {
+            if (pythonExecutorCommunicationService.performLifecycleRequest(
+                    EXTERNAL_PYTHON_EXECUTOR_STOP_PATH, "POST", null).getLeft() == 200) {
                 waitToStop();
             }
         } catch (ProcessingException processingEx) {

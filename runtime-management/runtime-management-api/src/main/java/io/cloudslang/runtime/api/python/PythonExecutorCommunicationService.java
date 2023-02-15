@@ -19,8 +19,13 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public interface PythonExecutorCommunicationService {
 
-    Pair<Integer, String> performRequest(String path,
+    Pair<Integer, String> performNoAuthRequest(String path,
                                          String method,
-                                         String requestPayload,
-                                         String auth);
+                                         String requestPayload);
+    Pair<Integer, String> performLifecycleRequest(String path,
+                                         String method,
+                                         String requestPayload);
+    Pair<Integer, String> performRuntimeRequest(String path,
+                                         String method,
+                                         String requestPayload);
 }

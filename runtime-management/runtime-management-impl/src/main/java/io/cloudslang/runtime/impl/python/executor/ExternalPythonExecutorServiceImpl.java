@@ -24,9 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.api.python.PythonExecutorCommunicationService;
-import io.cloudslang.runtime.api.python.PythonExecutorConfigurationDataService;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
-import io.cloudslang.runtime.api.python.entities.PythonExecutorDetails;
 import io.cloudslang.runtime.impl.python.external.EvaluationResults;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonEvalException;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonRuntimeServiceImpl;
@@ -36,7 +34,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.ws.rs.ProcessingException;
 import java.io.Serializable;
@@ -53,10 +50,7 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
     private final ObjectMapper objectMapper;
 
     @Autowired
-    PythonExecutorCommunicationService pythonExecutorCommunicationService;
-    @Autowired
-    @Qualifier("pythonExecutorConfigurationDataService")
-    PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService;
+    private PythonExecutorCommunicationService pythonExecutorCommunicationService;
 
     public ExternalPythonExecutorServiceImpl(Semaphore executionControlSemaphore,
                                              Semaphore testingControlSemaphore) {
@@ -107,8 +101,7 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
 
 
     private EvaluationResults executeRequestOnPythonServer(String method, String payload) throws JsonProcessingException {
-        PythonExecutorDetails pythonExecutorDetails = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
-        Pair<Integer, String> scriptResponse = pythonExecutorCommunicationService.performRequest(EXTERNAL_PYTHON_EXECUTOR_EVAL_PATH, method, payload, pythonExecutorDetails.getRuntimeEncodedAuth());
+        Pair<Integer, String> scriptResponse = pythonExecutorCommunicationService.performRuntimeRequest(EXTERNAL_PYTHON_EXECUTOR_EVAL_PATH, method, payload);
         return objectMapper.readValue(scriptResponse.getRight(), EvaluationResults.class);
     }
 

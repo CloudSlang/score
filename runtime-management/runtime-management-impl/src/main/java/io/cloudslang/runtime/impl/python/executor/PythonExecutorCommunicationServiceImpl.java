@@ -50,28 +50,56 @@ public class PythonExecutorCommunicationServiceImpl implements PythonExecutorCom
         this.pythonExecutorConfigurationDataService = pythonExecutorConfigurationDataService;
     }
 
-    public Pair<Integer, String> performRequest(String path,
-                                                String method,
-                                                String requestPayload,
-                                                String auth) {
+    public Pair<Integer, String> performNoAuthRequest(String path,
+                                                      String method,
+                                                      String requestPayload) {
+        PythonExecutorDetails pythonExecutorDetails = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
         return executeRequest(
+                pythonExecutorDetails.getUrl(),
                 path,
                 method,
                 requestPayload,
-                auth
+                null
         );
     }
 
-    private Pair<Integer, String> executeRequest(String path,
+    public Pair<Integer, String> performRuntimeRequest(String path,
+                                                       String method,
+                                                       String requestPayload) {
+        PythonExecutorDetails pythonExecutorDetails = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
+        return executeRequest(
+                pythonExecutorDetails.getUrl(),
+                path,
+                method,
+                requestPayload,
+                pythonExecutorDetails.getRuntimeEncodedAuth()
+        );
+    }
+
+    public Pair<Integer, String> performLifecycleRequest(String path,
+                                                         String method,
+                                                         String requestPayload) {
+        PythonExecutorDetails pythonExecutorDetails = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
+        return executeRequest(
+                pythonExecutorDetails.getUrl(),
+                path,
+                method,
+                requestPayload,
+                pythonExecutorDetails.getLifecycleEncodedAuth()
+        );
+    }
+
+    private Pair<Integer, String> executeRequest(String url,
+                                                 String path,
                                                  String method,
                                                  @Nullable String requestPayload,
                                                  String auth) {
 
         Invocation request = null;
         if (auth != null) {
-            request = buildRequest(path, method, requestPayload, auth);
+            request = buildRequest(url, path, method, requestPayload, auth);
         } else {
-            request = buildRequest(path, method, requestPayload);
+            request = buildRequest(url, path, method, requestPayload);
         }
 
         try (Response response = request.invoke()) {
@@ -82,14 +110,14 @@ public class PythonExecutorCommunicationServiceImpl implements PythonExecutorCom
         }
     }
 
-    private Invocation buildRequest(String path,
+    private Invocation buildRequest(String url,
+                                    String path,
                                     String method,
                                     @Nullable String requestPayload,
                                     String auth) {
 
-        PythonExecutorDetails pythonExecutorDetails = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
         Invocation.Builder request = restEasyClient
-                .target(pythonExecutorDetails.getUrl())
+                .target(url)
                 .path(path)
                 .request()
                 .accept(APPLICATION_JSON_TYPE)
@@ -102,13 +130,13 @@ public class PythonExecutorCommunicationServiceImpl implements PythonExecutorCom
         return request.build(method, entity);
     }
 
-    private Invocation buildRequest(String path,
+    private Invocation buildRequest(String url,
+                                    String path,
                                     String method,
                                     @Nullable String requestPayload) {
 
-        PythonExecutorDetails pythonExecutorDetails = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
         Invocation.Builder request = restEasyClient
-                .target(pythonExecutorDetails.getUrl())
+                .target(url)
                 .path(path)
                 .request()
                 .accept(APPLICATION_JSON_TYPE)
