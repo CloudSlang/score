@@ -106,7 +106,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     }
 
     private boolean isAlivePythonExecutor() {
-         try (Response response = restEasyClient
+        try (Response response = restEasyClient
                 .target(pythonExecutorConfigurationDataService.getPythonExecutorConfiguration().getUrl())
                 .path(EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH)
                 .request()
