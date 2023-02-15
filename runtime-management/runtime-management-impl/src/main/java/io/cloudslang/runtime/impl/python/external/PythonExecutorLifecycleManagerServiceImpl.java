@@ -32,6 +32,7 @@ import javax.annotation.PreDestroy;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.security.cert.CertPathValidatorException;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -105,7 +106,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     }
 
     private boolean isAlivePythonExecutor() {
-        try (Response response = restEasyClient
+         try (Response response = restEasyClient
                 .target(pythonExecutorConfigurationDataService.getPythonExecutorConfiguration().getUrl())
                 .path(EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH)
                 .request()
@@ -119,10 +120,15 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
                 return true;
             }
             return response.getStatus() == 200;
-        } catch (Exception e) {
-            isAlivePythonExecutorValue = false;
-            return false;
-        }
+        } catch (ProcessingException processingEx) {
+             // The request might fail if the python executor runs under other process
+             isAlivePythonExecutorValue = false;
+             if (containsIgnoreCase(processingEx.getMessage(), "signature check failed")) {
+                 logger.warn("Python Executor port is already in use");
+                 return true;
+             }
+             return false;
+         }
     }
 
     private void doStopPythonExecutor() {
@@ -162,7 +168,9 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
             return;
         }
         logger.info("A request to start the Python Executor was sent");
-        if (isAlivePythonExecutor() && isAlivePythonExecutorValue) {
+        if (isAlivePythonExecutor()) {
+            // Do not attempt to start because the python executor is running under other process
+            if (!isAlivePythonExecutorValue) return;
             logger.info("Python Executor is already running");
             return;
         }
