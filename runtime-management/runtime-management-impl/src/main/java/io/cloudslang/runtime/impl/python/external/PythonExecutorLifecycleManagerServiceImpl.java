@@ -32,7 +32,6 @@ import javax.annotation.PreDestroy;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.security.cert.CertPathValidatorException;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
