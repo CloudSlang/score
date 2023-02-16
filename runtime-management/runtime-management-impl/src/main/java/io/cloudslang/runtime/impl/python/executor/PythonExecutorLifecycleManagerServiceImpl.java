@@ -51,8 +51,10 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     private static final String EXTERNAL_PYTHON_EXECUTOR_STOP_PATH = "/rest/v1/stop";
     private static final String EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH = "/rest/v1/health";
     private static final int START_STOP_RETRIES_COUNT = 20;
-    private static final int PYTHON_EXECUTOR_INITIAL_DELAY = 5000;
+    private static final int PYTHON_EXECUTOR_INITIAL_DELAY = 30000;
     private static final long PYTHON_EXECUTOR_KEEP_ALIVE_INTERVAL = getLong("python.executor.keepAliveDelayMillis", 30000);
+
+    private static boolean isAlivePythonExecutorValue = false;
     private static ScheduledThreadPoolExecutor scheduledExecutor;
     private static Process pythonExecutorProcess;
     private final PythonExecutorCommunicationService pythonExecutorCommunicationService;
@@ -91,7 +93,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
 
     @Override
     public boolean isAlive() {
-        return isAlivePythonExecutor();
+        return isAlivePythonExecutorValue;
     }
 
     @Override
@@ -102,8 +104,18 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     private boolean isAlivePythonExecutor() {
         try {
             Pair<Integer, String> response = pythonExecutorCommunicationService.performNoAuthRequest(EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH, "GET", null);
+            if (response.getLeft() == 200 && pythonExecutorProcess == null) {
+                logger.warn("Python Executor port is already in use");
+                isAlivePythonExecutorValue = false;
+                return true;
+            }
             return response.getLeft() == 200;
         } catch (Exception e) {
+            isAlivePythonExecutorValue = false;
+            if (containsIgnoreCase(e.getMessage(), "signature check failed")) {
+                logger.warn("Python Executor port is already in use");
+                return true;
+            }
             return false;
         }
     }
@@ -113,7 +125,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
             return;
         }
         logger.info("A request to stop the Python Executor was sent");
-        if (!isAlivePythonExecutor()) {
+        if (!isAlivePythonExecutor() || !isAlivePythonExecutorValue) {
             logger.info("Python Executor was already stopped");
             return;
         }
@@ -137,7 +149,10 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         }
         logger.info("A request to start the Python Executor was sent");
         if (isAlivePythonExecutor()) {
-            logger.info("Python Executor is already running");
+            // Do not attempt to start because the python executor is running under other process
+            if (isAlivePythonExecutorValue) {
+                logger.info("Python Executor is already running");
+            }
             return;
         }
 
@@ -186,6 +201,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         for (int tries = 0; tries < START_STOP_RETRIES_COUNT; tries++) {
             if (isAlivePythonExecutor()) {
                 logger.info("Python Executor was successfully started");
+                isAlivePythonExecutorValue = true;
                 return;
             }
             try {
@@ -205,6 +221,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         for (int tries = 0; tries < START_STOP_RETRIES_COUNT; tries++) {
             if (!isAlivePythonExecutor()) {
                 logger.info("Python Executor was successfully stopped");
+                isAlivePythonExecutorValue = false;
                 destroyPythonExecutorProcess();
                 return;
             }
@@ -231,6 +248,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         if (pythonExecutorProcess != null) {
             pythonExecutorProcess.destroy();
             pythonExecutorProcess = null;
+            isAlivePythonExecutorValue = false;
         }
     }
 
