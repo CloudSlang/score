@@ -104,7 +104,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     private boolean isAlivePythonExecutor() {
         try {
             Pair<Integer, String> response = pythonExecutorCommunicationService.performNoAuthRequest(EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH, "GET", null);
-            if (response.getStatus() == 200 && pythonExecutorProcess == null) {
+            if (response.getLeft() == 200 && pythonExecutorProcess == null) {
                 logger.warn("Python Executor port is already in use");
                 isAlivePythonExecutorValue = false;
                 return true;
@@ -112,7 +112,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
             return response.getLeft() == 200;
         } catch (Exception e) {
             isAlivePythonExecutorValue = false;
-            if (containsIgnoreCase(processingEx.getMessage(), "signature check failed")) {
+            if (containsIgnoreCase(e.getMessage(), "signature check failed")) {
                 logger.warn("Python Executor port is already in use");
                 return true;
             }
