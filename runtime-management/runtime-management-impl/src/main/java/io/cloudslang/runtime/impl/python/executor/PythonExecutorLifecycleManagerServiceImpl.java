@@ -13,24 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.runtime.impl.python.external;
+package io.cloudslang.runtime.impl.python.executor;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.cloudslang.runtime.api.python.PythonExecutorCommunicationService;
 import io.cloudslang.runtime.api.python.PythonExecutorConfigurationDataService;
 import io.cloudslang.runtime.api.python.PythonExecutorLifecycleManagerService;
 import io.cloudslang.runtime.api.python.entities.PythonExecutorDetails;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
 import javax.ws.rs.ProcessingException;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
@@ -42,11 +41,7 @@ import static io.cloudslang.runtime.api.python.enums.PythonStrategy.getPythonStr
 import static java.io.File.separator;
 import static java.lang.Long.getLong;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static org.apache.commons.lang.StringUtils.containsIgnoreCase;
-import static org.jboss.resteasy.util.HttpHeaderNames.AUTHORIZATION;
-import static org.jboss.resteasy.util.HttpHeaderNames.CONTENT_TYPE;
-import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON;
 
 @Service("pythonExecutorLifecycleManagerService")
 public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutorLifecycleManagerService {
@@ -62,13 +57,14 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     private static boolean isAlivePythonExecutorValue = false;
     private static ScheduledThreadPoolExecutor scheduledExecutor;
     private static Process pythonExecutorProcess;
-    private final ResteasyClient restEasyClient;
+    private final PythonExecutorCommunicationService pythonExecutorCommunicationService;
     private final PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService;
 
+
     @Autowired
-    public PythonExecutorLifecycleManagerServiceImpl(StatefulRestEasyClientsHolder statefulRestEasyClientsHolder,
-                                                     @Qualifier("pythonExecutorConfigurationDataService") PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService) {
-        this.restEasyClient = statefulRestEasyClientsHolder.getRestEasyClient();
+    public PythonExecutorLifecycleManagerServiceImpl(PythonExecutorCommunicationService pythonExecutorCommunicationService,
+                                                     PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService) {
+        this.pythonExecutorCommunicationService = pythonExecutorCommunicationService;
         this.pythonExecutorConfigurationDataService = pythonExecutorConfigurationDataService;
         if (IS_PYTHON_EXECUTOR_EVAL) {
             createKeepAliveJob();
@@ -106,29 +102,22 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     }
 
     private boolean isAlivePythonExecutor() {
-        try (Response response = restEasyClient
-                .target(pythonExecutorConfigurationDataService.getPythonExecutorConfiguration().getUrl())
-                .path(EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH)
-                .request()
-                .accept(APPLICATION_JSON_TYPE)
-                .header(CONTENT_TYPE, APPLICATION_JSON)
-                .build("GET")
-                .invoke()) {
+        try {
+            Pair<Integer, String> response = pythonExecutorCommunicationService.performNoAuthRequest(EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH, "GET", null);
             if (response.getStatus() == 200 && pythonExecutorProcess == null) {
                 logger.warn("Python Executor port is already in use");
                 isAlivePythonExecutorValue = false;
                 return true;
             }
-            return response.getStatus() == 200;
-        } catch (ProcessingException processingEx) {
-             // The request might fail if the python executor runs under other process
-             isAlivePythonExecutorValue = false;
-             if (containsIgnoreCase(processingEx.getMessage(), "signature check failed")) {
-                 logger.warn("Python Executor port is already in use");
-                 return true;
-             }
-             return false;
-         }
+            return response.getLeft() == 200;
+        } catch (Exception e) {
+            isAlivePythonExecutorValue = false;
+            if (containsIgnoreCase(processingEx.getMessage(), "signature check failed")) {
+                logger.warn("Python Executor port is already in use");
+                return true;
+            }
+            return false;
+        }
     }
 
     private void doStopPythonExecutor() {
@@ -141,18 +130,9 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
             return;
         }
 
-        PythonExecutorDetails pythonExecutorConfiguration = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
-        try (Response response = restEasyClient
-                .target(pythonExecutorConfiguration.getUrl())
-                .path(EXTERNAL_PYTHON_EXECUTOR_STOP_PATH)
-                .request()
-                .accept(APPLICATION_JSON_TYPE)
-                .header(CONTENT_TYPE, APPLICATION_JSON)
-                .header(AUTHORIZATION, pythonExecutorConfiguration.getLifecycleEncodedAuth())
-                .build("POST")
-                .invoke()) {
-
-            if (response.getStatus() == 200) {
+        try {
+            if (pythonExecutorCommunicationService.performLifecycleRequest(
+                    EXTERNAL_PYTHON_EXECUTOR_STOP_PATH, "POST", null).getLeft() == 200) {
                 waitToStop();
             }
         } catch (ProcessingException processingEx) {

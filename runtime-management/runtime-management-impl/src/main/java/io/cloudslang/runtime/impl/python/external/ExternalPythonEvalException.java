@@ -16,7 +16,7 @@
 package io.cloudslang.runtime.impl.python.external;
 
 public class ExternalPythonEvalException extends RuntimeException {
-    ExternalPythonEvalException(String message) {
+    public ExternalPythonEvalException(String message) {
         super(message);
     }
 }
