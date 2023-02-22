@@ -192,7 +192,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
             pythonExecutorProcess = pb.start();
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(pythonExecutorProcess.getOutputStream()));
 
-            writer.write("magic_value");
+            writer.write(pythonExecutorConfiguration.getEncodedSecretKeyPath());
             writer.flush();
             writer.close();
         } catch (IOException ioException) {
