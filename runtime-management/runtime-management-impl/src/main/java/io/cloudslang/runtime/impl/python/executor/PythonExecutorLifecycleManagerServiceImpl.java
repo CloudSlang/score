@@ -30,7 +30,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
 import javax.ws.rs.ProcessingException;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -188,6 +190,11 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         try {
             logger.info("Starting Python Executor on port: " + pythonExecutorConfiguration.getPort());
             pythonExecutorProcess = pb.start();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(pythonExecutorProcess.getOutputStream()));
+
+            writer.write(pythonExecutorConfiguration.getEncodedSecretKeyPath());
+            writer.flush();
+            writer.close();
         } catch (IOException ioException) {
             logger.error("Failed to start Python Executor", ioException);
         } catch (Exception exception) {
