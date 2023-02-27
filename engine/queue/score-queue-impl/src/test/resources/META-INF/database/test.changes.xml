@@ -16,6 +16,12 @@
 	<property name="timestamp.type" dbms="postgresql" value="timestamp"/>
 	<property name="timestamp.type" dbms="h2" value="timestamp"/>
 
+	<property name="double.type" dbms="oracle" value="float"/>
+	<property name="double.type" dbms="mssql" value="double"/>
+	<property name="double.type" dbms="mysql" value="double"/>
+	<property name="double.type" dbms="postgresql" value="float8"/>
+	<property name="double.type" dbms="h2" value="float"/>
+
 	<changeSet id="create OO_EXECUTION_STATES" author="engine">
 		<createTable tableName="OO_EXECUTION_STATES">
 			<column name="ID" type="bigint">
@@ -91,14 +97,70 @@
             <column name="BRANCH_ID" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="STATUS" type="varchar(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="EXECUTION_OBJECT" type="${blob.type}"></column>
-        </createTable>
+			<column name="STATUS" type="varchar(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="EXECUTION_OBJECT" type="${blob.type}"></column>
+		</createTable>
 
-        <addUniqueConstraint tableName="OO_EXECUTION_STATE" columnNames="EXECUTION_ID, BRANCH_ID"
-          constraintName="OO_EXECUTION_STATE_UC"/>
-    </changeSet>
+		<addUniqueConstraint tableName="OO_EXECUTION_STATE" columnNames="EXECUTION_ID, BRANCH_ID"
+							 constraintName="OO_EXECUTION_STATE_UC"/>
+	</changeSet>
 
+	<changeSet id="Create OO_EXECUTION_SUMMARY" author="engine">
+		<createTable tableName="OO_EXECUTION_SUMMARY">
+			<column name="ID" type="BIGINT">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="EXECUTION_ID" type="varchar(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="BRANCH_ID" type="varchar(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="STATUS" type="varchar(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="START_TIME" type="${timestamp.type}">
+				<constraints nullable="false"/>
+			</column>
+			<column name="END_TIME" type="${timestamp.type}">
+			</column>
+			<column name="FLOW_UUID" type="varchar(128)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="FLOW_PATH" type="varchar(255)">
+				<!--todo-->
+				<!--<constraints nullable="false"/>-->
+			</column>
+			<column name="RESULT_STATUS_TYPE" type="varchar(255)">
+			</column>
+			<column name="RESULT_STATUS_NAME" type="varchar(255)">
+			</column>
+			<column name="PAUSE_REASON" type="varchar(255)">
+			</column>
+			<column name="OWNER" type="varchar(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="TRIGGERED_BY" type="varchar(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="EXECUTION_OBJECT" type="${blob.type}">
+			</column>
+			<column name="EXECUTION_NAME" type="varchar(255)">
+			</column>
+			<column name="ROI" type="${double.type}">
+			</column>
+			<column name="DURATION" type="BIGINT">
+			</column>
+			<column name="START_TIME_LONG" type="BIGINT">
+			</column>
+			<column name="END_TIME_LONG" type="BIGINT">
+			</column>
+		</createTable>
+
+		<addUniqueConstraint tableName="OO_EXECUTION_SUMMARY"
+							 columnNames="EXECUTION_ID, BRANCH_ID"
+							 constraintName="OO_EXECUTION_SUMMARY_UC"/>
+	</changeSet>
 </databaseChangeLog>
