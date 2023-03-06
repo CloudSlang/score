@@ -75,6 +75,7 @@ import static org.mockito.Mockito.when;
 // this test depend on repo - should mock it!
 public class WorkerNodeServiceTest {
     private static final boolean SHOW_SQL = false;
+    private static final String versionId = "123";
 
     @Autowired
     private WorkerNodeService workerNodeService;
@@ -128,7 +129,7 @@ public class WorkerNodeServiceTest {
         workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
         WorkerNode worker = workerNodeService.readByUUID("H3");
         Assert.assertEquals(WorkerStatus.FAILED, worker.getStatus());
-        workerNodeService.up("H3", "version", "123");
+        workerNodeService.up("H3", "version", versionId);
         worker = workerNodeService.readByUUID("H3");
         Assert.assertEquals(WorkerStatus.RUNNING, worker.getStatus());
     }
@@ -160,7 +161,7 @@ public class WorkerNodeServiceTest {
         workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
         WorkerNode worker = workerNodeService.readByUUID("H3");
         Assert.assertEquals(WorkerStatus.FAILED, worker.getStatus());
-        workerNodeService.up("H3", "version", "123");
+        workerNodeService.up("H3", "version", versionId);
         Assert.assertEquals(WorkerStatus.RUNNING, worker.getStatus());
         workerNodeService.updateWorkerToDeleted("H3");
         Assert.assertEquals(WorkerStatus.IN_RECOVERY, worker.getStatus());
@@ -198,7 +199,7 @@ public class WorkerNodeServiceTest {
         Assert.assertEquals(0, workers.size());//still it not "non responding" because it yet to login(first login)
 
         // after login version is current system version.
-        workerNodeService.up("H3", "version", "123");
+        workerNodeService.up("H3", "version", versionId);
         workers = workerNodeService.readNonRespondingWorkers();
         Assert.assertEquals(0, workers.size());
 
@@ -208,7 +209,7 @@ public class WorkerNodeServiceTest {
         Assert.assertEquals(3, workers.size());
 
         //after up the worker version will be aligned with current system version.
-        workerNodeService.up("H3", "version", "123");
+        workerNodeService.up("H3", "version", versionId);
         workers = workerNodeService.readNonRespondingWorkers();
         Assert.assertEquals(2, workers.size());
         Assert.assertFalse(workers.contains("H3"));
@@ -266,10 +267,10 @@ public class WorkerNodeServiceTest {
     public void updateBulkNumber() {
         workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
 
-        workerNodeService.updateBulkNumber("H3", "123");
+        workerNodeService.updateBulkNumber("H3", versionId);
 
         WorkerNode worker = workerNodeService.readByUUID("H3");
-        Assert.assertEquals("123", worker.getBulkNumber());
+        Assert.assertEquals(versionId, worker.getBulkNumber());
     }
 
     @Test
@@ -346,7 +347,7 @@ public class WorkerNodeServiceTest {
         WorkerNode workerNode = workerNodeService.readByUUID("H1");
         Assert.assertEquals("", workerNode.getVersion());
 
-        workerNodeService.updateVersion("H1", "VERSION", "123");
+        workerNodeService.updateVersion("H1", "VERSION", versionId);
 
         workerNode = workerNodeService.readByUUID("H1");
 
@@ -455,7 +456,7 @@ public class WorkerNodeServiceTest {
 
         @Bean
         EngineVersionService engineVersionService() {
-            return () -> "123";
+            return () -> versionId;
         }
 
     }
