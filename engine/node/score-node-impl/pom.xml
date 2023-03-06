@@ -153,6 +153,11 @@
 			<scope>test</scope>
 		</dependency>
 
+        <dependency>
+            <groupId>io.cloudslang</groupId>
+            <artifactId>score-orchestrator-api</artifactId>
+        </dependency>
+
 	</dependencies>
 
 	<build>

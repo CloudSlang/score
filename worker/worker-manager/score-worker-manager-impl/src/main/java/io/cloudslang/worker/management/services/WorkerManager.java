@@ -119,6 +119,8 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
 
     private boolean up = false;
 
+    private boolean versionMismatch = false;
+
     private int threadPoolVersion = 0;
 
     private boolean newCancelBehaviour;
@@ -199,7 +201,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
             if (endOfInit) {
                 WorkerQueueDetailsHolder queueDetailsHolder = null;
                 try {
-                    WorkerKeepAliveInfo workerKeepAliveInfo = workerNodeService.newKeepAlive(workerUuid);
+                    WorkerKeepAliveInfo workerKeepAliveInfo = workerNodeService.newKeepAlive(workerUuid, versionMismatch);
                     String newWrv = workerKeepAliveInfo.getWorkerRecoveryVersion();
                     workerStateUpdateService.setEnableState(workerKeepAliveInfo.isActive());
                     workerStateUpdateService.setMonitoringState(workerKeepAliveInfo.shouldMonitor());
@@ -265,6 +267,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
         new Thread(new Runnable() {
             @Override
             public void run() {
+                versionMismatch = !workerVersionService.getWorkerVersionId().equals(engineVersionService.getEngineVersionId());
                 initStarted = true;
                 long sleep = initStartUpSleep;
                 boolean shouldRetry = true;
@@ -288,8 +291,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
                 endOfInit = true;
 
                 //Check that this Worker is in the same version as engine - if not - stay idle
-                String engineVersionId = engineVersionService.getEngineVersionId();
-                if (workerVersionService.getWorkerVersionId().equals(engineVersionId)) {
+                if (!versionMismatch) {
 
                     //mark that worker is up and its recovery is ended - only now we can start asking for messages from queue
                     up = true;

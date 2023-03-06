@@ -21,6 +21,7 @@ import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
 import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.node.repositories.WorkerNodeRepository;
 import io.cloudslang.engine.versioning.services.VersionService;
+import io.cloudslang.orchestrator.services.EngineVersionService;
 import io.cloudslang.score.api.nodes.WorkerStatus;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
@@ -450,6 +451,11 @@ public class WorkerNodeServiceTest {
         @Bean
         QueueConfigurationDataService queueConfigurationDataService() {
             return mock(QueueConfigurationDataService.class);
+        }
+
+        @Bean
+        EngineVersionService engineVersionService() {
+            return () -> "123";
         }
 
     }

@@ -23,6 +23,7 @@ import io.cloudslang.engine.node.entities.WorkerKeepAliveInfo;
 import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.node.repositories.WorkerNodeRepository;
 import io.cloudslang.engine.versioning.services.VersionService;
+import io.cloudslang.orchestrator.services.EngineVersionService;
 import io.cloudslang.score.api.nodes.WorkerStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -71,6 +72,9 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
     @Autowired
     private PlatformTransactionManager transactionManager;
 
+    @Autowired
+    private EngineVersionService engineVersionService;
+
     @PostConstruct
     void setWorkerMonitoring(){
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
@@ -102,11 +106,18 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
     @Override
     @Transactional
     public WorkerKeepAliveInfo newKeepAlive(String uuid) {
+        // Any worker using this method will be considered an older version from engine
+		return newKeepAlive(uuid, true);
+    }
+
+    @Override
+    @Transactional
+    public WorkerKeepAliveInfo newKeepAlive(String uuid, boolean versionMismatch) {
         WorkerNode worker = readByUUID(uuid);
         worker.setAckTime(new Date());
         long version = versionService.getCurrentVersion(MSG_RECOVERY_VERSION_NAME);
         worker.setAckVersion(version);
-        if (!worker.getStatus().equals(WorkerStatus.IN_RECOVERY)) {
+        if (!versionMismatch && !worker.getStatus().equals(WorkerStatus.IN_RECOVERY)) {
             worker.setStatus(WorkerStatus.RUNNING);
         }
         boolean active = worker.isActive();
@@ -171,7 +182,8 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
                 listener.preLogin(uuid);
             }
         }
-        WorkerKeepAliveInfo workerKeepAliveInfo = newKeepAlive(uuid);
+        boolean versionMismatch = !engineVersionService.getEngineVersionId().equals(versionId);
+        WorkerKeepAliveInfo workerKeepAliveInfo = newKeepAlive(uuid, versionMismatch);
         if (loginListeners != null) {
             for (LoginListener listener : loginListeners) {
                 listener.postLogin(uuid);

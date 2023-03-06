@@ -49,6 +49,15 @@ public interface WorkerNodeService {
     WorkerKeepAliveInfo newKeepAlive(String uuid);
 
     /**
+     * Update the Worker Node entity with the current ack version for the keep alive mechanism
+     *
+     * @param uuid worker's unique identifier
+     * @param versionMismatch the boolean value between the engine versionId and worker versionId
+     * @return the WorkerKeepAliveInfo that contains the worker's recovery version (WRV) and the enable state
+     */
+    WorkerKeepAliveInfo newKeepAlive(String uuid, boolean versionMismatch);
+
+    /**
      * Create a new worker
      *
      * @param uuid worker's unique identifier
