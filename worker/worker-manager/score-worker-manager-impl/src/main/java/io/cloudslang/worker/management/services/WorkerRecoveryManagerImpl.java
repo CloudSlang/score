@@ -17,6 +17,8 @@
 package io.cloudslang.worker.management.services;
 
 import io.cloudslang.engine.node.services.WorkerNodeService;
+import io.cloudslang.orchestrator.services.EngineVersionService;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,7 @@ public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager {
 
     @Autowired
 	private List<WorkerRecoveryListener> listeners;
+
 	@Autowired
 	private WorkerNodeService workerNodeService;
 
@@ -45,6 +48,9 @@ public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager {
 
     @Autowired
    	protected WorkerVersionService workerVersionService;
+
+    @Autowired
+    private EngineVersionService engineVersionService;
 
 	private volatile boolean inRecovery; //must be volatile since it is read/written in several threads
 
@@ -80,11 +86,13 @@ public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager {
             }
             if (logger.isDebugEnabled()) logger.debug("Listeners recovery is done");
 
+            boolean versionMismatch = !StringUtils.equals(workerVersionService.getWorkerVersion(), engineVersionService.getEngineVersionId());
             retryTemplate.retry(RetryTemplate.INFINITELY, 30*1000L, new RetryTemplate.RetryCallback() {
                 @Override
                 public void tryOnce() {
 					if(logger.isDebugEnabled()) logger.debug("sending worker UP");
-                    String newWrv = workerNodeService.up(System.getProperty("worker.uuid"), workerVersionService.getWorkerVersion(), workerVersionService.getWorkerVersionId());
+                    String newWrv = workerNodeService.up(System.getProperty("worker.uuid"), workerVersionService.getWorkerVersion(),
+                                                         workerVersionService.getWorkerVersionId(), versionMismatch);
                     setWRV(newWrv);
                     if(logger.isDebugEnabled()) logger.debug("the worker is UP");
                 }

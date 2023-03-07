@@ -23,7 +23,6 @@ import io.cloudslang.engine.node.entities.WorkerKeepAliveInfo;
 import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.node.repositories.WorkerNodeRepository;
 import io.cloudslang.engine.versioning.services.VersionService;
-import io.cloudslang.orchestrator.services.EngineVersionService;
 import io.cloudslang.score.api.nodes.WorkerStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -71,9 +70,6 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 
     @Autowired
     private PlatformTransactionManager transactionManager;
-
-    @Autowired
-    private EngineVersionService engineVersionService;
 
     @PostConstruct
     void setWorkerMonitoring(){
@@ -175,6 +171,28 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 
     @Override
     @Transactional
+    public String up(String uuid, String version, String versionId, boolean versionMismatch) {
+
+        if (loginListeners != null) {
+            for (LoginListener listener : loginListeners) {
+                listener.preLogin(uuid);
+            }
+        }
+        WorkerKeepAliveInfo workerKeepAliveInfo = newKeepAlive(uuid, versionMismatch);
+        if (loginListeners != null) {
+            for (LoginListener listener : loginListeners) {
+                listener.postLogin(uuid);
+            }
+        }
+
+        updateVersion(uuid, version, versionId);
+
+        return workerKeepAliveInfo.getWorkerRecoveryVersion();
+    }
+
+    @Override
+    @Transactional
+    @Deprecated
     public String up(String uuid, String version, String versionId) {
 
         if (loginListeners != null) {
@@ -182,8 +200,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
                 listener.preLogin(uuid);
             }
         }
-        boolean versionMismatch = !engineVersionService.getEngineVersionId().equals(versionId);
-        WorkerKeepAliveInfo workerKeepAliveInfo = newKeepAlive(uuid, versionMismatch);
+        WorkerKeepAliveInfo workerKeepAliveInfo = newKeepAlive(uuid, true);
         if (loginListeners != null) {
             for (LoginListener listener : loginListeners) {
                 listener.postLogin(uuid);
@@ -205,7 +222,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
                 listener.preLogin(uuid);
             }
         }
-        WorkerKeepAliveInfo workerKeepAliveInfo = newKeepAlive(uuid);
+        WorkerKeepAliveInfo workerKeepAliveInfo = newKeepAlive(uuid, true);
         if (loginListeners != null) {
             for (LoginListener listener : loginListeners) {
                 listener.postLogin(uuid);

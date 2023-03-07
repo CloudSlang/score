@@ -17,6 +17,7 @@
 package io.cloudslang.worker.management.services;
 
 import io.cloudslang.engine.node.services.WorkerNodeService;
+import io.cloudslang.orchestrator.services.EngineVersionService;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -87,6 +88,11 @@ public class WorkerRecoveryManagerImplTest {
         @Bean
         public WorkerVersionService workerVersionService(){
             return mock(WorkerVersionService.class);
+        }
+
+        @Bean
+        public EngineVersionService engineVersionService() {
+            return mock(EngineVersionService.class);
         }
 
         @Bean

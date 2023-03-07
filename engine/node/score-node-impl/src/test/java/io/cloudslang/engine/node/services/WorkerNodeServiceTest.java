@@ -21,7 +21,6 @@ import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
 import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.node.repositories.WorkerNodeRepository;
 import io.cloudslang.engine.versioning.services.VersionService;
-import io.cloudslang.orchestrator.services.EngineVersionService;
 import io.cloudslang.score.api.nodes.WorkerStatus;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
@@ -129,7 +128,7 @@ public class WorkerNodeServiceTest {
         workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
         WorkerNode worker = workerNodeService.readByUUID("H3");
         Assert.assertEquals(WorkerStatus.FAILED, worker.getStatus());
-        workerNodeService.up("H3", "version", versionId);
+        workerNodeService.up("H3", "version", versionId, false);
         worker = workerNodeService.readByUUID("H3");
         Assert.assertEquals(WorkerStatus.RUNNING, worker.getStatus());
     }
@@ -161,7 +160,7 @@ public class WorkerNodeServiceTest {
         workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
         WorkerNode worker = workerNodeService.readByUUID("H3");
         Assert.assertEquals(WorkerStatus.FAILED, worker.getStatus());
-        workerNodeService.up("H3", "version", versionId);
+        workerNodeService.up("H3", "version", versionId, false);
         Assert.assertEquals(WorkerStatus.RUNNING, worker.getStatus());
         workerNodeService.updateWorkerToDeleted("H3");
         Assert.assertEquals(WorkerStatus.IN_RECOVERY, worker.getStatus());
@@ -199,7 +198,7 @@ public class WorkerNodeServiceTest {
         Assert.assertEquals(0, workers.size());//still it not "non responding" because it yet to login(first login)
 
         // after login version is current system version.
-        workerNodeService.up("H3", "version", versionId);
+        workerNodeService.up("H3", "version", versionId, false);
         workers = workerNodeService.readNonRespondingWorkers();
         Assert.assertEquals(0, workers.size());
 
@@ -209,7 +208,7 @@ public class WorkerNodeServiceTest {
         Assert.assertEquals(3, workers.size());
 
         //after up the worker version will be aligned with current system version.
-        workerNodeService.up("H3", "version", versionId);
+        workerNodeService.up("H3", "version", versionId, false);
         workers = workerNodeService.readNonRespondingWorkers();
         Assert.assertEquals(2, workers.size());
         Assert.assertFalse(workers.contains("H3"));
@@ -452,11 +451,6 @@ public class WorkerNodeServiceTest {
         @Bean
         QueueConfigurationDataService queueConfigurationDataService() {
             return mock(QueueConfigurationDataService.class);
-        }
-
-        @Bean
-        EngineVersionService engineVersionService() {
-            return () -> versionId;
         }
 
     }
