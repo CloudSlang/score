@@ -201,7 +201,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
                 listener.preLogin(uuid);
             }
         }
-        WorkerKeepAliveInfo workerKeepAliveInfo = newKeepAlive(uuid, true);
+        WorkerKeepAliveInfo workerKeepAliveInfo = newKeepAlive(uuid);
         if (loginListeners != null) {
             for (LoginListener listener : loginListeners) {
                 listener.postLogin(uuid);
@@ -223,7 +223,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
                 listener.preLogin(uuid);
             }
         }
-        WorkerKeepAliveInfo workerKeepAliveInfo = newKeepAlive(uuid, true);
+        WorkerKeepAliveInfo workerKeepAliveInfo = newKeepAlive(uuid);
         if (loginListeners != null) {
             for (LoginListener listener : loginListeners) {
                 listener.postLogin(uuid);
