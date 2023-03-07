@@ -101,6 +101,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 
     @Override
     @Transactional
+    @Deprecated
     public WorkerKeepAliveInfo newKeepAlive(String uuid) {
         // Any worker using this method will be considered an older version from engine
 		return newKeepAlive(uuid, true);
