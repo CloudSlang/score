@@ -25,7 +25,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -35,8 +34,7 @@ import java.util.List;
  * Date: 10/09/13
  * Time: 10:01
  */
-public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedExecution, Long> {
-    List<SuspendedExecution> findBySplitIdIn(List<String> splitIds);
+public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedExecution, Long>, SuspendedExecutionRepositoryCustom {
 
     @Query("from SuspendedExecution se where se.numberOfBranches=size(se.finishedBranches) and se.suspensionReason in :suspensionReasons")
     List<SuspendedExecution> findFinishedSuspendedExecutions(
@@ -49,11 +47,8 @@ public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedEx
             @Param("suspensionReasons") EnumSet<SuspendedExecutionReason> suspensionReasons,
             Pageable pageRequest);
 
-    @Query("delete from SuspendedExecution se where se.executionId in :ids")
-    @Modifying
-    int deleteByIds(@Param("ids") Collection<String> ids);
-
-    SuspendedExecution findBySplitId(String splitId);
+    @Query("from SuspendedExecution se where se.splitId = cast(:splitId as string)")
+    SuspendedExecution findBySplitId(@Param("splitId") String splitId);
 
     @Modifying
     @Query("update SuspendedExecution se set se.executionObj = :newExecution, se.locked = false where se.id = :suspendedExecutionId")

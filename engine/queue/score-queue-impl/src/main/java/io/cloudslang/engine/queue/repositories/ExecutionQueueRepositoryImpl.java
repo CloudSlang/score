@@ -16,9 +16,6 @@
 
 package io.cloudslang.engine.queue.repositories;
 
-import static java.lang.Long.parseLong;
-import static org.apache.commons.io.IOUtils.toByteArray;
-
 import com.google.common.collect.Iterables;
 import io.cloudslang.engine.data.IdentityGenerator;
 import io.cloudslang.engine.queue.entities.ExecStatus;
@@ -26,7 +23,21 @@ import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.entities.StartNewBranchPayload;
 import io.cloudslang.engine.queue.services.StatementAwareJdbcTemplateWrapper;
-import io.cloudslang.orchestrator.services.ExecutionStateService;
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.SingleColumnRowMapper;
+import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.jdbc.support.MetaDataAccessException;
+
+import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.sql.PreparedStatement;
@@ -41,20 +52,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
-import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowCallbackHandler;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.SingleColumnRowMapper;
-import org.springframework.jdbc.support.JdbcUtils;
-import org.springframework.jdbc.support.MetaDataAccessException;
+
+import static java.lang.Long.parseLong;
+import static org.apache.commons.io.IOUtils.toByteArray;
 
 /**
  * User: Date: 20/09/12 Time: 15:04
@@ -76,6 +76,10 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     final private String SELECT_FINISHED_STEPS_IDS_2 =
             "SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES EQ WHERE (EQ.EXEC_STATE_ID IN "
                     + "(SELECT DISTINCT STATES.ID FROM OO_EXECUTION_STATES STATES JOIN OO_EXECUTION_STATE ES ON STATES.MSG_ID = CAST(ES.EXECUTION_ID AS VARCHAR(255)) "
+                    + "WHERE ES.STATUS IN('COMPLETED','CANCELED','SYSTEM_FAILURE') ))";
+    final private String SELECT_FINISHED_STEPS_IDS_2_MSSQL =
+            "SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES EQ WHERE (EQ.EXEC_STATE_ID IN "
+                    + "(SELECT DISTINCT STATES.ID FROM OO_EXECUTION_STATES STATES JOIN OO_EXECUTION_STATE ES ON STATES.MSG_ID = CAST(ES.EXECUTION_ID AS NVARCHAR(255)) "
                     + "WHERE ES.STATUS IN('COMPLETED','CANCELED','SYSTEM_FAILURE') ))";
     final private String QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES = "DELETE FROM OO_EXECUTION_QUEUES " +
             " WHERE EXEC_STATE_ID in (:ids)";
@@ -119,6 +123,20 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "      ) AND " +
                     "      (q.MSG_VERSION < ?)  ";
 
+    final private String QUERY_COUNT_MESSAGES_WITHOUT_ACK_FOR_WORKER_SQL_MSSQL =
+            "SELECT COUNT(*)  " +
+                    "  FROM  OO_EXECUTION_QUEUES  q  " +
+                    "  WHERE " +
+                    "      (q.ASSIGNED_WORKER  = CAST(? AS NVARCHAR(40))) AND " +
+                    "      (q.STATUS  = ? ) AND " +
+                    "     (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
+                    "                  FROM OO_EXECUTION_QUEUES qq " +
+                    "                  WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND " +
+                    "                        qq.MSG_SEQ_ID > q.MSG_SEQ_ID " +
+                    "                 )" +
+                    "      ) AND " +
+                    "      (q.MSG_VERSION < ?)  ";
+
     final private String QUERY_WORKER_LEGACY_MEMORY_HANDLING_SQL =
             "SELECT EXEC_STATE_ID,      " +
                     "       ASSIGNED_WORKER,      " +
@@ -132,6 +150,27 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "      OO_EXECUTION_STATES s   " +
                     " WHERE  " +
                     "      (q.ASSIGNED_WORKER =  ?)  AND " +
+                    "      (q.STATUS IN (:status)) AND " +
+                    " 	   (s.ACTIVE = 1) AND " +
+                    " (q.EXEC_STATE_ID = s.ID) AND " +
+                    " (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
+                    "              FROM OO_EXECUTION_QUEUES qq " +
+                    "              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
+                    " ORDER BY q.CREATE_TIME  ";
+
+    final private String QUERY_WORKER_LEGACY_MEMORY_HANDLING_SQL_MSSQL =
+            "SELECT EXEC_STATE_ID,      " +
+                    "       ASSIGNED_WORKER,      " +
+                    "       EXEC_GROUP ,       " +
+                    "       STATUS,       " +
+                    "       PAYLOAD,       " +
+                    "       MSG_SEQ_ID ,      " +
+                    "       MSG_ID," +
+                    "       q.CREATE_TIME " +
+                    " FROM  OO_EXECUTION_QUEUES q,  " +
+                    "      OO_EXECUTION_STATES s   " +
+                    " WHERE  " +
+                    "      (q.ASSIGNED_WORKER =  CAST(? AS NVARCHAR(40)))  AND " +
                     "      (q.STATUS IN (:status)) AND " +
                     " 	   (s.ACTIVE = 1) AND " +
                     " (q.EXEC_STATE_ID = s.ID) AND " +
@@ -257,6 +296,25 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "              FROM OO_EXECUTION_QUEUES qq " +
                     "              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) ";
 
+    final private String QUERY_WORKER_RECOVERY_SQL_MSSQL =
+            "SELECT         EXEC_STATE_ID,      " +
+                    "       ASSIGNED_WORKER,      " +
+                    "       EXEC_GROUP,       " +
+                    "       STATUS,       " +
+                    "       PAYLOAD,       " +
+                    "       MSG_SEQ_ID,      " +
+                    "       MSG_ID," +
+                    "       q.CREATE_TIME " +
+                    " FROM  OO_EXECUTION_QUEUES q,  " +
+                    "       OO_EXECUTION_STATES s1   " +
+                    " WHERE  " +
+                    "      (q.ASSIGNED_WORKER =  cast(? as NVARCHAR(40)))  AND " +
+                    "      (q.STATUS IN (:status)) AND " +
+                    " q.EXEC_STATE_ID = s1.ID AND" +
+                    " (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
+                    "              FROM OO_EXECUTION_QUEUES qq " +
+                    "              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) ";
+
     final private String QUERY_MESSAGES_BY_STATUSES =
             "SELECT EXEC_STATE_ID, " +
                     "  ASSIGNED_WORKER, " +
@@ -330,14 +388,15 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     @Autowired
     private DataSource dataSource;
 
-    @Autowired
-    private ExecutionStateService executionStateService;
-
     private boolean useLargeMessageQuery = true;
 
     private String workerQuery;
 
-    private String cancelExecQuery;
+    private String selectFinishedStepsQuery;
+
+    private String queryCountMessages;
+
+    private String queryWorkerRecovery;
 
     private boolean isH2Database = false;
 
@@ -376,7 +435,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                 workerQuery = QUERY_WORKER_SQL_MSSQL;
             } else if (isMysql(dbms)) {
                 workerQuery = QUERY_WORKER_SQL_MYSQL;
-
             } else {
                 workerQuery = QUERY_WORKER_SQL;
             }
@@ -389,10 +447,19 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                 useLargeMessageQuery = false;
                 logger.info("Large message poll query failed" + ex.getMessage());
             }
+        } else {
+            workerQuery = isMssql(dbms) ? QUERY_WORKER_LEGACY_MEMORY_HANDLING_SQL_MSSQL :
+                    QUERY_WORKER_LEGACY_MEMORY_HANDLING_SQL;
         }
 
-        if (!useLargeMessageQuery) {
-            workerQuery = QUERY_WORKER_LEGACY_MEMORY_HANDLING_SQL;
+        if (isMssql(dbms)) {
+            selectFinishedStepsQuery = SELECT_FINISHED_STEPS_IDS_2_MSSQL;
+            queryCountMessages = QUERY_COUNT_MESSAGES_WITHOUT_ACK_FOR_WORKER_SQL_MSSQL;
+            queryWorkerRecovery = QUERY_WORKER_RECOVERY_SQL_MSSQL;
+        } else {
+            selectFinishedStepsQuery = SELECT_FINISHED_STEPS_IDS_2;
+            queryCountMessages = QUERY_COUNT_MESSAGES_WITHOUT_ACK_FOR_WORKER_SQL;
+            queryWorkerRecovery = QUERY_WORKER_RECOVERY_SQL;
         }
 
         logger.info("Poll using large message query: " + useLargeMessageQuery);
@@ -534,7 +601,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         pollForRecoveryJdbcTemplate.setStatementBatchSize(maxSize);
         try {
             // prepare the sql statement
-            String sqlStatPrvTable = QUERY_WORKER_RECOVERY_SQL
+            String sqlStatPrvTable = queryWorkerRecovery
                     .replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
 
             // prepare the argument
@@ -711,7 +778,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
             result = doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, SELECT_FINISHED_STEPS_IDS_1,
                     new SingleColumnRowMapper<>(Long.class)).stream().collect(Collectors.toSet());
             result.addAll(
-                    (Set<Long>) doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, SELECT_FINISHED_STEPS_IDS_2,
+                    (Set<Long>) doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, selectFinishedStepsQuery,
                             new SingleColumnRowMapper<>(Long.class)).stream().collect(Collectors.toSet()));
 
             return result;
@@ -760,10 +827,10 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
             long time = System.currentTimeMillis();
             Integer result = countMessagesWithoutAckForWorkerJdbcTemplate
-                    .queryForObject(QUERY_COUNT_MESSAGES_WITHOUT_ACK_FOR_WORKER_SQL, values, Integer.class);
+                    .queryForObject(queryCountMessages, values, Integer.class);
 
             if (logger.isTraceEnabled()) {
-                logger.trace("Query [" + QUERY_COUNT_MESSAGES_WITHOUT_ACK_FOR_WORKER_SQL + "] took " + (
+                logger.trace("Query [" + queryCountMessages + "] took " + (
                         System.currentTimeMillis() - time) + " ms");
             }
 
@@ -915,7 +982,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     }
 
     private <T> List<T> doSelectWithTemplate(JdbcTemplate jdbcTemplate, String sql, RowMapper<T> rowMapper,
-            Object... params) {
+                                             Object... params) {
         logSQL(sql, params);
         try {
             long t = System.currentTimeMillis();
