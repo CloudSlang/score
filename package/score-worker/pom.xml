@@ -23,7 +23,7 @@
     <parent>
         <artifactId>package</artifactId>
         <groupId>io.cloudslang</groupId>
-        <version>0.3.308-SNAPSHOT</version>
+        <version>0.3.308</version>
     </parent>
 
     <artifactId>score-worker</artifactId>
