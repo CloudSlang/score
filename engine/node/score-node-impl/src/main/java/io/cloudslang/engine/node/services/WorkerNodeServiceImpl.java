@@ -101,12 +101,20 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 
     @Override
     @Transactional
+    @Deprecated
     public WorkerKeepAliveInfo newKeepAlive(String uuid) {
+        // Any worker using this method will be considered an older version from engine
+		return newKeepAlive(uuid, true);
+    }
+
+    @Override
+    @Transactional
+    public WorkerKeepAliveInfo newKeepAlive(String uuid, boolean versionMismatch) {
         WorkerNode worker = readByUUID(uuid);
         worker.setAckTime(new Date());
         long version = versionService.getCurrentVersion(MSG_RECOVERY_VERSION_NAME);
         worker.setAckVersion(version);
-        if (!worker.getStatus().equals(WorkerStatus.IN_RECOVERY)) {
+        if (!versionMismatch && !worker.getStatus().equals(WorkerStatus.IN_RECOVERY)) {
             worker.setStatus(WorkerStatus.RUNNING);
         }
         boolean active = worker.isActive();
@@ -164,6 +172,28 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 
     @Override
     @Transactional
+    public String up(String uuid, String version, String versionId, boolean versionMismatch) {
+
+        if (loginListeners != null) {
+            for (LoginListener listener : loginListeners) {
+                listener.preLogin(uuid);
+            }
+        }
+        WorkerKeepAliveInfo workerKeepAliveInfo = newKeepAlive(uuid, versionMismatch);
+        if (loginListeners != null) {
+            for (LoginListener listener : loginListeners) {
+                listener.postLogin(uuid);
+            }
+        }
+
+        updateVersion(uuid, version, versionId);
+
+        return workerKeepAliveInfo.getWorkerRecoveryVersion();
+    }
+
+    @Override
+    @Transactional
+    @Deprecated
     public String up(String uuid, String version, String versionId) {
 
         if (loginListeners != null) {

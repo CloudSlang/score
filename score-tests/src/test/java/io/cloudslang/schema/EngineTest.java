@@ -87,7 +87,7 @@ public class EngineTest {
         // register worker
         workerNodeService.create("uuid", "password", "host", "dir");
         workerNodeService.activate("uuid");
-        workerNodeService.up("uuid", "", "");
+        workerNodeService.up("uuid", "", "", false);
 
         ExecutionPlan executionPlan = createExecutionPlan();
         TriggeringProperties triggeringProperties = TriggeringProperties.create(executionPlan);

@@ -49,6 +49,15 @@ public interface WorkerNodeService {
     WorkerKeepAliveInfo newKeepAlive(String uuid);
 
     /**
+     * Update the Worker Node entity with the current ack version for the keep alive mechanism
+     *
+     * @param uuid worker's unique identifier
+     * @param versionMismatch the boolean value between the engine versionId and worker versionId
+     * @return the WorkerKeepAliveInfo that contains the worker's recovery version (WRV) and the enable state
+     */
+    WorkerKeepAliveInfo newKeepAlive(String uuid, boolean versionMismatch);
+
+    /**
      * Create a new worker
      *
      * @param uuid worker's unique identifier
@@ -79,6 +88,17 @@ public interface WorkerNodeService {
      * flag
      */
     List<WorkerNode> readAllNotDeletedWorkers();
+
+    /**
+     * Notifies the orchestrator that a worker went up
+     *
+     * @param uuid the the uuid of the worker that went up
+     * @param version the version of the worker that went up
+     * @param versionId the versionId of the worker that went up
+     * @param versionMismatch the boolean value between the engine versionId and worker versionId
+     * @return a String of the current recovery version of the worker
+     */
+    String up(String uuid, String version, String versionId, boolean versionMismatch);
 
     /**
      * Notifies the orchestrator that a worker went up
