@@ -146,7 +146,14 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     }
 
     private void doStartPythonExecutor() {
+        PythonExecutorDetails pythonExecutorConfiguration = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
         if (!IS_PYTHON_EXECUTOR_EVAL) {
+            return;
+        }
+        String url = System.getProperty("mgmt.url");
+        String port = url.split(":")[2].split("/")[0];
+        String pythonExecutorPort = pythonExecutorConfiguration.getPort();
+        if (pythonExecutorPort.equals(port)){
             return;
         }
         logger.info("A request to start the Python Executor was sent");
