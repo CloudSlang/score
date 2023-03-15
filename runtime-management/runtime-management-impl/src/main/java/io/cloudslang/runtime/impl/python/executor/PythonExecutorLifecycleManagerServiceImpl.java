@@ -33,6 +33,8 @@ import javax.ws.rs.ProcessingException;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -147,6 +149,9 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
 
     private void doStartPythonExecutor() {
         if (!IS_PYTHON_EXECUTOR_EVAL) {
+            return;
+        }
+        if (isPythonInstalledOnSamePort()){
             return;
         }
         logger.info("A request to start the Python Executor was sent");
@@ -283,5 +288,19 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         scheduledExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardPolicy());
 
         return scheduledExecutor;
+    }
+
+    private boolean isPythonInstalledOnSamePort (){
+        PythonExecutorDetails pythonExecutorConfiguration = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
+        String pythonExecutorPort = pythonExecutorConfiguration.getPort();
+        String mgmtUrl = System.getProperty("mgmt.url");
+        int port = 0;
+        try {
+            URL url = new URL(mgmtUrl);
+            port = url.getPort();
+        } catch (MalformedURLException e) {
+            logger.error(e);
+        }
+        return pythonExecutorPort.equals(String.valueOf(port));
     }
 }
