@@ -151,7 +151,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         if (!IS_PYTHON_EXECUTOR_EVAL) {
             return;
         }
-        if (isPythonInstalledOnSamePort()){
+        if (isPythonInstalledOnSamePort()) {
             return;
         }
         logger.info("A request to start the Python Executor was sent");
@@ -290,7 +290,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         return scheduledExecutor;
     }
 
-    private boolean isPythonInstalledOnSamePort (){
+    private boolean isPythonInstalledOnSamePort() {
         PythonExecutorDetails pythonExecutorConfiguration = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
         String pythonExecutorPort = pythonExecutorConfiguration.getPort();
         String mgmtUrl = System.getProperty("mgmt.url");
@@ -301,6 +301,8 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         } catch (MalformedURLException e) {
             logger.error(e);
         }
-        return pythonExecutorPort.equals(String.valueOf(port));
+        if (pythonExecutorPort != null)
+            return pythonExecutorPort.equals(String.valueOf(port));
+        return false;
     }
 }
