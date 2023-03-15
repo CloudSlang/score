@@ -301,6 +301,6 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         } catch (MalformedURLException e) {
             logger.error(e);
         }
-        return pythonExecutorPort.equals(String.valueOf(port));
+        return String.valueOf(port).equals(pythonExecutorPort);
     }
 }
