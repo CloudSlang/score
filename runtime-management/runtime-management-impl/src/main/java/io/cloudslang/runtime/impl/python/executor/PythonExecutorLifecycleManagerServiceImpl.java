@@ -298,9 +298,12 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         try {
             URL url = new URL(mgmtUrl);
             port = url.getPort();
+            if (port == -1){
+                port = url.getDefaultPort();
+            }
         } catch (MalformedURLException e) {
             logger.error(e);
         }
-        return pythonExecutorPort.equals(String.valueOf(port));
+        return String.valueOf(port).equals(pythonExecutorPort);
     }
 }
