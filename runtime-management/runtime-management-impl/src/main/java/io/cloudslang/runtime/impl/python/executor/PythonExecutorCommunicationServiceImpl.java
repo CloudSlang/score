@@ -54,6 +54,9 @@ public class PythonExecutorCommunicationServiceImpl implements PythonExecutorCom
                                                       String method,
                                                       String requestPayload) {
         PythonExecutorDetails pythonExecutorDetails = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
+        if (pythonExecutorDetails == null) {
+            throw new IllegalArgumentException("Invalid python configuration");
+        }
         return executeRequest(
                 pythonExecutorDetails.getUrl(),
                 path,
@@ -67,6 +70,9 @@ public class PythonExecutorCommunicationServiceImpl implements PythonExecutorCom
                                                        String method,
                                                        String requestPayload) {
         PythonExecutorDetails pythonExecutorDetails = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
+        if (pythonExecutorDetails == null) {
+            throw new IllegalArgumentException("Invalid python configuration");
+        }
         return executeRequest(
                 pythonExecutorDetails.getUrl(),
                 path,
@@ -80,6 +86,9 @@ public class PythonExecutorCommunicationServiceImpl implements PythonExecutorCom
                                                          String method,
                                                          String requestPayload) {
         PythonExecutorDetails pythonExecutorDetails = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
+        if (pythonExecutorDetails == null) {
+            throw new IllegalArgumentException("Invalid python configuration");
+        }
         return executeRequest(
                 pythonExecutorDetails.getUrl(),
                 path,

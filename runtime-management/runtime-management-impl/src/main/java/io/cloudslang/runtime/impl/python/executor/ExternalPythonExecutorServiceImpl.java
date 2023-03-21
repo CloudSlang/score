@@ -65,6 +65,9 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
     public PythonEvaluationResult eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
         try {
             return getPythonEvaluationResult(script, prepareEnvironmentScript, vars);
+        } catch (IllegalArgumentException e) {
+            logger.error(e);
+            throw new ExternalPythonScriptException("Execution not possible due to configration");
         } catch (JsonProcessingException ie) {
             logger.error(ie);
             throw new ExternalPythonScriptException("Execution was interrupted while waiting for a python permit.");
