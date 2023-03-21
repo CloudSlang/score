@@ -170,8 +170,8 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
 
         destroyPythonExecutorProcess();
 
-        boolean starting = isWindows() ? startWindowsProcess() : startLinuxProcess();
-        if (starting) {
+        boolean hasPythonProcessStarted = isWindows() ? startWindowsProcess() : startLinuxProcess();
+        if (hasPythonProcessStarted) {
             waitToStart();
         }
     }
