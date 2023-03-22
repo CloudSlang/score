@@ -114,6 +114,9 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
                 return true;
             }
             return response.getLeft() == 200;
+        } catch (IllegalArgumentException e) {
+            logger.error(e);
+            return false;
         } catch (Exception e) {
             isAlivePythonExecutorValue = false;
             if (containsIgnoreCase(e.getMessage(), "signature check failed")) {
@@ -139,6 +142,8 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
                     EXTERNAL_PYTHON_EXECUTOR_STOP_PATH, "POST", null).getLeft() == 200) {
                 waitToStop();
             }
+        } catch (IllegalArgumentException e) {
+            logger.error(e);
         } catch (ProcessingException processingEx) {
             // Might not get a response if server gets shutdown immediately
             if (containsIgnoreCase(processingEx.getMessage(), "RESTEASY004655: Unable to invoke request")) {
@@ -165,25 +170,26 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
 
         destroyPythonExecutorProcess();
 
-        if (isWindows()) {
-            startWindowsProcess();
-        } else {
-            startLinuxProcess();
+        boolean hasPythonProcessStarted = isWindows() ? startWindowsProcess() : startLinuxProcess();
+        if (hasPythonProcessStarted) {
+            waitToStart();
         }
-
-        waitToStart();
     }
 
-    private void startWindowsProcess() {
-        startProcess("start-python-executor.bat");
+    private boolean startWindowsProcess() {
+        return startProcess("start-python-executor.bat");
     }
 
-    private void startLinuxProcess() {
-        startProcess("start-python-executor.sh");
+    private boolean startLinuxProcess() {
+        return startProcess("start-python-executor.sh");
     }
 
-    private void startProcess(String startPythonExecutor) {
+    private boolean startProcess(String startPythonExecutor) {
         PythonExecutorDetails pythonExecutorConfiguration = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
+        if (pythonExecutorConfiguration == null) {
+            logger.error("Invalid python configuration. Cannot start python process");
+            return false;
+        }
         ProcessBuilder pb = new ProcessBuilder(
                 pythonExecutorConfiguration.getSourceLocation() +
                         separator +
@@ -200,11 +206,13 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
             writer.write(pythonExecutorConfiguration.getEncodedSecretKeyPath());
             writer.flush();
             writer.close();
+            return true;
         } catch (IOException ioException) {
             logger.error("Failed to start Python Executor", ioException);
         } catch (Exception exception) {
             logger.error("An error occurred while trying to start the Python Executor", exception);
         }
+        return false;
     }
 
     private void waitToStart() {
@@ -290,8 +298,11 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         return scheduledExecutor;
     }
 
-    private boolean isPythonInstalledOnSamePort (){
+    private boolean isPythonInstalledOnSamePort() {
         PythonExecutorDetails pythonExecutorConfiguration = pythonExecutorConfigurationDataService.getPythonExecutorConfiguration();
+        if (pythonExecutorConfiguration == null) {
+            return false;
+        }
         String pythonExecutorPort = pythonExecutorConfiguration.getPort();
         String mgmtUrl = System.getProperty("mgmt.url");
         int port = 0;
