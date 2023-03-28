@@ -16,7 +16,6 @@
 package io.cloudslang.runtime.api.python;
 
 public interface PythonExecutorLifecycleManagerService {
-    void start();
 
     void stop();
 

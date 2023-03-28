@@ -28,6 +28,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ws.rs.ProcessingException;
 import java.io.BufferedWriter;
@@ -39,10 +40,13 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static io.cloudslang.runtime.api.python.enums.PythonStrategy.PYTHON_EXECUTOR;
 import static io.cloudslang.runtime.api.python.enums.PythonStrategy.getPythonStrategy;
 import static java.io.File.separator;
+import static java.lang.Integer.getInteger;
 import static java.lang.Long.getLong;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.apache.commons.lang.StringUtils.containsIgnoreCase;
@@ -51,16 +55,16 @@ import static org.apache.commons.lang.StringUtils.containsIgnoreCase;
 public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutorLifecycleManagerService {
 
     private static final Logger logger = LogManager.getLogger(PythonExecutorLifecycleManagerServiceImpl.class);
-    private static final boolean IS_PYTHON_EXECUTOR_EVAL = getPythonStrategy(System.getProperty("python.expressionsEval"), PYTHON_EXECUTOR).equals(PYTHON_EXECUTOR);
+    private static final boolean IS_PYTHON_EXECUTOR_EVAL = getPythonStrategy(System.getProperty("python.expressionsEval"), PYTHON_EXECUTOR) == PYTHON_EXECUTOR;
     private static final String EXTERNAL_PYTHON_EXECUTOR_STOP_PATH = "/rest/v1/stop";
     private static final String EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH = "/rest/v1/health";
-    private static final int START_STOP_RETRIES_COUNT = 20;
-    private static final int PYTHON_EXECUTOR_INITIAL_DELAY = 30000;
-    private static final long PYTHON_EXECUTOR_KEEP_ALIVE_INTERVAL = getLong("python.executor.keepAliveDelayMillis", 30000);
+    private static final int START_STOP_RETRIES_COUNT = getInteger("python.executor.startStopRetriesCount", 20);
+    private static final long PYTHON_EXECUTOR_INITIAL_DELAY = 30_000L;
+    private static final long PYTHON_EXECUTOR_KEEP_ALIVE_INTERVAL = getLong("python.executor.keepAliveDelayMillis", 30_000L);
 
-    private static boolean isAlivePythonExecutorValue = false;
-    private static ScheduledThreadPoolExecutor scheduledExecutor;
-    private static Process pythonExecutorProcess;
+    private final AtomicBoolean pythonExecutorRunning;
+    private ScheduledThreadPoolExecutor scheduledExecutor;
+    private final AtomicReference<Process> pythonExecutorProcess;
     private final PythonExecutorCommunicationService pythonExecutorCommunicationService;
     private final PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService;
 
@@ -70,9 +74,18 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
                                                      PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService) {
         this.pythonExecutorCommunicationService = pythonExecutorCommunicationService;
         this.pythonExecutorConfigurationDataService = pythonExecutorConfigurationDataService;
+        this.pythonExecutorRunning = new AtomicBoolean(false);
+        this.pythonExecutorProcess = new AtomicReference<>(null);
+    }
+
+    @PostConstruct
+    public void init() {
         if (IS_PYTHON_EXECUTOR_EVAL) {
-            createKeepAliveJob();
-            doStartPythonExecutor();
+            try {
+                doStartPythonExecutor();
+            } finally {
+                createKeepAliveJob();
+            }
         }
     }
 
@@ -91,13 +104,8 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     }
 
     @Override
-    public void start() {
-        doStartPythonExecutor();
-    }
-
-    @Override
     public boolean isAlive() {
-        return isAlivePythonExecutorValue;
+        return pythonExecutorRunning.get();
     }
 
     @Override
@@ -108,9 +116,9 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     private boolean isAlivePythonExecutor() {
         try {
             Pair<Integer, String> response = pythonExecutorCommunicationService.performNoAuthRequest(EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH, "GET", null);
-            if (response.getLeft() == 200 && pythonExecutorProcess == null) {
+            if (response.getLeft() == 200 && pythonExecutorProcess.get() == null) {
                 logger.warn("Python Executor port is already in use");
-                isAlivePythonExecutorValue = false;
+                pythonExecutorRunning.set(false);
                 return true;
             }
             return response.getLeft() == 200;
@@ -118,7 +126,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
             logger.error(e);
             return false;
         } catch (Exception e) {
-            isAlivePythonExecutorValue = false;
+            pythonExecutorRunning.set(false);
             if (containsIgnoreCase(e.getMessage(), "signature check failed")) {
                 logger.warn("Python Executor port is already in use");
                 return true;
@@ -132,7 +140,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
             return;
         }
         logger.info("A request to stop the Python Executor was sent");
-        if (!isAlivePythonExecutor() || !isAlivePythonExecutorValue) {
+        if (!isAlivePythonExecutor() || !pythonExecutorRunning.get()) {
             logger.info("Python Executor was already stopped");
             return;
         }
@@ -152,7 +160,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         }
     }
 
-    private void doStartPythonExecutor() {
+    private synchronized void doStartPythonExecutor() {
         if (!IS_PYTHON_EXECUTOR_EVAL) {
             return;
         }
@@ -162,7 +170,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         logger.info("A request to start the Python Executor was sent");
         if (isAlivePythonExecutor()) {
             // Do not attempt to start because the python executor is running under other process
-            if (isAlivePythonExecutorValue) {
+            if (pythonExecutorRunning.get()) {
                 logger.info("Python Executor is already running");
             }
             return;
@@ -200,8 +208,8 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         pb.directory(FileUtils.getFile(pythonExecutorConfiguration.getSourceLocation() + separator + "bin"));
         try {
             logger.info("Starting Python Executor on port: " + pythonExecutorConfiguration.getPort());
-            pythonExecutorProcess = pb.start();
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(pythonExecutorProcess.getOutputStream()));
+            pythonExecutorProcess.set(pb.start());
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(pythonExecutorProcess.get().getOutputStream()));
 
             writer.write(pythonExecutorConfiguration.getEncodedSecretKeyPath());
             writer.flush();
@@ -221,7 +229,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         for (int tries = 0; tries < START_STOP_RETRIES_COUNT; tries++) {
             if (isAlivePythonExecutor()) {
                 logger.info("Python Executor was successfully started");
-                isAlivePythonExecutorValue = true;
+                pythonExecutorRunning.set(true);
                 return;
             }
             try {
@@ -241,7 +249,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         for (int tries = 0; tries < START_STOP_RETRIES_COUNT; tries++) {
             if (!isAlivePythonExecutor()) {
                 logger.info("Python Executor was successfully stopped");
-                isAlivePythonExecutorValue = false;
+                pythonExecutorRunning.set(false);
                 destroyPythonExecutorProcess();
                 return;
             }
@@ -256,6 +264,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         destroyPythonExecutorProcess();
     }
 
+    // This method is called from the Scheduled executor repeatedly
     private void pythonExecutorKeepAlive() {
         if (isAlivePythonExecutor()) {
             return;
@@ -265,10 +274,10 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     }
 
     private void destroyPythonExecutorProcess() {
-        if (pythonExecutorProcess != null) {
-            pythonExecutorProcess.destroy();
-            pythonExecutorProcess = null;
-            isAlivePythonExecutorValue = false;
+        if (pythonExecutorProcess.get() != null) {
+            pythonExecutorProcess.get().destroy();
+            pythonExecutorProcess.set(null);
+            pythonExecutorRunning.set(false);
         }
     }
 
