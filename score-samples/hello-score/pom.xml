@@ -21,7 +21,7 @@
     <parent>
         <artifactId>score-samples</artifactId>
         <groupId>io.cloudslang</groupId>
-        <version>0.3.314</version>
+        <version>0.3.315-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
