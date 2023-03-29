@@ -23,7 +23,7 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>queue</artifactId>
-        <version>0.3.315-SNAPSHOT</version>
+        <version>0.3.315</version>
     </parent>
 
     <artifactId>score-queue-api</artifactId>
