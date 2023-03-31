@@ -17,7 +17,6 @@
 package io.cloudslang.schema;
 
 import io.cloudslang.engine.node.services.StubQueueConfigurationDataServiceImpl;
-import io.cloudslang.runtime.impl.python.external.StubPythonExecutorConfigurationDataServiceImpl;
 import io.cloudslang.runtime.impl.sequential.DefaultSequentialExecutionServiceImpl;
 import io.cloudslang.score.events.EventBusImpl;
 import io.cloudslang.score.events.FastEventBusImpl;
@@ -172,7 +171,6 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		registerExecutionPostconditionService(element, parserContext);
 		registerQueueConfigurationDataService(element, parserContext);
 		registerAplsLicensingService(element, parserContext);
-		registerPythonExecutorConfigurationDataService(element, parserContext);
 	}
 
 	private void registerSequentialExecution(Element element, ParserContext parserContext) {
@@ -253,16 +251,6 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 			new BeanRegistrator(parserContext)
 					.NAME("aplsLicensingService")
 					.CLASS(StubAplsLicensingServiceImpl.class)
-					.register();
-		}
-	}
-
-	private void registerPythonExecutorConfigurationDataService(Element element, ParserContext parserContext) {
-		String registerPythonExecutorConfigurationDataService = element.getAttribute("registerPythonExecutorConfigurationDataService");
-		if (!FALSE.toString().equals(registerPythonExecutorConfigurationDataService)) {
-			new BeanRegistrator(parserContext)
-					.NAME("stubPythonExecutorConfigurationDataService")
-					.CLASS(StubPythonExecutorConfigurationDataServiceImpl.class)
 					.register();
 		}
 	}

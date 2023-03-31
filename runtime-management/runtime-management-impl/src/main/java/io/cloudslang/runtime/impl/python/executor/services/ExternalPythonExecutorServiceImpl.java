@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.runtime.impl.python.executor;
+package io.cloudslang.runtime.impl.python.executor.services;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -23,7 +23,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
-import io.cloudslang.runtime.api.python.PythonExecutorCommunicationService;
+import io.cloudslang.runtime.api.python.executor.services.PythonExecutorCommunicationService;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
 import io.cloudslang.runtime.impl.python.external.EvaluationResults;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonEvalException;
@@ -35,7 +35,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.ws.rs.ProcessingException;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -71,7 +70,7 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
         } catch (JsonProcessingException ie) {
             logger.error(ie);
             throw new ExternalPythonScriptException("Execution was interrupted while waiting for a python permit.");
-        } catch (ProcessingException exception) {
+        } catch (Exception exception) {
             throw new ExternalPythonScriptException("Python server is down or can't process the execution of the python expression");
         }
     }

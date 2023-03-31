@@ -21,16 +21,13 @@ import io.cloudslang.dependency.api.services.MavenConfig;
 import io.cloudslang.dependency.impl.services.DependencyServiceImpl;
 import io.cloudslang.dependency.impl.services.MavenConfigImpl;
 import io.cloudslang.dependency.impl.services.utils.UnzipUtil;
-import io.cloudslang.runtime.api.python.PythonEvaluationResult;
-import io.cloudslang.runtime.api.python.PythonExecutionResult;
-import io.cloudslang.runtime.api.python.PythonExecutorConfigurationDataService;
-import io.cloudslang.runtime.api.python.PythonRuntimeService;
-import io.cloudslang.runtime.api.python.entities.PythonExecutorDetails;
-import io.cloudslang.runtime.impl.python.executor.ExternalPythonExecutorServiceImpl;
-import io.cloudslang.runtime.impl.python.executor.PythonExecutorCommunicationServiceImpl;
+import io.cloudslang.runtime.api.python.*;
+import io.cloudslang.runtime.api.python.executor.services.PythonExecutorCommunicationService;
+import io.cloudslang.runtime.api.python.executor.services.PythonExecutorConfigurationDataService;
+import io.cloudslang.runtime.api.python.executor.entities.PythonExecutorDetails;
+import io.cloudslang.runtime.impl.python.executor.services.ExternalPythonExecutorServiceImpl;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonRuntimeServiceImpl;
-import io.cloudslang.runtime.impl.python.external.StatefulRestEasyClientsHolder;
 import io.cloudslang.score.events.EventBus;
 import org.junit.Assert;
 import org.junit.Assume;
@@ -340,10 +337,8 @@ public class PythonExecutorTest {
         }
 
         @Bean(name = "pythonExecutorCommunicationService")
-        public PythonExecutorCommunicationServiceImpl pythonExecutorCommunicationService() {
-            return new PythonExecutorCommunicationServiceImpl(
-                    mock(StatefulRestEasyClientsHolder.class),
-                    mock(PythonExecutorConfigurationDataService.class));
+        public PythonExecutorCommunicationService pythonExecutorCommunicationService() {
+            return mock(PythonExecutorCommunicationService.class);
         }
 
         @Bean(name = "externalPythonExecutorService")

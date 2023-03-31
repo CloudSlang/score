@@ -18,9 +18,8 @@ package io.cloudslang.schema;
 
 import io.cloudslang.engine.queue.services.ExecutionQueueService;
 import io.cloudslang.orchestrator.services.*;
-import io.cloudslang.runtime.api.python.PythonExecutorConfigurationDataService;
-import io.cloudslang.runtime.api.python.entities.PythonExecutorDetails;
-import io.cloudslang.runtime.impl.python.external.StatefulRestEasyClientsHolder;
+import io.cloudslang.runtime.api.python.executor.services.PythonExecutorConfigurationDataService;
+import io.cloudslang.runtime.api.python.executor.entities.PythonExecutorDetails;
 import io.cloudslang.worker.management.queue.WorkerQueueDetailsContainer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -136,11 +135,6 @@ public class WorkerTest {
 		@Bean
 		public WorkerQueueDetailsContainer workerQueueDetailsContainer() {
 			return mock(WorkerQueueDetailsContainer.class);
-		}
-
-		@Bean
-		StatefulRestEasyClientsHolder statefulRestEasyClientsHolder() {
-			return mock(StatefulRestEasyClientsHolder.class);
 		}
 
 		@Bean

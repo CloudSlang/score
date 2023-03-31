@@ -18,10 +18,9 @@ package io.cloudslang.runtime.impl.python;
 
 import io.cloudslang.dependency.impl.services.DependenciesManagementConfiguration;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
-import io.cloudslang.runtime.impl.python.executor.ExternalPythonExecutorServiceImpl;
+import io.cloudslang.runtime.impl.python.executor.services.ExternalPythonExecutorServiceImpl;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonRuntimeServiceImpl;
-import io.cloudslang.runtime.impl.python.external.StatefulRestEasyClientsHolder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -53,7 +52,7 @@ public class PythonExecutionEngineConfiguration {
     }
 
     @Bean(name = "externalPythonExecutorService")
-    public PythonRuntimeService externalPythonExecutorService(StatefulRestEasyClientsHolder statefulRestEasyClient) {
+    public PythonRuntimeService externalPythonExecutorService() {
         Integer pythonProcessPermits = Integer.getInteger("python.concurrent.execution.permits", 30);
         Integer pythonTestingProcessPermits = Integer.getInteger("python.testing.concurrent.execution.permits", 10);
         return new ExternalPythonExecutorServiceImpl(new Semaphore(pythonProcessPermits), new Semaphore(pythonTestingProcessPermits));

@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.runtime.impl.python.executor;
+package io.cloudslang.runtime.impl.python.executor.services;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import io.cloudslang.runtime.api.python.PythonExecutorCommunicationService;
-import io.cloudslang.runtime.api.python.PythonExecutorConfigurationDataService;
-import io.cloudslang.runtime.api.python.PythonExecutorLifecycleManagerService;
-import io.cloudslang.runtime.api.python.entities.PythonExecutorDetails;
+import io.cloudslang.runtime.api.python.executor.services.PythonExecutorCommunicationService;
+import io.cloudslang.runtime.api.python.executor.services.PythonExecutorConfigurationDataService;
+import io.cloudslang.runtime.api.python.executor.services.PythonExecutorLifecycleManagerService;
+import io.cloudslang.runtime.api.python.executor.entities.PythonExecutorDetails;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -30,7 +30,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.ws.rs.ProcessingException;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -152,7 +151,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
             }
         } catch (IllegalArgumentException e) {
             logger.error(e);
-        } catch (ProcessingException processingEx) {
+        } catch (Exception processingEx) {
             // Might not get a response if server gets shutdown immediately
             if (containsIgnoreCase(processingEx.getMessage(), "RESTEASY004655: Unable to invoke request")) {
                 waitToStop();
