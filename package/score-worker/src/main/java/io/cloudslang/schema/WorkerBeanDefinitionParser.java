@@ -17,6 +17,8 @@
 package io.cloudslang.schema;
 
 import io.cloudslang.engine.node.services.StubQueueConfigurationDataServiceImpl;
+import io.cloudslang.runtime.impl.python.executor.services.stubs.StubPythonExecutorCommunicationServiceImpl;
+import io.cloudslang.runtime.impl.python.executor.services.stubs.StubPythonExecutorConfigurationDataServiceImpl;
 import io.cloudslang.runtime.impl.sequential.DefaultSequentialExecutionServiceImpl;
 import io.cloudslang.score.events.EventBusImpl;
 import io.cloudslang.score.events.FastEventBusImpl;
@@ -171,6 +173,8 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		registerExecutionPostconditionService(element, parserContext);
 		registerQueueConfigurationDataService(element, parserContext);
 		registerAplsLicensingService(element, parserContext);
+		registerPythonExecutorConfigurationDataService(element, parserContext);
+		registerPythonExecutorCommunicationService(element, parserContext);
 	}
 
 	private void registerSequentialExecution(Element element, ParserContext parserContext) {
@@ -251,6 +255,26 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 			new BeanRegistrator(parserContext)
 					.NAME("aplsLicensingService")
 					.CLASS(StubAplsLicensingServiceImpl.class)
+					.register();
+		}
+	}
+
+	private void registerPythonExecutorConfigurationDataService(Element element, ParserContext parserContext) {
+		String registerPythonExecutorConfigurationDataService = element.getAttribute("stubPythonExecutorConfigurationDataService");
+		if (!FALSE.toString().equals(registerPythonExecutorConfigurationDataService)) {
+			new BeanRegistrator(parserContext)
+					.NAME("stubPythonExecutorConfigurationDataService")
+					.CLASS(StubPythonExecutorConfigurationDataServiceImpl.class)
+					.register();
+		}
+	}
+
+	private void registerPythonExecutorCommunicationService(Element element, ParserContext parserContext) {
+		String registerPythonExecutorCommunicationService = element.getAttribute("stubPythonExecutorCommunicationService");
+		if (!FALSE.toString().equals(registerPythonExecutorCommunicationService)) {
+			new BeanRegistrator(parserContext)
+					.NAME("stubPythonExecutorCommunicationService")
+					.CLASS(StubPythonExecutorCommunicationServiceImpl.class)
 					.register();
 		}
 	}
