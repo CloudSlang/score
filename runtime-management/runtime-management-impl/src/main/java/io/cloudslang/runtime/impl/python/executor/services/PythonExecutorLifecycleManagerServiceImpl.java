@@ -163,7 +163,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         if (!IS_PYTHON_EXECUTOR_EVAL) {
             return;
         }
-        if (isPythonInstalledOnSamePort()){
+        if (isPythonInstalledOnSamePort()) {
             return;
         }
         logger.info("A request to start the Python Executor was sent");
