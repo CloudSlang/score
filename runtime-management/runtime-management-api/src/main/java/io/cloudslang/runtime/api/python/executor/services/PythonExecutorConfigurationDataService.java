@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.runtime.api.python;
+package io.cloudslang.runtime.api.python.executor.services;
 
-import io.cloudslang.runtime.api.python.entities.PythonExecutorDetails;
+import io.cloudslang.runtime.api.python.executor.entities.PythonExecutorDetails;
 
 public interface PythonExecutorConfigurationDataService {
     PythonExecutorDetails getPythonExecutorConfiguration();

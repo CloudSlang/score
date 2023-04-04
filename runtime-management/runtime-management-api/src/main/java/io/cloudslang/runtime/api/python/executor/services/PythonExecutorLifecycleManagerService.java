@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.runtime.api.python;
+package io.cloudslang.runtime.api.python.executor.services;
 
 public interface PythonExecutorLifecycleManagerService {
 

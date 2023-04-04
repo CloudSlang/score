@@ -10,13 +10,8 @@
     <score:engine />
     <score:worker uuid="-1" />
 
-	<bean name="restEasyClientWrapper" class="io.cloudslang.runtime.impl.python.external.RestEasyClientWrapper"/>
-	<bean name="statefulRestEasyClientsHolder"
-		  class="io.cloudslang.runtime.impl.python.external.StatefulRestEasyClientsHolder">
-		<constructor-arg ref="restEasyClientWrapper"/>
-	</bean>
-	<bean name="pythonExecutorDetails" class="io.cloudslang.runtime.api.python.entities.PythonExecutorDetails"/>
-	<bean name="pythonExecutorConfigurationDataService" class="io.cloudslang.runtime.impl.python.external.StubPythonExecutorConfigurationDataServiceImpl">
+	<bean name="pythonExecutorDetails" class="io.cloudslang.runtime.api.python.executor.entities.PythonExecutorDetails"/>
+	<bean name="pythonExecutorConfigurationDataService" class="io.cloudslang.runtime.impl.python.executor.services.stubs.StubPythonExecutorConfigurationDataServiceImpl">
 		<lookup-method name="getPythonExecutorConfiguration" bean="pythonExecutorDetails"/>
 	</bean>
 

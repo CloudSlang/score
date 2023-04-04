@@ -13,18 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.runtime.api.python.entities;
+package io.cloudslang.runtime.api.python.executor.entities;
 
 public class PythonExecutorDetails {
 
-    private String port;
-    private String url;
-    private String runtimeEncodedAuth;
-    private String lifecycleEncodedAuth;
-    private String sourceLocation;
-    private String encodedSecretKeyPath;
+    private final String port;
+    private final String url;
+    private final String runtimeEncodedAuth;
+    private final String lifecycleEncodedAuth;
+    private final String sourceLocation;
+    private final String encodedSecretKeyPath;
 
     public PythonExecutorDetails() {
+        this.port = null;
+        this.url = null;
+        this.runtimeEncodedAuth = null;
+        this.lifecycleEncodedAuth = null;
+        this.sourceLocation = null;
+        this.encodedSecretKeyPath = null;
     }
 
     public PythonExecutorDetails(String port, String url, String runtimeEncodedAuth, String lifecycleEncodedAuth, String sourceLocation, String encodedSecretKeyPath) {
@@ -40,47 +46,23 @@ public class PythonExecutorDetails {
         return port;
     }
 
-    public void setPort(String port) {
-        this.port = port;
-    }
-
     public String getUrl() {
         return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
     }
 
     public String getRuntimeEncodedAuth() {
         return runtimeEncodedAuth;
     }
 
-    public void setRuntimeEncodedAuth(String runtimeEncodedAuth) {
-        this.runtimeEncodedAuth = runtimeEncodedAuth;
-    }
-
     public String getLifecycleEncodedAuth() {
         return lifecycleEncodedAuth;
-    }
-
-    public void setLifecycleEncodedAuth(String lifecycleEncodedAuth) {
-        this.lifecycleEncodedAuth = lifecycleEncodedAuth;
     }
 
     public String getSourceLocation() {
         return sourceLocation;
     }
 
-    public void setSourceLocation(String sourceLocation) {
-        this.sourceLocation = sourceLocation;
-    }
-
     public String getEncodedSecretKeyPath() {
         return encodedSecretKeyPath;
-    }
-
-    public void setEncodedSecretKeyPath(String encodedSecretKeyPath) {
-        this.encodedSecretKeyPath = encodedSecretKeyPath;
     }
 }

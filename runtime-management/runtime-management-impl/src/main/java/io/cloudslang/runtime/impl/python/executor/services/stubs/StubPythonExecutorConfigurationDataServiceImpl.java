@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.runtime.impl.python.external;
+package io.cloudslang.runtime.impl.python.executor.services.stubs;
 
-import io.cloudslang.runtime.api.python.PythonExecutorConfigurationDataService;
-import io.cloudslang.runtime.api.python.entities.PythonExecutorDetails;
+import io.cloudslang.runtime.api.python.executor.services.PythonExecutorConfigurationDataService;
+import io.cloudslang.runtime.api.python.executor.entities.PythonExecutorDetails;
 
 public class StubPythonExecutorConfigurationDataServiceImpl implements PythonExecutorConfigurationDataService {
     @Override
