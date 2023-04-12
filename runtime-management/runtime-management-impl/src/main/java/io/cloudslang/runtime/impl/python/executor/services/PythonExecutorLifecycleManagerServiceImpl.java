@@ -78,7 +78,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         this.pythonExecutorConfigurationDataService = pythonExecutorConfigurationDataService;
         this.pythonExecutorRunning = new AtomicBoolean(false);
         this.pythonExecutorProcess = new AtomicReference<>(null);
-        this.currentKeepAliveRetriesCount = new AtomicInteger(1);
+        this.currentKeepAliveRetriesCount = new AtomicInteger(0);
     }
 
     @PostConstruct
