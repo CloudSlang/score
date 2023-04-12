@@ -78,7 +78,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         this.pythonExecutorConfigurationDataService = pythonExecutorConfigurationDataService;
         this.pythonExecutorRunning = new AtomicBoolean(false);
         this.pythonExecutorProcess = new AtomicReference<>(null);
-        this.currentKeepAliveRetriesCount = new AtomicInteger(0);
+        this.currentKeepAliveRetriesCount = new AtomicInteger(1);
     }
 
     @PostConstruct
@@ -159,12 +159,6 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
 
     private synchronized void doStartPythonExecutor() {
         if (!IS_PYTHON_EXECUTOR_EVAL) {
-            return;
-        }
-
-        if (currentKeepAliveRetriesCount.getAndIncrement() >= PYTHON_EXECUTOR_KEEP_ALIVE_RETRIES_COUNT) {
-            stopKeepAliveJob();
-            logger.info("Python executor did not start in " + currentKeepAliveRetriesCount.get() + " retries and stopped trying");
             return;
         }
 
@@ -271,6 +265,12 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
 
     // This method is called from the Scheduled executor repeatedly
     private void pythonExecutorKeepAlive() {
+        if (currentKeepAliveRetriesCount.getAndIncrement() >= PYTHON_EXECUTOR_KEEP_ALIVE_RETRIES_COUNT) {
+            stopKeepAliveJob();
+            logger.info("Python executor did not start in " + currentKeepAliveRetriesCount.get() + " retries and stopped trying");
+            return;
+        }
+
         if (isAlivePythonExecutor()) {
             return;
         }
