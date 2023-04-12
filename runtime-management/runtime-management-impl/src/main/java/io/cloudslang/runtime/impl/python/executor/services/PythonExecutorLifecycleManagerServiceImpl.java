@@ -40,6 +40,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static io.cloudslang.runtime.api.python.enums.PythonStrategy.PYTHON_EXECUTOR;
@@ -60,7 +61,9 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     private static final int START_STOP_RETRIES_COUNT = getInteger("python.executor.startStopRetriesCount", 20);
     private static final long PYTHON_EXECUTOR_INITIAL_DELAY = 30_000L;
     private static final long PYTHON_EXECUTOR_KEEP_ALIVE_INTERVAL = getLong("python.executor.keepAliveDelayMillis", 30_000L);
+    private static final int PYTHON_EXECUTOR_KEEP_ALIVE_RETRIES_COUNT = getInteger("python.executor.keepAliveRetriesCount", 50);
 
+    private final AtomicInteger currentKeepAliveRetriesCount;
     private final AtomicBoolean pythonExecutorRunning;
     private ScheduledThreadPoolExecutor scheduledExecutor;
     private final AtomicReference<Process> pythonExecutorProcess;
@@ -75,6 +78,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         this.pythonExecutorConfigurationDataService = pythonExecutorConfigurationDataService;
         this.pythonExecutorRunning = new AtomicBoolean(false);
         this.pythonExecutorProcess = new AtomicReference<>(null);
+        this.currentKeepAliveRetriesCount = new AtomicInteger(0);
     }
 
     @PostConstruct
@@ -91,14 +95,8 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     @PreDestroy
     public void destroy() {
         if (IS_PYTHON_EXECUTOR_EVAL) {
-            try {
-                scheduledExecutor.shutdown();
-                scheduledExecutor.shutdownNow();
-            } catch (Exception failedShutdownEx) {
-                logger.error("Could not shutdown executor: ", failedShutdownEx);
-            } finally {
-                doStopPythonExecutor();
-            }
+            stopKeepAliveJob();
+            doStopPythonExecutor();
         }
     }
 
@@ -163,6 +161,13 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         if (!IS_PYTHON_EXECUTOR_EVAL) {
             return;
         }
+
+        if (currentKeepAliveRetriesCount.getAndIncrement() >= PYTHON_EXECUTOR_KEEP_ALIVE_RETRIES_COUNT) {
+            stopKeepAliveJob();
+            logger.info("Python executor did not start in " + currentKeepAliveRetriesCount.get() + " retries and stopped trying");
+            return;
+        }
+
         if (isPythonInstalledOnSamePort()) {
             return;
         }
@@ -229,6 +234,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
             if (isAlivePythonExecutor()) {
                 logger.info("Python Executor was successfully started");
                 pythonExecutorRunning.set(true);
+                currentKeepAliveRetriesCount.set(0);
                 return;
             }
             try {
@@ -290,6 +296,15 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
                 PYTHON_EXECUTOR_INITIAL_DELAY, PYTHON_EXECUTOR_KEEP_ALIVE_INTERVAL, MILLISECONDS);
     }
 
+    private void stopKeepAliveJob() {
+        try {
+            scheduledExecutor.shutdown();
+            scheduledExecutor.shutdownNow();
+        } catch (Exception failedShutdownEx) {
+            logger.error("Could not shutdown executor: ", failedShutdownEx);
+        }
+    }
+
     private ScheduledThreadPoolExecutor getScheduledExecutor() {
         final ThreadFactory threadFactory = new ThreadFactoryBuilder()
                 .setNameFormat("python-executor-keepalive-%d")
@@ -317,7 +332,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         try {
             URL url = new URL(mgmtUrl);
             port = url.getPort();
-            if (port == -1){
+            if (port == -1) {
                 port = url.getDefaultPort();
             }
         } catch (MalformedURLException e) {
