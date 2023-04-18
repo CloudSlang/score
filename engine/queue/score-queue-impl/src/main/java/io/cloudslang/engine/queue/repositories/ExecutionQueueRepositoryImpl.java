@@ -102,7 +102,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "  FROM  OO_EXECUTION_QUEUES  q  " +
                     "  WHERE " +
                     "      (q.ASSIGNED_WORKER  = ? ) AND " +
-                    "      (q.STATUS  = ? ) AND " +
+                    "      (q.STATUS  IN (:status)) AND " +
                     "     (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
                     "                  FROM OO_EXECUTION_QUEUES qq " +
                     "                  WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND " +
@@ -671,14 +671,21 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     public Integer countMessagesWithoutAckForWorker(int maxSize, long minVersionAllowed, String workerUuid) {
         countMessagesWithoutAckForWorkerJdbcTemplate.setStatementBatchSize(maxSize);
         try {
-            Object[] values = {workerUuid, ExecStatus.SENT.getNumber(), minVersionAllowed};
-
+            int[] statuses = new int[]{ExecStatus.ASSIGNED.getNumber(), ExecStatus.SENT.getNumber(), ExecStatus.IN_PROGRESS.getNumber()};
+            String sql = QUERY_COUNT_MESSAGES_WITHOUT_ACK_FOR_WORKER_SQL
+                    .replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
+            // prepare the argument
+            Object[] values = new Object[statuses.length + 2];
+            values[0] = workerUuid;
+            int i = 1;
+            for (int status : statuses) {
+                values[i++] = status;
+            }
+            values[i] = minVersionAllowed;
             long time = System.currentTimeMillis();
-            Integer result = countMessagesWithoutAckForWorkerJdbcTemplate.queryForObject(QUERY_COUNT_MESSAGES_WITHOUT_ACK_FOR_WORKER_SQL, values,Integer.class);
-
+            Integer result = countMessagesWithoutAckForWorkerJdbcTemplate.queryForObject(sql, values,Integer.class);
             if (logger.isTraceEnabled())
-                logger.trace("Query [" + QUERY_COUNT_MESSAGES_WITHOUT_ACK_FOR_WORKER_SQL + "] took " + (System.currentTimeMillis() - time) + " ms");
-
+                logger.trace("Query [" + sql + "] took " + (System.currentTimeMillis() - time) + " ms");
             if (logger.isDebugEnabled()) {
                 logger.debug("Got msg without ack :" + result + ",for version:" + minVersionAllowed + ",for worker:" + workerUuid);
             }
