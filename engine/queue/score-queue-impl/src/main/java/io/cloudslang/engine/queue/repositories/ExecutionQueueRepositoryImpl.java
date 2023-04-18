@@ -128,7 +128,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "  FROM  OO_EXECUTION_QUEUES  q  " +
                     "  WHERE " +
                     "      (q.ASSIGNED_WORKER  = CAST(? AS NVARCHAR(40))) AND " +
-                    "      (q.STATUS  = ? ) AND " +
+                    "      (q.STATUS  IN (:status) ) AND " +
                     "     (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
                     "                  FROM OO_EXECUTION_QUEUES qq " +
                     "                  WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND " +
@@ -824,7 +824,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
         countMessagesWithoutAckForWorkerJdbcTemplate.setStatementBatchSize(maxSize);
         try {
             int[] statuses = new int[]{ExecStatus.ASSIGNED.getNumber(), ExecStatus.SENT.getNumber(), ExecStatus.IN_PROGRESS.getNumber()};
-            String sql = QUERY_COUNT_MESSAGES_WITHOUT_ACK_FOR_WORKER_SQL.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
+            String sql = queryCountMessages.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
             // prepare the argument
             Object[] values = new Object[statuses.length + 2];
             values[0] = workerUuid;
