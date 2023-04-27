@@ -104,7 +104,15 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
 
     private EvaluationResults executeRequestOnPythonServer(String method, String payload) throws JsonProcessingException {
         Pair<Integer, String> scriptResponse = pythonExecutorCommunicationService.performRuntimeRequest(EXTERNAL_PYTHON_EXECUTOR_EVAL_PATH, method, payload);
+        if (!isSuccessResponse(scriptResponse)) {
+            throw new ExternalPythonScriptException(String.format("Cannot execute request on python server. Response status was: %s",
+                    scriptResponse == null ? "null" : scriptResponse.getLeft()));
+        }
         return objectMapper.readValue(scriptResponse.getRight(), EvaluationResults.class);
+    }
+
+    private boolean isSuccessResponse(Pair<Integer, String> response) {
+        return response != null && response.getLeft() != null && response.getLeft() == 200;
     }
 
     private String generatePayloadForEval(String expression, String prepareEnvironmentScript,
