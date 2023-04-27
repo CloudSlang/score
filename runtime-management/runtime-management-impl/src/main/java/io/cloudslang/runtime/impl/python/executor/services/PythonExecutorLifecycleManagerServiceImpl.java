@@ -129,7 +129,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
             pythonExecutorRunning.set(false);
             if (containsIgnoreCase(e.getMessage(), "signature check failed")) {
                 logger.warn("Python Executor port is already in use");
-                return PythonExecutorStatus.UP;
+                return PythonExecutorStatus.BLOCKED;
             }
             return PythonExecutorStatus.DOWN;
         }
