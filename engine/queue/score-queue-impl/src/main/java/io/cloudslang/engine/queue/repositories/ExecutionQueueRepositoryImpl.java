@@ -823,7 +823,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     public Integer countMessagesWithoutAckForWorker(int maxSize, long minVersionAllowed, String workerUuid) {
         countMessagesWithoutAckForWorkerJdbcTemplate.setStatementBatchSize(maxSize);
         try {
-            int[] statuses = new int[]{ExecStatus.ASSIGNED.getNumber(), ExecStatus.SENT.getNumber(), ExecStatus.IN_PROGRESS.getNumber()};
+            int[] statuses = new int[]{ExecStatus.ASSIGNED.getNumber(), ExecStatus.SENT.getNumber()};
             String sql = queryCountMessages.replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
             // prepare the argument
             Object[] values = new Object[statuses.length + 2];
