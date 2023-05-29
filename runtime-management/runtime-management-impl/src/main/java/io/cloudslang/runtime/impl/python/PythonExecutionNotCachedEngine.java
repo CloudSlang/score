@@ -20,6 +20,7 @@ import io.cloudslang.dependency.api.services.DependencyService;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -32,6 +33,7 @@ import static java.util.Collections.emptySet;
  */
 public class PythonExecutionNotCachedEngine implements PythonExecutionEngine {
     @Autowired
+    @Qualifier("dependencyService")
     private DependencyService dependencyService;
 
     @Override

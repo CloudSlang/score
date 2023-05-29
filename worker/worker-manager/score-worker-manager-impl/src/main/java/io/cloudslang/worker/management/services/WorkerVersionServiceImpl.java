@@ -18,6 +18,7 @@ package io.cloudslang.worker.management.services;
 
 import io.cloudslang.orchestrator.services.EngineVersionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * Created by kravtsov on 07/12/2015
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class WorkerVersionServiceImpl implements WorkerVersionService {
 
     @Autowired
+    @Qualifier("ooEngineVersionService")
     private EngineVersionService engineVersionService;
 
     @Override

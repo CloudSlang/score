@@ -30,6 +30,7 @@ import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.services.RunningExecutionPlanService;
 import io.cloudslang.score.lang.SystemContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -50,6 +51,7 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
     private IdentityGenerator idGenerator;
 
     @Autowired
+    @Qualifier("queueDispatcherService")
     private QueueDispatcherService queueDispatcher;
 
     @Autowired

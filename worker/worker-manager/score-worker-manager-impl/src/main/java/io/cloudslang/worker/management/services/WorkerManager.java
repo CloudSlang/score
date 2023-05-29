@@ -69,6 +69,7 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
     protected WorkerNodeService workerNodeService;
 
     @Autowired
+    @Qualifier("ooEngineVersionService")
     private EngineVersionService engineVersionService;
 
     @Autowired

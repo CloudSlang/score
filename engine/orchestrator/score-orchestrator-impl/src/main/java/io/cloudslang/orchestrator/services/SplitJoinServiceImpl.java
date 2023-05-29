@@ -81,6 +81,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     private FinishedBranchRepository finishedBranchRepository;
 
     @Autowired
+    @Qualifier("queueDispatcherService")
     private QueueDispatcherService queueDispatcherService;
 
     @Autowired

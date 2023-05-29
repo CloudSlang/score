@@ -106,6 +106,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     private ReflectionAdapter reflectionAdapter;
 
     @Autowired
+    @Qualifier("workerDbSupportService")
     private WorkerDbSupportService workerDbSupportService;
 
     @Autowired

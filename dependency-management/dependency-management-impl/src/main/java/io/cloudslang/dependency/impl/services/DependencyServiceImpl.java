@@ -81,7 +81,7 @@ import static java.lang.System.getProperty;
 /**
  * @author Alexander Eskin
  */
-@Component
+@Component("dependencyService")
 @SuppressWarnings("unused")
 public class DependencyServiceImpl implements DependencyService {
     private static final Logger logger = LogManager.getLogger(DependencyServiceImpl.class);

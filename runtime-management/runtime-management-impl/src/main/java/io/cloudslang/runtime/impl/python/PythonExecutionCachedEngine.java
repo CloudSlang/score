@@ -21,6 +21,7 @@ import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.impl.ExecutionCachedEngine;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.io.Serializable;
@@ -38,6 +39,7 @@ import static java.util.Collections.emptySet;
  */
 public class PythonExecutionCachedEngine extends ExecutionCachedEngine<PythonExecutor> implements PythonExecutionEngine {
     @Autowired
+    @Qualifier("dependencyService")
     private DependencyService dependencyService;
 
     @Value("#{systemProperties['" + PythonExecutionConfigurationConsts.PYTHON_EXECUTOR_CACHE_SIZE + "'] != null ? systemProperties['" + PythonExecutionConfigurationConsts.PYTHON_EXECUTOR_CACHE_SIZE + "'] : " + PythonExecutionConfigurationConsts.PYTHON_EXECUTOR_CACHE_DEFAULT_SIZE + "}")

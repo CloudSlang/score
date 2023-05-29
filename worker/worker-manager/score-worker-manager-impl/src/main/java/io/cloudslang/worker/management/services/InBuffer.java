@@ -52,6 +52,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     private static final int MINIMUM_GC_DELTA = 10000; // Minimum delta between garbage collections in milliseconds
 
     @Autowired
+    @Qualifier("queueDispatcherService")
     private QueueDispatcherService queueDispatcher;
 
     @Resource

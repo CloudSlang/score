@@ -26,6 +26,7 @@ import io.cloudslang.score.facade.execution.ExecutionActionResult;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.orchestrator.entities.ExecutionState;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
     private ExecutionMessageConverter executionMessageConverter;
 
     @Autowired
+    @Qualifier("queueDispatcherService")
     private QueueDispatcherService queueDispatcherService;
 
     @Autowired

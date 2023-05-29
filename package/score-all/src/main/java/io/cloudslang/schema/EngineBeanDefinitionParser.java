@@ -120,7 +120,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(ExecutionQueueRepositoryImpl.class, null);
 		put(HiloFactoryBean.class, "scoreHiloFactoryBean");
 		put(WorkersMBean.class, "io.cloudslang.engine.node.services.WorkersMBean");
-        put(WorkerDbSupportServiceImpl.class, null);
+        put(WorkerDbSupportServiceImpl.class, "workerDbSupportService");
         put(ScoreDeprecatedImpl.class, null);
         put(ScoreEngineJobsImpl.class,"scoreEngineJobs");
 		put(BusyWorkersServiceImpl.class,"busyWorkersService");

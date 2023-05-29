@@ -32,6 +32,7 @@ import io.cloudslang.score.facade.entities.RunningExecutionPlan;
 import io.cloudslang.score.facade.services.RunningExecutionPlanService;
 import io.cloudslang.score.lang.SystemContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Collections;
 import java.util.Map;
@@ -58,6 +59,7 @@ public class ScoreDeprecatedImpl implements ScoreDeprecated {
     private ExecutionStateService executionStateService;
 
     @Autowired
+    @Qualifier("queueDispatcherService")
     private QueueDispatcherService queueDispatcher;
 
     @Autowired
