@@ -56,6 +56,7 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
     private QueueDispatcherService queueDispatcherService;
 
     @Autowired
+    @Qualifier("executionStateService")
     private ExecutionStateService executionStateService;
 
     @Override

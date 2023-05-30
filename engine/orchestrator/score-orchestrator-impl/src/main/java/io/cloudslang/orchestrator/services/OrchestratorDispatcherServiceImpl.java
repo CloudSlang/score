@@ -45,6 +45,7 @@ public final class OrchestratorDispatcherServiceImpl implements OrchestratorDisp
     private QueueDispatcherService queueDispatcher;
 
     @Autowired
+    @Qualifier("splitJoinService")
     private SplitJoinService splitJoinService;
 
     @Autowired

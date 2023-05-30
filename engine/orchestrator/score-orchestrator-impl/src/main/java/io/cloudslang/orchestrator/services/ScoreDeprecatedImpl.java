@@ -56,6 +56,7 @@ public class ScoreDeprecatedImpl implements ScoreDeprecated {
     private ExecutionMessageConverter executionMessageConverter;
 
     @Autowired
+    @Qualifier("executionStateService")
     private ExecutionStateService executionStateService;
 
     @Autowired

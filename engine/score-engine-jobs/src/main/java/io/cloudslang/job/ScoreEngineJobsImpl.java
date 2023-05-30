@@ -27,6 +27,7 @@ import org.apache.commons.lang.time.StopWatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -44,6 +45,7 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
     private QueueCleanerService queueCleanerService;
 
     @Autowired
+    @Qualifier("splitJoinService")
     private SplitJoinService splitJoinService;
 
     @Autowired

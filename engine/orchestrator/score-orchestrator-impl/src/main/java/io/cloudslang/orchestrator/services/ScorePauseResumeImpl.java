@@ -20,6 +20,7 @@ import io.cloudslang.orchestrator.entities.ExecutionState;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.score.facade.execution.PauseReason;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -31,9 +32,11 @@ import java.util.Map;
 public class ScorePauseResumeImpl implements ScorePauseResume {
 
     @Autowired
+    @Qualifier("executionStateService")
     private ExecutionStateService executionStateService;
 
     @Autowired
+    @Qualifier("pauseResumeService")
     private PauseResumeService pauseResumeService;
 
     @Override

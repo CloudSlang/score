@@ -58,6 +58,7 @@ public class ScoreTriggeringImpl implements ScoreTriggering {
     private ExecutionMessageConverter executionMessageConverter;
 
     @Autowired
+    @Qualifier("executionStateService")
     private ExecutionStateService executionStateService;
 
     @Override

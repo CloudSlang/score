@@ -100,6 +100,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     private static final Logger logger = LogManager.getLogger(ExecutionServiceImpl.class);
 
     @Autowired
+    @Qualifier("pauseResumeService")
     private PauseResumeService pauseService;
 
     @Autowired
@@ -113,6 +114,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     private WorkerConfigurationService workerConfigurationService;
 
     @Autowired
+    @Qualifier("aplsLicensingService")
     private AplsLicensingService aplsLicensingService;
 
     @Autowired
@@ -123,6 +125,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     private FastEventBus fastEventBus;
 
     @Autowired
+    @Qualifier("robotAvailabilityService")
     private RobotAvailabilityService robotAvailabilityService;
 
     private static final int DEFAULT_PLATFORM_LEVEL_OPERATION_TIMEOUT_IN_SECONDS = 24 * 60 * 60; // seconds in a day
