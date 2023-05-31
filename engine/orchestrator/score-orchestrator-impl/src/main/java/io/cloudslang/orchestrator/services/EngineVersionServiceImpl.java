@@ -16,13 +16,12 @@
 
 package io.cloudslang.orchestrator.services;
 
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Created by kravtsov on 03/01/2016
  */
-@Component("engineVersionService")
+
 public class EngineVersionServiceImpl implements EngineVersionService {
     @Override
     @Transactional

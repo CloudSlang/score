@@ -19,18 +19,15 @@ import io.cloudslang.orchestrator.services.ExecutionStateService;
 import io.cloudslang.orchestrator.services.PauseResumeService;
 import io.cloudslang.score.facade.entities.Execution;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.HashMap;
 
 public final class ExternalExecutionServiceImpl implements ExternalExecutionService {
 
-    @Autowired(required = false)
-    @Qualifier("pauseResumeService")
+    @Autowired
     private PauseResumeService pauseService;
 
-    @Autowired(required = false)
-    @Qualifier("executionStateService")
+    @Autowired
     private ExecutionStateService stateService;
 
     @Autowired

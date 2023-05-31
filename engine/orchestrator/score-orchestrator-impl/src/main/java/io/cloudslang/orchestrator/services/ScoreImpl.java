@@ -19,7 +19,6 @@ package io.cloudslang.orchestrator.services;
 import io.cloudslang.score.api.Score;
 import io.cloudslang.score.api.TriggeringProperties;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -38,7 +37,6 @@ public class ScoreImpl implements Score {
     private ScorePauseResume scorePauseResume;
 
     @Autowired
-    @Qualifier("cancelExecutionService")
     private CancelExecutionService cancelExecutionService;
 
     @Override

@@ -31,7 +31,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,7 +53,6 @@ public class QueueListenerImpl implements QueueListener {
     private static final String MULTI_INSTANCE = "MULTI_INSTANCE";
 
     @Autowired
-    @Qualifier("executionStateService")
     private ExecutionStateService executionStateService;
 
     @Autowired
@@ -64,14 +62,12 @@ public class QueueListenerImpl implements QueueListener {
     private EventBus eventBus;
 
     @Autowired
-    @Qualifier("splitJoinService")
     private SplitJoinService splitJoinService;
 
     @Autowired
     private ScoreEventFactory scoreEventFactory;
 
     @Autowired
-    @Qualifier("pauseResumeService")
     private PauseResumeService pauseResumeService;
 
     @Override

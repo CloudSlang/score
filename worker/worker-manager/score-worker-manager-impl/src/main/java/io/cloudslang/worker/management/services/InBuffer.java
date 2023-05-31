@@ -52,7 +52,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
     private static final int MINIMUM_GC_DELTA = 10000; // Minimum delta between garbage collections in milliseconds
 
     @Autowired
-    private QueueDispatcherService queueDispatcherService;
+    private QueueDispatcherService queueDispatcher;
 
     @Resource
     private String workerUuid;
@@ -168,7 +168,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
                         if (logger.isDebugEnabled()) {
                             logger.debug("Polling messages from queue (max " + messagesToGet + ")");
                         }
-                        List<ExecutionMessage> newMessages = queueDispatcherService.poll(workerUuid, messagesToGet, freeMemory);
+                        List<ExecutionMessage> newMessages = queueDispatcher.poll(workerUuid, messagesToGet, freeMemory);
                         if (executionsActivityListener != null) {
                             executionsActivityListener.onActivate(extract(newMessages, on(ExecutionMessage.class).getExecStateId()));
                         }

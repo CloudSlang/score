@@ -32,7 +32,6 @@ import io.cloudslang.score.facade.entities.Execution;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -63,7 +62,6 @@ public final class ExecutionAssignerServiceImpl implements ExecutionAssignerServ
     private ExecutionMessageConverter converter;
 
     @Autowired
-    @Qualifier("engineVersionService")
     private EngineVersionService engineVersionService;
 
     private final AssignStrategy workerAssignStrategy;

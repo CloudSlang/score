@@ -25,7 +25,6 @@ import io.cloudslang.score.facade.execution.ExecutionStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
@@ -42,7 +41,6 @@ import static org.springframework.util.CollectionUtils.isEmpty;
  * User:
  * Date: 12/05/2014
  */
-@Service("executionStateService")
 public class ExecutionStateServiceImpl implements ExecutionStateService {
 
     @Autowired

@@ -23,7 +23,6 @@ import io.cloudslang.orchestrator.model.MergedConfigurationHolder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -49,7 +48,6 @@ public class MergedConfigurationServiceImpl implements MergedConfigurationServic
     private static final long MERGED_CONFIGURATION_INITIAL_DELAY_MILLIS = getLong("worker.mergedConfiguration.initialDelayMillis", 1_000L);
 
     @Autowired
-    @Qualifier("cancelExecutionService")
     private CancelExecutionService cancelExecutionService;
 
     @Autowired

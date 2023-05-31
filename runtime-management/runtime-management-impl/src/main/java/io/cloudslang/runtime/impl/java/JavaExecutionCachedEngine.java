@@ -21,7 +21,6 @@ import io.cloudslang.runtime.api.java.JavaExecutionParametersProvider;
 import io.cloudslang.runtime.impl.ExecutionCachedEngine;
 import org.python.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Set;
@@ -30,8 +29,7 @@ import java.util.Set;
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
 public class JavaExecutionCachedEngine extends ExecutionCachedEngine<JavaExecutor> implements JavaExecutionEngine {
-    @Autowired(required = false)
-    @Qualifier("dependencyService")
+    @Autowired
     private DependencyService dependencyService;
 
     @Value("#{systemProperties['" + JavaExecutionConfigurationConsts.JAVA_EXECUTOR_CACHE_SIZE + "'] != null ? systemProperties['" + JavaExecutionConfigurationConsts.JAVA_EXECUTOR_CACHE_SIZE + "'] : " + JavaExecutionConfigurationConsts.JAVA_EXECUTOR_CACHE_DEFAULT_SIZE + "}")

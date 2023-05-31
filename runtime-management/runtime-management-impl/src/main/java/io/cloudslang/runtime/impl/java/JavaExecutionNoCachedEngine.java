@@ -21,14 +21,12 @@ import io.cloudslang.runtime.api.java.JavaExecutionParametersProvider;
 import io.cloudslang.runtime.impl.ExecutionEngine;
 import org.python.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
 public class JavaExecutionNoCachedEngine extends ExecutionEngine implements JavaExecutionEngine {
-    @Autowired(required = false)
-    @Qualifier("dependencyService")
+    @Autowired
     private DependencyService dependencyService;
 
     @Override

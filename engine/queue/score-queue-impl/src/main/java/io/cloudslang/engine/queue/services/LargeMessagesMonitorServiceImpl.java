@@ -23,7 +23,6 @@ import io.cloudslang.score.facade.execution.ExecutionActionResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -43,7 +42,6 @@ public final class LargeMessagesMonitorServiceImpl implements LargeMessagesMonit
     private static Logger logger = LogManager.getLogger(LargeMessagesMonitorServiceImpl.class);
 
     @Autowired
-    @Qualifier("cancelExecutionService")
     private CancelExecutionService cancelExecutionService;
 
     @Autowired

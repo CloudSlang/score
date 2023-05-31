@@ -21,7 +21,6 @@ import io.cloudslang.orchestrator.services.MergedConfigurationService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Set;
 
@@ -41,7 +40,6 @@ public class WorkerConfigurationServiceImpl implements WorkerConfigurationServic
     private volatile boolean enabled;
 
     @Autowired
-    @Qualifier("mergedConfigurationService")
     private MergedConfigurationService mergedConfigurationService;
 
     @Override

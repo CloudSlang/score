@@ -25,7 +25,6 @@ import org.apache.commons.lang.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
@@ -41,11 +40,9 @@ public final class OrchestratorDispatcherServiceImpl implements OrchestratorDisp
     private final Logger logger = LogManager.getLogger(getClass());
 
     @Autowired
-    @Qualifier("queueDispatcherService")
     private QueueDispatcherService queueDispatcher;
 
     @Autowired
-    @Qualifier("splitJoinService")
     private SplitJoinService splitJoinService;
 
     @Autowired

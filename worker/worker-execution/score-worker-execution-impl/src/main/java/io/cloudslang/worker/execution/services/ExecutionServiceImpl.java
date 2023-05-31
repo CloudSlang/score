@@ -99,22 +99,19 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     private static final Logger logger = LogManager.getLogger(ExecutionServiceImpl.class);
 
-    @Autowired(required = false)
-    @Qualifier("pauseResumeService")
+    @Autowired
     private PauseResumeService pauseService;
 
     @Autowired
     private ReflectionAdapter reflectionAdapter;
 
-    @Autowired(required = false)
-    @Qualifier("workerDbSupportService")
+    @Autowired
     private WorkerDbSupportService workerDbSupportService;
 
     @Autowired
     private WorkerConfigurationService workerConfigurationService;
 
-    @Autowired(required = false)
-    @Qualifier("aplsLicensingService")
+    @Autowired
     private AplsLicensingService aplsLicensingService;
 
     @Autowired
@@ -124,8 +121,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     @Qualifier("consumptionFastEventBus")
     private FastEventBus fastEventBus;
 
-    @Autowired(required = false)
-    @Qualifier("robotAvailabilityService")
+    @Autowired
     private RobotAvailabilityService robotAvailabilityService;
 
     private static final int DEFAULT_PLATFORM_LEVEL_OPERATION_TIMEOUT_IN_SECONDS = 24 * 60 * 60; // seconds in a day
