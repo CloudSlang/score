@@ -38,7 +38,7 @@ import static java.util.Collections.emptySet;
  * Uses a cache of PythonExecutor for python with dependencies.
  */
 public class PythonExecutionCachedEngine extends ExecutionCachedEngine<PythonExecutor> implements PythonExecutionEngine {
-    @Autowired
+    @Autowired(required = false)
     @Qualifier("dependencyService")
     private DependencyService dependencyService;
 

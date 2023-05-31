@@ -51,7 +51,7 @@ public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager {
    	protected WorkerVersionService workerVersionService;
 
     @Autowired
-    @Qualifier("ooEngineVersionService")
+    @Qualifier("engineVersionService")
     private EngineVersionService engineVersionService;
 
 	private volatile boolean inRecovery; //must be volatile since it is read/written in several threads

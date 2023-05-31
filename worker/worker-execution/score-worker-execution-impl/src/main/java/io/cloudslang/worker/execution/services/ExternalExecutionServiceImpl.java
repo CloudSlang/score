@@ -25,11 +25,11 @@ import java.util.HashMap;
 
 public final class ExternalExecutionServiceImpl implements ExternalExecutionService {
 
-    @Autowired
+    @Autowired(required = false)
     @Qualifier("pauseResumeService")
     private PauseResumeService pauseService;
 
-    @Autowired
+    @Autowired(required = false)
     @Qualifier("executionStateService")
     private ExecutionStateService stateService;
 

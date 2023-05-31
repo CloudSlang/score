@@ -124,7 +124,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
         put(ScoreDeprecatedImpl.class, null);
         put(ScoreEngineJobsImpl.class,"scoreEngineJobs");
 		put(BusyWorkersServiceImpl.class,"busyWorkersService");
-		put(MergedConfigurationServiceImpl.class,"MergedConfigurationService");
+		put(MergedConfigurationServiceImpl.class,"mergedConfigurationService");
 		put(FinishedExecutionStateCleanerServiceImpl.class, null);
 	}};
 

@@ -63,7 +63,7 @@ public final class ExecutionAssignerServiceImpl implements ExecutionAssignerServ
     private ExecutionMessageConverter converter;
 
     @Autowired
-    @Qualifier("ooEngineVersionService")
+    @Qualifier("engineVersionService")
     private EngineVersionService engineVersionService;
 
     private final AssignStrategy workerAssignStrategy;

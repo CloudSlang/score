@@ -99,21 +99,21 @@ public final class ExecutionServiceImpl implements ExecutionService {
 
     private static final Logger logger = LogManager.getLogger(ExecutionServiceImpl.class);
 
-    @Autowired
+    @Autowired(required = false)
     @Qualifier("pauseResumeService")
     private PauseResumeService pauseService;
 
     @Autowired
     private ReflectionAdapter reflectionAdapter;
 
-    @Autowired
+    @Autowired(required = false)
     @Qualifier("workerDbSupportService")
     private WorkerDbSupportService workerDbSupportService;
 
     @Autowired
     private WorkerConfigurationService workerConfigurationService;
 
-    @Autowired
+    @Autowired(required = false)
     @Qualifier("aplsLicensingService")
     private AplsLicensingService aplsLicensingService;
 
@@ -124,7 +124,7 @@ public final class ExecutionServiceImpl implements ExecutionService {
     @Qualifier("consumptionFastEventBus")
     private FastEventBus fastEventBus;
 
-    @Autowired
+    @Autowired(required = false)
     @Qualifier("robotAvailabilityService")
     private RobotAvailabilityService robotAvailabilityService;
 

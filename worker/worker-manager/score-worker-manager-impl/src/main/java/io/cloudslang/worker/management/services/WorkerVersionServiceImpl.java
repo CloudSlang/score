@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 public class WorkerVersionServiceImpl implements WorkerVersionService {
 
     @Autowired
-    @Qualifier("ooEngineVersionService")
+    @Qualifier("engineVersionService")
     private EngineVersionService engineVersionService;
 
     @Override

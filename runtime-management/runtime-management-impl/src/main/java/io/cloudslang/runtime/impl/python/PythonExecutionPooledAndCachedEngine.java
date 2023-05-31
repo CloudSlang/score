@@ -53,7 +53,7 @@ import static java.util.concurrent.Executors.newFixedThreadPool;
  */
 public class PythonExecutionPooledAndCachedEngine extends ExecutionEngine implements PythonExecutionEngine {
 
-    @Autowired
+    @Autowired(required = false)
     @Qualifier("dependencyService")
     private DependencyService dependencyService;
 

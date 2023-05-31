@@ -32,7 +32,7 @@ import static java.util.Collections.emptySet;
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
 public class PythonExecutionNotCachedEngine implements PythonExecutionEngine {
-    @Autowired
+    @Autowired(required = false)
     @Qualifier("dependencyService")
     private DependencyService dependencyService;
 

@@ -41,7 +41,7 @@ public class WorkerConfigurationServiceImpl implements WorkerConfigurationServic
     private volatile boolean enabled;
 
     @Autowired
-    @Qualifier("MergedConfigurationService")
+    @Qualifier("mergedConfigurationService")
     private MergedConfigurationService mergedConfigurationService;
 
     @Override

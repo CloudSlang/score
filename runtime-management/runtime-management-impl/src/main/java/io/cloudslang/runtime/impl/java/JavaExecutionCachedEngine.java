@@ -30,7 +30,7 @@ import java.util.Set;
  * Created by Genadi Rabinovich, genadi@hpe.com on 05/05/2016.
  */
 public class JavaExecutionCachedEngine extends ExecutionCachedEngine<JavaExecutor> implements JavaExecutionEngine {
-    @Autowired
+    @Autowired(required = false)
     @Qualifier("dependencyService")
     private DependencyService dependencyService;
 

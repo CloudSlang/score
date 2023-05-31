@@ -50,7 +50,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
     @Autowired
     private WorkerRecoveryManager recoveryManager;
 
-    @Autowired
+    @Autowired(required = false)
     @Qualifier("orchestratorDispatcherService")
     private OrchestratorDispatcherService dispatcherService;
 
