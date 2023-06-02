@@ -23,6 +23,8 @@ import java.util.Date;
 
 public class ExecutionSummary implements Serializable {
 
+    private static final long serialVersionUID = 3895708684033992809L;
+
     public static final String EMPTY_BRANCH = "EMPTY";
 
     private String executionId;
