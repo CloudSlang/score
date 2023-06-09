@@ -24,6 +24,8 @@ import static java.util.Collections.emptySet;
 
 public class MergedConfigurationDataContainer implements Serializable {
 
+    private static final long serialVersionUID = 6409757702040555672L;
+
     private Set<Long> cancelledExecutions;
     private Set<String> pausedExecutions;
     private Set<String> workerGroups;

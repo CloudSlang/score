@@ -27,6 +27,9 @@ import java.util.Map;
  *
  */
 public class Execution implements Serializable {
+
+    private static final long serialVersionUID = 7685861281598267312L;
+
     private Long executionId;
     private Long runningExecutionPlanId;
     private Long position;
@@ -40,7 +43,7 @@ public class Execution implements Serializable {
 
     public Execution(Long executionId, Long runningExecutionPlanId, Long position, Map<String, ? extends Serializable> contexts, Map<String, Serializable> systemContext) {
         this(runningExecutionPlanId, position, contexts);
-        if(systemContext != null) {
+        if (systemContext != null) {
             this.systemContext.putAll(systemContext);
         }
         this.executionId = executionId;
@@ -50,7 +53,7 @@ public class Execution implements Serializable {
         this();
         this.position = position;
         this.runningExecutionPlanId = runningExecutionPlanId;
-        if(contexts != null) {
+        if (contexts != null) {
             this.contexts.putAll(contexts);
         }
     }
@@ -79,7 +82,7 @@ public class Execution implements Serializable {
         return runningExecutionPlanId;
     }
 
-    public void setRunningExecutionPlanId(Long runningExecutionPlanId){
+    public void setRunningExecutionPlanId(Long runningExecutionPlanId) {
         this.runningExecutionPlanId = runningExecutionPlanId;
     }
 
@@ -104,7 +107,7 @@ public class Execution implements Serializable {
         return systemContext;
     }
 
-    public void setExecutionId(Long executionId){
+    public void setExecutionId(Long executionId) {
         this.executionId = executionId;
     }
 
