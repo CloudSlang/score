@@ -16,6 +16,7 @@
 package io.cloudslang.engine.queue.services.assigner.strategies;
 
 import io.cloudslang.engine.queue.services.assigner.ChooseWorkerStrategy;
+import org.apache.log4j.Logger;
 
 import java.util.concurrent.ConcurrentMap;
 
@@ -29,6 +30,7 @@ import static java.util.concurrent.TimeUnit.HOURS;
 
 public class RoundRobinStrategy implements ChooseWorkerStrategy {
 
+    private static final Logger logger = Logger.getLogger(RoundRobinStrategy.class);
     private static final int SEVEN_DAYS_IN_HOURS = 7 * 24;
     private static final int CACHE_MAX_ENTRIES = getInteger("worker.roundRobin.activeGroupAlias.maxSize", 10_000);
     private static final int MAX_CONCURRENCY_LEVEL = getInteger("worker.roundRobin.concurrencyLevel", 16);
@@ -42,11 +44,21 @@ public class RoundRobinStrategy implements ChooseWorkerStrategy {
 
     @Override
     public int getNextWorkerFromGroup(String groupAlias, int numberOfWorkersInGroup) {
-        return groupAliasLatestWorkerMap.merge(groupAlias, 0,
+        logger.debug("group alias = " + groupAlias);
+
+        int nextWorkerIndex = groupAliasLatestWorkerMap.merge(groupAlias, 0,
                 (oldValue, newValue) -> {
                     int nextOldValue = oldValue + 1;
                     return nextOldValue < numberOfWorkersInGroup ? nextOldValue : 0;
                 });
+
+        for(String group : groupAliasLatestWorkerMap.keySet()) {
+            logger.debug("group = " + group + " index = " + groupAliasLatestWorkerMap.get(group));
+        }
+
+        logger.debug("nextWorkerIndex = " + nextWorkerIndex);
+
+        return nextWorkerIndex;
     }
 
     private static boolean isStrategyInUse() {

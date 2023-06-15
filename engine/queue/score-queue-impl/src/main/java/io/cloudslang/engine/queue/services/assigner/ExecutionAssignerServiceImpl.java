@@ -93,14 +93,24 @@ public final class ExecutionAssignerServiceImpl implements ExecutionAssignerServ
             ChooseWorkerStrategy assignWorkerStrategy) {
         Collection<String> workerNames = groupWorkersMap.get(groupName);
 
+        logger.debug("Group the step is configured to execute on - " + groupName);
+
         if (isNotEmpty(workerNames)) {
             ArrayList<String> workerNamesAsList = new ArrayList<>(workerNames);
             // Please do not remove this, as this sorting is required in order to get predictable results
+            logger.debug("available workers in the group before sort - " + workerNamesAsList);
             Collections.sort(workerNamesAsList);
+            logger.debug("available workers in the group after sort - " + workerNamesAsList);
             int nextWorkerIndex = assignWorkerStrategy.getNextWorkerFromGroup(groupName, workerNamesAsList.size());
-            return workerNamesAsList.get(nextWorkerIndex);
+            String chosenWorker = workerNamesAsList.get(nextWorkerIndex);
+
+            logger.debug("chosen worker - " + chosenWorker + " at index - " + nextWorkerIndex);
+
+            return chosenWorker;
+
         } else {
             // This returns a worker UUID in case of the group defined on specific worker (private group)
+            logger.debug("Group defined on specific worker. Returning worker uuid.");
             return groupName.startsWith(WORKER_PREFIX) ? groupName.substring(WORKER_PREFIX_LENGTH) : null;
         }
     }
@@ -129,8 +139,22 @@ public final class ExecutionAssignerServiceImpl implements ExecutionAssignerServ
                     String engineVersionId = engineVersionService.getEngineVersionId();
                     //We allow to assign to workers who's version is equal to the engine version
                     groupWorkersMap = workerNodeService.readGroupWorkersMapActiveAndRunningAndVersion(engineVersionId);
+
+                    logger.debug("Available workers - ");
+
+                    for(String group : groupWorkersMap.keySet()) {
+                        logger.debug("group = " + group + " worker ids - " );
+                        Collection<String> workerNames = groupWorkersMap.get(group);
+                        ArrayList<String> workerNamesAsList = new ArrayList<>(workerNames);
+                        logger.debug("ids before sorting");
+                        logger.debug(workerNamesAsList);
+                        Collections.sort(workerNamesAsList);
+                        logger.debug("ids after sorting");
+                        logger.debug(workerNamesAsList);
+                    }
                 }
                 String workerId = chooseWorker(msg.getWorkerGroup(), groupWorkersMap, chooseWorkerStrategy);
+                logger.debug("worker id = " + workerId + " execution id = " + msg.getMsgId());
                 if (workerId == null) {
                     // error on assigning worker, no available worker
                     logger.warn("Can't assign worker for group name: " + msg.getWorkerGroup()
@@ -173,15 +197,19 @@ public final class ExecutionAssignerServiceImpl implements ExecutionAssignerServ
     private ChooseWorkerStrategy createChooseWorkerStrategy() {
         switch (workerAssignStrategy) {
             case RANDOM:
+                logger.debug("choosing random strategy");
                 return new RandomStrategy();
 
             case SECURE_RANDOM:
+                logger.debug("choosing secure random strategy");
                 return new SecureRandomStrategy();
 
             case ROUND_ROBIN:
+                logger.debug("choosing round robin strategy");
                 return new RoundRobinStrategy();
 
             default:
+                logger.debug("falling to default - random strategy");
                 return new RandomStrategy();
         }
     }

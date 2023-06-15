@@ -16,11 +16,14 @@
 package io.cloudslang.engine.queue.services.assigner.strategies;
 
 import io.cloudslang.engine.queue.services.assigner.ChooseWorkerStrategy;
+import org.apache.log4j.Logger;
 
 import java.util.Random;
 
 
 public class RandomStrategy implements ChooseWorkerStrategy {
+
+    private static final Logger logger = Logger.getLogger(RandomStrategy.class);
 
     private final Random randomGenerator;
 
@@ -30,6 +33,8 @@ public class RandomStrategy implements ChooseWorkerStrategy {
 
     @Override
     public int getNextWorkerFromGroup(String groupAlias, int numberOfWorkersInGroup) {
-        return randomGenerator.nextInt(numberOfWorkersInGroup) % numberOfWorkersInGroup;
+        int nextWorkerIndex = randomGenerator.nextInt(numberOfWorkersInGroup) % numberOfWorkersInGroup;
+        logger.debug("numberOfWorkersInGroup = " + numberOfWorkersInGroup + " nextWorkerIndex = " + nextWorkerIndex);
+        return nextWorkerIndex;
     }
 }
