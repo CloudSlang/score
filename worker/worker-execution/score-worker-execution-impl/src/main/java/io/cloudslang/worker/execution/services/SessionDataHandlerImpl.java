@@ -74,7 +74,7 @@ public class SessionDataHandlerImpl implements SessionDataHandler {
         return sessionDataHolder.getSessionData();
     }
 
-    private SessionDataHolder getSessionDataHolder(Long executionId, Long branchId) {
+    private synchronized SessionDataHolder getSessionDataHolder(Long executionId, Long branchId) {
         final Map<Long, SessionDataHolder> sessionMap = sessionsExecutionDataMap.computeIfAbsent(executionId,
                 (e) -> new HashMap<>());
         return sessionMap.computeIfAbsent(branchId, SessionDataHolder::new);
