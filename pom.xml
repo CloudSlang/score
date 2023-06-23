@@ -55,7 +55,7 @@
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
-        <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
+        <maven-dependency-plugin.version>3.6.0</maven-dependency-plugin.version>
         <maven-install-plugin.version>3.0.0-M1</maven-install-plugin.version>
         <maven-plugin-plugin.version>3.6.0</maven-plugin-plugin.version>
         <!--Project dependencies-->
@@ -64,13 +64,13 @@
         <jtds.version>1.3.0</jtds.version>
         <mysql.connector.version>8.0.20</mysql.connector.version>
         <postgres.driver.version>42.4.1</postgres.driver.version>
-        <spring.version>5.3.27</spring.version>
-        <hibernate.version>5.4.28.Final</hibernate.version>
+        <spring.version>6.0.3</spring.version>
+        <hibernate.version>6.2.5.Final</hibernate.version>
         <querydsl.version>4.2.1</querydsl.version>
         <!--Project properties-->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <custom.nexus>overwriten_by_ci</custom.nexus>
     </properties>
 
@@ -277,7 +277,7 @@
             <dependency>
                 <groupId>org.springframework.data</groupId>
                 <artifactId>spring-data-jpa</artifactId>
-                <version>2.4.5</version>
+                <version>3.1.1</version>
                 <exclusions>
                     <exclusion>
                         <groupId>junit</groupId>
@@ -289,23 +289,12 @@
 
             <!-- hibernate artifacts -->
             <dependency>
-                <groupId>org.eclipse.persistence</groupId>
-                <artifactId>javax.persistence</artifactId>
-                <version>2.2.1</version>
+                <groupId>jakarta.annotation</groupId>
+                <artifactId>jakarta.annotation-api</artifactId>
+                <version>2.1.1</version>
             </dependency>
             <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-entitymanager</artifactId>
-                <version>${hibernate.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.hibernate.javax.persistence</groupId>
-                        <artifactId>hibernate-jpa-2.1-api</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.hibernate</groupId>
+                <groupId>org.hibernate.orm</groupId>
                 <artifactId>hibernate-core</artifactId>
                 <version>${hibernate.version}</version>
                 <exclusions>
@@ -358,9 +347,9 @@
                 <version>2.14.0-rc2</version>
             </dependency>
             <dependency>
-                <groupId>javax.validation</groupId>
-                <artifactId>validation-api</artifactId>
-                <version>2.0.1.Final</version>
+                <groupId>jakarta.validation</groupId>
+                <artifactId>jakarta.validation-api</artifactId>
+                <version>3.0.2</version>
             </dependency>
             <!-- DB drivers -->
             <dependency>
@@ -487,9 +476,9 @@
                         <doclint>none</doclint>
                         <additionalDependencies>
                             <additionalDependency>
-                                <groupId>javax.interceptor</groupId>
-                                <artifactId>javax.interceptor-api</artifactId>
-                                <version>1.2</version>
+                                <groupId>jakarta.interceptor</groupId>
+                                <artifactId>jakarta.interceptor-api</artifactId>
+                                <version>2.1.0</version>
                             </additionalDependency>
                         </additionalDependencies>
                     </configuration>
@@ -548,6 +537,17 @@
         </pluginManagement>
 
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>
+                        --add-opens java.base/java.lang=ALL-UNNAMED
+                        --add-opens java.base/java.util=ALL-UNNAMED
+                        --add-opens java.base/java.io=ALL-UNNAMED
+                    </argLine>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>

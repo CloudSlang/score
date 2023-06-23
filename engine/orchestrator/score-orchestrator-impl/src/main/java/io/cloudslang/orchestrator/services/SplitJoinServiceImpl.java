@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.cloudslang.orchestrator.services;
 
 import ch.lambdaj.function.convert.Converter;
@@ -226,7 +225,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         for (FinishedBranch finishedBranch : finishedBranches) {
             dispatchBranchFinishedEvent(finishedBranch.getExecutionId(), finishedBranch.getSplitId(), finishedBranch.getBranchId());
 
-            String branchIdToCheckinLicense = (String) finishedBranch.getBranchContexts().getSystemContext().get(BRANCH_ID_TO_CHECK_IN_LICENSE);
+            String branchIdToCheckinLicense = (String) finishedBranch.getBranchContexts().systemContext().get(BRANCH_ID_TO_CHECK_IN_LICENSE);
             checkinLicenseForLaneIfRequired(finishedBranch.getExecutionId(), finishedBranch.getBranchId(), branchIdToCheckinLicense);
 
             SuspendedExecution suspendedExecution = suspendedMap.get(finishedBranch.getSplitId());
@@ -407,7 +406,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         boolean wasExecutionCancelled = false;
         ArrayList<EndBranchDataContainer> finishedContexts = new ArrayList<>();
         for (FinishedBranch fb : finishedBranches) {
-                finishedContexts.add(new EndBranchDataContainer(fb.getBranchContexts().getContexts(), fb.getBranchContexts().getSystemContext(), fb.getBranchException()));
+                finishedContexts.add(new EndBranchDataContainer(fb.getBranchContexts().contexts(), fb.getBranchContexts().systemContext(), fb.getBranchException()));
             if (fb.getBranchContexts().isBranchCancelled()) {
                 wasExecutionCancelled = true;
             }
@@ -433,7 +432,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         boolean wasExecutionCancelled = false;
         ArrayList<EndBranchDataContainer> finishedContexts = new ArrayList<>();
         for (FinishedBranch fb : finishedBranches) {
-            finishedContexts.add(new EndBranchDataContainer(fb.getBranchContexts().getContexts(), fb.getBranchContexts().getSystemContext(), fb.getBranchException()));
+            finishedContexts.add(new EndBranchDataContainer(fb.getBranchContexts().contexts(), fb.getBranchContexts().systemContext(), fb.getBranchException()));
             if (fb.getBranchContexts().isBranchCancelled()) {
                 wasExecutionCancelled = true;
             }

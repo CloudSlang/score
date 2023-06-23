@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.cloudslang.orchestrator.services;
 
 import io.cloudslang.engine.queue.entities.ExecStatus;
@@ -30,7 +29,6 @@ import io.cloudslang.orchestrator.entities.SuspendedExecution;
 import io.cloudslang.orchestrator.repositories.FinishedBranchRepository;
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
 import io.cloudslang.score.api.EndBranchDataContainer;
-import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.lang.SystemContext;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +39,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
@@ -58,7 +55,6 @@ import static ch.lambdaj.Lambda.having;
 import static ch.lambdaj.Lambda.on;
 import static ch.lambdaj.Lambda.select;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.MULTI_INSTANCE;
-import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.NON_BLOCKING;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL;
 import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL_LOOP;
 import static java.util.EnumSet.of;
@@ -235,8 +231,8 @@ public class SplitJoinServiceTest {
 
         List<EndBranchDataContainer> finishedChildContexts = value.getSystemContext().getFinishedChildBranchesData();
 
-        Map<String, Serializable> ooContexts = suspendedExecution.getFinishedBranches().iterator().next().getBranchContexts().getContexts();
-        Map<String, Serializable> systemContext = suspendedExecution.getFinishedBranches().iterator().next().getBranchContexts().getSystemContext();
+        Map<String, Serializable> ooContexts = suspendedExecution.getFinishedBranches().iterator().next().getBranchContexts().contexts();
+        Map<String, Serializable> systemContext = suspendedExecution.getFinishedBranches().iterator().next().getBranchContexts().systemContext();
         assertThat("parent execution must contain children maps", finishedChildContexts, is(Arrays.asList(
                 new EndBranchDataContainer(ooContexts, systemContext, null))));
     }

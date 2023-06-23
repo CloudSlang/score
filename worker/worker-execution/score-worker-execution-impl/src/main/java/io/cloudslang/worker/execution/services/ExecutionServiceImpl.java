@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.cloudslang.worker.execution.services;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -42,14 +41,14 @@ import io.cloudslang.worker.execution.model.StepActionDataHolder.ReadonlyStepAct
 import io.cloudslang.worker.execution.reflection.ReflectionAdapter;
 import io.cloudslang.worker.management.WorkerConfigurationService;
 import io.cloudslang.worker.management.services.dbsupport.WorkerDbSupportService;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PreDestroy;
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;

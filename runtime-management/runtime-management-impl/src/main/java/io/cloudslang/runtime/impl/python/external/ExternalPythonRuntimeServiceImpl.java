@@ -21,7 +21,7 @@ import io.cloudslang.runtime.api.python.PythonRuntimeService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;

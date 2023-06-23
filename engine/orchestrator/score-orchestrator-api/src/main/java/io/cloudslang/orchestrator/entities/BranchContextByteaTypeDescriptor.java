@@ -13,20 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.cloudslang.orchestrator.entities;
 
-import org.hibernate.type.AbstractSingleColumnStandardBasicType;
-import org.hibernate.type.descriptor.java.SerializableTypeDescriptor;
-import org.hibernate.type.descriptor.sql.LongVarbinaryTypeDescriptor;
+import org.hibernate.type.descriptor.java.SerializableJavaType;
+import org.hibernate.usertype.UserTypeSupport;
 
-public class BranchContextByteaTypeDescriptor extends AbstractSingleColumnStandardBasicType<BranchContexts> {
+import java.sql.Types;
+
+public class BranchContextByteaTypeDescriptor extends UserTypeSupport<BranchContexts> {
 
     public BranchContextByteaTypeDescriptor() {
-        super(LongVarbinaryTypeDescriptor.INSTANCE, new SerializableTypeDescriptor<>(BranchContexts.class));
-    }
-
-    public String getName() {
-        return BranchContexts.class.getName();
+        super(new SerializableJavaType<>(BranchContexts.class).getJavaTypeClass(), Types.LONGVARBINARY);
     }
 }

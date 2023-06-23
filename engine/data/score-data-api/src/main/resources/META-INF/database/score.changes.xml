@@ -247,7 +247,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
             <column name="UUID" type="VARCHAR(48)">
                 <constraints nullable="false" unique="true"/>
             </column>
-            <column name="STATUS" type="INTEGER">
+            <column name="STATUS" type="TINYINT">
                 <constraints nullable="false"/>
             </column>
             <column name="IS_ACTIVE" type="BOOLEAN">

@@ -13,24 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.cloudslang.orchestrator.entities;
 
 import io.cloudslang.engine.data.AbstractIdentifiable;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.score.facade.execution.ExecutionSummary;
 import org.apache.commons.lang.builder.EqualsBuilder;
+import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Lob;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import jakarta.persistence.Basic;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import org.hibernate.usertype.UserTypeLegacyBridge;
+
 import java.util.Arrays;
 
 /**
@@ -56,7 +58,8 @@ public class ExecutionState extends AbstractIdentifiable {
 
     @Column(name = "EXECUTION_OBJECT")
     @Lob
-    @Type(type = "org.hibernate.type.ImageType")
+    @Type(value = UserTypeLegacyBridge.class,
+          parameters = @Parameter(name = UserTypeLegacyBridge.TYPE_NAME_PARAM_KEY, value = "image"))
     @Basic(fetch = FetchType.LAZY)
     private byte[] executionObject;
 

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.cloudslang.engine.dialects;
 
 import org.hibernate.dialect.H2Dialect;
@@ -22,9 +21,13 @@ import java.sql.Types;
 
 public class ScoreH2Dialect extends H2Dialect {
 
-    public ScoreH2Dialect() {
-        super();
-        registerColumnType(Types.LONGVARBINARY, "binary");
+    @Override
+    protected String columnType(int sqlTypeCode) {
+        if (sqlTypeCode == Types.LONGVARBINARY) {
+            return "blob";
+        }
+
+        return super.columnType(sqlTypeCode);
     }
 
     @Override

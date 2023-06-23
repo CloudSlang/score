@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.cloudslang.runtime.impl.python;
 
 import com.github.benmanes.caffeine.cache.Cache;
@@ -24,12 +23,13 @@ import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.impl.ExecutionEngine;
 import io.cloudslang.runtime.impl.python.pool.ViburEmbeddedPythonPoolService;
 import io.cloudslang.runtime.impl.python.pool.ViburEmbeddedPythonPoolServiceImpl;
+import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.vibur.objectpool.util.ConcurrentLinkedQueueCollection;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PostConstruct;
+
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
