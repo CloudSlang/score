@@ -91,7 +91,7 @@ public class EmbeddedPythonExecutorWrapper {
         Writer outputWriter = new BoundedStringWriter(outputStreamLengthExceededSupplier);
         Writer errorWriter = new BoundedStringWriter(errorStreamLengthExceededSupplier);
         try {
-            pythonInterpreter.setOut(outputWriter);
+            pythonInterpreter.setOut(System.out);
             pythonInterpreter.setErr(errorWriter);
             pythonInterpreter.setIn(new NullInputStream(0));
             prepareInterpreterContext(callArguments);
