@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.cloudslang.orchestrator.entities;
 
 import org.apache.commons.lang.Validate;
@@ -24,8 +25,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public record BranchContexts(boolean isBranchCancelled, Map<String, Serializable> contexts,
-                             Map<String, Serializable> systemContext) implements Serializable {
+public class BranchContexts implements Serializable {
+    private boolean isBranchCancelled;
+    private final Map<String, Serializable> contexts;
+    private final Map<String, Serializable> systemContext;
+
     public BranchContexts(boolean isBranchCancelled, Map<String, Serializable> contexts, Map<String, Serializable> systemContext) {
         Validate.notNull(contexts);
         Validate.notNull(systemContext);
@@ -35,20 +39,28 @@ public record BranchContexts(boolean isBranchCancelled, Map<String, Serializable
         this.systemContext = new HashMap<>(systemContext);
     }
 
-    @Override
-    public Map<String, Serializable> contexts() {
+    public boolean isBranchCancelled() {
+        return isBranchCancelled;
+    }
+
+    public void setBranchCancelled(boolean branchCancelled) {
+        isBranchCancelled = branchCancelled;
+    }
+
+    public Map<String, Serializable> getContexts() {
         return Collections.unmodifiableMap(contexts);
     }
 
-    @Override
-    public Map<String, Serializable> systemContext() {
+    public Map<String, Serializable> getSystemContext() {
         return Collections.unmodifiableMap(systemContext);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof BranchContexts that)) return false;
+        if (!(o instanceof BranchContexts)) return false;
+
+        BranchContexts that = (BranchContexts) o;
 
         return new EqualsBuilder()
                 .append(this.contexts, that.contexts)
