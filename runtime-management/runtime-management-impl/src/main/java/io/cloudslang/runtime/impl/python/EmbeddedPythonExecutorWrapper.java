@@ -97,7 +97,7 @@ public class EmbeddedPythonExecutorWrapper {
         validateInterpreter();
         Writer errorWriter = new BoundedStringWriter(errorStreamLengthExceededSupplier);
         try {
-            pythonInterpreter.setOut((Writer) SELECTED_SUPPLIER);
+            pythonInterpreter.setOut(SELECTED_SUPPLIER.get());
             pythonInterpreter.setErr(errorWriter);
             pythonInterpreter.setIn(new NullInputStream(0));
             prepareInterpreterContext(callArguments);
@@ -116,7 +116,7 @@ public class EmbeddedPythonExecutorWrapper {
             }
             throw new RuntimeException("Error executing python script: " + originalExc, originalExc);
         } finally {
-            String standardStreamOutput = SELECTED_SUPPLIER.toString();
+            String standardStreamOutput = SELECTED_SUPPLIER.get().toString();
             if (isNotEmpty(standardStreamOutput)) {
                 logger.info("Script output: " + standardStreamOutput);
             }
