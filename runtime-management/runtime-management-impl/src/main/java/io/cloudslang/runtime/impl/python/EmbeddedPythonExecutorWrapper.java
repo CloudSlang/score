@@ -36,6 +36,8 @@ import org.python.core.PySystemState;
 import org.python.core.PyType;
 import org.python.util.PythonInterpreter;
 
+import java.io.BufferedWriter;
+import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.Writer;
 import java.util.Collections;
@@ -46,6 +48,9 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.parseBoolean;
+import static java.lang.System.getProperty;
 import static org.apache.commons.io.output.NullOutputStream.NULL_OUTPUT_STREAM;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -59,6 +64,8 @@ public class EmbeddedPythonExecutorWrapper {
             () -> new IllegalStateException("Cannot exceed threshold for python standard error stream.");
     private static final String noModuleNamedIssue = "No module named";
 
+    private static final Supplier<Writer> SELECTED_SUPPLIER = parseBoolean(getProperty("embeddedPythonExecutor.output.useSystemConsole", FALSE.toString())) ? () -> new BufferedWriter(new PrintWriter(System.out))
+            : () -> new BoundedStringWriter(outputStreamLengthExceededSupplier);
     private final PythonInterpreter pythonInterpreter;
     private final AtomicBoolean closed;
 
@@ -88,10 +95,9 @@ public class EmbeddedPythonExecutorWrapper {
      */
     public PythonExecutionResult exec(String script, Map<String, Serializable> callArguments) {
         validateInterpreter();
-        Writer outputWriter = new BoundedStringWriter(outputStreamLengthExceededSupplier);
         Writer errorWriter = new BoundedStringWriter(errorStreamLengthExceededSupplier);
         try {
-            pythonInterpreter.setOut(System.out);
+            pythonInterpreter.setOut((Writer) SELECTED_SUPPLIER);
             pythonInterpreter.setErr(errorWriter);
             pythonInterpreter.setIn(new NullInputStream(0));
             prepareInterpreterContext(callArguments);
@@ -110,7 +116,7 @@ public class EmbeddedPythonExecutorWrapper {
             }
             throw new RuntimeException("Error executing python script: " + originalExc, originalExc);
         } finally {
-            String standardStreamOutput = outputWriter.toString();
+            String standardStreamOutput = SELECTED_SUPPLIER.toString();
             if (isNotEmpty(standardStreamOutput)) {
                 logger.info("Script output: " + standardStreamOutput);
             }
@@ -280,7 +286,7 @@ public class EmbeddedPythonExecutorWrapper {
     private Serializable doEval(String prepareEnvironmentScript, String script) {
         // Set boolean values
         pythonInterpreter.set("true", Boolean.TRUE);
-        pythonInterpreter.set("false", Boolean.FALSE);
+        pythonInterpreter.set("false", FALSE);
         // Prepare environment if required
         if (isNotEmpty(prepareEnvironmentScript)) {
             pythonInterpreter.exec(prepareEnvironmentScript);
