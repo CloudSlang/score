@@ -66,7 +66,7 @@
         <postgres.driver.version>42.4.1</postgres.driver.version>
         <spring.version>6.0.3</spring.version>
         <hibernate.version>6.2.5.Final</hibernate.version>
-        <querydsl.version>4.2.1</querydsl.version>
+        <querydsl.version>5.0.0</querydsl.version>
         <!--Project properties-->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
@@ -317,17 +317,13 @@
                 <groupId>com.querydsl</groupId>
                 <artifactId>querydsl-apt</artifactId>
                 <version>${querydsl.version}</version>
+                <classifier>jakarta</classifier>
                 <scope>provided</scope>
             </dependency>
+
             <dependency>
                 <groupId>com.querydsl</groupId>
                 <artifactId>querydsl-jpa</artifactId>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.hibernate.javax.persistence</groupId>
-                        <artifactId>hibernate-jpa-2.1-api</artifactId>
-                    </exclusion>
-                </exclusions>
                 <version>${querydsl.version}</version>
             </dependency>
             <!-- end of querydsl artifacts -->

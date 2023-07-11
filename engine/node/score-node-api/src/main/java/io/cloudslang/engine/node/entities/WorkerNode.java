@@ -16,6 +16,7 @@
 
 package io.cloudslang.engine.node.entities;
 
+import io.cloudslang.score.api.WorkerStatusTypeDescriptor;
 import io.cloudslang.score.api.nodes.WorkerStatus;
 import io.cloudslang.engine.data.AbstractIdentifiable;
 import io.cloudslang.score.facade.TempConstants;
@@ -32,6 +33,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.Type;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -52,6 +55,7 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
     @Column(name = "UUID", nullable = false, unique = true, length = 48)
     private String uuid;
 
+    @Type(value = WorkerStatusTypeDescriptor.class)
     @Column(name = "STATUS", nullable = false, length = 20)
     private WorkerStatus status;
 
