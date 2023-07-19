@@ -325,6 +325,7 @@
                 <groupId>com.querydsl</groupId>
                 <artifactId>querydsl-jpa</artifactId>
                 <version>${querydsl.version}</version>
+                <classifier>jakarta</classifier>
             </dependency>
             <!-- end of querydsl artifacts -->
             <dependency>
