@@ -63,7 +63,7 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
     @Override
     public PythonEvaluationResult eval(String prepareEnvironmentScript, String script, Map<String, Serializable> vars) {
         try {
-            return getPythonEvaluationResult(script, prepareEnvironmentScript, vars);
+            return getPythonEvaluationResult(script, vars);
         } catch (IllegalArgumentException e) {
             logger.error(e);
             throw new ExternalPythonScriptException("Execution not possible due to configration");
@@ -86,10 +86,9 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
     }
 
 
-    private PythonEvaluationResult getPythonEvaluationResult(String expression, String prepareEnvironmentScript,
-                                                             Map<String, Serializable> context) throws JsonProcessingException {
+    private PythonEvaluationResult getPythonEvaluationResult(String expression, Map<String, Serializable> context) throws JsonProcessingException {
         String accessedResources = "accessed_resources_set";
-        String payload = generatePayloadForEval(expression, prepareEnvironmentScript, context);
+        String payload = generatePayloadForEval(expression, context);
         EvaluationResults scriptResults = executeRequestOnPythonServer("POST", payload);
 
         String exception = scriptResults.getException();
@@ -115,11 +114,9 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
         return response != null && response.getLeft() != null && response.getLeft() == 200;
     }
 
-    private String generatePayloadForEval(String expression, String prepareEnvironmentScript,
-                                          Map<String, Serializable> context) throws JsonProcessingException {
-        HashMap<String, Serializable> payload = new HashMap<>(3);
+    private String generatePayloadForEval(String expression, Map<String, Serializable> context) throws JsonProcessingException {
+        HashMap<String, Serializable> payload = new HashMap<>(2);
         payload.put("expression", expression);
-        payload.put("envSetup", prepareEnvironmentScript);
         payload.put("context", (Serializable) context);
         return objectMapper.writeValueAsString(payload);
     }
