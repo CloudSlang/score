@@ -459,7 +459,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
                 return false;
             }
 
-            int appDirEndIndex = command.indexOf(" --no-access-log", appDirStartIndex + appDirPrefix.length());
+            int appDirEndIndex = command.indexOf(" --", appDirStartIndex + appDirPrefix.length());
             String appDirValue = separatorsToUnix(command.substring(appDirStartIndex + appDirPrefix.length(), appDirEndIndex));
             appDirValue = removeEnd(removeStart(appDirValue, "\""), "\"");
             String sourceLocation = separatorsToUnix(pythonExecutorConfigurationDataService.getPythonExecutorConfiguration().getSourceLocation());
