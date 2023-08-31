@@ -227,6 +227,18 @@
                 <artifactId>jakarta.el</artifactId>
                 <version>3.0.4</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.jprocesses</groupId>
+                <artifactId>jProcesses</artifactId>
+                <version>1.6.5</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.profesorfalken</groupId>
+                <artifactId>jPowerShell</artifactId>
+                <version>3.1.1</version>
+            </dependency>
             <!-- spring artifacts -->
             <dependency>
                 <groupId>org.springframework</groupId>

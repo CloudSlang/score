@@ -21,20 +21,26 @@ import io.cloudslang.runtime.api.python.executor.services.PythonExecutorConfigur
 import io.cloudslang.runtime.api.python.executor.services.PythonExecutorLifecycleManagerService;
 import io.cloudslang.runtime.api.python.executor.entities.PythonExecutorDetails;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jutils.jprocesses.JProcesses;
+import org.jutils.jprocesses.info.ProcessesFactory;
+import org.jutils.jprocesses.info.ProcessesService;
+import org.jutils.jprocesses.model.ProcessInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -49,14 +55,15 @@ import static java.io.File.separator;
 import static java.lang.Integer.getInteger;
 import static java.lang.Long.getLong;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.apache.commons.lang.StringUtils.containsIgnoreCase;
+import static org.apache.commons.io.FilenameUtils.separatorsToUnix;
+import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
+import static org.apache.commons.lang3.StringUtils.startsWith;
 
 @Service("pythonExecutorLifecycleManagerService")
 public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutorLifecycleManagerService {
 
     private static final Logger logger = LogManager.getLogger(PythonExecutorLifecycleManagerServiceImpl.class);
     private static final boolean IS_PYTHON_EXECUTOR_EVAL = getPythonStrategy(System.getProperty("python.expressionsEval"), PYTHON_EXECUTOR) == PYTHON_EXECUTOR;
-    private static final String EXTERNAL_PYTHON_EXECUTOR_STOP_PATH = "/rest/v1/stop";
     private static final String EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH = "/rest/v1/health";
     private static final int START_STOP_RETRIES_COUNT = getInteger("python.executor.startStopRetriesCount", 20);
     private static final long PYTHON_EXECUTOR_INITIAL_DELAY = 30_000L;
@@ -69,6 +76,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     private final AtomicReference<Process> pythonExecutorProcess;
     private final PythonExecutorCommunicationService pythonExecutorCommunicationService;
     private final PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService;
+    private final AtomicReference<PythonExecutorProcessManager> pythonExecutorProcessManager;
 
 
     @Autowired
@@ -79,6 +87,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         this.pythonExecutorRunning = new AtomicBoolean(false);
         this.pythonExecutorProcess = new AtomicReference<>(null);
         this.currentKeepAliveRetriesCount = new AtomicInteger(0);
+        this.pythonExecutorProcessManager = new AtomicReference<>(new PythonExecutorProcessManager());
     }
 
     @PostConstruct
@@ -86,6 +95,8 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         if (IS_PYTHON_EXECUTOR_EVAL) {
             boolean shouldCreateKeepAlive = false;
             try {
+                // on startUp find if there is any leftover process alive
+                pythonExecutorProcessManager.get().fillPythonExecutorPIDs();
                 shouldCreateKeepAlive = doStartPythonExecutor();
             } finally {
                 if (shouldCreateKeepAlive) {
@@ -110,6 +121,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
 
     @Override
     public void stop() {
+        stopKeepAliveJob();
         doStopPythonExecutor();
     }
 
@@ -145,19 +157,8 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
             return;
         }
 
-        try {
-            if (pythonExecutorCommunicationService.performLifecycleRequest(
-                    EXTERNAL_PYTHON_EXECUTOR_STOP_PATH, "POST", null).getLeft() == 200) {
-                waitToStop();
-            }
-        } catch (IllegalArgumentException e) {
-            logger.error(e);
-        } catch (Exception processingEx) {
-            // Might not get a response if server gets shutdown immediately
-            if (containsIgnoreCase(processingEx.getMessage(), "RESTEASY004655: Unable to invoke request")) {
-                waitToStop();
-            }
-        }
+        pythonExecutorProcessManager.get().stopPythonExecutorProcesses();
+        waitToStop();
     }
 
     private synchronized boolean doStartPythonExecutor() {
@@ -212,11 +213,6 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         try {
             logger.info("Starting Python Executor on port: " + pythonExecutorConfiguration.getPort());
             pythonExecutorProcess.set(pb.start());
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(pythonExecutorProcess.get().getOutputStream()));
-
-            writer.write(pythonExecutorConfiguration.getEncodedSecretKeyPath());
-            writer.flush();
-            writer.close();
             return true;
         } catch (IOException ioException) {
             logger.error("Failed to start Python Executor", ioException);
@@ -231,9 +227,10 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
 
         for (int tries = 0; tries < START_STOP_RETRIES_COUNT; tries++) {
             if (getPythonExecutorStatus() == PythonExecutorStatus.UP) {
-                logger.info("Python Executor was successfully started");
                 pythonExecutorRunning.set(true);
                 currentKeepAliveRetriesCount.set(0);
+                pythonExecutorProcessManager.get().fillPythonExecutorPIDs();
+                logger.info("Python Executor was successfully started");
                 return;
             }
             try {
@@ -251,7 +248,8 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         logger.info("Waiting to stop");
 
         for (int tries = 0; tries < START_STOP_RETRIES_COUNT; tries++) {
-            if (getPythonExecutorStatus() != PythonExecutorStatus.UP) {
+            if (getPythonExecutorStatus() != PythonExecutorStatus.UP &&
+                    pythonExecutorProcessManager.get().stopPythonExecutorProcesses()) {
                 logger.info("Python Executor was successfully stopped");
                 pythonExecutorRunning.set(false);
                 destroyPythonExecutorProcess();
@@ -284,6 +282,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     }
 
     private void destroyPythonExecutorProcess() {
+        pythonExecutorProcessManager.get().stopPythonExecutorProcesses();
         if (pythonExecutorProcess.get() != null) {
             pythonExecutorProcess.get().destroy();
             pythonExecutorProcess.set(null);
@@ -347,4 +346,103 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     }
 
     enum PythonExecutorStatus { UP, DOWN, BLOCKED }
+
+    private class PythonExecutorProcessManager {
+        final ProcessesService processService;
+        Integer pythonExecutorParentPID;
+        Set<Integer> pythonExecutorChildPIDs;
+
+        PythonExecutorProcessManager() {
+            this.processService = ProcessesFactory.getService();
+            this.pythonExecutorParentPID = null;
+            this.pythonExecutorChildPIDs = new HashSet<>();
+        }
+
+        void fillPythonExecutorPIDs() {
+            List<ProcessInfo> processInfoList = this.processService.getList("python", true);
+
+            findParentPID(processInfoList);
+            findChildPIDs(processInfoList);
+        }
+
+        synchronized boolean stopPythonExecutorProcesses() {
+            if (this.pythonExecutorParentPID == null) {
+                if (this.pythonExecutorChildPIDs.isEmpty()) {
+                    return true;
+                }
+            } else {
+                if (!JProcesses.killProcessGracefully(this.pythonExecutorParentPID).isSuccess()) {
+                    if (JProcesses.killProcess(this.pythonExecutorParentPID).isSuccess()) {
+                        this.pythonExecutorParentPID = null;
+                    }
+                }
+            }
+
+            if (this.pythonExecutorChildPIDs.isEmpty()) {
+                return true;
+            }
+
+            Set<Integer> removedPythonExecutorPIDs = new HashSet<>(this.pythonExecutorChildPIDs.size());
+            for (Integer pythonExecutorPID : this.pythonExecutorChildPIDs) {
+                if (!JProcesses.killProcessGracefully(pythonExecutorPID).isSuccess()) {
+                    if (JProcesses.killProcess(pythonExecutorPID).isSuccess()) {
+                        removedPythonExecutorPIDs.add(pythonExecutorPID);
+                    }
+                }
+            }
+            this.pythonExecutorChildPIDs.removeAll(removedPythonExecutorPIDs);
+
+            return this.pythonExecutorChildPIDs.isEmpty();
+        }
+
+        void findParentPID(List<ProcessInfo> processInfoList) {
+            for (ProcessInfo processInfo : processInfoList) {
+                if (computeParentProcess(processInfo.getCommand())) {
+                    this.pythonExecutorParentPID = Integer.valueOf(processInfo.getPid());
+                    return;
+                }
+            }
+        }
+
+        void findChildPIDs(List<ProcessInfo> processInfoList) {
+            if (this.pythonExecutorParentPID == null) {
+                return;
+            }
+
+            for (ProcessInfo processInfo : processInfoList) {
+                if (computeChildProcess(processInfo.getCommand())) {
+                    this.pythonExecutorChildPIDs.add(Integer.valueOf(processInfo.getPid()));
+                }
+            }
+        }
+
+        boolean computeParentProcess(String command) {
+            String appDirPrefix = "--app-dir=\"";
+            int appDirStartIndex = command.indexOf(appDirPrefix);
+
+            if (appDirStartIndex == -1) {
+                return false;
+            }
+
+            int appDirEndIndex = command.indexOf("\"", appDirStartIndex + appDirPrefix.length());
+            String appDirValue = separatorsToUnix(command.substring(appDirStartIndex + appDirPrefix.length(), appDirEndIndex));
+            String sourceLocation = separatorsToUnix(pythonExecutorConfigurationDataService.getPythonExecutorConfiguration().getSourceLocation());
+
+            return startsWith(appDirValue, sourceLocation);
+        }
+
+        boolean computeChildProcess(String command) {
+            String parentPIDPrefix = "parent_pid=";
+            int parentPIDStartIndex = command.indexOf(parentPIDPrefix);
+
+            if (parentPIDStartIndex == -1) {
+                return false;
+            }
+
+            int parentPIDEndIndex = command.indexOf(",", parentPIDStartIndex + parentPIDPrefix.length());
+            String parentPIDValue = command.substring(parentPIDStartIndex + parentPIDPrefix.length(), parentPIDEndIndex);
+            
+            return StringUtils.equals(parentPIDValue, this.pythonExecutorParentPID.toString());
+        }
+    }
 }
