@@ -375,11 +375,15 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
             if (isWindows()) {
                 List<ProcessInfo> processInfoList = this.processService.getList("python", true);
                 findParentPID(processInfoList);
-                findChildPIDs(processInfoList);
+                if (this.pythonExecutorParentPID != null) {
+                    findChildPIDs(processInfoList);
+                }
             } else {
                 List<ProcessInfo> processInfoList = this.processService.getList("python3");
                 findParentPID(processInfoList);
-                findChildPIDsUnix();
+                if (this.pythonExecutorParentPID != null) {
+                    findChildPIDsUnix();
+                }
             }
         }
 
