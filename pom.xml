@@ -232,6 +232,12 @@
                 <groupId>org.jprocesses</groupId>
                 <artifactId>jProcesses</artifactId>
                 <version>1.6.5</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.profesorfalken</groupId>
+                        <artifactId>jPowerShell</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>

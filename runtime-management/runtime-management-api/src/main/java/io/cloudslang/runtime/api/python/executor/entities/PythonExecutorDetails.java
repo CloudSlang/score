@@ -22,6 +22,7 @@ public class PythonExecutorDetails {
     private final String runtimeEncodedAuth;
     private final String lifecycleEncodedAuth;
     private final String sourceLocation;
+    private final String workers;
 
     public PythonExecutorDetails() {
         this.port = null;
@@ -29,14 +30,16 @@ public class PythonExecutorDetails {
         this.runtimeEncodedAuth = null;
         this.lifecycleEncodedAuth = null;
         this.sourceLocation = null;
+        this.workers = null;
     }
 
-    public PythonExecutorDetails(String port, String url, String runtimeEncodedAuth, String lifecycleEncodedAuth, String sourceLocation) {
+    public PythonExecutorDetails(String port, String url, String runtimeEncodedAuth, String lifecycleEncodedAuth, String sourceLocation, String workers) {
         this.port = port;
         this.url = url;
         this.runtimeEncodedAuth = runtimeEncodedAuth;
         this.lifecycleEncodedAuth = lifecycleEncodedAuth;
         this.sourceLocation = sourceLocation;
+        this.workers = workers;
     }
 
     public String getPort() {
@@ -57,5 +60,9 @@ public class PythonExecutorDetails {
 
     public String getSourceLocation() {
         return sourceLocation;
+    }
+
+    public String getWorkers() {
+        return workers;
     }
 }
