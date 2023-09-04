@@ -160,7 +160,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         waitToStop();
     }
 
-    private boolean doStartPythonExecutor() {
+    private synchronized boolean doStartPythonExecutor() {
         if (!IS_PYTHON_EXECUTOR_EVAL) {
             return false;
         }
