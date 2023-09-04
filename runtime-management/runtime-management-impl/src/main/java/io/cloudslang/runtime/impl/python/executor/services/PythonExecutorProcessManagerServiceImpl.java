@@ -101,19 +101,22 @@ public class PythonExecutorProcessManagerServiceImpl implements PythonExecutorPr
         }
         List<String> pythonExecutorChildrenPID = pythonExecutorProcessDetails.getPythonExecutorChildrenPID();
         if (pythonExecutorChildrenPID == null) {
-            return stopPythonExecutorParentProcess(pythonExecutorParentPID);
+            return stopPythonExecutorParentProcess(pythonExecutorParentPID, pythonExecutorProcessDetails);
         }
-        return stopPythonExecutorParentProcess(pythonExecutorParentPID) &&
+        return stopPythonExecutorParentProcess(pythonExecutorParentPID, pythonExecutorProcessDetails) &&
                 stopPythonExecutorChildrenProcess(pythonExecutorChildrenPID, pythonExecutorProcessDetails);
     }
 
-    private boolean stopPythonExecutorParentProcess(String pythonExecutorParentPID) {
+    private boolean stopPythonExecutorParentProcess(String pythonExecutorParentPID, PythonExecutorProcessDetails pythonExecutorProcessDetails) {
         int pythonExecutorParentPIDValue = Integer.parseInt(pythonExecutorParentPID);
         JProcessesResponse killProcessGracefullyResponse = pythonExecutorProcessesService.killProcessGracefully(pythonExecutorParentPIDValue);
         if (!killProcessGracefullyResponse.isSuccess()) {
             JProcessesResponse killProcessResponse = pythonExecutorProcessesService.killProcess(pythonExecutorParentPIDValue);
-            return killProcessResponse.isSuccess();
+            if (!killProcessResponse.isSuccess()) {
+                return false;
+            }
         }
+        pythonExecutorProcessDetails.setPythonExecutorParentPID(null);
         return true;
     }
 
