@@ -61,12 +61,9 @@ public class PythonExecutorProcessManagerServiceImpl implements PythonExecutorPr
             logger.error("Invalid python configuration. Cannot start python process");
             return null;
         }
-        ProcessBuilder pb = new ProcessBuilder(
-                pythonExecutorConfiguration.getSourceLocation() +
-                        separator +
-                        "bin" +
-                        separator +
-                        startPythonExecutor,
+        String startPythonExecutorSourceLocation = pythonExecutorConfiguration.getSourceLocation() +
+                separator + "bin" + separator + startPythonExecutor;
+        ProcessBuilder pb = new ProcessBuilder(startPythonExecutorSourceLocation,
                 pythonExecutorConfiguration.getPort(),
                 pythonExecutorConfiguration.getWorkers());
         pb.directory(FileUtils.getFile(pythonExecutorConfiguration.getSourceLocation() + separator + "bin"));
