@@ -102,7 +102,7 @@ public class PythonExecutorProcessInspectorLinuxImpl implements PythonExecutorPr
         } else {
             appDirValue = command.substring(appDirStartIndex + appDirPrefix.length(), appDirEndIndex);
         }
-        Path appDirValueNormalizedParentPath = Paths.get(appDirValue).normalize().getParent();
+        Path appDirValueNormalizedParentPath = Paths.get(appDirValue).normalize();
         Path sourceLocationPath = Paths.get(pythonExecutorConfigurationDataService.getPythonExecutorConfiguration().getSourceLocation());
 
         return appDirValueNormalizedParentPath.equals(sourceLocationPath);
