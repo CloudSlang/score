@@ -46,7 +46,7 @@ public class PythonExecutorProcessInspectorWindowsImpl implements PythonExecutor
 
     @Override
     public List<ProcessInfo> getPythonProcessInfoList() {
-        return pythonExecutorProcessesService.getList("python.exe");
+        return pythonExecutorProcessesService.getList("python.exe", true);
     }
 
     @Override
@@ -94,7 +94,7 @@ public class PythonExecutorProcessInspectorWindowsImpl implements PythonExecutor
 
         int appDirEndIndex = command.indexOf("\"", appDirStartIndex + appDirPrefix.length());
         String appDirValue = command.substring(appDirStartIndex + appDirPrefix.length(), appDirEndIndex);
-        Path appDirValueNormalizedParentPath = Paths.get(appDirValue).normalize().getParent();
+        Path appDirValueNormalizedParentPath = Paths.get(appDirValue).normalize();
         Path sourceLocationPath = Paths.get(pythonExecutorConfigurationDataService.getPythonExecutorConfiguration().getSourceLocation());
 
         return appDirValueNormalizedParentPath.equals(sourceLocationPath);
