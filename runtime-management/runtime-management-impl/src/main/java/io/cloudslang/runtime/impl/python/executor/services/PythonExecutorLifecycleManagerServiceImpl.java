@@ -120,11 +120,15 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         try {
             Pair<Integer, String> response = pythonExecutorCommunicationService.performNoAuthRequest(EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH, "GET", null);
             if (response.getLeft() == 200 && pythonExecutorProcess.get() == null) {
-                logger.warn("Python Executor port is already in use");
-                pythonExecutorRunning.set(false);
-                return PythonExecutorStatus.BLOCKED;
+                if (pythonExecutorProcess.get() == null) {
+                    logger.warn("Python Executor port is already in use");
+                    pythonExecutorRunning.set(false);
+                    return PythonExecutorStatus.BLOCKED;
+                }
+                currentKeepAliveRetriesCount.set(0);
+                return PythonExecutorStatus.UP;
             }
-            return response.getLeft() == 200 ? PythonExecutorStatus.UP : PythonExecutorStatus.DOWN;
+            return PythonExecutorStatus.DOWN;
         } catch (IllegalArgumentException e) {
             logger.error(e);
             return PythonExecutorStatus.DOWN;
