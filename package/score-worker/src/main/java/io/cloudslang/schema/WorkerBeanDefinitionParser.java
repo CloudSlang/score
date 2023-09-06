@@ -17,6 +17,10 @@
 package io.cloudslang.schema;
 
 import io.cloudslang.engine.node.services.StubQueueConfigurationDataServiceImpl;
+import io.cloudslang.runtime.impl.python.executor.services.PythonExecutorLifecycleManagerServiceImpl;
+import io.cloudslang.runtime.impl.python.executor.services.PythonExecutorProcessInspectorLinuxImpl;
+import io.cloudslang.runtime.impl.python.executor.services.PythonExecutorProcessInspectorWindowsImpl;
+import io.cloudslang.runtime.impl.python.executor.services.PythonExecutorProcessManagerServiceImpl;
 import io.cloudslang.runtime.impl.python.executor.services.stubs.StubPythonExecutorCommunicationServiceImpl;
 import io.cloudslang.runtime.impl.python.executor.services.stubs.StubPythonExecutorConfigurationDataServiceImpl;
 import io.cloudslang.runtime.impl.sequential.DefaultSequentialExecutionServiceImpl;
@@ -55,6 +59,7 @@ import io.cloudslang.worker.monitor.metrics.HeapUtilizationService;
 import io.cloudslang.worker.monitor.PerformanceMetricsCollector;
 import io.cloudslang.worker.monitor.service.WorkerMetricsServiceImpl;
 import io.cloudslang.worker.monitor.mbean.WorkerMetricsMBean;
+import org.apache.commons.lang3.SystemUtils;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
@@ -95,6 +100,10 @@ public class WorkerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		put(SynchronizationManagerImpl.class, null);
         put(WorkerConfigurationServiceImpl.class, "workerConfiguration");
         put(WorkerQueueDetailsContainer.class, "workerQueueDetailsContainer");
+		put(PythonExecutorLifecycleManagerServiceImpl.class, "pythonExecutorLifecycleManagerService");
+		put(PythonExecutorProcessManagerServiceImpl.class, "pythonExecutorProcessManagerService");
+		put(SystemUtils.IS_OS_WINDOWS ? PythonExecutorProcessInspectorWindowsImpl.class : PythonExecutorProcessInspectorLinuxImpl.class,
+						"pythonExecutorProcessInspector");
 
         //Monitors
         put(WorkerExecutionMonitorServiceImpl.class, "workerExecutionMonitorService");

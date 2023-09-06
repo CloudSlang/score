@@ -10,6 +10,7 @@
     <score:engine />
     <score:worker uuid="-1" />
 
+	<bean name="pythonExecutorLifecycleManagerService" class="io.cloudslang.runtime.impl.python.executor.services.stubs.StubPythonExecutorLifecycleManagerServiceImpl"/>
 	<bean name="pythonExecutorDetails" class="io.cloudslang.runtime.api.python.executor.entities.PythonExecutorDetails"/>
 	<bean name="pythonExecutorConfigurationDataService" class="io.cloudslang.runtime.impl.python.executor.services.stubs.StubPythonExecutorConfigurationDataServiceImpl">
 		<lookup-method name="getPythonExecutorConfiguration" bean="pythonExecutorDetails"/>
