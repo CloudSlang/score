@@ -146,7 +146,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     }
 
     private boolean isPythonExecutorStartedByAnotherProcess() {
-        return pythonExecutorProcess.get() == null || pythonExecutorProcessDetails.getPythonExecutorParentPid() == null;
+        return pythonExecutorProcess.get() == null && pythonExecutorProcessDetails.getPythonExecutorParentPid() == null;
     }
 
     private void doStopPythonExecutor() {
