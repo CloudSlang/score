@@ -17,14 +17,12 @@ package io.cloudslang.runtime.impl.python.executor.services;
 
 import io.cloudslang.runtime.api.python.executor.services.PythonExecutorConfigurationDataService;
 import io.cloudslang.runtime.api.python.executor.services.PythonExecutorProcessInspector;
-import io.cloudslang.runtime.api.python.executor.conditions.OnLinuxCondition;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jutils.jprocesses.info.ProcessesFactory;
 import org.jutils.jprocesses.info.ProcessesService;
 import org.jutils.jprocesses.model.ProcessInfo;
 import org.jutils.jprocesses.util.ProcessesUtils;
-import org.springframework.context.annotation.Conditional;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -34,12 +32,12 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-@Conditional(OnLinuxCondition.class)
-@Component("pythonExecutorProcessInspector")
 public class PythonExecutorProcessInspectorLinuxImpl implements PythonExecutorProcessInspector {
     private final PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService;
     private final ProcessesService pythonExecutorProcessesService;
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Autowired
     public PythonExecutorProcessInspectorLinuxImpl(PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService) {
         this.pythonExecutorConfigurationDataService = pythonExecutorConfigurationDataService;
         this.pythonExecutorProcessesService = ProcessesFactory.getService();
@@ -51,19 +49,19 @@ public class PythonExecutorProcessInspectorLinuxImpl implements PythonExecutorPr
     }
 
     @Override
-    public Pair<String, List<String>> findPythonExecutorProcessesPID(List<ProcessInfo> processInfoList) {
-        String pythonExecutorParentPID = findPythonExecutorParentPID(processInfoList);
+    public Pair<String, List<String>> findPythonExecutorProcessesPid(List<ProcessInfo> processInfoList) {
+        String pythonExecutorParentPid = findPythonExecutorParentPid(processInfoList);
 
-        if (pythonExecutorParentPID == null) {
+        if (pythonExecutorParentPid == null) {
             return Pair.of(null, null);
         }
 
-        List<String> pythonExecutorChildrenPID = findPythonExecutorChildrenPID(pythonExecutorParentPID);
+        List<String> pythonExecutorChildrenPid = findPythonExecutorChildrenPid(pythonExecutorParentPid);
 
-        return Pair.of(pythonExecutorParentPID, pythonExecutorChildrenPID);
+        return Pair.of(pythonExecutorParentPid, pythonExecutorChildrenPid);
     }
 
-    private String findPythonExecutorParentPID(List<ProcessInfo> processInfoList) {
+    private String findPythonExecutorParentPid(List<ProcessInfo> processInfoList) {
         for (ProcessInfo processInfo : processInfoList) {
             if (isParentProcess(processInfo.getCommand())) {
                 return processInfo.getPid();
@@ -73,18 +71,15 @@ public class PythonExecutorProcessInspectorLinuxImpl implements PythonExecutorPr
         return null;
     }
 
-    private List<String> findPythonExecutorChildrenPID(String pythonExecutorParentPID) {
-        List<String> pythonExecutorChildrenPID = new ArrayList<>();
-        String commandOutput = ProcessesUtils.executeCommand("pgrep", "-P", pythonExecutorParentPID);
-
+    private List<String> findPythonExecutorChildrenPid(String pythonExecutorParentPid) {
+        String commandOutput = ProcessesUtils.executeCommand("pgrep", "-P", pythonExecutorParentPid);
         if (isEmpty(commandOutput)) {
-            return pythonExecutorChildrenPID;
+            return null;
         }
 
         String[] commandOutputLines = commandOutput.split("\\r?\\n");
-        pythonExecutorChildrenPID.addAll(Arrays.asList(commandOutputLines));
 
-        return pythonExecutorChildrenPID;
+        return new ArrayList<>(Arrays.asList(commandOutputLines));
     }
 
     private boolean isParentProcess(String command) {
@@ -102,9 +97,9 @@ public class PythonExecutorProcessInspectorLinuxImpl implements PythonExecutorPr
         } else {
             appDirValue = command.substring(appDirStartIndex + appDirPrefix.length(), appDirEndIndex);
         }
-        Path appDirValueNormalizedParentPath = Paths.get(appDirValue).normalize();
+        Path appDirValueNormalizedPath = Paths.get(appDirValue).normalize();
         Path sourceLocationPath = Paths.get(pythonExecutorConfigurationDataService.getPythonExecutorConfiguration().getSourceLocation());
 
-        return appDirValueNormalizedParentPath.equals(sourceLocationPath);
+        return appDirValueNormalizedPath.equals(sourceLocationPath);
     }
 }

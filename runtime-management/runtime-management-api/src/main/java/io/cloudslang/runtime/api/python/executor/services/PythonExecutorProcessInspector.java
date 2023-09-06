@@ -22,5 +22,5 @@ import java.util.List;
 
 public interface PythonExecutorProcessInspector {
     List<ProcessInfo> getPythonProcessInfoList();
-    Pair<String, List<String>> findPythonExecutorProcessesPID(List<ProcessInfo> processInfoList);
+    Pair<String, List<String>> findPythonExecutorProcessesPid(List<ProcessInfo> processInfoList);
 }

@@ -47,7 +47,6 @@ import static java.lang.Long.getLong;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 
-@Service("pythonExecutorLifecycleManagerService")
 public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutorLifecycleManagerService {
 
     private static final Logger logger = LogManager.getLogger(PythonExecutorLifecycleManagerServiceImpl.class);
@@ -59,15 +58,18 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     private static final long PYTHON_EXECUTOR_KEEP_ALIVE_INTERVAL = getLong("python.executor.keepAliveDelayMillis", 30_000L);
     private static final int PYTHON_EXECUTOR_KEEP_ALIVE_RETRIES_COUNT = getInteger("python.executor.keepAliveRetriesCount", 50);
 
-    private final AtomicInteger currentKeepAliveRetriesCount;
-    private final AtomicBoolean pythonExecutorRunning;
-    private final PythonExecutorProcessDetails pythonExecutorProcessDetails;
-    private ScheduledThreadPoolExecutor scheduledExecutor;
-    private final AtomicReference<Process> pythonExecutorProcess;
     private final PythonExecutorCommunicationService pythonExecutorCommunicationService;
     private final PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService;
     private final PythonExecutorProcessManagerService pythonExecutorProcessManagerService;
+    private ScheduledThreadPoolExecutor scheduledExecutor;
 
+    // This state is intentional
+    private final AtomicInteger currentKeepAliveRetriesCount;
+    private final AtomicBoolean pythonExecutorRunning;
+    private final PythonExecutorProcessDetails pythonExecutorProcessDetails;
+    private final AtomicReference<Process> pythonExecutorProcess;
+
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     public PythonExecutorLifecycleManagerServiceImpl(PythonExecutorCommunicationService pythonExecutorCommunicationService,
                                                      PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService,
@@ -75,10 +77,10 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         this.pythonExecutorCommunicationService = pythonExecutorCommunicationService;
         this.pythonExecutorConfigurationDataService = pythonExecutorConfigurationDataService;
         this.pythonExecutorProcessManagerService = pythonExecutorProcessManagerService;
-        this.pythonExecutorRunning = new AtomicBoolean(false);
-        this.pythonExecutorProcess = new AtomicReference<>(null);
         this.currentKeepAliveRetriesCount = new AtomicInteger(0);
+        this.pythonExecutorRunning = new AtomicBoolean(false);
         this.pythonExecutorProcessDetails = new PythonExecutorProcessDetails();
+        this.pythonExecutorProcess = new AtomicReference<>(null);
     }
 
     @PostConstruct
@@ -119,7 +121,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     private PythonExecutorStatus getPythonExecutorStatus() {
         try {
             Pair<Integer, String> response = pythonExecutorCommunicationService.performNoAuthRequest(EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH, "GET", null);
-            if (response.getLeft() == 200 && pythonExecutorProcess.get() == null) {
+            if (response.getLeft() == 200) {
                 if (pythonExecutorProcess.get() == null) {
                     logger.warn("Python Executor port is already in use");
                     pythonExecutorRunning.set(false);
@@ -128,9 +130,11 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
                 currentKeepAliveRetriesCount.set(0);
                 return PythonExecutorStatus.UP;
             }
+            pythonExecutorRunning.set(false);
             return PythonExecutorStatus.DOWN;
         } catch (IllegalArgumentException e) {
             logger.error(e);
+            pythonExecutorRunning.set(false);
             return PythonExecutorStatus.DOWN;
         } catch (Exception e) {
             pythonExecutorRunning.set(false);
@@ -148,8 +152,8 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         }
         logger.info("A request to stop the Python Executor was sent");
         if (getPythonExecutorStatus() != PythonExecutorStatus.UP || !pythonExecutorRunning.get()
-                && (pythonExecutorProcessDetails.getPythonExecutorParentPID() == null
-                && pythonExecutorProcessDetails.getPythonExecutorChildrenPID() == null)) {
+                && (pythonExecutorProcessDetails.getPythonExecutorParentPid() == null
+                && pythonExecutorProcessDetails.getPythonExecutorChildrenPid() == null)) {
             logger.info("Python Executor was already stopped");
             return;
         }

@@ -30,7 +30,6 @@ import org.jutils.jprocesses.info.ProcessesService;
 import org.jutils.jprocesses.model.JProcessesResponse;
 import org.jutils.jprocesses.model.ProcessInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,13 +37,13 @@ import java.util.List;
 
 import static java.io.File.separator;
 
-@Service("pythonExecutorProcessManagerService")
 public class PythonExecutorProcessManagerServiceImpl implements PythonExecutorProcessManagerService {
     private static final Logger logger = LogManager.getLogger(PythonExecutorProcessManagerServiceImpl.class);
     private final PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService;
     private final PythonExecutorProcessInspector pythonExecutorProcessInspector;
     private final ProcessesService pythonExecutorProcessesService;
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     public PythonExecutorProcessManagerServiceImpl(PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService,
                                                    PythonExecutorProcessInspector pythonExecutorProcessInspector) {
@@ -81,59 +80,63 @@ public class PythonExecutorProcessManagerServiceImpl implements PythonExecutorPr
     @Override
     public synchronized void updatePythonExecutorProcessDetails(PythonExecutorProcessDetails pythonExecutorProcessDetails) {
         List<ProcessInfo> pythonProcessInfoList = pythonExecutorProcessInspector.getPythonProcessInfoList();
-        Pair<String, List<String>> pythonExecutorProcessesPID = pythonExecutorProcessInspector.findPythonExecutorProcessesPID(pythonProcessInfoList);
-        pythonExecutorProcessDetails.setPythonExecutorParentPID(pythonExecutorProcessesPID.getLeft());
-        pythonExecutorProcessDetails.setPythonExecutorChildrenPID(pythonExecutorProcessesPID.getRight());
+        Pair<String, List<String>> pythonExecutorProcessesPid = pythonExecutorProcessInspector.findPythonExecutorProcessesPid(pythonProcessInfoList);
+        pythonExecutorProcessDetails.setPythonExecutorParentPid(pythonExecutorProcessesPid.getLeft());
+        pythonExecutorProcessDetails.setPythonExecutorChildrenPid(pythonExecutorProcessesPid.getRight());
+        logger.info(pythonExecutorProcessDetails.getPythonExecutorParentPid());
+        logger.info(pythonExecutorProcessDetails.getPythonExecutorChildrenPid());
     }
 
     @Override
     public synchronized boolean stopPythonExecutorProcess(PythonExecutorProcessDetails pythonExecutorProcessDetails) {
-        String pythonExecutorParentPID = pythonExecutorProcessDetails.getPythonExecutorParentPID();
-        if (pythonExecutorParentPID == null) {
-            List<String> pythonExecutorChildrenPID = pythonExecutorProcessDetails.getPythonExecutorChildrenPID();
-            if (pythonExecutorChildrenPID == null) {
+        String pythonExecutorParentPid = pythonExecutorProcessDetails.getPythonExecutorParentPid();
+        if (pythonExecutorParentPid == null) {
+            List<String> pythonExecutorChildrenPid = pythonExecutorProcessDetails.getPythonExecutorChildrenPid();
+            if (pythonExecutorChildrenPid == null) {
                 return true;
             }
-            return stopPythonExecutorChildrenProcess(pythonExecutorChildrenPID, pythonExecutorProcessDetails);
+            return doStopPythonExecutorChildrenProcess(pythonExecutorChildrenPid, pythonExecutorProcessDetails);
         }
-        List<String> pythonExecutorChildrenPID = pythonExecutorProcessDetails.getPythonExecutorChildrenPID();
-        if (pythonExecutorChildrenPID == null) {
-            return stopPythonExecutorParentProcess(pythonExecutorParentPID, pythonExecutorProcessDetails);
+        List<String> pythonExecutorChildrenPid = pythonExecutorProcessDetails.getPythonExecutorChildrenPid();
+        if (pythonExecutorChildrenPid == null) {
+            return doStopPythonExecutorParentProcess(pythonExecutorParentPid, pythonExecutorProcessDetails);
         }
-        return stopPythonExecutorParentProcess(pythonExecutorParentPID, pythonExecutorProcessDetails) &&
-                stopPythonExecutorChildrenProcess(pythonExecutorChildrenPID, pythonExecutorProcessDetails);
+        if (doStopPythonExecutorChildrenProcess(pythonExecutorChildrenPid, pythonExecutorProcessDetails)) {
+            return doStopPythonExecutorParentProcess(pythonExecutorParentPid, pythonExecutorProcessDetails);
+        }
+        return false;
     }
 
-    private boolean stopPythonExecutorParentProcess(String pythonExecutorParentPID, PythonExecutorProcessDetails pythonExecutorProcessDetails) {
-        int pythonExecutorParentPIDValue = Integer.parseInt(pythonExecutorParentPID);
-        JProcessesResponse killProcessGracefullyResponse = pythonExecutorProcessesService.killProcessGracefully(pythonExecutorParentPIDValue);
+    private boolean doStopPythonExecutorParentProcess(String pythonExecutorParentPid, PythonExecutorProcessDetails pythonExecutorProcessDetails) {
+        int pythonExecutorParentPidValue = Integer.parseInt(pythonExecutorParentPid);
+        JProcessesResponse killProcessGracefullyResponse = pythonExecutorProcessesService.killProcessGracefully(pythonExecutorParentPidValue);
         if (!killProcessGracefullyResponse.isSuccess()) {
-            JProcessesResponse killProcessResponse = pythonExecutorProcessesService.killProcess(pythonExecutorParentPIDValue);
+            JProcessesResponse killProcessResponse = pythonExecutorProcessesService.killProcess(pythonExecutorParentPidValue);
             if (!killProcessResponse.isSuccess()) {
                 return false;
             }
         }
-        pythonExecutorProcessDetails.setPythonExecutorParentPID(null);
+        pythonExecutorProcessDetails.setPythonExecutorParentPid(null);
         return true;
     }
 
-    private boolean stopPythonExecutorChildrenProcess(List<String> pythonExecutorChildrenPID, PythonExecutorProcessDetails pythonExecutorProcessDetails) {
-        List<String> notRemovedPythonExecutorChildrenPID = new ArrayList<>();
-        for (String pythonExecutorChildPID : pythonExecutorChildrenPID) {
-            int pythonExecutorChildPIDValue = Integer.parseInt(pythonExecutorChildPID);
+    private boolean doStopPythonExecutorChildrenProcess(List<String> pythonExecutorChildrenPid, PythonExecutorProcessDetails pythonExecutorProcessDetails) {
+        List<String> notRemovedPythonExecutorChildrenPid = new ArrayList<>();
+        for (String pythonExecutorChildPid : pythonExecutorChildrenPid) {
+            int pythonExecutorChildPIDValue = Integer.parseInt(pythonExecutorChildPid);
             JProcessesResponse killProcessGracefullyResponse = pythonExecutorProcessesService.killProcessGracefully(pythonExecutorChildPIDValue);
             if (!killProcessGracefullyResponse.isSuccess()) {
                 JProcessesResponse killProcessResponse = pythonExecutorProcessesService.killProcess(pythonExecutorChildPIDValue);
                 if (!killProcessResponse.isSuccess()) {
-                    notRemovedPythonExecutorChildrenPID.add(pythonExecutorChildPID);
+                    notRemovedPythonExecutorChildrenPid.add(pythonExecutorChildPid);
                 }
             }
         }
-        if(notRemovedPythonExecutorChildrenPID.isEmpty()) {
-            pythonExecutorProcessDetails.setPythonExecutorChildrenPID(null);
+        if(notRemovedPythonExecutorChildrenPid.isEmpty()) {
+            pythonExecutorProcessDetails.setPythonExecutorChildrenPid(null);
             return true;
         }
-        pythonExecutorProcessDetails.setPythonExecutorChildrenPID(notRemovedPythonExecutorChildrenPID);
+        pythonExecutorProcessDetails.setPythonExecutorChildrenPid(notRemovedPythonExecutorChildrenPid);
         return false;
     }
 }

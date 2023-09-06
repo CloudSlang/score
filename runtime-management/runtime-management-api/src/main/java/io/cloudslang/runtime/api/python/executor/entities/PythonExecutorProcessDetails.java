@@ -18,27 +18,27 @@ package io.cloudslang.runtime.api.python.executor.entities;
 import java.util.List;
 
 public class PythonExecutorProcessDetails {
-    private String pythonExecutorParentPID;
-    private List<String> pythonExecutorChildrenPID;
+    private String pythonExecutorParentPid;
+    private List<String> pythonExecutorChildrenPid;
 
     public PythonExecutorProcessDetails() {
-        this.pythonExecutorParentPID = null;
-        this.pythonExecutorChildrenPID = null;
+        this.pythonExecutorParentPid = null;
+        this.pythonExecutorChildrenPid = null;
     }
 
-    public String getPythonExecutorParentPID() {
-        return pythonExecutorParentPID;
+    public String getPythonExecutorParentPid() {
+        return pythonExecutorParentPid;
     }
 
-    public void setPythonExecutorParentPID(String pythonExecutorParentPID) {
-        this.pythonExecutorParentPID = pythonExecutorParentPID;
+    public void setPythonExecutorParentPid(String pythonExecutorParentPid) {
+        this.pythonExecutorParentPid = pythonExecutorParentPid;
     }
 
-    public List<String> getPythonExecutorChildrenPID() {
-        return pythonExecutorChildrenPID;
+    public List<String> getPythonExecutorChildrenPid() {
+        return pythonExecutorChildrenPid;
     }
 
-    public void setPythonExecutorChildrenPID(List<String> pythonExecutorChildrenPID) {
-        this.pythonExecutorChildrenPID = pythonExecutorChildrenPID;
+    public void setPythonExecutorChildrenPid(List<String> pythonExecutorChildrenPid) {
+        this.pythonExecutorChildrenPid = pythonExecutorChildrenPid;
     }
 }

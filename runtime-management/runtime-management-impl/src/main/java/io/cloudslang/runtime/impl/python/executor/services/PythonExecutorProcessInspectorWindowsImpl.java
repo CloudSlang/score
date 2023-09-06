@@ -17,27 +17,23 @@ package io.cloudslang.runtime.impl.python.executor.services;
 
 import io.cloudslang.runtime.api.python.executor.services.PythonExecutorConfigurationDataService;
 import io.cloudslang.runtime.api.python.executor.services.PythonExecutorProcessInspector;
-import io.cloudslang.runtime.api.python.executor.conditions.OnWindowsCondition;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jutils.jprocesses.info.ProcessesFactory;
 import org.jutils.jprocesses.info.ProcessesService;
 import org.jutils.jprocesses.model.ProcessInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Conditional;
-import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-@Conditional(OnWindowsCondition.class)
-@Component("pythonExecutorProcessInspector")
 public class PythonExecutorProcessInspectorWindowsImpl implements PythonExecutorProcessInspector {
     private final PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService;
     private final ProcessesService pythonExecutorProcessesService;
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     public PythonExecutorProcessInspectorWindowsImpl(PythonExecutorConfigurationDataService pythonExecutorConfigurationDataService) {
         this.pythonExecutorConfigurationDataService = pythonExecutorConfigurationDataService;
@@ -50,19 +46,19 @@ public class PythonExecutorProcessInspectorWindowsImpl implements PythonExecutor
     }
 
     @Override
-    public Pair<String, List<String>> findPythonExecutorProcessesPID(List<ProcessInfo> processInfoList) {
-        String pythonExecutorParentPID = findPythonExecutorParentPID(processInfoList);
+    public Pair<String, List<String>> findPythonExecutorProcessesPid(List<ProcessInfo> processInfoList) {
+        String pythonExecutorParentPid = findPythonExecutorParentPid(processInfoList);
 
-        if (pythonExecutorParentPID == null) {
+        if (pythonExecutorParentPid == null) {
             return Pair.of(null, null);
         }
 
-        List<String> pythonExecutorChildrenPID = findPythonExecutorChildrenPID(processInfoList, pythonExecutorParentPID);
+        List<String> pythonExecutorChildrenPid = findPythonExecutorChildrenPid(processInfoList, pythonExecutorParentPid);
 
-        return Pair.of(pythonExecutorParentPID, pythonExecutorChildrenPID);
+        return Pair.of(pythonExecutorParentPid, pythonExecutorChildrenPid);
     }
 
-    private String findPythonExecutorParentPID(List<ProcessInfo> processInfoList) {
+    private String findPythonExecutorParentPid(List<ProcessInfo> processInfoList) {
         for (ProcessInfo processInfo : processInfoList) {
             if (isParentProcess(processInfo.getCommand())) {
                 return processInfo.getPid();
@@ -72,16 +68,20 @@ public class PythonExecutorProcessInspectorWindowsImpl implements PythonExecutor
         return null;
     }
 
-    private List<String> findPythonExecutorChildrenPID(List<ProcessInfo> processInfoList, String pythonExecutorParentPID) {
-        List<String> pythonExecutorChildrenPID = new ArrayList<>();
+    private List<String> findPythonExecutorChildrenPid(List<ProcessInfo> processInfoList, String pythonExecutorParentPid) {
+        List<String> pythonExecutorChildrenPid = new ArrayList<>();
 
         for (ProcessInfo processInfo : processInfoList) {
-            if (isChildProcess(processInfo.getCommand(), pythonExecutorParentPID)) {
-                pythonExecutorChildrenPID.add(processInfo.getPid());
+            if (isChildProcess(processInfo.getCommand(), pythonExecutorParentPid)) {
+                pythonExecutorChildrenPid.add(processInfo.getPid());
             }
         }
 
-        return pythonExecutorChildrenPID;
+        if (pythonExecutorChildrenPid.isEmpty()) {
+            return null;
+        }
+
+        return pythonExecutorChildrenPid;
     }
 
     private boolean isParentProcess(String command) {
@@ -94,23 +94,23 @@ public class PythonExecutorProcessInspectorWindowsImpl implements PythonExecutor
 
         int appDirEndIndex = command.indexOf("\"", appDirStartIndex + appDirPrefix.length());
         String appDirValue = command.substring(appDirStartIndex + appDirPrefix.length(), appDirEndIndex);
-        Path appDirValueNormalizedParentPath = Paths.get(appDirValue).normalize();
+        Path appDirValueNormalizedPath = Paths.get(appDirValue).normalize();
         Path sourceLocationPath = Paths.get(pythonExecutorConfigurationDataService.getPythonExecutorConfiguration().getSourceLocation());
 
-        return appDirValueNormalizedParentPath.equals(sourceLocationPath);
+        return appDirValueNormalizedPath.equals(sourceLocationPath);
     }
 
-    private boolean isChildProcess(String command, String pythonExecutorParentPID) {
-        String parentPIDPrefix = "parent_pid=";
-        int parentPIDStartIndex = command.indexOf(parentPIDPrefix);
+    private boolean isChildProcess(String command, String pythonExecutorParentPid) {
+        String parentPidPrefix = "parent_pid=";
+        int parentPidStartIndex = command.indexOf(parentPidPrefix);
 
-        if (parentPIDStartIndex == -1) {
+        if (parentPidStartIndex == -1) {
             return false;
         }
 
-        int parentPIDEndIndex = command.indexOf(",", parentPIDStartIndex + parentPIDPrefix.length());
-        String parentPIDValue = command.substring(parentPIDStartIndex + parentPIDPrefix.length(), parentPIDEndIndex);
+        int parentPidEndIndex = command.indexOf(",", parentPidStartIndex + parentPidPrefix.length());
+        String parentPidValue = command.substring(parentPidStartIndex + parentPidPrefix.length(), parentPidEndIndex);
 
-        return StringUtils.equals(parentPIDValue, pythonExecutorParentPID);
+        return StringUtils.equals(parentPidValue, pythonExecutorParentPid);
     }
 }
