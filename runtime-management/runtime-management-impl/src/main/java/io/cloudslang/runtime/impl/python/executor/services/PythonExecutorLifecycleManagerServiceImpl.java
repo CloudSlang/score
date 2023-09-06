@@ -176,11 +176,15 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
             return false;
         }
         logger.info("A request to start the Python Executor was sent");
-        if (getPythonExecutorStatus() == PythonExecutorStatus.UP) {
+        PythonExecutorStatus status = getPythonExecutorStatus();
+        if (status == PythonExecutorStatus.UP) {
             // Do not attempt to start because the python executor is running under other process
             if (pythonExecutorRunning.get()) {
                 logger.info("Python Executor is already running");
             }
+            return false;
+        } else if (status == PythonExecutorStatus.BLOCKED) {
+            logger.warn("Another instance of Python Executor is already running");
             return false;
         }
 
