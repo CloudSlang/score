@@ -121,7 +121,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         try {
             Pair<Integer, String> response = pythonExecutorCommunicationService.performNoAuthRequest(EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH, "GET", null);
             if (response.getLeft() == 200) {
-                if (pythonExecutorProcess.get() == null) {
+                if (isPythonExecutorStartedByAnotherProcess()) {
                     logger.warn("Python Executor port is already in use");
                     pythonExecutorRunning.set(false);
                     return PythonExecutorStatus.BLOCKED;
@@ -143,6 +143,10 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
             }
             return PythonExecutorStatus.DOWN;
         }
+    }
+
+    private boolean isPythonExecutorStartedByAnotherProcess() {
+        return pythonExecutorProcess.get() == null || pythonExecutorProcessDetails.getPythonExecutorParentPid() == null;
     }
 
     private void doStopPythonExecutor() {
@@ -176,11 +180,15 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
             return false;
         }
         logger.info("A request to start the Python Executor was sent");
-        if (getPythonExecutorStatus() == PythonExecutorStatus.UP) {
+        PythonExecutorStatus status = getPythonExecutorStatus();
+        if (status == PythonExecutorStatus.UP) {
             // Do not attempt to start because the python executor is running under other process
             if (pythonExecutorRunning.get()) {
                 logger.info("Python Executor is already running");
             }
+            return false;
+        } else if (status == PythonExecutorStatus.BLOCKED) {
+            logger.warn("Another instance of Python Executor is already running");
             return false;
         }
 
