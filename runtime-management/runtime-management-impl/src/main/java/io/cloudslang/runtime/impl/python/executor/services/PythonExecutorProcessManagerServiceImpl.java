@@ -83,8 +83,6 @@ public class PythonExecutorProcessManagerServiceImpl implements PythonExecutorPr
         Pair<String, List<String>> pythonExecutorProcessesPid = pythonExecutorProcessInspector.findPythonExecutorProcessesPid(pythonProcessInfoList);
         pythonExecutorProcessDetails.setPythonExecutorParentPid(pythonExecutorProcessesPid.getLeft());
         pythonExecutorProcessDetails.setPythonExecutorChildrenPid(pythonExecutorProcessesPid.getRight());
-        logger.info(pythonExecutorProcessDetails.getPythonExecutorParentPid());
-        logger.info(pythonExecutorProcessDetails.getPythonExecutorChildrenPid());
     }
 
     @Override
