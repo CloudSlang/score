@@ -29,6 +29,7 @@ import org.jutils.jprocesses.info.ProcessesFactory;
 import org.jutils.jprocesses.info.ProcessesService;
 import org.jutils.jprocesses.model.JProcessesResponse;
 import org.jutils.jprocesses.model.ProcessInfo;
+import org.jutils.jprocesses.util.ProcessesUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -95,12 +96,27 @@ public class PythonExecutorProcessManagerServiceImpl implements PythonExecutorPr
             }
             return doStopPythonExecutorChildrenProcess(pythonExecutorChildrenPid, pythonExecutorProcessDetails);
         }
+        // Windows is slow in running cmd commands, and we try to stop the process tree at once
+        if (SystemUtils.IS_OS_WINDOWS &&
+                doStopPythonExecutorProcessTree(pythonExecutorParentPid, pythonExecutorProcessDetails)) {
+            return true;
+        }
         List<String> pythonExecutorChildrenPid = pythonExecutorProcessDetails.getPythonExecutorChildrenPid();
         if (pythonExecutorChildrenPid == null) {
             return doStopPythonExecutorParentProcess(pythonExecutorParentPid, pythonExecutorProcessDetails);
         }
         if (doStopPythonExecutorChildrenProcess(pythonExecutorChildrenPid, pythonExecutorProcessDetails)) {
             return doStopPythonExecutorParentProcess(pythonExecutorParentPid, pythonExecutorProcessDetails);
+        }
+        return false;
+    }
+
+    private boolean doStopPythonExecutorProcessTree(String pythonExecutorParentPid, PythonExecutorProcessDetails pythonExecutorProcessDetails) {
+        int endProcessTreeReturnCode = ProcessesUtils.executeCommandAndGetCode("taskkill", "/F", "/PID", pythonExecutorParentPid, "/T");
+        if (endProcessTreeReturnCode == 0) {
+            pythonExecutorProcessDetails.setPythonExecutorChildrenPid(null);
+            pythonExecutorProcessDetails.setPythonExecutorParentPid(null);
+            return true;
         }
         return false;
     }
