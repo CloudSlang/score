@@ -16,10 +16,16 @@
 package io.cloudslang.runtime.api.python;
 
 
+import com.fasterxml.jackson.core.StreamReadConstraints;
+
 import java.io.Serializable;
 import java.util.Map;
 
 public interface ExternalPythonProcessRunService {
+
+    int DEFAULT_MAX_DEPTH = Integer.getInteger("jackson.core.maxNestingDepth", StreamReadConstraints.DEFAULT_MAX_DEPTH);
+    int DEFAULT_MAX_NUM_LEN = Integer.getInteger("jackson.core.maxNumLen", StreamReadConstraints.DEFAULT_MAX_NUM_LEN);
+    int DEFAULT_MAX_STRING_LEN = Integer.getInteger("jackson.core.maxStringLen", StreamReadConstraints.DEFAULT_MAX_STRING_LEN);
 
     PythonExecutionResult exec(String script, Map<String, Serializable> inputs);
     PythonEvaluationResult eval(String expression, String prepareEnvironmentScript, Map<String, Serializable> context);
