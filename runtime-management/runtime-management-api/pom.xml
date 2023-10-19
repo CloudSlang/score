@@ -34,6 +34,11 @@
             <groupId>com.profesorfalken</groupId>
             <artifactId>jPowerShell</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
     </dependencies>
 
     <parent>
