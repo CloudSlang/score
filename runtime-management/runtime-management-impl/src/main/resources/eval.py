@@ -73,6 +73,7 @@ class PythonAgentExecutor(object):
         global get_sp_var
         global get_user_id
         global get_worker_group
+        global get_run_id
 
         get_from_smaller_context = self.get_from_smaller_context
         accessed_resources_set = set()
@@ -96,6 +97,7 @@ class PythonAgentExecutor(object):
         get_sp_var = None
         get_user_id = None
         get_worker_group = None
+        get_run_id = None
         exec (env_setup, globals())
 
     def main(self):
@@ -122,7 +124,8 @@ class PythonAgentExecutor(object):
                                                'cs_json_query': self.cs_json_query,
                                                'get_sp_var': get_sp_var,
                                                'get_user_id': get_user_id,
-                                               'get_worker_group': get_worker_group
+                                               'get_worker_group': get_worker_group,
+                                               'get_run_id': get_run_id
                                                })
 
             for x in dir(__builtins__):
