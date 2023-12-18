@@ -530,7 +530,6 @@ public class SimpleExecutionRunnable implements Runnable {
         executionMessage.setPayload(null);
         executionMessage.incMsgSeqId();
         try {
-            outBuffer.put(executionMessage);
             @SuppressWarnings("unchecked")
             ArrayList<String> miInputs = (ArrayList<String>) execution.getSystemContext().get("MI_INPUTS");
             int totalNumberOfLanes = miInputs.size();
@@ -578,6 +577,6 @@ public class SimpleExecutionRunnable implements Runnable {
         if (newExecutions != null && newExecutions.size() > 0) {
             return newExecutions.get(0).getSystemContext().getSplitId();
         }
-        throw new RuntimeException("Split executions list is null or empty!!!");
+        throw new RuntimeException("Cannot execute split step. Split executions are null or empty");
     }
 }
