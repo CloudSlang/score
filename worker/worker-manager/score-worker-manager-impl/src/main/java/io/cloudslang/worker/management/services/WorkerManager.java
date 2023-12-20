@@ -267,12 +267,12 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
         new Thread(new Runnable() {
             @Override
             public void run() {
-                versionMismatch = !workerVersionService.getWorkerVersionId().equals(engineVersionService.getEngineVersionId());
                 initStarted = true;
                 long sleep = initStartUpSleep;
                 boolean shouldRetry = true;
                 while (shouldRetry) {
                     try {
+                        versionMismatch = !workerVersionService.getWorkerVersionId().equals(engineVersionService.getEngineVersionId());
                         String newWrv = workerNodeService.up(workerUuid, workerVersionService.getWorkerVersion(),
                                 workerVersionService.getWorkerVersionId(), versionMismatch);
                         recoveryManager
