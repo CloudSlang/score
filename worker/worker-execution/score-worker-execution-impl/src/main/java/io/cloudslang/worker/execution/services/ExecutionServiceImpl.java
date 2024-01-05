@@ -747,6 +747,14 @@ public final class ExecutionServiceImpl implements ExecutionService {
         return useDefaultGroup;
     }
 
+    private static boolean isRemoteDebuggerStudio(Execution execution) {
+        Boolean isRemoteDebuggerStudio = (Boolean) execution.getSystemContext().get("REMOTE_DEBUGGER_MODE");
+        if (isRemoteDebuggerStudio == null) {
+            return false;
+        }
+        return isRemoteDebuggerStudio;
+    }
+
     protected void postExecutionSettings(Execution execution) {
         setWorkerGroup(execution);
 
@@ -765,8 +773,11 @@ public final class ExecutionServiceImpl implements ExecutionService {
         }
         // This new condition will allow user to remotely debug flows from studio/designer on specific worker group
         // Behaviour wanted only for studio local debug
-        if (useDefaultGroup(execution) && !StringUtils.isEmpty(group)) {
-            execution.setGroupName(null);
+
+        if (isDebuggerMode(execution.getSystemContext())) {
+            if (!StringUtils.isEmpty(group) && useDefaultGroup(execution) && !isRemoteDebuggerStudio(execution)) {
+                execution.setGroupName(null);
+            }
         }
     }
 
