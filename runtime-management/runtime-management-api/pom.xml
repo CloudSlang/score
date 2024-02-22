@@ -39,7 +39,7 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>runtime-management</artifactId>
-        <version>0.3.351</version>
+        <version>0.3.352-SNAPSHOT</version>
     </parent>
 
     <artifactId>runtime-management-api</artifactId>
