@@ -117,6 +117,8 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String BRANCH_EXCEPTION = "BRANCH_EXCEPTION";
 
+    private static final String EFFECTIVE_RUNNING_USER = "EFFECTIVE_RUNNING_USER";
+
     protected Map<String, Serializable> contextMap;
 
     public ExecutionRuntimeServices() {
@@ -676,6 +678,14 @@ public class ExecutionRuntimeServices implements Serializable {
             currentRoiValue = ExecutionParametersConsts.DEFAULT_ROI_VALUE;
         }
         contextMap.put(ExecutionParametersConsts.EXECUTION_TOTAL_ROI, currentRoiValue + roiValue);
+    }
+
+    public String getEffectiveRunningUser() {
+        return getFromMap(EFFECTIVE_RUNNING_USER);
+    }
+
+    public void setEffectiveRunningUser(String effectiveRunningUser) {
+        contextMap.put(EFFECTIVE_RUNNING_USER, effectiveRunningUser);
     }
 
     private <T> T removeFromMap(String key) {

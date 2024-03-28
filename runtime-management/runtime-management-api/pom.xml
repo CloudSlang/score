@@ -24,12 +24,22 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.jprocesses</groupId>
+            <artifactId>jProcesses</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.profesorfalken</groupId>
+            <artifactId>jPowerShell</artifactId>
+        </dependency>
     </dependencies>
 
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>runtime-management</artifactId>
-        <version>0.3.331-SNAPSHOT</version>
+        <version>0.3.358-SNAPSHOT</version>
     </parent>
 
     <artifactId>runtime-management-api</artifactId>

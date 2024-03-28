@@ -21,6 +21,10 @@ import java.util.Map;
 
 public interface ExternalPythonProcessRunService {
 
+    int DEFAULT_MAX_DEPTH = Integer.getInteger("jackson.core.maxNestingDepth", 5000);
+    int DEFAULT_MAX_NUM_LEN = Integer.getInteger("jackson.core.maxNumLen", 5000);
+    int DEFAULT_MAX_STRING_LEN = Integer.getInteger("jackson.core.maxStringLen", 100_000_000);
+
     PythonExecutionResult exec(String script, Map<String, Serializable> inputs);
     PythonEvaluationResult eval(String expression, String prepareEnvironmentScript, Map<String, Serializable> context);
     PythonEvaluationResult test(String expression, String prepareEnvironmentScript, Map<String, Serializable> context,

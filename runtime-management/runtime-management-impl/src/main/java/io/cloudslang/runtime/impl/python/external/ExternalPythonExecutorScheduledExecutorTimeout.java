@@ -18,6 +18,7 @@ package io.cloudslang.runtime.impl.python.external;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.core.json.JsonWriteFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -93,6 +94,11 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
         JsonFactory factory = new JsonFactory();
         factory.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
         factory.enable(JsonWriteFeature.ESCAPE_NON_ASCII.mappedFeature());
+        factory.setStreamReadConstraints(StreamReadConstraints.builder()
+                .maxNestingDepth(DEFAULT_MAX_DEPTH)
+                .maxNumberLength(DEFAULT_MAX_NUM_LEN)
+                .maxStringLength(DEFAULT_MAX_STRING_LEN)
+                .build());
         objectMapper = new ObjectMapper(factory);
     }
 

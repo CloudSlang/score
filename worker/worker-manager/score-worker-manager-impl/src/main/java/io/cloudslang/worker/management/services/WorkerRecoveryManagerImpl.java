@@ -85,10 +85,10 @@ public class WorkerRecoveryManagerImpl implements WorkerRecoveryManager {
             }
             if (logger.isDebugEnabled()) logger.debug("Listeners recovery is done");
 
-            boolean versionMismatch = !StringUtils.equals(workerVersionService.getWorkerVersion(), engineVersionService.getEngineVersionId());
             retryTemplate.retry(RetryTemplate.INFINITELY, 30*1000L, new RetryTemplate.RetryCallback() {
                 @Override
                 public void tryOnce() {
+                    boolean versionMismatch = !StringUtils.equals(workerVersionService.getWorkerVersion(), engineVersionService.getEngineVersionId());
 					if(logger.isDebugEnabled()) logger.debug("sending worker UP");
                     String newWrv = workerNodeService.up(System.getProperty("worker.uuid"), workerVersionService.getWorkerVersion(),
                                                          workerVersionService.getWorkerVersionId(), versionMismatch);
