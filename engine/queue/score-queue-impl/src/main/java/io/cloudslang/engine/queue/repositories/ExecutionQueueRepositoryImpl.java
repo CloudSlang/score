@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.cloudslang.engine.queue.repositories;
 
 import com.google.common.collect.Iterables;
@@ -36,7 +35,7 @@ import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

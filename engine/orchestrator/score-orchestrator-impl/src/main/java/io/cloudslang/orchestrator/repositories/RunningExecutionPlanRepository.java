@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.cloudslang.orchestrator.repositories;
 
 import io.cloudslang.score.facade.entities.RunningExecutionPlan;
@@ -27,7 +26,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 
-import javax.persistence.QueryHint;
+import jakarta.persistence.QueryHint;
 import java.lang.Long;
 import java.lang.String;
 

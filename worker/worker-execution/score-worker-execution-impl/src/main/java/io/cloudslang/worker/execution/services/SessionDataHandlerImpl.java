@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.cloudslang.worker.execution.services;
 
 import org.apache.logging.log4j.LogManager;
@@ -75,7 +74,7 @@ public class SessionDataHandlerImpl implements SessionDataHandler {
         return sessionDataHolder.getSessionData();
     }
 
-    private SessionDataHolder getSessionDataHolder(Long executionId, Long branchId) {
+    private synchronized SessionDataHolder getSessionDataHolder(Long executionId, Long branchId) {
         final Map<Long, SessionDataHolder> sessionMap = sessionsExecutionDataMap.computeIfAbsent(executionId,
                 (e) -> new HashMap<>());
         return sessionMap.computeIfAbsent(branchId, SessionDataHolder::new);

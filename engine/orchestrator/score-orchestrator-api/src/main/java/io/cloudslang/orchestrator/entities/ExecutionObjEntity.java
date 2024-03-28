@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.cloudslang.orchestrator.entities;
 
 import io.cloudslang.score.facade.entities.Execution;
-import org.hibernate.annotations.Type;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Lob;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Lob;
+import org.hibernate.annotations.Type;
 
 /**
  * Created by IntelliJ IDEA.
@@ -33,7 +32,7 @@ public class ExecutionObjEntity {
 
     @Lob
     @Column(name = "EXECUTION_OBJECT")
-    @Type(type = "io.cloudslang.orchestrator.entities.ExecutionByteaTypeDescriptor")
+    @Type(value = io.cloudslang.orchestrator.entities.ExecutionByteaTypeDescriptor.class)
     private Execution executionObj;
 
     public Execution getExecutionObj() {

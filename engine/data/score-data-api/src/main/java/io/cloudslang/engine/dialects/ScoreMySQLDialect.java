@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.cloudslang.engine.dialects;
 
 import org.hibernate.dialect.MySQLDialect;
@@ -28,8 +27,12 @@ import java.sql.Types;
  */
 public class ScoreMySQLDialect extends MySQLDialect {
 
-    public ScoreMySQLDialect() {
-        super();
-        registerColumnType(Types.BOOLEAN, "bit");
+    @Override
+    protected String columnType(int sqlTypeCode) {
+        if (sqlTypeCode == Types.BOOLEAN) {
+            return "bit";
+        }
+
+        return super.columnType(sqlTypeCode);
     }
 }

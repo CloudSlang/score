@@ -13,20 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.worker.execution.reflection;
+package io.cloudslang.score.api;
 
-import java.util.Map;
+import io.cloudslang.score.api.nodes.WorkerStatus;
+import org.hibernate.usertype.UserTypeSupport;
 
-/**
- * @author Avi Moradi
- * @since 16/07/2014
- * @version $Id$
- */
-public class ReflectionAdapterTestHelperNoSpring {
+import java.sql.Types;
 
-	@SuppressWarnings({ "static-method", "unused" })
-	public Map<String, ?> myMethod_4(int parameter_1, int parameter_2, Map<String, ?> executionContext) {
-		return executionContext;
-	}
-
+public class WorkerStatusTypeDescriptor extends UserTypeSupport<WorkerStatus> {
+    public WorkerStatusTypeDescriptor() {
+        super(WorkerStatus.class, Types.INTEGER);
+    }
 }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.cloudslang.engine.partitions.services;
 
 import io.cloudslang.engine.partitions.entities.PartitionGroup;
@@ -22,10 +21,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.context.ApplicationContext;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -136,17 +134,14 @@ public class PartitionTemplateImpl implements PartitionTemplate, BeanNameAware {
 		this.groupName = name;
 	}
 
-	@Required
 	public void setGroupSize(int groupSize) {
 		this.groupSize = groupSize;
 	}
 
-	@Required
 	public void setTimeThreshold(long timeThreshold) {
 		this.timeThreshold = timeThreshold;
 	}
 
-	@Required
 	public void setSizeThreshold(long sizeThreshold) {
 		this.sizeThreshold = sizeThreshold;
 	}

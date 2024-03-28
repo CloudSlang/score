@@ -13,23 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.cloudslang.orchestrator.entities;
 
 import io.cloudslang.engine.data.AbstractIdentifiable;
+import jakarta.persistence.Convert;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.hibernate.annotations.Immutable;
-import org.hibernate.annotations.Type;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import jakarta.persistence.Basic;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
+import org.hibernate.usertype.UserTypeLegacyBridge;
 
 /**
  * Created with IntelliJ IDEA.
@@ -58,7 +60,7 @@ public class FinishedBranch extends AbstractIdentifiable {
 
     @Column(name = "BRANCH_CONTEXT", nullable = false, updatable = false)
     @Lob
-    @Type(type = "io.cloudslang.orchestrator.entities.BranchContextByteaTypeDescriptor")
+    @Type(value = io.cloudslang.orchestrator.entities.BranchContextByteaTypeDescriptor.class)
     private BranchContexts branchContexts;
 
     @ManyToOne

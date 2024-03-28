@@ -51,11 +51,6 @@ public interface WorkerNodeRepository extends JpaRepository<WorkerNode,Long> {
 	@Query("select distinct g from WorkerNode w join w.groups g where w.deleted = false")
 	List<String> findGroups();
 
-	@Query(value = "update WorkerNode w set w.ackTime = current_time where w.uuid = ?1")
-	@Modifying
-	void updateAckTime(String uuid);
-
-
 	@Query("select distinct g from WorkerNode w join w.groups g where g in ?1")
 	List<String> findGroups(List<String> groupName);
 

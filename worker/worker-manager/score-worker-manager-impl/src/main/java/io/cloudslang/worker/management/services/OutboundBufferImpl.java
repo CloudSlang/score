@@ -13,21 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.cloudslang.worker.management.services;
 
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.orchestrator.entities.Message;
 import io.cloudslang.orchestrator.services.OrchestratorDispatcherService;
 import io.cloudslang.worker.management.ExecutionsActivityListener;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -13,26 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.cloudslang.orchestrator.entities;
 
 import io.cloudslang.orchestrator.enums.SuspendedExecutionReason;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.engine.data.AbstractIdentifiable;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Column;
-import javax.persistence.Enumerated;
-import javax.persistence.Basic;
-import javax.persistence.Embedded;
-import javax.persistence.OneToMany;
-import javax.persistence.CascadeType;
-import javax.persistence.FetchType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Basic;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.FetchType;
 import java.util.HashSet;
 import java.util.Set;
 
-import static javax.persistence.EnumType.STRING;
+import static jakarta.persistence.EnumType.STRING;
 
 /**
  * Created with IntelliJ IDEA.
