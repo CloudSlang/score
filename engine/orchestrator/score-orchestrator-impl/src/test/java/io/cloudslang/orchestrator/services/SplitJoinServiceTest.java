@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.cloudslang.orchestrator.services;
 
 import io.cloudslang.engine.queue.entities.ExecStatus;
@@ -20,8 +21,6 @@ import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
-import io.cloudslang.score.events.FastEventBus;
-import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.orchestrator.entities.BranchContexts;
 import io.cloudslang.orchestrator.entities.FinishedBranch;
 import io.cloudslang.orchestrator.entities.SplitMessage;
@@ -29,6 +28,8 @@ import io.cloudslang.orchestrator.entities.SuspendedExecution;
 import io.cloudslang.orchestrator.repositories.FinishedBranchRepository;
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
 import io.cloudslang.score.api.EndBranchDataContainer;
+import io.cloudslang.score.events.FastEventBus;
+import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.lang.SystemContext;
 import org.junit.Before;
 import org.junit.Test;

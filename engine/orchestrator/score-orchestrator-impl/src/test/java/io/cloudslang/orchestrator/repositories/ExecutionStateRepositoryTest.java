@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.cloudslang.orchestrator.repositories;
 
 import io.cloudslang.engine.data.SimpleHiloIdentifierGenerator;
 import io.cloudslang.orchestrator.entities.ExecutionState;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
+import jakarta.persistence.EntityManagerFactory;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.hibernate.jpa.HibernatePersistenceProvider;
@@ -38,9 +40,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import jakarta.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Properties;
+import java.util.UUID;
 
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -50,7 +55,7 @@ import static org.fest.assertions.Assertions.assertThat;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-public class ExecutionStateRepositoryTest{
+public class ExecutionStateRepositoryTest {
 
     @Autowired
     private ExecutionStateRepository executionStateRepository;

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.cloudslang.engine.queue.entities;
 
 import io.cloudslang.orchestrator.entities.Message;
