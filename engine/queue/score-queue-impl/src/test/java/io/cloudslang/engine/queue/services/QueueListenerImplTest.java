@@ -78,6 +78,9 @@ public class QueueListenerImplTest {
 	@Autowired
 	private SplitJoinService splitJoinService;
 
+	@Autowired
+	private QueueDispatcherService queueDispatcherService;
+
 	@Before
 	public void setup() throws IOException {
 		reset(eventBus);
@@ -238,6 +241,11 @@ public class QueueListenerImplTest {
 		@Bean
 		PauseResumeService pauseResumeService() {
 			return mock(PauseResumeService.class);
+		}
+
+		@Bean
+		QueueDispatcherService queueDispatcherService() {
+			return mock(QueueDispatcherService.class);
 		}
 	}
 
