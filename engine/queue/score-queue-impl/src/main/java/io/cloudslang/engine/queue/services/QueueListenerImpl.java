@@ -16,6 +16,7 @@
 
 package io.cloudslang.engine.queue.services;
 
+import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
 import io.cloudslang.orchestrator.services.ExecutionStateService;
@@ -24,6 +25,7 @@ import io.cloudslang.orchestrator.services.SplitJoinService;
 import io.cloudslang.score.events.EventBus;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.facade.entities.Execution;
+import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.score.facade.execution.ExecutionSummary;
 import io.cloudslang.score.facade.execution.PauseReason;
 import org.apache.commons.collections.CollectionUtils;
@@ -66,6 +68,9 @@ public class QueueListenerImpl implements QueueListener {
 
     @Autowired
     private ScoreEventFactory scoreEventFactory;
+
+    @Autowired
+    private QueueDispatcherService queueDispatcherService;
 
     @Autowired
     private PauseResumeService pauseResumeService;
@@ -181,8 +186,20 @@ public class QueueListenerImpl implements QueueListener {
         Long pauseId;
         if (pe == null) {
             // When cancel execution and no worker in group it should return to be paused without any termination type
-            execution.getSystemContext().setFlowTerminationType(null);
             pauseId = pauseResumeService.pauseExecution(execution.getExecutionId(), branchId, pauseReason);
+            if (pauseId == null) {
+                execution.getSystemContext().setFlowTerminationType(ExecutionStatus.CANCELED);
+                execution.setPosition(null);
+
+                queueDispatcherService.dispatch(
+                        String.valueOf(execution.getExecutionId()),
+                        execution.getGroupName(),
+                        ExecStatus.TERMINATED,
+                        executionMessageConverter.createPayload(execution)
+                );
+                return null;
+            }
+            execution.getSystemContext().setFlowTerminationType(null);
             pauseResumeService.writeExecutionObject(execution.getExecutionId(), branchId, execution, updateParentExecObject);
         } else {
             pauseId = null;
