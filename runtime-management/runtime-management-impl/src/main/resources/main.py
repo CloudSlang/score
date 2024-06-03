@@ -21,13 +21,17 @@ class PythonAgentExecutor(object):
             raise InvalidExecutionException("Expected inputs " + str(expected_inputs) +
                                      " are not the same with the actual inputs " + str(actual_inputs))
 
-    def __validate_output(self, output):
-        if "]]>" in output[1]:
-            raise InvalidExecutionException("Invalid value for output variable: " + output[0])
+    def __handle_special_character(self, output):
+        processed_output = output
+        if "]" in output:
+            processed_output = processed_output.replace("]", "\]")
+        if "[" in output:
+            processed_output = processed_output.replace("[", "\[")
+        return processed_output
 
     def __parse_output(self, output):
-        stringified_output = (str(output[0]), str(output[1]))
-        self.__validate_output(stringified_output )
+        processed_output = self.__handle_special_character(str(output[1]))
+        stringified_output = (str(output[0]), str(processed_output))
         return stringified_output
 
     def __execute_action(self, script_name, inputs):
@@ -52,8 +56,8 @@ class PythonAgentExecutor(object):
             final_result = {"returnResult": dict(map(lambda output: self.__parse_output(output), result.items()))}
         else:
             string_result = str(result)
-            self.__validate_output(('returnResult', string_result))
-            final_result = {"returnResult": {"returnResult": string_result}}
+            processed_result = self.__handle_special_character(('returnResult', string_result[1]))
+            final_result = {"returnResult": {"returnResult": processed_result}}
         return final_result
 
     def print_event(self, event):

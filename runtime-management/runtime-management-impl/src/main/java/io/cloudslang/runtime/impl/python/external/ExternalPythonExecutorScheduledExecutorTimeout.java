@@ -231,7 +231,8 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
             String returnResult = getResult(payload, processBuilder, EXECUTION_TIMEOUT);
             returnResult = parseScriptExecutionResult(returnResult).getElementsByTagName("result").item(0)
                     .getTextContent();
-            ScriptResults scriptResults = objectMapper.readValue(returnResult, ScriptResults.class);
+            String processedResult = handleSpecialCharacters(returnResult);
+            ScriptResults scriptResults = objectMapper.readValue(processedResult, ScriptResults.class);
             String exception = formatException(scriptResults.getException(), scriptResults.getTraceback());
 
             if (!StringUtils.isEmpty(exception)) {
@@ -451,6 +452,17 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     private String removeFileName(String trace) {
         int pythonFileNameIndex = trace.indexOf(PYTHON_FILENAME_SCRIPT_EXTENSION);
         return trace.substring(pythonFileNameIndex + PYTHON_FILENAME_DELIMITERS);
+    }
+
+    private String handleSpecialCharacters(String returnResult) {
+        String processedResult = returnResult;
+        if (returnResult.contains("\\\\]")) {
+            processedResult = processedResult.replace("\\\\]", "]");
+        }
+        if (returnResult.contains("\\\\[")) {
+            processedResult = processedResult.replace("\\\\[", "[");
+        }
+        return processedResult;
     }
 
     @Override
