@@ -6,6 +6,8 @@ import sys
 import traceback
 
 EXECUTE_METHOD = "execute"
+CDATA_TERMINATOR = "]]>"
+ESCAPED_CDATA_TERMINATOR = "#$!#$!#$!ESCAPED_CDATA_TERMINATOR#$!#$!#$!"
 
 
 # noinspection PyMethodMayBeStatic
@@ -21,16 +23,14 @@ class PythonAgentExecutor(object):
             raise InvalidExecutionException("Expected inputs " + str(expected_inputs) +
                                      " are not the same with the actual inputs " + str(actual_inputs))
 
-    def __handle_special_character(self, output):
-        processed_output = output
-        if "]" in output:
-            processed_output = processed_output.replace("]", "\]")
-        if "[" in output:
-            processed_output = processed_output.replace("[", "\[")
-        return processed_output
+    def __handle_special_characters(self, output):
+        if CDATA_TERMINATOR in output:
+            return output.replace(CDATA_TERMINATOR, ESCAPED_CDATA_TERMINATOR)
+        else:
+            return output
 
     def __parse_output(self, output):
-        processed_output = self.__handle_special_character(str(output[1]))
+        processed_output = self.__handle_special_characters(str(output[1]))
         stringified_output = (str(output[0]), str(processed_output))
         return stringified_output
 
@@ -56,7 +56,7 @@ class PythonAgentExecutor(object):
             final_result = {"returnResult": dict(map(lambda output: self.__parse_output(output), result.items()))}
         else:
             string_result = str(result)
-            processed_result = self.__handle_special_character(('returnResult', string_result[1]))
+            processed_result = self.__handle_special_characters(('returnResult', string_result[1]))
             final_result = {"returnResult": {"returnResult": processed_result}}
         return final_result
 

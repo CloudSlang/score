@@ -74,6 +74,8 @@ import static io.cloudslang.runtime.impl.python.external.ResourceScriptResolver.
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
+import static org.apache.commons.lang.StringUtils.contains;
+import static org.apache.commons.lang.StringUtils.replace;
 
 public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalPythonProcessRunService {
 
@@ -82,6 +84,8 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     private static final String EVAL_PY = "eval.py";
     private static final String MAIN_PY = "main.py";
     private static final String PYTHON_SUFFIX = ".py";
+    private static final String CDATA_TERMINATOR = "]]>";
+    private static final String ESCAPED_CDATA_TERMINATOR = "#$!#$!#$!ESCAPED_CDATA_TERMINATOR#$!#$!#$!";
     private static final long EXECUTION_TIMEOUT = Long.getLong("python.timeout", 30) * 60 * 1000;
     private static final long EVALUATION_TIMEOUT = Long.getLong("python.evaluation.timeout", 3) * 60 * 1000;
     private static final String PYTHON_FILENAME_SCRIPT_EXTENSION = ".py\"";
@@ -455,14 +459,11 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
     }
 
     private String handleSpecialCharacters(String returnResult) {
-        String processedResult = returnResult;
-        if (returnResult.contains("\\\\]")) {
-            processedResult = processedResult.replace("\\\\]", "]");
+        if (contains(returnResult, ESCAPED_CDATA_TERMINATOR)) {
+            return replace(returnResult, ESCAPED_CDATA_TERMINATOR, CDATA_TERMINATOR);
+        } else {
+            return returnResult;
         }
-        if (returnResult.contains("\\\\[")) {
-            processedResult = processedResult.replace("\\\\[", "[");
-        }
-        return processedResult;
     }
 
     @Override
