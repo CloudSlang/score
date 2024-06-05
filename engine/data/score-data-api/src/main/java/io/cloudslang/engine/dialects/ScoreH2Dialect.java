@@ -28,6 +28,10 @@ public class ScoreH2Dialect extends H2Dialect {
             return "blob";
         }
 
+        if (sqlTypeCode == Types.LONGVARCHAR) {
+            return "clob";
+        }
+
         return super.columnType(sqlTypeCode);
     }
 

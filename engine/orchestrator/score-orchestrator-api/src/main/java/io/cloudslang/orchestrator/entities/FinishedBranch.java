@@ -28,7 +28,9 @@ import jakarta.persistence.Table;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
+import org.hibernate.usertype.UserTypeLegacyBridge;
 
 /**
  * Created with IntelliJ IDEA.
@@ -52,6 +54,8 @@ public class FinishedBranch extends AbstractIdentifiable {
 
     @Lob
     @Basic(fetch = FetchType.LAZY)
+    @Type(value = UserTypeLegacyBridge.class,
+            parameters = @Parameter(name = UserTypeLegacyBridge.TYPE_NAME_PARAM_KEY, value = "text"))
     @Column(name = "BRANCH_EXCEPTION", updatable = false)
     private String branchException;
 
