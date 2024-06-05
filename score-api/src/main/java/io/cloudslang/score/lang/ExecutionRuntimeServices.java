@@ -120,6 +120,8 @@ public class ExecutionRuntimeServices implements Serializable {
 
     private static final String EFFECTIVE_RUNNING_USER = "EFFECTIVE_RUNNING_USER";
 
+    private static final String SYSTEM_LEVEL_CS_PROMPT_WHEN_VALUE = "SYSTEM_LEVEL_CS_PROMPT_WHEN_VALUE";
+
     protected Map<String, Serializable> contextMap;
 
     public ExecutionRuntimeServices() {
@@ -687,6 +689,11 @@ public class ExecutionRuntimeServices implements Serializable {
 
     public void setEffectiveRunningUser(String effectiveRunningUser) {
         contextMap.put(EFFECTIVE_RUNNING_USER, effectiveRunningUser);
+    }
+
+    public boolean getCslangPromptsEnabledFlag() {
+        Object isCslangDoublePromptsEnabled = contextMap.get(SYSTEM_LEVEL_CS_PROMPT_WHEN_VALUE);
+        return isCslangDoublePromptsEnabled == null ? true : (Boolean) isCslangDoublePromptsEnabled;
     }
 
     private <T> T removeFromMap(String key) {
