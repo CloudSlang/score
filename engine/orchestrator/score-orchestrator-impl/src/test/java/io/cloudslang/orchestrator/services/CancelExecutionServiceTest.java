@@ -119,10 +119,12 @@ public class CancelExecutionServiceTest {
     private void mockPausedParentAndBranchAndRequestCancel() {
         Long executionId = 111L;
         ExecutionState parent = createRun(executionId, ExecutionStatus.PAUSED);
+        parent.setExecutionObject(new byte[]{'p'});
         when(executionStateService.readByExecutionIdAndBranchId(executionId, EMPTY_BRANCH)).thenReturn(parent);
         // mock branch
         ExecutionState branch1 = createRun(executionId, ExecutionStatus.PAUSED);
         branch1.setBranchId("b1");
+        branch1.setExecutionObject(new byte[]{'b', '1'});
 
         Map<String, String> contexts = new HashMap<>();
         contexts.put("context_a", "");
@@ -133,9 +135,9 @@ public class CancelExecutionServiceTest {
 
         ExecutionActionResult result = service.requestCancelExecution(executionId);
 
-        // Validation - Parent status should be Pending-cancel
+        // Validation - Parent status should be Canceled
         assertThat(result).isEqualTo(ExecutionActionResult.SUCCESS);
-        assertThat(parent.getStatus()).as("Wrong status after cancelling the execution").isEqualTo(ExecutionStatus.PENDING_CANCEL);
+        assertThat(parent.getStatus()).as("Wrong status after cancelling the execution").isEqualTo(ExecutionStatus.CANCELED);
 
         // Branch should be canceled
         assertThat(branch1.getStatus()).as("Wrong status after cancelling the branch").isEqualTo(ExecutionStatus.PENDING_CANCEL);
