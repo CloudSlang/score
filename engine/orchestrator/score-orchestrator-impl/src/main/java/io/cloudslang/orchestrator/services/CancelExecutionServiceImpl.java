@@ -105,13 +105,19 @@ public final class CancelExecutionServiceImpl implements CancelExecutionService 
         // If the parent is paused because one of the branches is paused, OR, it was paused by the user / no-workers-in-group, but has branches that were not finished (and thus, were paused) -
         // The parent itself will return to the queue after all the branches are ended (due to this cancellation), and then it'll be canceled as well.
         if (branches.size() > 1) { // more than 1 means that it has paused branches (branches is at least 1 - the parent)
+            executionStateToCancel.setStatus(ExecutionStatus.PENDING_CANCEL);
             for (ExecutionState branch : branches) {
-                if (!EMPTY_BRANCH.equals(branch.getBranchId())) { // exclude the base execution
+                if (branch.getExecutionObject() != null) { // exclude the branches with no execution object
                     returnCanceledRunToQueue(branch);
-                    executionStateService.deleteExecutionState(branch.getExecutionId(), branch.getBranchId());
+                    if (!EMPTY_BRANCH.equals(branch.getBranchId())) {
+                        executionStateService.deleteExecutionState(branch.getExecutionId(), branch.getBranchId());
+                    } else {
+                        executionStateToCancel.setStatus(ExecutionStatus.CANCELED);
+                    }
+                } else {
+                    executionStateToCancel.setStatus(ExecutionStatus.CANCELED);
                 }
             }
-            executionStateToCancel.setStatus(ExecutionStatus.PENDING_CANCEL); // when the parent will return to queue - should have the correct status
         } else {
             returnCanceledRunToQueue(executionStateToCancel);
         }

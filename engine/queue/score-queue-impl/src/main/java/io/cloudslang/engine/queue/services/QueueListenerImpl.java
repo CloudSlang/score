@@ -180,12 +180,25 @@ public class QueueListenerImpl implements QueueListener {
     private Long pauseExecution(Execution execution, PauseReason pauseReason, boolean updateParentExecObject) {
         String branchId = execution.getSystemContext().getBranchId();
 
+        // When flow termination type is canceled, it should not pause
+        if ((execution.getSystemContext().getFlowTerminationType() != null) &&
+                execution.getSystemContext().getFlowTerminationType().equals(CANCELED)) {
+            execution.setPosition(null);
+
+            queueDispatcherService.dispatch(
+                    String.valueOf(execution.getExecutionId()),
+                    execution.getGroupName(),
+                    ExecStatus.TERMINATED,
+                    executionMessageConverter.createPayload(execution)
+            );
+            return null;
+        }
+
         ExecutionSummary pe = pauseResumeService.readPausedExecution(execution.getExecutionId(), branchId);
 
         //Check if this execution is not paused already (by user)
         Long pauseId;
         if (pe == null) {
-            // When cancel execution and no worker in group it should return to be paused without any termination type
             pauseId = pauseResumeService.pauseExecution(execution.getExecutionId(), branchId, pauseReason);
             if (pauseId == null) {
                 execution.getSystemContext().setFlowTerminationType(ExecutionStatus.CANCELED);
