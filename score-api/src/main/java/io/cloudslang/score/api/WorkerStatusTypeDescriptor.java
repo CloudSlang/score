@@ -14,26 +14,15 @@
  * limitations under the License.
  */
 
-package io.cloudslang.engine.dialects;
+package io.cloudslang.score.api;
 
-import org.hibernate.dialect.MySQLDialect;
+import io.cloudslang.score.api.nodes.WorkerStatus;
+import org.hibernate.usertype.UserTypeSupport;
 
 import java.sql.Types;
 
-/**
- * Created with IntelliJ IDEA.
- * User: kravtsov
- * Date: 22/07/14
- * Time: 11:54
- */
-public class ScoreMySQLDialect extends MySQLDialect {
-
-    @Override
-    protected String columnType(int sqlTypeCode) {
-        if (sqlTypeCode == Types.BOOLEAN) {
-            return "bit";
-        }
-
-        return super.columnType(sqlTypeCode);
+public class WorkerStatusTypeDescriptor extends UserTypeSupport<WorkerStatus> {
+    public WorkerStatusTypeDescriptor() {
+        super(WorkerStatus.class, Types.INTEGER);
     }
 }

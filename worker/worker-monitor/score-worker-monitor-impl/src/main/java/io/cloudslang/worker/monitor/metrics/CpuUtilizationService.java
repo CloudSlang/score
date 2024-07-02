@@ -17,12 +17,12 @@ package io.cloudslang.worker.monitor.metrics;
 
 import io.cloudslang.worker.monitor.metric.WorkerPerfMetric;
 import io.cloudslang.worker.monitor.service.WorkerPerformanceMetric;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.tuple.Pair;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.software.os.OSProcess;
 
-import javax.annotation.PostConstruct;
 import java.io.Serializable;
 
 import static io.cloudslang.worker.monitor.metric.WorkerPerfMetric.formatTo2Decimal;

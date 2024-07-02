@@ -19,7 +19,7 @@ package io.cloudslang.engine.data;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 public class HiloFactoryBean implements FactoryBean<IdentityGenerator> {

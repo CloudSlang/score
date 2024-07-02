@@ -20,12 +20,11 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.orchestrator.entities.MergedConfigurationDataContainer;
 import io.cloudslang.orchestrator.model.MergedConfigurationHolder;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 import java.util.HashSet;
 import java.util.Map;

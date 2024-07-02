@@ -17,17 +17,14 @@
 package io.cloudslang.orchestrator.entities;
 
 import io.cloudslang.score.facade.entities.Execution;
-import org.hibernate.type.AbstractSingleColumnStandardBasicType;
-import org.hibernate.type.descriptor.java.SerializableTypeDescriptor;
-import org.hibernate.type.descriptor.sql.LongVarbinaryTypeDescriptor;
+import org.hibernate.type.descriptor.java.SerializableJavaType;
+import org.hibernate.usertype.UserTypeSupport;
 
-public class ExecutionByteaTypeDescriptor extends AbstractSingleColumnStandardBasicType<Execution> {
+import java.sql.Types;
+
+public class ExecutionByteaTypeDescriptor extends UserTypeSupport<Execution> {
 
     public ExecutionByteaTypeDescriptor() {
-        super(LongVarbinaryTypeDescriptor.INSTANCE, new SerializableTypeDescriptor<>(Execution.class));
-    }
-
-    public String getName() {
-        return Execution.class.getName();
+        super(new SerializableJavaType<>(Execution.class).getJavaTypeClass(), Types.LONGVARBINARY);
     }
 }
