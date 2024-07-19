@@ -21,7 +21,8 @@ public enum LicenseType {
     HOURLY(1),
     INSTANT_ON(2),
     CONCURRENT_HOURLY(3),
-    SUITE_LICENSE(4);
+    SUITE_LICENSE(4),
+    NODE_LICENSE(5);
 
     private final int code;
 
