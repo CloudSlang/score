@@ -22,7 +22,7 @@ import oshi.SystemInfo;
 import oshi.hardware.GlobalMemory;
 import oshi.software.os.OSProcess;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.io.Serializable;
 
 import static io.cloudslang.worker.monitor.metric.WorkerPerfMetric.formatTo2Decimal;

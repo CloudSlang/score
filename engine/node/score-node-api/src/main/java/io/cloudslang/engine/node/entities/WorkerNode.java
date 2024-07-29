@@ -16,30 +16,29 @@
 
 package io.cloudslang.engine.node.entities;
 
+import io.cloudslang.score.api.WorkerStatusTypeDescriptor;
 import io.cloudslang.score.api.nodes.WorkerStatus;
 import io.cloudslang.engine.data.AbstractIdentifiable;
 import io.cloudslang.score.facade.TempConstants;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.SelectBeforeUpdate;
 
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.validation.constraints.Size;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.Type;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by IntelliJ IDEA.
@@ -56,6 +55,7 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
     @Column(name = "UUID", nullable = false, unique = true, length = 48)
     private String uuid;
 
+    @Type(value = WorkerStatusTypeDescriptor.class)
     @Column(name = "STATUS", nullable = false, length = 20)
     private WorkerStatus status;
 

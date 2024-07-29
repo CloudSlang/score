@@ -24,12 +24,12 @@ import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.impl.ExecutionEngine;
 import io.cloudslang.runtime.impl.python.pool.ViburEmbeddedPythonPoolService;
 import io.cloudslang.runtime.impl.python.pool.ViburEmbeddedPythonPoolServiceImpl;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.vibur.objectpool.util.ConcurrentLinkedQueueCollection;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
