@@ -27,6 +27,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.ContextRefreshedEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,10 +42,11 @@ import static ch.lambdaj.Lambda.extract;
 import static ch.lambdaj.Lambda.on;
 import static java.util.Collections.addAll;
 
-public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListener {
+public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListener, ApplicationListener {
 
     private static final Logger logger = LogManager.getLogger(OutboundBufferImpl.class);
     private static final long GB = 900000000; //there is JVM overhead, so i will take 10% buffer...
+    private boolean isShutdown;
 
     @Autowired
     private RetryTemplate retryTemplate;
@@ -166,7 +171,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         HashMap<String, LinkedList<Message>> bufferToDrain;
         try {
             syncManager.startDrain();
-            while (buffer.isEmpty()) {
+            while (!isShutdown && buffer.isEmpty()) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("buffer is empty. Waiting to drain...");
                 }
@@ -287,6 +292,18 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         }
         buffer.clear();
         currentWeight = 0;
+    }
+
+    @Override
+    public void onApplicationEvent(ApplicationEvent event) {
+        if (event instanceof ContextClosedEvent) {
+            // In case of spring closing, the notEmpty condition was still in await state resulting in delay in the shutdown of Studio.
+            // To be able to fix it, we lock the ReentrantLock to be able to signal the notEmpty condition, and unlock it at the end.
+            syncManager.unlockOnShutdown();
+            isShutdown = true;
+        } else if (event instanceof ContextRefreshedEvent) {
+            isShutdown = false;
+        }
     }
 
     private class CompoundMessage implements Message {
