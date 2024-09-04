@@ -40,4 +40,6 @@ public interface SynchronizationManager {
 
     void startDrain();
     void finishDrain();
+
+    void unlockOnShutdown();
 }

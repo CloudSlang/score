@@ -82,6 +82,13 @@ public class SynchronizationManagerImpl implements SynchronizationManager {
     }
 
     @Override
+    public void unlockOnShutdown() {
+        outBufferLock.lock();
+        notEmpty.signalAll();
+        unlockCompletely(outBufferLock);
+    }
+
+    @Override
     public void startDrain() {
         if (logger.isDebugEnabled()) {
             logger.debug("In SynchronizationManager.startDrain()");
