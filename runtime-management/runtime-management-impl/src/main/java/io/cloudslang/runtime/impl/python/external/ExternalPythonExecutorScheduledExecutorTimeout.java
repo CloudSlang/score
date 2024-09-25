@@ -69,7 +69,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 
-import static io.cloudslang.runtime.impl.python.external.EnvVariablesResolver.processEnvironmentVariablesAllowedForPython;
+import static io.cloudslang.runtime.impl.python.external.EnvVariablesUtil.processEnvironmentVariablesAllowedForPython;
 import static io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine.SCHEDULED_EXECUTOR_STRATEGY;
 import static io.cloudslang.runtime.impl.python.external.ResourceScriptResolver.loadEvalScriptAsString;
 import static java.nio.charset.StandardCharsets.UTF_8;

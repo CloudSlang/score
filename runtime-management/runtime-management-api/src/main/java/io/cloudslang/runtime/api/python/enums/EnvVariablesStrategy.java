@@ -17,12 +17,11 @@ package io.cloudslang.runtime.api.python.enums;
 
 import static java.util.Arrays.stream;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
-import static org.apache.commons.lang3.Validate.notNull;
 
 public enum EnvVariablesStrategy {
-    NO_ENV("no-env-variables"),
-    PARTIAL_ENV("partial-env-variables"),
-    FULL_ENV("all-env-variables");
+    INHERIT_NONE("inherit-none"), // This is the default strategy if misconfigured or unspecified
+    INHERIT_SUBSET("inherit-subset"),
+    INHERIT_ALL("inherit-all");
 
     private final String envVarStrategy;
 
@@ -30,12 +29,11 @@ public enum EnvVariablesStrategy {
         this.envVarStrategy = envVarStrategy;
     }
 
-    public static EnvVariablesStrategy getEnvVariableStrategy(final String givenStrategy, final EnvVariablesStrategy defaultStrategy) {
-        notNull(defaultStrategy, "Default strategy cannot be null.");
+    public static EnvVariablesStrategy getEnvVariableStrategy(final String givenStrategy) {
         return stream(EnvVariablesStrategy.values())
                 .filter(strategy -> equalsIgnoreCase(strategy.getEnvVariableStrategy(), givenStrategy))
                 .findFirst()
-                .orElse(defaultStrategy);
+                .orElse(INHERIT_NONE);
     }
 
     public String getEnvVariableStrategy() {

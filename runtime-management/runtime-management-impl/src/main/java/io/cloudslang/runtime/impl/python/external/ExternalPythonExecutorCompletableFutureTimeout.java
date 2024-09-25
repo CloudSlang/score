@@ -64,7 +64,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeoutException;
 
-import static io.cloudslang.runtime.impl.python.external.EnvVariablesResolver.processEnvironmentVariablesAllowedForPython;
+import static io.cloudslang.runtime.impl.python.external.EnvVariablesUtil.processEnvironmentVariablesAllowedForPython;
 import static io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine.COMPLETABLE_EXECUTOR_STRATEGY;
 import static io.cloudslang.runtime.impl.python.external.ResourceScriptResolver.loadEvalScriptAsString;
 import static java.nio.charset.StandardCharsets.UTF_8;
