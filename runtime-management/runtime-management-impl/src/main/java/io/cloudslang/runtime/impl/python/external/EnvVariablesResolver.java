@@ -25,13 +25,13 @@ import java.util.Map;
 import static io.cloudslang.runtime.api.python.enums.EnvVariablesStrategy.FULL_ENV;
 import static io.cloudslang.runtime.api.python.enums.EnvVariablesStrategy.NO_ENV;
 import static io.cloudslang.runtime.api.python.enums.EnvVariablesStrategy.PARTIAL_ENV;
-import static io.cloudslang.runtime.api.python.enums.EnvVariablesStrategy.getEnvVarStrategy;
+import static io.cloudslang.runtime.api.python.enums.EnvVariablesStrategy.getEnvVariableStrategy;
 import static java.lang.System.getenv;
 import static java.util.Arrays.asList;
 
 public class EnvVariablesResolver {
 
-    private static final EnvVariablesStrategy ENV_VARIABLES_STRATEGY = getEnvVarStrategy(System.getProperty("python.envVariablesStrategy"), NO_ENV);
+    private static final EnvVariablesStrategy ENV_VARIABLES_STRATEGY = getEnvVariableStrategy(System.getProperty("python.envVariablesStrategy"), NO_ENV);
     private static final String ALLOWED_PATHS_ENV_VARIABLES = System.getProperty("python.allowedPathsForEnvVariables");
 
     public static void processEnvironmentVariablesAllowedForPython(ProcessBuilder processBuilder) {

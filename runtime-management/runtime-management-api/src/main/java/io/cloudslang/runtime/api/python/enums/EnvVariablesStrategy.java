@@ -30,15 +30,15 @@ public enum EnvVariablesStrategy {
         this.envVarStrategy = envVarStrategy;
     }
 
-    public static EnvVariablesStrategy getEnvVarStrategy(final String givenStrategy, final EnvVariablesStrategy defaultStrategy) {
+    public static EnvVariablesStrategy getEnvVariableStrategy(final String givenStrategy, final EnvVariablesStrategy defaultStrategy) {
         notNull(defaultStrategy, "Default strategy cannot be null.");
         return stream(EnvVariablesStrategy.values())
-                .filter(strategy -> equalsIgnoreCase(strategy.getEnvVarStrategy(), givenStrategy))
+                .filter(strategy -> equalsIgnoreCase(strategy.getEnvVariableStrategy(), givenStrategy))
                 .findFirst()
                 .orElse(defaultStrategy);
     }
 
-    public String getEnvVarStrategy() {
+    public String getEnvVariableStrategy() {
         return envVarStrategy;
     }
 }
