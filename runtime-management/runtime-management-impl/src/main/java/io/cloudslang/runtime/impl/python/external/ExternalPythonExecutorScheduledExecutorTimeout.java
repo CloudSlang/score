@@ -69,6 +69,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 
+import static io.cloudslang.runtime.impl.python.external.EnvVariablesUtil.processEnvironmentVariablesAllowedForPython;
 import static io.cloudslang.runtime.impl.python.external.ExternalPythonExecutionEngine.SCHEDULED_EXECUTOR_STRATEGY;
 import static io.cloudslang.runtime.impl.python.external.ResourceScriptResolver.loadEvalScriptAsString;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -394,7 +395,7 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
         ProcessBuilder processBuilder = new ProcessBuilder(Arrays.asList(Paths.get(pythonPath, "python").toString(),
                 Paths.get(executionEnvironment.getParentFolder().toString(), executionEnvironment.getMainScriptName())
                         .toString()));
-        processBuilder.environment().clear();
+        processEnvironmentVariablesAllowedForPython(processBuilder);
         processBuilder.directory(executionEnvironment.getParentFolder());
         return processBuilder;
     }
@@ -410,7 +411,7 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
                 "-c",
                 evalPyCode)
         );
-        processBuilder.environment().clear();
+        processEnvironmentVariablesAllowedForPython(processBuilder);
         return processBuilder;
     }
 
