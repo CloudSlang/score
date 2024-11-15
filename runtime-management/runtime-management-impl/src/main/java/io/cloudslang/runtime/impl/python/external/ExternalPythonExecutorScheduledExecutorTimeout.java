@@ -383,7 +383,11 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
         ProcessBuilder processBuilder = new ProcessBuilder(Arrays.asList(Paths.get(pythonPath, "python").toString(),
                 Paths.get(executionEnvironment.getParentFolder().toString(), executionEnvironment.getMainScriptName())
                         .toString()));
-        processBuilder.environment().clear();
+        // Modules like pymqi need system environment variable, so we made cleanup as configurable.
+        boolean preventEnvironmentVariableCleanup = Boolean.getBoolean("use.system.path.for.pythonEvaluationExecution");
+        if (!preventEnvironmentVariableCleanup) {
+            processBuilder.environment().clear();
+        }
         processBuilder.directory(executionEnvironment.getParentFolder());
         return processBuilder;
     }
@@ -399,7 +403,11 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
                 "-c",
                 evalPyCode)
         );
-        processBuilder.environment().clear();
+        // Modules like pymqi need system environment variable, so we made cleanup as configurable
+        boolean preventEnvironmentVariableCleanup = Boolean.getBoolean("use.system.path.for.pythonEvaluationExecution");
+        if (!preventEnvironmentVariableCleanup) {
+            processBuilder.environment().clear();
+        }
         return processBuilder;
     }
 
