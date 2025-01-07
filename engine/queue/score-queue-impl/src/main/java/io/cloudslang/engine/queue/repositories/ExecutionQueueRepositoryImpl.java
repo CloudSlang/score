@@ -335,16 +335,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     final private String BUSY_WORKERS_SQL =
             "SELECT ASSIGNED_WORKER      " +
                     " FROM  OO_EXECUTION_QUEUES q  " +
-                    " WHERE  " +
-                    "      (q.STATUS IN (:status)) AND " +
-                    " (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
-                    "              FROM OO_EXECUTION_QUEUES qq " +
-                    "              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
-                    " GROUP BY ASSIGNED_WORKER";
-
-    final private String NEW_BUSY_WORKERS_SQL =
-            "SELECT ASSIGNED_WORKER      " +
-                    " FROM  OO_EXECUTION_QUEUES q  " +
                     " WHERE q.STATUS IN (%s) AND " +
                     " (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
                     "              FROM OO_EXECUTION_QUEUES qq " +
@@ -913,7 +903,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
          */
         String bindParams = String.join(",", Collections.nCopies(statuses.length, "?"));
         // prepare the sql statement
-        String sqlStat = String.format(NEW_BUSY_WORKERS_SQL, bindParams);
+        String sqlStat = String.format(BUSY_WORKERS_SQL, bindParams);
 
         // prepare the argument
         Object[] values = Arrays.stream(statuses)
