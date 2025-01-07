@@ -45,6 +45,7 @@ public class MergedConfigurationServiceImpl implements MergedConfigurationServic
     private static final Logger log = LogManager.getLogger(MergedConfigurationServiceImpl.class);
     private static final long MERGED_CONFIGURATION_PERIODIC_REFRESH_MILLIS = getLong("worker.mergedConfiguration.refreshDelayMillis", 1_800L);
     private static final long MERGED_CONFIGURATION_INITIAL_DELAY_MILLIS = getLong("worker.mergedConfiguration.initialDelayMillis", 1_000L);
+
     @Autowired
     private CancelExecutionService cancelExecutionService;
 
