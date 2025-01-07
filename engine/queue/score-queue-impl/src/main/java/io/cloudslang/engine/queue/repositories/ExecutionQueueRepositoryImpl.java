@@ -52,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.Collections;
 
 import static java.lang.Long.parseLong;
 import static org.apache.commons.io.IOUtils.toByteArray;
@@ -70,6 +71,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     private static final String MYSQL = "mysql";
     private static final String MSSQL = "Microsoft";
     private static final String H2 = "H2";
+    private static final boolean useMemoryEfficientApproach = Boolean.getBoolean("use.more.memory.efficient.approach");
 
     // Note : Do not join the below queries using a OR clause as it has proved to more expensive
     final private String SELECT_FINISHED_STEPS_IDS_1 = "SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES EQ WHERE EQ.STATUS IN (6,7,8)";
@@ -336,6 +338,15 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     " FROM  OO_EXECUTION_QUEUES q  " +
                     " WHERE  " +
                     "      (q.STATUS IN (:status)) AND " +
+                    " (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
+                    "              FROM OO_EXECUTION_QUEUES qq " +
+                    "              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
+                    " GROUP BY ASSIGNED_WORKER";
+
+    final private String NEW_BUSY_WORKERS_SQL =
+            "SELECT ASSIGNED_WORKER      " +
+                    " FROM  OO_EXECUTION_QUEUES q  " +
+                    " WHERE q.STATUS IN (%s) AND " +
                     " (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
                     "              FROM OO_EXECUTION_QUEUES qq " +
                     "              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
@@ -897,15 +908,26 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
     @Override
     public List<String> getBusyWorkers(ExecStatus... statuses) {
-        // prepare the sql statement
-        String sqlStat = BUSY_WORKERS_SQL
-                .replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
-        // prepare the argument
-        Object[] values = new Object[statuses.length];
-        int i = 0;
-        for (ExecStatus status : statuses) {
-            values[i] = status.getNumber();
+        String sqlStat;
+
+        if (useMemoryEfficientApproach) {
+            /**
+             * Uses bind parameters to avoid memory issues. This way the database uses fewer unique statements and thus reduces memory usage
+             * This way the database can reuse the same statement for multiple executions and thus prevent ORA-04031.
+             */
+            String bindParams = String.join(",", Collections.nCopies(statuses.length, "?"));
+            // prepare the sql statement
+            sqlStat = String.format(NEW_BUSY_WORKERS_SQL, bindParams);
+        } else {
+            sqlStat = BUSY_WORKERS_SQL
+                    .replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
         }
+
+        // prepare the argument
+        Object[] values = Arrays.stream(statuses)
+                .map(ExecStatus::getNumber)
+                .toArray();
+
         return doSelectWithTemplate(getBusyWorkersJdbcTemplate, sqlStat, new BusyWorkerRowMapper(), values);
     }
 

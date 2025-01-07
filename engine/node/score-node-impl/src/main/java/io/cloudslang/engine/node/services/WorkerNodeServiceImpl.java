@@ -28,6 +28,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +54,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
     private static final long MAX_VERSION_GAP_ALLOWED = Long.getLong("max.allowed.version.gap.worker.recovery", 2);
     private static boolean disableMonitoring = Boolean.getBoolean("global.worker.monitoring.disable");
     private static final String MSG_RECOVERY_VERSION_NAME = "MSG_RECOVERY_VERSION";
+    private static final int WORKER_GROUPS_PAGE_SIZE = Integer.getInteger("worker.groups.page.size", 50);
 
     @Autowired
     private WorkerNodeRepository workerNodeRepository;
@@ -506,6 +509,34 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
     public void updateWRV(String workerUuid, String wrv) {
         WorkerNode worker = workerNodeRepository.findByUuid(workerUuid);
         worker.setWorkerRecoveryVersion(wrv);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, Set<String>> readWorkerGroupsMapByPagination() {
+        /**
+         * Reduces memory usage by loading data in chunks of WORKER_GROUPS_PAGE_SIZE
+         * Prevent ORA-04031.
+         */
+        int currentPage = 0;
+        List<WorkerNode> all = new ArrayList<>();
+
+        Page<WorkerNode> page;
+        do {
+            page = workerNodeRepository.findAllWithPagination(
+                    PageRequest.of(currentPage, WORKER_GROUPS_PAGE_SIZE)
+            );
+            if (page != null && page.hasContent()) {
+                all.addAll(page.getContent());
+            }
+            currentPage++;
+        } while (page.hasNext());
+
+        Map<String, Set<String>> workerGroupsMap = newHashMapWithExpectedSize(all.size());
+        for (WorkerNode workerNode : all) {
+            workerGroupsMap.put(workerNode.getUuid(), new HashSet<>(workerNode.getGroups()));
+        }
+        return workerGroupsMap;
     }
 
 }
