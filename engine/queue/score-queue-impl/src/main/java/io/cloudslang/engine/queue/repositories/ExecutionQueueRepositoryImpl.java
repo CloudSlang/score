@@ -71,7 +71,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     private static final String MYSQL = "mysql";
     private static final String MSSQL = "Microsoft";
     private static final String H2 = "H2";
-    private static final boolean useMemoryEfficientApproach = Boolean.getBoolean("use.more.memory.efficient.approach");
 
     // Note : Do not join the below queries using a OR clause as it has proved to more expensive
     final private String SELECT_FINISHED_STEPS_IDS_1 = "SELECT DISTINCT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES EQ WHERE EQ.STATUS IN (6,7,8)";
@@ -908,20 +907,13 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
     @Override
     public List<String> getBusyWorkers(ExecStatus... statuses) {
-        String sqlStat;
-
-        if (useMemoryEfficientApproach) {
-            /**
-             * Uses bind parameters to avoid memory issues. This way the database uses fewer unique statements and thus reduces memory usage
-             * This way the database can reuse the same statement for multiple executions and thus prevent ORA-04031.
-             */
-            String bindParams = String.join(",", Collections.nCopies(statuses.length, "?"));
-            // prepare the sql statement
-            sqlStat = String.format(NEW_BUSY_WORKERS_SQL, bindParams);
-        } else {
-            sqlStat = BUSY_WORKERS_SQL
-                    .replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
-        }
+        /**
+         * Uses bind parameters to avoid memory issues. This way the database uses fewer unique statements and thus reduces memory usage
+         * This way the database can reuse the same statement for multiple executions and thus prevent ORA-04031.
+         */
+        String bindParams = String.join(",", Collections.nCopies(statuses.length, "?"));
+        // prepare the sql statement
+        String sqlStat = String.format(NEW_BUSY_WORKERS_SQL, bindParams);
 
         // prepare the argument
         Object[] values = Arrays.stream(statuses)

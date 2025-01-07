@@ -274,7 +274,24 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
     @Override
     @Transactional(readOnly = true)
     public Map<String, Set<String>> readWorkerGroupsMap() {
-        List<WorkerNode> all = workerNodeRepository.findAll();
+        /**
+         * Reduces memory usage by loading data in chunks of WORKER_GROUPS_PAGE_SIZE
+         * Prevent ORA-04031.
+         */
+        int currentPage = 0;
+        List<WorkerNode> all = new ArrayList<>();
+
+        Page<WorkerNode> page;
+        do {
+            page = workerNodeRepository.findAllWithPagination(
+                    PageRequest.of(currentPage, WORKER_GROUPS_PAGE_SIZE)
+            );
+            if (page != null && page.hasContent()) {
+                all.addAll(page.getContent());
+            }
+            currentPage++;
+        } while (page.hasNext());
+
         Map<String, Set<String>> workerGroupsMap = newHashMapWithExpectedSize(all.size());
         for (WorkerNode workerNode : all) {
             workerGroupsMap.put(workerNode.getUuid(), new HashSet<>(workerNode.getGroups()));
@@ -510,33 +527,4 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
         WorkerNode worker = workerNodeRepository.findByUuid(workerUuid);
         worker.setWorkerRecoveryVersion(wrv);
     }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Map<String, Set<String>> readWorkerGroupsMapByPagination() {
-        /**
-         * Reduces memory usage by loading data in chunks of WORKER_GROUPS_PAGE_SIZE
-         * Prevent ORA-04031.
-         */
-        int currentPage = 0;
-        List<WorkerNode> all = new ArrayList<>();
-
-        Page<WorkerNode> page;
-        do {
-            page = workerNodeRepository.findAllWithPagination(
-                    PageRequest.of(currentPage, WORKER_GROUPS_PAGE_SIZE)
-            );
-            if (page != null && page.hasContent()) {
-                all.addAll(page.getContent());
-            }
-            currentPage++;
-        } while (page.hasNext());
-
-        Map<String, Set<String>> workerGroupsMap = newHashMapWithExpectedSize(all.size());
-        for (WorkerNode workerNode : all) {
-            workerGroupsMap.put(workerNode.getUuid(), new HashSet<>(workerNode.getGroups()));
-        }
-        return workerGroupsMap;
-    }
-
 }

@@ -45,8 +45,6 @@ public class MergedConfigurationServiceImpl implements MergedConfigurationServic
     private static final Logger log = LogManager.getLogger(MergedConfigurationServiceImpl.class);
     private static final long MERGED_CONFIGURATION_PERIODIC_REFRESH_MILLIS = getLong("worker.mergedConfiguration.refreshDelayMillis", 1_800L);
     private static final long MERGED_CONFIGURATION_INITIAL_DELAY_MILLIS = getLong("worker.mergedConfiguration.initialDelayMillis", 1_000L);
-    private static final boolean useMemoryEfficientApproach = Boolean.getBoolean("use.more.memory.efficient.approach");
-
     @Autowired
     private CancelExecutionService cancelExecutionService;
 
@@ -158,11 +156,7 @@ public class MergedConfigurationServiceImpl implements MergedConfigurationServic
 
                 Map<String, Set<String>> workerGroupsMap;
                 try {
-                    if (useMemoryEfficientApproach) {
-                        workerGroupsMap = workerNodeService.readWorkerGroupsMapByPagination();
-                    } else {
-                        workerGroupsMap = workerNodeService.readWorkerGroupsMap();
-                    }
+                    workerGroupsMap = workerNodeService.readWorkerGroupsMap();
                 } catch (Exception readWorkerGroupsExc) {
                     workerGroupsMap = emptyMap();
                     log.error("Failed to read current worker group information: ", readWorkerGroupsExc);

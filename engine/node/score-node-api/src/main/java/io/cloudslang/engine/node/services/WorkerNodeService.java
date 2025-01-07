@@ -321,9 +321,4 @@ public interface WorkerNodeService {
      * @param workerBusynessValue the newly added busyness value
      */
     void updateWorkerBusynessValue(String uuid, String workerBusynessValue);
-
-    /**
-     * Retrieves the worker and worker groups as a map using pagination
-     */
-    Map<String, Set<String>> readWorkerGroupsMapByPagination();
 }
