@@ -52,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.Collections;
 
 import static java.lang.Long.parseLong;
 import static org.apache.commons.io.IOUtils.toByteArray;
@@ -334,8 +335,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     final private String BUSY_WORKERS_SQL =
             "SELECT ASSIGNED_WORKER      " +
                     " FROM  OO_EXECUTION_QUEUES q  " +
-                    " WHERE  " +
-                    "      (q.STATUS IN (:status)) AND " +
+                    " WHERE q.STATUS IN (%s) AND " +
                     " (NOT EXISTS (SELECT qq.MSG_SEQ_ID " +
                     "              FROM OO_EXECUTION_QUEUES qq " +
                     "              WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND qq.MSG_SEQ_ID > q.MSG_SEQ_ID)) " +
@@ -897,15 +897,19 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
     @Override
     public List<String> getBusyWorkers(ExecStatus... statuses) {
+        /**
+         * Uses bind parameters to avoid memory issues. This way the database uses fewer unique statements and thus reduces memory usage
+         * This way the database can reuse the same statement for multiple executions and thus prevent ORA-04031.
+         */
+        String bindParams = String.join(",", Collections.nCopies(statuses.length, "?"));
         // prepare the sql statement
-        String sqlStat = BUSY_WORKERS_SQL
-                .replaceAll(":status", StringUtils.repeat("?", ",", statuses.length));
+        String sqlStat = String.format(BUSY_WORKERS_SQL, bindParams);
+
         // prepare the argument
-        Object[] values = new Object[statuses.length];
-        int i = 0;
-        for (ExecStatus status : statuses) {
-            values[i] = status.getNumber();
-        }
+        Object[] values = Arrays.stream(statuses)
+                .map(ExecStatus::getNumber)
+                .toArray();
+
         return doSelectWithTemplate(getBusyWorkersJdbcTemplate, sqlStat, new BusyWorkerRowMapper(), values);
     }
 
