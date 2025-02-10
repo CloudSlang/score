@@ -61,7 +61,7 @@ import static io.cloudslang.orchestrator.enums.SuspendedExecutionReason.PARALLEL
 import static java.util.EnumSet.of;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.any;
 
 @RunWith(SpringJUnit4ClassRunner.class)

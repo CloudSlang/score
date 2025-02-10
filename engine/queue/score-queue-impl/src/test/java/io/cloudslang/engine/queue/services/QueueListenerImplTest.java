@@ -43,8 +43,8 @@ import java.util.Random;
 import java.util.UUID;
 
 import static org.junit.matchers.JUnitMatchers.hasItem;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -133,8 +133,8 @@ public class QueueListenerImplTest {
 
 		queueListener.onTerminated(messages);
 
-		verify(splitJoinService, times(1)).endBranch((List<Execution>) argThat(hasItem(execution1)));
-		verify(splitJoinService, times(1)).endBranch((List<Execution>) argThat(hasItem(execution2)));
+		verify(splitJoinService, times(1)).endBranch(argThat(list -> list.contains(execution1)));
+		verify(splitJoinService, times(1)).endBranch(argThat(list -> list.contains(execution2)));
 	}
 
 	private Execution createBranchExecution() {
@@ -201,8 +201,8 @@ public class QueueListenerImplTest {
 
 		queueListener.onFailed(messages);
 
-		verify(splitJoinService, times(1)).endBranch((List<Execution>) argThat(hasItem(execution1)));
-		verify(splitJoinService, times(1)).endBranch((List<Execution>) argThat(hasItem(execution2)));
+		verify(splitJoinService, times(1)).endBranch(argThat(list -> list.contains(execution1)));
+		verify(splitJoinService, times(1)).endBranch(argThat(list -> list.contains(execution2)));
 	}
 
 	@Configuration

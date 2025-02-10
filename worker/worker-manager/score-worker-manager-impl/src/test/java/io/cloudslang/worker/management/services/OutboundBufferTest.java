@@ -24,7 +24,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -39,9 +38,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -86,7 +86,7 @@ public class OutboundBufferTest {
         buffer.drain();
         verify(dispatcherService)
                 .dispatch((List<? extends Serializable>) argThat(new MessagesSizeMatcher(messages)), anyString(),
-                        anyString(), anyString());
+                        any(), anyString());
     }
 
     /**
@@ -153,7 +153,7 @@ public class OutboundBufferTest {
         thread.join();
         verify(dispatcherService)
                 .dispatch((List<? extends Serializable>) argThat(new MessagesSizeMatcher(Arrays.asList(messages))),
-                        anyString(), anyString(), anyString());
+                        anyString(), any(), anyString());
     }
 
 
@@ -211,7 +211,7 @@ public class OutboundBufferTest {
 			}
 			statistics.add(messages.size(), weight);
 			return null;
-		}).when(dispatcherService).dispatch(anyList(), anyString(), anyString(), anyString());
+		}).when(dispatcherService).dispatch(anyList(), anyString(), any(), anyString());
 
         new Thread(new Runnable() {
             @Override
@@ -264,7 +264,7 @@ public class OutboundBufferTest {
         assertEquals(0, buffer.getWeight());
     }
 
-    private class MessagesSizeMatcher extends ArgumentMatcher {
+    private class MessagesSizeMatcher implements ArgumentMatcher {
 
         List messages;
 

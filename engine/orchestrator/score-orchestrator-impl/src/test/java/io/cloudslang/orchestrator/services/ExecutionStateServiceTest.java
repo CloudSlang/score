@@ -40,8 +40,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyListOf;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -133,7 +133,7 @@ public class ExecutionStateServiceTest {
 
     @Test
     public void readExecutionIdAndBranchIdByStatuses_EmptyList() {
-        when(executionStateRepository.findExecutionIdByStatuses(anyListOf(ExecutionStatus.class))).thenReturn(new ArrayList<Long>());
+        when(executionStateRepository.findExecutionIdByStatuses(anyList())).thenReturn(new ArrayList<Long>());
         List<Long> actualExecutionIds = executionStateService.readExecutionIdByStatuses(new ArrayList<ExecutionStatus>());
         assertThat(actualExecutionIds).hasSize(0);
     }

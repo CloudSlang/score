@@ -48,7 +48,7 @@ import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.anyObject;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -78,7 +78,7 @@ public class WorkerMetricsServiceImplTest {
         when(perfMetricCollector.collectMetrics()).thenReturn(metricData);
         workerMetricsService.collectPerformanceMetrics();
         workerMetricsService.dispatchPerformanceMetrics();
-        verify(eventBus, times(1)).dispatch(anyObject());
+        verify(eventBus, times(1)).dispatch(any());
     }
 
     @Test

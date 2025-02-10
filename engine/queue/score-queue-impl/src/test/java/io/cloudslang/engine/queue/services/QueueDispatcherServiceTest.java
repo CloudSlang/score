@@ -33,8 +33,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * User: wahnonm
@@ -57,7 +60,8 @@ public class QueueDispatcherServiceTest {
     private QueueDispatcherService queueDispatcherService = new QueueDispatcherServiceImpl();
 
     @Configuration
-    static class EmptyConfig {}
+    static class EmptyConfig {
+    }
 
     @Before
     public void setUp() {
@@ -68,10 +72,10 @@ public class QueueDispatcherServiceTest {
     public void testDispatchEmptyValues() throws Exception {
         List<ExecutionMessage> msg = new ArrayList<>();
         queueDispatcherService.dispatch(msg);
-        verify(executionQueueService,never()).enqueue(anyList());
+        verify(executionQueueService, never()).enqueue(anyList());
 
         queueDispatcherService.dispatch(null);
-        verify(executionQueueService,never()).enqueue(anyList());
+        verify(executionQueueService, never()).enqueue(anyList());
     }
 
     @Test
@@ -80,15 +84,15 @@ public class QueueDispatcherServiceTest {
         msg.add(new ExecutionMessage());
 
         queueDispatcherService.dispatch(msg);
-        verify(executionQueueService,times(1)).enqueue(anyList());
+        verify(executionQueueService, times(1)).enqueue(anyList());
     }
 
     @Test
     public void testPoll() throws Exception {
         Date now = new Date();
         when(busyWorkersService.isWorkerBusy("workerId")).thenReturn(true);
-        queueDispatcherService.poll("workerId",5, WORKER_FREE_MEMORY);
-        verify(executionQueueService,times(1)).poll("workerId", 5, WORKER_FREE_MEMORY, ExecStatus.ASSIGNED);
+        queueDispatcherService.poll("workerId", 5, WORKER_FREE_MEMORY);
+        verify(executionQueueService, times(1)).poll("workerId", 5, WORKER_FREE_MEMORY, ExecStatus.ASSIGNED);
     }
 
     @Test
@@ -97,7 +101,7 @@ public class QueueDispatcherServiceTest {
         List<ExecutionMessage> msg = new ArrayList<>();
 
         when(executionQueueService.poll("workerId", 5, WORKER_FREE_MEMORY, ExecStatus.ASSIGNED)).thenReturn(msg);
-        List<ExecutionMessage> result = queueDispatcherService.poll("workerId",5, WORKER_FREE_MEMORY);
+        List<ExecutionMessage> result = queueDispatcherService.poll("workerId", 5, WORKER_FREE_MEMORY);
         Assert.assertTrue(result.isEmpty());
     }
 
@@ -113,9 +117,9 @@ public class QueueDispatcherServiceTest {
         msg.get(1).setMsgId("id2");
 
         when(executionQueueService.poll("workerId", 5, WORKER_FREE_MEMORY, ExecStatus.ASSIGNED)).thenReturn(msg);
-        List<ExecutionMessage> result = queueDispatcherService.poll("workerId",5, WORKER_FREE_MEMORY);
-        Assert.assertEquals(2,result.size());
-        Assert.assertEquals("id1",result.get(0).getMsgId());
-        Assert.assertEquals("id2",result.get(1).getMsgId());
+        List<ExecutionMessage> result = queueDispatcherService.poll("workerId", 5, WORKER_FREE_MEMORY);
+        Assert.assertEquals(2, result.size());
+        Assert.assertEquals("id1", result.get(0).getMsgId());
+        Assert.assertEquals("id2", result.get(1).getMsgId());
     }
 }
