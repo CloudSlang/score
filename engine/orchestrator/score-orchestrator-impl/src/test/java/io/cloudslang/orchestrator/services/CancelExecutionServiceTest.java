@@ -39,7 +39,7 @@ import java.util.Map;
 
 import static io.cloudslang.score.facade.execution.ExecutionSummary.EMPTY_BRANCH;
 import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
@@ -81,7 +81,7 @@ public class CancelExecutionServiceTest {
         contexts.put("context_a", "");
         // Paused
         Execution pausedExecutionObj = new Execution(1L, 1L, contexts);
-        when(executionSerializationUtil.objFromBytes(any(byte[].class))).thenReturn(pausedExecutionObj);
+        when(executionSerializationUtil.objFromBytes(any())).thenReturn(pausedExecutionObj);
         checkValidRequestCancel(ExecutionStatus.PAUSED, ExecutionStatus.PENDING_CANCEL, ExecutionActionResult.SUCCESS);
         assertThat(pausedExecutionObj.getPosition()).isNull();
         assertThat(pausedExecutionObj.getSystemContext().getFlowTerminationType()).isEqualTo(ExecutionStatus.CANCELED);

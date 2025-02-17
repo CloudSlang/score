@@ -60,13 +60,12 @@
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
+            <artifactId>mockito-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.cloudslang</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>score-worker-manager-impl</artifactId>
-            <version>0.4.7-SNAPSHOT</version>
-            <scope>compile</scope>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

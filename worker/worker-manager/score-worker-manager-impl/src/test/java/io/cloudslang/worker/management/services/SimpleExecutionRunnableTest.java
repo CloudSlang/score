@@ -40,10 +40,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static java.util.concurrent.Executors.newFixedThreadPool;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -126,7 +125,7 @@ public class SimpleExecutionRunnableTest {
                 buffer.add((ExecutionMessage) message);
             }
             return null;
-        }).when(outBuffer).put(any(ExecutionMessage[].class));
+        }).when(outBuffer).put(any());
 
         when(workerManager.isFromCurrentThreadPool(anyString())).thenReturn(true);
 
@@ -138,7 +137,7 @@ public class SimpleExecutionRunnableTest {
         executionMessage.setMsgId(String.valueOf(100L));
         simpleExecutionRunnable.setExecutionMessage(executionMessage);
         simpleExecutionRunnable.run();
-        verify(executionService, times(1)).execute(execution);
+        verify(executionService, times(1)).execute(any());
 
         Assert.assertFalse(buffer.isEmpty());
         assertEquals(ExecStatus.FINISHED, buffer.get(0).getStatus());

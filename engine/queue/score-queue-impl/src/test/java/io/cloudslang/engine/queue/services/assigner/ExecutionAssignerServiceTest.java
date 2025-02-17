@@ -43,7 +43,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -114,7 +114,7 @@ public class ExecutionAssignerServiceTest {
         Mockito.when(workerNodeService.readGroupWorkersMapActiveAndRunningAndVersion(engineVersionService.getEngineVersionId())).thenReturn(groupWorkersMap);
         Execution execution = Mockito.mock(Execution.class);
         Mockito.when(execution.getSystemContext()).thenReturn(new SystemContext());
-        Mockito.when(executionMessageConverter.extractExecution(any(Payload.class))).thenReturn(execution);
+        Mockito.when(executionMessageConverter.extractExecution(any())).thenReturn(execution);
 
         final List<ExecutionMessage> messagesInQ = executionAssignerService.assignWorkers(assignMessages);
 
