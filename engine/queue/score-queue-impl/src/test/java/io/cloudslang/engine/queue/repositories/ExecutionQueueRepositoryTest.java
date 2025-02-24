@@ -133,11 +133,13 @@ public class ExecutionQueueRepositoryTest {
         msg.add(generateMessageForWorker(2, "group2", "msg2", "uuid2", 1));
         msg.add(generateMessageForWorker(3, "group3","msg3", EMPTY_WORKER, 1));
         executionQueueRepository.insertExecutionQueue(msg,1L);
+        executionQueueRepository.insertExecutionStates(msg);
 
         msg.clear();
         msg.add(generateMessageForWorker(4, "group2","msg2", EMPTY_WORKER, 1));
 
         executionQueueRepository.insertExecutionQueue(msg,4L);
+        executionQueueRepository.insertExecutionStates(msg);
 
         Integer result = executionQueueRepository.countMessagesWithoutAckForWorker(100,3, EMPTY_WORKER);
         Assert.assertEquals(result.intValue(),2);

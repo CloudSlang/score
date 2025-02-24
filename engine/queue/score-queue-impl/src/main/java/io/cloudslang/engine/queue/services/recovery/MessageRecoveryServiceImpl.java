@@ -49,24 +49,27 @@ final public class MessageRecoveryServiceImpl implements MessageRecoveryService 
                 ExecStatus.SENT,
                 ExecStatus.IN_PROGRESS);
 
-        logMessageRecovery(messages);
-        enqueueMessages(messages,ExecStatus.RECOVERED);
+        logMessageRecovery(messages, workerName);
+        enqueueMessages(messages, ExecStatus.RECOVERED);
         //noinspection RedundantIfStatement
-        if (messages == null || messages.size() < defaultPoolSize){
-           return false;
+        if (messages == null || messages.size() < defaultPoolSize) {
+            return false;
         }
         return true;
     }
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
-    public void logMessageRecovery(List<ExecutionMessage> messages) {
-        if(!CollectionUtils.isEmpty(messages)){
-            logger.warn("Will do recovery for " + messages.size() + " messages. ");
-            if(logger.isDebugEnabled()){
-                for(ExecutionMessage msg:messages){
-                    logger.debug("Will do recovery for messages with ExecStateId = " + msg.getExecStateId());
+    public void logMessageRecovery(List<ExecutionMessage> messages, String workerName) {
+        if (!CollectionUtils.isEmpty(messages)) {
+            logger.warn("Worker [{}] will do recovery for {} messages. ", workerName, messages.size());
+            if (!CollectionUtils.isEmpty(messages)) {
+                for (ExecutionMessage msg : messages) {
+                    logger.info("Will do recovery for message with msg_id: {}, split_id: {}, execStateId: {}, workerId: {}, status: {}, worker group: {} and active: {}",
+                            msg.getMsgId(), msg.getSplitId(), msg.getExecStateId(), msg.getWorkerId(), msg.getStatus(), msg.getWorkerGroup(), msg.isActive());
                 }
+            } else {
+                logger.info("No messages to recover for worker [ {} ]", workerName);
             }
         }
     }
@@ -74,8 +77,8 @@ final public class MessageRecoveryServiceImpl implements MessageRecoveryService 
     @Override
     @Transactional
     public void enqueueMessages(List<ExecutionMessage> messages, ExecStatus messageStatus) {
-        if(!CollectionUtils.isEmpty(messages)){
-            for(ExecutionMessage msg:messages){
+        if (!CollectionUtils.isEmpty(messages)) {
+            for (ExecutionMessage msg : messages) {
                 msg.setStatus(messageStatus);
                 msg.setWorkerId(ExecutionMessage.EMPTY_WORKER);
                 msg.incMsgSeqId();
