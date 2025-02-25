@@ -112,7 +112,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
     final private String QUERY_COUNT_MESSAGES_WITHOUT_ACK_FOR_WORKER_SQL =
             "SELECT COUNT(*)  " +
-                    "  FROM  OO_EXECUTION_QUEUES  q  " +
+                    "  FROM  OO_EXECUTION_QUEUES  q,  " +
+                    "  OO_EXECUTION_STATES s   " +
                     "  WHERE " +
                     "      (q.ASSIGNED_WORKER  = ? ) AND " +
                     "      (q.STATUS  IN (:status)) AND " +
@@ -121,12 +122,13 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "                  WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND " +
                     "                        qq.MSG_SEQ_ID > q.MSG_SEQ_ID " +
                     "                 )" +
-                    "      ) AND " +
+                    "      ) AND (q.EXEC_STATE_ID = s.ID) AND " +
                     "      (q.MSG_VERSION < ?)  ";
 
     final private String QUERY_COUNT_MESSAGES_WITHOUT_ACK_FOR_WORKER_SQL_MSSQL =
             "SELECT COUNT(*)  " +
-                    "  FROM  OO_EXECUTION_QUEUES  q  " +
+                    "  FROM  OO_EXECUTION_QUEUES  q,  " +
+                    "  OO_EXECUTION_STATES s   " +
                     "  WHERE " +
                     "      (q.ASSIGNED_WORKER  = CAST(? AS NVARCHAR(40))) AND " +
                     "      (q.STATUS  IN (:status) ) AND " +
@@ -135,7 +137,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "                  WHERE (qq.EXEC_STATE_ID = q.EXEC_STATE_ID) AND " +
                     "                        qq.MSG_SEQ_ID > q.MSG_SEQ_ID " +
                     "                 )" +
-                    "      ) AND " +
+                    "      ) AND (q.EXEC_STATE_ID = s.ID) AND " +
                     "      (q.MSG_VERSION < ?)  ";
 
     final private String QUERY_WORKER_LEGACY_MEMORY_HANDLING_SQL =

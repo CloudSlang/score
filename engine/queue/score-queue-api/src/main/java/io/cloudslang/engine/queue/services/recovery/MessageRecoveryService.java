@@ -34,7 +34,7 @@ public interface MessageRecoveryService {
 
     boolean recoverMessagesBulk(String workerName, int defaultPoolSize);
 
-    void logMessageRecovery(List<ExecutionMessage> messages);
+    void logMessageRecovery(List<ExecutionMessage> messages, String workerName);
 
     void enqueueMessages(List<ExecutionMessage> messages, ExecStatus messageStatus);
 }
