@@ -63,14 +63,12 @@ final public class MessageRecoveryServiceImpl implements MessageRecoveryService 
     public void logMessageRecovery(List<ExecutionMessage> messages, String workerName) {
         if (!CollectionUtils.isEmpty(messages)) {
             logger.warn("Worker [{}] will do recovery for {} messages. ", workerName, messages.size());
-            if (!CollectionUtils.isEmpty(messages)) {
-                for (ExecutionMessage msg : messages) {
-                    logger.info("Will do recovery for message with msg_id: {}, split_id: {}, execStateId: {}, workerId: {}, status: {}, worker group: {} and active: {}",
-                            msg.getMsgId(), msg.getSplitId(), msg.getExecStateId(), msg.getWorkerId(), msg.getStatus(), msg.getWorkerGroup(), msg.isActive());
-                }
-            } else {
-                logger.info("No messages to recover for worker [ {} ]", workerName);
+            for (ExecutionMessage msg : messages) {
+                logger.info("Will do recovery for message with msg_id: {}, split_id: {}, execStateId: {}, workerId: {}, status: {}, worker group: {} and active: {}",
+                        msg.getMsgId(), msg.getSplitId(), msg.getExecStateId(), msg.getWorkerId(), msg.getStatus(), msg.getWorkerGroup(), msg.isActive());
             }
+        } else {
+            logger.info("No messages to recover for worker [ {} ]", workerName);
         }
     }
 
