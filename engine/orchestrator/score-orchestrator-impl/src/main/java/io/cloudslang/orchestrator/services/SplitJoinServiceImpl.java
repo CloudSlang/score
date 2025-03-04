@@ -338,7 +338,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             List<String> cancelledExecutions = suspendedExecutionsRepository.findCancelledExecutionInOOExecutionSummaryTable(
                     statusEnums.stream().map(Enum::name).collect(Collectors.toList()), executionIds, timeLimitMillis);
 
-            finishedBranchRepository.deleteByExecutionIds(executionIds);
+            finishedBranchRepository.deleteByExecutionIds(cancelledExecutions);
             suspendedExecutionsRepository.deleteByIds(cancelledExecutions);
         }
     }
