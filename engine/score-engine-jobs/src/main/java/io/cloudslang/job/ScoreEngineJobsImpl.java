@@ -69,6 +69,10 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
 
     private final Integer SPLIT_JOIN_ITERATIONS = Integer.getInteger("splitjoin.job.iterations", 20);
 
+    private static final long FINISHED_EXECUTION_END_TIME = Long.getLong("splitjoin.job.finished.execution.end.time", 3 * 60 * 60 * 1000L); // 3 hours
+
+
+
     /**
      * Job that will handle the cleaning of queue table.
      */
@@ -114,6 +118,8 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
                 int joinedSplits = splitJoinService.joinFinishedSplits(SPLIT_JOIN_BULK_SIZE);
                 moreToJoin = (joinedSplits == SPLIT_JOIN_BULK_SIZE);
             }
+
+            splitJoinService.deleteStaleSuspendedExecutions(FINISHED_EXECUTION_END_TIME);
 
             stopWatch.stop();
             if (logger.isDebugEnabled()) logger.debug("finished SplitJoinJob in " + stopWatch);

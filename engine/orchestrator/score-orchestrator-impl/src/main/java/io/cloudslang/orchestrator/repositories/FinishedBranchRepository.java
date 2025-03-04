@@ -36,4 +36,8 @@ public interface FinishedBranchRepository extends JpaRepository<FinishedBranch, 
     @Query("delete from FinishedBranch fe where fe.id in :ids")
     @Modifying
     void deleteByIds(@Param("ids") Collection<Long> ids);
+
+    @Query("delete from FinishedBranch fe where fe.executionId in :executionIds")
+    @Modifying
+    void deleteByExecutionIds(@Param("executionIds") Collection<String> executionIds);
 }

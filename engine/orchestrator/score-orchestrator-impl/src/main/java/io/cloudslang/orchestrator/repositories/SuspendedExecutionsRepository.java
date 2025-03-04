@@ -50,6 +50,15 @@ public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedEx
     @Query("from SuspendedExecution se where se.splitId = cast(:splitId as string)")
     SuspendedExecution findBySplitId(@Param("splitId") String splitId);
 
+    @Query("from SuspendedExecution se where se.locked = true")
+    List<SuspendedExecution> findPotentialStaleSuspendedExecution();
+
+    @Query(value = "SELECT execution_id FROM oo_execution_summary WHERE status IN (:suspensionReasons) AND" +
+            " execution_id IN (:executionIds) AND end_time_long < :time", nativeQuery = true)
+    List<String> findCancelledExecutionInOOExecutionSummaryTable(@Param("suspensionReasons") List<String> suspensionReasons,
+                                                                 @Param("executionIds") List<String> executionIds,
+                                                                 @Param("time") long time);
+
     @Modifying
     @Query("update SuspendedExecution se set se.executionObj = :newExecution, se.locked = false where se.id = :suspendedExecutionId")
     void updateSuspendedExecutionContexts(@Param("suspendedExecutionId") long suspendedExecutionId,

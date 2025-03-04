@@ -34,6 +34,7 @@ import io.cloudslang.score.events.EventConstants;
 import io.cloudslang.score.events.FastEventBus;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.facade.entities.Execution;
+import io.cloudslang.score.facade.execution.ExecutionStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.logging.log4j.LogManager;
@@ -45,10 +46,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ch.lambdaj.Lambda.convert;
 import static ch.lambdaj.Lambda.extract;
@@ -64,6 +67,8 @@ import static io.cloudslang.score.events.EventConstants.EXECUTION_ID;
 import static io.cloudslang.score.events.EventConstants.SPLIT_ID;
 import static io.cloudslang.score.facade.TempConstants.MI_REMAINING_BRANCHES_CONTEXT_KEY;
 import static io.cloudslang.score.facade.execution.ExecutionStatus.CANCELED;
+import static io.cloudslang.score.facade.execution.ExecutionStatus.COMPLETED;
+import static io.cloudslang.score.facade.execution.ExecutionStatus.SYSTEM_FAILURE;
 import static java.lang.Long.parseLong;
 import static java.lang.String.valueOf;
 import static java.util.EnumSet.of;
@@ -321,6 +326,23 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         return joinMiBranchesAndSendToQueue(suspendedExecutions);
     }
 
+    @Override
+    @Transactional
+    public void deleteStaleSuspendedExecutions(long finishedExecutionEndTime) {
+        List<SuspendedExecution> staleSuspendedExecutions = suspendedExecutionsRepository.findPotentialStaleSuspendedExecution();
+        List<String> executionIds = staleSuspendedExecutions.stream().map(SuspendedExecution::getExecutionId).toList();
+
+        if (!executionIds.isEmpty()) {
+            long timeLimitMillis = System.currentTimeMillis() - finishedExecutionEndTime;
+            List<ExecutionStatus> statusEnums = Arrays.asList(CANCELED, COMPLETED, SYSTEM_FAILURE);
+            List<String> cancelledExecutions = suspendedExecutionsRepository.findCancelledExecutionInOOExecutionSummaryTable(
+                    statusEnums.stream().map(Enum::name).collect(Collectors.toList()), executionIds, timeLimitMillis);
+
+            finishedBranchRepository.deleteByExecutionIds(executionIds);
+            suspendedExecutionsRepository.deleteByIds(cancelledExecutions);
+        }
+    }
+
     private int joinMiBranchesAndSendToQueue(List<SuspendedExecution> suspendedExecutions) {
         List<ExecutionMessage> messages = new ArrayList<>();
         List<SuspendedExecution> mergedSuspendedExecutions = new ArrayList<>();
@@ -349,7 +371,15 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             long updatedMergedBranches = mergedBranches + nrOfNewFinishedBranches;
             se.setMergedBranches(updatedMergedBranches);
             execution.getSystemContext().put(MI_REMAINING_BRANCHES_CONTEXT_KEY, valueOf(totalNumberOfBranches - updatedMergedBranches));
-            if (updatedMergedBranches == totalNumberOfBranches) {
+
+            boolean wasExecutionCancelled = false;
+            if (execution.getSystemContext() != null && execution.getSystemContext().getFlowTerminationType() != null) {
+                if (execution.getSystemContext().getFlowTerminationType().equals(CANCELED)) {
+                    wasExecutionCancelled = true;
+                }
+            }
+
+            if (updatedMergedBranches == totalNumberOfBranches || wasExecutionCancelled) {
                 mergedSuspendedExecutions.add(se);
             } else {
                 se.setLocked(true);
