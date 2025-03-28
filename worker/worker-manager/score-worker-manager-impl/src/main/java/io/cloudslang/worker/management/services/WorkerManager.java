@@ -23,6 +23,7 @@ import io.cloudslang.worker.management.WorkerConfigurationService;
 import io.cloudslang.worker.management.monitor.WorkerStateUpdateService;
 import io.cloudslang.worker.management.queue.WorkerQueueDetailsContainer;
 import io.cloudslang.worker.management.queue.WorkerQueueDetailsHolder;
+import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -392,4 +393,12 @@ public class WorkerManager implements ApplicationListener, EndExecutionCallback,
         return (++threadPoolVersion);
     }
 
+    @PreDestroy
+    public void destroy() {
+        try {
+            executorService.shutdown();
+            executorService.shutdownNow();
+        } catch (Exception ignored) {
+        }
+    }
 }
