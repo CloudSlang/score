@@ -322,16 +322,17 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     }
 
     private int joinMiBranchesAndSendToQueue(List<SuspendedExecution> suspendedExecutions) {
-        List<ExecutionMessage> messages = new ArrayList<>();
-        List<SuspendedExecution> mergedSuspendedExecutions = new ArrayList<>();
-
         if (logger.isDebugEnabled()) {
             logger.debug("Joining finished branches, found " + suspendedExecutions.size() + " suspended executions with all branches finished");
         }
 
         // nothing to do here
-        if (suspendedExecutions.isEmpty())
+        if (suspendedExecutions.isEmpty()) {
             return 0;
+        }
+
+        List<ExecutionMessage> messages = new ArrayList<>();
+        List<SuspendedExecution> mergedSuspendedExecutions = new ArrayList<>();
 
         for (SuspendedExecution se : suspendedExecutions) {
             Execution execution = se.getExecutionObj();
