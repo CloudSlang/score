@@ -13,20 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.worker.execution.services;
-
-import io.cloudslang.score.facade.entities.Execution;
+package io.cloudslang.engine.queue.entities;
 
 import java.util.Date;
 
-public interface ExternalExecutionService {
-    void pauseExternalExecution(Execution execution) throws InterruptedException;
-
-    void resumeExternalExecution(Execution execution) throws InterruptedException;
-
-    Execution readExecutionObject(Long executionId, String branchId);
-
-    void updateExecutionObject(Long executionId, String branchId, Execution execution, Date updateDate);
-
-    void postExecutionWork(Execution execution) throws InterruptedException;
+public record ExecutionStatesData(String messageId, Long id, Date createTime) {
 }

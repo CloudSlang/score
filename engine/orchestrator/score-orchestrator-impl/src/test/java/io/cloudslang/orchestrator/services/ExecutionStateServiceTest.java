@@ -36,6 +36,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -291,28 +292,28 @@ public class ExecutionStateServiceTest {
     @Test
     public void testUpdateExecutionObject_NullExecutionId() {
         IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
-                () -> executionStateService.updateExecutionObject(null, "Asdfsdf", null));
+                () -> executionStateService.updateExecutionObject(null, "Asdfsdf", null, new Date()));
         Assert.assertEquals("executionId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testUpdateExecutionObject_EmptyExecutionId() {
         IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
-                () -> executionStateService.updateExecutionObject(null, "Asdfsdf", null));
+                () -> executionStateService.updateExecutionObject(null, "Asdfsdf", null, new Date()));
         Assert.assertEquals("executionId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testUpdateExecutionObject_NullBranchId() {
         IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
-                () -> executionStateService.updateExecutionObject(123L, null, null));
+                () -> executionStateService.updateExecutionObject(123L, null, null, new Date()));
         Assert.assertEquals("branchId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testUpdateExecutionObject_EmptyBranchId() {
         IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
-                () -> executionStateService.updateExecutionObject(123L, "          ", null));
+                () -> executionStateService.updateExecutionObject(123L, "          ", null, new Date()));
         Assert.assertEquals("branchId cannot be null or empty", exception.getMessage());
     }
 
@@ -321,6 +322,7 @@ public class ExecutionStateServiceTest {
         Long executionId = 123L;
         String branchId = UUID.randomUUID().toString();
         Execution execution = new Execution();
+        Date date = new Date();
 
         byte[] runObjectBytes = new byte[]{0, 0, 0};
         ExecutionState executionState = Mockito.mock(ExecutionState.class);
@@ -328,7 +330,7 @@ public class ExecutionStateServiceTest {
         when(executionStateRepository.findByExecutionIdAndBranchId(executionId, branchId)).thenReturn(executionState);
         when(executionSerializationUtil.objToBytes(execution)).thenReturn(runObjectBytes);
 
-        executionStateService.updateExecutionObject(executionId, branchId, execution);
+        executionStateService.updateExecutionObject(executionId, branchId, execution, date);
         verify(executionState, times(1)).setExecutionObject(runObjectBytes);
     }
 

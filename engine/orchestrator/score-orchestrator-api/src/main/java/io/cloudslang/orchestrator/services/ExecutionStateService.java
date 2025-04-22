@@ -95,7 +95,7 @@ public interface ExecutionStateService {
      * @param branchId    id of the branch
      * @param execution   the execution object
      */
-    public void updateExecutionObject(Long executionId, String branchId, Execution execution);
+    public void updateExecutionObject(Long executionId, String branchId, Execution execution, Date updateDate);
 
     /***
      * Updates the status for the given execution id and branch id

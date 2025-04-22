@@ -74,27 +74,27 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
      */
     @Override
     public void cleanQueueJob() {
-        try {
-            Set<Long> ids = queueCleanerService.getFinishedExecStateIds();
-            if (logger.isDebugEnabled())
-                logger.debug("Will clean from queue the next Exec state ids amount:" + ids.size());
-
-            Set<Long> execIds = new HashSet<>();
-
-            for (Long id : ids) {
-                execIds.add(id);
-                if (execIds.size() >= QUEUE_BULK_SIZE) {
-                    queueCleanerService.cleanFinishedSteps(execIds);
-                    execIds.clear();
-                }
-            }
-
-            if (execIds.size() > 0) {
-                queueCleanerService.cleanFinishedSteps(execIds);
-            }
-        } catch (Exception e) {
-            logger.error("Can't run queue cleaner job.", e);
-        }
+//        try {
+//            Set<Long> ids = queueCleanerService.getFinishedExecStateIds();
+//            if (logger.isDebugEnabled())
+//                logger.debug("Will clean from queue the next Exec state ids amount:" + ids.size());
+//
+//            Set<Long> execIds = new HashSet<>();
+//
+//            for (Long id : ids) {
+//                execIds.add(id);
+//                if (execIds.size() >= QUEUE_BULK_SIZE) {
+//                    queueCleanerService.cleanFinishedSteps(execIds);
+//                    execIds.clear();
+//                }
+//            }
+//
+//            if (execIds.size() > 0) {
+//                queueCleanerService.cleanFinishedSteps(execIds);
+//            }
+//        } catch (Exception e) {
+//            logger.error("Can't run queue cleaner job.", e);
+//        }
     }
 
     /**

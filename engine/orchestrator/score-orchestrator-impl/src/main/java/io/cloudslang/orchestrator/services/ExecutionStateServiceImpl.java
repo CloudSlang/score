@@ -131,11 +131,12 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
 
     @Override
     @Transactional
-    public void updateExecutionObject(Long executionId, String branchId, Execution execution) {
+    public void updateExecutionObject(Long executionId, String branchId, Execution execution, Date updateDate) {
         validateExecutionId(executionId);
         validateBranchId(branchId);
         ExecutionState executionState = findByExecutionIdAndBranchId(executionId, branchId);
         executionState.setExecutionObject(executionSerializationUtil.objToBytes(execution));
+        executionState.setUpdateTime(updateDate.getTime());
     }
 
     @Override
