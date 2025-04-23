@@ -34,6 +34,8 @@ import io.cloudslang.score.events.EventConstants;
 import io.cloudslang.score.events.FastEventBus;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.facade.entities.Execution;
+import io.cloudslang.score.facade.execution.ExecutionStatus;
+import io.cloudslang.score.facade.execution.ExecutionSummary;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.logging.log4j.LogManager;
@@ -64,6 +66,7 @@ import static io.cloudslang.score.events.EventConstants.EXECUTION_ID;
 import static io.cloudslang.score.events.EventConstants.SPLIT_ID;
 import static io.cloudslang.score.facade.TempConstants.MI_REMAINING_BRANCHES_CONTEXT_KEY;
 import static io.cloudslang.score.facade.execution.ExecutionStatus.CANCELED;
+import static io.cloudslang.score.facade.execution.ExecutionStatus.SYSTEM_FAILURE;
 import static java.lang.Long.parseLong;
 import static java.lang.String.valueOf;
 import static java.util.EnumSet.of;
@@ -73,6 +76,8 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     private final Logger logger = LogManager.getLogger(getClass());
 
     private final Integer BULK_SIZE = Integer.getInteger("splitjoin.job.bulk.size", 200);
+
+    private final long SUSPENDED_EXECUTIONS_TIMEOUT = Integer.getInteger("splitjoin.suspendedExecutions.timeout", 24 * 60 * 60); // 24h in seconds
 
     @Autowired
     private SuspendedExecutionsRepository suspendedExecutionsRepository;
@@ -95,6 +100,10 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     @Autowired
     @Qualifier("consumptionFastEventBus")
     private FastEventBus fastEventBus;
+
+    @Autowired
+    @Qualifier("executionSummaryProxyService")
+    private ExecutionSummaryProxyService executionSummaryService;
 
     /*
         converts an execution to a fresh execution message for triggering a new flow
@@ -333,13 +342,19 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
         List<ExecutionMessage> messages = new ArrayList<>();
         List<SuspendedExecution> mergedSuspendedExecutions = new ArrayList<>();
+        List<SuspendedExecution> notMergedSuspendedExecutions = new ArrayList<>();
 
         for (SuspendedExecution se : suspendedExecutions) {
+            Set<FinishedBranch> finishedBranches = se.getFinishedBranches();
+            if (finishedBranches.isEmpty()) {
+                // no finish branch left to clear, maybe the execution is cancelled or failed
+                notMergedSuspendedExecutions.add(se);
+                continue;
+            }
             Execution execution = se.getExecutionObj();
             execution.getSystemContext().remove(FINISHED_CHILD_BRANCHES_DATA);
             execution.getSystemContext().put("CURRENT_PROCESSED__SPLIT_ID", se.getSplitId());
 
-            Set<FinishedBranch> finishedBranches = se.getFinishedBranches();
             long mergedBranches = se.getMergedBranches();
             Integer totalNumberOfBranches = se.getNumberOfBranches();
 
@@ -353,13 +368,14 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             if (updatedMergedBranches == totalNumberOfBranches) {
                 mergedSuspendedExecutions.add(se);
             } else {
-                se.setLocked(true);
                 finishedBranches.clear();
             }
             ExecutionMessage executionMessage = executionToStartExecutionMessage.convert(execution);
             setWorkerGroupOnCSParallelLoopBranches(execution, executionMessage);
             messages.add(executionMessage);
         }
+
+        mergedSuspendedExecutions.addAll(getTerminatedSuspendedExecutions(notMergedSuspendedExecutions));
 
         queueDispatcherService.dispatch(messages);
 
@@ -368,15 +384,47 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         return suspendedExecutions.size();
     }
 
-    private int joinAndSendToQueue(List<SuspendedExecution> suspendedExecutions) {
-        List<ExecutionMessage> messages = new ArrayList<>();
+    private List<SuspendedExecution> getTerminatedSuspendedExecutions(List<SuspendedExecution> suspendedExecutions) {
+        List<SuspendedExecution> terminatedSuspendedExecutions = new ArrayList<>();
+        List<String> terminatedExecutionSummaries = new ArrayList<>();
+        List<String> executionIds = suspendedExecutions.stream().map(SuspendedExecution::getExecutionId).toList();
+        List<ExecutionStatus> executionStatuses = List.of(CANCELED, SYSTEM_FAILURE);
+        List<ExecutionSummary> executionSummaries = executionSummaryService.getEndTimeByExecutionIdInAndStatusIn(executionIds, executionStatuses);
+        long now = System.currentTimeMillis();
+        long cutoff = now - SUSPENDED_EXECUTIONS_TIMEOUT * 1000;
 
-        if (logger.isDebugEnabled())
+        for (ExecutionSummary executionSummary : executionSummaries) {
+            long endTime = executionSummary.getEndTime().getTime();
+
+            if (endTime < cutoff) {
+                terminatedExecutionSummaries.add(executionSummary.getExecutionId());
+            }
+        }
+
+        if (terminatedExecutionSummaries.isEmpty()) {
+            return terminatedSuspendedExecutions;
+        }
+
+        for (SuspendedExecution suspendedExecution : suspendedExecutions) {
+            if (terminatedExecutionSummaries.contains(suspendedExecution.getExecutionId())) {
+                terminatedSuspendedExecutions.add(suspendedExecution);
+            }
+        }
+
+        return terminatedSuspendedExecutions;
+    }
+
+    private int joinAndSendToQueue(List<SuspendedExecution> suspendedExecutions) {
+        if (logger.isDebugEnabled()) {
             logger.debug("Joining finished branches, found " + suspendedExecutions.size() + " suspended executions with all branches finished");
+        }
 
         // nothing to do here
-        if (suspendedExecutions.isEmpty())
+        if (suspendedExecutions.isEmpty()) {
             return 0;
+        }
+
+        List<ExecutionMessage> messages = new ArrayList<>();
 
         for (SuspendedExecution se : suspendedExecutions) {
             Execution exec = joinSplit(se);

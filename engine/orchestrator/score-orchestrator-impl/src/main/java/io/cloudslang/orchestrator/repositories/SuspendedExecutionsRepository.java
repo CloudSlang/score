@@ -41,8 +41,7 @@ public interface SuspendedExecutionsRepository extends JpaRepository<SuspendedEx
             @Param("suspensionReasons") EnumSet<SuspendedExecutionReason> suspensionReasons,
             Pageable pageRequest);
 
-    @Query("from SuspendedExecution se where size(se.finishedBranches) > 0 and se.suspensionReason in :suspensionReasons " +
-            "and se.locked = false")
+    @Query("from SuspendedExecution se where se.suspensionReason in :suspensionReasons")
     List<SuspendedExecution> findUnmergedSuspendedExecutions(
             @Param("suspensionReasons") EnumSet<SuspendedExecutionReason> suspensionReasons,
             Pageable pageRequest);

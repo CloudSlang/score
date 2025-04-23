@@ -55,6 +55,7 @@ import io.cloudslang.orchestrator.services.ScoreImpl;
 import io.cloudslang.orchestrator.services.ScorePauseResumeImpl;
 import io.cloudslang.orchestrator.services.ScoreTriggeringImpl;
 import io.cloudslang.orchestrator.services.SplitJoinServiceImpl;
+import io.cloudslang.orchestrator.services.StubExecutionSummaryProxyService;
 import io.cloudslang.orchestrator.services.StubPauseResumeServiceImpl;
 import io.cloudslang.orchestrator.services.SuspendedExecutionCleanerServiceImpl;
 import io.cloudslang.orchestrator.services.SuspendedExecutionServiceImpl;
@@ -172,12 +173,20 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
         registerPauseResume(element,parserContext);
 		registerWorkerNodeService(element, parserContext);
 		registerEngineVersionService(element, parserContext);
+		registerExecutionSummary(element, parserContext);
     }
 
     private void registerPauseResume(Element element, ParserContext parserContext){
         String registerPauseResumeService = element.getAttribute("registerPauseResumeService");
         if(!registerPauseResumeService.equals(Boolean.FALSE.toString())){
             new BeanRegistrator(parserContext).CLASS(StubPauseResumeServiceImpl.class).register();
+        }
+    }
+
+	private void registerExecutionSummary(Element element, ParserContext parserContext){
+        String executionSummaryService = element.getAttribute("registerExecutionSummaryProxyService");
+        if(!executionSummaryService.equals(Boolean.FALSE.toString())){
+            new BeanRegistrator(parserContext).CLASS(StubExecutionSummaryProxyService.class).register();
         }
     }
 
