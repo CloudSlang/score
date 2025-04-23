@@ -389,9 +389,10 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         List<String> terminatedExecutionSummaries = new ArrayList<>();
         List<String> executionIds = suspendedExecutions.stream().map(SuspendedExecution::getExecutionId).toList();
         List<ExecutionStatus> executionStatuses = List.of(CANCELED, SYSTEM_FAILURE);
+        // the number of suspended executions is already batched for the "IN" query
         List<ExecutionSummary> executionSummaries = executionSummaryService.getEndTimeByExecutionIdInAndStatusIn(executionIds, executionStatuses);
         long now = System.currentTimeMillis();
-        long cutoff = now - SUSPENDED_EXECUTIONS_TIMEOUT * 1000;
+        long cutoff = now - SUSPENDED_EXECUTIONS_TIMEOUT * 1000; // time in millis
 
         for (ExecutionSummary executionSummary : executionSummaries) {
             long endTime = executionSummary.getEndTime().getTime();
