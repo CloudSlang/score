@@ -23,7 +23,7 @@
     <parent>
         <groupId>io.cloudslang</groupId>
         <artifactId>worker</artifactId>
-        <version>0.4.18</version>
+        <version>0.4.19-SNAPSHOT</version>
     </parent>
 
     <artifactId>worker-execution</artifactId>
