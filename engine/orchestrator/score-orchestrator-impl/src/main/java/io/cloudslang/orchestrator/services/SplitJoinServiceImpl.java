@@ -342,19 +342,13 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
         List<ExecutionMessage> messages = new ArrayList<>();
         List<SuspendedExecution> mergedSuspendedExecutions = new ArrayList<>();
-        List<SuspendedExecution> notMergedSuspendedExecutions = new ArrayList<>();
 
         for (SuspendedExecution se : suspendedExecutions) {
-            Set<FinishedBranch> finishedBranches = se.getFinishedBranches();
-            if (finishedBranches.isEmpty()) {
-                // no finish branch left to clear, maybe the execution is cancelled or failed
-                notMergedSuspendedExecutions.add(se);
-                continue;
-            }
             Execution execution = se.getExecutionObj();
             execution.getSystemContext().remove(FINISHED_CHILD_BRANCHES_DATA);
             execution.getSystemContext().put("CURRENT_PROCESSED__SPLIT_ID", se.getSplitId());
 
+            Set<FinishedBranch> finishedBranches = se.getFinishedBranches();
             long mergedBranches = se.getMergedBranches();
             Integer totalNumberOfBranches = se.getNumberOfBranches();
 
@@ -375,8 +369,6 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             messages.add(executionMessage);
         }
 
-        mergedSuspendedExecutions.addAll(getTerminatedSuspendedExecutions(notMergedSuspendedExecutions));
-
         queueDispatcherService.dispatch(messages);
 
         suspendedExecutionsRepository.deleteAll(mergedSuspendedExecutions);
@@ -384,7 +376,30 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         return suspendedExecutions.size();
     }
 
-    private List<SuspendedExecution> getTerminatedSuspendedExecutions(List<SuspendedExecution> suspendedExecutions) {
+    @Override
+    @Transactional
+    public void deleteFinishedSuspendedExecutions(int bulkSize) {
+        int pageNumber = 0;
+
+        while (true) {
+            PageRequest pageRequest = PageRequest.of(pageNumber, bulkSize);
+            List<SuspendedExecution> suspendedExecutions = suspendedExecutionsRepository.findAll(pageRequest).getContent();
+
+            if (suspendedExecutions.isEmpty()) {
+                break;
+            }
+
+            List<SuspendedExecution> toBeDeleted = findFinishedExecutionsToDelete(suspendedExecutions);
+
+            if (!toBeDeleted.isEmpty()) {
+                suspendedExecutionsRepository.deleteAll(toBeDeleted);
+            }
+
+            pageNumber++;
+        }
+    }
+
+    private List<SuspendedExecution> findFinishedExecutionsToDelete(List<SuspendedExecution> suspendedExecutions) {
         List<SuspendedExecution> terminatedSuspendedExecutions = new ArrayList<>();
         List<String> terminatedExecutionSummaries = new ArrayList<>();
         List<String> executionIds = suspendedExecutions.stream().map(SuspendedExecution::getExecutionId).toList();
