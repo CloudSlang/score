@@ -352,14 +352,14 @@ public class ExecutionStateServiceTest {
     public void testUpdateExecutionStateStatus_NullBranchId() {
         IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
                 () -> executionStateService.updateExecutionStateStatus(123L, null, null, new Date()));
-        Assert.assertEquals("branchId cannot be null or empty", exception.getMessage());
+        Assert.assertEquals("status cannot be null", exception.getMessage());
     }
 
     @Test
     public void testUpdateExecutionStateStatus_EmptyBranchId() {
         IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
                 () -> executionStateService.updateExecutionStateStatus(123L, "          ", null, new Date()));
-        Assert.assertEquals("branchId cannot be null or empty", exception.getMessage());
+        Assert.assertEquals("status cannot be null", exception.getMessage());
     }
 
     @Test

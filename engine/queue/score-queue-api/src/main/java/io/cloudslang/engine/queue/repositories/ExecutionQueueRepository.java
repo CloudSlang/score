@@ -61,7 +61,7 @@ public interface ExecutionQueueRepository {
 
 	void deleteOrphanExecutionQueuesById(Set<Long> ids);
 
-	Set<Long> getFinishedExecStateIds();
+	Set<Long> getNonLatestFinishedExecStateIds();
 
 	List<ExecutionMessage> findByStatuses(int maxSize, ExecStatus... statuses);
 	List<String> getBusyWorkers(ExecStatus... statuses);

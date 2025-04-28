@@ -38,8 +38,8 @@ final public class QueueCleanerServiceImpl  implements QueueCleanerService {
 
     @Override
     @Transactional(readOnly = true)
-    public Set<Long> getFinishedExecStateIds() {
-        return executionQueueRepository.getFinishedExecStateIds();
+    public Set<Long> getNonLatestFinishedExecStateIds() {
+        return executionQueueRepository.getNonLatestFinishedExecStateIds();
     }
 
     @Transactional(readOnly = true)

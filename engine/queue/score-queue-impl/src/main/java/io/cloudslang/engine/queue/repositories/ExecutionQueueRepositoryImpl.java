@@ -858,7 +858,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     }
 
     @Override
-    public Set<Long> getFinishedExecStateIds() {
+    public Set<Long> getNonLatestFinishedExecStateIds() {
         getFinishedExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
 
         try {

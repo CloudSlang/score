@@ -74,7 +74,7 @@ public class ExecutionCleanerServiceImpl implements ExecutionCleanerService {
 
     private void deleteUnusedExecutionStatesAndQueues() {
         try {
-            Set<Long> ids = queueCleanerService.getFinishedExecStateIds();
+            Set<Long> ids = queueCleanerService.getNonLatestFinishedExecStateIds();
             if (logger.isDebugEnabled()) {
                 logger.debug("Will clean from queue the next execution state ids amount: " + ids.size());
             }

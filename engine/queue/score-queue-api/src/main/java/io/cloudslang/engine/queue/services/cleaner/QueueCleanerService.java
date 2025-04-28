@@ -35,7 +35,7 @@ public interface QueueCleanerService {
      *
      * @return Set of ids of finished executions
      */
-    Set<Long> getFinishedExecStateIds();
+    Set<Long> getNonLatestFinishedExecStateIds();
 
     List<ExecutionStatesData> getLatestExecutionStates();
 
