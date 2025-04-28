@@ -22,6 +22,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,8 +37,9 @@ public class ExecutionCleanerServiceImpl implements ExecutionCleanerService {
     private final int MAX_BULK_SIZE = Integer.getInteger("execution.state.clean.job.bulk.size", 200);
     final private int QUEUE_BULK_SIZE = 500;
     private final int SPLIT_SIZE = 200;
-    private static final long EXECUTION_STATE_INACTIVE_TIME = 5 * 60 * 1000L;
-    private static final long ORPHAN_EXECUTION_QUEUES_INACTIVE_TIME = 10 * 60 * 1000L;
+    private static final long EXECUTION_STATE_INACTIVE_TIME_FINISHED = 3 * 60 * 60 * 1000L;
+    private static final long EXECUTION_STATE_INACTIVE_TIME_CANCELED = 24 * 60 * 60 * 1000L;
+    private static final long ORPHAN_EXECUTION_QUEUES_INACTIVE_TIME = 72 * 60 * 60 * 1000L; // 72 hours
 
     private static final Logger logger = LogManager.getLogger(ExecutionCleanerServiceImpl.class);
 
@@ -76,7 +78,6 @@ public class ExecutionCleanerServiceImpl implements ExecutionCleanerService {
             if (logger.isDebugEnabled()) {
                 logger.debug("Will clean from queue the next execution state ids amount: " + ids.size());
             }
-            logger.warn("Will clean from queue the next execution state ids amount: " + ids.size());
 
             List<ExecutionStatesData> latestExecutionStateData = queueCleanerService.getLatestExecutionStates();
             if (logger.isDebugEnabled()) {
@@ -85,10 +86,6 @@ public class ExecutionCleanerServiceImpl implements ExecutionCleanerService {
                         .collect(Collectors.joining(", "));
                 logger.debug("Latest execution states before cleaning job: " + execStates);
             }
-            String execStates = latestExecutionStateData.stream()
-                    .map(ExecutionStatesData::toString)
-                    .collect(Collectors.joining(", "));
-            logger.warn("Latest execution states before cleaning job: " + execStates);
             Set<Long> execIds = new HashSet<>();
 
             for (Long id : ids) {
@@ -108,26 +105,32 @@ public class ExecutionCleanerServiceImpl implements ExecutionCleanerService {
     }
 
     private void deleteFinalizedExecutionData(Integer bulkSize) {
-        long timeLimitMillis = System.currentTimeMillis() - EXECUTION_STATE_INACTIVE_TIME;
+        long timeLimitMillisFinished = System.currentTimeMillis() - EXECUTION_STATE_INACTIVE_TIME_FINISHED;
+        long timeLimitMillisCanceled = System.currentTimeMillis() - EXECUTION_STATE_INACTIVE_TIME_CANCELED;
 
         for (int i = 1; i <= bulkSize / SPLIT_SIZE; i++) {
             PageRequest pageRequest = PageRequest.of(0, SPLIT_SIZE);
             List<Long> finishedStateIds = executionStateService
-                    .findExecutionStateByStatusInAndUpdateTimeLessThanEqual(asList(CANCELED, COMPLETED, SYSTEM_FAILURE),
-                            timeLimitMillis, pageRequest);
+                    .findExecutionStateByStatusInAndUpdateTimeLessThanEqual(asList(COMPLETED, SYSTEM_FAILURE),
+                            timeLimitMillisFinished, pageRequest);
+            List<Long> canceledStateIds = executionStateService
+                    .findExecutionStateByStatusInAndUpdateTimeLessThanEqual(asList(CANCELED),
+                            timeLimitMillisCanceled, pageRequest);
+
             if (logger.isDebugEnabled()) {
-                logger.debug("Will clean from queue and states the next finished execution state ids amount: "
-                        + finishedStateIds.size());
+                int finishedAndCanceledSize = finishedStateIds.size() + canceledStateIds.size();
+                logger.debug("Will clean from queue and states the next finished and canceled execution state ids amount: "
+                        + finishedAndCanceledSize);
             }
-            logger.warn("Will clean from queue and states the next finished execution state ids amount: "
-                    + finishedStateIds.size());
 
-            if (!isEmpty(finishedStateIds)) {
-                Set<Long> finishedStatesQueuesIds = queueCleanerService
-                        .getExecutionStatesByFinishedMessageId(new HashSet<>(finishedStateIds));
+            List<Long> allFinishedAndCanceledIds = new ArrayList<>(finishedStateIds);
+            allFinishedAndCanceledIds.addAll(canceledStateIds);
+            if (!isEmpty(allFinishedAndCanceledIds)) {
+                Set<Long> finishedAndCanceledStatesQueuesIds = queueCleanerService
+                        .getExecutionStatesByFinishedMessageId(new HashSet<>(allFinishedAndCanceledIds));
 
-                queueCleanerService.cleanFinishedSteps(finishedStatesQueuesIds);
-                executionStateService.deleteExecutionStateByIds(finishedStateIds);
+                queueCleanerService.cleanFinishedSteps(finishedAndCanceledStatesQueuesIds);
+                executionStateService.deleteExecutionStateByIds(allFinishedAndCanceledIds);
             }
         }
     }
@@ -143,11 +146,6 @@ public class ExecutionCleanerServiceImpl implements ExecutionCleanerService {
             logger.debug("Will clean from queue the orphan amount: " + orphanExecutionQueuesIds.size());
             logger.debug("Will clean from queue the following orphans: " + orphanIds);
         }
-        String orphanIds = orphanExecutionQueuesIds.stream()
-                .map(String::valueOf)
-                .collect(Collectors.joining(", "));
-        logger.warn("Will clean from queue the orphan amount: " + orphanExecutionQueuesIds.size());
-        logger.warn("Will clean from queue the following orphans: " + orphanIds);
 
         queueCleanerService.cleanOrphanQueues(orphanExecutionQueuesIds);
     }

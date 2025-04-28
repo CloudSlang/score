@@ -771,7 +771,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
             if (logger.isDebugEnabled()) {
                 logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_STATES table.");
             }
-            logger.warn("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_STATES table.");
 
             query = QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES
                     .replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
@@ -783,7 +782,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
             if (logger.isDebugEnabled()) {
                 logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_QUEUES table.");
             }
-            logger.warn("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_QUEUES table.");
         }
     }
 
@@ -811,7 +809,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
             if (logger.isDebugEnabled()) {
                 logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_STATES table.");
             }
-            logger.warn("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_STATES table.");
 
             query = QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES
                     .replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
@@ -823,7 +820,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
             if (logger.isDebugEnabled()) {
                 logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_QUEUES table.");
             }
-            logger.warn("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_QUEUES table.");
 
             query = QUERY_DELETE_EXECS_STATES_MAPPINGS.replace(":ids", StringUtils.repeat("?", ",", ids.size()));
             logSQL(query, args);
@@ -832,8 +828,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                 logger.debug("Deleted " + deletedRows
                         + " rows of finished steps from OO_EXECS_STATES_EXECS_MAPPINGS table.");
             }
-            logger.warn("Deleted " + deletedRows
-                    + " rows of finished steps from OO_EXECS_STATES_EXECS_MAPPINGS table.");
         }
     }
 
@@ -860,7 +854,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
             if (logger.isDebugEnabled()) {
                 logger.debug("Deleted " + deletedRows + " rows of orphan steps from OO_EXECUTION_QUEUES table.");
             }
-            logger.warn("Deleted " + deletedRows + " rows of orphan steps from OO_EXECUTION_QUEUES table.");
         }
     }
 
