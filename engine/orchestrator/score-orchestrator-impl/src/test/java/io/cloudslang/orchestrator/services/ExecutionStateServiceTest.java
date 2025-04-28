@@ -337,35 +337,35 @@ public class ExecutionStateServiceTest {
     @Test
     public void testUpdateExecutionStateStatus_NullExecutionId() {
         IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
-                () -> executionStateService.updateExecutionStateStatus(null, "Asdfsdf", null));
+                () -> executionStateService.updateExecutionStateStatus(null, "Asdfsdf", null, new Date()));
         Assert.assertEquals("executionId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testUpdateExecutionStateStatus_EmptyExecutionId() {
         IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
-                () -> executionStateService.updateExecutionStateStatus(null, "Asdfsdf", null));
+                () -> executionStateService.updateExecutionStateStatus(null, "Asdfsdf", null, new Date()));
         Assert.assertEquals("executionId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testUpdateExecutionStateStatus_NullBranchId() {
         IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
-                () -> executionStateService.updateExecutionStateStatus(123L, null, null));
+                () -> executionStateService.updateExecutionStateStatus(123L, null, null, new Date()));
         Assert.assertEquals("branchId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testUpdateExecutionStateStatus_EmptyBranchId() {
         IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
-                () -> executionStateService.updateExecutionStateStatus(123L, "          ", null));
+                () -> executionStateService.updateExecutionStateStatus(123L, "          ", null, new Date()));
         Assert.assertEquals("branchId cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testUpdateExecutionStateStatus_NullStatus() {
         IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class,
-                () -> executionStateService.updateExecutionStateStatus(123L, "asdasd", null));
+                () -> executionStateService.updateExecutionStateStatus(123L, "asdasd", null, new Date()));
         Assert.assertEquals("status cannot be null", exception.getMessage());
     }
 
@@ -379,7 +379,7 @@ public class ExecutionStateServiceTest {
 
         when(executionStateRepository.findByExecutionIdAndBranchId(executionId, branchId)).thenReturn(executionState);
 
-        executionStateService.updateExecutionStateStatus(executionId, branchId, status);
+        executionStateService.updateExecutionStateStatus(executionId, branchId, status, new Date());
         verify(executionState, times(1)).setStatus(status);
     }
 

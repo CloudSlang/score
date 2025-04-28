@@ -59,7 +59,7 @@ import io.cloudslang.orchestrator.services.StubPauseResumeServiceImpl;
 import io.cloudslang.orchestrator.services.SuspendedExecutionCleanerServiceImpl;
 import io.cloudslang.orchestrator.services.SuspendedExecutionServiceImpl;
 import io.cloudslang.orchestrator.services.WorkerDbSupportServiceImpl;
-import io.cloudslang.orchestrator.services.FinishedExecutionStateCleanerServiceImpl;
+import io.cloudslang.orchestrator.services.ExecutionCleanerServiceImpl;
 import io.cloudslang.schema.context.ScoreDatabaseContext;
 import io.cloudslang.schema.context.ScoreDefaultDatasourceContext;
 import io.cloudslang.worker.execution.services.ExternalExecutionServiceImpl;
@@ -125,7 +125,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
         put(ScoreEngineJobsImpl.class,"scoreEngineJobs");
 		put(BusyWorkersServiceImpl.class,"busyWorkersService");
 		put(MergedConfigurationServiceImpl.class,"MergedConfigurationService");
-		put(FinishedExecutionStateCleanerServiceImpl.class, null);
+		put(ExecutionCleanerServiceImpl.class, null);
 	}};
 
 	@Override

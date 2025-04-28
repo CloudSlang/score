@@ -15,6 +15,6 @@
  */
 package io.cloudslang.orchestrator.services;
 
-public interface FinishedExecutionStateCleanerService {
-    void cleanFinishedExecutionState();
+public interface ExecutionCleanerService {
+    void cleanExecutions();
 }

@@ -25,6 +25,7 @@ import io.cloudslang.score.facade.execution.ExecutionStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
@@ -103,6 +104,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
     }
 
     @Override
+    @Transactional
     public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionStatus status,
                                            Date updateDate) {
         validateExecutionId(executionId);
@@ -137,16 +139,6 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         ExecutionState executionState = findByExecutionIdAndBranchId(executionId, branchId);
         executionState.setExecutionObject(executionSerializationUtil.objToBytes(execution));
         executionState.setUpdateTime(updateDate.getTime());
-    }
-
-    @Override
-    @Transactional
-    public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionStatus status) {
-        validateExecutionId(executionId);
-        validateBranchId(branchId);
-        Validate.notNull(status, "status cannot be null");
-        ExecutionState executionState = findByExecutionIdAndBranchId(executionId, branchId);
-        executionState.setStatus(status);
     }
 
     private ExecutionState findByExecutionIdAndBranchId(Long executionId, String branchId) {
@@ -196,6 +188,18 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
         } else {
             return null;
         }
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<Long> findExecutionStateByStatusInAndUpdateTimeLessThanEqual(List<ExecutionStatus> statuses, long time, PageRequest pageRequest) {
+        return executionStateRepository.findByStatusInAndUpdateTimeLessThanEqual(statuses, time, pageRequest);
+    }
+
+    @Transactional
+    @Override
+    public void deleteExecutionStateByIds(List<Long> ids) {
+        executionStateRepository.deleteByIds(ids);
     }
 
     private void validateBranchId(String branchId) {

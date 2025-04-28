@@ -16,6 +16,9 @@
 
 package io.cloudslang.engine.queue.services.cleaner;
 
+import io.cloudslang.engine.queue.entities.ExecutionStatesData;
+
+import java.util.List;
 import java.util.Set;
 /**
  * Created by IntelliJ IDEA.
@@ -34,6 +37,12 @@ public interface QueueCleanerService {
      */
     Set<Long> getFinishedExecStateIds();
 
+    List<ExecutionStatesData> getLatestExecutionStates();
+
+    Set<Long> getExecutionStatesByFinishedMessageId(Set<Long> messageIds);
+
+    Set<Long> getOrphanQueues(long time);
+
     /**
      *
      * clean queues data for the given ids
@@ -41,4 +50,8 @@ public interface QueueCleanerService {
      * @param ids the ids to clean data for
      */
     void cleanFinishedSteps(Set<Long> ids);
+
+    void cleanUnusedSteps(Set<Long> ids);
+
+    void cleanOrphanQueues(Set<Long> ids);
 }

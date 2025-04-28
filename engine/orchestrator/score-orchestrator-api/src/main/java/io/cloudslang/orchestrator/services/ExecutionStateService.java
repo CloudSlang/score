@@ -19,6 +19,7 @@ package io.cloudslang.orchestrator.services;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.orchestrator.entities.ExecutionState;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.Date;
 import java.util.List;
@@ -103,8 +104,9 @@ public interface ExecutionStateService {
      * @param executionId id of the execution
      * @param branchId id of the branch
      * @param status  status of the execution
+     * @param updateDate update time of the execution
      */
-    public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionStatus status);
+    public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionStatus status, Date updateDate);
 
     /**
      * Deletes the specified execution, both the parent execution and any child executions
@@ -117,5 +119,8 @@ public interface ExecutionStateService {
     public void deleteCanceledExecutionStates();
 
     public Execution getExecutionObjectForNullBranch(Long executionId);
-    public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionStatus status, Date updateDate);
+
+    List<Long> findExecutionStateByStatusInAndUpdateTimeLessThanEqual(List<ExecutionStatus> statuses, long time, PageRequest pageRequest);
+
+    void deleteExecutionStateByIds(List<Long> ids);
 }

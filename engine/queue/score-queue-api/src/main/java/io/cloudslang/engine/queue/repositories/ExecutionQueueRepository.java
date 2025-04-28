@@ -55,6 +55,8 @@ public interface ExecutionQueueRepository {
 
 	Map<Long,Payload> findPayloadByExecutionIds(Long ... ids);
 
+	void deleteUnusedSteps(Set<Long> stepIds);
+
 	void deleteFinishedSteps(Set<Long> ids);
 
 	void deleteOrphanExecutionQueuesById(Set<Long> ids);

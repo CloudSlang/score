@@ -16,10 +16,12 @@
 
 package io.cloudslang.engine.queue.services.cleaner;
 
+import io.cloudslang.engine.queue.entities.ExecutionStatesData;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -35,9 +37,27 @@ final public class QueueCleanerServiceImpl  implements QueueCleanerService {
    	private ExecutionQueueRepository executionQueueRepository;
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Set<Long> getFinishedExecStateIds() {
         return executionQueueRepository.getFinishedExecStateIds();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<ExecutionStatesData> getLatestExecutionStates() {
+        return executionQueueRepository.getLatestExecutionStates();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Set<Long> getExecutionStatesByFinishedMessageId(Set<Long> messageIds) {
+        return executionQueueRepository.getExecutionStatesByFinishedMessageId(messageIds);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Set<Long> getOrphanQueues(long time) {
+        return executionQueueRepository.getOrphanExecutionQueues(time);
     }
 
     @Override
@@ -46,4 +66,15 @@ final public class QueueCleanerServiceImpl  implements QueueCleanerService {
         executionQueueRepository.deleteFinishedSteps(ids);
     }
 
+    @Transactional
+    @Override
+    public void cleanUnusedSteps(Set<Long> ids) {
+        executionQueueRepository.deleteUnusedSteps(ids);
+    }
+
+    @Transactional
+    @Override
+    public void cleanOrphanQueues(Set<Long> ids) {
+        executionQueueRepository.deleteOrphanExecutionQueuesById(ids);
+    }
 }

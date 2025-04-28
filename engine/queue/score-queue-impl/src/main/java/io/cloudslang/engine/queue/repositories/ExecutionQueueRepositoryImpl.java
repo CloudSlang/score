@@ -110,8 +110,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     final private String QUERY_SELECT_NON_LATEST_EXEC_STATE_IDS =
             "SELECT S.ID  FROM OO_EXECUTION_STATES S WHERE " +
                     "   (S.MSG_ID,S.CREATE_TIME) NOT IN (SELECT MSG_ID,MAX(CREATE_TIME) FROM OO_EXECUTION_STATES GROUP BY MSG_ID)" +
-                    "   AND NOT EXISTS (SELECT EXEC_STATE_ID FROM OO_EXECS_STATES_EXECS_MAPPINGS)" +
-                    "   AND EXISTS (SELECT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES WHERE STATUS > 5)";
+                    "   AND S.ID NOT IN (SELECT EXEC_STATE_ID FROM OO_EXECS_STATES_EXECS_MAPPINGS)" +
+                    "   AND S.ID IN (SELECT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES WHERE STATUS > 5)";
 
     final private String QUERY_MESSAGES_WITHOUT_ACK_SQL =
             "SELECT EXEC_STATE_ID,      " +
@@ -748,12 +748,52 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     }
 
     @Override
+    public void deleteUnusedSteps(Set<Long> stepIds) {
+        if (stepIds == null || stepIds.size() == 0) {
+            return;
+        }
+
+        Iterable<List<Long>> lists = Iterables.partition(stepIds, 900);
+        Iterator itr = lists.iterator();
+
+        while (itr.hasNext()) {
+            List ids = (List) itr.next();
+            // Access STATES first and then QUEUES - same order as ExecutionQueueService#enqueue (prevents deadlocks on MSSQL)
+            String query = QUERY_DELETE_FINISHED_STEPS_FROM_STATES
+                    .replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
+
+            Object[] args = ids.toArray(new Object[ids.size()]);
+            logSQL(query, args);
+
+            int deletedRows = deleteFinishedStepsJdbcTemplate
+                    .update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_STATES table.");
+            }
+            logger.warn("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_STATES table.");
+
+            query = QUERY_DELETE_FINISHED_STEPS_FROM_QUEUES
+                    .replaceAll(":ids", StringUtils.repeat("?", ",", ids.size()));
+            logSQL(query, args);
+
+            deletedRows = deleteFinishedStepsJdbcTemplate
+                    .update(query, args); //MUST NOT set here maxRows!!!! It must delete all without limit!!!
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_QUEUES table.");
+            }
+            logger.warn("Deleted " + deletedRows + " rows of finished steps from OO_EXECUTION_QUEUES table.");
+        }
+    }
+
+    @Override
     public void deleteFinishedSteps(Set<Long> stepIds) {
         if (stepIds == null || stepIds.size() == 0) {
             return;
         }
 
-        Iterable<List<Long>> lists = Iterables.partition(stepIds, 1000);
+        Iterable<List<Long>> lists = Iterables.partition(stepIds, 900);
         Iterator itr = lists.iterator();
 
         while (itr.hasNext()) {
@@ -803,7 +843,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
             return;
         }
 
-        Iterable<List<Long>> lists = Iterables.partition(execQueuesIds, 1000);
+        Iterable<List<Long>> lists = Iterables.partition(execQueuesIds, 900);
         Iterator itr = lists.iterator();
 
         while (itr.hasNext()) {
@@ -827,19 +867,10 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     @Override
     public Set<Long> getFinishedExecStateIds() {
         getFinishedExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
+
         try {
-            Set<Long> result;
-
-            result = doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, QUERY_SELECT_NON_LATEST_EXEC_STATE_IDS,
+            return doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, QUERY_SELECT_NON_LATEST_EXEC_STATE_IDS,
                     new SingleColumnRowMapper<>(Long.class)).stream().collect(Collectors.toSet());
-
-//            result = doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, SELECT_FINISHED_STEPS_IDS_1,
-//                    new SingleColumnRowMapper<>(Long.class)).stream().collect(Collectors.toSet());
-//            result.addAll(
-//                    (Set<Long>) doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, selectFinishedStepsQuery,
-//                            new SingleColumnRowMapper<>(Long.class)).stream().collect(Collectors.toSet()));
-
-            return result;
         } finally {
             getFinishedExecStateIdsJdbcTemplate.clearStatementBatchSize();
         }
@@ -849,34 +880,47 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     public List<ExecutionStatesData> getLatestExecutionStates() {
         getFinishedExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
 
-        return doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate,
-                QUERY_SELECT_LATEST_EXEC_STATES,
-                new LatestExecutionStatesIdsRowMapper());
+        try {
+            return doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate,
+                    QUERY_SELECT_LATEST_EXEC_STATES,
+                    new LatestExecutionStatesIdsRowMapper());
+        } finally {
+            getFinishedExecStateIdsJdbcTemplate.clearStatementBatchSize();
+        }
     }
 
     @Override
     public Set<Long> getExecutionStatesByFinishedMessageId(Set<Long> messageIds) {
         getFinishedExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
-        String query = QUERY_SELECT_EXECUTION_STATES_WITH_MESSAGE_IDS
-                .replaceAll(":ids", StringUtils.repeat("?", ",", messageIds.size()));
 
-        Object[] args = messageIds.stream()
-                .map(String::valueOf)
-                .toArray(Object[]::new);
+        try {
+            String query = QUERY_SELECT_EXECUTION_STATES_WITH_MESSAGE_IDS
+                    .replaceAll(":ids", StringUtils.repeat("?", ",", messageIds.size()));
 
-        return doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, query,
-                new SingleColumnRowMapper<>(Long.class),
-                args).stream().collect(Collectors.toSet());
+            Object[] args = messageIds.stream()
+                    .map(String::valueOf)
+                    .toArray(Object[]::new);
+
+            return doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, query,
+                    new SingleColumnRowMapper<>(Long.class),
+                    args).stream().collect(Collectors.toSet());
+        } finally {
+            getFinishedExecStateIdsJdbcTemplate.clearStatementBatchSize();
+        }
     }
 
     @Override
     public Set<Long> getOrphanExecutionQueues(long time) {
         getFinishedExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
 
-        return doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate,
-                QUERY_SELECT_ORPHAN_EXECUTION_QUEUES,
-                new SingleColumnRowMapper<>(Long.class),
-                new Object[] {time}).stream().collect(Collectors.toSet());
+        try {
+            return doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate,
+                    QUERY_SELECT_ORPHAN_EXECUTION_QUEUES,
+                    new SingleColumnRowMapper<>(Long.class),
+                    new Object[]{time}).stream().collect(Collectors.toSet());
+        } finally {
+            getFinishedExecStateIdsJdbcTemplate.clearStatementBatchSize();
+        }
     }
 
     public List<ExecutionMessage> pollMessagesWithoutAck(int maxSize, long minVersionAllowed) {
