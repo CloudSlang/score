@@ -230,7 +230,7 @@ public class InBuffer implements WorkerRecoveryListener, ApplicationListener, Ru
             message.setWorkerKey(message.getMsgId() + " : " + message.getExecStateId());
 
             Payload payload = message.getPayload(); // store payload
-            message.setPayload(null);
+            message.setPayload(null); //
 
             cloned = (ExecutionMessage) message.clone(); // To clone without payload, payload is not needed in ack - make it null in order to minimize the data that is being sent
             cloned.setStatus(ExecStatus.IN_PROGRESS);

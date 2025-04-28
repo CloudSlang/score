@@ -286,7 +286,7 @@ public class ExecutionMessage implements Message, Cloneable {
     }
 
     @Override
-    public List<Message> shrink(List<Message> messages) {
+    public List<Message> shrink(List<Message> messages) { //
         if (messages.size() > 2) {
             List<Message> resultAfterShrink = new ArrayList<>();
 

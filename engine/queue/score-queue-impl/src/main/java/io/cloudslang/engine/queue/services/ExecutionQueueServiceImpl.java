@@ -74,7 +74,9 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 		messages = executionAssignerService.assignWorkers(messages);
 		if (logger.isDebugEnabled()) logger.debug("Messages were assigned successfully");
 
-		final List<ExecutionMessage> stateMessages = new ArrayList<>(messages.size());
+		final List<ExecutionMessage> stateMessages = new ArrayList<>(messages.size()); // logat state messages si messages
+		// ce intra in bulk, ce iese din shrink
+		// maybe sa nu curete payload
 
 		// first fill the execution state id for new insert
 		for (ExecutionMessage msg : messages) {
@@ -83,7 +85,7 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 				msg.setExecStateId(execStateId);
 				stateMessages.add(msg);
 			} else if (msg.getPayload() != null && msg.getStatus() == ExecStatus.IN_PROGRESS) {
-				stateMessages.add(msg);
+				stateMessages.add(msg); // vezi daca baiul vine de la faptul ca se pune in outbuffer/inbuffer clona cu null sau de la IN_PROGRESS
 			}
 		}
 

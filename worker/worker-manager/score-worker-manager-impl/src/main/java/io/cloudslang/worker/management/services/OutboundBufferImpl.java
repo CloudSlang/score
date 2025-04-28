@@ -196,15 +196,15 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         List<Message> bulk = new LinkedList<>();
         try {
             for (LinkedList<Message> value : bufferToDrain.values()) {
-                List<Message> convertedList = expandCompoundMessages(value);
-                List<Message> optimizedList = convertedList.get(0).shrink(convertedList);
+                List<Message> convertedList = expandCompoundMessages(value); // log converted list
+                List<Message> optimizedList = convertedList.get(0).shrink(convertedList); // log optimized list
                 int optimizedWeight = optimizedList.stream().mapToInt(Message::getWeight).sum();
 
                 bulk.addAll(optimizedList);
                 bulkWeight += optimizedWeight;
 
                 if (bulkWeight > maxBulkWeight) {
-                    drainBulk(bulk);
+                    drainBulk(bulk); // log bulk
                     bulk.clear();
                     bulkWeight = 0;
                 }
