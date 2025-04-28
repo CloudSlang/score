@@ -66,6 +66,7 @@ import static io.cloudslang.score.events.EventConstants.EXECUTION_ID;
 import static io.cloudslang.score.events.EventConstants.SPLIT_ID;
 import static io.cloudslang.score.facade.TempConstants.MI_REMAINING_BRANCHES_CONTEXT_KEY;
 import static io.cloudslang.score.facade.execution.ExecutionStatus.CANCELED;
+import static io.cloudslang.score.facade.execution.ExecutionStatus.COMPLETED;
 import static io.cloudslang.score.facade.execution.ExecutionStatus.SYSTEM_FAILURE;
 import static java.lang.Long.parseLong;
 import static java.lang.String.valueOf;
@@ -403,7 +404,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         List<SuspendedExecution> terminatedSuspendedExecutions = new ArrayList<>();
         List<String> terminatedExecutionSummaries = new ArrayList<>();
         List<String> executionIds = suspendedExecutions.stream().map(SuspendedExecution::getExecutionId).toList();
-        List<ExecutionStatus> executionStatuses = List.of(CANCELED, SYSTEM_FAILURE);
+        List<ExecutionStatus> executionStatuses = List.of(CANCELED, SYSTEM_FAILURE, COMPLETED);
         // the number of suspended executions is already batched for the "IN" query
         List<ExecutionSummary> executionSummaries = executionSummaryService.getEndTimeByExecutionIdInAndStatusIn(executionIds, executionStatuses);
         long now = System.currentTimeMillis();

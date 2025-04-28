@@ -69,7 +69,7 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
 
     private final Integer SPLIT_JOIN_ITERATIONS = Integer.getInteger("splitjoin.job.iterations", 20);
 
-    private final Integer CLEAN_SUSPENDED_EXECUTIONS_BULK_SIZE = Integer.getInteger("cleanSuspendedExecutions.job.bulk.size", 250);
+    private final Integer CLEAN_SUSPENDED_EXECUTIONS_BULK_SIZE = Integer.getInteger("cleanSuspendedExecutions.job.bulk.size", 200);
 
     /**
      * Job that will handle the cleaning of queue table.
