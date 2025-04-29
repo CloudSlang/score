@@ -192,7 +192,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<Long> findExecutionStateByStatusInAndUpdateTimeLessThanEqual(List<ExecutionStatus> statuses, long time, PageRequest pageRequest) {
+    public List<Long> findExecutionStateByStatusInAndUpdateTimeLessThanEqual(List<ExecutionStatus> statuses, Long time, PageRequest pageRequest) {
         return executionStateRepository.findByStatusInAndUpdateTimeLessThanEqual(statuses, time, pageRequest);
     }
 
