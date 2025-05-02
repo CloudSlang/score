@@ -85,7 +85,7 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         this.buffer = getInitialBuffer();
 
         this.maxBufferWeight = Integer.getInteger("out.buffer.max.buffer.weight", defaultBufferCapacity());
-        this.maxBulkWeight = Integer.getInteger("out.buffer.max.bulk.weight", 1500);
+        this.maxBulkWeight = Integer.getInteger("out.buffer.max.bulk.weight", 15000);
         this.retryAmount = Integer.getInteger("out.buffer.retry.number", 5);
         this.retryDelay = Long.getLong("out.buffer.retry.delay", 5000);
 
@@ -191,33 +191,43 @@ public class OutboundBufferImpl implements OutboundBuffer, WorkerRecoveryListene
         drainInternal(bufferToDrain);
     }
 
-    private void drainInternal(HashMap<String, LinkedList<Message>> bufferToDrain) {
+    private void drainInternal(HashMap<?, LinkedList<Message>> bufferToDrain) {
         int bulkWeight = 0;
         List<Message> bulk = new LinkedList<>();
+        String correlationId = UUID.randomUUID().toString();
+
         try {
             for (LinkedList<Message> value : bufferToDrain.values()) {
-                List<Message> convertedList = expandCompoundMessages(value); // log converted list
-                List<Message> optimizedList = convertedList.get(0).shrink(convertedList); // log optimized list
+                List<Message> convertedList = expandCompoundMessages(value);
+                logger.error("[{}] CONVERTED_LIST: {}", correlationId, convertedList);
+
+                List<Message> optimizedList = convertedList.get(0).shrink(convertedList);
+                logger.error("[{}] OPTIMIZED_LIST: {}", correlationId, optimizedList);
+
                 int optimizedWeight = optimizedList.stream().mapToInt(Message::getWeight).sum();
 
                 bulk.addAll(optimizedList);
                 bulkWeight += optimizedWeight;
 
                 if (bulkWeight > maxBulkWeight) {
-                    drainBulk(bulk); // log bulk
+                    logger.error("[{}] DRAINING_BULK (weight={}): {}", correlationId, bulkWeight, bulk);
+                    drainBulk(bulk);
                     bulk.clear();
                     bulkWeight = 0;
                 }
             }
-            // Drain last bulk if required
+
             if (!bulk.isEmpty()) {
+                logger.error("[{}] FINAL_DRAIN_BULK (weight={}): {}", correlationId, bulkWeight, bulk);
                 drainBulk(bulk);
             }
+
         } catch (Exception ex) {
-            logger.error("Failed to drain buffer, invoking worker internal recovery... ", ex);
+            logger.error("[{}] ERROR: Failed to drain buffer, invoking worker recovery", correlationId, ex);
             recoveryManager.doRecovery();
         }
     }
+
 
     private List<Message> expandCompoundMessages(LinkedList<Message> value) {
         int compoundMessages = 0, compoundMessageSize = 0;

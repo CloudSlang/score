@@ -76,7 +76,6 @@ public class ExecutionCleanerServiceImpl implements ExecutionCleanerService {
             if (logger.isDebugEnabled()) {
                 logger.debug("Will clean from queue the next execution state ids amount: " + ids.size());
             }
-            logger.warn("Will clean from queue the next execution state ids amount: " + ids.size());
 
             List<ExecutionStatesData> latestExecutionStateData = queueCleanerService.getLatestExecutionStates();
             if (logger.isDebugEnabled()) {
@@ -85,10 +84,7 @@ public class ExecutionCleanerServiceImpl implements ExecutionCleanerService {
                         .collect(Collectors.joining(", "));
                 logger.debug("Latest execution states before cleaning job: " + execStates);
             }
-            String execStates = latestExecutionStateData.stream()
-                    .map(ExecutionStatesData::toString)
-                    .collect(Collectors.joining(", "));
-            logger.warn("Latest execution states before cleaning job: " + execStates);
+
             Set<Long> execIds = new HashSet<>();
 
             for (Long id : ids) {
@@ -119,8 +115,6 @@ public class ExecutionCleanerServiceImpl implements ExecutionCleanerService {
                 logger.debug("Will clean from queue and states the next finished execution state ids amount: "
                         + finishedStateIds.size());
             }
-            logger.warn("Will clean from queue and states the next finished execution state ids amount: "
-                    + finishedStateIds.size());
 
             if (!isEmpty(finishedStateIds)) {
                 Set<Long> finishedStatesQueuesIds = queueCleanerService
@@ -143,11 +137,6 @@ public class ExecutionCleanerServiceImpl implements ExecutionCleanerService {
             logger.debug("Will clean from queue the orphan amount: " + orphanExecutionQueuesIds.size());
             logger.debug("Will clean from queue the following orphans: " + orphanIds);
         }
-        String orphanIds = orphanExecutionQueuesIds.stream()
-                .map(String::valueOf)
-                .collect(Collectors.joining(", "));
-        logger.warn("Will clean from queue the orphan amount: " + orphanExecutionQueuesIds.size());
-        logger.warn("Will clean from queue the following orphans: " + orphanIds);
 
         queueCleanerService.cleanOrphanQueues(orphanExecutionQueuesIds);
     }
