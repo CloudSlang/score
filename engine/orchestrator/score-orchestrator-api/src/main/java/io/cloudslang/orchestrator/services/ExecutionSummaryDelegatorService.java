@@ -20,7 +20,7 @@ import io.cloudslang.score.facade.execution.ExecutionSummary;
 
 import java.util.List;
 
-public interface ExecutionSummaryProxyService {
+public interface ExecutionSummaryDelegatorService {
 
     // executionSummary entity is only populated with executionId and endTime
     List<ExecutionSummary> getEndTimeByExecutionIdInAndStatusIn(List<String> executionIds, List<ExecutionStatus> statuses);

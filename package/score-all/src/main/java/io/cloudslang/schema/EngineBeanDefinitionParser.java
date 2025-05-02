@@ -55,7 +55,7 @@ import io.cloudslang.orchestrator.services.ScoreImpl;
 import io.cloudslang.orchestrator.services.ScorePauseResumeImpl;
 import io.cloudslang.orchestrator.services.ScoreTriggeringImpl;
 import io.cloudslang.orchestrator.services.SplitJoinServiceImpl;
-import io.cloudslang.orchestrator.services.StubExecutionSummaryProxyService;
+import io.cloudslang.orchestrator.services.StubExecutionSummaryDelegatorService;
 import io.cloudslang.orchestrator.services.StubPauseResumeServiceImpl;
 import io.cloudslang.orchestrator.services.SuspendedExecutionCleanerServiceImpl;
 import io.cloudslang.orchestrator.services.SuspendedExecutionServiceImpl;
@@ -184,9 +184,9 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
     }
 
 	private void registerExecutionSummary(Element element, ParserContext parserContext){
-        String executionSummaryService = element.getAttribute("registerExecutionSummaryProxyService");
+        String executionSummaryService = element.getAttribute("registerExecutionSummaryDelegatorService");
         if(!executionSummaryService.equals(Boolean.FALSE.toString())){
-            new BeanRegistrator(parserContext).CLASS(StubExecutionSummaryProxyService.class).register();
+            new BeanRegistrator(parserContext).CLASS(StubExecutionSummaryDelegatorService.class).register();
         }
     }
 

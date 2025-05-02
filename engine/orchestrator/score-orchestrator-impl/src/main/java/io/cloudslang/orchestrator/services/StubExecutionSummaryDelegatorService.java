@@ -20,7 +20,7 @@ import io.cloudslang.score.facade.execution.ExecutionSummary;
 
 import java.util.List;
 
-public class StubExecutionSummaryProxyService implements ExecutionSummaryProxyService {
+public class StubExecutionSummaryDelegatorService implements ExecutionSummaryDelegatorService {
 
     @Override
     public List<ExecutionSummary> getEndTimeByExecutionIdInAndStatusIn(List<String> executionIds, List<ExecutionStatus> statuses) {

@@ -16,4 +16,6 @@
 		<lookup-method name="getPythonExecutorConfiguration" bean="pythonExecutorDetails"/>
 	</bean>
 
+	<bean name="executionSummaryDelegatorService" class="io.cloudslang.orchestrator.services.StubExecutionSummaryDelegatorService"/>
+
 </beans>
