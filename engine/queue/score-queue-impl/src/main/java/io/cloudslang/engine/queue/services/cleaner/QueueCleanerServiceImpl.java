@@ -56,25 +56,25 @@ final public class QueueCleanerServiceImpl  implements QueueCleanerService {
 
     @Transactional(readOnly = true)
     @Override
-    public Set<Long> getOrphanQueues(long time) {
-        return executionQueueRepository.getOrphanExecutionQueues(time);
+    public Set<Long> getOrphanQueues(long cutOffTime) {
+        return executionQueueRepository.getOrphanExecutionQueues(cutOffTime);
     }
 
     @Override
     @Transactional
-    public void cleanFinishedSteps(Set<Long> ids) {
-        executionQueueRepository.deleteFinishedSteps(ids);
+    public void cleanFinishedSteps(Set<Long> toDeleteIds) {
+        executionQueueRepository.deleteFinishedSteps(toDeleteIds);
     }
 
     @Transactional
     @Override
-    public void cleanUnusedSteps(Set<Long> ids) {
-        executionQueueRepository.deleteUnusedSteps(ids);
+    public void cleanUnusedSteps(Set<Long> toDeleteIds) {
+        executionQueueRepository.deleteUnusedSteps(toDeleteIds);
     }
 
     @Transactional
     @Override
-    public void cleanOrphanQueues(Set<Long> ids) {
-        executionQueueRepository.deleteOrphanExecutionQueuesById(ids);
+    public void cleanOrphanQueues(Set<Long> toDeleteIds) {
+        executionQueueRepository.deleteOrphanExecutionQueuesById(toDeleteIds);
     }
 }

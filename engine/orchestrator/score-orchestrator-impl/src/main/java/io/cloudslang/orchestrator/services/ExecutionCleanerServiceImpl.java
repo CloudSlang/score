@@ -15,6 +15,7 @@
  */
 package io.cloudslang.orchestrator.services;
 
+import com.google.common.collect.Lists;
 import io.cloudslang.engine.queue.entities.ExecutionStatesData;
 import io.cloudslang.engine.queue.services.cleaner.QueueCleanerService;
 import org.apache.logging.log4j.LogManager;
@@ -22,26 +23,28 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.cloudslang.score.facade.execution.ExecutionStatus.*;
-import static java.util.Arrays.asList;
-import static org.springframework.util.CollectionUtils.isEmpty;
 
 public class ExecutionCleanerServiceImpl implements ExecutionCleanerService {
 
-    private final int MAX_BULK_SIZE = Integer.getInteger("execution.state.clean.job.bulk.size", 200);
-    final private int QUEUE_BULK_SIZE = 500;
-    private final int SPLIT_SIZE = 200;
-    private static final long EXECUTION_STATE_INACTIVE_TIME_FINISHED = 3 * 60 * 60 * 1000L;
-    private static final long EXECUTION_STATE_INACTIVE_TIME_CANCELED = 24 * 60 * 60 * 1000L;
-    private static final long ORPHAN_EXECUTION_QUEUES_INACTIVE_TIME = 72 * 60 * 60 * 1000L; // 72 hours
-
     private static final Logger logger = LogManager.getLogger(ExecutionCleanerServiceImpl.class);
+
+    private static final int MAX_BULK_SIZE = Integer.getInteger("execution.state.clean.job.bulk.size", 200);
+    private static final int SPLIT_SIZE = 50;
+
+    private static final long EXECUTION_STATE_INACTIVE_TIME_FINISHED = Duration.ofHours(3).toMillis();
+    private static final long EXECUTION_STATE_INACTIVE_TIME_CANCELED = Duration.ofHours(24).toMillis();
+    private static final long ORPHAN_EXECUTION_QUEUES_INACTIVE_TIME = Duration.ofHours(72).toMillis();
+
 
     @Autowired
     private ExecutionStateService executionStateService;
@@ -50,23 +53,22 @@ public class ExecutionCleanerServiceImpl implements ExecutionCleanerService {
     private QueueCleanerService queueCleanerService;
 
     @Override
-    // @Transactional
     public void cleanExecutions() {
         try {
-            performExecutionCleanup(MAX_BULK_SIZE);
-        } catch (Exception e) {
-            logger.error("Execution cleanup job failed!", e);
+            performExecutionCleanup();
+        } catch (Exception exception) {
+            logger.error("Execution cleanup job failed: ", exception);
         }
     }
 
-    private void performExecutionCleanup(Integer bulkSize) {
-        // safely delete execution queues and state mappings for non-latest or unused states
+    private void performExecutionCleanup() {
+        // Safely delete execution queues and state mappings for non-latest or unused states
         // from oo_execution_states and oo_execution_queues
         deleteUnusedExecutionStatesAndQueues();
 
-        // remove all finished executions and related data (CANCELED, COMPLETED, SYSTEM_FAILURE)
+        // Remove all finished executions and related data (CANCELED, COMPLETED, SYSTEM_FAILURE)
         // from oo_execution_queues, oo_execs_states_execs_mappings, oo_execution_states and oo_execution_state
-        deleteFinalizedExecutionData(bulkSize);
+        deleteFinishedExecutionData();
 
         // Clean up orphaned queue entries left from parallel or multi-instance execution from oo_execution_queues
         deleteOrphanExecutionQueues();
@@ -76,7 +78,8 @@ public class ExecutionCleanerServiceImpl implements ExecutionCleanerService {
         try {
             Set<Long> ids = queueCleanerService.getNonLatestFinishedExecStateIds();
             if (logger.isDebugEnabled()) {
-                logger.debug("Will clean from queue the next execution state ids amount: " + ids.size());
+                logger.debug("Detected {} unused entries to clean from oo_execution_states and oo_execution_queues",
+                        ids.size());
             }
 
             List<ExecutionStatesData> latestExecutionStateData = queueCleanerService.getLatestExecutionStates();
@@ -84,69 +87,87 @@ public class ExecutionCleanerServiceImpl implements ExecutionCleanerService {
                 String execStates = latestExecutionStateData.stream()
                         .map(ExecutionStatesData::toString)
                         .collect(Collectors.joining(", "));
-                logger.debug("Latest execution states before cleaning job: " + execStates);
+                logger.debug("Latest execution states before unused execution cleaning job: {}", execStates);
             }
-            Set<Long> execIds = new HashSet<>();
 
-            for (Long id : ids) {
-                execIds.add(id);
-                if (execIds.size() >= QUEUE_BULK_SIZE) {
-                    queueCleanerService.cleanUnusedSteps(execIds);
-                    execIds.clear();
+            List<Long> idList = new ArrayList<>(ids);
+            List<List<Long>> partitions = Lists.partition(idList, SPLIT_SIZE);
+
+            int processedEntries = 0;
+            for (List<Long> partition : partitions) {
+                if (processedEntries >= MAX_BULK_SIZE) {
+                    break;
                 }
+                queueCleanerService.cleanUnusedSteps(new HashSet<>(partition));
+                processedEntries += partition.size();
             }
-
-            if (execIds.size() > 0) {
-                queueCleanerService.cleanUnusedSteps(execIds);
-            }
-        } catch (Exception e) {
-            logger.error("Can't run queue cleaner job.", e);
+        } catch (Exception exception) {
+            logger.error("Unused executions cleanup job failed: ", exception);
         }
     }
 
-    private void deleteFinalizedExecutionData(Integer bulkSize) {
-        long timeLimitMillisFinished = System.currentTimeMillis() - EXECUTION_STATE_INACTIVE_TIME_FINISHED;
-        long timeLimitMillisCanceled = System.currentTimeMillis() - EXECUTION_STATE_INACTIVE_TIME_CANCELED;
+    private void deleteFinishedExecutionData() {
+        try {
+            long timeLimitMillisFinished = System.currentTimeMillis() - EXECUTION_STATE_INACTIVE_TIME_FINISHED;
+            long timeLimitMillisCanceled = System.currentTimeMillis() - EXECUTION_STATE_INACTIVE_TIME_CANCELED;
 
-        for (int i = 1; i <= bulkSize / SPLIT_SIZE; i++) {
-            PageRequest pageRequest = PageRequest.of(0, SPLIT_SIZE);
-            List<Long> finishedStateIds = executionStateService
-                    .findExecutionStateByStatusInAndUpdateTimeLessThanEqual(asList(COMPLETED, SYSTEM_FAILURE),
-                            timeLimitMillisFinished, pageRequest);
-            List<Long> canceledStateIds = executionStateService
-                    .findExecutionStateByStatusInAndUpdateTimeLessThanEqual(asList(CANCELED),
-                            timeLimitMillisCanceled, pageRequest);
+            for (int i = 0; i <= MAX_BULK_SIZE / SPLIT_SIZE; i++) {
+                PageRequest pageRequest = PageRequest.of(0, SPLIT_SIZE);
 
-            if (logger.isDebugEnabled()) {
-                int finishedAndCanceledSize = finishedStateIds.size() + canceledStateIds.size();
-                logger.debug("Will clean from queue and states the next finished and canceled execution state ids amount: "
-                        + finishedAndCanceledSize);
+                List<Long> finishedStateIds = executionStateService
+                        .findExecutionStateByStatusInAndUpdateTimeLessThanEqual(
+                                Arrays.asList(COMPLETED, SYSTEM_FAILURE),
+                                timeLimitMillisFinished,
+                                pageRequest
+                        );
+
+                List<Long> canceledStateIds = executionStateService
+                        .findExecutionStateByStatusInAndUpdateTimeLessThanEqual(
+                                Collections.singletonList(CANCELED),
+                                timeLimitMillisCanceled,
+                                pageRequest
+                        );
+
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Detected {} completed entries and {} canceled entries to clean " +
+                                    "from oo_execution_queues, oo_execs_states_execs_mappings, oo_execution_states and oo_execution_state ",
+                            finishedStateIds.size(), canceledStateIds.size());
+                }
+
+                if (finishedStateIds.size() + canceledStateIds.size() != 0) {
+                    List<Long> allFinishedAndCanceledIds = new ArrayList<>(finishedStateIds.size() + canceledStateIds.size());
+                    allFinishedAndCanceledIds.addAll(finishedStateIds);
+                    allFinishedAndCanceledIds.addAll(canceledStateIds);
+                    Set<Long> finishedAndCanceledStatesQueuesIds = queueCleanerService
+                            .getExecutionStatesByFinishedMessageId(new HashSet<>(allFinishedAndCanceledIds));
+
+                    queueCleanerService.cleanFinishedSteps(finishedAndCanceledStatesQueuesIds);
+                    executionStateService.deleteExecutionStateByIds(allFinishedAndCanceledIds);
+                }
             }
-
-            List<Long> allFinishedAndCanceledIds = new ArrayList<>(finishedStateIds);
-            allFinishedAndCanceledIds.addAll(canceledStateIds);
-            if (!isEmpty(allFinishedAndCanceledIds)) {
-                Set<Long> finishedAndCanceledStatesQueuesIds = queueCleanerService
-                        .getExecutionStatesByFinishedMessageId(new HashSet<>(allFinishedAndCanceledIds));
-
-                queueCleanerService.cleanFinishedSteps(finishedAndCanceledStatesQueuesIds);
-                executionStateService.deleteExecutionStateByIds(allFinishedAndCanceledIds);
-            }
+        } catch (Exception exception) {
+            logger.error("Finished execution cleanup job failed: ", exception);
         }
     }
 
     private void deleteOrphanExecutionQueues() {
-        long timeLimitMillisOrphanExecutionQueues = System.currentTimeMillis() - ORPHAN_EXECUTION_QUEUES_INACTIVE_TIME;
-        Set<Long> orphanExecutionQueuesIds = queueCleanerService
-                .getOrphanQueues(timeLimitMillisOrphanExecutionQueues);
-        if (logger.isDebugEnabled()) {
-            String orphanIds = orphanExecutionQueuesIds.stream()
-                            .map(String::valueOf)
-                            .collect(Collectors.joining(", "));
-            logger.debug("Will clean from queue the orphan amount: " + orphanExecutionQueuesIds.size());
-            logger.debug("Will clean from queue the following orphans: " + orphanIds);
-        }
+        try {
+            long timeLimitMillisOrphanExecutionQueues = System.currentTimeMillis() - ORPHAN_EXECUTION_QUEUES_INACTIVE_TIME;
+            Set<Long> orphanExecutionQueuesIds = queueCleanerService
+                    .getOrphanQueues(timeLimitMillisOrphanExecutionQueues);
+            if (logger.isDebugEnabled()) {
+                String orphanIds = orphanExecutionQueuesIds.stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining(", "));
+                logger.debug("Detected {} orphan execution queue entries to clean: {}",
+                        orphanExecutionQueuesIds.size(), orphanIds);
 
-        queueCleanerService.cleanOrphanQueues(orphanExecutionQueuesIds);
+            }
+
+            queueCleanerService.cleanOrphanQueues(orphanExecutionQueuesIds);
+        } catch (Exception exception) {
+            logger.error("Orphan execution queues cleanup job failed: ", exception);
+        }
     }
 }

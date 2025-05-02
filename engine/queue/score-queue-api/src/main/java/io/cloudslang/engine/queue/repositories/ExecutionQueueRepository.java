@@ -41,7 +41,7 @@ public interface ExecutionQueueRepository {
 
 	Set<Long> getExecutionStatesByFinishedMessageId(Set<Long> messageIds);
 
-	Set<Long> getOrphanExecutionQueues(long time);
+	Set<Long> getOrphanExecutionQueues(long cutOffTime);
 
 	List<ExecutionMessage> pollMessagesWithoutAck(int maxSize, long minVersionAllowed);
 
@@ -55,11 +55,11 @@ public interface ExecutionQueueRepository {
 
 	Map<Long,Payload> findPayloadByExecutionIds(Long ... ids);
 
-	void deleteUnusedSteps(Set<Long> stepIds);
+	void deleteUnusedSteps(Set<Long> toDeleteIds);
 
-	void deleteFinishedSteps(Set<Long> ids);
+	void deleteFinishedSteps(Set<Long> toDeleteIds);
 
-	void deleteOrphanExecutionQueuesById(Set<Long> ids);
+	void deleteOrphanExecutionQueuesById(Set<Long> toDeleteIds);
 
 	Set<Long> getNonLatestFinishedExecStateIds();
 

@@ -120,7 +120,7 @@ public interface ExecutionStateService {
 
     public Execution getExecutionObjectForNullBranch(Long executionId);
 
-    List<Long> findExecutionStateByStatusInAndUpdateTimeLessThanEqual(List<ExecutionStatus> statuses, Long time, PageRequest pageRequest);
+    public List<Long> findExecutionStateByStatusInAndUpdateTimeLessThanEqual(List<ExecutionStatus> statuses, long cutOffTime, PageRequest pageRequest);
 
-    void deleteExecutionStateByIds(List<Long> ids);
+    public void deleteExecutionStateByIds(List<Long> toDeleteIds);
 }

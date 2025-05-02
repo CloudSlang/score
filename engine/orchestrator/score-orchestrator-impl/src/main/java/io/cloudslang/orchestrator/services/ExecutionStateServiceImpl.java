@@ -192,14 +192,14 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<Long> findExecutionStateByStatusInAndUpdateTimeLessThanEqual(List<ExecutionStatus> statuses, Long time, PageRequest pageRequest) {
-        return executionStateRepository.findByStatusInAndUpdateTimeLessThanEqual(statuses, time, pageRequest);
+    public List<Long> findExecutionStateByStatusInAndUpdateTimeLessThanEqual(List<ExecutionStatus> statuses, long cutOffTime, PageRequest pageRequest) {
+        return executionStateRepository.findByStatusInAndUpdateTimeLessThanEqual(statuses, cutOffTime, pageRequest);
     }
 
     @Transactional
     @Override
-    public void deleteExecutionStateByIds(List<Long> ids) {
-        executionStateRepository.deleteByIds(ids);
+    public void deleteExecutionStateByIds(List<Long> toDeleteIds) {
+        executionStateRepository.deleteByIds(toDeleteIds);
     }
 
     private void validateBranchId(String branchId) {
