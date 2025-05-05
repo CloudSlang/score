@@ -93,13 +93,8 @@ public class ExecutionCleanerServiceImpl implements ExecutionCleanerService {
             List<Long> idList = new ArrayList<>(ids);
             List<List<Long>> partitions = Lists.partition(idList, SPLIT_SIZE);
 
-            int processedEntries = 0;
             for (List<Long> partition : partitions) {
-                if (processedEntries >= MAX_BULK_SIZE) {
-                    break;
-                }
                 queueCleanerService.cleanUnusedSteps(new HashSet<>(partition));
-                processedEntries += partition.size();
             }
         } catch (Exception exception) {
             logger.error("Unused executions cleanup job failed: ", exception);
