@@ -67,6 +67,7 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
 
     private final Integer SPLIT_JOIN_ITERATIONS = Integer.getInteger("splitjoin.job.iterations", 20);
 
+    private final Integer CLEAN_SUSPENDED_EXECUTIONS_BULK_SIZE = Integer.getInteger("cleanSuspendedExecutions.job.bulk.size", 200);
 
     /**
      * Job that will handle the joining of finished branches for parallel and non-blocking steps.
@@ -171,6 +172,26 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
             if (logger.isDebugEnabled()) logger.debug("finished MiContextsMediatorJob in " + stopWatch);
         } catch (Exception ex) {
             logger.error("MiContextsMediatorJob failed", ex);
+        }
+    }
+
+    @Override
+    public void cleanSuspendedExecutions() {
+        try {
+            if (logger.isDebugEnabled()) {
+                logger.debug("CleanSuspendedExecutions woke up at " + new Date());
+            }
+            StopWatch stopWatch = new StopWatch();
+            stopWatch.start();
+
+            splitJoinService.deleteFinishedSuspendedExecutions(CLEAN_SUSPENDED_EXECUTIONS_BULK_SIZE);
+
+            stopWatch.stop();
+            if (logger.isDebugEnabled()) {
+                logger.debug("finished CleanSuspendedExecutions in " + stopWatch);
+            }
+        } catch (Exception ex) {
+            logger.error("CleanSuspendedExecutions failed", ex);
         }
     }
 

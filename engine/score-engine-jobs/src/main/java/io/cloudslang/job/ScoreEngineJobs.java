@@ -43,5 +43,11 @@ public interface ScoreEngineJobs {
     void miMergeBranchesContexts();
 
     void monitorLargeMessagesJob();
+
     void cleanFinishedExecutionState() ;
+
+    /**
+     * Removes suspended executions that have been finished for more than 24 hours and were not automatically cleared.
+     */
+    void cleanSuspendedExecutions();
 }

@@ -34,6 +34,8 @@ import io.cloudslang.score.events.EventConstants;
 import io.cloudslang.score.events.FastEventBus;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.facade.entities.Execution;
+import io.cloudslang.score.facade.execution.ExecutionStatus;
+import io.cloudslang.score.facade.execution.ExecutionSummary;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.logging.log4j.LogManager;
@@ -41,10 +43,13 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,8 +69,11 @@ import static io.cloudslang.score.events.EventConstants.EXECUTION_ID;
 import static io.cloudslang.score.events.EventConstants.SPLIT_ID;
 import static io.cloudslang.score.facade.TempConstants.MI_REMAINING_BRANCHES_CONTEXT_KEY;
 import static io.cloudslang.score.facade.execution.ExecutionStatus.CANCELED;
+import static io.cloudslang.score.facade.execution.ExecutionStatus.COMPLETED;
+import static io.cloudslang.score.facade.execution.ExecutionStatus.SYSTEM_FAILURE;
 import static java.lang.Long.parseLong;
 import static java.lang.String.valueOf;
+import static java.time.Duration.ofHours;
 import static java.util.EnumSet.of;
 import static java.util.stream.Collectors.toList;
 
@@ -73,6 +81,10 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     private final Logger logger = LogManager.getLogger(getClass());
 
     private final Integer BULK_SIZE = Integer.getInteger("splitjoin.job.bulk.size", 200);
+
+    private final long SUSPENDED_EXECUTIONS_TIMEOUT = Long.getLong("splitjoin.suspendedExecutions.timeout", ofHours(12).toMillis());
+
+    private final long SUSPENDED_EXECUTIONS_BULK_SIZE_MAX = Integer.getInteger("splitjoin.suspendedExecutions.bulk.size.max", 10_000);
 
     @Autowired
     private SuspendedExecutionsRepository suspendedExecutionsRepository;
@@ -95,6 +107,10 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     @Autowired
     @Qualifier("consumptionFastEventBus")
     private FastEventBus fastEventBus;
+
+    @Autowired
+    @Qualifier("executionSummaryDelegatorService")
+    private ExecutionSummaryDelegatorService executionSummaryService;
 
     /*
         converts an execution to a fresh execution message for triggering a new flow
@@ -322,16 +338,17 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     }
 
     private int joinMiBranchesAndSendToQueue(List<SuspendedExecution> suspendedExecutions) {
-        List<ExecutionMessage> messages = new ArrayList<>();
-        List<SuspendedExecution> mergedSuspendedExecutions = new ArrayList<>();
-
         if (logger.isDebugEnabled()) {
             logger.debug("Joining finished branches, found " + suspendedExecutions.size() + " suspended executions with all branches finished");
         }
 
         // nothing to do here
-        if (suspendedExecutions.isEmpty())
+        if (suspendedExecutions.isEmpty()) {
             return 0;
+        }
+
+        List<ExecutionMessage> messages = new ArrayList<>();
+        List<SuspendedExecution> mergedSuspendedExecutions = new ArrayList<>();
 
         for (SuspendedExecution se : suspendedExecutions) {
             Execution execution = se.getExecutionObj();
@@ -352,7 +369,6 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             if (updatedMergedBranches == totalNumberOfBranches) {
                 mergedSuspendedExecutions.add(se);
             } else {
-                se.setLocked(true);
                 finishedBranches.clear();
             }
             ExecutionMessage executionMessage = executionToStartExecutionMessage.convert(execution);
@@ -367,15 +383,69 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         return suspendedExecutions.size();
     }
 
-    private int joinAndSendToQueue(List<SuspendedExecution> suspendedExecutions) {
-        List<ExecutionMessage> messages = new ArrayList<>();
+    @Override
+    @Transactional
+    public void deleteFinishedSuspendedExecutions(int bulkSize) {
+        List<ExecutionStatus> executionStatuses = List.of(CANCELED, SYSTEM_FAILURE, COMPLETED);
+        Date before = new Date(Instant.now().toEpochMilli() - SUSPENDED_EXECUTIONS_TIMEOUT);
+        PageRequest pageRequest = PageRequest.of(0, bulkSize, Sort.by("id").ascending());
+        for (int bulk = 0; bulk < SUSPENDED_EXECUTIONS_BULK_SIZE_MAX; bulk += bulkSize) {
+            List<SuspendedExecution> suspendedExecutions = suspendedExecutionsRepository.findAll(pageRequest).getContent();
+            pageRequest = pageRequest.next(); // creates a new pageRequest with next page
 
-        if (logger.isDebugEnabled())
+            if (suspendedExecutions.isEmpty()) {
+                break;
+            }
+
+            List<SuspendedExecution> toBeDeleted = findFinishedExecutionsToDelete(suspendedExecutions, executionStatuses, before);
+
+            if (!toBeDeleted.isEmpty()) {
+                suspendedExecutionsRepository.deleteAll(toBeDeleted);
+            }
+        }
+    }
+
+    private List<SuspendedExecution> findFinishedExecutionsToDelete(List<SuspendedExecution> suspendedExecutions,
+                                                                    List<ExecutionStatus> executionStatuses,
+                                                                    Date before) {
+        List<SuspendedExecution> terminatedSuspendedExecutions = new ArrayList<>();
+        List<String> terminatedExecutionSummaries = new ArrayList<>();
+        List<String> executionIds = suspendedExecutions.stream().map(SuspendedExecution::getExecutionId)
+                                                        .distinct().toList();
+        // the number of suspended executions is already batched for the "IN" query
+        List<ExecutionSummary> executionSummaries = executionSummaryService.getEndTimeByExecutionIdInAndStatusIn(executionIds, executionStatuses);
+
+        for (ExecutionSummary executionSummary : executionSummaries) {
+            Date endTimeDate = executionSummary.getEndTime();
+            if (endTimeDate != null && endTimeDate.before(before)) {
+                terminatedExecutionSummaries.add(executionSummary.getExecutionId());
+            }
+        }
+
+        if (terminatedExecutionSummaries.isEmpty()) {
+            return terminatedSuspendedExecutions;
+        }
+
+        for (SuspendedExecution suspendedExecution : suspendedExecutions) {
+            if (terminatedExecutionSummaries.contains(suspendedExecution.getExecutionId())) {
+                terminatedSuspendedExecutions.add(suspendedExecution);
+            }
+        }
+
+        return terminatedSuspendedExecutions;
+    }
+
+    private int joinAndSendToQueue(List<SuspendedExecution> suspendedExecutions) {
+        if (logger.isDebugEnabled()) {
             logger.debug("Joining finished branches, found " + suspendedExecutions.size() + " suspended executions with all branches finished");
+        }
 
         // nothing to do here
-        if (suspendedExecutions.isEmpty())
+        if (suspendedExecutions.isEmpty()) {
             return 0;
+        }
+
+        List<ExecutionMessage> messages = new ArrayList<>();
 
         for (SuspendedExecution se : suspendedExecutions) {
             Execution exec = joinSplit(se);
