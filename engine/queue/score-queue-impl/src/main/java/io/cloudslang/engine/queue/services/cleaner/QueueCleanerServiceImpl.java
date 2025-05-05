@@ -16,10 +16,12 @@
 
 package io.cloudslang.engine.queue.services.cleaner;
 
+import io.cloudslang.engine.queue.entities.ExecutionStatesData;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -35,15 +37,44 @@ final public class QueueCleanerServiceImpl  implements QueueCleanerService {
    	private ExecutionQueueRepository executionQueueRepository;
 
     @Override
-    @Transactional
-    public Set<Long> getFinishedExecStateIds() {
-        return executionQueueRepository.getFinishedExecStateIds();
+    @Transactional(readOnly = true)
+    public Set<Long> getNonLatestFinishedExecStateIds() {
+        return executionQueueRepository.getNonLatestFinishedExecStateIds();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<ExecutionStatesData> getLatestExecutionStates() {
+        return executionQueueRepository.getLatestExecutionStates();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Set<Long> getExecutionStatesByFinishedMessageId(Set<Long> messageIds) {
+        return executionQueueRepository.getExecutionStatesByFinishedMessageId(messageIds);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Set<Long> getOrphanQueues(long cutOffTime) {
+        return executionQueueRepository.getOrphanExecutionQueues(cutOffTime);
     }
 
     @Override
     @Transactional
-    public void cleanFinishedSteps(Set<Long> ids) {
-        executionQueueRepository.deleteFinishedSteps(ids);
+    public void cleanFinishedSteps(Set<Long> toDeleteIds) {
+        executionQueueRepository.deleteFinishedSteps(toDeleteIds);
     }
 
+    @Transactional
+    @Override
+    public void cleanUnusedSteps(Set<Long> toDeleteIds) {
+        executionQueueRepository.deleteUnusedSteps(toDeleteIds);
+    }
+
+    @Transactional
+    @Override
+    public void cleanOrphanQueues(Set<Long> toDeleteIds) {
+        executionQueueRepository.deleteOrphanExecutionQueuesById(toDeleteIds);
+    }
 }

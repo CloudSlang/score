@@ -18,6 +18,7 @@ package io.cloudslang.engine.queue.repositories;
 
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
+import io.cloudslang.engine.queue.entities.ExecutionStatesData;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.entities.StartNewBranchPayload;
 
@@ -36,7 +37,13 @@ public interface ExecutionQueueRepository {
 
 	List<ExecutionMessage> pollRecovery(String workerId, int maxSize, ExecStatus... statuses);
 
-	List<ExecutionMessage> pollMessagesWithoutAck(int maxSize,long minVersionAllowed);
+	List<ExecutionStatesData> getLatestExecutionStates();
+
+	Set<Long> getExecutionStatesByFinishedMessageId(Set<Long> messageIds);
+
+	Set<Long> getOrphanExecutionQueues(long cutOffTime);
+
+	List<ExecutionMessage> pollMessagesWithoutAck(int maxSize, long minVersionAllowed);
 
     Integer countMessagesWithoutAckForWorker(int maxSize, long minVersionAllowed, String workerUuid);
 
@@ -48,9 +55,13 @@ public interface ExecutionQueueRepository {
 
 	Map<Long,Payload> findPayloadByExecutionIds(Long ... ids);
 
-	void deleteFinishedSteps(Set<Long> ids);
+	void deleteUnusedSteps(Set<Long> toDeleteIds);
 
-    Set<Long> getFinishedExecStateIds();
+	void deleteFinishedSteps(Set<Long> toDeleteIds);
+
+	void deleteOrphanExecutionQueuesById(Set<Long> toDeleteIds);
+
+	Set<Long> getNonLatestFinishedExecStateIds();
 
 	List<ExecutionMessage> findByStatuses(int maxSize, ExecStatus... statuses);
 	List<String> getBusyWorkers(ExecStatus... statuses);

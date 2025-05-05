@@ -24,11 +24,6 @@ package io.cloudslang.job;
 public interface ScoreEngineJobs {
 
     /**
-     * job that clean the finished steps from the queue
-     */
-    void cleanQueueJob();
-
-    /**
      * job that join all the suspended execution of brunches that finished
      */
     void joinFinishedSplitsJob();
