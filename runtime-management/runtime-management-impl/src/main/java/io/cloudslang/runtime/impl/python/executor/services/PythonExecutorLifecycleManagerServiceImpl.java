@@ -16,6 +16,7 @@
 package io.cloudslang.runtime.impl.python.executor.services;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.cloudslang.runtime.api.model.ResponseData;
 import io.cloudslang.runtime.api.python.executor.entities.PythonExecutorProcessDetails;
 import io.cloudslang.runtime.api.python.executor.services.PythonExecutorCommunicationService;
 import io.cloudslang.runtime.api.python.executor.services.PythonExecutorConfigurationDataService;
@@ -119,8 +120,8 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
 
     private PythonExecutorStatus getPythonExecutorStatus() {
         try {
-            Pair<Integer, String> response = pythonExecutorCommunicationService.performNoAuthRequest(EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH, "GET", null);
-            if (response.getLeft() == 200) {
+           ResponseData<String> response = pythonExecutorCommunicationService.performNoAuthRequest(EXTERNAL_PYTHON_EXECUTOR_HEALTH_PATH, "GET", null);
+            if (response.getCode() == 200) {
                 if (pythonExecutorProcess.get() == null) {
                     if (pythonExecutorProcessDetails.getPythonExecutorParentPid() == null) {
                         logger.warn("Python Executor port is already in use");
