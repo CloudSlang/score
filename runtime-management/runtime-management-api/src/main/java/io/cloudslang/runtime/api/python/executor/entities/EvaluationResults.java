@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.runtime.impl.python.external;
+package io.cloudslang.runtime.api.python.executor.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
