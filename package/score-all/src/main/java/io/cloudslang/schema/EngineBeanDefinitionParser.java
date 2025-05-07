@@ -55,11 +55,12 @@ import io.cloudslang.orchestrator.services.ScoreImpl;
 import io.cloudslang.orchestrator.services.ScorePauseResumeImpl;
 import io.cloudslang.orchestrator.services.ScoreTriggeringImpl;
 import io.cloudslang.orchestrator.services.SplitJoinServiceImpl;
+import io.cloudslang.orchestrator.services.StubExecutionSummaryDelegatorService;
 import io.cloudslang.orchestrator.services.StubPauseResumeServiceImpl;
 import io.cloudslang.orchestrator.services.SuspendedExecutionCleanerServiceImpl;
 import io.cloudslang.orchestrator.services.SuspendedExecutionServiceImpl;
 import io.cloudslang.orchestrator.services.WorkerDbSupportServiceImpl;
-import io.cloudslang.orchestrator.services.FinishedExecutionStateCleanerServiceImpl;
+import io.cloudslang.orchestrator.services.ExecutionCleanerServiceImpl;
 import io.cloudslang.schema.context.ScoreDatabaseContext;
 import io.cloudslang.schema.context.ScoreDefaultDatasourceContext;
 import io.cloudslang.worker.execution.services.ExternalExecutionServiceImpl;
@@ -125,7 +126,7 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
         put(ScoreEngineJobsImpl.class,"scoreEngineJobs");
 		put(BusyWorkersServiceImpl.class,"busyWorkersService");
 		put(MergedConfigurationServiceImpl.class,"MergedConfigurationService");
-		put(FinishedExecutionStateCleanerServiceImpl.class, null);
+		put(ExecutionCleanerServiceImpl.class, null);
 	}};
 
 	@Override
@@ -172,12 +173,20 @@ public class EngineBeanDefinitionParser extends AbstractBeanDefinitionParser {
         registerPauseResume(element,parserContext);
 		registerWorkerNodeService(element, parserContext);
 		registerEngineVersionService(element, parserContext);
+		registerExecutionSummary(element, parserContext);
     }
 
     private void registerPauseResume(Element element, ParserContext parserContext){
         String registerPauseResumeService = element.getAttribute("registerPauseResumeService");
         if(!registerPauseResumeService.equals(Boolean.FALSE.toString())){
             new BeanRegistrator(parserContext).CLASS(StubPauseResumeServiceImpl.class).register();
+        }
+    }
+
+	private void registerExecutionSummary(Element element, ParserContext parserContext){
+        String executionSummaryService = element.getAttribute("registerExecutionSummaryDelegatorService");
+        if(!executionSummaryService.equals(Boolean.FALSE.toString())){
+            new BeanRegistrator(parserContext).CLASS(StubExecutionSummaryDelegatorService.class).register();
         }
     }
 

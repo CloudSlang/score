@@ -20,7 +20,7 @@ import io.cloudslang.engine.queue.services.LargeMessagesMonitorService;
 import io.cloudslang.engine.queue.services.cleaner.QueueCleanerService;
 import io.cloudslang.engine.queue.services.recovery.ExecutionRecoveryService;
 import io.cloudslang.engine.versioning.services.VersionService;
-import io.cloudslang.orchestrator.services.FinishedExecutionStateCleanerService;
+import io.cloudslang.orchestrator.services.ExecutionCleanerService;
 import io.cloudslang.orchestrator.services.SplitJoinService;
 import io.cloudslang.orchestrator.services.SuspendedExecutionCleanerService;
 import org.apache.commons.lang.time.StopWatch;
@@ -29,8 +29,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * This class will unite all periodic jobs needed by the score engine, to be triggered by a scheduler .
@@ -59,7 +57,7 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
     private LargeMessagesMonitorService largeMessagesMonitorService;
 
     @Autowired
-    private FinishedExecutionStateCleanerService finishedExecutionStateCleanerService;
+    private ExecutionCleanerService executionCleanerService;
 
     private final Logger logger = LogManager.getLogger(getClass());
 
@@ -69,33 +67,7 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
 
     private final Integer SPLIT_JOIN_ITERATIONS = Integer.getInteger("splitjoin.job.iterations", 20);
 
-    /**
-     * Job that will handle the cleaning of queue table.
-     */
-    @Override
-    public void cleanQueueJob() {
-        try {
-            Set<Long> ids = queueCleanerService.getFinishedExecStateIds();
-            if (logger.isDebugEnabled())
-                logger.debug("Will clean from queue the next Exec state ids amount:" + ids.size());
-
-            Set<Long> execIds = new HashSet<>();
-
-            for (Long id : ids) {
-                execIds.add(id);
-                if (execIds.size() >= QUEUE_BULK_SIZE) {
-                    queueCleanerService.cleanFinishedSteps(execIds);
-                    execIds.clear();
-                }
-            }
-
-            if (execIds.size() > 0) {
-                queueCleanerService.cleanFinishedSteps(execIds);
-            }
-        } catch (Exception e) {
-            logger.error("Can't run queue cleaner job.", e);
-        }
-    }
+    private final Integer CLEAN_SUSPENDED_EXECUTIONS_BULK_SIZE = Integer.getInteger("cleanSuspendedExecutions.job.bulk.size", 200);
 
     /**
      * Job that will handle the joining of finished branches for parallel and non-blocking steps.
@@ -204,13 +176,33 @@ public class ScoreEngineJobsImpl implements ScoreEngineJobs {
     }
 
     @Override
+    public void cleanSuspendedExecutions() {
+        try {
+            if (logger.isDebugEnabled()) {
+                logger.debug("CleanSuspendedExecutions woke up at " + new Date());
+            }
+            StopWatch stopWatch = new StopWatch();
+            stopWatch.start();
+
+            splitJoinService.deleteFinishedSuspendedExecutions(CLEAN_SUSPENDED_EXECUTIONS_BULK_SIZE);
+
+            stopWatch.stop();
+            if (logger.isDebugEnabled()) {
+                logger.debug("finished CleanSuspendedExecutions in " + stopWatch);
+            }
+        } catch (Exception ex) {
+            logger.error("CleanSuspendedExecutions failed", ex);
+        }
+    }
+
+    @Override
     public void cleanFinishedExecutionState() {
         if (logger.isDebugEnabled()) {
             logger.debug("started in CleanFinishedExecutionState method");
         }
 
         try {
-            finishedExecutionStateCleanerService.cleanFinishedExecutionState();
+            executionCleanerService.cleanExecutions();
         } catch (Exception e) {
             logger.error("Can't run finished execution state cleaner job. : " + e);
         }

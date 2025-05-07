@@ -13,20 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cloudslang.worker.execution.services;
+package io.cloudslang.orchestrator.services;
 
-import io.cloudslang.score.facade.entities.Execution;
+import io.cloudslang.score.facade.execution.ExecutionStatus;
+import io.cloudslang.score.facade.execution.ExecutionSummary;
 
-import java.util.Date;
+import java.util.List;
 
-public interface ExternalExecutionService {
-    void pauseExternalExecution(Execution execution) throws InterruptedException;
+public interface ExecutionSummaryDelegatorService {
 
-    void resumeExternalExecution(Execution execution) throws InterruptedException;
-
-    Execution readExecutionObject(Long executionId, String branchId);
-
-    void updateExecutionObject(Long executionId, String branchId, Execution execution, Date updateDate);
-
-    void postExecutionWork(Execution execution) throws InterruptedException;
+    // executionSummary entity is only populated with executionId and endTime
+    List<ExecutionSummary> getEndTimeByExecutionIdInAndStatusIn(List<String> executionIds, List<ExecutionStatus> statuses);
 }

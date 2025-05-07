@@ -22,6 +22,7 @@ import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import io.cloudslang.orchestrator.services.AplsLicensingService;
+import io.cloudslang.orchestrator.services.ExecutionSummaryDelegatorService;
 import io.cloudslang.score.api.ExecutionPlan;
 import io.cloudslang.score.api.ExecutionStep;
 import io.cloudslang.score.api.Score;
@@ -211,6 +212,11 @@ public class EngineTest {
         @Bean
         public QueueConfigurationDataService queueConfigurationDataService() {
             return mock(QueueConfigurationDataService.class);
+        }
+
+        @Bean
+        public ExecutionSummaryDelegatorService executionSummaryDelegatorService() {
+            return mock(ExecutionSummaryDelegatorService.class);
         }
     }
 

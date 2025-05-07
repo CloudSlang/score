@@ -24,11 +24,6 @@ package io.cloudslang.job;
 public interface ScoreEngineJobs {
 
     /**
-     * job that clean the finished steps from the queue
-     */
-    void cleanQueueJob();
-
-    /**
      * job that join all the suspended execution of brunches that finished
      */
     void joinFinishedSplitsJob();
@@ -48,5 +43,11 @@ public interface ScoreEngineJobs {
     void miMergeBranchesContexts();
 
     void monitorLargeMessagesJob();
+
     void cleanFinishedExecutionState() ;
+
+    /**
+     * Removes suspended executions that have been finished for more than 24 hours and were not automatically cleared.
+     */
+    void cleanSuspendedExecutions();
 }

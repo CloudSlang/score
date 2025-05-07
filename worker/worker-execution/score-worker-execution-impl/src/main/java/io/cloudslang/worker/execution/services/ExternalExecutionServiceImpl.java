@@ -20,6 +20,7 @@ import io.cloudslang.orchestrator.services.PauseResumeService;
 import io.cloudslang.score.facade.entities.Execution;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Date;
 import java.util.HashMap;
 
 public final class ExternalExecutionServiceImpl implements ExternalExecutionService {
@@ -50,8 +51,8 @@ public final class ExternalExecutionServiceImpl implements ExternalExecutionServ
     }
 
     @Override
-    public void updateExecutionObject(Long executionId, String branchId, Execution execution) {
-        stateService.updateExecutionObject(executionId, branchId, execution);
+    public void updateExecutionObject(Long executionId, String branchId, Execution execution, Date updateDate) {
+        stateService.updateExecutionObject(executionId, branchId, execution, updateDate);
     }
 
     @Override
