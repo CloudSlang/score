@@ -15,14 +15,14 @@
  */
 package io.cloudslang.runtime.impl.python.executor.services.stubs;
 
-import io.cloudslang.runtime.api.model.ResponseData;
 import io.cloudslang.runtime.api.python.executor.entities.EvaluationResults;
 import io.cloudslang.runtime.api.python.executor.services.PythonExecutorCommunicationService;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class StubPythonExecutorCommunicationServiceImpl implements PythonExecutorCommunicationService {
 
     @Override
-    public ResponseData<String> performNoAuthRequest(String path, String method, String requestPayload) {
+    public Pair<Integer, String> performNoAuthRequest(String path, String method, String requestPayload) {
         return null;
     }
 
@@ -32,7 +32,7 @@ public class StubPythonExecutorCommunicationServiceImpl implements PythonExecuto
     }
 
     @Override
-    public ResponseData<EvaluationResults> performRuntimeRequest(String path, String method, String requestPayload) {
+    public Pair<Integer, EvaluationResults> performRuntimeRequest(String path, String method, String requestPayload) {
         return null;
     }
 }

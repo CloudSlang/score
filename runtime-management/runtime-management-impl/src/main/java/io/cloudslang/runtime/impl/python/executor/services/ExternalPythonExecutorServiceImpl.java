@@ -22,7 +22,6 @@ import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.core.json.JsonWriteFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.cloudslang.runtime.api.model.ResponseData;
 import io.cloudslang.runtime.api.python.PythonEvaluationResult;
 import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.api.python.PythonRuntimeService;
@@ -32,6 +31,7 @@ import io.cloudslang.runtime.impl.python.external.ExternalPythonEvalException;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonRuntimeServiceImpl;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonScriptException;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,12 +112,12 @@ public class ExternalPythonExecutorServiceImpl extends ExternalPythonRuntimeServ
 
 
     private EvaluationResults executeRequestOnPythonServer(String method, String payload) {
-        ResponseData<EvaluationResults> scriptResponse = pythonExecutorCommunicationService.performRuntimeRequest(EXTERNAL_PYTHON_EXECUTOR_EVAL_PATH, method, payload);
-        if (!isSuccessResponse(scriptResponse.getCode())) {
+        Pair<Integer, EvaluationResults> scriptResponse = pythonExecutorCommunicationService.performRuntimeRequest(EXTERNAL_PYTHON_EXECUTOR_EVAL_PATH, method, payload);
+        if (!isSuccessResponse(scriptResponse.getLeft())) {
             throw new ExternalPythonScriptException(String.format("Cannot execute request on python server. Response status was: %s",
-                    scriptResponse.getCode()));
+                    scriptResponse.getLeft()));
         }
-        return scriptResponse.getResponse();
+        return scriptResponse.getRight();
     }
 
     private boolean isSuccessResponse(int response) {
