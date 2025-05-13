@@ -82,7 +82,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
 
     private final Integer BULK_SIZE = Integer.getInteger("splitjoin.job.bulk.size", 200);
 
-    private final long SUSPENDED_EXECUTIONS_TIMEOUT = Long.getLong("splitjoin.suspendedExecutions.timeout", ofHours(12).toMillis());
+    private final long SUSPENDED_EXECUTIONS_TIMEOUT = Long.getLong("splitjoin.suspendedExecutions.timeout", ofHours(24).toMillis());
 
     private final long SUSPENDED_EXECUTIONS_BULK_SIZE_MAX = Integer.getInteger("splitjoin.suspendedExecutions.bulk.size.max", 10_000);
 
