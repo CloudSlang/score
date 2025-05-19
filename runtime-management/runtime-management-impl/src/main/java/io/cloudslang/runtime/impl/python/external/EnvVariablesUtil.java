@@ -31,9 +31,6 @@ import static org.apache.commons.lang3.StringUtils.split;
 
 public class EnvVariablesUtil {
 
-    private static final String TRUST_STORE = "TRUST_STORE";
-    private static final String TRUST_STORE_PASSWORD = "TRUST_STORE_PASSWORD";
-
     private static final EnvVariablesStrategy ENVIRONMENT_VARIABLES_STRATEGY = getEnvVariableStrategy(getProperty("python.environmentVariablesStrategy"));
     private static final List<String> ENVIRONMENT_VARIABLES_SUBSET = stream(split(getProperty("python.environmentVariablesSubset", ""), ","))
             .collect(Collectors.toList());
@@ -42,21 +39,17 @@ public class EnvVariablesUtil {
     }
 
     public static void processEnvironmentVariablesAllowedForPython(ProcessBuilder processBuilder) {
+        if (ENVIRONMENT_VARIABLES_STRATEGY == INHERIT_ALL) {
+            return;
+        }
+        if (ENVIRONMENT_VARIABLES_STRATEGY == INHERIT_NONE) {
+            processBuilder.environment().clear();
+            return;
+        }
         if (ENVIRONMENT_VARIABLES_STRATEGY == INHERIT_SUBSET) {
             Map<String, String> environmentVariables = processBuilder.environment();
             environmentVariables.entrySet()
                     .removeIf(entry -> !ENVIRONMENT_VARIABLES_SUBSET.contains(entry.getKey()));
-        } else if (ENVIRONMENT_VARIABLES_STRATEGY == INHERIT_NONE) {
-            processBuilder.environment().clear();
-        } else if (ENVIRONMENT_VARIABLES_STRATEGY == INHERIT_ALL) {
-            // Do nothing, keep all environment variables
         }
-
-        addTrustStoreEnvironmentVariables(processBuilder);
-    }
-
-    private static void addTrustStoreEnvironmentVariables(ProcessBuilder processBuilder) {
-        processBuilder.environment().put(TRUST_STORE, getProperty("javax.net.ssl.trustStore"));
-        processBuilder.environment().put(TRUST_STORE_PASSWORD, getProperty("javax.net.ssl.trustStorePassword"));
     }
 }
