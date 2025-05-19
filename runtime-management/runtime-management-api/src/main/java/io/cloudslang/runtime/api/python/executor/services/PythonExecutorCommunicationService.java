@@ -15,17 +15,20 @@
  */
 package io.cloudslang.runtime.api.python.executor.services;
 
+import io.cloudslang.runtime.api.python.executor.entities.EvaluationResults;
 import org.apache.commons.lang3.tuple.Pair;
 
 public interface PythonExecutorCommunicationService {
 
     Pair<Integer, String> performNoAuthRequest(String path,
-                                         String method,
-                                         String requestPayload);
-    Pair<Integer, String> performLifecycleRequest(String path,
-                                         String method,
-                                         String requestPayload);
-    Pair<Integer, String> performRuntimeRequest(String path,
-                                         String method,
-                                         String requestPayload);
+                                               String method,
+                                               String requestPayload);
+
+    void performLifecycleRequest(String path,
+                                 String method,
+                                 String requestPayload);
+
+    Pair<Integer, EvaluationResults> performRuntimeRequest(String path,
+                                                           String method,
+                                                           String requestPayload);
 }

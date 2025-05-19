@@ -16,19 +16,19 @@
 package io.cloudslang.runtime.impl.python.executor.services;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.cloudslang.runtime.api.python.executor.entities.PythonExecutorDetails;
 import io.cloudslang.runtime.api.python.executor.entities.PythonExecutorProcessDetails;
 import io.cloudslang.runtime.api.python.executor.services.PythonExecutorCommunicationService;
 import io.cloudslang.runtime.api.python.executor.services.PythonExecutorConfigurationDataService;
 import io.cloudslang.runtime.api.python.executor.services.PythonExecutorLifecycleManagerService;
-import io.cloudslang.runtime.api.python.executor.entities.PythonExecutorDetails;
 import io.cloudslang.runtime.api.python.executor.services.PythonExecutorProcessManagerService;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -168,7 +168,8 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         try {
             pythonExecutorCommunicationService.performLifecycleRequest(
                     EXTERNAL_PYTHON_EXECUTOR_STOP_PATH, "POST", null);
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+        }
 
         waitToStop();
     }
@@ -252,7 +253,7 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
     private void pythonExecutorKeepAlive() {
         if (currentKeepAliveRetriesCount.getAndIncrement() >= PYTHON_EXECUTOR_KEEP_ALIVE_RETRIES_COUNT) {
             stopKeepAliveJob();
-            logger.info("Python executor did not start in " + (currentKeepAliveRetriesCount.get()-1) + " retries and stopped trying");
+            logger.info("Python executor did not start in " + (currentKeepAliveRetriesCount.get() - 1) + " retries and stopped trying");
             return;
         }
 
@@ -323,5 +324,5 @@ public class PythonExecutorLifecycleManagerServiceImpl implements PythonExecutor
         return String.valueOf(port).equals(pythonExecutorPort);
     }
 
-    enum PythonExecutorStatus { UP, DOWN, BLOCKED }
+    enum PythonExecutorStatus {UP, DOWN, BLOCKED}
 }
