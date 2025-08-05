@@ -24,7 +24,7 @@
     <version>0.4.42-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>${project.groupId}:${project.artifactId}</name>
+    <name>io.cloudslang:score-parent</name>
     <description>A Java based orchestration engine</description>
     <url>https://github.com/CloudSlang/score</url>
 
