@@ -632,10 +632,10 @@
                         <executions>
                             <execution>
                                 <id>custom-deployment-to-nexus</id>
+                                <phase>install</phase>
                                 <goals>
                                     <goal>deploy</goal>
                                 </goals>
-                                <phase>deploy</phase>
                                 <configuration>
                                     <altDeploymentRepository>${custom.nexus}</altDeploymentRepository>
                                 </configuration>
