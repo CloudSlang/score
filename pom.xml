@@ -73,6 +73,19 @@
         <custom.nexus>overwriten_by_ci</custom.nexus>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>ossrh</id>
+            <name>Maven Central staging repository</name>
+            <url>${nexus.url}</url>
+        </repository>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <name>Maven Central snapshots repository</name>
+            <url>${nexus.url}</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <developers>
         <developer>
             <id>hararzafrir</id>
@@ -482,12 +495,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>${maven-deploy-plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <id>default-deploy</id>
-                            <phase>none</phase>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -587,15 +594,15 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>org.sonatype.central</groupId>
-                <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.8.0</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <publishingServerId>ossrh</publishingServerId>
-                </configuration>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.sonatype.central</groupId>-->
+<!--                <artifactId>central-publishing-maven-plugin</artifactId>-->
+<!--                <version>0.8.0</version>-->
+<!--                <extensions>true</extensions>-->
+<!--                <configuration>-->
+<!--                    <publishingServerId>ossrh</publishingServerId>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 
@@ -625,23 +632,23 @@
             <id>deploy-internal</id>
             <build>
                 <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-deploy-plugin</artifactId>
-                        <version>${maven-deploy-plugin.version}</version>
-                        <executions>
-                            <execution>
-                                <id>custom-deployment-to-nexus</id>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>deploy</goal>
-                                </goals>
-                                <configuration>
-                                    <altDeploymentRepository>${custom.nexus}</altDeploymentRepository>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
+<!--                    <plugin>-->
+<!--                        <groupId>org.apache.maven.plugins</groupId>-->
+<!--                        <artifactId>maven-deploy-plugin</artifactId>-->
+<!--                        <version>${maven-deploy-plugin.version}</version>-->
+<!--                        <executions>-->
+<!--                            <execution>-->
+<!--                                <id>custom-deployment-to-nexus</id>-->
+<!--                                <phase>deploy</phase>-->
+<!--                                <goals>-->
+<!--                                    <goal>deploy</goal>-->
+<!--                                </goals>-->
+<!--                                <configuration>-->
+<!--                                    <altDeploymentRepository>${custom.nexus}</altDeploymentRepository>-->
+<!--                                </configuration>-->
+<!--                            </execution>-->
+<!--                        </executions>-->
+<!--                    </plugin>-->
                 </plugins>
             </build>
         </profile>
