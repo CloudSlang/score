@@ -276,9 +276,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
             <column name="WRV" type="VARCHAR(48)"/>
             <column name="VERSION" type="VARCHAR(48)"/>
             <column name="VERSION_ID" type="VARCHAR(48)"/>
-            <column name="ALIAS" type="VARCHAR(255)">
-                <constraints unique="true"/>
-            </column>
         </createTable>
 
         <createTable tableName="OO_WORKER_GROUPS">
@@ -337,6 +334,15 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         <rollback>
             <dropColumn tableName="OO_EXECS_STATES_EXECS_MAPPINGS" columnName="SPLIT_ID"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="Add ALIAS column to OO_WORKER_NODES" author="engine">
+        <addColumn tableName="OO_WORKER_NODES">
+            <column name="ALIAS" type="VARCHAR(255)"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="OO_WORKER_NODES" columnName="ALIAS"/>
         </rollback>
     </changeSet>
 
