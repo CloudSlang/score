@@ -126,6 +126,9 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
 	@Column(name = "PERCENTAGE_UTILIZATION")
 	private String workerBusynessValue;
 
+    @Column(name = "ALIAS", unique = true)
+    private String alias;
+
     @Override
     public String getUuid() {
         return uuid;
@@ -309,6 +312,15 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
 	}
 
     @Override
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -335,6 +347,7 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
         if (workerRecoveryVersion != null ? !workerRecoveryVersion.equals(that.workerRecoveryVersion) : that.workerRecoveryVersion != null)
             return false;
         if (version != null ? !version.equals(that.version) : that.version != null) return false;
+        if (alias != null ? !alias.equals(that.alias) : that.alias != null) return false;
         return !(versionId != null ? !versionId.equals(that.versionId) : that.versionId != null);
 
     }
@@ -360,6 +373,7 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
         result = 31 * result + (workerRecoveryVersion != null ? workerRecoveryVersion.hashCode() : 0);
         result = 31 * result + (version != null ? version.hashCode() : 0);
         result = 31 * result + (versionId != null ? versionId.hashCode() : 0);
+        result = 31 * result + (alias != null ? alias.hashCode() : 0);
         return result;
     }
 
@@ -384,6 +398,7 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
                 ", version='" + version + '\'' +
                 ", versionId='" + versionId + '\'' +
                 ", queueSync='" + queueSync + '\'' +
+                ", alias='" + alias + '\'' +
                 '}';
     }
 }

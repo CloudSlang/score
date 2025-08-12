@@ -64,8 +64,9 @@ public interface WorkerNodeService {
      * @param password worker's password
      * @param hostName worker's host
      * @param installDir worker's installation directory
+     * @param alias worker's alias
      */
-    void create(String uuid, String password, String hostName, String installDir);
+    void create(String uuid, String password, String hostName, String installDir, String alias);
 
     /**
      * update a worker record to IS_DELETED state

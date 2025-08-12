@@ -55,4 +55,6 @@ public interface Worker {
 	boolean isQueueSync();
 
 	String getWorkerBusynessValue();
+
+	String getAlias();
 }

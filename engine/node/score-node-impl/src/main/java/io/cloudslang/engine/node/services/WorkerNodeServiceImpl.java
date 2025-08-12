@@ -130,7 +130,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 
     @Override
     @Transactional
-    public void create(String uuid, String password, String hostName, String installDir) {
+    public void create(String uuid, String password, String hostName, String installDir, String alias) {
         WorkerNode worker = new WorkerNode();
         worker.setUuid(uuid);
         worker.setDescription(uuid);
@@ -141,6 +141,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
         worker.setPassword(password);
         worker.setGroups(Arrays.asList(WorkerNode.DEFAULT_WORKER_GROUPS));
         worker.setWorkerBusynessValue("NA");
+        worker.setAlias(alias);
         workerNodeRepository.save(worker);
         workerLockService.create(uuid);
     }
