@@ -86,7 +86,7 @@ public class EngineTest {
     @Test
     public void baseEngineTest() throws InterruptedException {
         // register worker
-        workerNodeService.create("uuid", "password", "host", "dir",null);
+        workerNodeService.create("uuid", "password", "host", "dir");
         workerNodeService.activate("uuid");
         workerNodeService.up("uuid", "", "", false);
 

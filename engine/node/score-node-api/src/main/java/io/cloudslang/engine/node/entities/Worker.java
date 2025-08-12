@@ -26,35 +26,35 @@ import java.util.List;
  */
 public interface Worker {
 
-	String getUuid();
+    String getUuid();
 
-	boolean isActive();
+    boolean isActive();
 
     WorkerStatus getStatus();
 
-	String getHostName();
+    String getHostName();
 
-	String getInstallPath();
+    String getInstallPath();
 
-	String getDescription();
+    String getDescription();
 
-	String getOs();
+    String getOs();
 
-	String getJvm();
+    String getJvm();
 
-	String getDotNetVersion();
+    String getDotNetVersion();
 
-	List<String> getGroups();
+    List<String> getGroups();
 
     boolean isDeleted();
 
-	String getVersion();
+    String getVersion();
 
-	String getVersionId();
+    String getVersionId();
 
-	boolean isQueueSync();
+    boolean isQueueSync();
 
-	String getWorkerBusynessValue();
+    String getWorkerBusynessValue();
 
-	String getAlias();
+    String getAlias();
 }

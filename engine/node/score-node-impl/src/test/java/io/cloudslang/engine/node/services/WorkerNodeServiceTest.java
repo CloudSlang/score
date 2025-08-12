@@ -22,6 +22,7 @@ import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.node.repositories.WorkerNodeRepository;
 import io.cloudslang.engine.versioning.services.VersionService;
 import io.cloudslang.score.api.nodes.WorkerStatus;
+import jakarta.persistence.EntityManagerFactory;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.hibernate.jpa.HibernatePersistenceProvider;
@@ -48,14 +49,12 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
-
 
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
@@ -90,9 +89,9 @@ public class WorkerNodeServiceTest {
 
     @Before
     public void initNodes() {
-        workerNodeService.create("H1", "H1", "amit.levin", "c:/dir", "AliasH1");
+        workerNodeService.create("H1", "H1", "amit.levin", "c:/dir");
 
-        workerNodeService.create("H2", "H2", "dima.rassin", "c:/dir", "AliasH2");
+        workerNodeService.create("H2", "H2", "dima.rassin", "c:/dir");
     }
 
     @After
@@ -117,7 +116,7 @@ public class WorkerNodeServiceTest {
 
     @Test
     public void createNode() throws Exception {
-        workerNodeService.create("H3", "H3", "amit.levin", "c:/dir", "AliasH3");
+        workerNodeService.create("H3", "H3", "amit.levin", "c:/dir");
         verify(workerLockService).create("H3");
         WorkerNode worker = workerNodeService.readByUUID("H3");
         Assert.assertNotNull(worker);
@@ -125,7 +124,7 @@ public class WorkerNodeServiceTest {
 
     @Test
     public void login() throws Exception {
-        workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir", "AliasH3");
+        workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
         WorkerNode worker = workerNodeService.readByUUID("H3");
         Assert.assertEquals(WorkerStatus.FAILED, worker.getStatus());
         workerNodeService.up("H3", "version", versionId, false);
@@ -147,7 +146,7 @@ public class WorkerNodeServiceTest {
 
     @Test
     public void readAllNotDeletedWorkers() {
-        workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir", "AliasH3");
+        workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
         List<WorkerNode> workers = workerNodeService.readAllNotDeletedWorkers();
         Assert.assertEquals(3, workers.size());
         workerNodeService.updateWorkerToDeleted("H3");
@@ -157,7 +156,7 @@ public class WorkerNodeServiceTest {
 
     @Test
     public void deleteRunningWorkerTest() {
-        workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir", "AliasH3");
+        workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
         WorkerNode worker = workerNodeService.readByUUID("H3");
         Assert.assertEquals(WorkerStatus.FAILED, worker.getStatus());
         workerNodeService.up("H3", "version", versionId, false);
@@ -170,7 +169,7 @@ public class WorkerNodeServiceTest {
 
     @Test
     public void restoreDeletedWorker() {
-        workerNodeService.create("H3", "H3", "tirla.alin", "m:/y/imaginary/path", "AliasH3");
+        workerNodeService.create("H3", "H3", "tirla.alin", "m:/y/imaginary/path");
         WorkerNode worker = workerNodeService.readByUUID("H3");
         worker.setActive(false);
         worker.setDeleted(true);
@@ -188,7 +187,7 @@ public class WorkerNodeServiceTest {
         List<String> workers = workerNodeService.readNonRespondingWorkers();
         Assert.assertEquals(0, workers.size());
 
-        workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir", "AliasH3");
+        workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
         workers = workerNodeService.readNonRespondingWorkers();
         Assert.assertEquals(0, workers.size());
 
@@ -218,7 +217,7 @@ public class WorkerNodeServiceTest {
     @Test
     public void readWorkersByActivation() throws Exception {
 
-        workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir", "AliasH3");
+        workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
         List<WorkerNode> workers = workerNodeService.readWorkersByActivation(true);
         Assert.assertEquals(0, workers.size());
         workers = workerNodeService.readWorkersByActivation(false);
@@ -242,7 +241,7 @@ public class WorkerNodeServiceTest {
 
     @Test
     public void updateEnvironmentParams() throws Exception {
-        workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir", "AliasH3");
+        workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
         workerNodeService.updateEnvironmentParams("H3", "Window", "7.0", "4");
         WorkerNode worker = workerNodeService.readByUUID("H3");
         Assert.assertEquals("Window", worker.getOs());
@@ -253,7 +252,7 @@ public class WorkerNodeServiceTest {
 
     @Test
     public void updateStatus() {
-        workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir", "AliasH3");
+        workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
         WorkerNode worker = workerNodeService.readByUUID("H3");
         Assert.assertEquals(WorkerStatus.FAILED, worker.getStatus());
 
@@ -264,7 +263,7 @@ public class WorkerNodeServiceTest {
 
     @Test
     public void updateBulkNumber() {
-        workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir", "AliasH3");
+        workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
 
         workerNodeService.updateBulkNumber("H3", versionId);
 
@@ -277,7 +276,7 @@ public class WorkerNodeServiceTest {
         List<String> groups = workerNodeService.readAllWorkerGroups();
         Assert.assertEquals(WorkerNode.DEFAULT_WORKER_GROUPS.length, groups.size());
 
-        workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir", "AliasH3");
+        workerNodeService.create("H3", "H3", "dima.rassin", "c:/dir");
         workerNodeService.updateWorkerGroups("H3", "group 1", "group 2");
         workerNodeService.updateWorkerGroups("H1", "group 1");
         groups = workerNodeService.readAllWorkerGroups();
@@ -316,7 +315,7 @@ public class WorkerNodeServiceTest {
         List<String> list;
         HashSet<String> expected;
 
-        workerNodeService.create("PLM", "PLM", "dan.filip", "c:/plm", "AliasP");
+        workerNodeService.create("PLM", "PLM", "dan.filip", "c:/plm");
 
         workerNodeService.updateWorkerGroups("PLM", "c1", "c2", "c2", "c3");
         list = workerNodeService.readWorkerGroups("PLM");
@@ -342,7 +341,7 @@ public class WorkerNodeServiceTest {
 
     @Test
     public void updateVersionTest() {
-        workerNodeService.create("worker_1", "password", "stamHost", "c:/dir", "AliasW1");
+        workerNodeService.create("worker_1", "password", "stamHost", "c:/dir");
         WorkerNode workerNode = workerNodeService.readByUUID("H1");
         Assert.assertEquals("", workerNode.getVersion());
 
@@ -355,7 +354,7 @@ public class WorkerNodeServiceTest {
 
     @Test
     public void updateMigratedPasswordTest() {
-        workerNodeService.create("worker_1", "password", "stamHost", "c:/dir", "AliasW1");
+        workerNodeService.create("worker_1", "password", "stamHost", "c:/dir");
         WorkerNode workerNode = workerNodeService.readByUUID("H1");
         Assert.assertNull(workerNode.getMigratedPassword());
 
@@ -364,6 +363,20 @@ public class WorkerNodeServiceTest {
         workerNode = workerNodeService.readByUUID("H1");
 
         Assert.assertEquals("Version not updated!", "newPassword", workerNode.getMigratedPassword());
+    }
+
+
+    @Test
+    public void updateAliasTest() {
+        workerNodeService.create("worker_1", "password", "stamHost", "c:/dir");
+        WorkerNode workerNode = workerNodeService.readByUUID("H1");
+        Assert.assertNull(workerNode.getAlias());
+
+        workerNodeService.updateWorkerAlias("H1", "alias");
+
+        workerNode = workerNodeService.readByUUID("H1");
+
+        Assert.assertEquals("Version not updated!", "alias", workerNode.getAlias());
     }
 
     @Configuration

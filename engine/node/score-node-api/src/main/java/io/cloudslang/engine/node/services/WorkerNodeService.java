@@ -64,9 +64,8 @@ public interface WorkerNodeService {
      * @param password worker's password
      * @param hostName worker's host
      * @param installDir worker's installation directory
-     * @param alias worker's alias
      */
-    void create(String uuid, String password, String hostName, String installDir, String alias);
+    void create(String uuid, String password, String hostName, String installDir);
 
     /**
      * update a worker record to IS_DELETED state
@@ -315,6 +314,7 @@ public interface WorkerNodeService {
     void updateQueueSyncByUuid(String workerUuid, boolean isQueueSync);
 
     void updateQueueSync(boolean isQueueSync);
+
     /**
      * updates worker's busyness value
      *
@@ -322,4 +322,6 @@ public interface WorkerNodeService {
      * @param workerBusynessValue the newly added busyness value
      */
     void updateWorkerBusynessValue(String uuid, String workerBusynessValue);
+
+    void updateWorkerAlias(String workerUuid, String alias);
 }
