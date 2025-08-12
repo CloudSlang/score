@@ -21,10 +21,10 @@
 
     <groupId>io.cloudslang</groupId>
     <artifactId>score-parent</artifactId>
-    <version>0.4.40-SNAPSHOT</version>
+    <version>0.4.46-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>${project.groupId}:${project.artifactId}</name>
+    <name>io.cloudslang:score-parent</name>
     <description>A Java based orchestration engine</description>
     <url>https://github.com/CloudSlang/score</url>
 
@@ -77,12 +77,12 @@
         <repository>
             <id>ossrh</id>
             <name>Maven Central staging repository</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <url>${nexus.url}</url>
         </repository>
         <snapshotRepository>
             <id>ossrh</id>
             <name>Maven Central snapshots repository</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <url>${nexus.url}</url>
         </snapshotRepository>
     </distributionManagement>
 
@@ -621,25 +621,25 @@
         <profile>
             <id>deploy-internal</id>
             <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-deploy-plugin</artifactId>
-                        <version>${maven-deploy-plugin.version}</version>
-                        <executions>
-                            <execution>
-                                <id>custom-deployment-to-nexus</id>
-                                <goals>
-                                    <goal>deploy</goal>
-                                </goals>
-                                <phase>deploy</phase>
-                                <configuration>
-                                    <altDeploymentRepository>${custom.nexus}</altDeploymentRepository>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
+<!--                <plugins>-->
+<!--                    <plugin>-->
+<!--                        <groupId>org.apache.maven.plugins</groupId>-->
+<!--                        <artifactId>maven-deploy-plugin</artifactId>-->
+<!--                        <version>${maven-deploy-plugin.version}</version>-->
+<!--                        <executions>-->
+<!--                            <execution>-->
+<!--                                <id>custom-deployment-to-nexus</id>-->
+<!--                                <goals>-->
+<!--                                    <goal>deploy</goal>-->
+<!--                                </goals>-->
+<!--                                <phase>deploy</phase>-->
+<!--                                <configuration>-->
+<!--                                    <altDeploymentRepository>${custom.nexus}</altDeploymentRepository>-->
+<!--                                </configuration>-->
+<!--                            </execution>-->
+<!--                        </executions>-->
+<!--                    </plugin>-->
+<!--                </plugins>-->
             </build>
         </profile>
     </profiles>
