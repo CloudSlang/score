@@ -24,6 +24,7 @@ import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.node.repositories.WorkerNodeRepository;
 import io.cloudslang.engine.versioning.services.VersionService;
 import io.cloudslang.score.api.nodes.WorkerStatus;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,7 +36,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -75,13 +75,13 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
     private PlatformTransactionManager transactionManager;
 
     @PostConstruct
-    void setWorkerMonitoring(){
+    void setWorkerMonitoring() {
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
 
-        if(disableMonitoring) {
+        if (disableMonitoring) {
             logger.info("Monitoring is disabled,setting busyness status as not available for all workers");
             transactionTemplate.executeWithoutResult(transactionStatus -> {
-                readAllWorkersUuids().stream().forEach(uuid -> updateWorkerBusynessValue(uuid,"NA") );
+                readAllWorkersUuids().stream().forEach(uuid -> updateWorkerBusynessValue(uuid, "NA"));
             });
         }
     }
@@ -107,7 +107,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
     @Deprecated
     public WorkerKeepAliveInfo newKeepAlive(String uuid) {
         // Any worker using this method will be considered an older version from engine
-		return newKeepAlive(uuid, true);
+        return newKeepAlive(uuid, true);
     }
 
     @Override
@@ -125,7 +125,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
                 "Got keepAlive for Worker with uuid=" + uuid + " and update its ackVersion to " + version + " isActive"
                         + active);
         QueueDetails queueDetails = queueConfigurationDataService.getQueueConfigurations();
-		return new WorkerKeepAliveInfo(worker.getWorkerRecoveryVersion(), active, queueDetails,disableMonitoring);
+        return new WorkerKeepAliveInfo(worker.getWorkerRecoveryVersion(), active, queueDetails, disableMonitoring);
     }
 
     @Override
@@ -526,5 +526,12 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
     public void updateWRV(String workerUuid, String wrv) {
         WorkerNode worker = workerNodeRepository.findByUuid(workerUuid);
         worker.setWorkerRecoveryVersion(wrv);
+    }
+
+    @Override
+    @Transactional
+    public void updateWorkerAliasByUuid(String workerUuid, String alias) {
+        WorkerNode worker = workerNodeRepository.findByUuid(workerUuid);
+        worker.setAlias(alias);
     }
 }

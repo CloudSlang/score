@@ -16,13 +16,10 @@
 
 package io.cloudslang.engine.node.entities;
 
+import io.cloudslang.engine.data.AbstractIdentifiable;
 import io.cloudslang.score.api.WorkerStatusTypeDescriptor;
 import io.cloudslang.score.api.nodes.WorkerStatus;
-import io.cloudslang.engine.data.AbstractIdentifiable;
 import io.cloudslang.score.facade.TempConstants;
-import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.SelectBeforeUpdate;
-
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -33,6 +30,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.SelectBeforeUpdate;
 import org.hibernate.annotations.Type;
 
 import java.util.ArrayList;
@@ -123,8 +122,11 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
     @Column(name = "QUEUE_SYNC", nullable = false)
     private boolean queueSync = false;
 
-	@Column(name = "PERCENTAGE_UTILIZATION")
-	private String workerBusynessValue;
+    @Column(name = "PERCENTAGE_UTILIZATION")
+    private String workerBusynessValue;
+
+    @Column(name = "ALIAS", unique = true)
+    private String alias;
 
     @Override
     public String getUuid() {
@@ -299,14 +301,23 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
         this.queueSync = queueSync;
     }
 
-	@Override
-	public String getWorkerBusynessValue() {
-		return workerBusynessValue;
-	}
+    @Override
+    public String getWorkerBusynessValue() {
+        return workerBusynessValue;
+    }
 
-	public void setWorkerBusynessValue(String workerBusynessValue) {
-		this.workerBusynessValue = workerBusynessValue;
-	}
+    public void setWorkerBusynessValue(String workerBusynessValue) {
+        this.workerBusynessValue = workerBusynessValue;
+    }
+
+    @Override
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -335,6 +346,7 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
         if (workerRecoveryVersion != null ? !workerRecoveryVersion.equals(that.workerRecoveryVersion) : that.workerRecoveryVersion != null)
             return false;
         if (version != null ? !version.equals(that.version) : that.version != null) return false;
+        if (alias != null ? !alias.equals(that.alias) : that.alias != null) return false;
         return !(versionId != null ? !versionId.equals(that.versionId) : that.versionId != null);
 
     }
@@ -360,6 +372,7 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
         result = 31 * result + (workerRecoveryVersion != null ? workerRecoveryVersion.hashCode() : 0);
         result = 31 * result + (version != null ? version.hashCode() : 0);
         result = 31 * result + (versionId != null ? versionId.hashCode() : 0);
+        result = 31 * result + (alias != null ? alias.hashCode() : 0);
         return result;
     }
 
@@ -384,6 +397,7 @@ public class WorkerNode extends AbstractIdentifiable implements Worker {
                 ", version='" + version + '\'' +
                 ", versionId='" + versionId + '\'' +
                 ", queueSync='" + queueSync + '\'' +
+                ", alias='" + alias + '\'' +
                 '}';
     }
 }

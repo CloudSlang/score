@@ -314,6 +314,7 @@ public interface WorkerNodeService {
     void updateQueueSyncByUuid(String workerUuid, boolean isQueueSync);
 
     void updateQueueSync(boolean isQueueSync);
+
     /**
      * updates worker's busyness value
      *
@@ -321,4 +322,6 @@ public interface WorkerNodeService {
      * @param workerBusynessValue the newly added busyness value
      */
     void updateWorkerBusynessValue(String uuid, String workerBusynessValue);
+
+    void updateWorkerAliasByUuid(String workerUuid, String alias);
 }

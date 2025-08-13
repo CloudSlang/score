@@ -22,6 +22,7 @@ import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.node.repositories.WorkerNodeRepository;
 import io.cloudslang.engine.versioning.services.VersionService;
 import io.cloudslang.score.api.nodes.WorkerStatus;
+import jakarta.persistence.EntityManagerFactory;
 import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.hibernate.jpa.HibernatePersistenceProvider;
@@ -48,14 +49,12 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
-
 
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
@@ -364,6 +363,20 @@ public class WorkerNodeServiceTest {
         workerNode = workerNodeService.readByUUID("H1");
 
         Assert.assertEquals("Version not updated!", "newPassword", workerNode.getMigratedPassword());
+    }
+
+
+    @Test
+    public void updateAliasTest() {
+        workerNodeService.create("worker_1", "password", "stamHost", "c:/dir");
+        WorkerNode workerNode = workerNodeService.readByUUID("H1");
+        Assert.assertNull(workerNode.getAlias());
+
+        workerNodeService.updateWorkerAliasByUuid("H1", "alias");
+
+        workerNode = workerNodeService.readByUUID("H1");
+
+        Assert.assertEquals("Alias not updated!", "alias", workerNode.getAlias());
     }
 
     @Configuration
