@@ -323,5 +323,5 @@ public interface WorkerNodeService {
      */
     void updateWorkerBusynessValue(String uuid, String workerBusynessValue);
 
-    void updateWorkerAlias(String workerUuid, String alias);
+    void updateWorkerAliasByUuid(String workerUuid, String alias);
 }

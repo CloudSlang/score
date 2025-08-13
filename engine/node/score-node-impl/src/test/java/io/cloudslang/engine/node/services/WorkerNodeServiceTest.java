@@ -372,11 +372,11 @@ public class WorkerNodeServiceTest {
         WorkerNode workerNode = workerNodeService.readByUUID("H1");
         Assert.assertNull(workerNode.getAlias());
 
-        workerNodeService.updateWorkerAlias("H1", "alias");
+        workerNodeService.updateWorkerAliasByUuid("H1", "alias");
 
         workerNode = workerNodeService.readByUUID("H1");
 
-        Assert.assertEquals("Version not updated!", "alias", workerNode.getAlias());
+        Assert.assertEquals("Alias not updated!", "alias", workerNode.getAlias());
     }
 
     @Configuration

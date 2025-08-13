@@ -530,7 +530,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
 
     @Override
     @Transactional
-    public void updateWorkerAlias(String workerUuid, String alias) {
+    public void updateWorkerAliasByUuid(String workerUuid, String alias) {
         WorkerNode worker = workerNodeRepository.findByUuid(workerUuid);
         worker.setAlias(alias);
     }
