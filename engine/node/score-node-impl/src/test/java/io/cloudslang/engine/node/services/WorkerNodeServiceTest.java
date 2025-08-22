@@ -161,10 +161,13 @@ public class WorkerNodeServiceTest {
         Assert.assertEquals(WorkerStatus.FAILED, worker.getStatus());
         workerNodeService.up("H3", "version", versionId, false);
         Assert.assertEquals(WorkerStatus.RUNNING, worker.getStatus());
+        workerNodeService.updateWorkerAliasByUuid("H3", "alias");
+        Assert.assertEquals("alias", worker.getAlias());
         workerNodeService.updateWorkerToDeleted("H3");
         Assert.assertEquals(WorkerStatus.IN_RECOVERY, worker.getStatus());
         Assert.assertEquals(false, worker.isActive());
         Assert.assertEquals(true, worker.isDeleted());
+        Assert.assertEquals(null, worker.getAlias());
     }
 
     @Test
