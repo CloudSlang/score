@@ -153,6 +153,7 @@ public class WorkerNodeServiceImpl implements WorkerNodeService {
             worker.setActive(false);
             worker.setDeleted(true);
             worker.setStatus(WorkerStatus.IN_RECOVERY);
+            worker.setAlias(null);
         }
     }
 
