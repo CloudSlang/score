@@ -109,10 +109,12 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     " AND Q.CREATE_TIME < ?";
 
     final private String QUERY_SELECT_NON_LATEST_EXEC_STATE_IDS =
-            "SELECT S.ID  FROM OO_EXECUTION_STATES S WHERE " +
-                    "   (S.MSG_ID,S.CREATE_TIME) NOT IN (SELECT MSG_ID,MAX(CREATE_TIME) FROM OO_EXECUTION_STATES GROUP BY MSG_ID)" +
-                    "   AND S.ID NOT IN (SELECT EXEC_STATE_ID FROM OO_EXECS_STATES_EXECS_MAPPINGS)" +
-                    "   AND S.ID IN (SELECT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES WHERE STATUS > 5)";
+            "SELECT S.ID FROM OO_EXECUTION_STATES S " +
+                    "WHERE NOT EXISTS " +
+                        "( SELECT 1 FROM (SELECT MSG_ID , MAX(CREATE_TIME) AS MAX_CREATE_TIME FROM OO_EXECUTION_STATES GROUP BY MSG_ID) T " +
+                    "WHERE S.MSG_ID = T.MSG_ID AND S.CREATE_TIME = T.MAX_CREATE_TIME) " +
+                    "AND S.ID NOT IN (SELECT EXEC_STATE_ID FROM OO_EXECS_STATES_EXECS_MAPPINGS) " +
+                    "AND S.ID IN (SELECT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES WHERE STATUS > 5)";
 
     final private String QUERY_MESSAGES_WITHOUT_ACK_SQL =
             "SELECT EXEC_STATE_ID,      " +
