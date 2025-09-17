@@ -99,8 +99,11 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     final private String QUERY_SELECT_EXECUTION_STATES_WITH_MESSAGE_IDS =
             "SELECT S.ID FROM OO_EXECUTION_STATES S WHERE S.MSG_ID IN (:ids)";
 
-    final private String QUERY_SELECT_LATEST_EXEC_STATES = "SELECT S.MSG_ID, S.ID, S.CREATE_TIME FROM OO_EXECUTION_STATES S WHERE " +
-            "   (S.MSG_ID,S.CREATE_TIME) IN (SELECT MSG_ID, MAX(CREATE_TIME) FROM OO_EXECUTION_STATES GROUP BY MSG_ID) ORDER BY S.MSG_ID DESC";
+    final private String QUERY_SELECT_LATEST_EXEC_STATES =
+            "SELECT S.MSG_ID, S.ID, S.CREATE_TIME FROM OO_EXECUTION_STATES S " +
+                    "JOIN (SELECT MSG_ID, MAX(CREATE_TIME) AS MaxCreateTime " +
+                    "FROM OO_EXECUTION_STATES GROUP BY MSG_ID) X " +
+                    "ON S.MSG_ID = X.MSG_ID AND S.CREATE_TIME = X.MaxCreateTime ORDER BY S.MSG_ID DESC";
 
     final private String QUERY_SELECT_ORPHAN_EXECUTION_QUEUES =
             "SELECT Q.ID FROM OO_EXECUTION_QUEUES Q " +
