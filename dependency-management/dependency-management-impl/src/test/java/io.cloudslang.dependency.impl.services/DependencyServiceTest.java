@@ -60,7 +60,8 @@ public class DependencyServiceTest {
     private static boolean shouldRunMaven;
     static  {
         ClassLoader classLoader = DependencyServiceTest.class.getClassLoader();
-        @SuppressWarnings("ConstantConditions") String settingsXmlPath = classLoader.getResource("settings.xml").getPath();
+        File settingsXmlFile = new File(classLoader.getResource("settings.xml").getFile());
+        String settingsXmlPath = settingsXmlFile.getPath();
         File rootHome = new File(settingsXmlPath).getParentFile();
         File mavenHome = new File(rootHome, "maven");
         UnzipUtil.unzipToFolder(mavenHome.getAbsolutePath(), classLoader.getResourceAsStream("maven.zip"));
@@ -78,10 +79,13 @@ public class DependencyServiceTest {
         if (localRepository != null && !localRepository.isEmpty()) {
             System.setProperty("maven.repo.local", localRepository);
         }
+        File m2ConfFile = new File(classLoader.getResource("m2.conf").getFile());
+        String m2ConfPath = m2ConfFile.getPath();
 
         System.setProperty(MavenConfigImpl.MAVEN_SETTINGS_PATH, settingsXmlPath);
         //noinspection ConstantConditions
-        System.setProperty(MavenConfigImpl.MAVEN_M2_CONF_PATH, classLoader.getResource("m2.conf").getPath());
+        System.setProperty(MavenConfigImpl.MAVEN_M2_CONF_PATH, m2ConfPath);
+        System.setProperty("maven.multiModuleProjectDirectory", rootHome.getAbsolutePath());
     }
 
 
