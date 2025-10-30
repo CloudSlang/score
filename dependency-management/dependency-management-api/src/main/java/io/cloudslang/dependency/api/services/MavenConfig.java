@@ -42,8 +42,8 @@ public interface MavenConfig {
     String MAVEN_FOLDER = "maven";
     String POM_EXTENSION = "pom";
     String LOG_FILE_FLAG = "--log-file";
-    String DEPENDENCY_BUILD_CLASSPATH_COMMAND = "org.apache.maven.plugins:maven-dependency-plugin:3.6.0:build-classpath";
-    String DEPENDENCY_GET_COMMAND = "org.apache.maven.plugins:maven-dependency-plugin:3.6.0:get";
+    String DEPENDENCY_BUILD_CLASSPATH_COMMAND = "org.apache.maven.plugins:maven-dependency-plugin:3.9.0:build-classpath";
+    String DEPENDENCY_GET_COMMAND = "org.apache.maven.plugins:maven-dependency-plugin:3.9.0:get";
     String MAVEN_SETTINGS_FILE_FLAG = "-s";
     String MAVEN_POM_PATH_PROPERTY = "-f";
     String MAVEN_CLASSWORLDS_CONF_PROPERTY = "classworlds.conf";
