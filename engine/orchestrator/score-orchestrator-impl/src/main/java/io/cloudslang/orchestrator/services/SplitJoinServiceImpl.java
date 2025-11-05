@@ -369,6 +369,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             if (updatedMergedBranches == totalNumberOfBranches) {
                 mergedSuspendedExecutions.add(se);
             } else {
+                se.setLocked(true);
                 finishedBranches.clear();
             }
             ExecutionMessage executionMessage = executionToStartExecutionMessage.convert(execution);
