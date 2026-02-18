@@ -31,7 +31,6 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.SelectBeforeUpdate;
 import org.hibernate.annotations.Type;
 
 import java.util.ArrayList;
@@ -46,8 +45,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "OO_WORKER_NODES")
-@DynamicUpdate(value = true)
-@SelectBeforeUpdate(value = true)
+@DynamicUpdate
 public class WorkerNode extends AbstractIdentifiable implements Worker {
     public static final String[] DEFAULT_WORKER_GROUPS = {TempConstants.DEFAULT_GROUP};
 
