@@ -93,8 +93,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     final private String QUERY_DELETE_EXECS_STATES_MAPPINGS = "DELETE FROM OO_EXECS_STATES_EXECS_MAPPINGS " +
             " WHERE EXEC_STATE_ID in (:ids)";
 
-    final private String QUERY_DELETE_EXECUTION_QUEUES_BY_IDS = "DELETE FROM OO_EXECUTION_QUEUES Q " +
-            " WHERE Q.ID in (:ids)";
+    final private String QUERY_DELETE_EXECUTION_QUEUES_BY_IDS = "DELETE FROM OO_EXECUTION_QUEUES " +
+            " WHERE ID in (:ids)";
 
     final private String QUERY_SELECT_EXECUTION_STATES_WITH_MESSAGE_IDS =
             "SELECT S.ID FROM OO_EXECUTION_STATES S WHERE S.MSG_ID IN (:ids)";
