@@ -16,7 +16,7 @@
 
 package io.cloudslang.engine.queue.entities;
 
-import org.apache.commons.lang.Validate;
+import io.cloudslang.score.util.Validate;
 
 import java.util.Collections;
 import java.util.List;

@@ -34,8 +34,8 @@
             <artifactId>log4j-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
             <groupId>jakarta.annotation</groupId>
@@ -59,6 +59,11 @@
             <groupId>io.github.openfeign.querydsl</groupId>
             <artifactId>querydsl-jpa</artifactId>
             <classifier>jakarta</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>io.cloudslang</groupId>
+            <artifactId>score-api</artifactId>
         </dependency>
     </dependencies>
 

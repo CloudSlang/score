@@ -21,7 +21,7 @@ import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import io.cloudslang.orchestrator.entities.SplitMessage;
-import org.apache.commons.lang.Validate;
+import io.cloudslang.score.util.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

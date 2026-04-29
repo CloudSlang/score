@@ -17,8 +17,8 @@
 package io.cloudslang.orchestrator.entities;
 
 import io.cloudslang.score.facade.entities.Execution;
-import org.apache.commons.lang.Validate;
-import org.apache.commons.lang.builder.EqualsBuilder;
+import io.cloudslang.score.util.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import java.util.ArrayList;
 import java.util.Collections;

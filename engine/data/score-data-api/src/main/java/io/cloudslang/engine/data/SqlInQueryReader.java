@@ -16,7 +16,7 @@
 
 package io.cloudslang.engine.data;
 
-import org.apache.commons.lang.Validate;
+import io.cloudslang.score.util.Validate;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;

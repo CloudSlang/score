@@ -19,7 +19,7 @@ package io.cloudslang.orchestrator.entities;
 import io.cloudslang.engine.data.AbstractIdentifiable;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.score.facade.execution.ExecutionSummary;
-import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 

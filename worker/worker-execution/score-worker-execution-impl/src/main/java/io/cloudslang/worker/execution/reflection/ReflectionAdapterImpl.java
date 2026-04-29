@@ -21,7 +21,7 @@ import io.cloudslang.score.exceptions.FlowExecutionException;
 import io.cloudslang.score.lang.ExecutionRuntimeServices;
 import io.cloudslang.worker.execution.model.StepActionDataHolder.ReadonlyStepActionDataAccessor;
 import io.cloudslang.worker.execution.services.SessionDataHandler;
-import org.apache.commons.lang.Validate;
+import io.cloudslang.score.util.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeansException;

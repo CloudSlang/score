@@ -30,7 +30,7 @@ import io.cloudslang.runtime.api.python.executor.services.PythonExecutorCommunic
 import io.cloudslang.runtime.impl.python.external.ExternalPythonEvalException;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonRuntimeServiceImpl;
 import io.cloudslang.runtime.impl.python.external.ExternalPythonScriptException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

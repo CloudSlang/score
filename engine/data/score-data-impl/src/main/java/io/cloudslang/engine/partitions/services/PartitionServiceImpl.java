@@ -18,7 +18,7 @@ package io.cloudslang.engine.partitions.services;
 
 import io.cloudslang.engine.partitions.entities.PartitionGroup;
 import io.cloudslang.engine.partitions.repositories.PartitionGroupRepository;
-import org.apache.commons.lang.Validate;
+import io.cloudslang.score.util.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

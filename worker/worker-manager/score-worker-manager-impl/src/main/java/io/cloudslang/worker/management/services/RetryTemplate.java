@@ -16,7 +16,7 @@
 
 package io.cloudslang.worker.management.services;
 
-import org.apache.commons.lang.Validate;
+import io.cloudslang.score.util.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

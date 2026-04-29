@@ -64,7 +64,7 @@ import io.cloudslang.orchestrator.services.ExecutionCleanerServiceImpl;
 import io.cloudslang.schema.context.ScoreDatabaseContext;
 import io.cloudslang.schema.context.ScoreDefaultDatasourceContext;
 import io.cloudslang.worker.execution.services.ExternalExecutionServiceImpl;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;

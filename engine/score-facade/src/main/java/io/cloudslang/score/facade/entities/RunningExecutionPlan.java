@@ -18,7 +18,7 @@ package io.cloudslang.score.facade.entities;
 
 import io.cloudslang.score.api.ExecutionPlan;
 import io.cloudslang.engine.data.AbstractIdentifiable;
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
