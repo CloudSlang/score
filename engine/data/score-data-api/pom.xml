@@ -60,11 +60,6 @@
             <artifactId>querydsl-jpa</artifactId>
             <classifier>jakarta</classifier>
         </dependency>
-
-        <dependency>
-            <groupId>io.cloudslang</groupId>
-            <artifactId>score-api</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
