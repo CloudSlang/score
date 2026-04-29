@@ -17,7 +17,6 @@
 package io.cloudslang.score.api;
 
 import io.cloudslang.score.lang.SystemContext;
-import io.cloudslang.score.util.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -37,10 +36,10 @@ public class StartBranchDataContainer implements Serializable{
     private final SystemContext systemContext;
 
     public StartBranchDataContainer(Long startPosition, Long executionPlanId, Map<String, Serializable> contexts, SystemContext systemContext) {
-        Validate.notNull(startPosition);
-        Validate.notNull(executionPlanId);
-        Validate.notNull(contexts);
-        Validate.notNull(systemContext);
+        if (startPosition == null) throw new IllegalArgumentException("startPosition cannot be null");
+        if (executionPlanId == null) throw new IllegalArgumentException("executionPlanId cannot be null");
+        if (contexts == null) throw new IllegalArgumentException("contexts cannot be null");
+        if (systemContext == null) throw new IllegalArgumentException("systemContext cannot be null");
 
         this.startPosition = startPosition;
         this.executionPlanId = executionPlanId;

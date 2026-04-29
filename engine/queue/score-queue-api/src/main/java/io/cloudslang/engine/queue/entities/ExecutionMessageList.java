@@ -16,7 +16,6 @@
 
 package io.cloudslang.engine.queue.entities;
 
-import io.cloudslang.score.util.Validate;
 
 import java.util.Collections;
 import java.util.List;
@@ -32,7 +31,7 @@ public class ExecutionMessageList {
 	private ExecutionMessageList(){/*used by JSON*/}
 
 	public ExecutionMessageList(List<ExecutionMessage> list){
-		Validate.notNull(list, "A list is null");
+		if (list == null) throw new IllegalArgumentException("A list is null");
 		this.list = list;
 	}
 

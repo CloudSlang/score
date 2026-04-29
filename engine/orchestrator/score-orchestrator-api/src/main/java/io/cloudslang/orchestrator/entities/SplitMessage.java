@@ -17,7 +17,6 @@
 package io.cloudslang.orchestrator.entities;
 
 import io.cloudslang.score.facade.entities.Execution;
-import io.cloudslang.score.util.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import java.util.ArrayList;
@@ -46,10 +45,10 @@ public class SplitMessage implements Message {
                         List<Execution> children,
                         int totalNumberOfBranches,
                         boolean executable) {
-        Validate.notNull(splitId, "splitId cannot be null");
-        Validate.notNull(parent, "parent cannot be null");
-        Validate.notNull(children, "children cannot be null");
-        Validate.notEmpty(children, "cannot create a split message without any children");
+        if (splitId == null) throw new IllegalArgumentException("splitId cannot be null");
+        if (parent == null) throw new IllegalArgumentException("parent cannot be null");
+        if (children == null) throw new IllegalArgumentException("children cannot be null");
+        if (children.isEmpty()) throw new IllegalArgumentException("cannot create a split message without any children");
 
         this.splitId = splitId;
         this.parent = parent;

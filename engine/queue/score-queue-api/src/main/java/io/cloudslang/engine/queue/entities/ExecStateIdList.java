@@ -16,8 +16,6 @@
 
 package io.cloudslang.engine.queue.entities;
 
-import io.cloudslang.score.util.Validate;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -34,7 +32,7 @@ public class ExecStateIdList {
     	private ExecStateIdList(){/*used by JSON*/}
 
     	public ExecStateIdList(List<Long> list){
-    		Validate.notNull(list, "A list is null");
+    		if (list == null) throw new IllegalArgumentException("A list is null");
     		this.list = list;
     	}
 
