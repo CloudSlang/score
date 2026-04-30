@@ -33,7 +33,9 @@ public class RetryTemplate {
 	}
 
 	public void retry(int maxRetries, long sleepBetweenRetries, RetryCallback callback){
-		if (callback == null) throw new IllegalArgumentException("Callback is null");
+		if (callback == null) {
+			throw new IllegalArgumentException("Callback is null");
+		}
 
 		boolean infinity = (maxRetries == INFINITELY);
 		for (int i=0; infinity || i<maxRetries-1; i++) {

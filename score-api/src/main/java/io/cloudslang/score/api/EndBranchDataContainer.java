@@ -40,6 +40,7 @@ public class EndBranchDataContainer implements Serializable {
         if (contexts == null) {
             throw new IllegalArgumentException("contexts cannot be null");
         }
+
         if (systemContext == null) {
             throw new IllegalArgumentException("systemContext cannot be null");
         }

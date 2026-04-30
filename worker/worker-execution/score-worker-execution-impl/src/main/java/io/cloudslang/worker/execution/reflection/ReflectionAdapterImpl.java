@@ -79,12 +79,14 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 
     @Override
     public Object executeControlAction(ControlActionMetadata actionMetadata, ReadonlyStepActionDataAccessor accessor) {
-        if (actionMetadata == null)
+        if (actionMetadata == null) {
             throw new IllegalArgumentException("Action metadata is null");
+        }
 
         if (logger.isDebugEnabled()) {
             logger.debug("Executing control action [" + actionMetadata.getClassName() + '.' + actionMetadata.getMethodName() + ']');
         }
+
         try {
             Object actionBean = getActionBean(actionMetadata);
             Method actionMethod = getActionMethod(actionMetadata);

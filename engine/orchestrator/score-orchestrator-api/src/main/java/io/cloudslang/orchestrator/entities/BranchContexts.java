@@ -30,8 +30,13 @@ public class BranchContexts implements Serializable {
     private final Map<String, Serializable> systemContext;
 
     public BranchContexts(boolean isBranchCancelled, Map<String, Serializable> contexts, Map<String, Serializable> systemContext) {
-        if (contexts == null) throw new IllegalArgumentException("contexts cannot be null");
-        if (systemContext == null) throw new IllegalArgumentException("systemContext cannot be null");
+        if (contexts == null) {
+            throw new IllegalArgumentException("contexts cannot be null");
+        }
+
+        if (systemContext == null) {
+            throw new IllegalArgumentException("systemContext cannot be null");
+        }
 
         this.isBranchCancelled = isBranchCancelled;
         this.contexts = new HashMap<>(contexts);

@@ -36,10 +36,21 @@ public class StartBranchDataContainer implements Serializable{
     private final SystemContext systemContext;
 
     public StartBranchDataContainer(Long startPosition, Long executionPlanId, Map<String, Serializable> contexts, SystemContext systemContext) {
-        if (startPosition == null) throw new IllegalArgumentException("startPosition cannot be null");
-        if (executionPlanId == null) throw new IllegalArgumentException("executionPlanId cannot be null");
-        if (contexts == null) throw new IllegalArgumentException("contexts cannot be null");
-        if (systemContext == null) throw new IllegalArgumentException("systemContext cannot be null");
+        if (startPosition == null) {
+            throw new IllegalArgumentException("startPosition cannot be null");
+        }
+
+        if (executionPlanId == null) {
+            throw new IllegalArgumentException("executionPlanId cannot be null");
+        }
+
+        if (contexts == null) {
+            throw new IllegalArgumentException("contexts cannot be null");
+        }
+
+        if (systemContext == null) {
+            throw new IllegalArgumentException("systemContext cannot be null");
+        }
 
         this.startPosition = startPosition;
         this.executionPlanId = executionPlanId;

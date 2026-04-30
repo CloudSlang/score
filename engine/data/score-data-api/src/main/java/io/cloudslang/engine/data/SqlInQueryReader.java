@@ -37,7 +37,10 @@ public class SqlInQueryReader {
     private final int DATABASE_IN_CLAUSE_LIMIT = 1000;
 
     public <T> List<T> read(Set<String> items, SqlInQueryCallback<T> callback) {
-        if (callback == null) throw new IllegalArgumentException("callback cannot be null");
+        if (callback == null) {
+            throw new IllegalArgumentException("callback cannot be null");
+        }
+
         if (items == null) {
             return Collections.emptyList();
         } else {

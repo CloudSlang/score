@@ -143,8 +143,9 @@ public class ExecutionRuntimeServices implements Serializable {
      * @param data - list of EndBranchDataContainer
      */
     public void setFinishedChildBranchesData(ArrayList<EndBranchDataContainer> data) {
-        if (contextMap.containsKey(ExecutionParametersConsts.FINISHED_CHILD_BRANCHES_DATA))
+        if (contextMap.containsKey(ExecutionParametersConsts.FINISHED_CHILD_BRANCHES_DATA)) {
             throw new IllegalArgumentException("not allowed to overwrite finished branches data");
+        }
         contextMap.put(ExecutionParametersConsts.FINISHED_CHILD_BRANCHES_DATA, data);
     }
 
@@ -194,7 +195,9 @@ public class ExecutionRuntimeServices implements Serializable {
      * setter for the brunch id of the current Execution
      */
     public void setBranchId(String branchId) {
-        if (!StringUtils.isEmpty(getBranchId())) throw new IllegalArgumentException("not allowed to overwrite branch id");
+        if (!StringUtils.isEmpty(getBranchId())) {
+            throw new IllegalArgumentException("not allowed to overwrite branch id");
+        }
         contextMap.put(BRANCH_ID, branchId);
     }
 
@@ -342,8 +345,9 @@ public class ExecutionRuntimeServices implements Serializable {
     }
 
     public void setParallelTemporaryContext(ArrayList<Map<String, Serializable>> parallelTemporaryContext) {
-        if (contextMap.containsKey(PARALLEL_TEMPORARY_CONTEXT))
+        if (contextMap.containsKey(PARALLEL_TEMPORARY_CONTEXT)) {
             throw new IllegalArgumentException("not allowed to overwrite temporary branches context");
+        }
         contextMap.put(PARALLEL_TEMPORARY_CONTEXT, parallelTemporaryContext);
     }
 
@@ -388,7 +392,9 @@ public class ExecutionRuntimeServices implements Serializable {
      * set teh split id
      */
     public void setSplitId(String splitId) {
-        if (!StringUtils.isEmpty(getSplitId())) throw new IllegalArgumentException("not allowed to overwrite split id");
+        if (!StringUtils.isEmpty(getSplitId())) {
+            throw new IllegalArgumentException("not allowed to overwrite split id");
+        }
         contextMap.put(NEW_SPLIT_ID, splitId);
     }
 

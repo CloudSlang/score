@@ -107,7 +107,10 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
     public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionStatus status,
                                            Date updateDate) {
         validateExecutionId(executionId);
-        if (status == null) throw new IllegalArgumentException("status cannot be null");
+        if (status == null) {
+            throw new IllegalArgumentException("status cannot be null");
+        }
+
         validateBranchId(branchId);
         Optional<ExecutionState> executionState = findByExecutionIdAndBranchIdNoException(executionId, branchId);
         if (executionState.isPresent()) {
@@ -202,10 +205,14 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
     }
 
     private void validateBranchId(String branchId) {
-        if (StringUtils.isBlank(branchId)) throw new IllegalArgumentException("branchId cannot be null or empty");
+        if (StringUtils.isBlank(branchId)) {
+            throw new IllegalArgumentException("branchId cannot be null or empty");
+        }
     }
 
     private void validateExecutionId(Long executionId) {
-        if (executionId == null) throw new IllegalArgumentException("executionId cannot be null or empty");
+        if (executionId == null) {
+            throw new IllegalArgumentException("executionId cannot be null or empty");
+        }
     }
 }

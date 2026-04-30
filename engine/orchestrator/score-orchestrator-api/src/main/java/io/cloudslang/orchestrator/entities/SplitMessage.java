@@ -45,10 +45,21 @@ public class SplitMessage implements Message {
                         List<Execution> children,
                         int totalNumberOfBranches,
                         boolean executable) {
-        if (splitId == null) throw new IllegalArgumentException("splitId cannot be null");
-        if (parent == null) throw new IllegalArgumentException("parent cannot be null");
-        if (children == null) throw new IllegalArgumentException("children cannot be null");
-        if (children.isEmpty()) throw new IllegalArgumentException("cannot create a split message without any children");
+        if (splitId == null) {
+            throw new IllegalArgumentException("splitId cannot be null");
+        }
+
+        if (parent == null) {
+            throw new IllegalArgumentException("parent cannot be null");
+        }
+
+        if (children == null) {
+            throw new IllegalArgumentException("children cannot be null");
+        }
+
+        if (children.isEmpty()) {
+            throw new IllegalArgumentException("cannot create a split message without any children");
+        }
 
         this.splitId = splitId;
         this.parent = parent;

@@ -55,7 +55,9 @@ public final class OrchestratorDispatcherServiceImpl implements OrchestratorDisp
     public void dispatch(List<? extends Serializable> messages, String bulkNumber, String wrv, String workerUuid) {
         //lock to synchronize with the recovery job
         workerLockService.lock(workerUuid);
-        if (messages == null) throw new IllegalArgumentException("Messages list is null");
+        if (messages == null) {
+            throw new IllegalArgumentException("Messages list is null");
+        }
 
         String currentBulkNumber = workerNodeService.readByUUID(workerUuid).getBulkNumber();
         //can not be null at this point
@@ -77,7 +79,9 @@ public final class OrchestratorDispatcherServiceImpl implements OrchestratorDisp
     }
 
     private void dispatch(List<? extends Serializable> messages) {
-        if (messages == null) throw new IllegalArgumentException("Messages list is null");
+        if (messages == null) {
+            throw new IllegalArgumentException("Messages list is null");
+        }
 
         if (logger.isDebugEnabled()) {
             logger.debug("Dispatching " + messages.size() + " messages");

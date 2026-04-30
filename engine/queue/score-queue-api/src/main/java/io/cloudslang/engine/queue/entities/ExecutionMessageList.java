@@ -30,8 +30,10 @@ public class ExecutionMessageList {
 	@SuppressWarnings("unused")
 	private ExecutionMessageList(){/*used by JSON*/}
 
-	public ExecutionMessageList(List<ExecutionMessage> list){
-		if (list == null) throw new IllegalArgumentException("A list is null");
+	public ExecutionMessageList(List<ExecutionMessage> list) {
+		if (list == null) {
+			throw new IllegalArgumentException("A list is null");
+		}
 		this.list = list;
 	}
 

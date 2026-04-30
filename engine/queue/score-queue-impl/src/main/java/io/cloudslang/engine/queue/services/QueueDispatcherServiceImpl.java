@@ -92,8 +92,13 @@ public final class QueueDispatcherServiceImpl implements QueueDispatcherService 
 	@Transactional
 	@Override
 	public void dispatch(String messageId, String group, ExecStatus status, Payload payload) {
-		if (messageId == null || messageId.isEmpty()) throw new IllegalArgumentException("Message ID is null or empty");
-		if (status == null) throw new IllegalArgumentException("Status is null");
+		if (messageId == null || messageId.isEmpty()) {
+			throw new IllegalArgumentException("Message ID is null or empty");
+		}
+
+		if (status == null) {
+			throw new IllegalArgumentException("Status is null");
+		}
 
 		group = !StringUtils.isEmpty(group)? group: WorkerNode.DEFAULT_WORKER_GROUPS[0];
 
