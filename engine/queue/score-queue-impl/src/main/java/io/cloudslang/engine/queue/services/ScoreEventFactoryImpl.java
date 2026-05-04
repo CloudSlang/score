@@ -24,7 +24,7 @@ import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.score.facade.services.RunningExecutionPlanService;
 import io.cloudslang.score.lang.ExecutionRuntimeServices;
 import io.cloudslang.score.lang.SystemContext;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;

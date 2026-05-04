@@ -21,7 +21,6 @@ import io.cloudslang.engine.node.services.WorkerNodeService;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
 import io.cloudslang.orchestrator.entities.SplitMessage;
-import org.apache.commons.lang.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +55,9 @@ public final class OrchestratorDispatcherServiceImpl implements OrchestratorDisp
     public void dispatch(List<? extends Serializable> messages, String bulkNumber, String wrv, String workerUuid) {
         //lock to synchronize with the recovery job
         workerLockService.lock(workerUuid);
-        Validate.notNull(messages, "Messages list is null");
+        if (messages == null) {
+            throw new IllegalArgumentException("Messages list is null");
+        }
 
         String currentBulkNumber = workerNodeService.readByUUID(workerUuid).getBulkNumber();
         //can not be null at this point
@@ -78,7 +79,9 @@ public final class OrchestratorDispatcherServiceImpl implements OrchestratorDisp
     }
 
     private void dispatch(List<? extends Serializable> messages) {
-        Validate.notNull(messages, "Messages list is null");
+        if (messages == null) {
+            throw new IllegalArgumentException("Messages list is null");
+        }
 
         if (logger.isDebugEnabled()) {
             logger.debug("Dispatching " + messages.size() + " messages");

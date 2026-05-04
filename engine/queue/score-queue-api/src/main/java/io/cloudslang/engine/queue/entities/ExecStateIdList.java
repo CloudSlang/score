@@ -16,8 +16,6 @@
 
 package io.cloudslang.engine.queue.entities;
 
-import org.apache.commons.lang.Validate;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -33,8 +31,10 @@ public class ExecStateIdList {
     	@SuppressWarnings("unused")
     	private ExecStateIdList(){/*used by JSON*/}
 
-    	public ExecStateIdList(List<Long> list){
-    		Validate.notNull(list, "A list is null");
+    	public ExecStateIdList(List<Long> list) {
+    		if (list == null) {
+				throw new IllegalArgumentException("A list is null");
+			}
     		this.list = list;
     	}
 

@@ -32,8 +32,8 @@ import io.cloudslang.runtime.impl.python.external.model.TempExecutionEnvironment
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -76,8 +76,8 @@ import static io.cloudslang.runtime.impl.python.external.ResourceScriptResolver.
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
-import static org.apache.commons.lang.StringUtils.contains;
-import static org.apache.commons.lang.StringUtils.replace;
+import static org.apache.commons.lang3.StringUtils.contains;
+import static org.apache.commons.lang3.StringUtils.replace;
 
 public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalPythonProcessRunService {
 
@@ -473,3 +473,4 @@ public class ExternalPythonExecutorScheduledExecutorTimeout implements ExternalP
         return SCHEDULED_EXECUTOR_STRATEGY;
     }
 }
+
