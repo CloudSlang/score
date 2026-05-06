@@ -36,7 +36,8 @@ import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.score.facade.execution.ExecutionSummary;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,9 +134,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     @Override
     @Transactional
     public void split(List<SplitMessage> splitMessages) {
-        if (splitMessages == null) {
-            throw new IllegalArgumentException("split messages cannot be null");
-        }
+        Validate.notNull(splitMessages, "split messages cannot be null");
 
         if (splitMessages.isEmpty())
             return;
@@ -204,9 +203,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     @Override
     @Transactional
     public void endBranch(List<Execution> executions) {
-        if (executions == null) {
-            throw new IllegalArgumentException("executions cannot be null");
-        }
+        Validate.notNull(executions, "executions cannot be null");
 
         if (executions.isEmpty())
             return;
@@ -472,9 +469,8 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         Set<FinishedBranch> finishedBranches = suspendedExecution.getFinishedBranches();
         Execution exec = suspendedExecution.getExecutionObj();
 
-        if (!suspendedExecution.getNumberOfBranches().equals(finishedBranches.size())) {
-            throw new IllegalArgumentException("Expected suspended execution " + exec.getExecutionId() + " to have " + suspendedExecution.getNumberOfBranches() + "finished branches, but found " + finishedBranches.size());
-        }
+        Validate.isTrue(suspendedExecution.getNumberOfBranches().equals(finishedBranches.size()),
+                "Expected suspended execution " + exec.getExecutionId() + " to have " + suspendedExecution.getNumberOfBranches() + "finished branches, but found " + finishedBranches.size());
 
         if (logger.isDebugEnabled())
             logger.debug("Joining execution " + exec.getExecutionId());
