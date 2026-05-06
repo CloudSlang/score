@@ -18,6 +18,7 @@ package io.cloudslang.engine.partitions.services;
 
 import io.cloudslang.engine.partitions.entities.PartitionGroup;
 import io.cloudslang.engine.partitions.repositories.PartitionGroupRepository;
+import org.apache.commons.lang.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,14 +47,8 @@ public final class PartitionServiceImpl implements PartitionService {
 	@Override
 	@Transactional
 	public void createPartitionGroup(String groupName, int groupSize, long timeThreshold, long sizeThreshold){
-		if (groupName == null || groupName.isEmpty()) {
-			throw new IllegalArgumentException("Group name is empty or null");
-		}
-
-		if (groupSize < MIN_GROUP_SIZE) {
-			throw new IllegalArgumentException(formatMessage2Small("Group size", groupSize, MIN_GROUP_SIZE));
-		}
-
+		Validate.notEmpty(groupName, "Group name is empty or null");
+		Validate.isTrue(groupSize >= MIN_GROUP_SIZE, formatMessage2Small("Group size", groupSize, MIN_GROUP_SIZE));
 //		Validate.isTrue(timeThreshold==-1 || timeThreshold >= MIN_TIME_THRESHOLD, formatMessage2Small("Time threshold", timeThreshold, MIN_TIME_THRESHOLD));
 //		Validate.isTrue(sizeThreshold==-1 || sizeThreshold >= MIN_SIZE_THRESHOLD, formatMessage2Small("Size threshold", sizeThreshold, MIN_SIZE_THRESHOLD));
 
@@ -64,13 +59,8 @@ public final class PartitionServiceImpl implements PartitionService {
     @Override
     @Transactional
     public void updatePartitionGroup(String groupName, int groupSize, long timeThreshold, long sizeThreshold){
-        if (groupName == null || groupName.isEmpty()) {
-			throw new IllegalArgumentException("Group name is empty or null");
-		}
-
-        if (groupSize < MIN_GROUP_SIZE) {
-			throw new IllegalArgumentException(formatMessage2Small("Group size", groupSize, MIN_GROUP_SIZE));
-		}
+        Validate.notEmpty(groupName, "Group name is empty or null");
+        Validate.isTrue(groupSize >= MIN_GROUP_SIZE, formatMessage2Small("Group size", groupSize, MIN_GROUP_SIZE));
 
         PartitionGroup partitionGroup = repository.findByName(groupName);
 
@@ -90,22 +80,16 @@ public final class PartitionServiceImpl implements PartitionService {
 	@Override
 	@Transactional(readOnly = true)
 	public PartitionGroup readPartitionGroup(String groupName){
-		if (groupName == null || groupName.isEmpty()) {
-			throw new IllegalArgumentException("Group name is empty or null");
-		}
+		Validate.notEmpty(groupName, "Group name is empty or null");
 		return repository.findByName(groupName);
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public boolean rollPartitions(String groupName) {
-		if (groupName == null || groupName.isEmpty()) {
-			throw new IllegalArgumentException("Group name is empty or null");
-		}
+		Validate.notEmpty(groupName, "Group name is empty or null");
 
-		if (repository.lock(groupName) != 1) {
-			throw new IllegalArgumentException("Unknown partition group [" + groupName + "]");
-		}
+		Validate.isTrue(repository.lock(groupName)==1, "Unknown partition group [" + groupName + "]");
 
 		// the partition group cannot be null since it is locked in the database
 		PartitionGroup partitionGroup = repository.findByName(groupName);
