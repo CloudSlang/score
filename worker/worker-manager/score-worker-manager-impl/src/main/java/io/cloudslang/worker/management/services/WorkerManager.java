@@ -24,7 +24,7 @@ import io.cloudslang.worker.management.monitor.WorkerStateUpdateService;
 import io.cloudslang.worker.management.queue.WorkerQueueDetailsContainer;
 import io.cloudslang.worker.management.queue.WorkerQueueDetailsHolder;
 import jakarta.annotation.PreDestroy;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

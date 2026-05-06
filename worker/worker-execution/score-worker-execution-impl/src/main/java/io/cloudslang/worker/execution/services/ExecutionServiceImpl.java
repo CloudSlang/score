@@ -43,7 +43,7 @@ import io.cloudslang.worker.execution.reflection.ReflectionAdapter;
 import io.cloudslang.worker.management.WorkerConfigurationService;
 import io.cloudslang.worker.management.services.dbsupport.WorkerDbSupportService;
 import jakarta.annotation.PostConstruct;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,7 +92,7 @@ import static java.lang.String.valueOf;
 import static java.lang.Thread.currentThread;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.apache.commons.lang.StringUtils.endsWith;
+import static org.apache.commons.lang3.StringUtils.endsWith;
 
 
 public final class ExecutionServiceImpl implements ExecutionService {

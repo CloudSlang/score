@@ -20,8 +20,7 @@ import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.Payload;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,8 +92,13 @@ public final class QueueDispatcherServiceImpl implements QueueDispatcherService 
 	@Transactional
 	@Override
 	public void dispatch(String messageId, String group, ExecStatus status, Payload payload) {
-		Validate.notEmpty(messageId, "Message ID is null or empty");
-		Validate.notNull(status, "Status is null");
+		if (messageId == null || messageId.isEmpty()) {
+			throw new IllegalArgumentException("Message ID is null or empty");
+		}
+
+		if (status == null) {
+			throw new IllegalArgumentException("Status is null");
+		}
 
 		group = !StringUtils.isEmpty(group)? group: WorkerNode.DEFAULT_WORKER_GROUPS[0];
 

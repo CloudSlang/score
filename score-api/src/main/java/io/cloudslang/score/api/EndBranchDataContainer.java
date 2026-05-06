@@ -16,9 +16,8 @@
 
 package io.cloudslang.score.api;
 
-import org.apache.commons.lang.Validate;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.io.Serializable;
 import java.lang.Object;
@@ -38,8 +37,13 @@ public class EndBranchDataContainer implements Serializable {
     private final String exception;
 
     public EndBranchDataContainer(Map<String, Serializable> contexts, Map<String, Serializable> systemContext, String exception) {
-        Validate.notNull(contexts);
-        Validate.notNull(systemContext);
+        if (contexts == null) {
+            throw new IllegalArgumentException("contexts cannot be null");
+        }
+
+        if (systemContext == null) {
+            throw new IllegalArgumentException("systemContext cannot be null");
+        }
 
         this.contexts = new HashMap<>(contexts);
         this.systemContext = new HashMap<>(systemContext);
