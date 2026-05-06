@@ -63,8 +63,8 @@
         <oracle.version>23.5.0.24.07</oracle.version>
         <jtds.version>1.3.0</jtds.version>
         <postgres.driver.version>42.7.7</postgres.driver.version>
-        <spring.version>6.2.15</spring.version>
-        <hibernate.version>6.2.5.Final</hibernate.version>
+        <spring.version>7.0.7</spring.version>
+        <hibernate.version>7.3.1.Final</hibernate.version>
         <querydsl.version>5.6.1</querydsl.version>
         <!--Project properties-->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -208,7 +208,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>32.1.1-jre</version>
+                <version>33.5.0-jre</version>
             </dependency>
             <dependency>
                 <groupId>org.liquibase</groupId>
@@ -289,7 +289,7 @@
             <dependency>
                 <groupId>org.springframework.data</groupId>
                 <artifactId>spring-data-jpa</artifactId>
-                <version>3.3.2</version>
+                <version>4.0.2</version>
                 <exclusions>
                     <exclusion>
                         <groupId>junit</groupId>
@@ -303,8 +303,9 @@
             <dependency>
                 <groupId>jakarta.annotation</groupId>
                 <artifactId>jakarta.annotation-api</artifactId>
-                <version>2.1.1</version>
+                <version>3.0.0</version>
             </dependency>
+
             <dependency>
                 <groupId>org.hibernate.orm</groupId>
                 <artifactId>hibernate-core</artifactId>
@@ -319,7 +320,7 @@
             <dependency>
                 <groupId>org.hibernate.validator</groupId>
                 <artifactId>hibernate-validator</artifactId>
-                <version>6.2.5.Final</version>
+                <version>9.1.0.Final</version>
                 <scope>runtime</scope>
             </dependency>
             <!-- end of hibernate artifacts -->
@@ -358,7 +359,7 @@
             <dependency>
                 <groupId>jakarta.validation</groupId>
                 <artifactId>jakarta.validation-api</artifactId>
-                <version>3.0.2</version>
+                <version>3.1.1</version>
             </dependency>
             <!-- DB drivers -->
             <dependency>
@@ -434,6 +435,12 @@
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>caffeine</artifactId>
                 <version>2.9.0</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.checkerframework</groupId>
+                        <artifactId>checker-qual</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
