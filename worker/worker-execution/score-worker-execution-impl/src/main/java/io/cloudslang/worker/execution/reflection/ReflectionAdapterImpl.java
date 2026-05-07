@@ -21,6 +21,7 @@ import io.cloudslang.score.exceptions.FlowExecutionException;
 import io.cloudslang.score.lang.ExecutionRuntimeServices;
 import io.cloudslang.worker.execution.model.StepActionDataHolder.ReadonlyStepActionDataAccessor;
 import io.cloudslang.worker.execution.services.SessionDataHandler;
+import org.apache.commons.lang.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeansException;
@@ -79,14 +80,10 @@ public class ReflectionAdapterImpl implements ReflectionAdapter, ApplicationCont
 
     @Override
     public Object executeControlAction(ControlActionMetadata actionMetadata, ReadonlyStepActionDataAccessor accessor) {
-        if (actionMetadata == null) {
-            throw new IllegalArgumentException("Action metadata is null");
-        }
-
+        Validate.notNull(actionMetadata, "Action metadata is null");
         if (logger.isDebugEnabled()) {
             logger.debug("Executing control action [" + actionMetadata.getClassName() + '.' + actionMetadata.getMethodName() + ']');
         }
-
         try {
             Object actionBean = getActionBean(actionMetadata);
             Method actionMethod = getActionMethod(actionMetadata);

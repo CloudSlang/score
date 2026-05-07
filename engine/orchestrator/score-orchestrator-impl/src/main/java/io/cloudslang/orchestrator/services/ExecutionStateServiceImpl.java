@@ -22,7 +22,8 @@ import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.execution.ExecutionActionException;
 import io.cloudslang.score.facade.execution.ExecutionActionResult;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
@@ -107,10 +108,7 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
     public void updateExecutionStateStatus(Long executionId, String branchId, ExecutionStatus status,
                                            Date updateDate) {
         validateExecutionId(executionId);
-        if (status == null) {
-            throw new IllegalArgumentException("status cannot be null");
-        }
-
+        Validate.notNull(status, "status cannot be null");
         validateBranchId(branchId);
         Optional<ExecutionState> executionState = findByExecutionIdAndBranchIdNoException(executionId, branchId);
         if (executionState.isPresent()) {
@@ -205,14 +203,10 @@ public class ExecutionStateServiceImpl implements ExecutionStateService {
     }
 
     private void validateBranchId(String branchId) {
-        if (StringUtils.isBlank(branchId)) {
-            throw new IllegalArgumentException("branchId cannot be null or empty");
-        }
+        Validate.notEmpty(StringUtils.trim(branchId), "branchId cannot be null or empty");
     }
 
     private void validateExecutionId(Long executionId) {
-        if (executionId == null) {
-            throw new IllegalArgumentException("executionId cannot be null or empty");
-        }
+        Validate.notNull(executionId, "executionId cannot be null or empty");
     }
 }
