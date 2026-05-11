@@ -21,10 +21,9 @@ import io.cloudslang.score.api.StartBranchDataContainer;
 import io.cloudslang.score.api.execution.ExecutionParametersConsts;
 import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.Validate;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.io.Serializable;
 import java.util.ArrayDeque;
@@ -144,8 +143,9 @@ public class ExecutionRuntimeServices implements Serializable {
      * @param data - list of EndBranchDataContainer
      */
     public void setFinishedChildBranchesData(ArrayList<EndBranchDataContainer> data) {
-        Validate.isTrue(!contextMap.containsKey(ExecutionParametersConsts.FINISHED_CHILD_BRANCHES_DATA),
-                "not allowed to overwrite finished branches data");
+        if (contextMap.containsKey(ExecutionParametersConsts.FINISHED_CHILD_BRANCHES_DATA)) {
+            throw new IllegalArgumentException("not allowed to overwrite finished branches data");
+        }
         contextMap.put(ExecutionParametersConsts.FINISHED_CHILD_BRANCHES_DATA, data);
     }
 
@@ -195,7 +195,9 @@ public class ExecutionRuntimeServices implements Serializable {
      * setter for the brunch id of the current Execution
      */
     public void setBranchId(String branchId) {
-        Validate.isTrue(StringUtils.isEmpty(getBranchId()), "not allowed to overwrite branch id");
+        if (!StringUtils.isEmpty(getBranchId())) {
+            throw new IllegalArgumentException("not allowed to overwrite branch id");
+        }
         contextMap.put(BRANCH_ID, branchId);
     }
 
@@ -343,8 +345,9 @@ public class ExecutionRuntimeServices implements Serializable {
     }
 
     public void setParallelTemporaryContext(ArrayList<Map<String, Serializable>> parallelTemporaryContext) {
-        Validate.isTrue(!contextMap.containsKey(PARALLEL_TEMPORARY_CONTEXT),
-                "not allowed to overwrite temporary branches context");
+        if (contextMap.containsKey(PARALLEL_TEMPORARY_CONTEXT)) {
+            throw new IllegalArgumentException("not allowed to overwrite temporary branches context");
+        }
         contextMap.put(PARALLEL_TEMPORARY_CONTEXT, parallelTemporaryContext);
     }
 
@@ -389,7 +392,9 @@ public class ExecutionRuntimeServices implements Serializable {
      * set teh split id
      */
     public void setSplitId(String splitId) {
-        Validate.isTrue(StringUtils.isEmpty(getSplitId()), "not allowed to overwrite split id");
+        if (!StringUtils.isEmpty(getSplitId())) {
+            throw new IllegalArgumentException("not allowed to overwrite split id");
+        }
         contextMap.put(NEW_SPLIT_ID, splitId);
     }
 

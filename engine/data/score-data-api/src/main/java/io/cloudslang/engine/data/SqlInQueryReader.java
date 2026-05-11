@@ -16,7 +16,6 @@
 
 package io.cloudslang.engine.data;
 
-import org.apache.commons.lang.Validate;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
@@ -38,7 +37,10 @@ public class SqlInQueryReader {
     private final int DATABASE_IN_CLAUSE_LIMIT = 1000;
 
     public <T> List<T> read(Set<String> items, SqlInQueryCallback<T> callback) {
-        Validate.notNull(callback);
+        if (callback == null) {
+            throw new IllegalArgumentException("callback cannot be null");
+        }
+
         if (items == null) {
             return Collections.emptyList();
         } else {

@@ -16,9 +16,8 @@
 
 package io.cloudslang.orchestrator.entities;
 
-import org.apache.commons.lang.Validate;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -31,8 +30,13 @@ public class BranchContexts implements Serializable {
     private final Map<String, Serializable> systemContext;
 
     public BranchContexts(boolean isBranchCancelled, Map<String, Serializable> contexts, Map<String, Serializable> systemContext) {
-        Validate.notNull(contexts);
-        Validate.notNull(systemContext);
+        if (contexts == null) {
+            throw new IllegalArgumentException("contexts cannot be null");
+        }
+
+        if (systemContext == null) {
+            throw new IllegalArgumentException("systemContext cannot be null");
+        }
 
         this.isBranchCancelled = isBranchCancelled;
         this.contexts = new HashMap<>(contexts);
