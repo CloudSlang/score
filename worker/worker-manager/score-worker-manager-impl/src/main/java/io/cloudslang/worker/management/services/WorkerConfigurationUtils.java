@@ -29,7 +29,7 @@ import static java.lang.Double.parseDouble;
 import static java.lang.Integer.getInteger;
 import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 public class WorkerConfigurationUtils {

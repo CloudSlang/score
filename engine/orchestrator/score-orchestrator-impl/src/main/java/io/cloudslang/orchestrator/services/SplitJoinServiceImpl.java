@@ -36,8 +36,8 @@ import io.cloudslang.score.events.ScoreEvent;
 import io.cloudslang.score.facade.entities.Execution;
 import io.cloudslang.score.facade.execution.ExecutionStatus;
 import io.cloudslang.score.facade.execution.ExecutionSummary;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,7 +134,9 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     @Override
     @Transactional
     public void split(List<SplitMessage> splitMessages) {
-        Validate.notNull(splitMessages, "split messages cannot be null");
+        if (splitMessages == null) {
+            throw new IllegalArgumentException("split messages cannot be null");
+        }
 
         if (splitMessages.isEmpty())
             return;
@@ -203,7 +205,9 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
     @Override
     @Transactional
     public void endBranch(List<Execution> executions) {
-        Validate.notNull(executions, "executions cannot be null");
+        if (executions == null) {
+            throw new IllegalArgumentException("executions cannot be null");
+        }
 
         if (executions.isEmpty())
             return;
