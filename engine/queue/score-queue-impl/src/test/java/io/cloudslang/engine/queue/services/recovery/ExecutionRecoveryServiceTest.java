@@ -69,9 +69,9 @@ public class ExecutionRecoveryServiceTest {
         when(workerNodeService.readAllWorkersUuids()).thenReturn(getWorkers());
         executionRecoveryService.recoverWorkers();
 
-        verify(workerRecoveryService, times(1)).doWorkerAndMessageRecovery("123");
-        verify(workerRecoveryService, times(1)).doWorkerAndMessageRecovery("456");
-        verify(workerRecoveryService, times(1)).doWorkerAndMessageRecovery("789");
+        verify(workerRecoveryService, times(1)).doWorkerAndMessageRecovery("123", true);
+        verify(workerRecoveryService, times(1)).doWorkerAndMessageRecovery("456", false);
+        verify(workerRecoveryService, times(1)).doWorkerAndMessageRecovery("789", false);
     }
 
     private List<String> getWorkers(){

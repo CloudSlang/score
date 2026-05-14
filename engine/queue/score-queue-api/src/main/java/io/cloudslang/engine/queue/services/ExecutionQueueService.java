@@ -99,4 +99,7 @@ public interface ExecutionQueueService {
      * @return the number of messages that didn't receive ack for a number of recovery versions
      */
     int countMessagesWithoutAckForWorker(int maxSize,long minVersionAllowed, String workerUuid);
+
+    void purgeExecutionQueuesForFinishedExecutions();
+
 }
