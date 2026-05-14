@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 import static java.lang.Long.parseLong;
 import static java.util.stream.Collectors.toSet;
@@ -919,6 +920,18 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     QUERY_SELECT_ORPHAN_EXECUTION_QUEUES,
                     new SingleColumnRowMapper<>(Long.class),
                     new Object[]{cutOffTime}).stream().collect(toSet());
+        } finally {
+            getFinishedExecStateIdsJdbcTemplate.clearStatementBatchSize();
+        }
+    }
+
+    @Override
+    public Set<Long> getQueuesForCompletedExecutions() {
+        getFinishedExecStateIdsJdbcTemplate.setStatementBatchSize(1_000_000);
+
+        try {
+            return doSelectWithTemplate(getFinishedExecStateIdsJdbcTemplate, SELECT_FINISHED_STEPS_IDS_2,
+                    new SingleColumnRowMapper<>(Long.class)).stream().collect(Collectors.toSet());
         } finally {
             getFinishedExecStateIdsJdbcTemplate.clearStatementBatchSize();
         }

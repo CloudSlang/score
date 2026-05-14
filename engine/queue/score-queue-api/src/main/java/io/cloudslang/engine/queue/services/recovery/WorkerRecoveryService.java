@@ -29,12 +29,12 @@ public interface WorkerRecoveryService {
      * Also used during worker startup - in order to recover all data that was in worker before restart
      * @param workerUuid - the uuid of worker
      */
-    void doWorkerRecovery(String workerUuid);
+    void doWorkerRecovery(String workerUuid, boolean shouldPurgeQueues);
 
     /**
      * Used by the recovery job
      * Recovery will be done if the worker is non responsive or has not acknowledged messages
      * @param workerUuid - the uuid of worker
      */
-    void doWorkerAndMessageRecovery(String workerUuid);
+    void doWorkerAndMessageRecovery(String workerUuid, boolean shouldPurgeQueues);
 }
