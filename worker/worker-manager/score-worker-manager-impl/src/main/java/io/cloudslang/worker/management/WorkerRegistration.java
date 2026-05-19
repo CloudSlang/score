@@ -23,7 +23,7 @@ import java.util.UUID;
 import jakarta.annotation.PostConstruct;
 
 import jakarta.annotation.Resource;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

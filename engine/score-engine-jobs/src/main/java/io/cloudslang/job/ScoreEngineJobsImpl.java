@@ -23,7 +23,7 @@ import io.cloudslang.engine.versioning.services.VersionService;
 import io.cloudslang.orchestrator.services.ExecutionCleanerService;
 import io.cloudslang.orchestrator.services.SplitJoinService;
 import io.cloudslang.orchestrator.services.SuspendedExecutionCleanerService;
-import org.apache.commons.lang.time.StopWatch;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
