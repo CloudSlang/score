@@ -72,10 +72,12 @@ final public class ExecutionRecoveryServiceImpl implements ExecutionRecoveryServ
         long time = System.currentTimeMillis();
         // Recovery for all workers
         List<String> workersUuids = workerNodeService.readAllWorkersUuids();
+        AtomicBoolean shouldPurgeQueues = new AtomicBoolean(true);
 
         for (String workerUuid : workersUuids) {
             try {
-                workerRecoveryService.doWorkerAndMessageRecovery(workerUuid);
+                workerRecoveryService.doWorkerAndMessageRecovery(workerUuid,
+                        shouldPurgeQueues.compareAndSet(true, false));
             } catch (Exception ex) {
                 logger.error("Failed to recover worker [" + workerUuid + "]", ex);
             }
@@ -86,11 +88,16 @@ final public class ExecutionRecoveryServiceImpl implements ExecutionRecoveryServ
     protected void assignRecoveredMessages() {
         if (logger.isDebugEnabled()) logger.debug("Reassigning recovered messages is being started");
         long time = System.currentTimeMillis();
+        int count = 0;
         final AtomicBoolean shouldContinue = new AtomicBoolean(true);
         while (shouldContinue.get()) {
                     List<ExecutionMessage> messages = executionQueueService.readMessagesByStatus(DEFAULT_POLL_SIZE, ExecStatus.RECOVERED);
                     messageRecoveryService.enqueueMessages(messages, ExecStatus.PENDING);
                     shouldContinue.set(messages != null && messages.size() == DEFAULT_POLL_SIZE);
+                    count += messages != null ? messages.size() : 0;
+        }
+        if (count > 0) {
+            logger.info("Execution recovery is done for a number of {} messages", count);
         }
         if (logger.isDebugEnabled()) logger.debug("Reassigning recovered messages is done in " + (System.currentTimeMillis() - time) + " ms");
     }

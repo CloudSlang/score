@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
 
@@ -202,4 +203,15 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
     public int countMessagesWithoutAckForWorker(int maxSize, long minVersionAllowed, String workerUuid) {
         return executionQueueRepository.countMessagesWithoutAckForWorker(maxSize, minVersionAllowed, workerUuid);
     }
+
+    @Override
+    @Transactional
+    public void purgeExecutionQueuesForFinishedExecutions() {
+        Set<Long> ids = executionQueueRepository.getQueuesForCompletedExecutions();
+        executionQueueRepository.deleteUnusedSteps(ids);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Purged executions queues for finished executions and removed the following ids: " + ids);
+        }
+    }
+
 }

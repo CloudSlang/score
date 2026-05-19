@@ -87,7 +87,7 @@ public class WorkerRecoveryServiceTest {
         WorkerNode mockWorker = mock(WorkerNode.class);
         when(mockWorker.getStatus()).thenReturn(WorkerStatus.RUNNING);
         when(workerNodeService.findByUuid("123")).thenReturn(mockWorker);
-        workerRecoveryService.doWorkerAndMessageRecovery("123");
+        workerRecoveryService.doWorkerAndMessageRecovery("123", false);
 
         //Make sure the methods did not run
         verify(workerNodeService, never()).updateStatusInSeparateTransaction("123", WorkerStatus.IN_RECOVERY);
@@ -101,7 +101,7 @@ public class WorkerRecoveryServiceTest {
         WorkerNode mockWorker = mock(WorkerNode.class);
         when(mockWorker.getStatus()).thenReturn(WorkerStatus.RUNNING);
         when(workerNodeService.findByUuid("123")).thenReturn(mockWorker);
-        workerRecoveryService.doWorkerAndMessageRecovery("123");
+        workerRecoveryService.doWorkerAndMessageRecovery("123", false);
         //Make sure the methods did run
         verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("123", WorkerStatus.IN_RECOVERY);
     }
@@ -114,7 +114,7 @@ public class WorkerRecoveryServiceTest {
         WorkerNode mockWorker = mock(WorkerNode.class);
         when(mockWorker.getStatus()).thenReturn(WorkerStatus.RUNNING);
         when(workerNodeService.findByUuid("123")).thenReturn(mockWorker);
-        workerRecoveryService.doWorkerAndMessageRecovery("123");
+        workerRecoveryService.doWorkerAndMessageRecovery("123", false);
 
         //Make sure the methods did run
         verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("123", WorkerStatus.IN_RECOVERY);
@@ -128,7 +128,7 @@ public class WorkerRecoveryServiceTest {
         WorkerNode mockWorker = mock(WorkerNode.class);
         when(mockWorker.getStatus()).thenReturn(WorkerStatus.IN_RECOVERY);
         when(workerNodeService.findByUuid("123")).thenReturn(mockWorker);
-        workerRecoveryService.doWorkerAndMessageRecovery("123");
+        workerRecoveryService.doWorkerAndMessageRecovery("123", false);
 
         //Make sure the methods did run
         verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("123", WorkerStatus.IN_RECOVERY);
@@ -142,14 +142,14 @@ public class WorkerRecoveryServiceTest {
         WorkerNode mockWorker = mock(WorkerNode.class);
         when(mockWorker.getStatus()).thenReturn(WorkerStatus.IN_RECOVERY);
         when(workerNodeService.findByUuid("123")).thenReturn(mockWorker);
-        workerRecoveryService.doWorkerAndMessageRecovery("123");
+        workerRecoveryService.doWorkerAndMessageRecovery("123", false);
         //Make sure the methods did run
         verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("123", WorkerStatus.IN_RECOVERY);
     }
 
     @Test
     public void testDoWorkerRecovery() throws Exception {
-        workerRecoveryService.doWorkerRecovery("worker1");
+        workerRecoveryService.doWorkerRecovery("worker1", false);
 
         verify(workerLockService, times(1)).lock("worker1");
         verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("worker1", WorkerStatus.IN_RECOVERY);
