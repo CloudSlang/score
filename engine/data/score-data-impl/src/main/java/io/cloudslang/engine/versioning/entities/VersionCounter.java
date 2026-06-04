@@ -17,7 +17,7 @@
 package io.cloudslang.engine.versioning.entities;
 
 import io.cloudslang.engine.data.AbstractIdentifiable;
-import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
