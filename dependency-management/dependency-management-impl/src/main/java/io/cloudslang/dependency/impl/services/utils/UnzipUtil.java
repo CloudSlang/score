@@ -37,7 +37,11 @@ public class UnzipUtil {
                     if(ze.isDirectory()) {
                         new File(mavenHome, ze.getName()).mkdirs();
                     } else {
-                        try (FileOutputStream fos = new FileOutputStream(new File(mavenHome, ze.getName()))) {
+                        final File zipEntryFile = new File(mavenHome, ze.getName());
+                        if (!zipEntryFile.toPath().normalize().startsWith(mavenHome.toPath().normalize())) {
+                            throw new IOException("Bad zip entry");
+                        }
+                        try (FileOutputStream fos = new FileOutputStream(zipEntryFile)) {
                             int len;
                             while ((len = zio.read(buffer)) > 0)
                             {
