@@ -346,4 +346,24 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         </rollback>
     </changeSet>
 
+    <changeSet author="engine" id="Add JOIN_MESSAGE column to OO_EXECUTION_QUEUES">
+        <addColumn tableName="OO_EXECUTION_QUEUES">
+            <column name="JOIN_MESSAGE" type="INT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="OO_EXECUTION_QUEUES" columnName="JOIN_MESSAGE"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="Add MERGED_BRANCH_IDS column to OO_SUSPENDED_EXECUTIONS" author="engine">
+        <addColumn tableName="OO_SUSPENDED_EXECUTIONS">
+            <column name="MERGED_BRANCH_IDS" type="${blob.stream.type}"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="OO_SUSPENDED_EXECUTIONS" columnName="MERGED_BRANCH_IDS"/>
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>

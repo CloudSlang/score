@@ -177,7 +177,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       PAYLOAD,       " +
                     "       MSG_SEQ_ID ,      " +
                     "       MSG_ID," +
-                    "       q.CREATE_TIME " +
+                    "       q.CREATE_TIME, " +
+                    "       q.JOIN_MESSAGE " +
                     " FROM  OO_EXECUTION_QUEUES q,  " +
                     "      OO_EXECUTION_STATES s   " +
                     " WHERE  " +
@@ -198,7 +199,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       PAYLOAD,       " +
                     "       MSG_SEQ_ID ,      " +
                     "       MSG_ID," +
-                    "       q.CREATE_TIME " +
+                    "       q.CREATE_TIME, " +
+                    "       q.JOIN_MESSAGE " +
                     " FROM  OO_EXECUTION_QUEUES q,  " +
                     "      OO_EXECUTION_STATES s   " +
                     " WHERE  " +
@@ -219,7 +221,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "    PAYLOAD, " +
                     "    MSG_SEQ_ID, " +
                     "    MSG_ID, " +
-                    "    CREATE_TIME " +
+                    "    CREATE_TIME, " +
+                    "    JOIN_MESSAGE " +
                     "FROM (" +
                     "   SELECT EXEC_STATE_ID, " +
                     "       ASSIGNED_WORKER, " +
@@ -229,6 +232,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       MSG_SEQ_ID, " +
                     "       MSG_ID, " +
                     "       q.CREATE_TIME, " +
+                    "       q.JOIN_MESSAGE, " +
                     "       SUM(PAYLOAD_SIZE) OVER (ORDER BY q.CREATE_TIME ASC) AS total " +
                     "   FROM OO_EXECUTION_QUEUES q, " +
                     "       OO_EXECUTION_STATES s " +
@@ -252,7 +256,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "    PAYLOAD, " +
                     "    MSG_SEQ_ID, " +
                     "    MSG_ID, " +
-                    "    CREATE_TIME " +
+                    "    CREATE_TIME, " +
+                    "    JOIN_MESSAGE " +
                     "FROM (" +
                     "   SELECT EXEC_STATE_ID, " +
                     "       ASSIGNED_WORKER, " +
@@ -262,6 +267,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       MSG_SEQ_ID, " +
                     "       MSG_ID, " +
                     "       q.CREATE_TIME, " +
+                    "       q.JOIN_MESSAGE, " +
                     "       SUM(PAYLOAD_SIZE) OVER (ORDER BY q.CREATE_TIME ASC) AS total " +
                     "   FROM OO_EXECUTION_QUEUES q, " +
                     "       OO_EXECUTION_STATES s " +
@@ -284,7 +290,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "    PAYLOAD, " +
                     "    MSG_SEQ_ID, " +
                     "    MSG_ID, " +
-                    "    CREATE_TIME " +
+                    "    CREATE_TIME, " +
+                    "    JOIN_MESSAGE " +
                     "FROM (" +
                     "   SELECT EXEC_STATE_ID, " +
                     "       ASSIGNED_WORKER, " +
@@ -294,6 +301,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       MSG_SEQ_ID, " +
                     "       MSG_ID, " +
                     "       q.CREATE_TIME, " +
+                    "       q.JOIN_MESSAGE, " +
                     "       (@csum:=@csum + PAYLOAD_SIZE) AS total " +
                     "   FROM OO_EXECUTION_QUEUES q, " +
                     "       OO_EXECUTION_STATES s JOIN(SELECT @csum:=0) c " +
@@ -317,7 +325,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       PAYLOAD,       " +
                     "       MSG_SEQ_ID,      " +
                     "       MSG_ID," +
-                    "       q.CREATE_TIME " +
+                    "       q.CREATE_TIME, " +
+                    "       q.JOIN_MESSAGE " +
                     " FROM  OO_EXECUTION_QUEUES q,  " +
                     "       OO_EXECUTION_STATES s1   " +
                     " WHERE  " +
@@ -336,7 +345,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       PAYLOAD,       " +
                     "       MSG_SEQ_ID,      " +
                     "       MSG_ID," +
-                    "       q.CREATE_TIME " +
+                    "       q.CREATE_TIME, " +
+                    "       q.JOIN_MESSAGE " +
                     " FROM  OO_EXECUTION_QUEUES q,  " +
                     "       OO_EXECUTION_STATES s1   " +
                     " WHERE  " +
@@ -374,7 +384,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
     final private String INSERT_EXEC_STATE = "INSERT INTO OO_EXECUTION_STATES  (ID, MSG_ID,  PAYLOAD, PAYLOAD_SIZE, CREATE_TIME, ACTIVE) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?)";
 
-    final private String INSERT_QUEUE = "INSERT INTO OO_EXECUTION_QUEUES (ID, EXEC_STATE_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS,MSG_SEQ_ID, CREATE_TIME,MSG_VERSION) VALUES (?, ?, ?, ?, ?, ?,?,?)";
+    final private String INSERT_QUEUE = "INSERT INTO OO_EXECUTION_QUEUES (ID, EXEC_STATE_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS, MSG_SEQ_ID, CREATE_TIME, MSG_VERSION, JOIN_MESSAGE) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     final private String INSERT_EXECUTION_STATE_MAPPING = "INSERT INTO OO_EXECS_STATES_EXECS_MAPPINGS (ID, EXEC_STATE_ID, EXEC_ID, SPLIT_ID) VALUES (?, ?, ?, ?)";
 
@@ -550,6 +560,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                 ps.setInt(6, msg.getMsgSeqId());
                 ps.setLong(7, Calendar.getInstance().getTimeInMillis());
                 ps.setLong(8, version);
+                ps.setInt(9, msg.isJoinMessage() ? 1 : 0);
             }
 
             @Override
@@ -1115,7 +1126,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
         @Override
         public ExecutionMessage mapRow(ResultSet rs, int rowNum) throws SQLException {
-            return new ExecutionMessage(rs.getLong("EXEC_STATE_ID"),
+            ExecutionMessage msg = new ExecutionMessage(rs.getLong("EXEC_STATE_ID"),
                     rs.getString("ASSIGNED_WORKER"),
                     rs.getString("EXEC_GROUP"),
                     rs.getString("MSG_ID"),
@@ -1123,6 +1134,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     new Payload(rs.getBytes("PAYLOAD")),
                     rs.getInt("MSG_SEQ_ID"),
                     rs.getLong("CREATE_TIME"));
+            msg.setJoinMessage(rs.getInt("JOIN_MESSAGE") == 1);
+            return msg;
         }
     }
 

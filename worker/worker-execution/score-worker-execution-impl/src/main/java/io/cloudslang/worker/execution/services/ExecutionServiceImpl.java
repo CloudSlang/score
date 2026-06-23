@@ -217,8 +217,6 @@ public final class ExecutionServiceImpl implements ExecutionService {
             }
             // Dump the bus events
             dumpBusEvents(execution);
-            // Update MI suspended execution
-            updateMiIfRequired(execution);
 
             return execution;
         } catch (InterruptedException ex) {
@@ -251,10 +249,21 @@ public final class ExecutionServiceImpl implements ExecutionService {
         }
     }
 
-    private void updateMiIfRequired(Execution execution) {
-        if (execution.getSystemContext().containsKey(MI_REMAINING_BRANCHES_CONTEXT_KEY)) {
-            executorService.execute(() -> workerDbSupportService.updateSuspendedExecutionMiThrottlingContext(execution));
-        }
+    @Override
+    public void updateMiThrottlingContextAndThen(Execution execution, Runnable afterCommit) {
+        // Keep the DB write off the worker execution thread, but only acknowledge the join message
+        // (via afterCommit) once the merged context is durably persisted. If the persistence fails,
+        // afterCommit is NOT run so the join message stays recoverable and its outputs are not lost.
+        executorService.execute(() -> {
+            try {
+                workerDbSupportService.updateSuspendedExecutionMiThrottlingContext(execution);
+            } catch (RuntimeException ex) {
+                logger.error("Failed to persist MI throttling context for execution id "
+                        + execution.getExecutionId() + "; join message will not be acknowledged and remains recoverable.", ex);
+                return;
+            }
+            afterCommit.run();
+        });
     }
 
     @Override

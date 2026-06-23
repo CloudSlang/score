@@ -195,7 +195,25 @@ public class SimpleExecutionRunnable implements Runnable {
     }
 
     private boolean isMiRunning(Execution nextStepExecution) {
-        return nextStepExecution.getSystemContext().containsKey(MI_REMAINING_BRANCHES_CONTEXT_KEY);
+        if (nextStepExecution.getSystemContext().containsKey(MI_REMAINING_BRANCHES_CONTEXT_KEY)) {
+            Runnable callback = executionMessage.isJoinMessage()
+                    ? this::acknowledgeJoinMessage
+                    : () -> {};
+            executionService.updateMiThrottlingContextAndThen(nextStepExecution, callback);
+            return true;
+        }
+        return false;
+    }
+
+    private void acknowledgeJoinMessage() {
+        try {
+            executionMessage.setStatus(ExecStatus.FINISHED);
+            executionMessage.incMsgSeqId();
+            executionMessage.setPayload(null);
+            outBuffer.put(executionMessage);
+        } catch (InterruptedException e) {
+            logger.warn("Thread was interrupted while handling isMiRunning:", e);
+        }
     }
 
     private boolean preconditionNotFulfilled(Execution nextStepExecution) {

@@ -60,6 +60,7 @@ public class ExecutionMessage implements Message, Cloneable {
 
     private boolean active;
     private String splitId;
+    private boolean joinMessage;
 
     public ExecutionMessage() {
         execStateId = EMPTY_EXEC_STATE_ID;
@@ -285,6 +286,14 @@ public class ExecutionMessage implements Message, Cloneable {
         return splitId;
     }
 
+    public boolean isJoinMessage() {
+        return joinMessage;
+    }
+
+    public void setJoinMessage(boolean joinMessage) {
+        this.joinMessage = joinMessage;
+    }
+
     @Override
     public List<Message> shrink(List<Message> messages) {
         if (messages.size() > 2) {
@@ -355,7 +364,8 @@ public class ExecutionMessage implements Message, Cloneable {
                 append(" Status:").append(this.status).
                 append(" WorkerKey:").append(this.getId()).
                 append(" IsAck:").append(isAck)
-                .append(" IsActive:").append(active);
+                .append(" IsActive:").append(active)
+                .append(" IsJoinMessage:").append(joinMessage);
 
         return str.toString();
     }

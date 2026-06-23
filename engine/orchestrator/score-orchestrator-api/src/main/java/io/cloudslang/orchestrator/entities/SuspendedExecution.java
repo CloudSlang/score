@@ -16,20 +16,23 @@
 
 package io.cloudslang.orchestrator.entities;
 
+import io.cloudslang.engine.data.AbstractIdentifiable;
 import io.cloudslang.orchestrator.enums.SuspendedExecutionReason;
 import io.cloudslang.score.facade.entities.Execution;
-import io.cloudslang.engine.data.AbstractIdentifiable;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Basic;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static jakarta.persistence.EnumType.STRING;
@@ -52,7 +55,7 @@ public class SuspendedExecution extends AbstractIdentifiable {
     @Column(name = "SPLIT_ID", nullable = false, unique = true)
     private String splitId;
 
-    @Column(name= "NUMBER_OF_BRANCHES", nullable = false)
+    @Column(name = "NUMBER_OF_BRANCHES", nullable = false)
     private Integer numberOfBranches;
 
     @Enumerated(STRING)
@@ -69,8 +72,14 @@ public class SuspendedExecution extends AbstractIdentifiable {
     @Embedded
     private ExecutionObjEntity executionObj;
 
-    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy="suspendedExecution")
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "suspendedExecution")
     private Set<FinishedBranch> finishedBranches = new HashSet<>();
+
+    // Branch ids whose outputs have already been merged into the executionObj. Used so a duplicate
+    // (recovered) lane is skipped in endBranch instead of being merged/counted twice.
+    @Convert(converter = MergedBranchIdsConverter.class)
+    @Column(name = "MERGED_BRANCH_IDS")
+    private List<String> mergedBranchIds = new ArrayList<>();
 
     private SuspendedExecution() {
     }
@@ -115,10 +124,11 @@ public class SuspendedExecution extends AbstractIdentifiable {
     }
 
     public Execution getExecutionObj() {
-        if  (executionObj == null)
+        if (executionObj == null) {
             return null;
-        else
+        } else {
             return executionObj.getExecutionObj();
+        }
     }
 
     public void setExecutionObj(Execution executionObj) {
@@ -157,19 +167,43 @@ public class SuspendedExecution extends AbstractIdentifiable {
         this.locked = locked;
     }
 
+    public List<String> getMergedBranchIds() {
+        return mergedBranchIds;
+    }
+
+    public void setMergedBranchIds(List<String> mergedBranchIds) {
+        this.mergedBranchIds = mergedBranchIds;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SuspendedExecution)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof SuspendedExecution)) {
+            return false;
+        }
 
         SuspendedExecution that = (SuspendedExecution) o;
 
-        if (!executionId.equals(that.executionId)) return false;
-        if (!numberOfBranches.equals(that.numberOfBranches)) return false;
-        if (!splitId.equals(that.splitId)) return false;
-        if (!suspensionReason.equals(that.suspensionReason)) return false;
-        if (mergedBranches != that.mergedBranches) return false;
-        if (locked != that.locked) return false;
+        if (!executionId.equals(that.executionId)) {
+            return false;
+        }
+        if (!numberOfBranches.equals(that.numberOfBranches)) {
+            return false;
+        }
+        if (!splitId.equals(that.splitId)) {
+            return false;
+        }
+        if (!suspensionReason.equals(that.suspensionReason)) {
+            return false;
+        }
+        if (mergedBranches != that.mergedBranches) {
+            return false;
+        }
+        if (locked != that.locked) {
+            return false;
+        }
 
         return true;
     }
