@@ -16,6 +16,8 @@
 
 package io.cloudslang.engine.queue.services.recovery;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Created with IntelliJ IDEA.
  * User: kravtsov
@@ -36,5 +38,5 @@ public interface WorkerRecoveryService {
      * Recovery will be done if the worker is non responsive or has not acknowledged messages
      * @param workerUuid - the uuid of worker
      */
-    void doWorkerAndMessageRecovery(String workerUuid, boolean shouldPurgeQueues);
+    void doWorkerAndMessageRecovery(String workerUuid, AtomicBoolean shouldPurgeQueues);
 }
