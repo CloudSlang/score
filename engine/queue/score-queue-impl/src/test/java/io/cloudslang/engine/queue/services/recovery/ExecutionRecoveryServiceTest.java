@@ -32,6 +32,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.mockito.Mockito.*;
 
@@ -69,9 +70,9 @@ public class ExecutionRecoveryServiceTest {
         when(workerNodeService.readAllWorkersUuids()).thenReturn(getWorkers());
         executionRecoveryService.recoverWorkers();
 
-        verify(workerRecoveryService, times(1)).doWorkerAndMessageRecovery("123", true);
-        verify(workerRecoveryService, times(1)).doWorkerAndMessageRecovery("456", false);
-        verify(workerRecoveryService, times(1)).doWorkerAndMessageRecovery("789", false);
+        verify(workerRecoveryService, times(1)).doWorkerAndMessageRecovery(eq("123"), any(AtomicBoolean.class));
+        verify(workerRecoveryService, times(1)).doWorkerAndMessageRecovery(eq("456"), any(AtomicBoolean.class));
+        verify(workerRecoveryService, times(1)).doWorkerAndMessageRecovery(eq("789"), any(AtomicBoolean.class));
     }
 
     private List<String> getWorkers(){

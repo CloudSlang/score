@@ -67,7 +67,7 @@ public class WorkerRecoveryServiceImpl implements WorkerRecoveryService, LoginLi
 
     @Override
     @Transactional
-    public void doWorkerAndMessageRecovery(final String workerUuid, boolean shouldPurgeQueues) {
+    public void doWorkerAndMessageRecovery(final String workerUuid, AtomicBoolean shouldPurgeQueues) {
 
         //lock this worker to synchronize with drain action
         workerLockService.lock(workerUuid);
@@ -85,7 +85,8 @@ public class WorkerRecoveryServiceImpl implements WorkerRecoveryService, LoginLi
             if (worker.getStatus().equals(WorkerStatus.IN_RECOVERY)) {
                 logger.warn("Worker : " + workerUuid + " is IN_RECOVERY status. Worker recovery is started");
             }
-            doWorkerRecovery(workerUuid, shouldPurgeQueues);
+            doWorkerRecovery(workerUuid, shouldPurgeQueues.get());
+            shouldPurgeQueues.set(false);
         } else {
             logger.debug("Worker : " + workerUuid + " is NOT for recovery");
         }
