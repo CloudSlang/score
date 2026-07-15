@@ -31,6 +31,7 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -115,7 +116,6 @@ public class JavaExecutor implements Executor {
             Object[] executionParameters = parametersProvider.getExecutionParameters(executionMethod);
             Object[] transformedExecutionParameters = transformExecutionParameters(executionParameters,
                     executionMethod);
-
             return executionMethod.invoke(actionClass.newInstance(), transformedExecutionParameters);
         } catch (Exception e) {
             throw new RuntimeException(
@@ -143,18 +143,19 @@ public class JavaExecutor implements Executor {
                 // check if it's a string - optimization - most of the parameters for actions are strings
                 if (!currentParameterClass.getCanonicalName().equals(stringClassCanonicalName)) {
                     if (isSerializableSessionObjectMismatch(expectedClass, currentParameterClass)) {
-                        String valueFieldName = "value";
-                        String nameFieldName = "name";
+                        Object nameField;
+                        Object valueField;
 
-                        // get the old data
-                        Object valueField = getFieldValue(valueFieldName, currentParameterClass, currentParameter);
-                        Object nameField = getFieldValueFromSuperClass(nameFieldName, currentParameterClass,
+                        // extract the data from the current object
+                        String nameFieldName = "name";
+                        nameField = getFieldValueFromSuperClass(nameFieldName, currentParameterClass,
                                 currentParameter);
+                        valueField = getFieldValue("value", currentParameterClass, currentParameter);
 
                         // set the data in the new object
                         Object transformedParameter = expectedClass.newInstance();
-                        setValue(valueField, expectedClass, transformedParameter);
                         setName(nameField, expectedClass, transformedParameter);
+                        setValue(valueField, expectedClass, transformedParameter);
 
                         transformedExecutionParameters[i] = transformedParameter;
                     } else {
