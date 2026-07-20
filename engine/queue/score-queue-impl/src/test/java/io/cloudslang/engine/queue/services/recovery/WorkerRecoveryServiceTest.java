@@ -35,10 +35,12 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -87,7 +89,7 @@ public class WorkerRecoveryServiceTest {
         WorkerNode mockWorker = mock(WorkerNode.class);
         when(mockWorker.getStatus()).thenReturn(WorkerStatus.RUNNING);
         when(workerNodeService.findByUuid("123")).thenReturn(mockWorker);
-        workerRecoveryService.doWorkerAndMessageRecovery("123", false);
+        workerRecoveryService.doWorkerAndMessageRecovery("123", new AtomicBoolean(false));
 
         //Make sure the methods did not run
         verify(workerNodeService, never()).updateStatusInSeparateTransaction("123", WorkerStatus.IN_RECOVERY);
@@ -101,7 +103,7 @@ public class WorkerRecoveryServiceTest {
         WorkerNode mockWorker = mock(WorkerNode.class);
         when(mockWorker.getStatus()).thenReturn(WorkerStatus.RUNNING);
         when(workerNodeService.findByUuid("123")).thenReturn(mockWorker);
-        workerRecoveryService.doWorkerAndMessageRecovery("123", false);
+        workerRecoveryService.doWorkerAndMessageRecovery("123", new AtomicBoolean(false));
         //Make sure the methods did run
         verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("123", WorkerStatus.IN_RECOVERY);
     }
@@ -114,7 +116,7 @@ public class WorkerRecoveryServiceTest {
         WorkerNode mockWorker = mock(WorkerNode.class);
         when(mockWorker.getStatus()).thenReturn(WorkerStatus.RUNNING);
         when(workerNodeService.findByUuid("123")).thenReturn(mockWorker);
-        workerRecoveryService.doWorkerAndMessageRecovery("123", false);
+        workerRecoveryService.doWorkerAndMessageRecovery("123", new AtomicBoolean(false));
 
         //Make sure the methods did run
         verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("123", WorkerStatus.IN_RECOVERY);
@@ -128,7 +130,7 @@ public class WorkerRecoveryServiceTest {
         WorkerNode mockWorker = mock(WorkerNode.class);
         when(mockWorker.getStatus()).thenReturn(WorkerStatus.IN_RECOVERY);
         when(workerNodeService.findByUuid("123")).thenReturn(mockWorker);
-        workerRecoveryService.doWorkerAndMessageRecovery("123", false);
+        workerRecoveryService.doWorkerAndMessageRecovery("123", new AtomicBoolean(false));
 
         //Make sure the methods did run
         verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("123", WorkerStatus.IN_RECOVERY);
@@ -142,18 +144,22 @@ public class WorkerRecoveryServiceTest {
         WorkerNode mockWorker = mock(WorkerNode.class);
         when(mockWorker.getStatus()).thenReturn(WorkerStatus.IN_RECOVERY);
         when(workerNodeService.findByUuid("123")).thenReturn(mockWorker);
-        workerRecoveryService.doWorkerAndMessageRecovery("123", false);
+        workerRecoveryService.doWorkerAndMessageRecovery("123", new AtomicBoolean(false));
         //Make sure the methods did run
         verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("123", WorkerStatus.IN_RECOVERY);
     }
 
     @Test
     public void testDoWorkerRecovery() throws Exception {
+        when(messageRecoveryService.recoverMessagesBulk("worker1", 100)).thenReturn(true, false);
+
         workerRecoveryService.doWorkerRecovery("worker1", false);
 
         verify(workerLockService, times(1)).lock("worker1");
         verify(workerNodeService, times(1)).updateStatusInSeparateTransaction("worker1", WorkerStatus.IN_RECOVERY);
+        verify(messageRecoveryService, times(2)).recoverMessagesBulk(eq("worker1"), eq(100));
         verify(workerNodeService, times(1)).updateStatus("worker1", WorkerStatus.RECOVERED);
+        verify(workerNodeService, times(1)).updateWRV(eq("worker1"), anyString());
     }
 
     private List<String> getNonResponsiveWorkers() {
