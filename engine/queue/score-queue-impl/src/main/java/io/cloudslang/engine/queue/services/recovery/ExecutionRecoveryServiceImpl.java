@@ -76,8 +76,7 @@ final public class ExecutionRecoveryServiceImpl implements ExecutionRecoveryServ
 
         for (String workerUuid : workersUuids) {
             try {
-                workerRecoveryService.doWorkerAndMessageRecovery(workerUuid,
-                        shouldPurgeQueues.compareAndSet(true, false));
+                workerRecoveryService.doWorkerAndMessageRecovery(workerUuid, shouldPurgeQueues);
             } catch (Exception ex) {
                 logger.error("Failed to recover worker [" + workerUuid + "]", ex);
             }
