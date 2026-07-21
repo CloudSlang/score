@@ -44,13 +44,16 @@ public class SuspendedExecutionServiceImpl implements SuspendedExecutionService 
         SuspendedExecution suspendedExecution = suspendedExecutionsRepository.findBySplitId(splitId.toString());
         if (suspendedExecution != null) {
             Execution oldExecution = suspendedExecution.getExecutionObj();
-            if (parseInt(execution.getSystemContext().getRemainingBranches()) <= parseInt(oldExecution.getSystemContext().getRemainingBranches())) {
+            int newRemaining = parseInt(execution.getSystemContext().getRemainingBranches());
+            int oldRemaining = parseInt(oldExecution.getSystemContext().getRemainingBranches());
+
+            if (newRemaining <= oldRemaining) {
                 executionMessagesLogger.info("Updating suspended execution {}", execution.getExecutionId());
                 execution.setPosition(oldExecution.getPosition());
                 suspendedExecutionsRepository.updateSuspendedExecutionContexts(suspendedExecution.getId(),
                         new ExecutionObjEntity(execution));
             } else {
-                executionMessagesLogger.warn("Execution {} didnt update", execution.getExecutionId());
+                executionMessagesLogger.warn("Execution {} did not update", execution.getExecutionId());
             }
         }
     }
