@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
+import org.springframework.util.CollectionUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ import java.util.List;
 /**
  * Maps the list of merged branch ids of a {@link SuspendedExecution} to/from a single binary column.
  * <p>
- * The value is serialized as a JSON array of strings (e.g. {@code ["split-1:0","split-1:1"]}) and stored
+ * The value is serialized as a JSON array of strings (e.g. {@code ["uuid1:0","uuid1:1"]}) and stored
  * UTF-8 encoded as bytes, so the column can be a binary LOB ({@code blob.stream.type}). Using JSON keeps
  * the stored structure easy to extend later (for example to a richer object) without a format change.
  */
@@ -41,11 +42,12 @@ public class MergedBranchIdsConverter implements AttributeConverter<List<String>
 
     @Override
     public byte[] convertToDatabaseColumn(List<String> branchIds) {
-        if (branchIds == null || branchIds.isEmpty()) {
-            return null;
+        if (CollectionUtils.isEmpty(branchIds)) {
+            return "[]".getBytes(StandardCharsets.UTF_8);
         }
+
         try {
-            return objectMapper.writeValueAsString(branchIds).getBytes(StandardCharsets.UTF_8);
+            return objectMapper.writeValueAsBytes(branchIds);
         } catch (Exception e) {
             throw new IllegalStateException("Failed to serialize merged branch ids to JSON", e);
         }
@@ -53,15 +55,17 @@ public class MergedBranchIdsConverter implements AttributeConverter<List<String>
 
     @Override
     public List<String> convertToEntityAttribute(byte[] dbValue) {
-        List<String> result = new ArrayList<>();
-        if (dbValue != null && dbValue.length > 0) {
-            try {
-                result = objectMapper.readValue(new String(dbValue, StandardCharsets.UTF_8), LIST_TYPE);
-            } catch (Exception e) {
-                throw new IllegalStateException("Failed to deserialize merged branch ids from JSON", e);
-            }
+        if (dbValue == null || dbValue.length == 0) {
+            return new ArrayList<>();
         }
-        return result;
+
+        try {
+            return objectMapper.readValue(dbValue, new TypeReference<>() {
+            });
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to deserialize merged branch ids from JSON", e);
+        }
     }
+
 }
 

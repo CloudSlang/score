@@ -250,6 +250,9 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         for (FinishedBranch finishedBranch : finishedBranches) {
             SuspendedExecution suspendedExecution = suspendedMap.get(finishedBranch.getSplitId());
 
+            if (suspendedExecution == null) {
+                continue;
+            }
             // In case of recovery a lane can be re-delivered after it was already merged into its parent.
             // Skip such a duplicate so the same branch is not merged (and counted) twice.
             if (isFinishBranchAlreadyMerged(finishedBranch, suspendedExecution)) {
@@ -264,17 +267,15 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             String branchIdToCheckinLicense = (String) finishedBranch.getBranchContexts().getSystemContext().get(BRANCH_ID_TO_CHECK_IN_LICENSE);
             checkinLicenseForLaneIfRequired(finishedBranch.getExecutionId(), finishedBranch.getBranchId(), branchIdToCheckinLicense);
 
-            if (suspendedExecution != null) {
-                boolean shouldProcessBranch = finishedBranch.connectToSuspendedExecution(suspendedExecution);
-                if (of(MULTI_INSTANCE, PARALLEL_LOOP).contains(suspendedExecution.getSuspensionReason())) {
-                    // start a new branch
-                    if (!finishedBranch.getBranchContexts().isBranchCancelled()) {
-                        startNewBranch(suspendedExecution);
-                    }
-                    processFinishedBranch(finishedBranch, suspendedExecution, suspendedExecutionsForMiWithOneBranch, shouldProcessBranch);
-                } else {
-                    processFinishedBranch(finishedBranch, suspendedExecution, suspendedExecutionsWithOneBranch, shouldProcessBranch);
+            boolean shouldProcessBranch = finishedBranch.connectToSuspendedExecution(suspendedExecution);
+            if (of(MULTI_INSTANCE, PARALLEL_LOOP).contains(suspendedExecution.getSuspensionReason())) {
+                // start a new branch
+                if (!finishedBranch.getBranchContexts().isBranchCancelled()) {
+                    startNewBranch(suspendedExecution);
                 }
+                processFinishedBranch(finishedBranch, suspendedExecution, suspendedExecutionsForMiWithOneBranch, shouldProcessBranch);
+            } else {
+                processFinishedBranch(finishedBranch, suspendedExecution, suspendedExecutionsWithOneBranch, shouldProcessBranch);
             }
         }
 
@@ -286,9 +287,8 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         }
     }
 
-    private static boolean isFinishBranchAlreadyMerged(FinishedBranch finishedBranch, SuspendedExecution suspendedExecution) {
-        return suspendedExecution != null
-                && of(MULTI_INSTANCE, PARALLEL_LOOP).contains(suspendedExecution.getSuspensionReason())
+    private boolean isFinishBranchAlreadyMerged(FinishedBranch finishedBranch, SuspendedExecution suspendedExecution) {
+        return of(MULTI_INSTANCE, PARALLEL_LOOP).contains(suspendedExecution.getSuspensionReason())
                 && suspendedExecution.getMergedBranchIds().contains(finishedBranch.getBranchId());
     }
 
@@ -384,7 +384,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             Integer totalNumberOfBranches = se.getNumberOfBranches();
 
             Set<String> mergedBranchIds = new HashSet<>(se.getMergedBranchIds());
-            Set<FinishedBranch> branchesToMerge = new HashSet<>();
+            List<FinishedBranch> branchesToMerge = new ArrayList<>(finishedBranches.size());
             long nrOfNewFinishedBranches = 0;
 
             for (FinishedBranch finishedBranch : finishedBranches) {
@@ -392,9 +392,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
                 if (!mergedBranchIds.contains(branchId)) {
                     branchesToMerge.add(finishedBranch);
                     mergedBranchIds.add(branchId);
-                    if (!finishedBranch.getBranchContexts().isBranchCancelled()) {
-                        nrOfNewFinishedBranches++;
-                    }
+                    nrOfNewFinishedBranches++;
                 }
             }
 
@@ -412,6 +410,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             }
             ExecutionMessage executionMessage = executionToStartExecutionMessage.convert(execution);
             setWorkerGroupOnCSParallelLoopBranches(execution, executionMessage);
+            executionMessage.setJoinMessage(true);
             messages.add(executionMessage);
         }
 
@@ -536,7 +535,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
         return exec;
     }
 
-    private void joinMiSplit(Set<FinishedBranch> finishedBranches, Execution exec) {
+    private void joinMiSplit(List<FinishedBranch> finishedBranches, Execution exec) {
 
         if (logger.isDebugEnabled()) {
             logger.debug("Joining execution " + exec.getExecutionId());

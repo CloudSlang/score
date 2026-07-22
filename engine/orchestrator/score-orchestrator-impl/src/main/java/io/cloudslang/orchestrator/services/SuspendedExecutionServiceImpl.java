@@ -32,7 +32,7 @@ import static java.lang.Integer.parseInt;
 @Service
 public class SuspendedExecutionServiceImpl implements SuspendedExecutionService {
 
-    private static final Logger executionMessagesLogger = LogManager.getLogger("execution.messages");
+    private static final Logger logger = LogManager.getLogger(SuspendedExecutionServiceImpl.class);
 
     @Autowired
     private SuspendedExecutionsRepository suspendedExecutionsRepository;
@@ -48,12 +48,12 @@ public class SuspendedExecutionServiceImpl implements SuspendedExecutionService 
             int oldRemaining = parseInt(oldExecution.getSystemContext().getRemainingBranches());
 
             if (newRemaining <= oldRemaining) {
-                executionMessagesLogger.info("Updating suspended execution {}", execution.getExecutionId());
                 execution.setPosition(oldExecution.getPosition());
                 suspendedExecutionsRepository.updateSuspendedExecutionContexts(suspendedExecution.getId(),
                         new ExecutionObjEntity(execution));
             } else {
-                executionMessagesLogger.warn("Execution {} did not update", execution.getExecutionId());
+                logger.warn("Skipping update for execution {} - persisted MI throttling context is up to date.",
+                        execution.getExecutionId());
             }
         }
     }
