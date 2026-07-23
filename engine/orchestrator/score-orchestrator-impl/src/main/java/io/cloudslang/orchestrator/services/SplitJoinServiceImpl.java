@@ -19,6 +19,7 @@ package io.cloudslang.orchestrator.services;
 import ch.lambdaj.function.convert.Converter;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
+import io.cloudslang.engine.queue.entities.MessageType;
 import io.cloudslang.engine.queue.entities.StartNewBranchPayload;
 import io.cloudslang.engine.queue.repositories.ExecutionQueueRepository;
 import io.cloudslang.engine.queue.services.QueueDispatcherService;
@@ -410,7 +411,7 @@ public final class SplitJoinServiceImpl implements SplitJoinService {
             }
             ExecutionMessage executionMessage = executionToStartExecutionMessage.convert(execution);
             setWorkerGroupOnCSParallelLoopBranches(execution, executionMessage);
-            executionMessage.setJoinMessage(true);
+            executionMessage.setMessageType(MessageType.JOIN.getNumber());
             messages.add(executionMessage);
         }
 

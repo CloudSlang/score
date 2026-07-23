@@ -46,8 +46,6 @@ import static java.util.stream.Collectors.toList;
 final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 
 	private final Logger logger = LogManager.getLogger(this.getClass());
-	private static final Logger executionMessagesLogger = LogManager.getLogger("execution.messages");
-	private static final boolean LOG_ENQUEUED_EXECUTION_MESSAGES = Boolean.getBoolean("log.execution.messages");
 
 	@Autowired
 	private ExecutionQueueRepository executionQueueRepository;
@@ -110,7 +108,6 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 		executionQueueRepository.insertExecutionQueue(messages, msgVersion);
 		if (logger.isDebugEnabled()) logger.debug("Persistency done in " + (stopWatch.getSplitTime()) + " ms");
 
-		logEnqueuedExecutionMessages(messages);
 		if (CollectionUtils.isNotEmpty(listeners)) {
 			stopWatch.split();
 			List<ExecutionMessage> failedMessages = filter(messages, ExecStatus.FAILED);
@@ -152,25 +149,6 @@ final public class ExecutionQueueServiceImpl implements ExecutionQueueService {
 		}
 		return result;
 	}
-
-    private void logEnqueuedExecutionMessages(List<ExecutionMessage> messages) {
-        if (!LOG_ENQUEUED_EXECUTION_MESSAGES || !executionMessagesLogger.isInfoEnabled() || CollectionUtils.isEmpty(messages)) {
-            return;
-        }
-
-		logger.info("Enqueuing {} messages", messages.size());
-        for (ExecutionMessage message : messages) {
-            executionMessagesLogger.info(
-                    "Enqueue execution message: executionId={}, execStateId={}, status={}, seqId={}, workerId={}, payloadSize={}, joinMessage={}",
-                    message.getMsgId(),
-                    message.getExecStateId(),
-                    message.getStatus(),
-                    message.getMsgSeqId(),
-                    message.getWorkerId(),
-                    message.getPayloadSize(),
-                    message.isJoinMessage());
-        }
-    }
 
 	@Override
 	@Transactional(readOnly = true)

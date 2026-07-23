@@ -346,9 +346,9 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         </rollback>
     </changeSet>
 
-    <changeSet id="Add JOIN_MESSAGE column to OO_EXECUTION_QUEUES" author="engine">
+    <changeSet id="Add MESSAGE_TYPE column to OO_EXECUTION_QUEUES" author="engine">
         <addColumn tableName="OO_EXECUTION_QUEUES">
-            <column name="JOIN_MESSAGE" type="INT"/>
+            <column name="MESSAGE_TYPE" type="INT"/>
         </addColumn>
     </changeSet>
 
