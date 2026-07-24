@@ -29,6 +29,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -78,6 +80,7 @@ public class SuspendedExecution extends AbstractIdentifiable {
     // Branch ids whose outputs have already been merged into the executionObj. Used so a duplicate
     // (recovered) lane is skipped in endBranch instead of being merged/counted twice.
     @Convert(converter = MergedBranchIdsConverter.class)
+    @JdbcTypeCode(SqlTypes.LONGVARBINARY)
     @Column(name = "MERGED_BRANCH_IDS")
     private List<String> mergedBranchIds = new ArrayList<>();
 

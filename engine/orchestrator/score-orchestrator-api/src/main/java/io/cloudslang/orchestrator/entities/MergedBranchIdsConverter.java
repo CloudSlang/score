@@ -60,8 +60,7 @@ public class MergedBranchIdsConverter implements AttributeConverter<List<String>
         }
 
         try {
-            return objectMapper.readValue(dbValue, new TypeReference<>() {
-            });
+            return objectMapper.readValue(dbValue, LIST_TYPE);
         } catch (Exception e) {
             throw new IllegalStateException("Failed to deserialize merged branch ids from JSON", e);
         }
