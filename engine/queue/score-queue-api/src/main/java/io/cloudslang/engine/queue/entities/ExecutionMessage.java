@@ -60,6 +60,7 @@ public class ExecutionMessage implements Message, Cloneable {
 
     private boolean active;
     private String splitId;
+    private int messageType;
 
     public ExecutionMessage() {
         execStateId = EMPTY_EXEC_STATE_ID;
@@ -87,13 +88,13 @@ public class ExecutionMessage implements Message, Cloneable {
     }
 
     public ExecutionMessage(long execStateId,
-            String workerId,
-            String workerGroup,
-            String msgId,
-            ExecStatus status,
-            Payload payload,
-            int msgSeqId,
-            Long createDate) {
+                            String workerId,
+                            String workerGroup,
+                            String msgId,
+                            ExecStatus status,
+                            Payload payload,
+                            int msgSeqId,
+                            Long createDate) {
         this.execStateId = execStateId;
         this.workerId = workerId;
         this.workerGroup = workerGroup;
@@ -107,12 +108,12 @@ public class ExecutionMessage implements Message, Cloneable {
     }
 
     public ExecutionMessage(long execStateId,
-            String workerId,
-            String workerGroup,
-            String msgId,
-            ExecStatus status,
-            Payload payload,
-            int msgSeqId) {
+                            String workerId,
+                            String workerGroup,
+                            String msgId,
+                            ExecStatus status,
+                            Payload payload,
+                            int msgSeqId) {
         this.execStateId = execStateId;
         this.workerId = workerId;
         this.workerGroup = workerGroup;
@@ -125,13 +126,13 @@ public class ExecutionMessage implements Message, Cloneable {
     }
 
     public ExecutionMessage(long execStateId,
-            String workerId,
-            String workerGroup,
-            String msgId,
-            ExecStatus status,
-            Execution executionObject,
-            Payload payload,
-            int msgSeqId) {
+                            String workerId,
+                            String workerGroup,
+                            String msgId,
+                            ExecStatus status,
+                            Execution executionObject,
+                            Payload payload,
+                            int msgSeqId) {
         this.execStateId = execStateId;
         this.workerId = workerId;
         this.workerGroup = workerGroup;
@@ -283,6 +284,14 @@ public class ExecutionMessage implements Message, Cloneable {
 
     public String getSplitId() {
         return splitId;
+    }
+
+    public int getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(int messageType) {
+        this.messageType = messageType;
     }
 
     @Override

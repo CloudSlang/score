@@ -126,7 +126,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       EXEC_GROUP ,       " +
                     "       STATUS,       " +
                     "       MSG_SEQ_ID,   " +
-                    "      CREATE_TIME " +
+                    "      CREATE_TIME, " +
+                    "      MESSAGE_TYPE " +
                     "  FROM  OO_EXECUTION_QUEUES q  " +
                     "  WHERE " +
                     "      (q.STATUS  = ? ) AND " +
@@ -177,7 +178,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       PAYLOAD,       " +
                     "       MSG_SEQ_ID ,      " +
                     "       MSG_ID," +
-                    "       q.CREATE_TIME " +
+                    "       q.CREATE_TIME, " +
+                    "       q.MESSAGE_TYPE " +
                     " FROM  OO_EXECUTION_QUEUES q,  " +
                     "      OO_EXECUTION_STATES s   " +
                     " WHERE  " +
@@ -198,7 +200,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       PAYLOAD,       " +
                     "       MSG_SEQ_ID ,      " +
                     "       MSG_ID," +
-                    "       q.CREATE_TIME " +
+                    "       q.CREATE_TIME, " +
+                    "       q.MESSAGE_TYPE " +
                     " FROM  OO_EXECUTION_QUEUES q,  " +
                     "      OO_EXECUTION_STATES s   " +
                     " WHERE  " +
@@ -219,7 +222,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "    PAYLOAD, " +
                     "    MSG_SEQ_ID, " +
                     "    MSG_ID, " +
-                    "    CREATE_TIME " +
+                    "    CREATE_TIME, " +
+                    "    MESSAGE_TYPE " +
                     "FROM (" +
                     "   SELECT EXEC_STATE_ID, " +
                     "       ASSIGNED_WORKER, " +
@@ -229,6 +233,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       MSG_SEQ_ID, " +
                     "       MSG_ID, " +
                     "       q.CREATE_TIME, " +
+                    "       q.MESSAGE_TYPE, " +
                     "       SUM(PAYLOAD_SIZE) OVER (ORDER BY q.CREATE_TIME ASC) AS total " +
                     "   FROM OO_EXECUTION_QUEUES q, " +
                     "       OO_EXECUTION_STATES s " +
@@ -252,7 +257,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "    PAYLOAD, " +
                     "    MSG_SEQ_ID, " +
                     "    MSG_ID, " +
-                    "    CREATE_TIME " +
+                    "    CREATE_TIME, " +
+                    "    MESSAGE_TYPE " +
                     "FROM (" +
                     "   SELECT EXEC_STATE_ID, " +
                     "       ASSIGNED_WORKER, " +
@@ -262,6 +268,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       MSG_SEQ_ID, " +
                     "       MSG_ID, " +
                     "       q.CREATE_TIME, " +
+                    "       q.MESSAGE_TYPE, " +
                     "       SUM(PAYLOAD_SIZE) OVER (ORDER BY q.CREATE_TIME ASC) AS total " +
                     "   FROM OO_EXECUTION_QUEUES q, " +
                     "       OO_EXECUTION_STATES s " +
@@ -284,7 +291,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "    PAYLOAD, " +
                     "    MSG_SEQ_ID, " +
                     "    MSG_ID, " +
-                    "    CREATE_TIME " +
+                    "    CREATE_TIME, " +
+                    "    MESSAGE_TYPE " +
                     "FROM (" +
                     "   SELECT EXEC_STATE_ID, " +
                     "       ASSIGNED_WORKER, " +
@@ -294,6 +302,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       MSG_SEQ_ID, " +
                     "       MSG_ID, " +
                     "       q.CREATE_TIME, " +
+                    "       q.MESSAGE_TYPE, " +
                     "       (@csum:=@csum + PAYLOAD_SIZE) AS total " +
                     "   FROM OO_EXECUTION_QUEUES q, " +
                     "       OO_EXECUTION_STATES s JOIN(SELECT @csum:=0) c " +
@@ -317,7 +326,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       PAYLOAD,       " +
                     "       MSG_SEQ_ID,      " +
                     "       MSG_ID," +
-                    "       q.CREATE_TIME " +
+                    "       q.CREATE_TIME, " +
+                    "       q.MESSAGE_TYPE " +
                     " FROM  OO_EXECUTION_QUEUES q,  " +
                     "       OO_EXECUTION_STATES s1   " +
                     " WHERE  " +
@@ -336,7 +346,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       PAYLOAD,       " +
                     "       MSG_SEQ_ID,      " +
                     "       MSG_ID," +
-                    "       q.CREATE_TIME " +
+                    "       q.CREATE_TIME, " +
+                    "       q.MESSAGE_TYPE " +
                     " FROM  OO_EXECUTION_QUEUES q,  " +
                     "       OO_EXECUTION_STATES s1   " +
                     " WHERE  " +
@@ -353,7 +364,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "  EXEC_GROUP , " +
                     "  STATUS, " +
                     "  MSG_SEQ_ID, " +
-                    "  CREATE_TIME " +
+                    "  CREATE_TIME, " +
+                    "  MESSAGE_TYPE " +
                     "FROM  OO_EXECUTION_QUEUES q  " +
                     "WHERE STATUS IN (:status) AND " +
                     "  NOT EXISTS (" +
@@ -374,14 +386,14 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
     final private String INSERT_EXEC_STATE = "INSERT INTO OO_EXECUTION_STATES  (ID, MSG_ID,  PAYLOAD, PAYLOAD_SIZE, CREATE_TIME, ACTIVE) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?)";
 
-    final private String INSERT_QUEUE = "INSERT INTO OO_EXECUTION_QUEUES (ID, EXEC_STATE_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS,MSG_SEQ_ID, CREATE_TIME,MSG_VERSION) VALUES (?, ?, ?, ?, ?, ?,?,?)";
+    final private String INSERT_QUEUE = "INSERT INTO OO_EXECUTION_QUEUES (ID, EXEC_STATE_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS, MSG_SEQ_ID, CREATE_TIME, MSG_VERSION, MESSAGE_TYPE) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     final private String INSERT_EXECUTION_STATE_MAPPING = "INSERT INTO OO_EXECS_STATES_EXECS_MAPPINGS (ID, EXEC_STATE_ID, EXEC_ID, SPLIT_ID) VALUES (?, ?, ?, ?)";
 
     private static final String QUERY_PAYLOAD_BY_EXECUTION_IDS = "SELECT ID, PAYLOAD FROM OO_EXECUTION_STATES WHERE ID IN (:IDS)";
 
     private static final String FIND_OLD_STATES =
-            "SELECT q.EXEC_STATE_ID, CREATE_TIME, MSG_SEQ_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS " +
+            "SELECT q.EXEC_STATE_ID, CREATE_TIME, MSG_SEQ_ID, ASSIGNED_WORKER, EXEC_GROUP, STATUS, q.MESSAGE_TYPE " +
                     "FROM OO_EXECUTION_QUEUES q, " +
                     "  (SELECT EXEC_STATE_ID FROM OO_EXECUTION_QUEUES qt WHERE (CREATE_TIME < ?) AND " +
                     "     (STATUS = " + ExecStatus.ASSIGNED.getNumber() + ") AND " +
@@ -550,6 +562,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                 ps.setInt(6, msg.getMsgSeqId());
                 ps.setLong(7, Calendar.getInstance().getTimeInMillis());
                 ps.setLong(8, version);
+                ps.setInt(9, msg.getMessageType());
             }
 
             @Override
@@ -698,7 +711,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                 try {
                     byte[] payload = isH2Database ? toByteArray(rs.getBinaryStream("PAYLOAD")) :
                             rs.getBytes("PAYLOAD");
-                    return new ExecutionMessage(
+                    ExecutionMessage msg = new ExecutionMessage(
                             rs.getLong("EXEC_STATE_ID"),
                             rs.getString("ASSIGNED_WORKER"),
                             rs.getString("EXEC_GROUP"),
@@ -707,6 +720,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                             new Payload(payload),
                             rs.getInt("MSG_SEQ_ID"),
                             rs.getLong("CREATE_TIME"));
+                    msg.setMessageType(rs.getInt("MESSAGE_TYPE"));
+                    return msg;
                 } catch (IOException e) {
                     throw new RuntimeException("Failed to poll messages: " + e.getMessage());
                 }
@@ -1077,6 +1092,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                             null,
                             rs.getInt("MSG_SEQ_ID"),
                             rs.getLong("CREATE_TIME"));
+                    msg.setMessageType(rs.getInt("MESSAGE_TYPE"));
                     return msg;
                 }
         );
@@ -1115,7 +1131,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
         @Override
         public ExecutionMessage mapRow(ResultSet rs, int rowNum) throws SQLException {
-            return new ExecutionMessage(rs.getLong("EXEC_STATE_ID"),
+            ExecutionMessage msg = new ExecutionMessage(rs.getLong("EXEC_STATE_ID"),
                     rs.getString("ASSIGNED_WORKER"),
                     rs.getString("EXEC_GROUP"),
                     rs.getString("MSG_ID"),
@@ -1123,6 +1139,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     new Payload(rs.getBytes("PAYLOAD")),
                     rs.getInt("MSG_SEQ_ID"),
                     rs.getLong("CREATE_TIME"));
+            msg.setMessageType(rs.getInt("MESSAGE_TYPE"));
+            return msg;
         }
     }
 
@@ -1130,7 +1148,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
 
         @Override
         public ExecutionMessage mapRow(ResultSet rs, int rowNum) throws SQLException {
-            return new ExecutionMessage(rs.getLong("EXEC_STATE_ID"),
+            ExecutionMessage msg = new ExecutionMessage(rs.getLong("EXEC_STATE_ID"),
                     rs.getString("ASSIGNED_WORKER"),
                     rs.getString("EXEC_GROUP"),
                     "-1",
@@ -1138,6 +1156,8 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     null,
                     rs.getInt("MSG_SEQ_ID"),
                     rs.getLong("CREATE_TIME"));
+            msg.setMessageType(rs.getInt("MESSAGE_TYPE"));
+            return msg;
         }
     }
 

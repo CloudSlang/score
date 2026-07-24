@@ -19,14 +19,20 @@ import io.cloudslang.orchestrator.entities.ExecutionObjEntity;
 import io.cloudslang.orchestrator.entities.SuspendedExecution;
 import io.cloudslang.orchestrator.repositories.SuspendedExecutionsRepository;
 import io.cloudslang.score.facade.entities.Execution;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
 
+import static java.lang.Integer.parseInt;
+
 @Service
 public class SuspendedExecutionServiceImpl implements SuspendedExecutionService {
+
+    private static final Logger logger = LogManager.getLogger(SuspendedExecutionServiceImpl.class);
 
     @Autowired
     private SuspendedExecutionsRepository suspendedExecutionsRepository;
@@ -38,9 +44,17 @@ public class SuspendedExecutionServiceImpl implements SuspendedExecutionService 
         SuspendedExecution suspendedExecution = suspendedExecutionsRepository.findBySplitId(splitId.toString());
         if (suspendedExecution != null) {
             Execution oldExecution = suspendedExecution.getExecutionObj();
-            execution.setPosition(oldExecution.getPosition());
-            suspendedExecutionsRepository.updateSuspendedExecutionContexts(suspendedExecution.getId(),
-                    new ExecutionObjEntity(execution));
+            int newRemaining = parseInt(execution.getSystemContext().getRemainingBranches());
+            int oldRemaining = parseInt(oldExecution.getSystemContext().getRemainingBranches());
+
+            if (newRemaining <= oldRemaining) {
+                execution.setPosition(oldExecution.getPosition());
+                suspendedExecutionsRepository.updateSuspendedExecutionContexts(suspendedExecution.getId(),
+                        new ExecutionObjEntity(execution));
+            } else {
+                logger.warn("Skipping update for execution {} - persisted MI throttling context is up to date.",
+                        execution.getExecutionId());
+            }
         }
     }
 

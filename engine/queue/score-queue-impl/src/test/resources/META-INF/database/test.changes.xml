@@ -118,4 +118,10 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="Add MESSAGE_TYPE column to OO_EXECUTION_QUEUES" author="engine">
+		<addColumn tableName="OO_EXECUTION_QUEUES">
+			<column name="MESSAGE_TYPE" type="INT"/>
+		</addColumn>
+	</changeSet>
+
 </databaseChangeLog>

@@ -65,4 +65,6 @@ public interface ExecutionService {
                                                      String splitDataKey) throws InterruptedException;
 
     boolean isSplitStep(Execution execution);
+
+    void updateMiThrottlingContextAndThen(Execution execution, Runnable afterCommit);
 }

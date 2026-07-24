@@ -20,6 +20,7 @@ import io.cloudslang.engine.node.entities.WorkerNode;
 import io.cloudslang.engine.queue.entities.ExecStatus;
 import io.cloudslang.engine.queue.entities.ExecutionMessage;
 import io.cloudslang.engine.queue.entities.ExecutionMessageConverter;
+import io.cloudslang.engine.queue.entities.MessageType;
 import io.cloudslang.engine.queue.entities.Payload;
 import io.cloudslang.engine.queue.services.QueueStateIdGeneratorService;
 import io.cloudslang.orchestrator.entities.SplitMessage;
@@ -195,7 +196,25 @@ public class SimpleExecutionRunnable implements Runnable {
     }
 
     private boolean isMiRunning(Execution nextStepExecution) {
-        return nextStepExecution.getSystemContext().containsKey(MI_REMAINING_BRANCHES_CONTEXT_KEY);
+        if (nextStepExecution.getSystemContext().containsKey(MI_REMAINING_BRANCHES_CONTEXT_KEY)) {
+            Runnable callback = executionMessage.getMessageType() == MessageType.JOIN.getNumber()
+                    ? this::acknowledgeJoinMessage
+                    : () -> {};
+            executionService.updateMiThrottlingContextAndThen(nextStepExecution, callback);
+            return true;
+        }
+        return false;
+    }
+
+    private void acknowledgeJoinMessage() {
+        try {
+            executionMessage.setStatus(ExecStatus.FINISHED);
+            executionMessage.incMsgSeqId();
+            executionMessage.setPayload(null);
+            outBuffer.put(executionMessage);
+        } catch (InterruptedException e) {
+            logger.warn("Thread was interrupted while handling isMiRunning:", e);
+        }
     }
 
     private boolean preconditionNotFulfilled(Execution nextStepExecution) {
