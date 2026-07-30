@@ -323,7 +323,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       ASSIGNED_WORKER,      " +
                     "       EXEC_GROUP,       " +
                     "       STATUS,       " +
-                    "       PAYLOAD,       " +
                     "       MSG_SEQ_ID,      " +
                     "       MSG_ID," +
                     "       q.CREATE_TIME, " +
@@ -343,7 +342,6 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     "       ASSIGNED_WORKER,      " +
                     "       EXEC_GROUP,       " +
                     "       STATUS,       " +
-                    "       PAYLOAD,       " +
                     "       MSG_SEQ_ID,      " +
                     "       MSG_ID," +
                     "       q.CREATE_TIME, " +
@@ -657,7 +655,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                 values[i++] = status.getNumber();
             }
 
-            return doSelectWithTemplate(pollForRecoveryJdbcTemplate, sqlStatPrvTable, new ExecutionMessageRowMapper(),
+            return doSelectWithTemplate(pollForRecoveryJdbcTemplate, sqlStatPrvTable, new PollRecoveryExecutionMessageRowMapper(),
                     values);
         } finally {
             pollForRecoveryJdbcTemplate.clearStatementBatchSize();
@@ -1127,7 +1125,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
     }
 
 
-    private class ExecutionMessageRowMapper implements RowMapper<ExecutionMessage> {
+    private class PollRecoveryExecutionMessageRowMapper implements RowMapper<ExecutionMessage> {
 
         @Override
         public ExecutionMessage mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -1136,7 +1134,7 @@ public class ExecutionQueueRepositoryImpl implements ExecutionQueueRepository {
                     rs.getString("EXEC_GROUP"),
                     rs.getString("MSG_ID"),
                     ExecStatus.find(rs.getInt("STATUS")),
-                    new Payload(rs.getBytes("PAYLOAD")),
+                    null,
                     rs.getInt("MSG_SEQ_ID"),
                     rs.getLong("CREATE_TIME"));
             msg.setMessageType(rs.getInt("MESSAGE_TYPE"));
