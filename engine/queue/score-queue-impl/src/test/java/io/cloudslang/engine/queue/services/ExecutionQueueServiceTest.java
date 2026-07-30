@@ -113,7 +113,7 @@ public class ExecutionQueueServiceTest {
 		List<ExecutionMessage> msgInQueue, msgFromQueue;
 		msgInQueue = executionQueueService.pollRecovery("worker3", 100, ExecStatus.ASSIGNED);
 		Assert.assertEquals(2, msgInQueue.size());
-		Assert.assertNotNull(msgInQueue.get(0).getPayload().getData());
+		Assert.assertNull(msgInQueue.get(0).getPayload());
 
 		msgInQueue = updateMessages(msgInQueue, ExecStatus.ASSIGNED, "worker1");
 		executionQueueService.enqueue(msgInQueue);
