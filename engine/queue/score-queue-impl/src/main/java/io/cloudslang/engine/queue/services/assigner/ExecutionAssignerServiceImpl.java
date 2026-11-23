@@ -42,8 +42,8 @@ import java.util.Map;
 
 import static io.cloudslang.engine.queue.enums.AssignStrategy.RANDOM;
 import static io.cloudslang.engine.queue.enums.AssignStrategy.getAssignedStrategy;
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 public final class ExecutionAssignerServiceImpl implements ExecutionAssignerService {
 
