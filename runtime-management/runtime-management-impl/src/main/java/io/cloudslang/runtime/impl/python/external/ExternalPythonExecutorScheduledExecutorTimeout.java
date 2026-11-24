@@ -29,7 +29,7 @@ import io.cloudslang.runtime.api.python.PythonExecutionResult;
 import io.cloudslang.runtime.api.python.executor.entities.EvaluationResults;
 import io.cloudslang.runtime.impl.python.external.model.TempEnvironment;
 import io.cloudslang.runtime.impl.python.external.model.TempExecutionEnvironment;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
